@@ -20,7 +20,7 @@ CURVEEDITOR_DARKS;Darks
 CURVEEDITOR_EDITPOINT_HINT;Enable edition of node in/out values.\n\nRight-click on a node to select it.\nRight-click on empty space to de-select the node.
 CURVEEDITOR_HIGHLIGHTS;Highlights
 CURVEEDITOR_LIGHTS;Lights
-CURVEEDITOR_LINEAR;Linear
+CURVEEDITOR_LINEAR;Off
 CURVEEDITOR_LOADDLGLABEL;Load curve...
 CURVEEDITOR_MINMAXCPOINTS;Equalizer
 CURVEEDITOR_NURBS;Control cage
@@ -28,7 +28,7 @@ CURVEEDITOR_PARAMETRIC;Parametric
 CURVEEDITOR_SAVEDLGLABEL;Save curve...
 CURVEEDITOR_SHADOWS;Shadows
 CURVEEDITOR_TOOLTIPCOPY;Copy current curve to clipboard.
-CURVEEDITOR_TOOLTIPLINEAR;Reset curve to linear.
+CURVEEDITOR_TOOLTIPLINEAR;Reset curve to identity.
 CURVEEDITOR_TOOLTIPLOAD;Load a curve from file.
 CURVEEDITOR_TOOLTIPPASTE;Paste curve from clipboard.
 CURVEEDITOR_TOOLTIPSAVE;Save current curve.
@@ -745,6 +745,8 @@ HISTORY_MSG_COLORCORRECTION_SATURATION;CC - saturation
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - region show mask
 HISTORY_MSG_COLORCORRECTION_SLOPE;CC - region slope
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC- dE mask
+HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - brush mask
+HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametric mask
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Color correction
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - auto chroma strength
 HISTORY_MSG_DENOISE_GUIDED_EPSILON;NR - GF epsilon
@@ -772,6 +774,8 @@ HISTORY_MSG_EPD_SHOWMASK;TB - show mask
 HISTORY_MSG_EPD_AREAMASK;TB - area mask
 HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - contrast threshold mask
 HISTORY_MSG_EPD_DELTAEMASK;TB - dE mask
+HISTORY_MSG_EPD_DRAWNMASK;TB - brush mask
+HISTORY_MSG_EPD_PARAMETRICMASK;TB - parametric mask
 HISTORY_MSG_EXPOSURE_BLACK;Exposure - Black point
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Negative
 HISTORY_MSG_FILMNEGATIVE_VALUES;Film negative values
@@ -787,6 +791,7 @@ HISTORY_MSG_ICM_OUTPUT_TYPE;Output - Type
 HISTORY_MSG_ICM_WORKING_GAMMA;Working - Gamma
 HISTORY_MSG_ICM_WORKING_SLOPE;Working - Slope
 HISTORY_MSG_ICM_WORKING_TRC_METHOD;Working - TRC method
+HISTORY_MSG_LABMASKS_MASK_NAME;Mask name
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount
 HISTORY_MSG_LOCALCONTRAST_CONTRAST;Local Contrast - Residual contrast
 HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;Local Contrast - Contrast threshold mask
@@ -797,6 +802,8 @@ HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Local Contrast - Lightness
 HISTORY_MSG_LOCALCONTRAST_MODE;Local Contrast - Method
 HISTORY_MSG_LOCALCONTRAST_RADIUS;Local Contrast - Radius
 HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Local Contrast - dE mask
+HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Local Contrast - brush mask
+HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Local Contrast - parametric mask
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
 HISTORY_MSG_LOGENC_AUTOGRAY;Log - Auto gray
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regularization
@@ -840,6 +847,8 @@ HISTORY_MSG_SMOOTHING_MASKBLUR;Smoothing - mask blur
 HISTORY_MSG_SMOOTHING_SHOWMASK;Smoothing - show mask
 HISTORY_MSG_SMOOTHING_AREAMASK;Smoothing - area mask
 HISTORY_MSG_SMOOTHING_DELTAEMASK;Smoothing - dE mask
+HISTORY_MSG_SMOOTHING_DRAWNMASK;Smoothing - brush mask
+HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Smoothing - parametric mask
 HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Soft light - Strength
 HISTORY_MSG_TM_FATTAL_ANCHOR;DRC - Anchor
@@ -847,6 +856,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;Tone equalizer
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Tone equalizer - Bands
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tone equalizer - Regularization
 HISTORY_MSG_TONECURVE_SATCURVE;Tone curve - Saturation
+HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tone curve - Perceptual strength
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -950,7 +960,7 @@ MAIN_BUTTON_NAVPREV_TOOLTIP;Navigate to the previous image relative to image ope
 MAIN_BUTTON_NAVSYNC_TOOLTIP;Synchronize the File Browser or Filmstrip with the Editor to reveal the thumbnail of the currently opened image, and clear any active filters.\nShortcut: <b>x</b>\n\nAs above, but without clearing active filters:\nShortcut: <b>y</b>\n(Note that the thumbnail of the opened image will not be shown if filtered out).
 MAIN_BUTTON_PREFERENCES;Preferences
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Put current image to processing queue (Ctrl-click for fast export).\nShortcut: <b>Ctrl-b</b> (<b>Ctrl-Shift-b</b> for fast export)
-MAIN_BUTTON_SAVE_TOOLTIP;Save current image (Ctrl-click for fast expor.t)\nShortcut: <b>Ctrl-s</b> (<b>Ctrl-Shift-s</b> for fast export)
+MAIN_BUTTON_SAVE_TOOLTIP;Save current image (Ctrl-click for fast export.)\nShortcut: <b>Ctrl-s</b> (<b>Ctrl-Shift-s</b> for fast export)
 MAIN_BUTTON_SENDTOEDITOR;Edit image in external editor
 MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Edit current image in external editor.\nShortcut: <b>Ctrl-e</b>
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Show/hide all side panels.\nShortcut: <b>m</b>
@@ -1501,6 +1511,9 @@ TP_DIRPYRDENOISE_CHROMINANCE_MASTER;Chrominance - Master
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD;Method
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manual\nActs on the full image.\nYou control the noise reduction settings manually.\n\nAutomatic global\nActs on the full image.\n9 zones are used to calculate a global chrominance noise reduction setting.\n\nAutomatic multi-zones\nNo preview - works only during saving, but using the "Preview" method by matching the tile size and center to the preview size and center you can get an idea of the expected results.\nThe image is divided into tiles (about 10 to 70 depending on image size) and each tile receives its own chrominance noise reduction settings.\n\nPreview\nActs on the whole image.\nThe part of the image visible in the preview is used to calculate global chrominance noise reduction settings.
 TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Chrominance - Red-Green
+TP_DIRPYRDENOISE_MAIN_COLORSPACE;Color space
+TP_DIRPYRDENOISE_MAIN_COLORSPACE_LAB;L*a*b*
+TP_DIRPYRDENOISE_MAIN_COLORSPACE_RGB;RGB
 TP_DIRPYRDENOISE_LABEL;Noise Reduction
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL;Detail recovery
 TP_DIRPYRDENOISE_LUMINANCE_FRAME;Luminance
@@ -1658,11 +1671,11 @@ TP_LABMASKS_AREA_FEATHER;Feather
 TP_LABMASKS_AREA_HEIGHT;Height
 TP_LABMASKS_INVERTED;Inverted
 TP_LABMASKS_AREA_ROUNDNESS;Roundness
-TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copy the current area mask to the clipboard
+TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copy the current mask to the clipboard
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Edit the current area shape by drawing on the preview image
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Add an area shape by drawing on the preview image
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Display the current area shape on the preview image
-TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Paste an area mask from the clipboard
+TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Paste a mask from the clipboard
 TP_LABMASKS_AREA_SHAPE;Shape
 TP_LABMASKS_AREA_SHAPE_MODE;Mode
 TP_LABMASKS_AREA_SHAPE_MODE_ADD;Add
@@ -1677,8 +1690,9 @@ TP_LABMASKS_CHROMATICITY;C
 TP_LABMASKS_HUE;H
 TP_LABMASKS_LIGHTNESS;L
 TP_LABMASKS_MASK;Mask
+TP_LABMASKS_MASK_UNNAMED;Unnamed
 TP_LABMASKS_SHOW;Show mask
-TP_LABMASKS_CONTRASTTHRESHOLDMASK;Contrast threshold
+TP_LABMASKS_CONTRASTTHRESHOLDMASK;Contrast threshold mask
 TP_LABMASKS_DELTAE;ΔE mask
 TP_LABMASKS_DELTAE_L;L
 TP_LABMASKS_DELTAE_C;C
@@ -1688,6 +1702,20 @@ TP_LABMASKS_DELTAE_DECAY;Decay
 TP_LABMASKS_DELTAE_PICK;Pick
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Weight in the ΔE computation
 TP_LABMASKS_DELTAE_TOOLTIP;Select regions of similar colour\n(according to the CIELAB ΔE* metric)
+TP_LABMASKS_DRAWNMASK;Brush Mask
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Toggle on-canvas painting
+TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Brush settings
+TP_LABMASKS_DRAWNMASK_RESET_TIP;Clear all strokes
+TP_LABMASKS_DRAWNMASK_UNDO_TIP;Remove the last group of strokes
+TP_LABMASKS_DRAWNMASK_RADIUS;Radius
+TP_LABMASKS_DRAWNMASK_TRANSPARENCY;Transparency
+TP_LABMASKS_DRAWNMASK_SMOOTHNESS;Smoothness
+TP_LABMASKS_DRAWNMASK_ERASE;Eraser mode
+TP_LABMASKS_DRAWNMASK_HARDNESS;Hardness
+TP_LABMASKS_DRAWNMASK_INFO;%1 stroke(s)
+TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Intersect the brush mask with the other masks
+TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Add the brush mask on top of the other masks
+TP_LABMASKS_PARAMETRIC;Parametric mask
 TP_LENSGEOM_AUTOCROP;Auto-Crop
 TP_LENSGEOM_FILL;Auto-fill
 TP_LENSGEOM_LABEL;Lens / Geometry
@@ -1903,6 +1931,7 @@ TP_TM_FATTAL_LABEL;Dynamic Range Compression
 TP_TM_FATTAL_THRESHOLD;Detail
 TP_TONECURVE_LABEL;Tone Curves
 TP_TONECURVE_SATCURVE;Saturation
+TP_TONECURVE_PERCEPTUAL_STRENGTH;Perceptual curve strength
 TP_TONE_EQUALIZER_BAND_0;Blacks
 TP_TONE_EQUALIZER_BAND_1;Shadows
 TP_TONE_EQUALIZER_BAND_2;Midtones

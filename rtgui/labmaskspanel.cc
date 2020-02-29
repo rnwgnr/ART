@@ -30,9 +30,9 @@ using Shape = rtengine::procparams::AreaMask::Shape;
 
 constexpr int ID_HUE_MASK = 5;
 
-inline bool hasMask(const std::vector<double> &dflt, const std::vector<double> &mask)
+inline bool hasMask(const rtengine::procparams::Mask &m, const std::vector<double> &dflt, const std::vector<double> &mask)
 {
-    return !(mask.empty() || mask[0] == FCT_Linear || mask == dflt);
+    return m.parametricMask.enabled && !(mask.empty() || mask[0] == FCT_Linear || mask == dflt);
 }
 
 
@@ -191,12 +191,442 @@ public:
     }
 
 private:
+    void on_hide() override
+    {
+        if (isCurrentSubscriber()) {
+            switchOffEditMode();
+        }
+    }
+
     float L_;
     float C_;
     float H_;
 
     SigSpotRequested sig_spot_requested_;
 };
+
+
+class DrawnMaskPanel: public MyExpander, public EditSubscriber, public AdjusterListener, public CurveListener {
+public:
+    DrawnMaskPanel():
+        MyExpander(true, M("TP_LABMASKS_DRAWNMASK")),
+        EditSubscriber(ET_OBJECTS),
+        prev_erase_(false)
+    {
+        // Editing geometry; create the spot rectangle
+        pen_ = new Circle();
+        pen_->radiusInImageSpace = true;
+        // pen_->setInnerLineColor(255, 255, 255);
+        // pen_->setHoverable(false);
+        // pen_->setInnerLineWidth(1.f);
+        pen_->filled = false;
+    
+        visibleGeometry.push_back(pen_);
+
+        // Stick a dummy rectangle over the whole image in mouseOverGeometry.
+        // This is to make sure the getCursor() call is fired everywhere.
+        Rectangle *imgRect = new Rectangle();
+        imgRect->filled = true;
+        mouseOverGeometry.push_back(imgRect);
+
+
+        const auto set_btn_style =
+            [](Gtk::Button *w) -> void
+            {
+                w->set_relief(Gtk::RELIEF_NONE);
+                w->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
+                w->set_can_focus(false);
+            };
+
+        auto tb = Gtk::manage(new ToolParamBlock());
+        add(*tb, false);
+        setLevel(1);
+
+        Gtk::VBox *vbg = Gtk::manage(new Gtk::VBox());
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+
+        Gtk::Button *btncopy = Gtk::manage(new Gtk::Button());
+        btncopy->add(*Gtk::manage(new RTImage("copy.png")));
+        btncopy->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_COPY_TOOLTIP"));
+        btncopy->signal_clicked().connect(sigc::mem_fun(*this, &DrawnMaskPanel::on_copy_pressed));
+        set_btn_style(btncopy);
+        hb->pack_start(*btncopy, Gtk::PACK_SHRINK);
+
+        Gtk::Button *btnpaste = Gtk::manage(new Gtk::Button());
+        btnpaste->add(*Gtk::manage(new RTImage("paste.png")));
+        btnpaste->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP"));
+        btnpaste->signal_clicked().connect(sigc::mem_fun(*this, &DrawnMaskPanel::on_paste_pressed));
+        set_btn_style(btnpaste);
+        hb->pack_start(*btnpaste, Gtk::PACK_SHRINK);
+
+        info_ = Gtk::manage(new Gtk::Label(M("TP_LABMASKS_DRAWNMASK_INFO")));
+        hb->pack_start(*info_, Gtk::PACK_EXPAND_WIDGET, 4);
+        
+        const char *img[2] = {
+            "area-shape-intersect.png",
+            "area-shape-add.png"
+        };
+        const char *tips[2] = {
+            "TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP",
+            "TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP"
+        };
+        for (int i = 0; i < 2; ++i) {
+            mode_[i] = Gtk::manage(new Gtk::ToggleButton());
+            mode_[i]->add(*Gtk::manage(new RTImage(img[i])));
+            modeconn_[i] = mode_[i]->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &DrawnMaskPanel::on_mode_changed), i));
+            set_btn_style(mode_[i]);
+            mode_[i]->set_tooltip_text(M(tips[i]));
+        }
+
+        toggle_ = Gtk::manage(new Gtk::ToggleButton());
+        toggle_->add(*Gtk::manage(new RTImage("brush.png")));
+        set_btn_style(toggle_);
+        toggle_->set_tooltip_text(M("TP_LABMASKS_DRAWNMASK_TOGGLE_TIP"));
+        toggle_->signal_toggled().connect(sigc::mem_fun(this, &DrawnMaskPanel::on_toggled));
+
+        reset_ = Gtk::manage(new Gtk::Button());
+        reset_->add(*Gtk::manage(new RTImage("undo-all.png")));
+        set_btn_style(reset_);
+        reset_->set_tooltip_text(M("TP_LABMASKS_DRAWNMASK_RESET_TIP"));
+        reset_->signal_clicked().connect(sigc::mem_fun(this, &DrawnMaskPanel::on_reset));
+
+        undo_ = Gtk::manage(new Gtk::Button());
+        undo_->add(*Gtk::manage(new RTImage("undo.png")));
+        set_btn_style(undo_);
+        undo_->set_tooltip_text(M("TP_LABMASKS_DRAWNMASK_UNDO_TIP"));
+        undo_->signal_clicked().connect(sigc::mem_fun(this, &DrawnMaskPanel::on_undo));
+        
+        vbg->pack_start(*hb);
+        hb = Gtk::manage(new Gtk::HBox());
+        
+        Gtk::Frame *f = Gtk::manage(new Gtk::Frame(M("TP_LABMASKS_DRAWNMASK_PEN_SETTINGS")));
+        Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+        f->add(*vb);
+
+        radius_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_RADIUS"), 0.1, 100, 0.1, 10));
+        radius_->setLogScale(2, 0);
+        vb->pack_start(*radius_);
+
+        hardness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_HARDNESS"), 0, 100, 1, 100));
+        vb->pack_start(*hardness_);
+
+        erase_ = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_DRAWNMASK_ERASE")));
+        vb->pack_start(*erase_);
+
+        vbg->pack_start(*f);
+        hb->pack_start(*vbg);
+
+        Gtk::Grid *grid = Gtk::manage(new Gtk::Grid());
+        setExpandAlignProperties(grid, false, true, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+        grid->attach(*reset_, 0, 1, 1, 1);
+        grid->attach(*undo_, 0, 2, 1, 1);
+        grid->attach(*toggle_, 0, 3, 1, 1);
+        grid->attach(*mode_[0], 0, 4, 1, 1);
+        grid->attach(*mode_[1], 0, 5, 1, 1);
+        hb->pack_start(*grid, Gtk::PACK_SHRINK, 2);
+        
+        tb->pack_start(*hb);
+        
+        feather_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
+        tb->pack_start(*feather_);
+        feather_->setAdjusterListener(this);
+
+        transparency_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_TRANSPARENCY"), 0, 100, 1, 0));
+        tb->pack_start(*transparency_);
+        transparency_->setAdjusterListener(this);
+
+        smoothness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_SMOOTHNESS"), 0, 100, 1, 0));
+        tb->pack_start(*smoothness_);
+        smoothness_->setAdjusterListener(this);
+
+        CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_AREA_CONTRAST")));
+        cg->setCurveListener(this);
+
+        contrast_ = static_cast<DiagonalCurveEditor *>(cg->addCurve(CT_Diagonal, ""));
+        cg->curveListComplete();
+        tb->pack_start(*cg, Gtk::PACK_SHRINK, 2);
+        
+        signal_enabled_toggled().connect(sigc::mem_fun(*this, &DrawnMaskPanel::on_enabled_toggled));
+
+        tb->signal_unmap().connect(sigc::mem_fun(*this, &DrawnMaskPanel::on_hide));
+    }
+
+    ~DrawnMaskPanel()
+    {
+        for (auto geometry : visibleGeometry) {
+            delete geometry;
+        }
+
+        for (auto geometry : mouseOverGeometry) {
+            delete geometry;
+        }        
+    }
+
+    void adjusterChanged(Adjuster *a, double newval)
+    {
+        if (mask_) {
+            mask_->feather = feather_->getValue();
+            mask_->transparency = transparency_->getValue() / 100.0;
+            mask_->smoothness = smoothness_->getValue() / 100.0;
+            sig_draw_updated_.emit();
+        }
+    }
+
+    void curveChanged()
+    {
+        if (mask_) {
+            mask_->contrast = contrast_->getCurve();
+            sig_draw_updated_.emit();
+        }
+    }
+
+    void adjusterAutoToggled(Adjuster *a, bool newval) {}
+
+    // EditSubscriber interface
+    CursorShape getCursor(int objectID) override
+    {
+        return CSEmpty;
+    }
+    
+    bool mouseOver(int modifierKey) override
+    {
+        bool ctrl = modifierKey & GDK_CONTROL_MASK;
+        bool shift = modifierKey & GDK_SHIFT_MASK;
+        if ((!ctrl && shift) != prev_erase_) {
+            prev_erase_ = (!ctrl && shift);
+            erase_->set_active(!erase_->get_active());
+        }
+        update_pen(false);
+        return true;
+    }
+    
+    bool button1Pressed(int modifierKey) override
+    {
+        EditSubscriber::action = ES_ACTION_DRAGGING;
+        undo_stack_.push_back(mask_->strokes.size());
+        bool ctrl = modifierKey & GDK_CONTROL_MASK;
+        bool shift = modifierKey & GDK_SHIFT_MASK;
+        if (ctrl && !shift) {
+            mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
+        } else if ((!ctrl && shift) != prev_erase_) {
+            prev_erase_ = !ctrl && shift;
+            erase_->set_active(!erase_->get_active());
+        }
+        add_stroke(false);
+        return true;
+    }
+
+    bool drag1(int modifierKey) override
+    {
+        add_stroke(true);
+        update_pen(true);
+        return true;
+    }
+    
+    bool button1Released() override
+    {
+        EditSubscriber::action = ES_ACTION_NONE;
+        sig_draw_updated_.emit();
+        return true;
+    }
+
+    bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY) override
+    {
+        double delta = (abs(deltaX) > abs(deltaY)) ? deltaX : deltaY;
+        bool isUp = direction == GDK_SCROLL_UP || (direction == GDK_SCROLL_SMOOTH && delta < 0.0);
+        int incr = isUp ? 1 : -1;
+
+        bool ctrl = bstate & GDK_CONTROL_MASK;
+        bool shift = bstate & GDK_SHIFT_MASK;
+        if (ctrl && !shift) {
+            radius_->setValue(std::max(radius_->getValue() + incr, 0.0));
+            update_pen(false);
+            return true;
+        } else if (ctrl && shift) {
+            hardness_->setValue(std::max(hardness_->getValue() + incr, 0.0));
+            return true;
+        }
+        
+        return false;
+    }
+
+    void switchOffEditMode() override
+    {
+        toggle_->set_active(false);
+    }
+
+    void setTargetMask(rtengine::procparams::DrawnMask *mask)
+    {
+        if (mask != mask_) {
+            mask_ = nullptr;
+            undo_stack_.clear();
+            if (mask) {
+                if (toggle_->get_active()) {
+                    toggle_->set_active(false);
+                    unsubscribe();
+                }
+                info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask->strokes.size()));
+                setEnabled(mask->enabled);
+                feather_->setValue(mask->feather);
+                transparency_->setValue(mask->transparency * 100.0);
+                smoothness_->setValue(mask->smoothness * 100.0);
+                contrast_->setCurve(mask->contrast);
+                set_mode(mask->addmode ? 1 : 0);
+            }
+            mask_ = mask;
+        }
+    }
+
+    typedef sigc::signal<void> SigDrawUpdated;
+    SigDrawUpdated signal_draw_updated() { return sig_draw_updated_; }
+    
+private:
+    void on_toggled()
+    {
+        if (mask_ && getEnabled() && getEditProvider()) {
+            if (toggle_->get_active()) {
+                auto p = getEditProvider();
+                if (p && p->getCurrSubscriber()) {
+                    p->getCurrSubscriber()->switchOffEditMode();
+                }
+                subscribe();
+            } else {
+                unsubscribe();
+            }
+        }
+    }
+
+    void on_reset()
+    {
+        if (mask_) {
+            mask_->strokes.clear();
+            info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
+            sig_draw_updated_.emit();
+        }
+    }
+
+    void on_enabled_toggled()
+    {
+        if (mask_) {
+            mask_->enabled = getEnabled();
+            if (!getEnabled()) {
+                toggle_->set_active(false);
+            }
+            sig_draw_updated_.emit();
+        }
+    }
+
+    void on_undo()
+    {
+        if (mask_ && !undo_stack_.empty()) {
+            size_t n = undo_stack_.back();
+            undo_stack_.pop_back();
+            mask_->strokes.resize(n);
+            info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), n));
+            sig_draw_updated_.emit();
+        }
+    }
+
+    void on_hide() override
+    {
+        if (isCurrentSubscriber()) {
+            switchOffEditMode();
+        }
+    }
+    
+    void add_stroke(bool dragging)
+    {
+        auto provider = getEditProvider();
+        int w, h;
+        provider->getImageSize(w, h);
+        mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
+        auto &s = mask_->strokes.back();
+        rtengine::Coord p = provider->posImage;
+        if (dragging) {
+            p += provider->deltaImage;
+        }
+        s.x = double(p.x) / double(w);
+        s.y = double(p.y) / double(h);
+        s.radius = radius_->getValue() / 100.0;
+        s.erase = erase_->get_active();
+        s.hardness = hardness_->getValue() / 100.0;
+        info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
+    }
+
+    void update_pen(bool dragging)
+    {
+        auto provider = getEditProvider();
+        int w, h;
+        provider->getImageSize(w, h);
+        pen_->center = provider->posImage;
+        if (dragging) {
+            pen_->center += provider->deltaImage;
+        }
+        pen_->radius = radius_->getValue() / 100.0 * std::min(w, h) * 0.25;
+    }
+
+    void set_mode(int i)
+    {
+        for (int j = 0; j < 2; ++j) {
+            ConnectionBlocker blocker(modeconn_[j]);
+            mode_[j]->set_active(i == j);
+        }
+    }
+
+    void on_mode_changed(int i)
+    {
+        if (!mode_[i]->get_active()) {
+            ConnectionBlocker blocker(modeconn_[i]);
+            mode_[i]->set_active(true);
+            return;
+        }
+        set_mode(i);
+        if (mask_) {
+            mask_->addmode = mode_[1]->get_active();
+            sig_draw_updated_.emit();
+        }
+    }
+
+    void on_copy_pressed()
+    {
+        if (mask_) {
+            clipboard.setDrawnMask(*mask_);
+        }
+    }
+
+    void on_paste_pressed()
+    {
+        if (mask_ && clipboard.hasDrawnMask()) {
+            *mask_ = clipboard.getDrawnMask();
+            sig_draw_updated_.emit();
+        }
+    }
+    
+    rtengine::procparams::DrawnMask *mask_;
+    Circle *pen_;
+    Gtk::ToggleButton *toggle_;
+    Gtk::Label *info_;
+    Gtk::Button *reset_;
+    Gtk::Button *undo_;
+    Adjuster *feather_;
+    Adjuster *radius_;
+    Adjuster *transparency_;
+    Adjuster *smoothness_;
+    Adjuster *hardness_;
+    Gtk::CheckButton *erase_;
+    DiagonalCurveEditor *contrast_;
+    Gtk::ToggleButton *mode_[2];
+    sigc::connection modeconn_[2];
+
+    SigDrawUpdated sig_draw_updated_;
+    bool prev_erase_;
+    std::vector<size_t> undo_stack_;
+};
+
+bool on_release_event_ignore(GdkEventButton *event)
+{
+    return true;
+}
 
 } // namespace
 
@@ -212,9 +642,10 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaE_provider_(nullptr)
 {
     Gtk::Widget *child = cp_->getWidget();
-    cp_->getEvents(EvMaskList, EvHMask, EvCMask, EvLMask, EvMaskBlur, EvShowMask, EvAreaMask, EvDeltaEMask, EvContrastThresholdMask);
+    cp_->getEvents(EvMaskList, EvParametricMask, EvHMask, EvCMask, EvLMask, EvMaskBlur, EvShowMask, EvAreaMask, EvDeltaEMask, EvContrastThresholdMask, EvDrawnMask);
     EvAreaMaskVoid = ProcEventMapper::getInstance()->newEvent(M_VOID, EvAreaMask.get_message());
     EvDeltaEMaskVoid = ProcEventMapper::getInstance()->newEvent(M_VOID, EvDeltaEMask.get_message());
+    EvMaskName = ProcEventMapper::getInstance()->newEvent(M_VOID, "HISTORY_MSG_LABMASKS_MASK_NAME");
     
     CurveListener::setMulti(true);
     
@@ -307,31 +738,37 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     maskInverted->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onMaskInvertedChanged));
     hb->pack_start(*maskInverted);
     mask_box->pack_start(*hb);
-    
+
+    parametricMask = Gtk::manage(new MyExpander(true, M("TP_LABMASKS_PARAMETRIC")));
+    ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
+    parametricMask->add(*tb, false);
+    parametricMask->setLevel(1);
+    parametricMask->signal_enabled_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onParametricMaskEnableToggled));
+        
     maskEditorGroup = Gtk::manage(new CurveEditorGroup(options.lastColorToningCurvesDir, "", 0.7));
     maskEditorGroup->setCurveListener(this);
 
-    rtengine::LabCorrectionMask default_params;
+    rtengine::Mask default_params;
 
     EditUniqueID eh, ec, el, ede;
     cp_->getEditIDs(eh, ec, el, ede);
 
     hueMask = static_cast<FlatCurveEditor *>(maskEditorGroup->addCurve(CT_Flat, M("TP_LABMASKS_HUE"), nullptr, false, true));
     hueMask->setIdentityValue(0.);
-    hueMask->setResetCurve(FlatCurveType(default_params.hueMask[0]), default_params.hueMask);
+    hueMask->setResetCurve(FlatCurveType(default_params.parametricMask.hue[0]), default_params.parametricMask.hue);
     hueMask->setCurveColorProvider(this, ID_HUE_MASK);
     hueMask->setBottomBarColorProvider(this, ID_HUE_MASK);
     hueMask->setEditID(eh, BT_SINGLEPLANE_FLOAT);
 
     chromaticityMask = static_cast<FlatCurveEditor *>(maskEditorGroup->addCurve(CT_Flat, M("TP_LABMASKS_CHROMATICITY"), nullptr, false, false));
     chromaticityMask->setIdentityValue(0.);
-    chromaticityMask->setResetCurve(FlatCurveType(default_params.chromaticityMask[0]), default_params.chromaticityMask);
+    chromaticityMask->setResetCurve(FlatCurveType(default_params.parametricMask.chromaticity[0]), default_params.parametricMask.chromaticity);
     chromaticityMask->setBottomBarColorProvider(this, ID_HUE_MASK+1);
     chromaticityMask->setEditID(ec, BT_SINGLEPLANE_FLOAT);
 
     lightnessMask = static_cast<FlatCurveEditor *>(maskEditorGroup->addCurve(CT_Flat, M("TP_LABMASKS_LIGHTNESS"), nullptr, false, false));
     lightnessMask->setIdentityValue(0.);
-    lightnessMask->setResetCurve(FlatCurveType(default_params.lightnessMask[0]), default_params.lightnessMask);
+    lightnessMask->setResetCurve(FlatCurveType(default_params.parametricMask.lightness[0]), default_params.parametricMask.lightness);
     std::vector<GradientMilestone> milestones = {
         GradientMilestone(0., 0., 0., 0.),
         GradientMilestone(1., 1., 1., 1.)
@@ -341,17 +778,21 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
 
     maskEditorGroup->curveListComplete();
     maskEditorGroup->show();
-    mask_box->pack_start(*maskEditorGroup, Gtk::PACK_SHRINK, 4);
+    tb->pack_start(*maskEditorGroup);//, Gtk::PACK_SHRINK, 4);
+
+    contrastThreshold = Gtk::manage(new Adjuster(M("TP_LABMASKS_CONTRASTTHRESHOLDMASK"), -150, 150, 1, 0));
+    contrastThreshold->setAdjusterListener(this);
+    //mask_box->pack_start(*contrastThreshold);
+    tb->pack_start(*contrastThreshold);
 
     maskBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), -10, 500, 0.1, 0));
     maskBlur->setLogScale(10, -10);
     maskBlur->setAdjusterListener(this);
-    mask_box->pack_start(*maskBlur);
+    //mask_box->pack_start(*maskBlur);
+    tb->pack_start(*maskBlur);
 
-    contrastThreshold = Gtk::manage(new Adjuster(M("TP_LABMASKS_CONTRASTTHRESHOLDMASK"), -150, 150, 1, 0));
-    contrastThreshold->setAdjusterListener(this);
-    mask_box->pack_start(*contrastThreshold);
-
+    mask_box->pack_start(*parametricMask);
+    
     //-------------------------------------------------------------------------
     deltaEMask = Gtk::manage(new MyExpander(true, M("TP_LABMASKS_DELTAE")));
     deltaEMask->getLabelWidget()->set_tooltip_text(M("TP_LABMASKS_DELTAE_TOOLTIP"));
@@ -385,7 +826,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     vb->pack_start(*deltaEPick);
     vb->pack_start(*deltaEColor, Gtk::PACK_EXPAND_WIDGET, 4);
     hb->pack_start(*vb, Gtk::PACK_SHRINK, 4);
-    ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
+    tb = Gtk::manage(new ToolParamBlock());
     tb->pack_start(*deltaEL);
     tb->pack_start(*deltaEC);
     tb->pack_start(*deltaEH);
@@ -451,6 +892,9 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     areaMaskFeather = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
     add_adjuster(areaMaskFeather, area);
 
+    areaMaskBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), 0, 500, 0.1, 0));
+    add_adjuster(areaMaskBlur, area);
+    
     CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_AREA_CONTRAST")));
     cg->setCurveListener(this);
 
@@ -538,10 +982,33 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     vb->pack_start(*areaFrame);
     areaMask->add(*vb, false);
     areaMask->setLevel(1);
+    vb->signal_unmap().connect(sigc::mem_fun(*this, &LabMasksPanel::on_hide));
     mask_box->pack_start(*areaMask);
+
+    drawnMask = Gtk::manage(new DrawnMaskPanel());
+    mask_box->pack_start(*drawnMask);
+    static_cast<DrawnMaskPanel *>(drawnMask)->signal_draw_updated().connect(sigc::mem_fun(this, &LabMasksPanel::onDrawnMaskUpdated));
+    
     mask_box->set_border_width(4);
 
-    MyExpander *mask_exp = Gtk::manage(new MyExpander(false, M("TP_LABMASKS_MASK")));
+    MyExpander *mask_exp = nullptr;
+    {
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        Gtk::Label *l = Gtk::manage(new Gtk::Label());
+        l->set_markup("<b>" + M("TP_LABMASKS_MASK") + "</b>");
+        l->set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+        hb->pack_start(*l);
+        Gtk::Entry *e = Gtk::manage(new Gtk::Entry());
+        hb->pack_start(*e, Gtk::PACK_EXPAND_WIDGET, 2);
+        e->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
+        e->set_alignment(Gtk::ALIGN_END);
+        e->set_placeholder_text("(" + M("TP_LABMASKS_MASK_UNNAMED") + ")");
+        mask_exp = Gtk::manage(new MyExpander(false, hb));
+        e->signal_button_release_event().connect(&on_release_event_ignore);
+        e->add_events(Gdk::FOCUS_CHANGE_MASK);
+        e->signal_focus_out_event().connect(sigc::mem_fun(*this, &LabMasksPanel::onMaskNameFocusOut));
+        maskName = e;
+    }
     mask_exp->add(*mask_box, false);
     mask_exp->setLevel(2);
     pack_start(*mask_exp);
@@ -572,12 +1039,16 @@ ToolPanelListener *LabMasksPanel::getListener()
 void LabMasksPanel::disableListener()
 {
     listenerDisabled.push_back(true);
+    //static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(nullptr);
 }
 
 
 void LabMasksPanel::enableListener()
 {
     listenerDisabled.pop_back();
+    // if (listenerDisabled.empty() || !listenerDisabled.back()) {
+    //     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&masks_[selected_].drawnMask);
+    // }
 }
 
 
@@ -606,13 +1077,16 @@ void LabMasksPanel::maskGet(int idx)
     }
     
     auto &r = masks_[idx];
-    r.hueMask = hueMask->getCurve();
-    r.chromaticityMask = chromaticityMask->getCurve();
-    r.lightnessMask = lightnessMask->getCurve();
-    r.maskBlur = maskBlur->getValue();
+    r.parametricMask.enabled = parametricMask->getEnabled();
+    r.parametricMask.hue = hueMask->getCurve();
+    r.parametricMask.chromaticity = chromaticityMask->getCurve();
+    r.parametricMask.lightness = lightnessMask->getCurve();
+    r.parametricMask.blur = maskBlur->getValue();
+    r.parametricMask.contrastThreshold = contrastThreshold->getValue();
     r.inverted = maskInverted->get_active();
-    r.areaEnabled = areaMask->getEnabled();
+    r.areaMask.enabled = areaMask->getEnabled();
     r.areaMask.feather = areaMaskFeather->getValue();
+    r.areaMask.blur = areaMaskBlur->getValue();
     r.areaMask.contrast = areaMaskContrast->getCurve();
     if (area_shape_index_ < r.areaMask.shapes.size()) {
         auto &a = r.areaMask.shapes[area_shape_index_];
@@ -637,7 +1111,7 @@ void LabMasksPanel::maskGet(int idx)
     r.deltaEMask.weight_H = b;
     r.deltaEMask.range = deltaERange->getValue();
     r.deltaEMask.decay = deltaEDecay->getValue();
-    r.contrastThresholdMask = contrastThreshold->getValue();
+    r.name = maskName->get_text();
 }
 
 
@@ -649,7 +1123,7 @@ void LabMasksPanel::onAddPressed()
 
     listEdited = true;
     selected_ = masks_.size();
-    masks_.push_back(rtengine::procparams::LabCorrectionMask());
+    masks_.push_back(rtengine::procparams::Mask());
     masks_.back().areaMask.shapes = {defaultAreaShape};
     populateList();
     area_shape_index_ = 0;
@@ -763,7 +1237,7 @@ void LabMasksPanel::populateList()
 {
     ConnectionBlocker b(selectionConn);
     list_model_->clear();
-    rtengine::procparams::LabCorrectionMask dflt;
+    rtengine::procparams::Mask dflt;
 
     int n = cp_->getColumnCount();
     for (size_t i = 0; i < masks_.size(); ++i) {
@@ -775,19 +1249,31 @@ void LabMasksPanel::populateList()
         for (int c = 0; c < n; ++c) {
             row[list_model_columns_->cols[c]] = cp_->getColumnContent(c, i);
         }
-        Glib::ustring am("");
-        if (r.areaEnabled && !r.areaMask.isTrivial()) {
-            am = Glib::ustring::compose("\n%1 shape%2", r.areaMask.shapes.size(), r.areaMask.shapes.size() > 1 ? "s" : "");
+        if (!r.name.empty()) {
+            row[list_model_columns_->mask] = r.name;            
+        } else {
+            Glib::ustring am("");
+            if (r.areaMask.enabled && !r.areaMask.isTrivial()) {
+                am = Glib::ustring::compose("\n%1 shape%2", r.areaMask.shapes.size(), r.areaMask.shapes.size() > 1 ? "s" : "");
+            }
+            if (!r.drawnMask.isTrivial()) {
+                if (am.empty()) {
+                    am = "\n";
+                } else {
+                    am += " ";
+                }
+                am += Glib::ustring::compose("%1 stroke%2", r.drawnMask.strokes.size(), r.drawnMask.strokes.size() == 1 ? "" : "s");
+            }
+            row[list_model_columns_->mask] = 
+                Glib::ustring::compose(
+                    "%1%2%3%4%7%5%6",
+                    hasMask(r, dflt.parametricMask.hue, r.parametricMask.hue) ? "H" : "",
+                    hasMask(r, dflt.parametricMask.chromaticity, r.parametricMask.chromaticity) ? "C" : "",
+                    hasMask(r, dflt.parametricMask.lightness, r.parametricMask.lightness) ? "L" : "",
+                    r.deltaEMask.enabled ? "ΔE" : "",
+                    r.parametricMask.blur ? Glib::ustring::compose(" b=%1", r.parametricMask.blur) : "",
+                    am, (r.parametricMask.enabled && r.parametricMask.contrastThreshold) ? Glib::ustring::compose(" c=%1", r.parametricMask.contrastThreshold) : "");
         }
-        row[list_model_columns_->mask] = 
-            Glib::ustring::compose(
-                "%1%2%3%4%7%5%6",
-                hasMask(dflt.hueMask, r.hueMask) ? "H" : "",
-                hasMask(dflt.chromaticityMask, r.chromaticityMask) ? "C" : "",
-                hasMask(dflt.lightnessMask, r.lightnessMask) ? "L" : "",
-                r.deltaEMask.enabled ? "ΔE" : "",
-                r.maskBlur ? Glib::ustring::compose(" b=%1", r.maskBlur) : "",
-                am, r.contrastThresholdMask > 0 ? Glib::ustring::compose(" c=%1", r.contrastThresholdMask) : "");
     }
 }
 
@@ -795,22 +1281,26 @@ void LabMasksPanel::populateList()
 void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
 {
     disableListener();
-    rtengine::procparams::LabCorrectionMask dflt;
+    rtengine::procparams::Mask dflt;
     auto &r = masks_[idx];
     if (!list_only) {
         cp_->selectionChanged(idx);
-        hueMask->setCurve(r.hueMask);
-        chromaticityMask->setCurve(r.chromaticityMask);
-        lightnessMask->setCurve(r.lightnessMask);
-        maskBlur->setValue(r.maskBlur);
+        parametricMask->setEnabled(r.parametricMask.enabled);
+        hueMask->setCurve(r.parametricMask.hue);
+        chromaticityMask->setCurve(r.parametricMask.chromaticity);
+        lightnessMask->setCurve(r.parametricMask.lightness);
+        contrastThreshold->setValue(r.parametricMask.contrastThreshold);
+        maskBlur->setValue(r.parametricMask.blur);
         maskInverted->set_active(r.inverted);
+        maskName->set_text(r.name);
 
         if (unsub && isCurrentSubscriber()) {
             unsubscribe();
         }
         areaMaskToggle->set_active(false);
-        areaMask->setEnabled(r.areaEnabled);
+        areaMask->setEnabled(r.areaMask.enabled);
         areaMaskFeather->setValue(r.areaMask.feather);
+        areaMaskBlur->setValue(r.areaMask.blur);
         areaMaskContrast->setCurve(r.areaMask.contrast);
         if (area_shape_index_ < r.areaMask.shapes.size()) {
             auto &a = r.areaMask.shapes[area_shape_index_];
@@ -831,11 +1321,10 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaERange->setValue(r.deltaEMask.range);
         deltaEDecay->setValue(r.deltaEMask.decay);
         static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
-
-        contrastThreshold->setValue(r.contrastThresholdMask);
         
         updateAreaMask(false);
     }
+    static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&r.drawnMask);
 
     int n = cp_->getColumnCount();
     auto row = list_model_->children()[idx];
@@ -843,20 +1332,32 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
     for (int c = 0; c < n; ++c) {
         row[list_model_columns_->cols[c]] = cp_->getColumnContent(c, idx);
     }
-    Glib::ustring am("");
-    if (r.areaEnabled && !r.areaMask.isTrivial()) {
-        am = Glib::ustring::compose("\n%1 shape%2", r.areaMask.shapes.size(),
-                                    r.areaMask.shapes.size() > 1 ? "s" : "");
+    if (!r.name.empty()) {
+        row[list_model_columns_->mask] = r.name;
+    } else {
+        Glib::ustring am("");
+        if (r.areaMask.enabled && !r.areaMask.isTrivial()) {
+            am = Glib::ustring::compose("\n%1 shape%2", r.areaMask.shapes.size(),
+                                        r.areaMask.shapes.size() > 1 ? "s" : "");
+        }
+        if (!r.drawnMask.isTrivial()) {
+            if (am.empty()) {
+                am = "\n";
+            } else {
+                am += " ";
+            }
+            am += Glib::ustring::compose("%1 stroke%2", r.drawnMask.strokes.size(), r.drawnMask.strokes.size() == 1 ? "" : "s");
+        }
+        row[list_model_columns_->mask] = 
+            Glib::ustring::compose(
+                "%1%2%3%4%7%5%6",
+                hasMask(r, dflt.parametricMask.hue, r.parametricMask.hue) ? "H" : "",
+                hasMask(r, dflt.parametricMask.chromaticity, r.parametricMask.chromaticity) ? "C" : "",
+                hasMask(r, dflt.parametricMask.lightness, r.parametricMask.lightness) ? "L" : "",
+                r.deltaEMask.enabled ? "ΔE" : "",
+                r.parametricMask.blur ? Glib::ustring::compose(" b=%1", r.parametricMask.blur) : "", am,
+                (r.parametricMask.enabled && r.parametricMask.contrastThreshold) ? Glib::ustring::compose(" c=%1", r.parametricMask.contrastThreshold) : "");
     }
-    row[list_model_columns_->mask] = 
-        Glib::ustring::compose(
-            "%1%2%3%4%7%5%6",
-            hasMask(dflt.hueMask, r.hueMask) ? "H" : "",
-            hasMask(dflt.chromaticityMask, r.chromaticityMask) ? "C" : "",
-            hasMask(dflt.lightnessMask, r.lightnessMask) ? "L" : "",
-            r.deltaEMask.enabled ? "ΔE" : "",
-            r.maskBlur ? Glib::ustring::compose(" b=%1", r.maskBlur) : "", am,
-            r.contrastThresholdMask ? Glib::ustring::compose(" c=%1", r.contrastThresholdMask) : "");
     Gtk::TreePath pth;
     pth.push_back(idx);
     list->get_selection()->select(pth);
@@ -871,6 +1372,7 @@ void LabMasksPanel::setEditProvider(EditDataProvider *provider)
     lightnessMask->setEditProvider(provider);
     static_cast<DeltaEArea *>(deltaEColor)->setEditProvider(provider);
     AreaMask::setEditProvider(provider);
+    static_cast<DrawnMaskPanel *>(drawnMask)->setEditProvider(provider);
 }
 
 
@@ -1017,7 +1519,7 @@ void LabMasksPanel::adjusterAutoToggled(Adjuster *a, bool newval)
 }
 
 
-void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::LabCorrectionMask> &masks, int show_mask_idx)
+void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int show_mask_idx)
 {
     disableListener();
     ConnectionBlocker b(selectionConn);
@@ -1030,6 +1532,7 @@ void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::LabCorrecti
     } else {
         showMask->set_active(false);
     }
+    static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(nullptr);
     populateList();
     area_shape_index_ = 0;
     maskShow(selected_);
@@ -1037,7 +1540,7 @@ void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::LabCorrecti
 }
         
 
-void LabMasksPanel::getMasks(std::vector<rtengine::procparams::LabCorrectionMask> &masks, int &show_mask_idx)
+void LabMasksPanel::getMasks(std::vector<rtengine::procparams::Mask> &masks, int &show_mask_idx)
 {
     maskGet(selected_);
     masks = masks_;
@@ -1345,6 +1848,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
             updateGeometry();
             updateAreaMask(true);
             areaMaskFeather->setValue(a.feather);
+            areaMaskBlur->setValue(a.blur);
             areaMaskContrast->setCurve(a.contrast);
             areaMaskRoundness->setValue(s.roundness);
             toggleAreaShapeMode(int(s.mode));
@@ -1469,8 +1973,10 @@ void LabMasksPanel::on_map()
 {
     Gtk::VBox::on_map();
     if (first_mask_exp_) {
+        parametricMask->set_expanded(false);
         areaMask->set_expanded(false);
         deltaEMask->set_expanded(false);
+        drawnMask->set_expanded(false);
         mask_exp_->set_expanded(false);
         first_mask_exp_ = false;
     }
@@ -1483,6 +1989,26 @@ void LabMasksPanel::onMaskFold(GdkEventButton *evt)
         if (showMask->get_active()) {
             showMask->set_active(false);
         }
+        if (isCurrentSubscriber()) {
+            switchOffEditMode();
+        }
+    }
+}
+
+
+void LabMasksPanel::on_hide()
+{
+    if (isCurrentSubscriber()) {
+        switchOffEditMode();
+    }
+}
+
+
+void LabMasksPanel::onParametricMaskEnableToggled()
+{
+    auto l = getListener();
+    if (l) {
+        l->panelChanged(EvParametricMask, parametricMask->getEnabled() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
 }
 
@@ -1560,4 +2086,24 @@ void LabMasksPanel::setListEnabled(Gtk::CellRenderer *renderer, const Gtk::TreeM
 {
     auto row = *it;
     static_cast<Gtk::CellRendererToggle *>(renderer)->set_active(row[list_model_columns_->enabled]);
+}
+
+
+void LabMasksPanel::onDrawnMaskUpdated()
+{
+    auto l = getListener();
+    if (l) {
+        l->panelChanged(EvDrawnMask, M("GENERAL_CHANGED"));
+    }
+}
+
+
+bool LabMasksPanel::onMaskNameFocusOut(GdkEventFocus *e)
+{
+    auto l = getListener();
+    if (l) {
+        l->panelChanged(EvMaskName, M("GENERAL_CHANGED"));
+    }
+    maskShow(selected_, true);
+    return false;
 }

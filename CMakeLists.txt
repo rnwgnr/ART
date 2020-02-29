@@ -413,7 +413,7 @@ if(WITH_PROF)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wuninitialized -Wno-deprecated-declarations -Wno-unused-result -Wunused-macros")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wuninitialized -Wno-deprecated-declarations -Wno-unused-result")
 if(OPTION_OMP)
     find_package(OpenMP)
     if(OPENMP_FOUND)
@@ -526,13 +526,13 @@ elseif(APPLE)
         -DLFLAGS:STRING=${LFLAGS}
         -DCOMPILER_INFO:STRING=${COMPILER_INFO})
 else()
-    list(APPEND ABOUT_COMMAND_WITH_ARGS -DSYSTEM:STRING=Linux
+    list(APPEND ABOUT_COMMAND_WITH_ARGS -DSYSTEM:STRING="${CMAKE_SYSTEM_NAME}"
         -DCXX_FLAGS:STRING=${CXX_FLAGS}
         -DLFLAGS:STRING=${LFLAGS}
         -DCOMPILER_INFO:STRING=${COMPILER_INFO})
 endif()
 
-list(APPEND ABOUT_COMMAND_WITH_ARGS -P "${PROJECT_SOURCE_DIR}/UpdateInfo.cmake")
+list(APPEND ABOUT_COMMAND_WITH_ARGS "-DBUILDINFO_OS:STRING=${CMAKE_HOST_SYSTEM_NAME}" -P "${PROJECT_SOURCE_DIR}/UpdateInfo.cmake")
 
 add_custom_target(UpdateInfo ALL
     COMMAND ${ABOUT_COMMAND_WITH_ARGS}

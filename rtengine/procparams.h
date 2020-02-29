@@ -102,7 +102,9 @@ struct AreaMask {
         bool operator==(const Shape &other) const;
         bool operator!=(const Shape &other) const;
     };
+    bool enabled;
     double feather; // [0,100]
+    double blur;
     std::vector<double> contrast; // curve
     std::vector<Shape> shapes;
         
@@ -131,31 +133,70 @@ public:
 };
 
 
-class LabCorrectionMask {
+struct DrawnMask {
+    struct Stroke {
+        double x; // [0,1], with 0 as leftmost point of the image
+        double y; // [0,1]
+        double radius; // [0,1], with 1 as 10% of the image smallest dimension
+        double hardness; // [0,1] with 1 as opaque (strongest)
+        bool erase;
+        Stroke();
+        bool operator==(const Stroke &other) const;
+        bool operator!=(const Stroke &other) const;
+    };
+    bool enabled;
+    double feather; // [0,100]    
+    double transparency; // [0,1] (0 = opaque, 1 = fully transparent)
+    double smoothness; // [0,1] (0 = harsh edges, 1 = fully blurred)
+    std::vector<double> contrast; // curve
+    std::vector<Stroke> strokes;
+    bool addmode;
+        
+    DrawnMask();
+    bool operator==(const DrawnMask &other) const;
+    bool operator!=(const DrawnMask &other) const;
+    bool isTrivial() const;
+
+    void strokes_to_list(std::vector<double> &out) const;
+    void strokes_from_list(const std::vector<double> &v);
+};
+
+
+class ParametricMask {
 public:
     bool enabled;
-    std::vector<double> hueMask;
-    std::vector<double> chromaticityMask;
-    std::vector<double> lightnessMask;
-    double maskBlur;
+    double blur;
+    std::vector<double> hue;
+    std::vector<double> chromaticity;
+    std::vector<double> lightness;
+    int contrastThreshold;
+
+    ParametricMask();
+    bool operator==(const ParametricMask &other) const;
+    bool operator!=(const ParametricMask &other) const;
+};
+
+
+class Mask {
+public:
+    bool enabled;
     bool inverted;
-    bool areaEnabled;
+    ParametricMask parametricMask;
     AreaMask areaMask;
     DeltaEMask deltaEMask;
-    int contrastThresholdMask;
+    DrawnMask drawnMask;
+    Glib::ustring name;
 
-    LabCorrectionMask();
-    bool operator==(const LabCorrectionMask &other) const;
-    bool operator!=(const LabCorrectionMask &other) const;
+    Mask();
+    bool operator==(const Mask &other) const;
+    bool operator!=(const Mask &other) const;
 
-    bool load(const KeyFile &keyfile, const Glib::ustring &group_name,
+    bool load(int ppVersion,
+              const KeyFile &keyfile, const Glib::ustring &group_name,
               const Glib::ustring &prefix, const Glib::ustring &suffix);
     void save(KeyFile &keyfile, const Glib::ustring &group_name,
               const Glib::ustring &prefix, const Glib::ustring &suffix) const;
 };
-
-
-
 
 
 template<typename T>
@@ -405,6 +446,7 @@ struct ToneCurveParams {
     bool histmatching; // histogram matching
     bool fromHistMatching;
     std::vector<double> saturation;
+    int perceptualStrength;
 
     ToneCurveParams();
 
@@ -447,7 +489,7 @@ struct LocalContrastParams {
 
     bool enabled;
     std::vector<Region> regions;
-    std::vector<LabCorrectionMask> labmasks;
+    std::vector<Mask> labmasks;
     int showMask;
 
     LocalContrastParams();
@@ -603,8 +645,14 @@ struct DenoiseParams {
         MEDIAN,
         GUIDED
     };
+
+    enum class ColorSpace {
+        RGB,
+        LAB
+    };
     
     bool enabled;
+    ColorSpace colorSpace;
 
     bool aggressive;
     double gamma;
@@ -651,7 +699,7 @@ struct TextureBoostParams {
 
     bool   enabled;
     std::vector<Region> regions;
-    std::vector<LabCorrectionMask> labmasks;
+    std::vector<Mask> labmasks;
     int showMask;
 
     TextureBoostParams();
@@ -1093,7 +1141,7 @@ struct GuidedSmoothingParams {
     };
     bool enabled;
     std::vector<Region> regions;
-    std::vector<LabCorrectionMask> labmasks;
+    std::vector<Mask> labmasks;
     int showMask;
 
     GuidedSmoothingParams();
@@ -1129,7 +1177,7 @@ struct ColorCorrectionParams {
 
     bool enabled;
     std::vector<Region> regions;
-    std::vector<LabCorrectionMask> labmasks;
+    std::vector<Mask> labmasks;
     int showMask;
 
     ColorCorrectionParams();

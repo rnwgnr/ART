@@ -42,9 +42,10 @@ public:
         return parent_->box;
     }
 
-    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask) override
+    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask) override
     {
         mask_list = parent_->EvList;
+        parametric_mask = parent_->EvParametricMask;
         h_mask = parent_->EvHueMask;
         c_mask = parent_->EvChromaticityMask;
         l_mask = parent_->EvLightnessMask;
@@ -53,6 +54,7 @@ public:
         area_mask = parent_->EvAreaMask;
         deltaE_mask = parent_->EvDeltaEMask;
         contrastThreshold_mask = parent_->EvContrastThresholdMask;
+        drawn_mask = parent_->EvDrawnMask;
     }
 
     ToolPanelListener *listener() override
@@ -94,7 +96,7 @@ public:
     bool resetPressed() override
     {
         parent_->data = { GuidedSmoothingParams::Region() };
-        parent_->labMasks->setMasks({ LabCorrectionMask() }, -1);
+        parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
     
@@ -164,6 +166,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvIterations = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_ITERATIONS");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_LIST");
+    EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_PARAMETRICMASK");
     EvHueMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_HUEMASK");
     EvChromaticityMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_CHROMATICITYMASK");
     EvLightnessMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_LIGHTNESSMASK");
@@ -172,6 +175,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvAreaMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_AREAMASK");
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK");
+    EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_DRAWNMASK");
 
     box = Gtk::manage(new Gtk::VBox());
 
@@ -220,7 +224,7 @@ void Smoothing::read(const ProcParams *pp)
     auto m = pp->smoothing.labmasks;
     if (data.empty()) {
         data.emplace_back(rtengine::GuidedSmoothingParams::Region());
-        m.emplace_back(rtengine::LabCorrectionMask());
+        m.emplace_back(rtengine::Mask());
     }
     labMasks->setMasks(m, pp->smoothing.showMask);
 

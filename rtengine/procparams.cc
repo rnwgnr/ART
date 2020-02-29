@@ -263,6 +263,17 @@ void getFromKeyfile(
     rtengine::sanitizeCurve(value);
 }
 
+void getFromKeyfile(
+    const KeyFile& keyfile,
+    const Glib::ustring& group_name,
+    const Glib::ustring& key,
+    std::vector<float>& value
+)
+{
+    std::vector<double> tmpval = keyfile.get_double_list(group_name, key);
+    value.assign(tmpval.begin(), tmpval.end());
+}
+
 template<typename T>
 bool assignFromKeyfile(const KeyFile& keyfile, const Glib::ustring& group_name, const Glib::ustring& key, T &value)
 {
@@ -454,7 +465,9 @@ bool AreaMask::Shape::operator!=(const Shape &other) const
 
 
 AreaMask::AreaMask():
+    enabled(false),
     feather(0),
+    blur(0),
     contrast{DCT_Linear},
     shapes{Shape()}
 {
@@ -463,7 +476,9 @@ AreaMask::AreaMask():
 
 bool AreaMask::operator==(const AreaMask &other) const
 {
-    return feather == other.feather
+    return enabled == other.enabled
+        && feather == other.feather
+        && blur == other.blur
         && contrast == other.contrast
         && shapes == other.shapes;
 }
@@ -477,7 +492,9 @@ bool AreaMask::operator!=(const AreaMask &other) const
 
 bool AreaMask::isTrivial() const
 {
-    return (*this == AreaMask());
+    AreaMask n;
+    n.enabled = true;
+    return (!enabled || *this == n);
 }
 
 
@@ -515,9 +532,130 @@ bool DeltaEMask::operator!=(const DeltaEMask &other) const
 }
 
 
-LabCorrectionMask::LabCorrectionMask():
-    enabled(true),
-    hueMask{
+DrawnMask::Stroke::Stroke():
+    x(-1),
+    y(-1),
+    radius(0),
+    hardness(1),
+    erase(false)
+{
+}
+
+
+bool DrawnMask::Stroke::operator==(const Stroke &other) const
+{
+    return x == other.x
+        && y == other.y
+        && radius == other.radius
+        && erase == other.erase
+        && hardness == other.hardness;
+}
+
+
+bool DrawnMask::Stroke::operator!=(const Stroke &other) const
+{
+    return !(*this == other);
+}
+
+
+DrawnMask::DrawnMask():
+    enabled(false),
+    feather(0.0),
+    transparency(0),
+    smoothness(0),
+    contrast{DCT_Linear},
+    strokes(),
+    addmode(false)
+{
+}
+
+
+bool DrawnMask::operator==(const DrawnMask &other) const
+{
+    return enabled == other.enabled
+        && feather == other.feather
+        && transparency == other.transparency
+        && smoothness == other.smoothness
+        && contrast == other.contrast
+        && strokes == other.strokes
+        && addmode == other.addmode;
+}
+
+
+bool DrawnMask::operator!=(const DrawnMask &other) const
+{
+    return !(*this == other);
+}
+
+
+bool DrawnMask::isTrivial() const
+{
+    return !enabled;
+}
+
+
+void DrawnMask::strokes_to_list(std::vector<double> &out) const
+{
+    if (strokes.empty()) {
+        return;
+    }
+
+    const auto same =
+        [](const Stroke &a, const Stroke &b) -> bool
+        {
+            return a.radius == b.radius
+                && a.erase == b.erase
+                && a.hardness == b.hardness;
+        };
+
+    auto cur = strokes[0];
+    size_t pos = 0;
+    while (true) {
+        int n = 0;
+        while (pos + n < strokes.size() && same(strokes[pos + n], cur)) {
+            ++n;
+        }
+        out.push_back(n);
+        out.push_back(cur.radius);
+        out.push_back(int(!cur.erase));
+        out.push_back(cur.hardness);
+        for (int i = 0; i < n; ++i) {
+            out.push_back(strokes[pos].x);
+            out.push_back(strokes[pos].y);
+            ++pos;
+        }
+        if (pos >= strokes.size()) {
+            break;
+        } else {
+            cur = strokes[pos];
+        }
+    }
+}
+
+
+void DrawnMask::strokes_from_list(const std::vector<double> &v)
+{
+    strokes.clear();
+    size_t pos = 0;
+    while (pos + 4 < v.size()) {
+        int n = v[pos++];
+        Stroke s;
+        s.radius = v[pos++];
+        s.erase = !bool(v[pos++]);
+        s.hardness = v[pos++];
+        for (int i = 0; i < n && pos + 1 < v.size(); ++i) {
+            strokes.push_back(s);
+            strokes.back().x = v[pos++];
+            strokes.back().y = v[pos++];
+        }
+    }
+}
+
+
+ParametricMask::ParametricMask():
+    enabled(false),
+    blur(0),
+    hue{
         FCT_MinMaxCPoints,
             0.166666667,
             1.,
@@ -528,7 +666,7 @@ LabCorrectionMask::LabCorrectionMask():
             0.35,
             0.35
     },
-    chromaticityMask{
+    chromaticity{
         FCT_MinMaxCPoints,
             0.,
             1.,
@@ -539,7 +677,7 @@ LabCorrectionMask::LabCorrectionMask():
             0.35,
             0.35
             },
-    lightnessMask{
+    lightness{
         FCT_MinMaxCPoints,
             0.,
             1.,
@@ -550,32 +688,53 @@ LabCorrectionMask::LabCorrectionMask():
             0.35,
             0.35
             },
-    maskBlur(0),
-    inverted(false),
-    areaEnabled(false),
-    areaMask(),
-    deltaEMask(),
-    contrastThresholdMask(0)
+    contrastThreshold(0)
 {
 }
 
 
-bool LabCorrectionMask::operator==(const LabCorrectionMask &other) const
+bool ParametricMask::operator==(const ParametricMask &other) const
 {
     return enabled == other.enabled
-        && hueMask == other.hueMask
-        && chromaticityMask == other.chromaticityMask
-        && lightnessMask == other.lightnessMask
-        && maskBlur == other.maskBlur
-        && inverted == other.inverted
-        && areaEnabled == other.areaEnabled
-        && areaMask == other.areaMask
-        && deltaEMask == other.deltaEMask
-        && contrastThresholdMask == other.contrastThresholdMask;
+        && blur == other.blur
+        && hue == other.hue
+        && chromaticity == other.chromaticity
+        && lightness == other.lightness
+        && contrastThreshold == other.contrastThreshold;
 }
 
 
-bool LabCorrectionMask::operator!=(const LabCorrectionMask &other) const
+bool ParametricMask::operator!=(const ParametricMask &other) const
+{
+    return !(*this == other);
+}
+
+
+Mask::Mask():
+    enabled(true),
+    inverted(false),
+    parametricMask(),
+    areaMask(),
+    deltaEMask(),
+    drawnMask(),
+    name("")
+{
+}
+
+
+bool Mask::operator==(const Mask &other) const
+{
+    return enabled == other.enabled
+        && inverted == other.inverted
+        && parametricMask == other.parametricMask
+        && areaMask == other.areaMask
+        && deltaEMask == other.deltaEMask
+        && drawnMask == other.drawnMask
+        && name == other.name;
+}
+
+
+bool Mask::operator!=(const Mask &other) const
 {
     return !(*this == other);
 }
@@ -610,16 +769,29 @@ Glib::ustring mode2str(AreaMask::Shape::Mode mode)
 } // namespace
 
 
-bool LabCorrectionMask::load(const KeyFile &keyfile, const Glib::ustring &group_name, const Glib::ustring &prefix, const Glib::ustring &suffix)
+bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &group_name, const Glib::ustring &prefix, const Glib::ustring &suffix)
 {
     bool ret = false;
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskEnabled" + suffix, enabled);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "HueMask" + suffix, hueMask);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, chromaticityMask);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMask" + suffix, lightnessMask);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskBlur" + suffix, maskBlur);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskInverted" + suffix, inverted);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskEnabled" + suffix, areaEnabled);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskName" + suffix, name);
+    if (ppVersion < 1008) {
+        parametricMask.enabled = true;
+    } else {
+        ret |= assignFromKeyfile(keyfile, group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled);
+    }
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "HueMask" + suffix, parametricMask.hue);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMask" + suffix, parametricMask.lightness);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "ContrastThresholdMask" + suffix, parametricMask.contrastThreshold);
+    if (ppVersion < 1008) {
+        ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskBlur" + suffix, parametricMask.blur);
+        areaMask.blur = parametricMask.blur;
+    } else {
+        ret |= assignFromKeyfile(keyfile, group_name, prefix + "ParametricMaskBlur" + suffix, parametricMask.blur);
+        ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskBlur" + suffix, areaMask.blur);
+    }
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskEnabled" + suffix, areaMask.enabled);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskFeather" + suffix, areaMask.feather);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskContrast" + suffix, areaMask.contrast);
     if (areaMask.contrast.empty() || areaMask.contrast[0] < DCT_Linear || areaMask.contrast[0] >= DCT_Unchanged) {
@@ -661,22 +833,37 @@ bool LabCorrectionMask::load(const KeyFile &keyfile, const Glib::ustring &group_
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightL" + suffix, deltaEMask.weight_L);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightC" + suffix, deltaEMask.weight_C);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightH" + suffix, deltaEMask.weight_H);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "ContrastThresholdMask" + suffix, contrastThresholdMask);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskEnabled" + suffix, drawnMask.enabled);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskFeather" + suffix, drawnMask.feather);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskTransparency" + suffix, drawnMask.transparency);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskSmoothness" + suffix, drawnMask.smoothness);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskContrast" + suffix, drawnMask.contrast);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskAddMode" + suffix, drawnMask.addmode);
+    std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
+    if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, v)) {
+        ret = true;
+        std::vector<double> vv(v.begin(), v.end());
+        drawnMask.strokes_from_list(vv);
+    }
     
     return ret;
 }
 
 
-void LabCorrectionMask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::ustring &prefix, const Glib::ustring &suffix) const
+void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::ustring &prefix, const Glib::ustring &suffix) const
 {
     putToKeyfile(group_name, prefix + "MaskEnabled" + suffix, enabled, keyfile);
-    putToKeyfile(group_name, prefix + "HueMask" + suffix, hueMask, keyfile);
-    putToKeyfile(group_name, prefix + "ChromaticityMask" + suffix, chromaticityMask, keyfile);
-    putToKeyfile(group_name, prefix + "LightnessMask" + suffix, lightnessMask, keyfile);
-    putToKeyfile(group_name, prefix + "MaskBlur" + suffix, maskBlur, keyfile);
     putToKeyfile(group_name, prefix + "MaskInverted" + suffix, inverted, keyfile);
-    putToKeyfile(group_name, prefix + "AreaMaskEnabled" + suffix, areaEnabled, keyfile);
+    putToKeyfile(group_name, prefix + "MaskName" + suffix, name, keyfile);
+    putToKeyfile(group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled, keyfile);
+    putToKeyfile(group_name, prefix + "HueMask" + suffix, parametricMask.hue, keyfile);
+    putToKeyfile(group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity, keyfile);
+    putToKeyfile(group_name, prefix + "LightnessMask" + suffix, parametricMask.lightness, keyfile);
+    putToKeyfile(group_name, prefix + "ContrastThresholdMask" + suffix, parametricMask.contrastThreshold, keyfile);
+    putToKeyfile(group_name, prefix + "ParametricMaskBlur" + suffix, parametricMask.blur, keyfile);
+    putToKeyfile(group_name, prefix + "AreaMaskEnabled" + suffix, areaMask.enabled, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskFeather" + suffix, areaMask.feather, keyfile);
+    putToKeyfile(group_name, prefix + "AreaMaskBlur" + suffix, areaMask.blur, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskContrast" + suffix, areaMask.contrast, keyfile);
     for (size_t i = 0; i < areaMask.shapes.size(); ++i) {
         auto &a = areaMask.shapes[i];
@@ -699,7 +886,15 @@ void LabCorrectionMask::save(KeyFile &keyfile, const Glib::ustring &group_name, 
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightL" + suffix, deltaEMask.weight_L, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightC" + suffix, deltaEMask.weight_C, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightH" + suffix, deltaEMask.weight_H, keyfile);
-    putToKeyfile(group_name, prefix + "ContrastThresholdMask" + suffix, contrastThresholdMask, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskEnabled" + suffix, drawnMask.enabled, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskFeather" + suffix, drawnMask.feather, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskTransparency" + suffix, drawnMask.transparency, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskSmoothness" + suffix, drawnMask.smoothness, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskContrast" + suffix, drawnMask.contrast, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskAddMode" + suffix, drawnMask.addmode, keyfile);
+    std::vector<double> v;
+    drawnMask.strokes_to_list(v);
+    putToKeyfile(group_name, prefix + "DrawnMaskStrokes" + suffix, v, keyfile);
 }
 
 
@@ -764,7 +959,8 @@ ToneCurveParams::ToneCurveParams():
     fromHistMatching(false),
     saturation{
         FCT_Linear
-    }
+    },
+    perceptualStrength(100)
 {
 }
 
@@ -779,7 +975,8 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
         && curveMode2 == other.curveMode2
         && histmatching == other.histmatching
         && fromHistMatching == other.fromHistMatching
-        && saturation == other.saturation;
+        && saturation == other.saturation
+        && perceptualStrength == perceptualStrength;
 }
 
 
@@ -885,7 +1082,7 @@ bool LocalContrastParams::Region::operator!=(const Region &other) const
 LocalContrastParams::LocalContrastParams():
     enabled(false),
     regions{Region()},
-    labmasks{LabCorrectionMask()},
+    labmasks{Mask()},
     showMask(-1)
 {
 }
@@ -1089,6 +1286,7 @@ bool ImpulseDenoiseParams::operator !=(const ImpulseDenoiseParams& other) const
 
 DenoiseParams::DenoiseParams() :
     enabled(false),
+    colorSpace(ColorSpace::RGB),
     aggressive(false),
     gamma(1.7),
     luminance(0),
@@ -1116,6 +1314,7 @@ bool DenoiseParams::operator ==(const DenoiseParams& other) const
 {
     return
         enabled == other.enabled
+        && colorSpace == other.colorSpace
         && aggressive == other.aggressive
         && gamma == other.gamma
         && luminance == other.luminance
@@ -1169,7 +1368,7 @@ bool TextureBoostParams::Region::operator!=(const Region &other) const
 TextureBoostParams::TextureBoostParams() :
     enabled(false),
     regions{Region()},
-    labmasks{LabCorrectionMask()},
+    labmasks{Mask()},
     showMask(-1)
 {
 }
@@ -1889,7 +2088,7 @@ bool GuidedSmoothingParams::Region::operator!=(const Region &other) const
 GuidedSmoothingParams::GuidedSmoothingParams():
     enabled(false),
     regions{Region()},
-    labmasks{LabCorrectionMask()},
+    labmasks{Mask()},
     showMask(-1)
 {
 }
@@ -1951,7 +2150,7 @@ bool ColorCorrectionParams::Region::operator!=(const Region &other) const
 ColorCorrectionParams::ColorCorrectionParams():
     enabled(false),
     regions{Region()},
-    labmasks{LabCorrectionMask()},
+    labmasks{Mask()},
     showMask(-1)
 {
 }
@@ -2478,6 +2677,7 @@ int ProcParams::save(bool save_general,
             saveToKeyfile("ToneCurve", "Curve", toneCurve.curve, keyFile);
             saveToKeyfile("ToneCurve", "Curve2", toneCurve.curve2, keyFile);
             saveToKeyfile("ToneCurve", "Saturation", toneCurve.saturation, keyFile);
+            saveToKeyfile("ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength, keyFile);
         }
 
 // Local contrast
@@ -2595,6 +2795,7 @@ int ProcParams::save(bool save_general,
 // Denoising
         if (RELEVANT_(denoise)) {
             saveToKeyfile("Denoise", "Enabled", denoise.enabled, keyFile);
+            saveToKeyfile("Denoise", "ColorSpace", denoise.colorSpace == DenoiseParams::ColorSpace::LAB ? "LAB" : "RGB", keyFile);
             saveToKeyfile("Denoise", "Aggressive", denoise.aggressive, keyFile);
             saveToKeyfile("Denoise", "Gamma", denoise.gamma, keyFile);
             saveToKeyfile("Denoise", "Luminance", denoise.luminance, keyFile);
@@ -3217,6 +3418,7 @@ int ProcParams::load(bool load_general,
                 assignFromKeyfile(keyFile, "ToneCurve", "HistogramMatching", toneCurve.histmatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveFromHistogramMatching", toneCurve.fromHistMatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "Saturation", toneCurve.saturation);
+                assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength);
             }
         }
 
@@ -3277,12 +3479,12 @@ int ProcParams::load(bool load_general,
             assignFromKeyfile(keyFile, "Local Contrast", "Enabled", localContrast.enabled);
                 
             std::vector<LocalContrastParams::Region> ll;
-            std::vector<LabCorrectionMask> lm;
+            std::vector<Mask> lm;
             bool found = false;
             bool done = false;
             for (int i = 0; !done; ++i) {
                 LocalContrastParams::Region cur;
-                LabCorrectionMask curmask;
+                Mask curmask;
                 done = true;
                 std::string n = i ? std::string("_") + std::to_string(i) : std::string("");
                 if (assignFromKeyfile(keyFile, "Local Contrast", Glib::ustring("Contrast") + n, cur.contrast)) {
@@ -3293,7 +3495,7 @@ int ProcParams::load(bool load_general,
                     found = true;
                     done = false;
                 }
-                if (curmask.load(keyFile, "Local Contrast", "", n)) {
+                if (curmask.load(ppVersion, keyFile, "Local Contrast", "", n)) {
                     found = true;
                     done = false;
                 }
@@ -3425,6 +3627,13 @@ int ProcParams::load(bool load_general,
         } else {
             if (keyFile.has_group("Denoise") && RELEVANT_(denoise)) {
                 assignFromKeyfile(keyFile, "Denoise", "Enabled", denoise.enabled);
+                Glib::ustring cs = "RGB";
+                assignFromKeyfile(keyFile, "Denoise", "ColorSpace", cs);
+                if (cs == "LAB") {
+                    denoise.colorSpace = DenoiseParams::ColorSpace::LAB;
+                } else {
+                    denoise.colorSpace = DenoiseParams::ColorSpace::RGB;
+                }
                 int val;
                 assignFromKeyfile(keyFile, "Denoise", "Aggressive", denoise.aggressive);
                 assignFromKeyfile(keyFile, "Denoise", "Gamma", denoise.gamma);
@@ -3461,12 +3670,12 @@ int ProcParams::load(bool load_general,
             assignFromKeyfile(keyFile, tbgroup, "Enabled", textureBoost.enabled);
                 
             std::vector<TextureBoostParams::Region> ll;
-            std::vector<LabCorrectionMask> lm;
+            std::vector<Mask> lm;
             bool found = false;
             bool done = false;
             for (int i = 0; !done; ++i) {
                 TextureBoostParams::Region cur;
-                LabCorrectionMask curmask;
+                Mask curmask;
                 done = true;
                 std::string n = i ? std::string("_") + std::to_string(i) : std::string("");
                 if (assignFromKeyfile(keyFile, tbgroup, Glib::ustring("Strength") + n, cur.strength)) {
@@ -3481,7 +3690,7 @@ int ProcParams::load(bool load_general,
                     found = true;
                     done = false;
                 }
-                if (curmask.load(keyFile, tbgroup, "", n)) {
+                if (curmask.load(ppVersion, keyFile, tbgroup, "", n)) {
                     found = true;
                     done = false;
                 }
@@ -3819,12 +4028,12 @@ int ProcParams::load(bool load_general,
             assignFromKeyfile(keyFile, "GuidedSmoothing", "Enabled", smoothing.enabled);
                 
             std::vector<GuidedSmoothingParams::Region> ll;
-            std::vector<LabCorrectionMask> lm;
+            std::vector<Mask> lm;
             bool found = false;
             bool done = false;
             for (int i = 1; !done; ++i) {
                 GuidedSmoothingParams::Region cur;
-                LabCorrectionMask curmask;
+                Mask curmask;
                 done = true;
                 std::string n = std::to_string(i);
                 int c;
@@ -3845,7 +4054,7 @@ int ProcParams::load(bool load_general,
                     found = true;
                     done = false;
                 }
-                if (curmask.load(keyFile, "GuidedSmoothing", "", Glib::ustring("_") + n)) {
+                if (curmask.load(ppVersion, keyFile, "GuidedSmoothing", "", Glib::ustring("_") + n)) {
                     found = true;
                     done = false;
                 }
@@ -3867,13 +4076,13 @@ int ProcParams::load(bool load_general,
             const Glib::ustring prefix = "";
             assignFromKeyfile(keyFile, ccgroup, "Enabled", colorcorrection.enabled);
             std::vector<ColorCorrectionParams::Region> lg;
-            std::vector<LabCorrectionMask> lm;
+            std::vector<Mask> lm;
             bool found = false;
             bool done = false;
 
             for (int i = 1; !done; ++i) {
                 ColorCorrectionParams::Region cur;
-                LabCorrectionMask curmask;
+                Mask curmask;
                 done = true;
                 std::string n = std::to_string(i);
 
@@ -3960,7 +4169,7 @@ int ProcParams::load(bool load_general,
                         }
                     }
                 }
-                if (curmask.load(keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
+                if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
                     found = true;
                     done = false;
                 }
