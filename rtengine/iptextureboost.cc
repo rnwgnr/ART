@@ -195,12 +195,12 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
 #endif
             for (int y = 0; y < lab.H; ++y) {
                 for (int x = 0; x < lab.W; ++x) {
-                    float l = lab.L[y][x];
-                    float aa = lab.a[y][x];
-                    float bb = lab.b[y][x];
-                    lab.L[y][x] = intp(blend[y][x], lab.L[y][x], L[y][x]);
-                    lab.a[y][x] = intp(blend[y][x], lab.a[y][x], a[y][x]);
-                    lab.b[y][x] = intp(blend[y][x], lab.b[y][x], b[y][x]);
+                    float &l = lab.L[y][x];
+                    float &aa = lab.a[y][x];
+                    float &bb = lab.b[y][x];
+                    l = intp(blend[y][x], l, L[y][x]);
+                    aa = intp(blend[y][x], aa, a[y][x]);
+                    bb = intp(blend[y][x], bb, b[y][x]);
                     L[y][x] = l;
                     a[y][x] = aa;
                     b[y][x] = bb;
