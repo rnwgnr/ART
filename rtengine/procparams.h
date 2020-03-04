@@ -690,6 +690,7 @@ struct TextureBoostParams {
     struct Region {
         double strength;
         double edgeStopping;
+        int iterations;
         double scale;
 
         Region();

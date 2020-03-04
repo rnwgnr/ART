@@ -131,7 +131,7 @@ public:
         auto &r = parent_->data[row];
 
         return Glib::ustring::compose(
-            "%1 %2 %3", r.strength, r.edgeStopping, r.scale); 
+            "%1 %2 %3", r.strength, r.edgeStopping, r.iterations); 
     }
 
     void getEditIDs(EditUniqueID &hcurve, EditUniqueID &ccurve, EditUniqueID &lcurve, EditUniqueID &deltaE) override
@@ -154,6 +154,7 @@ private:
 TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL"), true, true)
 {
     auto m = ProcEventMapper::getInstance();
+    EvEPDIterations = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_ITERATIONS");
     EvList = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_LIST");
     EvParametricMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_PARAMETRICMASK");
     EvHueMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_HUEMASK");
@@ -167,22 +168,25 @@ TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL")
     EvDrawnMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_DRAWNMASK");
 
     strength = Gtk::manage(new Adjuster (M("TP_EPD_STRENGTH"), -1.0, 2.0, 0.01, 0.5));
-    edgeStopping = Gtk::manage(new Adjuster (M("TP_EPD_EDGESTOPPING"), 0.1, 4.0, 0.01, 0.5));
-    scale = Gtk::manage(new Adjuster (M("TP_EPD_SCALE"), 0.1, 10.0, 0.01, 0.1));
+    edgeStopping = Gtk::manage(new Adjuster (M("TP_EPD_EDGESTOPPING"), 0.1, 4.0, 0.01, 1.4));
+    iterations = Gtk::manage(new Adjuster(M("TP_EPD_ITERATIONS"), 1, 5, 1, 1));
+    scale_deprecated = Gtk::manage(new Adjuster(M("TP_EPD_SCALE"), 0.1, 10.0, 0.01, 1, nullptr, nullptr, nullptr, nullptr, true));
 
     box = Gtk::manage(new Gtk::VBox());
 
     strength->setAdjusterListener(this);
     edgeStopping->setAdjusterListener(this);
-    scale->setAdjusterListener(this);
+    iterations->setAdjusterListener(this);
+    scale_deprecated->setAdjusterListener(this);
 
     strength->show();
     edgeStopping->show();
-    scale->show();
+    iterations->show();
 
     box->pack_start(*strength);
     box->pack_start(*edgeStopping);
-    box->pack_start(*scale);
+    box->pack_start(*iterations);
+    box->pack_start(*scale_deprecated);
 
     labMasksContentProvider.reset(new EPDMasksContentProvider(this));
     labMasks = Gtk::manage(new LabMasksPanel(labMasksContentProvider.get()));
@@ -204,6 +208,14 @@ void TextureBoost::read(const ProcParams *pp)
     }
     labMasks->setMasks(m, pp->textureBoost.showMask);
 
+    scale_deprecated->set_visible(false);
+    for (auto &r : data) {
+        if (r.scale > 0.f) {
+            scale_deprecated->set_visible(true);
+            break;
+        }
+    }
+
     enableListener();
 }
 
@@ -224,7 +236,7 @@ void TextureBoost::setDefaults(const ProcParams *defParams)
 {
     strength->setDefault(defParams->textureBoost.regions[0].strength);
     edgeStopping->setDefault(defParams->textureBoost.regions[0].edgeStopping);
-    scale->setDefault(defParams->textureBoost.regions[0].scale);
+    iterations->setDefault(defParams->textureBoost.regions[0].iterations);
 }
 
 void TextureBoost::adjusterChanged(Adjuster* a, double newval)
@@ -236,7 +248,9 @@ void TextureBoost::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvEPDStrength, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(2), a->getValue()));
         } else if(a == edgeStopping) {
             listener->panelChanged(EvEPDEdgeStopping, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(2), a->getValue()));
-        } else if(a == scale) {
+        } else if(a == iterations) {
+            listener->panelChanged(EvEPDIterations, a->getTextValue());
+        } else if(a == scale_deprecated) {
             listener->panelChanged(EvEPDScale, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(2), a->getValue()));
         }
     }
@@ -290,7 +304,12 @@ void TextureBoost::regionGet(int idx)
     auto &r = data[idx];
     r.strength = strength->getValue();
     r.edgeStopping = edgeStopping->getValue();
-    r.scale = scale->getValue();
+    r.iterations = iterations->getValue();
+    if (scale_deprecated->is_visible()) {
+        r.scale = scale_deprecated->getValue();
+    } else {
+        r.scale = 0;
+    }
 }
 
 
@@ -304,7 +323,8 @@ void TextureBoost::regionShow(int idx)
     auto &r = data[idx];
     strength->setValue(r.strength);
     edgeStopping->setValue(r.edgeStopping);
-    scale->setValue(r.scale);
+    iterations->setValue(r.iterations);
+    scale_deprecated->setValue(r.scale);
     
     if (disable) {
         enableListener();

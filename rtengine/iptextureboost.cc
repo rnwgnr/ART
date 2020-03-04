@@ -33,11 +33,9 @@ namespace {
 
 void EPD(LabImage *lab, const rtengine::procparams::TextureBoostParams::Region &pp, double scale, bool multithread)
 {
-    unsigned int Iterates = 0;//5;
-
     float stren = pp.strength; 
     float edgest = pp.edgeStopping; 
-    float sca = pp.scale;
+    const float sca = pp.scale > 0.f ? pp.scale : 1.f;
     constexpr float gamm = 1.5f;
     constexpr float rew = 0;
     constexpr float noise_floor = 1e-8f * 32768.f;
@@ -47,7 +45,6 @@ void EPD(LabImage *lab, const rtengine::procparams::TextureBoostParams::Region &
     float *a = lab->a[0];
     float *b = lab->b[0];
     size_t N = lab->W * lab->H;
-    EdgePreservingDecomposition epd (lab->W, lab->H);
 
     //Due to the taking of logarithms, L must be nonnegative. Further, scale to 0 to 1 using nominal range of L, 0 to 15 bit.
     float minL = FLT_MAX;
@@ -113,6 +110,7 @@ void EPD(LabImage *lab, const rtengine::procparams::TextureBoostParams::Region &
         DetailBoost = 0.0f;    //Go with effect of exponent only if uncompressing.
     }
 
+    unsigned int Iterates = 0;
     //Auto select number of iterates. Note that p->EdgeStopping = 0 makes a Gaussian blur.
     if (Iterates == 0) {
         Iterates = (unsigned int) (edgest * 15.0f);
@@ -125,7 +123,11 @@ void EPD(LabImage *lab, const rtengine::procparams::TextureBoostParams::Region &
     fwrite(L, N, sizeof(float), f);
     fclose(f);*/
 
-    epd.CompressDynamicRange (L, sca / SQR(scale), edgest, Compression, DetailBoost, Iterates, rew);
+    const float scale_d = pp.scale > 0.f ? scale : SQR(scale);
+    for (int j = 0; j < pp.iterations; ++j) {
+        EdgePreservingDecomposition epd(lab->W, lab->H);
+        epd.CompressDynamicRange(L, sca / scale_d, edgest, Compression, DetailBoost, Iterates, rew);
+    }
 
     //Restore past range, also desaturate a bit per Mantiuk's Color correction for tone mapping.
     float s = (1.0f + 38.7889f) * powf (Compression, 1.5856f) / (1.0f + 38.7889f * powf (Compression, 1.5856f));

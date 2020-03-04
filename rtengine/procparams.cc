@@ -1346,7 +1346,8 @@ bool DenoiseParams::operator !=(const DenoiseParams& other) const
 TextureBoostParams::Region::Region():
     strength(0.5),
     edgeStopping(1.4),
-    scale(1.0)
+    iterations(1),
+    scale(0)
 {
 }
 
@@ -1355,7 +1356,8 @@ bool TextureBoostParams::Region::operator==(const Region &other) const
 {
     return strength == other.strength
         && edgeStopping == other.edgeStopping
-        && scale == other.scale;
+        && scale == other.scale
+        && iterations == other.iterations;
 }
 
 
@@ -2825,7 +2827,10 @@ int ProcParams::save(bool save_general,
                 auto &r = textureBoost.regions[j];
                 putToKeyfile("TextureBoost", Glib::ustring("Strength") + n, r.strength, keyFile);
                 putToKeyfile("TextureBoost", Glib::ustring("EdgeStopping") + n, r.edgeStopping, keyFile);
-                putToKeyfile("TextureBoost", Glib::ustring("Scale") + n, r.scale, keyFile);
+                if (r.scale != 1) {
+                    putToKeyfile("TextureBoost", Glib::ustring("Scale") + n, r.scale, keyFile);
+                }
+                putToKeyfile("TextureBoost", Glib::ustring("Iterations") + n, r.iterations, keyFile);
                 textureBoost.labmasks[j].save(keyFile, "TextureBoost", "", n);
             }
             saveToKeyfile("TextureBoost", "showMask", textureBoost.showMask, keyFile);
@@ -3687,6 +3692,10 @@ int ProcParams::load(bool load_general,
                     done = false;
                 }
                 if (assignFromKeyfile(keyFile, tbgroup, Glib::ustring("Scale") + n, cur.scale)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, tbgroup, Glib::ustring("Iterations") + n, cur.iterations)) {
                     found = true;
                     done = false;
                 }
