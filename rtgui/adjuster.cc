@@ -32,7 +32,7 @@ static double one2one(double val)
     return val;
 }
 
-Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep, double vdefault, Gtk::Image *imgIcon1, Gtk::Image *imgIcon2, double2double_fun slider2value_, double2double_fun value2slider_)
+Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep, double vdefault, Gtk::Image *imgIcon1, Gtk::Image *imgIcon2, double2double_fun slider2value_, double2double_fun value2slider_, bool deprecated)
 {
 
     set_hexpand(true);
@@ -119,7 +119,18 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
         attach_next_to(*reset, *spin, Gtk::POS_RIGHT, 1, 1);
     } else {
         // A label is provided, spreading the widgets in 2 rows
-        attach_next_to(*label, Gtk::POS_LEFT, 1, 1);
+        Gtk::HBox *hb = nullptr;
+        if (deprecated) {
+            hb = Gtk::manage(new Gtk::HBox());
+            Gtk::Image *w = Gtk::manage(new RTImage("warning-small.png"));
+            w->set_tooltip_markup(M("GENERAL_DEPRECATED_TOOLTIP"));
+            hb->pack_start(*w, Gtk::PACK_SHRINK, 2);
+            hb->pack_start(*label, Gtk::PACK_SHRINK);
+            setExpandAlignProperties(hb, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+            attach_next_to(*hb, Gtk::POS_LEFT, 1, 1);
+        } else {
+            attach_next_to(*label, Gtk::POS_LEFT, 1, 1);
+        }
         attach_next_to(*spin, Gtk::POS_RIGHT, 1, 1);
         // A second HBox is necessary
         grid = Gtk::manage(new Gtk::Grid());
@@ -136,7 +147,11 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
             grid->attach_next_to(*reset, *slider, Gtk::POS_RIGHT, 1, 1);
         }
 
-        attach_next_to(*grid, *label, Gtk::POS_BOTTOM, 2, 1);
+        if (deprecated) {
+            attach_next_to(*grid, *hb, Gtk::POS_BOTTOM, 2, 1);
+        } else {
+            attach_next_to(*grid, *label, Gtk::POS_BOTTOM, 2, 1);
+        }
     }
 
     setLimits (vmin, vmax, vstep, vdefault);
