@@ -45,6 +45,9 @@ public:
     void onLensfunLensChanged();
     void onCorrModeChanged(const Gtk::RadioButton* rbChanged);
 
+    void setDefaults(const rtengine::procparams::ProcParams *def) override;
+    void toolReset(bool to_initial) override;
+
 private:
     class LFDbHelper final
     {
@@ -127,6 +130,8 @@ private:
     Gtk::CheckButton* const ckbUseDist;
     Gtk::CheckButton* const ckbUseVign;
     Gtk::CheckButton* const ckbUseCA;
+
+    rtengine::procparams::LensProfParams initial_params;
 
     static LFDbHelper* lf;
 };

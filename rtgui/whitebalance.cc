@@ -17,6 +17,7 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "whitebalance.h"
+#include "../rtengine/refreshmap.h"
 
 #include <iomanip>
 
@@ -142,8 +143,9 @@ static double wbTemp2Slider(double temp)
     return sval;
 }
 
-WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true), wbp(nullptr), wblistener(nullptr)
+WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true, true), wbp(nullptr), wblistener(nullptr)
 {
+    EvToolReset.set_action(ALLNORAW);
 
     Gtk::Grid* methodgrid = Gtk::manage(new Gtk::Grid());
     methodgrid->get_style_context()->add_class("grid-spacing");
@@ -660,6 +662,8 @@ void WhiteBalance::setDefaults(const ProcParams* defParams)
         green->setDefault (defParams->wb.green);
     }
     // Recomputing AutoWB if it's the current method will happen in improccoordinator.cc
+
+    initial_params = defParams->wb;
 }
 
 
@@ -800,4 +804,15 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
             return false;
         }
     );
+}
+
+
+void WhiteBalance::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.wb = initial_params;
+    }
+    pp.wb.enabled = getEnabled();
+    read(&pp);
 }

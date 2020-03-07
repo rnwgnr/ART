@@ -58,6 +58,8 @@ private:
     rtengine::ProcEvent EvContrastThresholdMask;
     rtengine::ProcEvent EvDrawnMask;
 
+    rtengine::procparams::LocalContrastParams initial_params;
+
 public:
 
     LocalContrast();
@@ -84,5 +86,7 @@ public:
     void updateGeometry(int fullWidth, int fullHeight);
     void setAreaDrawListener(AreaDrawListener *l);
     void setDeltaEColorProvider(DeltaEColorProvider *p);
+
+    void toolReset(bool to_initial) override;
 };
 

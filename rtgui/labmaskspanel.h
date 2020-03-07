@@ -48,7 +48,7 @@ public:
     virtual bool copyPressed(int idx) = 0;
     virtual bool moveUpPressed(int idx) = 0;
     virtual bool moveDownPressed(int idx) = 0;
-    virtual bool resetPressed() = 0;
+    virtual bool resetPressed(int idx) = 0;
 
     virtual int getColumnCount() = 0;
     virtual Glib::ustring getColumnHeader(int col) = 0;

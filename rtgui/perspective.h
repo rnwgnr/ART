@@ -34,12 +34,14 @@ public:
     void setDefaults(const rtengine::procparams::ProcParams* defParams) override;
     void adjusterChanged (Adjuster* a, double newval) override;
     void adjusterAutoToggled(Adjuster* a, bool newval) override;
-    void trimValues          (rtengine::procparams::ProcParams* pp) override;
+    void trimValues(rtengine::procparams::ProcParams* pp) override;
 
     void setLensGeomListener (LensGeomListener* l) { lgl = l; }
     void autoPressed(Gtk::Button *which);
 
     void setRawMeta(bool raw, const rtengine::FramesMetaData *meta);
+
+    void toolReset(bool to_initial) override;
 
 private:
     void do_set_metadata(const rtengine::FramesMetaData *meta);
@@ -57,6 +59,8 @@ private:
     LensGeomListener *lgl;
     rtengine::ProcEvent EvPerspCorrLens;
     const rtengine::FramesMetaData *metadata;
+
+    rtengine::procparams::PerspectiveParams initial_params;
 };
 
 #endif

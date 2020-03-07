@@ -18,6 +18,8 @@ protected:
     Adjuster *centerY;
     rtengine::ProcEvent EvCenter;
 
+    rtengine::procparams::PCVignetteParams initial_params;
+
 public:
     PCVignette();
 
@@ -28,4 +30,5 @@ public:
     void adjusterAutoToggled(Adjuster *a, bool newval) override;
     void enabledChanged() override;
     void trimValues(rtengine::procparams::ProcParams *pp) override;
+    void toolReset(bool to_initial) override;
 };

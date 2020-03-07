@@ -25,10 +25,11 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-FattalToneMapping::FattalToneMapping(): FoldableToolPanel(this, "fattal", M("TP_TM_FATTAL_LABEL"), false, true)
+FattalToneMapping::FattalToneMapping(): FoldableToolPanel(this, "fattal", M("TP_TM_FATTAL_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvTMFattalAnchor = m->newEvent(HDR, "HISTORY_MSG_TM_FATTAL_ANCHOR");
+    EvToolReset.set_action(HDR);
 
     amount = Gtk::manage(new Adjuster (M("TP_TM_FATTAL_AMOUNT"), 1., 100., 1., 20.));
     threshold = Gtk::manage(new Adjuster (M("TP_TM_FATTAL_THRESHOLD"), -100., 300., 1., 30.0));
@@ -67,6 +68,8 @@ void FattalToneMapping::setDefaults(const ProcParams *defParams)
 {
     threshold->setDefault(defParams->fattal.threshold);
     amount->setDefault(defParams->fattal.amount);
+
+    initial_params = defParams->fattal;
 }
 
 void FattalToneMapping::adjusterChanged(Adjuster* a, double newval)
@@ -98,3 +101,12 @@ void FattalToneMapping::enabledChanged ()
 }
 
 
+void FattalToneMapping::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.fattal = initial_params;
+    }
+    pp.fattal.enabled = getEnabled();
+    read(&pp);
+}

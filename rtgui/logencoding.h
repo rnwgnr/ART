@@ -46,6 +46,8 @@ protected:
     rtengine::ProcEvent EvRegularization;
 
     sigc::connection autoconn;
+
+    rtengine::procparams::LogEncodingParams initial_params;
     
 public:
     LogEncoding();
@@ -60,5 +62,7 @@ public:
 
     void logEncodingChanged(const rtengine::LogEncodingParams &params);
     void autocomputeToggled();
+
+    void toolReset(bool to_initial) override;
 };
 

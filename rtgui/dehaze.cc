@@ -25,7 +25,7 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false, true)
+Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvDehazeEnabled = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_ENABLED");
@@ -33,6 +33,7 @@ Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false,
     EvDehazeShowDepthMap = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP");
     EvDehazeDepth = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_DEPTH");
     EvDehazeLuminance = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_LUMINANCE");
+    EvToolReset.set_action(HDR);
     
     strength = Gtk::manage(new Adjuster(M("TP_DEHAZE_STRENGTH"), -100., 100., 1., 50.));
     strength->setAdjusterListener(this);
@@ -91,6 +92,8 @@ void Dehaze::setDefaults(const ProcParams *defParams)
 {
     strength->setDefault(defParams->dehaze.strength);
     depth->setDefault(defParams->dehaze.depth);
+
+    initial_params = defParams->dehaze;
 }
 
 
@@ -133,4 +136,15 @@ void Dehaze::luminanceChanged()
     if (listener) {
         listener->panelChanged(EvDehazeLuminance, luminance->get_active_row_number() == 1 ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
+}
+
+
+void Dehaze::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.dehaze = initial_params;
+    }
+    pp.dehaze.enabled = getEnabled();
+    read(&pp);
 }

@@ -28,13 +28,14 @@ namespace { constexpr double IN_TO_CM = 2.54; }
 
 
 Resize::Resize():
-    FoldableToolPanel(this, "resize", M("TP_RESIZE_LABEL"), false, true),
+    FoldableToolPanel(this, "resize", M("TP_RESIZE_LABEL"), false, true, true),
     maxw(100000), maxh(100000)
 {
     auto m = ProcEventMapper::getInstance();
     EvResizeAllowUpscaling = m->newEvent(RESIZE, "HISTORY_MSG_RESIZE_ALLOWUPSCALING");
     EvUnit = m->newEvent(RESIZE, "HISTORY_MSG_RESIZE_UNIT");
     EvPPI = m->newEvent(RESIZE, "HISTORY_MSG_RESIZE_PPI");
+    EvToolReset.set_action(RESIZE);
 
     cropw = 0;
     croph = 0;
@@ -261,6 +262,7 @@ void Resize::write(ProcParams* pp)
 void Resize::setDefaults(const ProcParams* defParams)
 {
     scale->setDefault (defParams->resize.scale);
+    initial_params = defParams->resize;
 }
 
 
@@ -774,4 +776,15 @@ int Resize::to_px(double p, ResizeParams::Unit u)
 int Resize::to_px(double p)
 {
     return to_px(p, ResizeParams::Unit(unit->get_active_row_number()));
+}
+
+
+void Resize::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.resize = initial_params;
+    }
+    pp.resize.enabled = getEnabled();
+    read(&pp);
 }

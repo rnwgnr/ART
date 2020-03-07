@@ -34,6 +34,8 @@ protected:
     sigc::connection    idConn;
     LensGeomListener * rlistener;
 
+    rtengine::procparams::DistortionParams initial_params;
+
 public:
 
     Distortion();
@@ -49,6 +51,8 @@ public:
     {
         rlistener = l;
     }
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

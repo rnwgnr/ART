@@ -57,6 +57,8 @@ protected:
     sigc::connection hsmconn;
     sigc::connection obpcconn;
 
+    rtengine::procparams::ColorManagementParams initial_params;
+
 private:
     rtengine::ProcEvent EvICMprimariMethod;
     rtengine::ProcEvent EvICMprofileMethod;
@@ -137,6 +139,8 @@ public:
     {
         icmplistener = ipl;
     }
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

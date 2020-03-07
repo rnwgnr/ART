@@ -24,11 +24,12 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-Distortion::Distortion (): FoldableToolPanel(this, "distortion", M("TP_DISTORTION_LABEL"), false, true)
+Distortion::Distortion (): FoldableToolPanel(this, "distortion", M("TP_DISTORTION_LABEL"), false, true, true)
 {
     rlistener = nullptr;
 
     EvToolEnabled.set_action(TRANSFORM);
+    EvToolReset.set_action(TRANSFORM);
     
     autoDistor = Gtk::manage (new Gtk::Button (M("GENERAL_AUTO")));
     autoDistor->set_image (*Gtk::manage (new RTImage ("distortion-auto-small.png")));
@@ -68,6 +69,7 @@ void Distortion::write(ProcParams* pp)
 void Distortion::setDefaults(const ProcParams* defParams)
 {
     distor->setDefault (defParams->distortion.amount);
+    initial_params = defParams->distortion;
 }
 
 void Distortion::adjusterChanged(Adjuster* a, double newval)
@@ -93,6 +95,16 @@ void Distortion::idPressed ()
 
 void Distortion::trimValues (rtengine::procparams::ProcParams* pp)
 {
-
     distor->trimValue(pp->distortion.amount);
+}
+
+
+void Distortion::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.distortion = initial_params;
+    }
+    pp.distortion.enabled = getEnabled();
+    read(&pp);
 }

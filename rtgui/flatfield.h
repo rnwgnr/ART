@@ -60,6 +60,9 @@ protected:
     bool israw;
 
     IdleRegister idle_register;
+
+    rtengine::procparams::RAWParams initial_params;
+    
 public:
 
     FlatField();
@@ -80,8 +83,10 @@ public:
     void setFFProvider              (FFProvider* p)
     {
         ffp = p;
-    };
+    }
     void flatFieldAutoClipValueChanged(int n = 0) override;
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

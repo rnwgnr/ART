@@ -93,10 +93,10 @@ public:
         return true;
     }
 
-    bool resetPressed() override
+    bool resetPressed(int idx) override
     {
-        parent_->data = { GuidedSmoothingParams::Region() };
-        parent_->labMasks->setMasks({ Mask() }, -1);
+        parent_->data[idx] = GuidedSmoothingParams::Region();
+        //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
     
@@ -155,7 +155,7 @@ private:
 // Smoothing
 //-----------------------------------------------------------------------------
 
-Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LABEL"), false, true)
+Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     auto EVENT = LUMINANCECURVE | M_LUMACURVE;
@@ -176,6 +176,8 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_DRAWNMASK");
+
+    EvToolEnabled.set_action(EVENT);
 
     box = Gtk::manage(new Gtk::VBox());
 
@@ -250,6 +252,8 @@ void Smoothing::setDefaults(const ProcParams *defParams)
     radius->setDefault(defParams->smoothing.regions[0].radius);
     epsilon->setDefault(defParams->smoothing.regions[0].epsilon);
     iterations->setDefault(defParams->smoothing.regions[0].iterations);
+
+    initial_params = defParams->smoothing;
 }
 
 
@@ -354,4 +358,15 @@ void Smoothing::setAreaDrawListener(AreaDrawListener *l)
 void Smoothing::setDeltaEColorProvider(DeltaEColorProvider *p)
 {
     labMasks->setDeltaEColorProvider(p);
+}
+
+
+void Smoothing::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.smoothing = initial_params;
+    }
+    pp.smoothing.enabled = getEnabled();
+    read(&pp);
 }

@@ -45,7 +45,7 @@ Adjuster* createExponentAdjuster(AdjusterListener* listener, const Glib::ustring
 
 
 FilmNegative::FilmNegative() :
-    FoldableToolPanel(this, "filmnegative", M("TP_FILMNEGATIVE_LABEL"), false, true),
+    FoldableToolPanel(this, "filmnegative", M("TP_FILMNEGATIVE_LABEL"), false, true, true),
     EditSubscriber(ET_OBJECTS),
     evFilmNegativeExponents(ProcEventMapper::getInstance()->newEvent(FIRST, "HISTORY_MSG_FILMNEGATIVE_VALUES")),
     evFilmNegativeEnabled(ProcEventMapper::getInstance()->newEvent(FIRST, "HISTORY_MSG_FILMNEGATIVE_ENABLED")),
@@ -56,6 +56,8 @@ FilmNegative::FilmNegative() :
     spotgrid(Gtk::manage(new Gtk::Grid())),
     spotbutton(Gtk::manage(new Gtk::ToggleButton(M("TP_FILMNEGATIVE_PICK"))))
 {
+    EvToolReset.set_action(FIRST);
+    
     spotgrid->get_style_context()->add_class("grid-spacing");
     setExpandAlignProperties(spotgrid, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
 
@@ -141,6 +143,8 @@ void FilmNegative::setDefaults(const rtengine::procparams::ProcParams *defParams
     redRatio->setValue(defParams->filmNegative.redRatio);
     greenExp->setValue(defParams->filmNegative.greenExp);
     blueRatio->setValue(defParams->filmNegative.blueRatio);
+
+    initial_params = defParams->filmNegative;
 }
 
 void FilmNegative::adjusterChanged(Adjuster* a, double newval)
@@ -272,4 +276,15 @@ void FilmNegative::editToggled()
         refSpotCoords.clear();
         unsubscribe();
     }
+}
+
+
+void FilmNegative::toolReset(bool to_initial)
+{
+    rtengine::procparams::ProcParams pp;
+    if (to_initial) {
+        pp.filmNegative = initial_params;
+    }
+    pp.filmNegative.enabled = getEnabled();
+    read(&pp);
 }

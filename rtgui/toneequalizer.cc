@@ -23,12 +23,13 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 
-ToneEqualizer::ToneEqualizer(): FoldableToolPanel(this, "toneequalizer", M("TP_TONE_EQUALIZER_LABEL"), false, true)
+ToneEqualizer::ToneEqualizer(): FoldableToolPanel(this, "toneequalizer", M("TP_TONE_EQUALIZER_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvEnabled = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_ENABLED");
     EvBands = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_BANDS");
     EvRegularization = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION");
+    EvToolReset.set_action(RGBCURVE);
 
     for (size_t i = 0; i < bands.size(); ++i) {
         bands[i] = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_BAND_" + std::to_string(i)), -100, 100, 1, 0));
@@ -75,6 +76,8 @@ void ToneEqualizer::setDefaults(const ProcParams *defParams)
         bands[i]->setDefault(defParams->toneEqualizer.bands[i]);
     }
     regularization->setDefault(defParams->toneEqualizer.regularization);
+
+    inital_params = defParams->toneEqualizer;
 }
 
 
@@ -119,4 +122,15 @@ void ToneEqualizer::trimValues(rtengine::procparams::ProcParams *pp)
         bands[i]->trimValue(pp->toneEqualizer.bands[i]);
     }
     regularization->trimValue(pp->toneEqualizer.regularization);
+}
+
+
+void ToneEqualizer::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.toneEqualizer = inital_params;
+    }
+    pp.toneEqualizer.enabled = getEnabled();
+    read(&pp);
 }

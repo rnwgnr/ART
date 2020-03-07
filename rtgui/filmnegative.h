@@ -64,6 +64,8 @@ public:
     bool button1Released() override;
     void switchOffEditMode() override;
 
+    void toolReset(bool to_initial) override;
+
 private:
     void editToggled();
 
@@ -81,4 +83,6 @@ private:
     Gtk::Grid* const spotgrid;
     Gtk::ToggleButton* const spotbutton;
     sigc::connection spotConn;
+
+    rtengine::procparams::FilmNegativeParams initial_params;
 };

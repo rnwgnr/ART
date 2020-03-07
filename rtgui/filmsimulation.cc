@@ -7,6 +7,7 @@
 
 #include "options.h"
 #include "../rtengine/clutstore.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -59,9 +60,11 @@ bool notifySlowParseDir (const std::chrono::system_clock::time_point& startedAt)
 
 }
 
-FilmSimulation::FilmSimulation()
-    :   FoldableToolPanel( this, "filmsimulation", M("TP_FILMSIMULATION_LABEL"), false, true )
+FilmSimulation::FilmSimulation():
+    FoldableToolPanel(this, "filmsimulation", M("TP_FILMSIMULATION_LABEL"), false, true, true)
 {
+    EvToolEnabled.set_action(RGBCURVE);
+    
     m_clutComboBox = Gtk::manage( new ClutComboBox(options.clutsDir) );
     int foundClutsCount = m_clutComboBox->foundClutsCount();
 
@@ -407,4 +410,21 @@ Gtk::TreeIter ClutComboBox::findRowByClutFilename( Gtk::TreeModel::Children chil
     }
 
     return result;
+}
+
+
+void FilmSimulation::setDefaults(const ProcParams *defParams)
+{
+    initial_params = defParams->filmSimulation;
+}
+
+
+void FilmSimulation::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.filmSimulation = initial_params;
+    }
+    pp.filmSimulation.enabled = getEnabled();
+    read(&pp);
 }

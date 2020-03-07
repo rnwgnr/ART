@@ -51,6 +51,8 @@ public:
     void setAreaDrawListener(AreaDrawListener *l);
     void setDeltaEColorProvider(DeltaEColorProvider *p);
 
+    void toolReset(bool to_initial) override;
+
 private:
     void regionGet(int idx);
     void regionShow(int idx);
@@ -79,6 +81,8 @@ private:
     Adjuster *iterations;
     Adjuster *scale_deprecated;
     Gtk::VBox *box;
+
+    rtengine::procparams::TextureBoostParams initial_params;
 };
 
 #endif

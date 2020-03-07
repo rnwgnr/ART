@@ -25,7 +25,7 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"), false, true)
+LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     const auto EVENT = LUMINANCECURVE;
@@ -40,6 +40,7 @@ LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"),
     EvBlackEv = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_BLACK_EV");
     EvWhiteEv = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_WHITE_EV");
     EvRegularization = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_REGULARIZATION");
+    EvToolReset.set_action(EVENT);
 
     autocompute = Gtk::manage(new Gtk::ToggleButton(M("TP_LOGENC_AUTO")));
     autoconn = autocompute->signal_toggled().connect(sigc::mem_fun(*this, &LogEncoding::autocomputeToggled));
@@ -126,6 +127,8 @@ void LogEncoding::setDefaults(const ProcParams *defParams)
     whiteEv->setDefault(defParams->logenc.whiteEv);
     targetGray->setDefault(defParams->logenc.targetGray);
     regularization->setDefault(defParams->logenc.regularization);
+
+    initial_params = defParams->logenc;
 }
 
 void LogEncoding::adjusterChanged(Adjuster* a, double newval)
@@ -210,4 +213,15 @@ void LogEncoding::logEncodingChanged(const rtengine::LogEncodingParams &params)
 //    targetGray->setValue(params.targetGray);
     
     enableListener();
+}
+
+
+void LogEncoding::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.logenc = initial_params;
+    }
+    pp.logenc.enabled = getEnabled();
+    read(&pp);
 }

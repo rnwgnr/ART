@@ -25,13 +25,14 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-FilmGrain::FilmGrain(): FoldableToolPanel(this, "grain", M("TP_GRAIN_LABEL"), true, true)
+FilmGrain::FilmGrain(): FoldableToolPanel(this, "grain", M("TP_GRAIN_LABEL"), true, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvEnabled = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_ENABLED");
     EvStrength = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_STRENGTH");
     EvISO = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_ISO");
     EvScale = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_SCALE");
+    EvToolReset.set_action(DIRPYREQUALIZER);
     
     iso = Gtk::manage(new Adjuster(M("TP_GRAIN_ISO"), 20., 6400., 1., 400.));
     iso->setAdjusterListener(this);
@@ -77,6 +78,8 @@ void FilmGrain::setDefaults(const ProcParams *defParams)
     iso->setDefault(defParams->grain.iso);
     strength->setDefault(defParams->grain.strength);
     scale->setDefault(defParams->grain.scale);
+
+    initial_params = defParams->grain;
 }
 
 
@@ -105,4 +108,15 @@ void FilmGrain::enabledChanged ()
             listener->panelChanged(EvEnabled, M("GENERAL_DISABLED"));
         }
     }
+}
+
+
+void FilmGrain::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.grain = initial_params;
+    }
+    pp.grain.enabled = getEnabled();
+    read(&pp);
 }

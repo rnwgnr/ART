@@ -24,9 +24,10 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-BayerPreProcess::BayerPreProcess() : FoldableToolPanel(this, "bayerpreprocess", M("TP_PREPROCESS_LABEL"), true, true)
+BayerPreProcess::BayerPreProcess() : FoldableToolPanel(this, "bayerpreprocess", M("TP_PREPROCESS_LABEL"), true, true, true)
 {
     EvToolEnabled.set_action(DARKFRAME);
+    EvToolReset.set_action(DARKFRAME);
     
     auto m = ProcEventMapper::getInstance();
     EvLineDenoiseDirection = m->newEvent(DARKFRAME, "HISTORY_MSG_PREPROCESS_LINEDENOISE_DIRECTION");
@@ -134,6 +135,7 @@ void BayerPreProcess::setDefaults(const rtengine::procparams::ProcParams* defPar
 {
     lineDenoise->setDefault(defParams->raw.bayersensor.linenoise);
     greenEqThreshold->setDefault(defParams->raw.bayersensor.greenthresh);
+    initial_params = defParams->raw.bayersensor;
 }
 
 
@@ -157,4 +159,15 @@ void BayerPreProcess::pdafLinesFilterChanged()
     if (listener && getEnabled()) {
         listener->panelChanged(EvPDAFLinesFilter, pdafLinesFilter->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
+}
+
+
+void BayerPreProcess::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.raw.bayersensor = initial_params;
+    }
+    pp.raw.bayersensor.enable_preproc = getEnabled();
+    read(&pp);
 }

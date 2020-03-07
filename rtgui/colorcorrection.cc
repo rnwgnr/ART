@@ -111,10 +111,10 @@ public:
         return true;
     }
 
-    bool resetPressed() override
+    bool resetPressed(int idx) override
     {
-        parent_->data = { ColorCorrectionParams::Region() };
-        parent_->labMasks->setMasks({ Mask() }, -1);
+        parent_->data[idx] = ColorCorrectionParams::Region();
+        //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
 
@@ -174,7 +174,7 @@ private:
 // ColorCorrection
 //-----------------------------------------------------------------------------
 
-ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M("TP_COLORCORRECTION_LABEL"), false, true)
+ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M("TP_COLORCORRECTION_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     auto EVENT = LUMINANCECURVE | M_LUMACURVE;
@@ -199,6 +199,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_DRAWNMASK");
+
+    EvToolReset.set_action(EVENT);
 
     box = Gtk::manage(new Gtk::VBox());
 
@@ -373,6 +375,8 @@ void ColorCorrection::setDefaults(const ProcParams *defParams)
         power_rgb[c]->setDefault(defParams->colorcorrection.regions[0].power[c]);
         pivot_rgb[c]->setDefault(defParams->colorcorrection.regions[0].pivot[c]);
     }
+
+    initial_params = defParams->colorcorrection;
 }
 
 
@@ -664,4 +668,15 @@ void ColorCorrection::colorForValue(double valX, double valY, enum ColorCaller::
     caller->ccRed = double(R);
     caller->ccGreen = double(G);
     caller->ccBlue = double(B);
+}
+
+
+void ColorCorrection::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.colorcorrection = initial_params;
+    }
+    pp.colorcorrection.enabled = getEnabled();
+    read(&pp);
 }

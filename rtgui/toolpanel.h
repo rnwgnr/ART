@@ -119,10 +119,16 @@ protected:
     void foldThemAll (GdkEventButton* event);
     void enabled_toggled();
     rtengine::ProcEvent EvToolEnabled;
+    rtengine::ProcEvent EvToolReset;
+
+    Gtk::EventBox *imageEvBox;
+
+    bool on_enter_leave_reset(GdkEventCrossing *event);
+    bool on_reset_change(GdkEventButton *event);
 
 public:
 
-    FoldableToolPanel(Gtk::Box* content, Glib::ustring toolName, Glib::ustring UILabel, bool need11 = false, bool useEnabled = false);
+    FoldableToolPanel(Gtk::Box *content, const Glib::ustring &toolName, const Glib::ustring &UILabel, bool need11=false, bool useEnabled=false, bool useReset=false);
 
     MyExpander* getExpander() override
     {
@@ -189,6 +195,10 @@ public:
     MyExpander::type_signal_enabled_toggled signal_enabled_toggled()
     {
         return exp->signal_enabled_toggled();
+    }
+
+    virtual void toolReset(bool to_initial)
+    {
     }
 };
 

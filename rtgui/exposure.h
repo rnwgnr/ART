@@ -36,6 +36,8 @@ protected:
     Adjuster *expcomp;
     Adjuster *black;
 
+    rtengine::procparams::ExposureParams initial_params;
+
 public:
     Exposure();
 
@@ -50,5 +52,7 @@ public:
     void setRaw(bool raw);
 
     void hrmodeChanged();
+
+    void toolReset(bool to_initial) override;
 };
 

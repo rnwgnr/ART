@@ -61,6 +61,8 @@ protected:
     void setHistmatching(bool enabled);
     void showPerceptualStrength();
 
+    rtengine::procparams::ToneCurveParams initial_params;
+
 public:
     ToneCurve();
     ~ToneCurve() override;
@@ -100,4 +102,6 @@ public:
     void setRaw (bool raw);
 
     void adjusterChanged(Adjuster *a, double newval) override;
+
+    void toolReset(bool to_initial) override;
 };

@@ -64,6 +64,8 @@ protected:
     rtengine::ProcEvent EvDeconvCornerLatitude;
 
     IdleRegister idle_register;
+
+    rtengine::procparams::SharpeningParams initial_params;
     
 public:
     Sharpening();
@@ -88,6 +90,8 @@ public:
     void trimValues(rtengine::procparams::ProcParams* pp) override;
 
     void autoDeconvRadiusChanged(float radius) override;
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

@@ -51,6 +51,8 @@ public:
 
     void trimValues(rtengine::procparams::ProcParams* pp) override;
 
+    void toolReset(bool to_initial) override;
+
 private:
     void aggressiveChanged();
     void chrominanceMethodChanged();
@@ -93,5 +95,7 @@ private:
     Adjuster *guidedChromaStrength;
 
     IdleRegister idle_register;
+
+    rtengine::procparams::DenoiseParams initial_params;
 };
 

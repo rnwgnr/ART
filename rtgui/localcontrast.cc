@@ -92,10 +92,10 @@ public:
         return true;
     }
 
-    bool resetPressed() override
+    bool resetPressed(int idx) override
     {
-        parent_->regionData = { LocalContrastParams::Region() };
-        parent_->labMasks->setMasks({ Mask() }, -1);
+        parent_->regionData[idx] = LocalContrastParams::Region();
+        //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
     
@@ -165,7 +165,7 @@ private:
 // LocalContrast
 //-----------------------------------------------------------------------------
 
-LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_LOCALCONTRAST_LABEL"), false, true)
+LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_LOCALCONTRAST_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     auto EVENT = DISPLAY;
@@ -184,6 +184,8 @@ LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_L
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_LOCALCONTRAST_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_LOCALCONTRAST_DRAWNMASK");
+
+    EvToolEnabled.set_action(EVENT);
     
     box = Gtk::manage(new Gtk::VBox());
 
@@ -240,10 +242,10 @@ void LocalContrast::write(ProcParams *pp)
 
 void LocalContrast::setDefaults(const ProcParams *defParams)
 {
-    // if (defParams->localContrast.regions.size() == 1) {
-    //     contrast->setDefault(defParams->localContrast.regions[0].contrast);
-    //     curve->setResetCurve(FlatCurveType(defParams->localContrast.regions[0].curve.at(0)), defParams->localContrast.regions[0].curve);
-    // }
+    contrast->setDefault(defParams->localContrast.regions[0].contrast);
+    curve->setResetCurve(FlatCurveType(defParams->localContrast.regions[0].curve.at(0)), defParams->localContrast.regions[0].curve);
+
+    initial_params = defParams->localContrast;
 }
 
 void LocalContrast::adjusterChanged(Adjuster* a, double newval)
@@ -346,4 +348,15 @@ void LocalContrast::setAreaDrawListener(AreaDrawListener *l)
 void LocalContrast::setDeltaEColorProvider(DeltaEColorProvider *p)
 {
     labMasks->setDeltaEColorProvider(p);
+}
+
+
+void LocalContrast::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.localContrast = initial_params;
+    }
+    pp.localContrast.enabled = getEnabled();
+    read(&pp);
 }

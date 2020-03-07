@@ -7,10 +7,12 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-PCVignette::PCVignette () : FoldableToolPanel(this, "pcvignette", M("TP_PCVIGNETTE_LABEL"), false, true)
+PCVignette::PCVignette():
+    FoldableToolPanel(this, "pcvignette", M("TP_PCVIGNETTE_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvCenter = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_PCVIGNETTE_CENTER");
+    EvToolReset.set_action(LUMINANCECURVE);
 
     strength = Gtk::manage (new Adjuster (M("TP_PCVIGNETTE_STRENGTH"), -6, 6, 0.01, 0));
     strength->set_tooltip_text (M("TP_PCVIGNETTE_STRENGTH_TOOLTIP"));
@@ -70,6 +72,7 @@ void PCVignette::setDefaults(const ProcParams* defParams)
     roundness->setDefault (defParams->pcvignette.roundness);
     centerX->setDefault(defParams->pcvignette.centerX);
     centerY->setDefault(defParams->pcvignette.centerY);
+    initial_params = defParams->pcvignette;
 }
 
 void PCVignette::adjusterChanged(Adjuster* a, double newval)
@@ -114,3 +117,13 @@ void PCVignette::trimValues (rtengine::procparams::ProcParams* pp)
     centerY->trimValue(pp->pcvignette.centerY);
 }
 
+
+void PCVignette::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.pcvignette = initial_params;
+    }
+    pp.pcvignette.enabled = getEnabled();
+    read(&pp);
+}

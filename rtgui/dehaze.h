@@ -36,6 +36,8 @@ private:
     rtengine::ProcEvent EvDehazeDepth;
     rtengine::ProcEvent EvDehazeShowDepthMap;
     rtengine::ProcEvent EvDehazeLuminance;
+
+    rtengine::procparams::DehazeParams initial_params;
     
 public:
 
@@ -49,5 +51,7 @@ public:
     void showDepthMapChanged();
     void luminanceChanged();
     void adjusterAutoToggled(Adjuster* a, bool newval) override {}
+
+    void toolReset(bool to_initial) override;
 };
 

@@ -19,6 +19,7 @@
 #include "crop.h"
 #include "options.h"
 #include "rtimage.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -46,7 +47,7 @@ inline void get_custom_ratio(int w, int h, double &rw, double &rh)
 } // namespace
 
 Crop::Crop():
-    FoldableToolPanel(this, "crop", M("TP_CROP_LABEL"), false, true),
+    FoldableToolPanel(this, "crop", M("TP_CROP_LABEL"), false, true, true),
     crop_ratios{
         {M("GENERAL_ASIMAGE"), 0.0},
         {M("GENERAL_CURRENT"), -1.0},
@@ -85,6 +86,7 @@ Crop::Crop():
     yDirty(true),
     lastFixRatio(true)
 {
+    EvToolReset.set_action(CROP);
 
     clistener = nullptr;
 
@@ -1492,4 +1494,20 @@ void Crop::updateCurrentRatio()
     get_custom_ratio(w->get_value(), h->get_value(), rw, rh);
     customRatioLabel->set_text(Glib::ustring::compose("%1:%2", rw, rh));
     crop_ratios[1].value = double(w->get_value())/double(h->get_value());
+}
+
+
+void Crop::setDefaults(const ProcParams *def)
+{
+    initial_params = def->crop;
+}
+
+
+void Crop::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.crop = initial_params;
+    }
+    pp.crop.enabled = getEnabled();
 }

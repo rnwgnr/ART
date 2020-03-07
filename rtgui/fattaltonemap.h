@@ -30,6 +30,8 @@ protected:
     Adjuster *amount;
 
     rtengine::ProcEvent EvTMFattalAnchor;
+
+    rtengine::procparams::FattalToneMappingParams initial_params;
     
 public:
 
@@ -41,5 +43,7 @@ public:
     void adjusterChanged (Adjuster* a, double newval) override;
     void adjusterAutoToggled(Adjuster* a, bool newval) override;
     void enabledChanged  () override;
+
+    void toolReset(bool to_initial) override;
 };
 

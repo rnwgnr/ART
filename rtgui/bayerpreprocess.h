@@ -37,6 +37,8 @@ protected:
 
     rtengine::ProcEvent EvLineDenoiseDirection;
     rtengine::ProcEvent EvPDAFLinesFilter;
+
+    rtengine::procparams::RAWParams::BayerSensor initial_params;
     
 public:
 
@@ -53,6 +55,8 @@ public:
     void trimValues          (rtengine::procparams::ProcParams* pp) override;
     void lineDenoiseDirectionChanged();
     void pdafLinesFilterChanged();
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

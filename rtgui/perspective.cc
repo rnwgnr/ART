@@ -23,9 +23,11 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-PerspCorrection::PerspCorrection() : FoldableToolPanel(this, "perspective", M("TP_PERSPECTIVE_LABEL"), false, true)
+PerspCorrection::PerspCorrection() : FoldableToolPanel(this, "perspective", M("TP_PERSPECTIVE_LABEL"), false, true, true)
 {
     EvToolEnabled.set_action(TRANSFORM);
+    EvToolReset.set_action(TRANSFORM);
+    
     auto m = ProcEventMapper::getInstance();
     EvPerspCorrLens = m->newEvent(TRANSFORM, "HISTORY_MSG_PERSPECTIVE_LENS");
     
@@ -145,7 +147,6 @@ void PerspCorrection::write(ProcParams* pp)
 
 void PerspCorrection::setDefaults(const ProcParams* defParams)
 {
-
     horiz->setDefault (defParams->perspective.horizontal);
     vert->setDefault (defParams->perspective.vertical);
     angle->setDefault(defParams->perspective.angle);
@@ -153,6 +154,8 @@ void PerspCorrection::setDefaults(const ProcParams* defParams)
     flength->setDefault(defParams->perspective.flength);
     cropfactor->setDefault(defParams->perspective.cropfactor);
     aspect->setDefault(defParams->perspective.aspect);
+
+    initial_params = defParams->perspective;
 }
 
 void PerspCorrection::adjusterChanged(Adjuster* a, double newval)
@@ -239,4 +242,15 @@ void PerspCorrection::setRawMeta(bool raw, const rtengine::FramesMetaData *meta)
     disableListener();
     do_set_metadata(meta);
     enableListener();
+}
+
+
+void PerspCorrection::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.perspective = initial_params;
+    }
+    pp.perspective.enabled = getEnabled();
+    read(&pp);
 }

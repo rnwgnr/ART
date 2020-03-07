@@ -41,7 +41,7 @@ const std::vector<double> default_satcurve{
 
 
 ToneCurve::ToneCurve():
-    FoldableToolPanel(this, "tonecurve", M("TP_TONECURVE_LABEL"), false, true)
+    FoldableToolPanel(this, "tonecurve", M("TP_TONECURVE_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvHistMatching = m->newEvent(AUTOEXP, "HISTORY_MSG_HISTMATCHING");
@@ -49,6 +49,7 @@ ToneCurve::ToneCurve():
     EvSatCurve = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_SATCURVE");
     EvPerceptualStrength = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH");
     EvToolEnabled.set_action(AUTOEXP);
+    EvToolReset.set_action(AUTOEXP);
 
     contrast = Gtk::manage (new Adjuster(M("TP_BRIGHTCONTRSAT_CONTRAST"), -100, 100, 1, 0));
     pack_start(*contrast);
@@ -257,6 +258,8 @@ void ToneCurve::setDefaults(const ProcParams* defParams)
 {
     contrast->setDefault(defParams->toneCurve.contrast);
     perceptualStrength->setDefault(defParams->toneCurve.perceptualStrength);
+
+    initial_params = defParams->toneCurve;
 }
 
 
@@ -441,4 +444,15 @@ void ToneCurve::showPerceptualStrength()
     perceptualStrength->set_visible(
         toneCurveMode->get_active_row_number() == 5 ||
         toneCurveMode2->get_active_row_number() == 5);
+}
+
+
+void ToneCurve::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.toneCurve = initial_params;
+    }
+    pp.toneCurve.enabled = getEnabled();
+    read(&pp);
 }

@@ -1592,6 +1592,9 @@ TP_FLATFIELD_CLIPCONTROL;Clip control
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;Clip control avoids clipped highlights caused by applying the flat field. If there are already clipped highlights before applying the flat field, clip control can lead to color cast.
 TP_FLATFIELD_LABEL;Flat-Field
 TP_GENERAL_11SCALE_TOOLTIP;The effects of this tool are only visible or only accurate at a preview scale of 1:1.
+TP_GENERAL_RESET_DEFAULT;Reset to default
+TP_GENERAL_RESET_SAVED;Reset to saved
+TP_GENERAL_TOOL_RESET_TOOLTIP;Reset all settings.\n<b>Click</b>: reset to default.\n<b>Ctrl-click</b>: reset to last saved.
 TP_GRADIENT_CENTER_X;Center X
 TP_GRADIENT_CENTER_X_TOOLTIP;Shift gradient to the left (negative values) or right (positive values).
 TP_GRADIENT_CENTER_Y;Center Y

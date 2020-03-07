@@ -26,9 +26,10 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-FlatField::FlatField () : FoldableToolPanel(this, "flatfield", M("TP_FLATFIELD_LABEL"), false, true)
+FlatField::FlatField () : FoldableToolPanel(this, "flatfield", M("TP_FLATFIELD_LABEL"), false, true, true)
 {
     EvToolEnabled.set_action(DARKFRAME);
+    EvToolReset.set_action(DARKFRAME);
     
     hbff = Gtk::manage(new Gtk::HBox());
     hbff->set_spacing(2);
@@ -260,6 +261,8 @@ void FlatField::setDefaults(const rtengine::procparams::ProcParams* defParams)
 {
     flatFieldBlurRadius->setDefault( defParams->raw.ff_BlurRadius);
     flatFieldClipControl->setDefault( defParams->raw.ff_clipControl);
+
+    initial_params = defParams->raw;
 }
 
 void FlatField::flatFieldFileChanged()
@@ -361,4 +364,15 @@ void FlatField::flatFieldAutoClipValueChanged(int n)
             return false;
         }
     );
+}
+
+
+void FlatField::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.raw = initial_params;
+    }
+    pp.raw.enable_flatfield = getEnabled();
+    read(&pp);
 }

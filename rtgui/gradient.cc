@@ -4,13 +4,17 @@
 #include "gradient.h"
 #include "rtimage.h"
 #include "../rtengine/rt_math.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-Gradient::Gradient () : FoldableToolPanel(this, "gradient", M("TP_GRADIENT_LABEL"), false, true), EditSubscriber(ET_OBJECTS), lastObject(-1), draggedPointOldAngle(-1000.)
+Gradient::Gradient():
+    FoldableToolPanel(this, "gradient", M("TP_GRADIENT_LABEL"), false, true, true),
+    EditSubscriber(ET_OBJECTS), lastObject(-1), draggedPointOldAngle(-1000.)
 {
-
+    EvToolReset.set_action(LUMINANCECURVE);
+    
     editHBox = Gtk::manage (new Gtk::HBox());
     edit = Gtk::manage (new Gtk::ToggleButton());
     edit->get_style_context()->add_class("independent");
@@ -213,6 +217,8 @@ void Gradient::setDefaults(const ProcParams* defParams)
     strength->setDefault (defParams->gradient.strength);
     centerX->setDefault (defParams->gradient.centerX);
     centerY->setDefault (defParams->gradient.centerY);
+
+    initial_params = defParams->gradient;
 }
 
 void Gradient::adjusterChanged(Adjuster* a, double newval)
@@ -541,3 +547,13 @@ void Gradient::switchOffEditMode ()
     EditSubscriber::switchOffEditMode();  // disconnect
 }
 
+
+void Gradient::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.gradient = initial_params;
+    }
+    pp.gradient.enabled = getEnabled();
+    read(&pp);
+}

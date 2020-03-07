@@ -32,7 +32,7 @@ using namespace rtengine::procparams;
 extern Options options;
 
 ICMPanel::ICMPanel():
-    FoldableToolPanel(this, "icm", M("TP_ICM_LABEL")),
+    FoldableToolPanel(this, "icm", M("TP_ICM_LABEL"), false, false, true),
     iunchanged(nullptr),
     icmplistener(nullptr),
     lastRefFilename(""),
@@ -52,6 +52,8 @@ ICMPanel::ICMPanel():
     EvICMgamm = m->newEvent(AUTOEXP, "HISTORY_MSG_ICM_WORKING_GAMMA");
     EvICMslop = m->newEvent(AUTOEXP, "HISTORY_MSG_ICM_WORKING_SLOPE");
     EvICMtrcinMethod = m->newEvent(AUTOEXP, "HISTORY_MSG_ICM_WORKING_TRC_METHOD");
+
+    EvToolReset.set_action(DEMOSAIC);
 
     ipDialog = Gtk::manage(new MyFileChooserButton(M("TP_ICM_INPUTDLGLABEL"), Gtk::FILE_CHOOSER_ACTION_OPEN));
     ipDialog->set_tooltip_text(M("TP_ICM_INPUTCUSTOM_TOOLTIP"));
@@ -533,6 +535,7 @@ void ICMPanel::write(ProcParams* pp)
 
 void ICMPanel::setDefaults(const ProcParams* defParams)
 {
+    initial_params = defParams->icm;
 }
 
 void ICMPanel::adjusterChanged(Adjuster* a, double newval)
@@ -777,3 +780,12 @@ void ICMPanel::saveReferencePressed()
     return;
 }
 
+
+void ICMPanel::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.icm = initial_params;
+    }
+    read(&pp);
+}

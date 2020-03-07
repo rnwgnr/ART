@@ -36,10 +36,14 @@ public:
 
     void trimValues(rtengine::procparams::ProcParams *pp) override;
 
+    void toolReset(bool to_initial) override;
+
 private:
     std::array<Adjuster *, 5> bands;
     Adjuster *regularization;
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvBands;
     rtengine::ProcEvent EvRegularization;
+
+    rtengine::procparams::ToneEqualizerParams inital_params;
 };

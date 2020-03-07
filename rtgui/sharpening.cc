@@ -23,7 +23,7 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-Sharpening::Sharpening() : FoldableToolPanel(this, "sharpening", M("TP_SHARPENING_LABEL"), true, true)
+Sharpening::Sharpening() : FoldableToolPanel(this, "sharpening", M("TP_SHARPENING_LABEL"), true, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvSharpenContrast = m->newEvent(SHARPENING, "HISTORY_MSG_SHARPENING_CONTRAST");
@@ -32,6 +32,7 @@ Sharpening::Sharpening() : FoldableToolPanel(this, "sharpening", M("TP_SHARPENIN
     EvAutoRadiusOff = m->newEvent(M_VOID, "HISTORY_MSG_SHARPENING_AUTORADIUS");
     EvDeconvCornerBoost = m->newEvent(SHARPENING, "HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS");
     EvDeconvCornerLatitude = m->newEvent(SHARPENING, "HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE");
+    EvToolReset.set_action(SHARPENING);
 
     Gtk::HBox* hb = Gtk::manage (new Gtk::HBox ());
     hb->show ();
@@ -252,6 +253,8 @@ void Sharpening::setDefaults(const ProcParams* defParams)
     dradius->setDefault (defParams->sharpening.deconvradius);
     deconvCornerBoost->setDefault(defParams->sharpening.deconvCornerBoost);
     deconvCornerLatitude->setDefault(defParams->sharpening.deconvCornerLatitude);
+
+    initial_params = defParams->sharpening;
 }
 
 void Sharpening::adjusterChanged(Adjuster* a, double newval)
@@ -428,4 +431,15 @@ void Sharpening::autoDeconvRadiusChanged(float radius)
             return false;
         }
     );
+}
+
+
+void Sharpening::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.sharpening = initial_params;
+    }
+    pp.sharpening.enabled = getEnabled();
+    read(&pp);
 }

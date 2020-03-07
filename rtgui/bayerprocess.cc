@@ -24,7 +24,7 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 
-BayerProcess::BayerProcess () : FoldableToolPanel(this, "bayerprocess", M("TP_RAW_LABEL"), true)
+BayerProcess::BayerProcess () : FoldableToolPanel(this, "bayerprocess", M("TP_RAW_LABEL"), true, false, true)
 {
 
     auto m = ProcEventMapper::getInstance();
@@ -32,6 +32,8 @@ BayerProcess::BayerProcess () : FoldableToolPanel(this, "bayerprocess", M("TP_RA
     EvDemosaicContrast = m->newEvent(DEMOSAIC, "HISTORY_MSG_DUALDEMOSAIC_CONTRAST");
     EvDemosaicAutoContrast = m->newEvent(DEMOSAIC, "HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST");
     EvDemosaicPixelshiftDemosaicMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_PIXELSHIFT_DEMOSAIC");
+
+    EvToolReset.set_action(DEMOSAIC);
 
     Gtk::HBox* hb1 = Gtk::manage (new Gtk::HBox ());
     hb1->pack_start (*Gtk::manage (new Gtk::Label ( M("TP_RAW_DMETHOD") + ": ")), Gtk::PACK_SHRINK, 4);
@@ -401,6 +403,8 @@ void BayerProcess::setDefaults(const rtengine::procparams::ProcParams* defParams
     pixelShiftSigma->setDefault( defParams->raw.bayersensor.pixelShiftSigma);
     border->setDefault (defParams->raw.bayersensor.border);
     ccSteps->setDefault (defParams->raw.bayersensor.ccSteps);
+
+    initial_params = defParams->raw.bayersensor;
 }
 
 void BayerProcess::adjusterChanged (Adjuster* a, double newval)
@@ -611,4 +615,14 @@ void BayerProcess::autoContrastChanged (double autoContrast)
             return false;
         }
     );
+}
+
+
+void BayerProcess::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.raw.bayersensor = initial_params;
+    }
+    read(&pp);
 }

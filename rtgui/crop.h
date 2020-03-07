@@ -91,6 +91,9 @@ public:
     void vFlipCrop          ();
     void rotateCrop         (int deg, bool hflip, bool vflip);
 
+    void setDefaults(const rtengine::procparams::ProcParams *def) override;
+    void toolReset(bool to_initial) override;
+
 private:
     struct CropRatio {
         Glib::ustring label;
@@ -130,6 +133,8 @@ private:
     bool wDirty, hDirty, xDirty, yDirty, lastFixRatio;
 
     IdleRegister idle_register;
+
+    rtengine::procparams::CropParams initial_params;
 };
 
 #endif

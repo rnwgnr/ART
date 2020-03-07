@@ -36,6 +36,8 @@ protected:
     DiagonalCurveEditor* Gshape;
     DiagonalCurveEditor* Bshape;
 
+    rtengine::procparams::RGBCurvesParams initial_params;
+
 public:
 
     RGBCurves();
@@ -60,6 +62,9 @@ public:
         const LUTu& histLRETI
     );
     void enabledChanged() override;
+
+    void setDefaults(const rtengine::procparams::ProcParams *def) override;
+    void toolReset(bool to_initial) override;
 };
 
 #endif

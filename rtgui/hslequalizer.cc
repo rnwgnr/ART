@@ -45,10 +45,11 @@ void hsv2rgb01(float h, float s, float v, float &r, float &g, float &b)
 } // namespace
 
 HSLEqualizer::HSLEqualizer():
-    FoldableToolPanel(this, "hslequalizer", M("TP_HSVEQUALIZER_LABEL"), false, true)
+    FoldableToolPanel(this, "hslequalizer", M("TP_HSVEQUALIZER_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvHSLSmoothing = m->newEvent(RGBCURVE, "HISTORY_MSG_HSL_SMOOTHING");
+    EvToolReset.set_action(RGBCURVE);
     
     std::vector<GradientMilestone> bottomMilestones;
     for (int i = 0; i < 7; i++) {
@@ -211,4 +212,22 @@ void HSLEqualizer::enabledChanged()
             listener->panelChanged(EvHSVEqEnabled, M("GENERAL_DISABLED"));
         }
     }
+}
+
+
+void HSLEqualizer::setDefaults(const ProcParams *def)
+{
+    smoothing->setDefault(def->hsl.smoothing);
+    initial_params = def->hsl;
+}
+
+
+void HSLEqualizer::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.hsl = initial_params;
+    }
+    pp.hsl.enabled = getEnabled();
+    read(&pp);
 }

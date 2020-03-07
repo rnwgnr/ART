@@ -73,10 +73,11 @@ extern void computeBWMixerConstants(const Glib::ustring &setting, const Glib::us
 
 
 BlackWhite::BlackWhite():
-    FoldableToolPanel(this, "blackwhite", M("TP_BWMIX_LABEL"), false, true)
+    FoldableToolPanel(this, "blackwhite", M("TP_BWMIX_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvColorCast = m->newEvent(M_LUMINANCE, "HISTORY_MSG_BWMIX_COLORCAST");
+    EvToolReset.set_action(M_LUMINANCE);
     
     nextredbw = 0.3333;
     nextgreenbw = 0.3333;
@@ -372,7 +373,6 @@ void BlackWhite::neutral_pressed ()
 
 void BlackWhite::setDefaults (const ProcParams* defParams)
 {
-
     mixerRed->setDefault (defParams->blackwhite.mixerRed);
     mixerGreen->setDefault (defParams->blackwhite.mixerGreen);
     mixerBlue->setDefault (defParams->blackwhite.mixerBlue);
@@ -380,6 +380,8 @@ void BlackWhite::setDefaults (const ProcParams* defParams)
     gammaGreen->setDefault (defParams->blackwhite.gammaGreen);
     gammaBlue->setDefault (defParams->blackwhite.gammaBlue);
     colorCast->setDefault(defParams->blackwhite.colorCast);
+
+    initial_params = defParams->blackwhite;
 }
 
 
@@ -546,4 +548,15 @@ void BlackWhite::colorForValue(double valX, double valY, enum ColorCaller::ElemT
     caller->ccRed = double(R);
     caller->ccGreen = double(G);
     caller->ccBlue = double(B);
+}
+
+
+void BlackWhite::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.blackwhite = initial_params;
+    }
+    pp.blackwhite.enabled = getEnabled();
+    read(&pp);
 }

@@ -28,10 +28,11 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 Exposure::Exposure():
-    FoldableToolPanel(this, "exposure", M("TP_EXPOSURE_LABEL"), false, true)
+    FoldableToolPanel(this, "exposure", M("TP_EXPOSURE_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvToolEnabled.set_action(DARKFRAME);
+    EvToolReset.set_action(DARKFRAME);
     EvBlack = m->newEvent(AUTOEXP, "HISTORY_MSG_EXPOSURE_BLACK");
 
 //-------------- Highlight Reconstruction -----------------
@@ -113,6 +114,8 @@ void Exposure::setDefaults(const ProcParams* defParams)
 {
     expcomp->setDefault(defParams->exposure.expcomp);
     black->setDefault(defParams->exposure.black);
+
+    initial_params = defParams->exposure;
 }
 
 
@@ -145,3 +148,12 @@ void Exposure::trimValues (rtengine::procparams::ProcParams* pp)
 }
 
 
+void Exposure::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.exposure = initial_params;
+    }
+    pp.exposure.enabled = getEnabled();
+    read(&pp);
+}

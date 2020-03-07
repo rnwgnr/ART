@@ -65,6 +65,8 @@ public:
     void adjusterChanged2(ThresholdAdjuster *a, int newBottomL, int newTopL, int newBottomR, int newTopR) override {}
 
     void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller) override;
+
+    void toolReset(bool to_initial) override;
     
 private:
     void showFilter();
@@ -102,6 +104,8 @@ private:
     int nextcount = 0;
 
     IdleRegister idle_register;
+
+    rtengine::procparams::BlackWhiteParams initial_params;
 };
 
 #endif

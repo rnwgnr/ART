@@ -32,7 +32,7 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 LensProfilePanel::LensProfilePanel() :
-    FoldableToolPanel(this, "lensprof", M("TP_LENSPROFILE_LABEL"), false, true),
+    FoldableToolPanel(this, "lensprof", M("TP_LENSPROFILE_LABEL"), false, true, true),
     lcModeChanged(false),
     lcpFileChanged(false),
     useDistChanged(false),
@@ -63,6 +63,7 @@ LensProfilePanel::LensProfilePanel() :
     ckbUseCA(Gtk::manage((new Gtk::CheckButton(M("TP_LENSPROFILE_USE_CA")))))
 {
     EvToolEnabled.set_action(TRANSFORM);
+    EvToolReset.set_action(TRANSFORM);
     
     if (!lf) {
         lf = new LFDbHelper();
@@ -758,3 +759,23 @@ void LensProfilePanel::updateLensfunWarning()
 }
 
 LensProfilePanel::LFDbHelper* LensProfilePanel::lf(nullptr);
+
+
+void LensProfilePanel::setDefaults(const ProcParams *def)
+{
+    initial_params = def->lensProf;
+}
+
+
+void LensProfilePanel::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.lensProf = initial_params;
+    }
+    //pp.lensProf.enabled = getEnabled();
+    read(&pp);
+    if (listener && !getEnabled()) {
+        listener->panelChanged(EvToolReset, M("GENERAL_RESET"));
+    }
+}

@@ -91,6 +91,8 @@ protected:
     unsigned int                                          findWBEntryId  (const Glib::ustring& label, enum WB_LabelType lblType = WBLT_GUI);
     std::pair<bool, const rtengine::procparams::WBEntry&> findWBEntry    (const Glib::ustring& label, enum WB_LabelType lblType = WBLT_GUI);
 
+    rtengine::procparams::WBParams initial_params;
+
 public:
 
     WhiteBalance ();
@@ -120,6 +122,8 @@ public:
 
     void trimValues          (rtengine::procparams::ProcParams* pp) override;
     void enabledChanged() override;
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

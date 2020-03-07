@@ -1214,8 +1214,13 @@ void LabMasksPanel::onCopyPressed()
 
 void LabMasksPanel::onResetPressed()
 {
-    if (cp_->resetPressed()) {
+    if (selected_ < masks_.size() && cp_->resetPressed(selected_)) {
         listEdited = true;
+        masks_[selected_] = rtengine::procparams::Mask();
+        populateList();
+        area_shape_index_ = 0;
+        maskShow(selected_);
+        
         auto l = getListener();
         if (l) {
             l->panelChanged(EvMaskList, M("HISTORY_CHANGED"));

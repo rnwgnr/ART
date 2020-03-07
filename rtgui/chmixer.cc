@@ -18,12 +18,14 @@
  */
 #include "chmixer.h"
 #include "rtimage.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-ChMixer::ChMixer (): FoldableToolPanel(this, "chmixer", M("TP_CHMIXER_LABEL"), false, true)
+ChMixer::ChMixer (): FoldableToolPanel(this, "chmixer", M("TP_CHMIXER_LABEL"), false, true, true)
 {
+    EvToolReset.set_action(RGBCURVE);
 
     imgIcon[0] = Gtk::manage (new RTImage ("circle-red-small.png"));
     imgIcon[1] = Gtk::manage (new RTImage ("circle-green-red-small.png"));
@@ -126,14 +128,16 @@ void ChMixer::write(ProcParams* pp)
     pp->chmixer.enabled = getEnabled();
 }
 
+
 void ChMixer::setDefaults(const ProcParams* defParams)
 {
-
     for (int i = 0; i < 3; i++) {
         red[i]->setDefault (defParams->chmixer.red[i] / 10.f);
         green[i]->setDefault (defParams->chmixer.green[i] / 10.f);
         blue[i]->setDefault (defParams->chmixer.blue[i] / 10.f);
     }
+
+    initial_params = defParams->chmixer;
 }
 
 void ChMixer::adjusterChanged(Adjuster* a, double newval)
@@ -180,4 +184,15 @@ void ChMixer::trimValues (rtengine::procparams::ProcParams* pp)
         pp->chmixer.green[i] = g * 10;
         pp->chmixer.blue[i] = b * 10;
     }
+}
+
+
+void ChMixer::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.chmixer = initial_params;
+    }
+    pp.chmixer.enabled = getEnabled();
+    read(&pp);
 }

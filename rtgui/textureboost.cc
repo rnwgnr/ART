@@ -91,10 +91,10 @@ public:
         return true;
     }
 
-    bool resetPressed() override
+    bool resetPressed(int idx) override
     {
-        parent_->data = { TextureBoostParams::Region() };
-        parent_->labMasks->setMasks({ Mask() }, -1);
+        parent_->data[idx] = TextureBoostParams::Region();
+        //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
     
@@ -151,7 +151,7 @@ private:
 // EPD
 //-----------------------------------------------------------------------------
 
-TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL"), true, true)
+TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL"), true, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvEPDIterations = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_ITERATIONS");
@@ -166,6 +166,8 @@ TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL")
     EvDeltaEMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_DRAWNMASK");
+
+    EvToolEnabled.set_action(DISPLAY);
 
     strength = Gtk::manage(new Adjuster (M("TP_EPD_STRENGTH"), -1.0, 2.0, 0.01, 0.5));
     edgeStopping = Gtk::manage(new Adjuster (M("TP_EPD_EDGESTOPPING"), 0.1, 4.0, 0.01, 1.4));
@@ -237,6 +239,8 @@ void TextureBoost::setDefaults(const ProcParams *defParams)
     strength->setDefault(defParams->textureBoost.regions[0].strength);
     edgeStopping->setDefault(defParams->textureBoost.regions[0].edgeStopping);
     iterations->setDefault(defParams->textureBoost.regions[0].iterations);
+
+    initial_params = defParams->textureBoost;
 }
 
 void TextureBoost::adjusterChanged(Adjuster* a, double newval)
@@ -341,4 +345,15 @@ void TextureBoost::setAreaDrawListener(AreaDrawListener *l)
 void TextureBoost::setDeltaEColorProvider(DeltaEColorProvider *p)
 {
     labMasks->setDeltaEColorProvider(p);
+}
+
+
+void TextureBoost::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.textureBoost = initial_params;
+    }
+    pp.textureBoost.enabled = getEnabled();
+    read(&pp);
 }

@@ -69,6 +69,8 @@ public:
     void adjusterChanged2(ThresholdAdjuster *a, int newBottomL, int newTopL, int newBottomR, int newTopR) override {}
 
     void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller) override;
+
+    void toolReset(bool to_initial) override;
     
 private:
     void regionGet(int idx);
@@ -127,5 +129,7 @@ private:
     
     Adjuster *lfactor[3];
     ThresholdAdjuster *huesat[3];
+
+    rtengine::ColorCorrectionParams initial_params;
 };
 

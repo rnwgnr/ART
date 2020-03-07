@@ -147,7 +147,8 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     // transform
     addfavoritePanel(transformPanel, crop);
     addfavoritePanel(transformPanel, resize);
-    addfavoritePanel(resize->getPackBox(), prsharpening, 2);
+    //addfavoritePanel(resize->getPackBox(), prsharpening, 2);
+    addfavoritePanel(transformPanel, prsharpening, 2);
     addfavoritePanel(transformPanel, lensgeom);
     addfavoritePanel(lensgeom->getPackBox(), rotate, 2);
     addfavoritePanel(lensgeom->getPackBox(), perspective, 2);

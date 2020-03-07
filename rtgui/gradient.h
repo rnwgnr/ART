@@ -31,6 +31,8 @@ protected:
     rtengine::Coord draggedCenter;
     sigc::connection editConn;
 
+    rtengine::procparams::GradientParams initial_params;
+
     void editToggled ();
 
 public:
@@ -56,6 +58,8 @@ public:
     bool button1Released() override;
     bool drag1(const int modifierKey) override;
     void switchOffEditMode () override;
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

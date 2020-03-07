@@ -28,7 +28,7 @@ using namespace rtengine::procparams;
 extern Options options;
 
 Denoise::Denoise():
-    FoldableToolPanel(this, "dirpyrdenoise", M("TP_DIRPYRDENOISE_LABEL"), true, true)
+    FoldableToolPanel(this, "dirpyrdenoise", M("TP_DIRPYRDENOISE_LABEL"), true, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     EvSmoothingMethod = m->newEvent(ALLNORAW, "HISTORY_MSG_DENOISE_SMOOTHING_METHOD");
@@ -39,6 +39,7 @@ Denoise::Denoise():
     EvChrominanceAutoFactor = m->newEvent(ALLNORAW, "HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR");
     EvLuminanceDetailThreshold = m->newEvent(ALLNORAW, "HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD");
     EvColorSpace = m->newEvent(ALLNORAW, "HISTORY_MSG_203");
+    EvToolReset.set_action(ALLNORAW);
 
     Gtk::Frame *lumaFrame = Gtk::manage(new Gtk::Frame(M("TP_DIRPYRDENOISE_LUMINANCE_FRAME")));
     lumaFrame->set_label_align(0.025, 0.5);
@@ -400,6 +401,8 @@ void Denoise::setDefaults(const ProcParams *defParams)
     guidedLumaStrength->setDefault(defParams->denoise.guidedLumaStrength);
     guidedChromaRadius->setDefault(defParams->denoise.guidedChromaRadius);
     guidedChromaStrength->setDefault(defParams->denoise.guidedChromaStrength);
+
+    initial_params = defParams->denoise;
 }
 
 
@@ -499,4 +502,15 @@ void Denoise::smoothingMethodChanged()
     if (listener) {
         listener->panelChanged(EvSmoothingMethod, M("GENERAL_CHANGED"));
     }
+}
+
+
+void Denoise::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.denoise = initial_params;
+    }
+    pp.denoise.enabled = getEnabled();
+    read(&pp);
 }
