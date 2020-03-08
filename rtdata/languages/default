@@ -7,7 +7,7 @@ ABOUT_TAB_CREDITS;Credits
 ABOUT_TAB_LICENSE;License
 ABOUT_TAB_RELEASENOTES;Release Notes
 ABOUT_TAB_SPLASH;Splash
-ADJUSTER_RESET_TO_DEFAULT;<b>Click</b> - reset to default value.\n<b>Ctrl</b>+<b>click</b> - reset to initial value.
+ADJUSTER_RESET_TO_DEFAULT;<b>Click</b> - reset to default value.\n<b>Ctrl</b>+<b>click</b> - reset to last saved value.
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
@@ -1594,7 +1594,7 @@ TP_FLATFIELD_LABEL;Flat-Field
 TP_GENERAL_11SCALE_TOOLTIP;The effects of this tool are only visible or only accurate at a preview scale of 1:1.
 TP_GENERAL_RESET_DEFAULT;Reset to default
 TP_GENERAL_RESET_SAVED;Reset to saved
-TP_GENERAL_TOOL_RESET_TOOLTIP;Reset all settings.\n<b>Click</b>: reset to default.\n<b>Ctrl-click</b>: reset to last saved.
+TP_GENERAL_TOOL_RESET_TOOLTIP;Reset all settings.
 TP_GRADIENT_CENTER_X;Center X
 TP_GRADIENT_CENTER_X_TOOLTIP;Shift gradient to the left (negative values) or right (positive values).
 TP_GRADIENT_CENTER_Y;Center Y

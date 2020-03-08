@@ -71,7 +71,7 @@ FoldableToolPanel::FoldableToolPanel(Gtk::Box *content, const Glib::ustring &too
             EvToolReset = ProcEventMapper::getInstance()->newEvent(0, UILabel);
             
             image = Gtk::manage(new RTImage("undo-small.png"));
-            image->set_tooltip_markup(M("TP_GENERAL_TOOL_RESET_TOOLTIP"));
+            image->set_tooltip_markup(M("TP_GENERAL_TOOL_RESET_TOOLTIP") + "\n" + M("ADJUSTER_RESET_TO_DEFAULT"));
 
             imageEvBox = Gtk::manage(new Gtk::EventBox());
             imageEvBox->set_name("MyExpanderStatus");
