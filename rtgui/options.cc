@@ -355,7 +355,7 @@ void Options::setDefaults()
     showClippedShadows = false;
     highlightThreshold = 253;           // was 254
     shadowThreshold = 8;                // was 0
-    bgcolor = 0;
+    bgcolor = 1;
     language = DefaultLanguage;
     languageAutoDetect = langMgr.isOSLanguageDetectSupported();
     lastSaveAsPath = "";
@@ -1262,7 +1262,7 @@ void Options::readFromFile(Glib::ustring fname)
                 }
 
                 if (keyFile.has_key("GUI", "FrameColor")) {
-                    bgcolor = keyFile.get_integer("GUI", "FrameColor");
+                    bgcolor = rtengine::LIM(keyFile.get_integer("GUI", "FrameColor"), 1, 3);
                 }
 
                 if (keyFile.has_key("GUI", "ProcessingQueueEnbled")) {
