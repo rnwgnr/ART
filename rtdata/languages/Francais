@@ -7,7 +7,7 @@ ABOUT_TAB_CREDITS;Crédits
 ABOUT_TAB_LICENSE;Licence
 ABOUT_TAB_RELEASENOTES;Notes de version
 ABOUT_TAB_SPLASH;Splash
-ADJUSTER_RESET_TO_DEFAULT;<b>Clic</b> - réinitialise à la valeur par défaut.\n<b>Ctrl</b>+<b>clic</b> - réinitialise à la valeur initiale.
+ADJUSTER_RESET_TO_DEFAULT;<b>Clic</b> - réinitialise à la valeur par défaut.\n<b>Ctrl</b>+<b>clic</b> - réinitialise à la dernière valeur sauvegardée.
 CURVEEDITOR_AXIS_IN;E :
 CURVEEDITOR_AXIS_LEFT_TAN;TG :
 CURVEEDITOR_AXIS_OUT;S :
@@ -1592,6 +1592,9 @@ TP_FLATFIELD_CLIPCONTROL;Contrôle de l'écrêtage
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;"Contrôle de l'écrêtage" évite l'écrêtage des Hautes Lumière dû à l'application du Champ Uniforme. S'il y a déjà des Hautes Lumières brûlées avant l'application du Champ Uniforme, "Contrôle de l'écrêtage" peut conduire à une dérive couleur.
 TP_FLATFIELD_LABEL;Champ Uniforme
 TP_GENERAL_11SCALE_TOOLTIP;Les effets de cet outil ne sont visibles ou fiables qu'à une échelle d'aperçu de 1:1.
+TP_GENERAL_RESET_DEFAULT;Réinitialiser les paramètres par défaut
+TP_GENERAL_RESET_SAVED;Réinitialiser les paramètres sauvegardés
+TP_GENERAL_TOOL_RESET_TOOLTIP;Réinitialiser tous les réglages.
 TP_GRADIENT_CENTER_X;Centre X
 TP_GRADIENT_CENTER_X_TOOLTIP;Décaler le gradient vers la gauche (valeurs négatives) ou la droite (valeurs positives)
 TP_GRADIENT_CENTER_Y;Centre Y
