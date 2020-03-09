@@ -563,7 +563,12 @@ Exiv2::XmpData Exiv2Metadata::getXmpSidecar(const Glib::ustring &path)
 void Exiv2Metadata::init(const Glib::ustring &base_dir)
 {
     cache_.reset(new ImageCache(IMAGE_CACHE_SIZE));
-    exiftool_base_dir = base_dir;
+    const gchar *exiftool_base_dir_env = g_getenv("ART_EXIFTOOL_BASE_DIR");
+    if (exiftool_base_dir_env) {
+        exiftool_base_dir = exiftool_base_dir_env;
+    } else {
+        exiftool_base_dir = base_dir;
+    }
     Exiv2::XmpParser::initialize();
 }
 
