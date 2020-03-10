@@ -39,12 +39,15 @@
 #include "iccjpeg.h"
 #include "color.h"
 #include "imagedata.h"
+#include "settings.h"
 
 #include "jpeg.h"
 
 using namespace std;
 using namespace rtengine;
 using namespace rtengine::procparams;
+
+namespace rtengine { extern const Settings *settings; }
 
 namespace
 {
@@ -1331,12 +1334,24 @@ bool ImageIO::saveMetadata(const Glib::ustring &fname) const
         return true;
     }
 
+    bool has_meta = true;
     try {
         metadataInfo.load();
-        metadataInfo.saveToImage(fname);
-        return true;
     } catch (std::exception &exc) {
-        std::cout << "EXIF ERROR: " << exc.what() << std::endl;
-        return false;
+        if (settings->verbose) {
+            std::cout << "EXIF LOAD ERROR: " << exc.what() << std::endl;
+        }
+        has_meta = false;
     }
+
+    if (has_meta) {
+        try {
+            metadataInfo.saveToImage(fname);
+        } catch (std::exception &exc) {
+            std::cout << "EXIF ERROR: " << exc.what() << std::endl;
+            return false;
+        }
+    }
+
+    return true;
 }
