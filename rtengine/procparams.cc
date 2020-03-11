@@ -976,7 +976,7 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
         && histmatching == other.histmatching
         && fromHistMatching == other.fromHistMatching
         && saturation == other.saturation
-        && perceptualStrength == perceptualStrength;
+        && perceptualStrength == other.perceptualStrength;
 }
 
 
@@ -2797,7 +2797,7 @@ int ProcParams::save(bool save_general,
 // Denoising
         if (RELEVANT_(denoise)) {
             saveToKeyfile("Denoise", "Enabled", denoise.enabled, keyFile);
-            saveToKeyfile("Denoise", "ColorSpace", denoise.colorSpace == DenoiseParams::ColorSpace::LAB ? "LAB" : "RGB", keyFile);
+            saveToKeyfile("Denoise", "ColorSpace", denoise.colorSpace == DenoiseParams::ColorSpace::LAB ? Glib::ustring("LAB") : Glib::ustring("RGB"), keyFile);
             saveToKeyfile("Denoise", "Aggressive", denoise.aggressive, keyFile);
             saveToKeyfile("Denoise", "Gamma", denoise.gamma, keyFile);
             saveToKeyfile("Denoise", "Luminance", denoise.luminance, keyFile);
