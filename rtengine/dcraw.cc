@@ -94,9 +94,12 @@ using rtengine::DNG_FP24ToFloat;
 #ifdef WIN32
 #include <sys/utime.h>
 #include <winsock2.h>
-#define snprintf _snprintf
+#ifndef strcasecmp
 #define strcasecmp stricmp
+#endif
+#ifndef strncasecmp
 #define strncasecmp strnicmp
+#endif
 typedef __int64 INT64;
 typedef unsigned __int64 UINT64;
 #else
