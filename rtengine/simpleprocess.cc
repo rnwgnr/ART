@@ -413,6 +413,10 @@ private:
                 ProfileContent pc = ICCStore::getInstance()->getContent (params.icm.outputProfile);
                 readyImg->setOutputProfile (pc.getData().c_str(), pc.getData().size());
             }
+        } else if (params.icm.outputProfile == ColorManagementParams::NoProfileString) {
+            cmsHPROFILE wp = ICCStore::getInstance()->workingSpace(params.icm.workingProfile);
+            ProfileContent wpc(wp);
+            readyImg->setOutputProfile(wpc.getData().c_str(), wpc.getData().size());
         } else {
             // No ICM
             readyImg->setOutputProfile (nullptr, 0);
