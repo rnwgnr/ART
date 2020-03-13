@@ -1189,6 +1189,12 @@ PREFERENCES_DIRSOFTWARE;Dossier d'installation
 PREFERENCES_EDITORCMDLINE;Ligne de commande personnalisée
 PREFERENCES_EDITORLAYOUT;Disposition de l'éditeur
 PREFERENCES_EXTERNALEDITOR;Éditeur externe
+PREFERENCES_EXTEDITOR_DIR;répertoire de sortie Output directory
+PREFERENCES_EXTEDITOR_DIR_TEMP;Répertoire temporaire du sytéme
+PREFERENCES_EXTEDITOR_DIR_CURRENT;Identique à l'image d'entrée
+PREFERENCES_EXTEDITOR_DIR_CUSTOM;Personnel
+PREFERENCES_EXTEDITOR_FLOAT32;Sortie TIFF 32-bit
+PREFERENCES_EXTEDITOR_BYPASS_OUTPUT_PROFILE;Court-circuiter le profil de sortie
 PREFERENCES_EXIFTOOL_PATH;Commande du programme exiftool
 PREFERENCES_EXIFTOOL_PATH_TOOLTIP;Exiftool est utilisé comme solution de secours pour décoder les métadonnées dont les formats ne sont pas encore supportés par Exiv2
 PREFERENCES_FBROWSEROPTS;Options du Navigateur de fichiers et des vignettes
