@@ -16,6 +16,7 @@
 #16 2017-04-21 update by wim ter meer
 
 #17 2020-01-28 First translation of ART v1.0 by paul.matthijsse/paulmatth, based on existing Dutch translation of RawTherapee 2007-2017, see above for credits
+#18 2020-03-14 update to art v1.2 by paul.matthijsse
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -23,7 +24,7 @@ ABOUT_TAB_LICENSE;Licentie
 ABOUT_TAB_RELEASENOTES;Uitgave-opmerkingen
 ABOUT_TAB_SPLASH;Welkom
 
-ADJUSTER_RESET_TO_DEFAULT;<b>Klik</b> - terug naar standaardwaarde.\n<b>Ctrl+klik</b> - terug naar initiële waarde.
+ADJUSTER_RESET_TO_DEFAULT;<b>Klik</b> - terug naar standaardwaarde.\n<b>Ctrl+klik</b> - terug naar laatst bewaarde waarde.
 BATCH_PROCESSING;Batch-verwerking
 
 CURVEEDITOR_AXIS_IN;I:
@@ -38,7 +39,7 @@ CURVEEDITOR_DARKS;Schaduwen
 CURVEEDITOR_EDITPOINT_HINT;Activeer wijzigen van node in/uit-waarden.\n\nRechtsklik op een node om die te selecteren.\nRechtsklik in een leeg gebied om de node te deselecteren.
 CURVEEDITOR_HIGHLIGHTS;Hoge lichten
 CURVEEDITOR_LIGHTS;Lichten
-CURVEEDITOR_LINEAR;Lineair
+CURVEEDITOR_LINEAR;Uit
 CURVEEDITOR_LOADDLGLABEL;Laad curve...
 CURVEEDITOR_MINMAXCPOINTS;Equalizer
 CURVEEDITOR_NURBS;Kooicurve
@@ -46,7 +47,7 @@ CURVEEDITOR_PARAMETRIC;Parametrisch
 CURVEEDITOR_SAVEDLGLABEL;Bewaar curve...
 CURVEEDITOR_SHADOWS;Schaduwen
 CURVEEDITOR_TOOLTIPCOPY;Kopieer deze curve naar klembord
-CURVEEDITOR_TOOLTIPLINEAR;Zet curve terug naar lineair
+CURVEEDITOR_TOOLTIPLINEAR;Zet curve terug naar identiek
 CURVEEDITOR_TOOLTIPLOAD;Laad curve uit bestand
 CURVEEDITOR_TOOLTIPPASTE;Plak curve van klembord
 CURVEEDITOR_TOOLTIPSAVE;Bewaar huidige curve
@@ -256,6 +257,7 @@ GENERAL_SAVE_AS;Opslaan als...
 GENERAL_SLIDER;Schuifregelaar
 GENERAL_UNCHANGED;(Onveranderd)
 GENERAL_WARNING;Waarschuwing
+GENERAL_DEPRECATED_TOOLTIP;<b>Verouderd!</b> Komt niet meer voor in een toekomstige versie.
 GIMP_PLUGIN_INFO;Welkom bij de ART GIMP plug-in!\nAls uw bewerking gereed is, sluit dan het hoofdvenster van ART en uw afbeelding wordt automatisch in GIMP geladen.
 
 # Histogram
@@ -653,6 +655,8 @@ HISTORY_MSG_COLORCORRECTION_SATURATION;CC - verzadiging
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - toon masker gebied
 HISTORY_MSG_COLORCORRECTION_SLOPE;CC - helling gebied
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC- dE-masker
+HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - kwastmasker
+HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametrisch masker
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Kleurcorrectie
 HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RV - Verzachtmethode
 HISTORY_MSG_DEHAZE_DEPTH;Nevelvermindering - diepte
@@ -662,6 +666,7 @@ HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Nevelvermindering - Toon dieptemap
 HISTORY_MSG_DEHAZE_STRENGTH;Nevelvermindering - Sterkte
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Dual-demozaïek - auto-drempel
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dual-demozaïek - Contrastdrempel
+HISTORY_MSG_EPD_ITERATIONS;TB - iteraties
 HISTORY_MSG_EPD_LIST;TB - gebieden
 HISTORY_MSG_EPD_HUEMASK;TB - H-masker
 HISTORY_MSG_EPD_CHROMATICITYMASK;TB - C-masker
@@ -671,6 +676,8 @@ HISTORY_MSG_EPD_SHOWMASK;TB - toon masker
 HISTORY_MSG_EPD_AREAMASK;TB - gebiedsmasker
 HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - Masker contrastdrempel
 HISTORY_MSG_EPD_DELTAEMASK;TB - dE-masker
+HISTORY_MSG_EPD_DRAWNMASK;TB - penseelmasker
+HISTORY_MSG_EPD_PARAMETRICMASK;TB - parametrisch masker
 HISTORY_MSG_EXPOSURE_BLACK;Belichting - Zwartpunt
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatief
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
@@ -686,6 +693,7 @@ HISTORY_MSG_ICM_OUTPUT_TYPE;Uitvoer - Type
 HISTORY_MSG_ICM_WORKING_GAMMA;Working - Gamma
 HISTORY_MSG_ICM_WORKING_SLOPE;Working - Helling
 HISTORY_MSG_ICM_WORKING_TRC_METHOD;Working - TRC-methode
+HISTORY_MSG_LABMASKS_MASK_NAME;Maskernaam
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Lokaal contrast - Hoeveelheid
 HISTORY_MSG_LOCALCONTRAST_CONTRAST;Lokaal contrast - Residueel contrast
 HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;Lokaal Contrast - Masker contrastdrempel
@@ -697,6 +705,9 @@ HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Lokaal contrast - Licht
 HISTORY_MSG_LOCALCONTRAST_MODE;Lokaal contrast - Methode
 HISTORY_MSG_LOCALCONTRAST_RADIUS;Lokaal contrast - Straal
 HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Lokaal contrast - dE-masker
+HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Lokaal contrast - penseelmasker
+HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Lokaal contrast - parametrisch masker
+
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
 HISTORY_MSG_LOGENC_AUTOGRAY;Log - Auto-grijs
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Reguleer
@@ -739,13 +750,17 @@ HISTORY_MSG_SMOOTHING_MASKBLUR;Verzachten - vervaging masker
 HISTORY_MSG_SMOOTHING_SHOWMASK;Verzachten - toon masker
 HISTORY_MSG_SMOOTHING_AREAMASK;Verzachten - gebiedsmasker
 HISTORY_MSG_SMOOTHING_DELTAEMASK;Verzachten - dE-masker
+HISTORY_MSG_SMOOTHING_DRAWNMASK;Verzachten - penseelmasker
+HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Verzachten - parametrisch masker
+
 HISTORY_MSG_SOFTLIGHT_ENABLED;Zacht licht
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Zacht licht - Sterkte
 HISTORY_MSG_TM_FATTAL_ANCHOR;DRC - Anker
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Toonequalizer
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Toonequalizer - Banden
-HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Toonequalizer - Regularisatie
+HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Toonequalizer - Regulariseer
 HISTORY_MSG_TONECURVE_SATCURVE;Tooncurve - Verzadiging
+HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tooncurve - Perceptuele kracht
 HISTORY_NEWSNAPSHOT;Voeg toe
 HISTORY_NEWSNAPSHOT_TOOLTIP;Sneltoets: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -1099,7 +1114,14 @@ PREFERENCES_DIRSOFTWARE;Installatiemap
 PREFERENCES_EDITORCMDLINE;Aangepaste opdrachtregel
 PREFERENCES_EDITORLAYOUT;Lay-out bewerkingsvenster
 PREFERENCES_EXTERNALEDITOR;Externe fotobewerker
-PREFERENCES_EXIFTOOL_PATH;Exiftool-commando
+PREFERENCES_EXTEDITOR_DIR;Uitvoermap
+PREFERENCES_EXTEDITOR_DIR_TEMP;Tijdelijke map
+PREFERENCES_EXTEDITOR_DIR_CURRENT;Zelfde als invoerafbeelding
+PREFERENCES_EXTEDITOR_DIR_CUSTOM;Handmatig
+PREFERENCES_EXTEDITOR_FLOAT32;32-bit drijvendekomma TIFF-uitvoer
+PREFERENCES_EXTEDITOR_BYPASS_OUTPUT_PROFILE;Negeer uitvoerprofiel
+
+PREFERENCES_EXIFTOOL_PATH;Exiftool-opdracht
 PREFERENCES_EXIFTOOL_PATH_TOOLTIP;Exiftool wordt gebruikt voor formaten die nog niet door Exiv2 worden ondersteund
 PREFERENCES_FBROWSEROPTS;Opties bestandsnavigator/miniaturen
 PREFERENCES_FILEBROWSERTOOLBARSINGLEROW;Compacte gereedschapsbalken in bestandsnavigator
@@ -1414,14 +1436,14 @@ TP_COLORCORRECTION_HUESAT;Tint/Verzadiging
 
 # Area mask
 TP_LABMASKS_AREA;Gebiedsmasker
-TP_LABMASKS_AREA_FEATHER;Verdoezelen
+TP_LABMASKS_AREA_FEATHER;Verzachten
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Kopieer het huidige masker naar het klembord
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Bewerk het huidige masker door te tekenen op het voorbeeld
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Voeg een gebiedsvorm toe door te tekenen op het voorbeeld
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Toon de huidige gebiedsvorm op het voorbeeld
-TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Plak een gebiedsmasker van het klembord
+TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Plak een masker van het klembord
 TP_LABMASKS_AREA_SHAPES;Vormen
-TP_LABMASKS_BLUR;Vervaging
+TP_LABMASKS_BLUR;Vervagen
 TP_LABMASKS_CONTRASTTHRESHOLDMASK;Contrastdrempel
 TP_LABMASKS_DELTAE_DECAY;Verval
 TP_LABMASKS_DELTAE;ΔE-masker
@@ -1545,6 +1567,7 @@ TP_DISTORTION_LABEL;Vervormingscorrectie
 TP_EPD_EDGESTOPPING;Randbehandeling
 TP_EPD_REWEIGHTINGITERATES;Herhaling
 TP_EPD_SCALE;Schaal
+TP_EPD_ITERATIONS;Iteraties
 TP_EPD_STRENGTH;Sterkte
 TP_EXPOSURE_AUTOLEVELS;Autom. niveaus
 TP_EXPOSURE_AUTOLEVELS_TIP;Activeert automatische niveaus\nActiveert Herstel Hoge lichten indien nodig.
@@ -1601,6 +1624,10 @@ TP_FLATFIELD_CLIPCONTROL_TOOLTIP;Afkapcontrole vermijdt uitgevreten hoge lichten
 TP_FLATFIELD_LABEL;Vlakveld
 
 TP_GENERAL_11SCALE_TOOLTIP;De werking is alleen zichtbaar op schaal 1:1 van het voorbeeld
+TP_GENERAL_RESET_DEFAULT;Terug naar standaardwaarden
+TP_GENERAL_RESET_SAVED;Terug naar opgeslagen waarden
+TP_GENERAL_TOOL_RESET_TOOLTIP;Alles terug naar standaardwaarden
+
 
 # Grijsverloop
 TP_GRADIENT_CENTER;Centrum
@@ -1655,7 +1682,7 @@ TP_ICM_INPUTCAMERAICC;Camera-specifiek kleurprofiel
 TP_ICM_INPUTCAMERAICC_TOOLTIP;Gebruik RawTherapee's camera-specifieke DCP- of ICC-kleurprofiel dat preciezer is dan een eenvoudige matrix. Beschikbaar voor sommige camera's. Deze profielen zijn opgeslagen in de map /iccprofiles/input en worden automatisch opgehaald gebaseerd op de exacte overeenkomst van bestandsnaam met de modelnaam van de camera.
 TP_ICM_INPUTCAMERA_TOOLTIP;Gebruik de eenvoudige kleurenmatrix van dcraw of de uitgebreidere RawTherapee-versie (indien aanwezig voor het cameramodel), of gebruik het ingebedde profiel in de DNG.
 TP_ICM_INPUTCUSTOM;Handmatig
-TP_ICM_INPUTCUSTOM_TOOLTIP;Selecteer eigen DCP/ICC-kleurenprofiel voor uw camera.
+TP_ICM_INPUTCUSTOM_TOOLTIP;Selecteer eigen DCP/ICC-kleurenprofiel voor uw camera
 TP_ICM_INPUTDLGLABEL;Selecteer invoer-ICC-profiel...
 TP_ICM_INPUTEMBEDDED;Gebruik ingebed profiel, indien mogelijk
 TP_ICM_INPUTEMBEDDED_TOOLTIP;Gebruik het ingebedde kleurenprofiel van de foto.\nIndien niet beschikbaar wordt 'Camera standaard' gebruikt
@@ -1681,23 +1708,32 @@ TP_IMPULSEDENOISE_THRESH;Drempel
 
 # Kleur - Lab
 TP_LABCURVE_BRIGHTNESS;Helderheid
-TP_LABCURVE_CHROMATICITY;Chromaticiteit
-TP_LABCURVE_CHROMA_TOOLTIP;Voor zwart-wit, zet Chromaticiteit op -100
-TP_LABCURVE_CURVEEDITOR;Luminantiecurve
-TP_LABCURVE_LABEL;L*a*b-bewerking
+TP_LABCURVE_CHROMATICITY;Chroma
+TP_LABCURVE_CHROMA_TOOLTIP;Voor zwart-wit, zet Chroma op -100
+TP_LABCURVE_CONTRAST;Contrast
+TP_LABCURVE_CURVEEDITOR_A_RANGE1;Verzadigd groen 
+TP_LABCURVE_CURVEEDITOR_A_RANGE2;Pastelgroen
+TP_LABCURVE_CURVEEDITOR_A_RANGE3;Pastelrood
+TP_LABCURVE_CURVEEDITOR_A_RANGE4;Verzadigd rood
+TP_LABCURVE_CURVEEDITOR_B_RANGE1;Verzadigd blauw
+TP_LABCURVE_CURVEEDITOR_B_RANGE2;Pastelblauw
+TP_LABCURVE_CURVEEDITOR_B_RANGE3;Pastelgeel
+TP_LABCURVE_CURVEEDITOR_B_RANGE4;Verzadigd geel
+TP_LABCURVE_CURVEEDITOR_LL_TOOLTIP;Luminantie volgens luminantie L=f(L)
+TP_LABCURVE_LABEL;L*a*b*-aanpassingen
 
 TP_LABMASKS_AREA;Gebiedsmasker
 TP_LABMASKS_AREA_ANGLE;Hoek
 TP_LABMASKS_AREA_CONTRAST;Contrastcurve
-TP_LABMASKS_AREA_FEATHER;Verdoezelen
+TP_LABMASKS_AREA_FEATHER;Verzachten
 TP_LABMASKS_AREA_HEIGHT;Hoogte
 TP_LABMASKS_INVERTED;Omgekeerd
 TP_LABMASKS_AREA_ROUNDNESS;Rondheid
-TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Kopieer het huidige gebiedsmasker naar het klembord
+TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Kopieer het huidige masker naar het klembord
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Bewerk het huidige gebiedsmasker door op het voorbeeld te tekenen
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Voeg een gebied toe door op het voorbeeld te tekenen
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Toon huidige vorm op het voorbeeld
-TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Plak een gebiedsmasker van het klembord
+TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Plak een masker van het klembord
 TP_LABMASKS_AREA_SHAPE;Vorm
 TP_LABMASKS_AREA_SHAPE_MODE;Modus
 TP_LABMASKS_AREA_SHAPE_MODE_ADD;Toevoegen
@@ -1707,6 +1743,37 @@ TP_LABMASKS_AREA_SHAPES;Gebiedsvormen
 TP_LABMASKS_AREA_WIDTH;Breedte
 TP_LABMASKS_AREA_X;Centrum X
 TP_LABMASKS_AREA_Y;Centrum Y
+TP_LABMASKS_BLUR;Vervagen
+TP_LABMASKS_CHROMATICITY;C
+TP_LABMASKS_HUE;H
+TP_LABMASKS_LIGHTNESS;L
+TP_LABMASKS_MASK;Masker
+TP_LABMASKS_MASK_UNNAMED;Onbenoemd
+TP_LABMASKS_SHOW;Toon masker
+TP_LABMASKS_CONTRASTTHRESHOLDMASK;Contrastdrempelmasker
+TP_LABMASKS_DELTAE;ΔE masker
+TP_LABMASKS_DELTAE_L;L
+TP_LABMASKS_DELTAE_C;C
+TP_LABMASKS_DELTAE_H;H
+TP_LABMASKS_DELTAE_RANGE;Bereik
+TP_LABMASKS_DELTAE_DECAY;Vermindering
+TP_LABMASKS_DELTAE_PICK;Kies kleur
+TP_LABMASKS_DELTAE_CHAN_WEIGHT;Gewicht in de ΔE-berekening
+TP_LABMASKS_DELTAE_TOOLTIP;Kies gebieden van gelijke kleur\n(volgens de CIELAB ΔE*-metriek)
+TP_LABMASKS_DRAWNMASK;Penseelmasker
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Schakel canvastekenen aan/uit
+TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Penseelinstellingen
+TP_LABMASKS_DRAWNMASK_RESET_TIP;Wis alles penseelstreken
+TP_LABMASKS_DRAWNMASK_UNDO_TIP;Verwijder laatste groep penseelstreken
+TP_LABMASKS_DRAWNMASK_RADIUS;Straal
+TP_LABMASKS_DRAWNMASK_TRANSPARENCY;Transparantie
+TP_LABMASKS_DRAWNMASK_SMOOTHNESS;Gladheid
+TP_LABMASKS_DRAWNMASK_ERASE;Gum-modus
+TP_LABMASKS_DRAWNMASK_HARDNESS;Hardheid
+TP_LABMASKS_DRAWNMASK_INFO;%1 penseelstreken
+TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Doorsnij penseelmasker met de andere maskers
+TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Plaats penseelmasker bovenop de andere maskers
+TP_LABMASKS_PARAMETRIC;Parametrisch masker
 
 
 TP_LENSGEOM_AUTOCROP;Automatisch bijsnijden
@@ -1801,7 +1868,7 @@ TP_LOGENC_SOURCE_GRAY;Grijspunt bron
 TP_LOGENC_WHITE_EV;Wit EV
 TP_LOGENC_TARGET_GRAY;Grijspunt doel
 TP_LOGENC_LABEL;Logcodering
-TP_LOGENC_REGULARIZATION;Regularisatie
+TP_LOGENC_REGULARIZATION;Regulariseer
 
 # Meta
 TP_METADATA_EDIT;Pas wijzigingen toe
@@ -1935,6 +2002,7 @@ TP_TM_FATTAL_THRESHOLD;Detail
 
 TP_TONECURVE_LABEL;Tooncurven
 TP_TONECURVE_SATCURVE;Verzadiging
+TP_TONECURVE_PERCEPTUAL_STRENGTH;Kracht perceptuele curve
 
 # Toon-equalizer
 TP_TONE_EQUALIZER_BAND_0;Zwarten
@@ -1942,7 +2010,7 @@ TP_TONE_EQUALIZER_BAND_1;Schaduwen
 TP_TONE_EQUALIZER_BAND_2;Middentinten
 TP_TONE_EQUALIZER_BAND_3;Hoge lichten
 TP_TONE_EQUALIZER_BAND_4;Witten
-TP_TONE_EQUALIZER_DETAIL;Regularisatie
+TP_TONE_EQUALIZER_DETAIL;Regulariseer
 TP_TONE_EQUALIZER_LABEL;Toon-equalizer
 
 # module Vignetteringscorrectie
