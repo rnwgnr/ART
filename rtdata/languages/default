@@ -244,8 +244,8 @@ HISTORY_CUSTOMCURVE;Custom curve
 HISTORY_FROMCLIPBOARD;From clipboard
 HISTORY_LABEL;History
 HISTORY_MSG_1;Photo loaded
-HISTORY_MSG_2;PP3 loaded
-HISTORY_MSG_3;PP3 changed
+HISTORY_MSG_2;ARP loaded
+HISTORY_MSG_3;ARP changed
 HISTORY_MSG_4;History browsing
 HISTORY_MSG_5;B, C &amp; S - Brightness
 HISTORY_MSG_6;Tone Curve - Contrast
@@ -1257,7 +1257,7 @@ PREFERENCES_PERFORMANCE_THREADS_LABEL;Maximum number of threads for Noise Reduct
 PREFERENCES_PREVDEMO;Preview Accuracy
 PREFERENCES_PREVDEMO_FAST;Fast
 PREFERENCES_PREVDEMO_LABEL;Demosaicing method used for the preview at <100% zoom:
-PREFERENCES_PREVDEMO_SIDECAR;As in PP3
+PREFERENCES_PREVDEMO_SIDECAR;As in ARP
 PREFERENCES_PRINTER;Printer (Soft-Proofing)
 PREFERENCES_PROFILEHANDLING;Processing Profile Handling
 PREFERENCES_PROFILELOADPR;Processing profile loading priority
@@ -1272,7 +1272,7 @@ PREFERENCES_PRTINTENT;Rendering intent
 PREFERENCES_PRTPROFILE;Color profile
 PREFERENCES_PSPATH;Adobe Photoshop installation directory
 PREFERENCES_REMEMBERZOOMPAN;Remember zoom % and pan offset
-PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Remember the zoom % and pan offset of the current image when opening a new image.\n\nThis option only works in "Single Editor Tab Mode" and when "Demosaicing method used for the preview at <100% zoom" is set to "As in PP3".
+PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Remember the zoom % and pan offset of the current image when opening a new image.\n\nThis option only works in "Single Editor Tab Mode" and when "Demosaicing method used for the preview at <100% zoom" is set to "As in ARP".
 PREFERENCES_SAVE_TP_OPEN_NOW;Save tool collapsed/expanded state now
 PREFERENCES_SELECTLANG;Select language
 PREFERENCES_SERIALIZE_TIFF_READ;TIFF Read Settings
