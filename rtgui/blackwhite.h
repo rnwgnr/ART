@@ -74,7 +74,6 @@ private:
 
     rtengine::ProcEvent EvColorCast;
 
-    Gtk::Button*         neutral;
     Gtk::Label*          RGBLabels;
 
     Adjuster *mixerRed;
