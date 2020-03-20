@@ -780,7 +780,8 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     maskEditorGroup->show();
     tb->pack_start(*maskEditorGroup);//, Gtk::PACK_SHRINK, 4);
 
-    contrastThreshold = Gtk::manage(new Adjuster(M("TP_LABMASKS_CONTRASTTHRESHOLDMASK"), -150, 150, 1, 0));
+    Gtk::Image *cicon = Gtk::manage(new RTImage("one-to-one-small.png"));
+    contrastThreshold = Gtk::manage(new Adjuster(M("TP_LABMASKS_CONTRASTTHRESHOLDMASK"), -150, 150, 1, 0, cicon));
     contrastThreshold->setAdjusterListener(this);
     //mask_box->pack_start(*contrastThreshold);
     tb->pack_start(*contrastThreshold);
