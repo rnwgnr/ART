@@ -172,8 +172,8 @@ int CacheImageData::load (const Glib::ustring& fname)
             }
 
             if (keyFile.has_group ("FileInfo")) {
-                if (keyFile.has_key ("FileInfo", "Filetype")) {
-                    filetype    = keyFile.get_string ("FileInfo", "Filetype");
+                if (keyFile.has_key("FileInfo", "Filetype")) {
+                    filetype = keyFile.get_string("FileInfo", "Filetype").uppercase();
                 }
                 if (keyFile.has_key ("FileInfo", "FrameCount")) {
                     frameCount  = static_cast<unsigned int>(keyFile.get_integer ("FileInfo", "FrameCount"));
