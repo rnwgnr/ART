@@ -820,7 +820,7 @@ int Thumbnail::infoFromImage (const Glib::ustring& fname)
     idx = fname.rfind('.');
 
     if(idx != std::string::npos) {
-        cfs.filetype = fname.substr(idx + 1);
+        cfs.filetype = fname.substr(idx + 1).uppercase();
     } else {
         cfs.filetype = "";
     }
