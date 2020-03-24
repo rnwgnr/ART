@@ -168,6 +168,7 @@ TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL")
     EvDrawnMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_DRAWNMASK");
 
     EvToolEnabled.set_action(DISPLAY);
+    EvToolReset.set_action(DISPLAY);
 
     strength = Gtk::manage(new Adjuster (M("TP_EPD_STRENGTH"), -1.0, 2.0, 0.01, 0.5));
     edgeStopping = Gtk::manage(new Adjuster (M("TP_EPD_EDGESTOPPING"), 0.1, 4.0, 0.01, 1.4));

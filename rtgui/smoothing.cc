@@ -178,6 +178,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_DRAWNMASK");
 
     EvToolEnabled.set_action(EVENT);
+    EvToolReset.set_action(EVENT);
 
     box = Gtk::manage(new Gtk::VBox());
 

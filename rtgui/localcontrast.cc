@@ -186,6 +186,7 @@ LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_L
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_LOCALCONTRAST_DRAWNMASK");
 
     EvToolEnabled.set_action(EVENT);
+    EvToolReset.set_action(EVENT);
     
     box = Gtk::manage(new Gtk::VBox());
 
