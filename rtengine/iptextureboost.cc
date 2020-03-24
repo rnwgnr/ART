@@ -137,7 +137,10 @@ void EPD(LabImage *lab, const rtengine::procparams::TextureBoostParams::Region &
     for (size_t ii = 0; ii < N; ++ii) {
         a[ii] *= s;
         b[ii] *= s;
-        L[ii] = L[ii] * maxL * (1.f / gamm) + minL;
+        L[ii] = LIM(L[ii] * maxL * (1.f / gamm) + minL, 0.f, 32768.f);
+        assert(!xisnanf(a[ii]));
+        assert(!xisnanf(b[ii]));
+        assert(!xisnanf(L[ii]));
     }
 }
 
