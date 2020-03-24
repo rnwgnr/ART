@@ -31,7 +31,6 @@ set(CAMCONSTSFILE "camconst.json")
 set(RTENGINESOURCEFILES
     badpixels.cc
     CA_correct_RT.cc
-    EdgePreservingDecomposition.cc
     FTblockDN.cc
     PF_correct_RT.cc
     ahd_demosaic_RT.cc
@@ -53,7 +52,6 @@ set(RTENGINESOURCEFILES
     demosaic_algos.cc
     dfmanager.cc
     diagonalcurves.cc
-    #dirpyr_equalizer.cc
     dual_demosaic_RT.cc
     dynamicprofile.cc
     eahd_demosaic.cc
