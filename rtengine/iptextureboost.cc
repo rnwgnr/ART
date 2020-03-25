@@ -45,32 +45,50 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     array2D<float> mid(W, H);
     array2D<float> base(W, H);
 
-    LUTf enc(65536);
-    LUTf dec(65536);
-    for (int i = 0; i < 65536; ++i) {
-        enc[i] = pow_F(float(i) / 65535.f, 1.f/3.f);
-        dec[i] = pow_F(float(i) / 65535.f, 3.f) * 65535.f;
-    }
-    
+#ifdef __SSE2__
+    vfloat v65535 = F2V(65535.f);
+    vfloat vone = F2V(1.f);
+    vfloat vstrength = F2V(strength);
+    vfloat vstrength2 = F2V(strength2);
+#endif
+
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
     for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            float v = enc[Y[y][x]];
+        int x = 0;
+#ifdef __SSE2__
+        for (; x < W-3; x += 4) {
+            vfloat v = LVFU(Y[y][x]);
+            STVFU(Y[y][x], v / v65535);
+        }
+#endif
+        for (; x < W; ++x) {
+            float v = Y[y][x] / 65535.f;
             Y[y][x] = v;
         }
     }
 
     for (int i = 0; i < pp.iterations; ++i) {
         guidedFilter(Y, Y, mid, radius, epsilon, multithread);
-        guidedFilter(mid, mid, base, radius * 4, epsilon * 10.f, multithread);
+        guidedFilter(mid, mid, base, radius * 4, epsilon / 10.f, multithread);
         
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
         for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
+            int x = 0;
+#ifdef __SSE2__
+            for (; x < W-3; x += 4) {
+                vfloat vy = LVFU(Y[y][x]);
+                vfloat vm = LVFU(mid[y][x]);
+                vfloat vb = LVFU(base[y][x]);
+                vfloat d = (vy - vm) * vstrength;
+                vfloat d2 = (vm - vb) * vstrength2;
+                STVFU(Y[y][x], vminf(vmaxf(vb + d + d2, ZEROV), vone));
+            }
+#endif
+            for (; x < W; ++x) {
                 float d = Y[y][x] - mid[y][x];
                 d *= strength;
                 float d2 = mid[y][x] - base[y][x];
@@ -84,8 +102,15 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #   pragma omp parallel for if (multithread)
 #endif
     for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            Y[y][x] = dec[Y[y][x] * 65535.f];
+        int x = 0;
+#ifdef __SSE2__
+        for (; x < W-3; x += 4) {
+            vfloat v = LVFU(Y[y][x]);
+            STVFU(Y[y][x], v * v65535);
+        }
+#endif
+        for (; x < W; ++x) {
+            Y[y][x] = Y[y][x] * 65535.f;
         }
     }
 }
