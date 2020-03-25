@@ -33,37 +33,49 @@ namespace {
 
 void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostParams::Region &pp, double scale, bool multithread)
 {
-    int radius = int(pp.edgeStopping * 3.5f / scale + 0.5f);
+    int radius = std::max(int(pp.edgeStopping * 3.5f / scale + 0.5f), 1);
     float epsilon = 0.001f;
-    float strength = pp.strength >= 0 ? 1.f + pp.strength: 1.f / (1.f - pp.strength);
+    float s = pp.strength >= 0 ? pow_F(pp.strength / 2.f, 0.3f) * 2.f : pp.strength;
+    float strength = s >= 0 ? 1.f + s : 1.f / (1.f - s);
+    float strength2 = s >= 0 ? 1.f + s / 4.f: 1.f / (1.f - s / 4.f);
 
     const int W = Y.width();
     const int H = Y.height();
+
+    array2D<float> mid(W, H);
+    array2D<float> base(W, H);
+
+    LUTf enc(65536);
+    LUTf dec(65536);
+    for (int i = 0; i < 65536; ++i) {
+        enc[i] = pow_F(float(i) / 65535.f, 1.f/3.f);
+        dec[i] = pow_F(float(i) / 65535.f, 3.f) * 65535.f;
+    }
     
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            Y[y][x] /= 65535.f;
+            float v = enc[Y[y][x]];
+            Y[y][x] = v;
         }
     }
 
-    array2D<float> base(W, H, Y, 0);
     for (int i = 0; i < pp.iterations; ++i) {
-        guidedFilterLog(Y, 100.f, base, radius, epsilon, multithread);
-        guidedFilter(base, base, base, radius * 4, epsilon * 10.f, multithread);
+        guidedFilter(Y, Y, mid, radius, epsilon, multithread);
+        guidedFilter(mid, mid, base, radius * 4, epsilon * 10.f, multithread);
         
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
         for (int y = 0; y < H; ++y) {
             for (int x = 0; x < W; ++x) {
-                float d = Y[y][x] - base[y][x];
+                float d = Y[y][x] - mid[y][x];
                 d *= strength;
-                float blend = std::sqrt(LIM01(Y[y][x] * 10.f));
-                Y[y][x] = intp(blend, base[y][x] + d, Y[y][x]);
-                base[y][x] = Y[y][x];
+                float d2 = mid[y][x] - base[y][x];
+                d2 *= strength2;
+                Y[y][x] = LIM01(base[y][x] + d + d2);
             }
         }
     }
@@ -73,7 +85,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            Y[y][x] *= 65535.f;
+            Y[y][x] = dec[Y[y][x] * 65535.f];
         }
     }
 }
@@ -112,13 +124,8 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
             return true; // show mask is active, nothing more to do
         }
 
-        // LabImage lab(rgb->getWidth(), rgb->getHeight());
-        // rgb2lab(*rgb, lab);
         rgb->setMode(Imagefloat::Mode::YUV, multiThread);
 
-        // array2D<float> L(lab.W, lab.H, lab.L, 0);
-        // array2D<float> a(lab.W, lab.H, lab.a, 0);
-        // array2D<float> b(lab.W, lab.H, lab.b, 0);
         const int W = rgb->getWidth();
         const int H = rgb->getHeight();
         array2D<float> Y(W, H, rgb->g.ptrs, 0);
@@ -129,26 +136,12 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
             }
             
             auto &r = params->textureBoost.regions[i];
-            //EPD(&lab, r, scale, multiThread);
             texture_boost(Y, r, scale, multiThread);
             const auto &blend = mask[i];
 
 #ifdef _OPENMP
 #           pragma omp parallel for if (multiThread)
 #endif
-            // for (int y = 0; y < lab.H; ++y) {
-            //     for (int x = 0; x < lab.W; ++x) {
-            //         float &l = lab.L[y][x];
-            //         float &aa = lab.a[y][x];
-            //         float &bb = lab.b[y][x];
-            //         l = intp(blend[y][x], l, L[y][x]);
-            //         aa = intp(blend[y][x], aa, a[y][x]);
-            //         bb = intp(blend[y][x], bb, b[y][x]);
-            //         L[y][x] = l;
-            //         a[y][x] = aa;
-            //         b[y][x] = bb;
-            //     }
-            // }
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
                     float &YY = rgb->g(y, x);
@@ -157,8 +150,6 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
                 }
             }
         }
-
-        // lab2rgb(lab, *rgb);
     } else if (editWhatever) {
         editWhatever->fill(0.f);
     }

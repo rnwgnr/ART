@@ -154,21 +154,22 @@ private:
 TextureBoost::TextureBoost () : FoldableToolPanel(this, "epd", M("TP_EPD_LABEL"), true, true, true)
 {
     auto m = ProcEventMapper::getInstance();
-    EvEPDIterations = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_ITERATIONS");
-    EvList = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_LIST");
-    EvParametricMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_PARAMETRICMASK");
-    EvHueMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_HUEMASK");
-    EvChromaticityMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_CHROMATICITYMASK");
-    EvLightnessMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_LIGHTNESSMASK");
-    EvMaskBlur = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_MASKBLUR");
-    EvShowMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_SHOWMASK");
-    EvAreaMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_AREAMASK");
-    EvDeltaEMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_DELTAEMASK");
-    EvContrastThresholdMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK");
-    EvDrawnMask = m->newEvent(DISPLAY, "HISTORY_MSG_EPD_DRAWNMASK");
+    auto EVENT = LUMINANCECURVE;
+    EvEPDIterations = m->newEvent(EVENT, "HISTORY_MSG_EPD_ITERATIONS");
+    EvList = m->newEvent(EVENT, "HISTORY_MSG_EPD_LIST");
+    EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_PARAMETRICMASK");
+    EvHueMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_HUEMASK");
+    EvChromaticityMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_CHROMATICITYMASK");
+    EvLightnessMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_LIGHTNESSMASK");
+    EvMaskBlur = m->newEvent(EVENT, "HISTORY_MSG_EPD_MASKBLUR");
+    EvShowMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_SHOWMASK");
+    EvAreaMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_AREAMASK");
+    EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_DELTAEMASK");
+    EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK");
+    EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_DRAWNMASK");
 
-    EvToolEnabled.set_action(DISPLAY);
-    EvToolReset.set_action(DISPLAY);
+    EvToolEnabled.set_action(EVENT);
+    EvToolReset.set_action(EVENT);
 
     strength = Gtk::manage(new Adjuster (M("TP_EPD_STRENGTH"), -1.0, 2.0, 0.01, 0.5));
     edgeStopping = Gtk::manage(new Adjuster (M("TP_EPD_EDGESTOPPING"), 0.1, 4.0, 0.01, 1.4));

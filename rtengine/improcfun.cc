@@ -888,13 +888,14 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
         break;
     case Stage::STAGE_3:
         STEP_(creativeGradients);
+        stop = stop || STEP_s_(textureBoost);
         STEP_(logEncoding);
         STEP_(saturationVibrance);
         dcpProfile(img, dcpProf, dcpApplyState, multiThread);
         STEP_(toneCurve);
         STEP_(rgbCurves);
         STEP_(labAdjustments);
-        stop = stop || STEP_s_(textureBoost);
+        // stop = stop || STEP_s_(textureBoost);
         if (!stop) { 
             STEP_(softLight);
         }
