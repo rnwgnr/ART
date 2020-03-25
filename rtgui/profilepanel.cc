@@ -632,33 +632,11 @@ void ProfilePanel::paste_clicked (GdkEventButton* event)
     }
     
     ProcParams pp = clipboard.getProcParams();
-    // if (fillMode->get_active()) {
-    //     pp.setDefaults();
-    // }
-
-    const PartialProfile *selected = nullptr;
-    if (isLastSavedSelected()) {
-        selected = lastsaved;
-    } else if (isDefaultSelected()) {
-        selected = defprofile;
-    } else {
-        const ProfileStoreEntry *entry = profiles->getSelectedEntry();        
-        if (entry) {
-            const PartialProfile* partProfile = ProfileStore::getInstance()->getProfile (entry);
-            selected = partProfile;
-        }
-    }
 
     profiles->set_active (addCustomRow());
     currRow = profiles->get_active();
 
     changeconn.block(prevState);
-
-    // Now we have procparams initialized to default if fillMode is on
-    // and paramsedited initialized to default in all cases
-    if (selected) {
-        selected->applyTo(pp);
-    }
 
     if ((event->state & Gdk::CONTROL_MASK) && partialProfileDlg) {
         auto pe = partialProfileDlg->getParamsEdited();

@@ -59,13 +59,11 @@ public:
     }
 
     void setProcParams(const rtengine::procparams::ProcParams &pp)
-
     {
         if (!pparams) {
-            pparams.reset(new rtengine::procparams::ProcParams(pp));
-        } else {
-            *pparams = pp;
+            pparams.reset(new rtengine::procparams::ProcParams());
         }
+        *pparams = pp;
         has_pparams_ = true;
     }
     
