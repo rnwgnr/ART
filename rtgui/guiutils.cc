@@ -845,6 +845,12 @@ void MyExpander::setEnabled(bool isEnabled)
             }
         }
     }
+
+    if (useEnabled) {
+        if (options.toolpanels_disable) {
+            expBox->set_sensitive(enabled);
+        }
+    }        
 }
 
 void MyExpander::setEnabledTooltipMarkup(Glib::ustring tooltipMarkup)
@@ -953,6 +959,10 @@ bool MyExpander::on_enabled_change(GdkEventButton* event)
             statusImage->set(enabledImage->get_surface());
         }
 
+        if (options.toolpanels_disable) {
+            expBox->set_sensitive(enabled);
+        }
+        
         message.emit();
         flushEvent = true;
     }

@@ -181,6 +181,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
 
     Gtk::CheckButton* ckbAutoSaveTpOpen;
     Gtk::Button* btnSaveTpOpenNow;
+    Gtk::CheckButton *ckbTpDisable;
 
     DynamicProfilePanel *dynProfilePanel;
 
