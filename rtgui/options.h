@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -405,6 +406,8 @@ public:
 
     Glib::ustring batch_queue_profile_path;
     bool batch_queue_use_profile;
+
+    bool toolpanels_disable;
 
     Options();
 

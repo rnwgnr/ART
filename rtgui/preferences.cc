@@ -616,6 +616,9 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     setExpandAlignProperties (ckbHideTPVScrollbar, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
     workflowGrid->attach_next_to (*hb4label, *ckbFileBrowserToolbarSingleRow, Gtk::POS_BOTTOM, 1, 1);
     workflowGrid->attach_next_to (*ckbHideTPVScrollbar, *hb4label, Gtk::POS_RIGHT, 1, 1);
+    ckbTpDisable = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_TP_DISABLE") + " (" + M("PREFERENCES_APPLNEXTSTARTUP") + ")"));
+    workflowGrid->attach_next_to(*ckbTpDisable, *ckbHideTPVScrollbar, Gtk::POS_RIGHT, 1, 1);
+    
     ckbAutoSaveTpOpen = Gtk::manage (new Gtk::CheckButton (M ("PREFERENCES_AUTOSAVE_TP_OPEN")));
     workflowGrid->attach_next_to (*ckbAutoSaveTpOpen, *hb4label, Gtk::POS_BOTTOM, 1, 1);
     btnSaveTpOpenNow = Gtk::manage (new Gtk::Button (M ("PREFERENCES_SAVE_TP_OPEN_NOW")));
@@ -1543,12 +1546,14 @@ void Preferences::storePreferences ()
     moptions.rtSettings.xmp_sidecar_style = rtengine::Settings::XmpSidecarStyle(xmpSidecarCombo->get_active_row_number());
     moptions.rtSettings.exiftool_path = exiftoolPath->get_text();
 
+    moptions.toolpanels_disable = ckbTpDisable->get_active();
+
     exportPanel->SaveSettings(moptions);
 }
 
+
 void Preferences::fillPreferences ()
 {
-
     tconn.block (true);
     fconn.block (true);
     cpfconn.block (true);
@@ -1788,6 +1793,9 @@ void Preferences::fillPreferences ()
     metadataSyncCombo->set_active(int(moptions.rtSettings.metadata_xmp_sync));
     xmpSidecarCombo->set_active(int(moptions.rtSettings.xmp_sidecar_style));
     exiftoolPath->set_text(moptions.rtSettings.exiftool_path);
+
+    ckbTpDisable->set_active(moptions.toolpanels_disable);
+
 
     exportPanel->LoadSettings(moptions);
 }

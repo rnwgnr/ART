@@ -614,6 +614,8 @@ void Options::setDefaults()
 
     batch_queue_use_profile = false;
     batch_queue_profile_path = "";
+
+    toolpanels_disable = false;
 }
 
 Options* Options::copyFrom(Options* other)
@@ -1386,6 +1388,10 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("GUI", "CurveBBoxPosition")) {
                     curvebboxpos = keyFile.get_integer("GUI", "CurveBBoxPosition");
                 }
+
+                if (keyFile.has_key("GUI", "ToolPanelsDisable")) {
+                    toolpanels_disable = keyFile.get_boolean("GUI", "ToolPanelsDisable");
+                }
             }
 
             if (keyFile.has_group("Crop Settings")) {
@@ -2085,6 +2091,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean ("GUI", "HideTPVScrollbar", hideTPVScrollbar);
         keyFile.set_boolean ("GUI", "HistogramWorking", rtSettings.HistogramWorking);
         keyFile.set_integer ("GUI", "CurveBBoxPosition", curvebboxpos);
+        keyFile.set_boolean("GUI", "ToolPanelsDisable", toolpanels_disable);
 
         //Glib::ArrayHandle<int> crvopen = crvOpen;
         //keyFile.set_integer_list ("GUI", "CurvePanelsExpanded", crvopen);
