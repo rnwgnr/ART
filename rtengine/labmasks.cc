@@ -226,7 +226,9 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
             ox_(ox), oy_(oy),
             width_(width), height_(height),
             mask_w_(mask_w), mask_h_(mask_h),
-            radius_(-1), neg_(false)
+            radius_(-1),
+            lx_(0), ly_(0),
+            neg_(false)
         {
             curflag_ = 1;
             flag_.resize(mask_w_ * mask_h_, 0);
@@ -263,6 +265,8 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
 
             int cx = width_ * s.x - ox_;
             int cy = height_ * s.y - oy_;
+            lx_ = cx - radius_;
+            ly_ = cy - radius_;
             lx = std::max(cx - radius_, 0);
             ly = std::max(cy - radius_, 0);
             ux = std::min(cx + radius_, mask_w_-1);
@@ -271,11 +275,10 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
 
         bool operator()(int x, int y, float &val)
         {
-            val = buf_[y - ly][x - lx];
+            val = buf_[y - ly_][x - lx_];
             size_t idx = y * mask_w_ + x;
             if (!xisnanf(val) && flag_[idx] != curflag_) {
                 flag_[idx] = curflag_;
-                // flagmods_.push_back(idx);
                 return true;
             }
             return false;
@@ -299,6 +302,8 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         int mask_w_;
         int mask_h_;
         int radius_;
+        int lx_;
+        int ly_;
         bool neg_;
         double hardness_;
         
