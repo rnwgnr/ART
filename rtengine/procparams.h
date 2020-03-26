@@ -685,20 +685,19 @@ struct DenoiseParams {
     bool operator !=(const DenoiseParams& other) const;
 };
 
-// EPD related parameters.
+
 struct TextureBoostParams {
     struct Region {
         double strength;
-        double edgeStopping;
+        double detailThreshold;
         int iterations;
-        double scale;
 
         Region();
         bool operator==(const Region &other) const;
         bool operator!=(const Region &other) const;
     };
 
-    bool   enabled;
+    bool enabled;
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;

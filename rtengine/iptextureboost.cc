@@ -34,7 +34,7 @@ namespace {
 
 void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostParams::Region &pp, double scale, bool multithread)
 {
-    float fradius = pp.edgeStopping * 3.5f / scale;
+    float fradius = pp.detailThreshold * 3.5f / scale;
     int radius = std::max(int(fradius + 0.5f), 1);
     float delta = radius / fradius;
 

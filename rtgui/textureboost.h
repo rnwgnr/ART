@@ -57,7 +57,8 @@ private:
     void regionGet(int idx);
     void regionShow(int idx);
 
-    rtengine::ProcEvent EvEPDIterations;
+    rtengine::ProcEvent EvIterations;
+    rtengine::ProcEvent EvDetailThreshold;
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
     rtengine::ProcEvent EvHueMask;
@@ -77,9 +78,8 @@ private:
     LabMasksPanel *labMasks;
     
     Adjuster *strength;
-    Adjuster *edgeStopping;
+    Adjuster *detailThreshold;
     Adjuster *iterations;
-    Adjuster *scale_deprecated;
     Gtk::VBox *box;
 
     rtengine::procparams::TextureBoostParams initial_params;

@@ -1345,9 +1345,8 @@ bool DenoiseParams::operator !=(const DenoiseParams& other) const
 
 TextureBoostParams::Region::Region():
     strength(0.5),
-    edgeStopping(1.4),
-    iterations(1),
-    scale(0)
+    detailThreshold(1.0),
+    iterations(1)
 {
 }
 
@@ -1355,8 +1354,7 @@ TextureBoostParams::Region::Region():
 bool TextureBoostParams::Region::operator==(const Region &other) const
 {
     return strength == other.strength
-        && edgeStopping == other.edgeStopping
-        && scale == other.scale
+        && detailThreshold == other.detailThreshold
         && iterations == other.iterations;
 }
 
@@ -2826,10 +2824,7 @@ int ProcParams::save(bool save_general,
                 std::string n = j ? std::string("_") + std::to_string(j) : std::string("");
                 auto &r = textureBoost.regions[j];
                 putToKeyfile("TextureBoost", Glib::ustring("Strength") + n, r.strength, keyFile);
-                putToKeyfile("TextureBoost", Glib::ustring("EdgeStopping") + n, r.edgeStopping, keyFile);
-                if (r.scale != 1) {
-                    putToKeyfile("TextureBoost", Glib::ustring("Scale") + n, r.scale, keyFile);
-                }
+                putToKeyfile("TextureBoost", Glib::ustring("DetailThreshold") + n, r.detailThreshold, keyFile);
                 putToKeyfile("TextureBoost", Glib::ustring("Iterations") + n, r.iterations, keyFile);
                 textureBoost.labmasks[j].save(keyFile, "TextureBoost", "", n);
             }
@@ -3687,11 +3682,7 @@ int ProcParams::load(bool load_general,
                     found = true;
                     done = false;
                 }
-                if (assignFromKeyfile(keyFile, tbgroup, Glib::ustring("EdgeStopping") + n, cur.edgeStopping)) {
-                    found = true;
-                    done = false;
-                }
-                if (assignFromKeyfile(keyFile, tbgroup, Glib::ustring("Scale") + n, cur.scale)) {
+                if (assignFromKeyfile(keyFile, tbgroup, Glib::ustring(ppVersion < 1009 ? "EdgeStopping" : "DetailThreshold") + n, cur.detailThreshold)) {
                     found = true;
                     done = false;
                 }
