@@ -764,7 +764,7 @@ HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Dehaze - Show depth map
 HISTORY_MSG_DEHAZE_STRENGTH;Dehaze - Strength
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Dual demosaic - Auto threshold
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dual demosaic - Contrast threshold
-HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - detail threshold
+HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - detail scale
 HISTORY_MSG_EPD_ITERATIONS;TB - iterations
 HISTORY_MSG_EPD_LIST;TB - regions
 HISTORY_MSG_EPD_HUEMASK;TB - H mask
@@ -1553,7 +1553,7 @@ TP_DIRPYRDENOISE_TYPE_9X9;9x9
 TP_DISTORTION_AMOUNT;Amount
 TP_DISTORTION_AUTO_TIP;Automatically corrects lens distortion in raw files by matching it against the embedded JPEG image if one exists and has had its lens disortion auto-corrected by the camera.
 TP_DISTORTION_LABEL;Distortion Correction
-TP_EPD_DETAIL_THRESHOLD;Detail threshold
+TP_EPD_DETAIL_THRESHOLD;Detail scale
 TP_EPD_LABEL;Texture Boost
 TP_EPD_LIST_TITLE;Parameters
 TP_EPD_SCALE;Scale
