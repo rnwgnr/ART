@@ -59,11 +59,33 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     array2D<float> mid(W, H);
     array2D<float> base(W, H);
 
+    const auto scurve =
+        [](float x) -> float
+        {
+            x = std::min(x / 0.05f, 1.f);
+            return x < 0.5f ? 2.f * SQR(x) : 1.f - 2.f * SQR(1.f - x);
+        };
+
 #ifdef __SSE2__
-    vfloat v65535 = F2V(65535.f);
-    vfloat vone = F2V(1.f);
-    vfloat vstrength = F2V(strength);
-    vfloat vstrength2 = F2V(strength2);
+    const vfloat v65535 = F2V(65535.f);
+    const vfloat vone = F2V(1.f);
+    const vfloat vstrength = F2V(strength);
+    const vfloat vstrength2 = F2V(strength2);
+    const vfloat vtwo = F2V(2.f);
+    const vfloat vmid = F2V(0.5f);
+    const vfloat vfloor = F2V(0.05f);
+
+    const auto vscurve =
+        [&](vfloat x) -> vfloat
+        {
+            x = vminf(x / vfloor, vone);
+            vmask m = vmaskf_lt(x, vmid);
+            if (_mm_movemask_ps((vfloat)m)) {
+                return vtwo * SQR(x);
+            } else {
+                return vone - vtwo * SQR(vone - x);
+            }
+        };
 #endif
 
 #ifdef _OPENMP
@@ -99,15 +121,18 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 vfloat vb = LVFU(base[y][x]);
                 vfloat d = (vy - vm) * vstrength;
                 vfloat d2 = (vm - vb) * vstrength2;
-                STVFU((*src)[y][x], vminf(vmaxf(vb + d + d2, ZEROV), vone));
+                vfloat vblend = vscurve(vy);
+                STVFU((*src)[y][x], intp(vblend, vminf(vmaxf(vb + d + d2, ZEROV), vone), vy));
             }
 #endif
             for (; x < W; ++x) {
-                float d = (*src)[y][x] - mid[y][x];
+                float v = (*src)[y][x];
+                float d = v - mid[y][x];
                 d *= strength;
                 float d2 = mid[y][x] - base[y][x];
                 d2 *= strength2;
-                (*src)[y][x] = LIM01(base[y][x] + d + d2);
+                float blend = scurve(v);
+                (*src)[y][x] = intp(blend, LIM01(base[y][x] + d + d2), v);
             }
         }
     }
