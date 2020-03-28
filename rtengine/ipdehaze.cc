@@ -241,21 +241,48 @@ void extract_channels(Imagefloat *img, array2D<float> &r, array2D<float> &g, arr
 
 void ImProcFunctions::dehaze(Imagefloat *img)
 {
+    PlanarWhateverData<float> *editWhatever = nullptr;
+    EditUniqueID editID = pipetteBuffer ? pipetteBuffer->getEditID() : EUID_None;
+
+    if (editID == EUID_DehazeStrength && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_SINGLEPLANE_FLOAT) {
+        editWhatever = pipetteBuffer->getSinglePlaneBuffer();
+    }
+
     if (!params->dehaze.enabled) {
+        if (editWhatever) {
+            editWhatever->fill(0.f);
+        }
         return;
     }
 
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
+    
     img->setMode(Imagefloat::Mode::RGB, multiThread);
     const float maxchan = normalize(img, multiThread);
     
     const int W = img->getWidth();
     const int H = img->getHeight();
-    const float strength = LIM01(float(std::abs(params->dehaze.strength)) / 100.f * 0.9f);
-    const bool add_haze = params->dehaze.strength < 0;
 
-    if (options.rtSettings.verbose) {
-        std::cout << "dehaze: strength = " << strength << std::endl;
+    if (editWhatever) {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float r = img->r(y, x), g = img->g(y, x), b = img->b(y, x);
+                float Y = Color::rgbLuminance(r, g, b, ws) * maxchan;
+                float s = Color::gamma2curve[Y];
+                editWhatever->v(y, x) = LIM01(s / 65535.f);
+            }
+        }
     }
+    
+    // const float strength = LIM01(float(std::abs(params->dehaze.strength)) / 100.f * 0.9f);
+    // const bool add_haze = params->dehaze.strength < 0;
+
+    // if (options.rtSettings.verbose) {
+    //     std::cout << "dehaze: strength = " << strength << std::endl;
+    // }
 
     array2D<float> dark(W, H);
 
@@ -310,12 +337,24 @@ void ImProcFunctions::dehaze(Imagefloat *img)
 
     DEBUG_DUMP(t_tilde);
 
+    array2D<bool> add_haze(W, H);
+
+    FlatCurve strength_curve(params->dehaze.strength, false);
+    strength_curve.setIdentityValue(0.5);
+    LUTf strength(65536);
+    for (int i = 0; i < 65536; ++i) {
+        strength[i] = (strength_curve.getVal(Color::gamma2curve[i] / 65535.f) - 0.5f) * 0.9f;
+    }
+
 #ifdef _OPENMP
     #pragma omp parallel for if (multiThread)
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            dark[y][x] = 1.f - strength * dark[y][x];
+            float Y = Color::rgbLuminance(img->r(y, x), img->g(y, x), img->b(y, x), ws) * maxchan;
+            float s = strength[Y];
+            add_haze[y][x] = s < 0;
+            dark[y][x] = 1.f - std::abs(s) * dark[y][x];
         }
     }
 
@@ -338,7 +377,6 @@ void ImProcFunctions::dehaze(Imagefloat *img)
     const float teps = 1e-6f;
     const float t0 = max(teps, std::exp(depth * max_t));
     const bool luminance = params->dehaze.luminance;
-    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
     const float ambientY = Color::rgbLuminance(ambient[0], ambient[1], ambient[2], ws);
 #ifdef _OPENMP
     #pragma omp parallel for if (multiThread)
@@ -367,7 +405,7 @@ void ImProcFunctions::dehaze(Imagefloat *img)
                 float Y = Color::rgbLuminance(rgb[0], rgb[1], rgb[2], ws);
                 float YY = (Y - ambientY) / mt + ambientY;
                 if (Y > 1e-5f) {
-                    if (add_haze) {
+                    if (add_haze[y][x]) {
                         YY = Y + Y - YY;
                     }
                     float f = YY / Y;
@@ -380,7 +418,7 @@ void ImProcFunctions::dehaze(Imagefloat *img)
                 float g = (rgb[1] - ambient[1]) / mt + ambient[1];
                 float b = (rgb[2] - ambient[2]) / mt + ambient[2];
 
-                if (add_haze) {
+                if (add_haze[y][x]) {
                     ir += (ir - r);
                     ig += (ig - g);
                     ib += (ib - b);

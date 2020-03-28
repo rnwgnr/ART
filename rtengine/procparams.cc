@@ -2016,7 +2016,17 @@ bool SoftLightParams::operator !=(const SoftLightParams& other) const
 
 DehazeParams::DehazeParams() :
     enabled(false),
-    strength(50),
+    strength{
+        FCT_MinMaxCPoints,
+        0.0,
+        0.75,
+        0.0,
+        0.0,
+        1.0,
+        0.75,
+        0.0,
+        0.0
+    },
     showDepthMap(false),
     depth(25),
     luminance(false)
@@ -3986,7 +3996,25 @@ int ProcParams::load(bool load_general,
 
         if (keyFile.has_group("Dehaze") && RELEVANT_(dehaze)) {
             assignFromKeyfile(keyFile, "Dehaze", "Enabled", dehaze.enabled);
-            assignFromKeyfile(keyFile, "Dehaze", "Strength", dehaze.strength);
+            if (ppVersion < 1010) {
+                int s = 0;
+                if (assignFromKeyfile(keyFile, "Dehaze", "Strength", s)) {
+                    float v = 0.5 + float(s) / 200.0;
+                    dehaze.strength = {
+                        FCT_MinMaxCPoints,
+                        0.0,
+                        v,
+                        0.0,
+                        0.0,
+                        1.0,
+                        v,
+                        0.0,
+                        0.0       
+                    };
+                }
+            } else {
+                assignFromKeyfile(keyFile, "Dehaze", "Strength", dehaze.strength);
+            }
             assignFromKeyfile(keyFile, "Dehaze", "ShowDepthMap", dehaze.showDepthMap);
             assignFromKeyfile(keyFile, "Dehaze", "Depth", dehaze.depth);
             assignFromKeyfile(keyFile, "Dehaze", "Luminance", dehaze.luminance);

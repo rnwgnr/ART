@@ -24,6 +24,7 @@
 enum EditUniqueID {
     EUID_None,  /// special value (default)
 
+    EUID_DehazeStrength,
     EUID_ToneCurve1,
     EUID_ToneCurve2,
     EUID_ToneCurveSaturation,

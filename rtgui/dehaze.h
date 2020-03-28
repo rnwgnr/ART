@@ -22,11 +22,15 @@
 #include <gtkmm.h>
 #include "adjuster.h"
 #include "toolpanel.h"
+#include "curveeditor.h"
+#include "curveeditorgroup.h"
+#include "mycurve.h"
 
-class Dehaze: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel
+class Dehaze: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel, public CurveListener
 {
 private:
-    Adjuster *strength;
+    FlatCurveEditor *strength;
+    //Adjuster *strength;
     Adjuster *depth;
     Gtk::CheckButton *showDepthMap;
     MyComboBoxText *luminance;
@@ -50,8 +54,12 @@ public:
     void enabledChanged() override;
     void showDepthMapChanged();
     void luminanceChanged();
-    void adjusterAutoToggled(Adjuster* a, bool newval) override {}
+    void adjusterAutoToggled(Adjuster *a, bool newval) override {}
+    void curveChanged() override;
+    void autoOpenCurve() override;
+    void setEditProvider(EditDataProvider *provider) override;
 
     void toolReset(bool to_initial) override;
+
 };
 

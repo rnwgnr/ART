@@ -1098,7 +1098,7 @@ struct SoftLightParams {
 
 struct DehazeParams {
     bool enabled;
-    int strength;
+    std::vector<double> strength;
     bool showDepthMap;
     int depth;
     bool luminance;
