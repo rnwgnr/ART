@@ -343,7 +343,7 @@ void ImProcFunctions::dehaze(Imagefloat *img)
     strength_curve.setIdentityValue(0.5);
     LUTf strength(65536);
     for (int i = 0; i < 65536; ++i) {
-        strength[i] = (strength_curve.getVal(Color::gamma2curve[i] / 65535.f) - 0.5f) * 0.9f;
+        strength[i] = (strength_curve.getVal(Color::gamma2curve[i] / 65535.f) - 0.5f) * 1.3f;
     }
 
 #ifdef _OPENMP

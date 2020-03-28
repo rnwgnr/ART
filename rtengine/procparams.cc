@@ -3999,7 +3999,7 @@ int ProcParams::load(bool load_general,
             if (ppVersion < 1010) {
                 int s = 0;
                 if (assignFromKeyfile(keyFile, "Dehaze", "Strength", s)) {
-                    float v = 0.5 + float(s) / 200.0;
+                    float v = 0.5f + LIM((float(s) / 200.f) * 1.38f, -0.5f, 0.5f);
                     dehaze.strength = {
                         FCT_MinMaxCPoints,
                         0.0,
