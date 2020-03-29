@@ -1882,6 +1882,8 @@ TP_RAW_SENSOR_BAYER_LABEL;Sensor with Bayer Matrix
 TP_RAW_SENSOR_XTRANS_DMETHOD_TOOLTIP;3-pass gives best results (recommended for low ISO images).\n1-pass is almost undistinguishable from 3-pass for high ISO images and is faster.\n+fast gives less artifacts in flat areas
 TP_RAW_SENSOR_XTRANS_LABEL;Sensor with X-Trans Matrix
 TP_RAW_VNG4;VNG4
+TP_RESET_DEFAULT;Reset to default
+TP_RESET_SAVED;Reset to last saved
 TP_RESIZE_ALLOW_UPSCALING;Allow Upscaling
 TP_RESIZE_APPLIESTO;Applies to:
 TP_RESIZE_ALLOW_UPSCALING;Allow Upscaling
