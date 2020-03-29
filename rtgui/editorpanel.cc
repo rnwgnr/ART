@@ -1702,6 +1702,7 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     return true;
 
                 case GDK_KEY_Z:
+                case GDK_KEY_y:
                     history->redo ();
                     return true;
 
