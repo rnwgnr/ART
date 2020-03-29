@@ -281,7 +281,7 @@ public:
         toggle_ = Gtk::manage(new Gtk::ToggleButton());
         toggle_->add(*Gtk::manage(new RTImage("brush.png")));
         set_btn_style(toggle_);
-        toggle_->set_tooltip_text(M("TP_LABMASKS_DRAWNMASK_TOGGLE_TIP"));
+        toggle_->set_tooltip_markup(M("TP_LABMASKS_DRAWNMASK_TOGGLE_TIP"));
         toggle_->signal_toggled().connect(sigc::mem_fun(this, &DrawnMaskPanel::on_toggled));
 
         reset_ = Gtk::manage(new Gtk::Button());
