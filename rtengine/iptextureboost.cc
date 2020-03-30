@@ -68,7 +68,6 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 
 #ifdef __SSE2__
     const vfloat v65535 = F2V(65535.f);
-    const vfloat vone = F2V(1.f);
     const vfloat vstrength = F2V(strength);
     const vfloat vstrength2 = F2V(strength2);
 
@@ -118,7 +117,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 vfloat d2 = (vm - vb) * vstrength2;
                 vfloat vblend;
                 vscurve((*src)[y] + x, vblend);
-                STVFU((*src)[y][x], intp(vblend, vminf(vmaxf(vb + d + d2, ZEROV), vone), vy));
+                STVFU((*src)[y][x], intp(vblend, vmaxf(vb + d + d2, ZEROV), vy));
             }
 #endif
             for (; x < W; ++x) {
@@ -128,7 +127,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 float d2 = mid[y][x] - base[y][x];
                 d2 *= strength2;
                 float blend = scurve(v);
-                (*src)[y][x] = intp(blend, LIM01(base[y][x] + d + d2), v);
+                (*src)[y][x] = intp(blend, std::max(base[y][x] + d + d2, 0.f), v);
             }
         }
     }
