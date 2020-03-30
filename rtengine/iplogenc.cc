@@ -101,7 +101,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
 
     const float gray = params->logenc.sourceGray / 100.f;
     const float shadows_range = params->logenc.blackEv;
-    const float dynamic_range = params->logenc.whiteEv - params->logenc.blackEv;
+    const float dynamic_range = std::max(params->logenc.whiteEv - params->logenc.blackEv, 0.5);
     const float noise = pow_F(2.f, -16.f);
     const float log2 = xlogf(2.f);
     const float b = params->logenc.targetGray > 1 && params->logenc.targetGray < 100 && dynamic_range > 0 ? find_gray(std::abs(params->logenc.blackEv) / dynamic_range, params->logenc.targetGray / 100.f) : 0.f;
