@@ -343,10 +343,10 @@ HISTORY_MSG_97;L*a*b* - Courbe b*
 HISTORY_MSG_98;Méthode de dématriçage
 HISTORY_MSG_99;Filtrage des pixels chauds
 HISTORY_MSG_100;S&amp;V - Saturation
-HISTORY_MSG_101;TSV - Teinte
-HISTORY_MSG_102;TSV - Saturation
-HISTORY_MSG_103;TSV - Valeur
-HISTORY_MSG_104;Égaliseur TSV
+HISTORY_MSG_101;Égaliseur couleur - Teinte
+HISTORY_MSG_102;Égaliseur couleur - Saturation
+HISTORY_MSG_103;Égaliseur couleur - Luminosité
+HISTORY_MSG_104;Égaliseur couleur
 HISTORY_MSG_105;Défrangeage
 HISTORY_MSG_106;Défrangeage - Rayon
 HISTORY_MSG_107;Défrangeage - Seuil
@@ -400,10 +400,8 @@ HISTORY_MSG_155;Vib. - Éviter dérive de teinte
 HISTORY_MSG_156;Vib. - Lier Pastels/Saturés
 HISTORY_MSG_157;Vib. - Seuil Pastels/Saturés
 HISTORY_MSG_158;RT - Force
-HISTORY_MSG_159;RT - Arrêt des bords
 HISTORY_MSG_160;RT - Échelle
-HISTORY_MSG_161;RT - Itérations de la pondération
-HISTORY_MSG_162;Renforcement de la texture
+HISTORY_MSG_162;Amplification de la texture
 HISTORY_MSG_163;Courbes RVB - Rouge
 HISTORY_MSG_164;Courbes RVB - Vert
 HISTORY_MSG_165;Courbes RVB - Bleu
@@ -766,6 +764,7 @@ HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;EB - Montrer carte de profondeur
 HISTORY_MSG_DEHAZE_STRENGTH;EB - Force
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Double dématriçage - Seuil auto.
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Double dématriçage - Seuil de contraste
+HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - échelle détails
 HISTORY_MSG_EPD_ITERATIONS;TB - itérations
 HISTORY_MSG_EPD_LIST;TM - Régions
 HISTORY_MSG_EPD_HUEMASK;TM - Masque T
@@ -786,7 +785,7 @@ HISTORY_MSG_GRAIN_ISO;Grain d'émulsion - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Grain d'émulsion - Force
 HISTORY_MSG_GRAIN_SCALE;Grain d'émulsion - Echelle
 HISTORY_MSG_HISTMATCHING;Courbe tonale auto. adaptée
-HISTORY_MSG_HSL_SMOOTHING;HSL - Lissage
+HISTORY_MSG_HSL_SMOOTHING;Égaliseur couleur - Lissage
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Profil de sortie - Primaires
 HISTORY_MSG_ICM_OUTPUT_TEMP;Profil de sortie - Illuminant D ICC-v4
 HISTORY_MSG_ICM_OUTPUT_TYPE;Profil de sortie - Type
@@ -1092,7 +1091,7 @@ PARTIALPASTE_FLATFIELDCLIPCONTROL;Contrôle de l'écrêtage du Champs Uniforme
 PARTIALPASTE_FLATFIELDFILE;Image de Champ Uniforme
 PARTIALPASTE_GRADIENT;Filtre Dégradé
 PARTIALPASTE_GRAIN;Grain d'émulsion
-PARTIALPASTE_HSLEQUALIZER;Égaliseur TSV
+PARTIALPASTE_HSLEQUALIZER;Égaliseur couleur
 PARTIALPASTE_ICMSETTINGS;Gestion de la colorimétrie
 PARTIALPASTE_IMPULSEDENOISE;Réduction du Bruit d'Impulsion
 PARTIALPASTE_IPTCINFO;Infos IPTC
@@ -1131,7 +1130,7 @@ PARTIALPASTE_SHARPENMICRO;Microcontraste
 PARTIALPASTE_SMOOTHING;Lissage
 PARTIALPASTE_SOFTLIGHT;Lumière Douce
 PARTIALPASTE_TM_FATTAL;Compression de la Plage Dynamique
-PARTIALPASTE_TM_LOG;Encodage Log
+PARTIALPASTE_TM_LOG;Mappage tonal Log
 PARTIALPASTE_TONE_EQUALIZER;Egaliseur tonal
 PARTIALPASTE_VIBRANCE;Vibrance
 PARTIALPASTE_VIGNETTING;Correction du Vignetage
@@ -1305,6 +1304,7 @@ PREFERENCES_THUMBNAIL_INSPECTOR_RAW_IF_NO_JPEG_FULLSIZE;Image JPEG incluse si pl
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW_FILM_CURVE;Utilise une courbe film standard pour le rendu raw
 PREFERENCES_THUMBNAIL_RATING;Charger/Enregister le classement des vignettes depuis/vers les fichiers XMP
 PREFERENCES_TP_LABEL;Panneau Outils :
+PREFERENCES_TP_DISABLE;Griser les outils inactifs
 PREFERENCES_TP_VSCROLLBAR;Cacher la barre de défilement vertical
 PREFERENCES_USEBUNDLEDPROFILES;Utiliser les profils de traitement fournis
 PREFERENCES_WORKFLOW;Agencement
@@ -1553,8 +1553,8 @@ TP_DIRPYRDENOISE_TYPE_9X9;9×9
 TP_DISTORTION_AMOUNT;Quantité
 TP_DISTORTION_AUTO_TIP;Corrige automatiquement la distortion optique dans les fichiers raw en opérant une mise en correspondance avec le fichier JPEG incorporé, si il existe, et sur lequel la correction de la distortion a été appliqué par le boitier.
 TP_DISTORTION_LABEL;Correction de la distorsion
-TP_EPD_EDGESTOPPING;Arrêt des bords
-TP_EPD_LABEL;Amplifier la Texture
+TP_EPD_DETAIL_THRESHOLD;Échelle des détails
+TP_EPD_LABEL;Amplification de la Texture
 TP_EPD_LIST_TITLE;Paramètres
 TP_EPD_SCALE;Échelle
 TP_EPD_ITERATIONS;Itérations
@@ -1622,7 +1622,7 @@ TP_HLREC_OFF;Inactif
 TP_HLREC_LABEL;Reconstruction des Hautes Lumières
 TP_HSVEQUALIZER_CHANNEL;Canal
 TP_HSVEQUALIZER_HUE;T
-TP_HSVEQUALIZER_LABEL;Egaliseur TSL
+TP_HSVEQUALIZER_LABEL;Égaliseur de couleurs
 TP_HSVEQUALIZER_SAT;S
 TP_HSVEQUALIZER_VAL;L
 TP_HSL_SMOOTHING;Lissage
@@ -1715,7 +1715,7 @@ TP_LABMASKS_DELTAE_PICK;Choisir
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Pondération dans le calcul du ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Sélectionne des régions de couleurs similaires\n(selon la définition de la métrique CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Masque au pinceau
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Basculer vers le dessin sur image
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Basculer en mode tracé avec le pinceau.\nMaintenir <b>Shift</b> pour basculer temporairement en "mode effacement".\nUtiliser <b>Ctrl+scroll wheel</b> pour changer le rayon du pinceau, <b>Ctrl+Shift+scroll wheel</b> pour changer la dureté du pinceau,\net <b>Ctrl+click</b> pour commencer de nouveaux tracés sans changer les paramètres \n(de sorte que des tracés multiples sur la même zone s'additionnent).
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Paramètres du pinceau
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Effacer tous les tracés
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Eliminer le dernier groupe de tracés
@@ -1882,6 +1882,8 @@ TP_RAW_SENSOR_BAYER_LABEL;Capteur à matrice Bayer
 TP_RAW_SENSOR_XTRANS_DMETHOD_TOOLTIP;"3 passes" donne les meilleurs résultats (recommendé pour les images à faible ISO).\n"1 passe" est presque identique à "3 passes" pour les images à ISO élevé, et est plus rapide.
 TP_RAW_SENSOR_XTRANS_LABEL;Capteur à matrice X-Trans
 TP_RAW_VNG4;VNG4
+TP_RESET_DEFAULT;Réinitialiser à la valeur par défaut
+TP_RESET_SAVED;réinitialiser à la dernière valeur sauvegardée
 TP_RESIZE_ALLOW_UPSCALING;Autoriser l'agrandissement
 TP_RESIZE_APPLIESTO;S'applique à :
 TP_RESIZE_ALLOW_UPSCALING;Autoriser l'agrandissement
@@ -1950,7 +1952,7 @@ TP_TONE_EQUALIZER_BAND_2;Tons Moyens
 TP_TONE_EQUALIZER_BAND_3;Hautes lumières
 TP_TONE_EQUALIZER_BAND_4;Blancs
 TP_TONE_EQUALIZER_DETAIL;Régularisation
-TP_TONE_EQUALIZER_LABEL;Egaliseur Tonal
+TP_TONE_EQUALIZER_LABEL;Égaliseur Tonal
 TP_VIGNETTING_AMOUNT;Quantité
 TP_VIGNETTING_CENTER_X;Centre X
 TP_VIGNETTING_CENTER_Y;Centre Y
