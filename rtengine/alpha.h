@@ -16,49 +16,43 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef _ALPHA_H_
+#define _ALPHA_H_
 
-#pragma once
+#include <gtkmm.h>
+#include <assert.h>
 
-class PreviewProps
+#define CHECK_BOUNDS 0
+
+namespace rtengine
 {
-public:
-    PreviewProps(int _x, int _y, int _width, int _height, int _skip);
 
-    int getX() const;
-    int getY() const;
+/// Alpha channel class (8 bits)
+class Alpha
+{
+protected:
+    Cairo::RefPtr<Cairo::ImageSurface> surface;
+
+public:
+    Alpha ();
+    Alpha (int width, int height);
+    //~Alpha ();
+
+    void setSize (int width, int height);
     int getWidth() const;
     int getHeight() const;
-    int getSkip() const;
-    void set (int x, int y, int w, int h, int skip);
 
-private:
-    int x;
-    int y;
-    int width;
-    int height;
-    int skip;
+    Cairo::RefPtr<Cairo::ImageSurface> getSurface () const;
+
+    // TODO: to make the editing faster, we should add an iterator class
+
+    // Will send back the start of a row
+    unsigned char* operator () (unsigned row) const;
+    // Will send back a value at a given row, col position
+    unsigned char& operator () (unsigned row, unsigned col);
+    unsigned char operator () (unsigned row, unsigned col) const;
 };
 
-/*
- * Description of an image dimension, with getter
- */
-class ImageDimensions
-{
-public:
-    ImageDimensions();
+}
 
-    int getWidth() const
-    {
-        return width;
-    }
-    int getHeight() const
-    {
-        return height;
-    }
-
-    void transform(const PreviewProps& pp, int tran, int& sx1, int& sy1, int& sx2, int& sy2) const;
-
-protected:
-    int width;
-    int height;
-};
+#endif

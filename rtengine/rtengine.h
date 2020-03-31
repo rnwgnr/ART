@@ -34,6 +34,7 @@
 #include "../rtgui/editid.h"
 #include "settings.h"
 #include "LUT.h"
+#include "tweakoperator.h"
 /**
  * @file
  * This file contains the main functionality of the RawTherapee engine.
@@ -389,6 +390,14 @@ public:
     /** Returns the initial image corresponding to the image processor.
       * @return the initial image corresponding to the image processor */
     virtual InitialImage* getInitialImage () = 0;
+    /** Set the TweakOperator
+      * @param tOperator is a pointer to the object that will alter the ProcParams for the rendering */
+    virtual void        setTweakOperator (TweakOperator *tOperator) = 0;
+    /** Unset the TweakOperator
+      * @param tOperator is a pointer to the object that were altering the ProcParams for the rendering
+      *        It will only unset the tweak operator if tOperator is the same than the currently set operator.
+      *        If it doesn't match, the currently set TweakOperator will remain set. */
+    virtual void        unsetTweakOperator (TweakOperator *tOperator) = 0;
     /** Returns the current processing parameters.
       * @param dst is the location where the image processing parameters are copied (it is assumed that the memory is allocated by the caller) */
     virtual void        getParams (procparams::ProcParams* dst) = 0;

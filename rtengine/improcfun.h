@@ -196,6 +196,9 @@ public:
     DeltaEData deltaE;
     int setDeltaEData(EditUniqueID id, double x, double y);
 
+    // Spot Removal Tool
+    void removeSpots (rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
+
 private:
     cmsHTRANSFORM monitorTransform;
     std::unique_ptr<GamutWarning> gamutWarning;

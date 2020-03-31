@@ -24,6 +24,7 @@
 #include <glibmm.h>
 #include "../rtengine/rtengine.h"
 #include "../rtengine/procparams.h"
+#include "../rtengine/tweakoperator.h"
 #include "guiutils.h"
 #include "multilangmgr.h"
 #include "paramsedited.h"
@@ -37,7 +38,14 @@ class ToolPanelListener
 {
 public:
     virtual ~ToolPanelListener() = default;
+    /// @brief Ask to refresh the preview not triggered by a parameter change (e.g. 'On Preview' editing).
+    virtual void refreshPreview(const rtengine::ProcEvent& event) = 0;
+    /// @brief Used to notify all listeners that a parameters has been effectively changed
     virtual void panelChanged(const rtengine::ProcEvent& event, const Glib::ustring& descr) = 0;
+    /// @brief Set the TweakOperator to the StagedImageProcessor, to let some tool enter into special modes
+    virtual void setTweakOperator (rtengine::TweakOperator *tOperator) = 0;
+    /// @brief Unset the TweakOperator to the StagedImageProcessor
+    virtual void unsetTweakOperator (rtengine::TweakOperator *tOperator) = 0;
 };
 
 /// @brief This class control the space around the group of tools inside a tab, as well as the space separating each tool. */
@@ -58,10 +66,12 @@ protected:
     Glib::ustring toolName;
     ToolPanelListener* listener;
     ToolPanelListener* tmp;
+    bool batchMode;  // True if the ToolPanel is used in Batch mode
+    bool multiImage; // True if more than one image are being edited at the same time (also imply that batchMode=true), false otherwise
     bool need100Percent;
 
 public:
-    ToolPanel(Glib::ustring toolName = "", bool need11 = false) : toolName(toolName), listener(nullptr), tmp(nullptr), need100Percent(need11) {}
+    ToolPanel(Glib::ustring toolName = "", bool need11 = false) : toolName(toolName), listener(nullptr), tmp(nullptr), batchMode(false), multiImage(false), need100Percent(need11) {}
     virtual ~ToolPanel() {}
 
     virtual void setParent(Gtk::Box* parent) {}
@@ -73,6 +83,8 @@ public:
     virtual void setEditProvider(EditDataProvider *provider) {}
     virtual void read(const rtengine::procparams::ProcParams *pp) {}
     virtual void write(rtengine::procparams::ProcParams *pp) {}
+//    virtual void read(const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr) {}
+//    virtual void write(rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr) {}
     virtual void trimValues(rtengine::procparams::ProcParams *pp) {}
     virtual void setDefaults(const rtengine::procparams::ProcParams *defParams) {}
     virtual void autoOpenCurve() {}
@@ -104,6 +116,10 @@ public:
     }
 
     virtual Glib::ustring getToolName() { return toolName; }
+virtual void setBatchMode    (bool batchMode)
+    {
+        this->batchMode = batchMode;
+    }
 
     virtual PParamsChangeListener *getPParamsChangeListener() { return nullptr; }
 };

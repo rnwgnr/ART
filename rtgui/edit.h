@@ -287,6 +287,7 @@ public:
         F_VISIBLE     = 1 << 0, /// true if the geometry have to be drawn on the visible layer
         F_HOVERABLE   = 1 << 1, /// true if the geometry have to be drawn on the "mouse over" layer
         F_AUTO_COLOR  = 1 << 2, /// true if the color depend on the state value, not the color field above
+        F_DASHED      = 1 << 3, /// true if the geometry have to be drawn as a dash line
     };
 
     /// @brief Key point of the image's rectangle that is used to locate the icon copy to the target point:
@@ -303,6 +304,7 @@ public:
     };
 
 protected:
+    static const std::vector<double> dash;
     RGBColor innerLineColor;
     RGBColor outerLineColor;
     short flags;
@@ -328,6 +330,8 @@ public:
     void setVisible (bool visible);
     bool isHoverable ();
     void setHoverable (bool visible);
+    bool isDashed ();
+    void setDashed (bool dashed);
 
 
     // setActive will enable/disable the visible and hoverable flags in one shot!
@@ -473,7 +477,7 @@ public:
     virtual ~EditSubscriber () {}
 
     void               setEditProvider(EditDataProvider *provider);
-    EditDataProvider*  getEditProvider ();
+    EditDataProvider*  getEditProvider () const;
     void               setEditID(EditUniqueID ID, BufferType buffType);
     bool               isCurrentSubscriber();
     virtual void       subscribe();
@@ -488,6 +492,12 @@ public:
     /** @brief Get the cursor to be displayed when above handles
     @param objectID object currently "hovered" */
     virtual CursorShape getCursor (const int objectID);
+
+    /** @brief Get the cursor to be displayed when above handles
+    @param objectID object currently "hovered"
+    @param xPos X cursor position in image space
+    @param yPos Y cursor position in image space */
+    virtual CursorShape getCursor (int objectID, int xPos, int yPos) const;
 
     /** @brief Triggered when the mouse is moving over an object
     This method is also triggered when the cursor is moving over the image in ET_PIPETTE mode
@@ -602,6 +612,9 @@ public:
     virtual void        subscribe(EditSubscriber *subscriber);
     virtual void        unsubscribe();         /// Occurs when the subscriber has been switched off first
     virtual void        switchOffEditMode ();  /// Occurs when the user want to stop the editing mode
+    int getObject() const;
+    void setObject(int newObject);
+
     virtual CursorShape getCursor(int objectID);
     int                 getPipetteRectSize ();
     EditSubscriber*     getCurrSubscriber();
@@ -726,7 +739,19 @@ inline void Geometry::setActive (bool active) {
     }
 }
 
-inline EditDataProvider* EditSubscriber::getEditProvider () {
+inline bool Geometry::isDashed () {
+    return flags & F_DASHED;
+}
+
+inline void Geometry::setDashed (bool dashed) {
+    if (dashed) {
+        flags |= F_DASHED;
+    } else {
+        flags &= ~F_DASHED;
+    }
+}
+
+inline EditDataProvider* EditSubscriber::getEditProvider () const {
     return provider;
 }
 

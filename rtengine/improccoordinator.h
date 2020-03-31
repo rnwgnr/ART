@@ -56,6 +56,7 @@ class ImProcCoordinator : public StagedImageProcessor
 protected:
     Imagefloat *orig_prev;
     Imagefloat *oprevi;
+    Imagefloat *spotprev;
     Imagefloat *bufs_[3];
     Imagefloat *drcomp_11_dcrop_cache; // global cache for dynamicRangeCompression used in 1:1 detail windows (except when denoise is active)
     Image8 *previmg;  // displayed image in monitor color space, showing the output profile as well (soft-proofing enabled, which then correspond to workimg) or not
@@ -120,15 +121,20 @@ protected:
     bool resultValid;
 
     MyMutex minit;  // to gain mutually exclusive access to ... to what exactly?
+    void backupParams();
+    void restoreParams();
 
     void progress (Glib::ustring str, int pr);
     void reallocAll ();
+    void allocCache (Imagefloat* &imgfloat);
     void updateLRGBHistograms();
     void setScale (int prevscale);
     void updatePreviewImage (int todo, bool panningRelatedChange);
 
     MyMutex mProcessing;
     ProcParams params;
+    ProcParams paramsBackup;
+    TweakOperator* tweakOperator;
 
     // for optimization purpose, the output profile, output rendering intent and
     // output BPC will trigger a regeneration of the profile on parameter change only
@@ -198,6 +204,8 @@ public:
     }
 
     DetailedCrop* createCrop  (::EditDataProvider *editDataProvider, bool isDetailWindow) override;
+    void setTweakOperator (TweakOperator *tOperator) override;
+    void unsetTweakOperator (TweakOperator *tOperator) override;
 
     bool getAutoWB   (double& temp, double& green, double equal) override;
     void getCamWB    (double& temp, double& green) override;

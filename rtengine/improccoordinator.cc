@@ -41,6 +41,8 @@ extern const Settings* settings;
 ImProcCoordinator::ImProcCoordinator():
     orig_prev(nullptr),
     oprevi(nullptr),
+    spotprev(nullptr),
+
     drcomp_11_dcrop_cache(nullptr),
     previmg(nullptr),
     workimg(nullptr),
@@ -87,6 +89,7 @@ ImProcCoordinator::ImProcCoordinator():
     autoLogListener(nullptr),
     autoRadiusListener(nullptr),
     resultValid(false),
+    tweakOperator(nullptr),
     lastOutputProfile("BADFOOD"),
     lastOutputIntent(RI__COUNT),
     lastOutputBPC(false),
@@ -152,6 +155,16 @@ DetailedCrop* ImProcCoordinator::createCrop(::EditDataProvider *editDataProvider
 {
 
     return new Crop(this, editDataProvider, isDetailWindow);
+}
+void ImProcCoordinator::backupParams()
+{
+    paramsBackup.setDefaults();
+    paramsBackup = params;
+}
+
+void ImProcCoordinator::restoreParams()
+{
+    params = paramsBackup;
 }
 
 
@@ -371,7 +384,25 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         }
     
         oprevi = orig_prev;
-    
+    if (todo & M_SPOT) {
+            if (params.spot.enabled && !params.spot.entries.empty()) {
+                allocCache(spotprev);
+                orig_prev->copyData(spotprev);
+                PreviewProps pp(0, 0, fw, fh, scale);
+                ipf.removeSpots(spotprev, imgsrc, params.spot.entries, pp, currWB, &params.icm, tr);
+            } else {
+                if (spotprev) {
+                    delete spotprev;
+                    spotprev = nullptr;
+                }
+            }
+        }
+        if (spotprev) {
+            if (oprevi == orig_prev) {
+                oprevi = new Imagefloat(pW, pH);
+            }
+            spotprev->copyData(oprevi);
+        }
         progress("Rotate / Distortion...", 100 * readyphase / numofphases);
         // Remove transformation if unneeded
         if (ipf.needsTransform()) {
@@ -517,12 +548,29 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 
     
 }
+void ImProcCoordinator::setTweakOperator (TweakOperator *tOperator)
+{
+    if (tOperator) {
+        tweakOperator = tOperator;
+    }
+}
+
+void ImProcCoordinator::unsetTweakOperator (TweakOperator *tOperator)
+{
+    if (tOperator && tOperator == tweakOperator) {
+        tweakOperator = nullptr;
+    }
+}
 
 
 void ImProcCoordinator::freeAll()
 {
 
     if (allocated) {
+        if (spotprev && spotprev != oprevi) {
+            delete spotprev;
+        }
+        spotprev = nullptr;
         if (orig_prev != oprevi) {
             delete oprevi;
         }
@@ -548,6 +596,15 @@ void ImProcCoordinator::freeAll()
     }
 
     allocated = false;
+}
+
+void ImProcCoordinator::allocCache (Imagefloat* &imgfloat)
+{
+    if (imgfloat == nullptr) {
+        imgfloat = new Imagefloat(pW, pH);
+    } else {
+        imgfloat->allocate(pW, pH);
+    }
 }
 
 /** @brief Handles image buffer (re)allocation and trigger sizeChanged of SizeListener[s]
@@ -1024,6 +1081,16 @@ void ImProcCoordinator::process()
         params = nextParams;
         int change = changeSinceLast;
         changeSinceLast = 0;
+        if (tweakOperator) {
+            // TWEAKING THE PROCPARAMS FOR THE SPOT ADJUSTMENT MODE
+            backupParams();
+            tweakOperator->tweakParams(params);
+        } 
+        /* TODODANCAT see if this is needed here anymore
+        else if (paramsBackup) {
+            paramsBackup.release();
+        }
+        */
         paramsUpdateMutex.unlock();
 
         // M_VOID means no update, and is a bit higher that the rest

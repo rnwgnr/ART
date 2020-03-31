@@ -835,23 +835,23 @@ OPIcon::OPIcon(Glib::ustring normalImage, Glib::ustring activeImage, Glib::ustri
                Glib::ustring  draggedImage, Glib::ustring insensitiveImage, DrivenPoint drivenPoint) : drivenPoint(drivenPoint)
 {
     if (!normalImage.empty()) {
-        normalImg->setImage(normalImage);
+        normalImg = Cairo::RefPtr<RTSurface>(new RTSurface(normalImage));
     }
 
     if (!prelightImage.empty()) {
-        prelightImg->setImage(prelightImage);
+        prelightImg = Cairo::RefPtr<RTSurface>(new RTSurface(prelightImage));
     }
 
     if (!activeImage.empty()) {
-        activeImg->setImage(activeImage);
+        activeImg = Cairo::RefPtr<RTSurface>(new RTSurface(activeImage));
     }
 
     if (!draggedImage.empty()) {
-        draggedImg->setImage(draggedImage);
+        draggedImg = Cairo::RefPtr<RTSurface>(new RTSurface(draggedImage));
     }
 
     if (!insensitiveImage.empty()) {
-        insensitiveImg->setImage(insensitiveImage);
+        insensitiveImg = Cairo::RefPtr<RTSurface>(new RTSurface(insensitiveImage));
     }
 }
 
@@ -1107,6 +1107,11 @@ bool EditSubscriber::isPicking()
     return action == ES_ACTION_PICKING;
 }
 
+CursorShape EditSubscriber::getCursor(int objectID, int xPos, int yPos) const
+{
+    return CSHandOpen;
+}
+
 //--------------------------------------------------------------------------------------------------
 
 
@@ -1151,3 +1156,12 @@ EditSubscriber* EditDataProvider::getCurrSubscriber()
     return currSubscriber;
 }
 
+int EditDataProvider::getObject() const
+{
+    return object;
+}
+
+void EditDataProvider::setObject(int newObject)
+{
+    object = newObject;
+}
