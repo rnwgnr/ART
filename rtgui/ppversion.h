@@ -1,11 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1010
-#define PPVERSION_AEXP 301 //value of PPVERSION when auto exposure algorithm was modified
+#define PPVERSION 1011
 
 /*
   Log of version changes
+  1011  2020-03-31
+        new film negative
   1010  2020-03-28
         dehaze, changed strength from integer to (luminance) curve
   1009  2020-03-26

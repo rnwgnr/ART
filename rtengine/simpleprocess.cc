@@ -185,7 +185,14 @@ private:
 
         imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
         imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled);
-        imgsrc->filmNegativeProcess(params.filmNegative);
+        if (params.filmNegative.enabled) {
+            std::array<float, 3> filmBaseValues = {
+                static_cast<float>(params.filmNegative.redBase),
+                static_cast<float>(params.filmNegative.greenBase),
+                static_cast<float>(params.filmNegative.blueBase)
+            };
+            imgsrc->filmNegativeProcess (params.filmNegative, filmBaseValues);
+        }            
 
         if (pl) {
             pl->setProgress (0.20);

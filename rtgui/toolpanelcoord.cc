@@ -1123,6 +1123,12 @@ bool ToolPanelCoordinator::getFilmNegativeExponents(rtengine::Coord spotA, rteng
 }
 
 
+bool ToolPanelCoordinator::getRawSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues)
+{
+    return ipc && ipc->getRawSpotValues(spot.x, spot.y, spotSize, rawValues);
+}
+
+
 void ToolPanelCoordinator::setAreaDrawListener(AreaDrawListener *listener)
 {
     colorcorrection->setAreaDrawListener(listener);

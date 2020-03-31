@@ -2450,26 +2450,30 @@ Glib::ustring RAWParams::getFlatFieldBlurTypeString(FlatFieldBlurType type)
 }
 
 
-FilmNegativeParams::FilmNegativeParams():
+FilmNegativeParams::FilmNegativeParams() :
     enabled(false),
     redRatio(1.36),
     greenExp(1.5),
-    blueRatio(0.86)
+    blueRatio(0.86),
+    redBase(-1),
+    greenBase(-1),
+    blueBase(-1)
 {
 }
 
-
-bool FilmNegativeParams::operator==(const FilmNegativeParams &other) const
+bool FilmNegativeParams::operator ==(const FilmNegativeParams& other) const
 {
     return
         enabled == other.enabled
-        && redRatio   == other.redRatio
+        && redRatio == other.redRatio
         && greenExp == other.greenExp
-        && blueRatio  == other.blueRatio;
+        && blueRatio == other.blueRatio
+        && redBase == other.redBase
+        && greenBase == other.greenBase
+        && blueBase == other.blueBase;
 }
 
-
-bool FilmNegativeParams::operator!=(const FilmNegativeParams &other) const
+bool FilmNegativeParams::operator !=(const FilmNegativeParams& other) const
 {
     return !(*this == other);
 }
@@ -2499,86 +2503,48 @@ ProcParams::ProcParams()
 void ProcParams::setDefaults()
 {
     exposure = ExposureParams();
-
     saturation = SaturationParams();
-        
     toneCurve = ToneCurveParams();
-
     labCurve = LabCurveParams();
-
     rgbCurves = RGBCurvesParams();
-
     localContrast = LocalContrastParams();
-
     sharpening = SharpeningParams();
-
     prsharpening = SharpeningParams();
     prsharpening.contrast = 25.0;
     prsharpening.method = "usm";
-
     wb = WBParams();
-
     defringe = DefringeParams();
-
     impulseDenoise = ImpulseDenoiseParams();
-
     denoise = DenoiseParams();
-
     textureBoost = TextureBoostParams();
-
     fattal = FattalToneMappingParams();
-
     logenc = LogEncodingParams();
-
     toneEqualizer = ToneEqualizerParams();
-
     crop = CropParams();
-
     coarse = CoarseTransformParams();
-
     commonTrans = CommonTransformParams();
-
     rotate = RotateParams();
-
     distortion = DistortionParams();
-
     lensProf = LensProfParams();
-
     perspective = PerspectiveParams();
-
     gradient = GradientParams();
-
     pcvignette = PCVignetteParams();
-
     vignetting = VignettingParams();
-
     chmixer = ChannelMixerParams();
-
     blackwhite = BlackWhiteParams();
-
     hsl = HSLEqualizerParams();
-
     cacorrection = CACorrParams();
-
     resize = ResizeParams();
-
     icm = ColorManagementParams();
-
     filmSimulation = FilmSimulationParams();
-
     softlight = SoftLightParams();
-
     dehaze = DehazeParams();
-
     grain = GrainParams();
-
     smoothing = GuidedSmoothingParams();
-
     colorcorrection = ColorCorrectionParams();
-
     raw = RAWParams();
-
     metadata = MetaDataParams();
+    filmNegative = FilmNegativeParams();
     exif.clear();
     iptc.clear();
 
@@ -3219,6 +3185,9 @@ int ProcParams::save(bool save_general,
             saveToKeyfile("Film Negative", "RedRatio", filmNegative.redRatio, keyFile);
             saveToKeyfile("Film Negative", "GreenExponent", filmNegative.greenExp, keyFile);
             saveToKeyfile("Film Negative", "BlueRatio", filmNegative.blueRatio, keyFile);
+            saveToKeyfile("Film Negative", "RedBase", filmNegative.redBase, keyFile);
+            saveToKeyfile("Film Negative", "GreenBase", filmNegative.greenBase, keyFile);
+            saveToKeyfile("Film Negative", "BlueBase", filmNegative.blueBase, keyFile);
         }
 
 // MetaData
@@ -4404,6 +4373,16 @@ int ProcParams::load(bool load_general,
             assignFromKeyfile(keyFile, "Film Negative", "RedRatio", filmNegative.redRatio);
             assignFromKeyfile(keyFile, "Film Negative", "GreenExponent", filmNegative.greenExp);
             assignFromKeyfile(keyFile, "Film Negative", "BlueRatio", filmNegative.blueRatio);
+            if (ppVersion >= 1011) {
+                assignFromKeyfile(keyFile, "Film Negative", "RedBase", filmNegative.redBase);
+                assignFromKeyfile(keyFile, "Film Negative", "GreenBase", filmNegative.greenBase);
+                assignFromKeyfile(keyFile, "Film Negative", "BlueBase", filmNegative.blueBase);
+            } else {
+                // Backwards compatibility: use special film base value -1
+                filmNegative.redBase = -1.f;
+                filmNegative.greenBase = -1.f;
+                filmNegative.blueBase = -1.f;
+            }
         }
 
         if (keyFile.has_group("MetaData") && RELEVANT_(metadata)) {

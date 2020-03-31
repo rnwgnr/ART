@@ -1375,6 +1375,10 @@ struct FilmNegativeParams {
     double greenExp;
     double blueRatio;
 
+    double redBase;
+    double greenBase;
+    double blueBase;
+    
     FilmNegativeParams();
 
     bool operator ==(const FilmNegativeParams& other) const;

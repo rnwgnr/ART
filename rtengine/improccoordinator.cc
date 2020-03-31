@@ -36,6 +36,25 @@
 
 namespace rtengine {
 
+namespace {
+
+using rtengine::Coord2D;
+
+Coord2D translateCoord(const rtengine::ImProcFunctions& ipf, int fw, int fh, int x, int y)
+{
+    const std::vector<Coord2D> points = {Coord2D(x, y)};
+
+    std::vector<Coord2D> red;
+    std::vector<Coord2D> green;
+    std::vector<Coord2D> blue;
+    const_cast<rtengine::ImProcFunctions &>(ipf).transCoord(fw, fh, points, red, green, blue);
+
+    return green[0];
+}
+
+} // namespace
+
+
 extern const Settings* settings;
 
 ImProcCoordinator::ImProcCoordinator():
@@ -82,6 +101,7 @@ ImProcCoordinator::ImProcCoordinator():
     xtransAutoContrastListener(nullptr),
     frameCountListener(nullptr),
     imageTypeListener(nullptr),
+    filmNegListener(nullptr),
     adnListener(nullptr),
     hListener(nullptr),
     autoLogListener(nullptr),
@@ -233,9 +253,17 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     
             highDetailPreprocessComputed = highDetailNeeded;
 
-            if (todo & M_RAW) {
-                imgsrc->filmNegativeProcess(params.filmNegative);
-            }                
+            if (todo & M_RAW && params.filmNegative.enabled) {
+                std::array<float, 3> filmBaseValues = {
+                    static_cast<float>(params.filmNegative.redBase),
+                    static_cast<float>(params.filmNegative.greenBase),
+                    static_cast<float>(params.filmNegative.blueBase)
+                };
+                imgsrc->filmNegativeProcess(params.filmNegative, filmBaseValues);
+                if (filmNegListener && params.filmNegative.redBase <= 0.f) {
+                    filmNegListener->filmBaseValuesChanged(filmBaseValues);
+                }
+            }
         }
     
         /*
@@ -822,6 +850,15 @@ bool ImProcCoordinator::getFilmNegativeExponents(int xA, int yA, int xB, int yB,
     const Coord2D p2 = xlate(xB, yB);
 
     return imgsrc->getFilmNegativeExponents(p1, p2, tr, params.filmNegative, newExps);
+}
+
+
+bool ImProcCoordinator::getRawSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues)
+{
+    MyMutex::MyLock lock(mProcessing);
+
+    return imgsrc->getRawSpotValues(translateCoord(ipf, fw, fh, x, y), spotSize,
+        getCoarseBitMask(params.coarse), params.filmNegative, rawValues);
 }
 
 

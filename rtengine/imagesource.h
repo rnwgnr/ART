@@ -159,8 +159,10 @@ public:
     virtual void getRawValues(int x, int y, int rotate, int &R, int &G, int &B) = 0;
 
     virtual bool getDeconvAutoRadius(float *out=nullptr) { return false; }
+
+    virtual void  filmNegativeProcess(const procparams::FilmNegativeParams &params, std::array<float, 3>& filmBaseValues) {}
     virtual bool getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const FilmNegativeParams& currentParams, std::array<float, 3>& newExps) { return false; }
-    virtual void filmNegativeProcess(const procparams::FilmNegativeParams &params) {}
+    virtual bool getRawSpotValues (Coord2D spot, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& rawValues) { return false; };
 };
 } // namespace rtengine
 #endif

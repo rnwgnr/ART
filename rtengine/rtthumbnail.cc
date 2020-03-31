@@ -437,6 +437,7 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
     //tpp->defGain = 1.0 / min(ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2));
     tpp->defGain = max (scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]) / min (scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]);
     tpp->defGain *= std::pow(2, ri->getBaselineExposure());
+    tpp->scaleGain = scale_mul[0] / pre_mul[0]; // used to reconstruct scale_mul from filmnegativethumb.cc
 
     tpp->gammaCorrected = true;
 
@@ -884,6 +885,7 @@ Thumbnail::Thumbnail () :
     scaleForSave (8192),
     gammaCorrected (false),
     colorMatrix{},
+    scaleGain(1.0),
     sensorType(ST_NONE),
     isRaw(false)
 {
@@ -1007,7 +1009,7 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
 
     Imagefloat* baseImg = resizeTo<Imagefloat> (rwidth, rheight, interp, thumbImg);
     if (isRaw && params.filmNegative.enabled && (sensorType == ST_BAYER || sensorType == ST_FUJI_XTRANS)) {
-        processFilmNegative(params, baseImg, rwidth, rheight, rmi, gmi, bmi);
+        processFilmNegative(params, baseImg, rwidth, rheight);
     }
     baseImg->assignColorSpace(params.icm.workingProfile);
 
@@ -1722,6 +1724,10 @@ bool Thumbnail::readData  (const Glib::ustring& fname)
                         colorMatrix[i][j] = cm[ix++];
                     }
             }
+
+            if (keyFile.has_key("LiveThumbData", "ScaleGain")) {
+                scaleGain = keyFile.get_double("LiveThumbData", "ScaleGain");
+            }
         }
 
         return true;
@@ -1772,7 +1778,8 @@ bool Thumbnail::writeData  (const Glib::ustring& fname)
         keyFile.set_integer ("LiveThumbData", "ScaleForSave", scaleForSave);
         keyFile.set_boolean ("LiveThumbData", "GammaCorrected", gammaCorrected);
         Glib::ArrayHandle<double> cm ((double*)colorMatrix, 9, Glib::OWNERSHIP_NONE);
-        keyFile.set_double_list ("LiveThumbData", "ColorMatrix", cm);
+        keyFile.set_double_list("LiveThumbData", "ColorMatrix", cm);
+        keyFile.set_double("LiveThumbData", "ScaleGain", scaleGain);
 
         keyData = keyFile.to_data ();
 
