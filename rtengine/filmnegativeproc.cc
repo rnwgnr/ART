@@ -42,15 +42,7 @@ extern const Settings *settings;
 
 namespace {
 
-bool channelsAvg(
-    const rtengine::RawImage* ri,
-    int width,
-    int height,
-    const float* cblacksom,
-    rtengine::Coord spotPos,
-    int spotSize,
-    std::array<float, 3>& avgs
-)
+bool channelsAvg(const rtengine::RawImage* ri, int width, int height, const float* cblacksom, rtengine::Coord spotPos, int spotSize, std::array<float, 3> &avgs)
 {
     avgs = {}; // Channel averages
 
@@ -92,7 +84,17 @@ bool channelsAvg(
                 }
             }
         }
+    } else if (ri->get_colors() == 1) {
+        for (int c = x1; c < x2; ++c) {
+            for (int r = y1; r < y2; ++r) {
+                ++pxCount[0];
+                avgs[0] += ri->data[r][c] - cblacksom[0];
+            }
+            pxCount[1] = pxCount[2] = pxCount[0];
+            avgs[1] = avgs[2] = avgs[0];
+        }        
     } else {
+        assert(false);
         return false;
     }
 
@@ -104,14 +106,7 @@ bool channelsAvg(
 }
 
 
-bool channelsAvg(
-    const rtengine::Imagefloat* img,
-    int width,
-    int height,
-    rtengine::Coord spotPos,
-    int spotSize,
-    std::array<float, 3>& avgs
-)
+bool channelsAvg(const rtengine::Imagefloat* img, int width, int height, rtengine::Coord spotPos, int spotSize, std::array<float, 3>& avgs)
 {
     avgs = {}; // Channel averages
 
@@ -146,14 +141,8 @@ bool channelsAvg(
 }
 
 
-void calcMedians(
-    const rtengine::RawImage* ri,
-    float** data,
-    int x1, int y1, int x2, int y2,
-    std::array<float, 3>& meds
-)
+void calcMedians(const rtengine::RawImage *ri, float **data, int x1, int y1, int x2, int y2, std::array<float, 3> &meds)
 {
-
     MyTime t1, t2, t3;
     t1.set();
 
@@ -207,6 +196,14 @@ void calcMedians(
                 }
             }
         }
+    } else if (ri->get_colors() == 1) {
+        for (int row = y1; row < y2; row += 5) {
+            for (int col = x1; col < x2; col += 5) {
+                for (int c = 0; c < 3; ++c) {
+                    cvs[c].push_back(data[row][col]);
+                }
+            }
+        }        
     }
 
     t2.set();
@@ -233,11 +230,7 @@ void calcMedians(
 
 }
 
-std::array<double, 3> calcWBMults(
-    const rtengine::ColorTemp& wb,
-    const rtengine::ImageMatrices& imatrices,
-    const rtengine::RawImage *ri,
-    const float ref_pre_mul[4])
+std::array<double, 3> calcWBMults(const rtengine::ColorTemp& wb, const rtengine::ImageMatrices& imatrices, const rtengine::RawImage *ri, const float ref_pre_mul[4])
 {
     std::array<double, 3> wb_mul;
     double r, g, b;
@@ -261,13 +254,7 @@ std::array<double, 3> calcWBMults(
 }
 
 
-void calcMedians(
-    const Imagefloat* baseImg,
-    const int x1, const int y1,
-    const int x2, const int y2,
-    int skip,
-    std::array<float, 3> &meds
-)
+void calcMedians(const Imagefloat* baseImg, const int x1, const int y1, const int x2, const int y2, int skip, std::array<float, 3> &meds)
 {
     // Channel vectors to calculate medians
     std::vector<float> rv, gv, bv;
@@ -398,10 +385,6 @@ void RawImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &p
 
     if (!params.enabled) {
         return;
-    }
-
-    if (ri->get_colors() == 1) {
-        return; // TODO
     }
 
     // Exponents are expressed as positive in the parameters, so negate them in order
@@ -614,9 +597,7 @@ void RawImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &p
                 rawData[row][col + c] = min(multsc[c] * pow_F(max(rawData[row][col + c], 1.f), expsc[c]), CLIP_VAL);
             }
         }
-    } else {
-        assert(ri->get_colors() == 3);
-
+    } else if (ri->get_colors() == 3) {
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic, 16)
 #endif
@@ -625,6 +606,15 @@ void RawImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &p
                 for (int c = 0; c < 3; ++c) {
                     rawData[row][3*col+c] = min(mults[c] * pow_F(max(rawData[row][3*col+c], 1.f), exps[c]), CLIP_VAL);
                 }
+            }
+        }
+    } else if (ri->get_colors() == 1) {
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic, 16)
+#endif
+        for (int row = 0; row < H; ++row) {
+            for (int col = 0; col < W; ++col) {
+                rawData[row][col] = min(mults[1] * pow_F(max(rawData[row][col], 1.f), exps[1]), CLIP_VAL);
             }
         }
     }

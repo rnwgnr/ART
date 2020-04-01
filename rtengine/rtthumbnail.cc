@@ -1008,9 +1008,7 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
 
 
     Imagefloat* baseImg = resizeTo<Imagefloat> (rwidth, rheight, interp, thumbImg);
-    if (isRaw && params.filmNegative.enabled && (sensorType == ST_BAYER || sensorType == ST_FUJI_XTRANS)) {
-        processFilmNegative(params, baseImg, rwidth, rheight);
-    }
+    processFilmNegative(params, baseImg, rwidth, rheight);
     baseImg->assignColorSpace(params.icm.workingProfile);
 
     if (params.coarse.rotate) {
@@ -1226,6 +1224,8 @@ void Thumbnail::getSpotWB (const procparams::ProcParams& params, int xp, int yp,
     rtemp = ct.getTemp ();
     rgreen = ct.getGreen ();
 }
+
+
 void Thumbnail::transformPixel (int x, int y, int tran, int& tx, int& ty)
 {
 

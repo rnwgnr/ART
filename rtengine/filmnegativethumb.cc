@@ -42,12 +42,7 @@ using rtengine::Imagefloat;
 using rtengine::findMinMaxPercentile;
 
 
-void calcMedians(
-    const Imagefloat* baseImg,
-    const int x1, const int y1,
-    const int x2, const int y2,
-    float &rmed, float &gmed, float &bmed
-)
+void calcMedians(const Imagefloat* baseImg, const int x1, const int y1, const int x2, const int y2, float &rmed, float &gmed, float &bmed)
 {
     // Channel vectors to calculate medians
     std::vector<float> rv, gv, bv;
@@ -73,12 +68,11 @@ void calcMedians(
 
 } // namespace
 
-void Thumbnail::processFilmNegative(
-    const procparams::ProcParams &params,
-    const Imagefloat* baseImg,
-    const int rwidth, const int rheight
-)
+void Thumbnail::processFilmNegative(const procparams::ProcParams &params, const Imagefloat* baseImg, const int rwidth, const int rheight)
 {
+    if (!params.filmNegative.enabled) {
+        return;
+    }
 
     // Channel exponents
     const float rexp = -params.filmNegative.redRatio * params.filmNegative.greenExp;

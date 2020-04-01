@@ -126,7 +126,7 @@ FilmNegative::FilmNegative() :
     for (int i = 0; i < 3; ++i) {
         filmBase[i] = Gtk::manage(new Adjuster("", 0, 1e6, 0.1, 0, Gtk::manage(new RTImage(icons[i]))));
         filmBase[i]->setAdjusterListener(this);
-        filmBase[i]->setLogScale(100, 0);
+        filmBase[i]->setLogScale(1000, 0);
         hb->pack_start(*filmBase[i]);
     }
     // Gtk::Grid* const fbGrid = Gtk::manage(new Gtk::Grid());
@@ -178,9 +178,9 @@ void FilmNegative::read(const rtengine::procparams::ProcParams* pp)
     greenExp->setValue(pp->filmNegative.greenExp);
     blueRatio->setValue(pp->filmNegative.blueRatio);
 
-    filmBase[0]->setValue(pp->filmNegative.redBase);
-    filmBase[1]->setValue(pp->filmNegative.greenBase);
-    filmBase[2]->setValue(pp->filmNegative.blueBase);
+    filmBase[0]->setValue(std::max(pp->filmNegative.redBase, 0.0));
+    filmBase[1]->setValue(std::max(pp->filmNegative.greenBase, 0.0));
+    filmBase[2]->setValue(std::max(pp->filmNegative.blueBase, 0.0));
 
     // If base values are not set in params, estimated values will be passed in later
     // (after processing) via FilmNegListener
@@ -400,6 +400,12 @@ void FilmNegative::editToggled()
 void FilmNegative::baseSpotToggled()
 {
     if (filmBaseSpotButton->get_active()) {
+        disableListener();
+        filmBaseCheck->set_active(true);
+        for (int i = 0; i < 3; ++i) {
+            filmBase[i]->set_sensitive(true);
+        }
+        enableListener();
 
         spotbutton->set_active(false);
         refSpotCoords.clear();
@@ -426,7 +432,7 @@ void FilmNegative::baseCheckToggled()
     for (int i = 0; i < 3; ++i) {
         filmBase[i]->set_sensitive(en);
     }
-    filmBaseSpotButton->set_sensitive(en);
+//    filmBaseSpotButton->set_sensitive(en);
 
     if (listener && getEnabled()) {
         // std::array<float, 3> vals = { -1.f, -1.f, -1.f };
