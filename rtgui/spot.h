@@ -67,6 +67,7 @@ private:
     int lastObject;                // current object that is hovered
     int activeSpot;                // currently active spot, being edited
     std::vector<rtengine::procparams::SpotEntry> spots; // list of edited spots
+#ifdef GUIVERSION
     OPIcon sourceIcon;             // to show the source location
     Circle sourceCircle;           // to show and change the Source radius
     Circle sourceMODisc;           // to change the Source position
@@ -75,8 +76,11 @@ private:
     Circle sourceFeatherCircle;    // to show the Feather radius at the Source position
     Circle targetFeatherCircle;    // to show the Feather radius at the Target position
     Line link;                     // to show the link between the Source and Target position
+#endif
 
+#ifdef GUIVERSION
     OPIcon *getActiveSpotIcon ();
+#endif
     void updateGeometry ();
     void createGeometry ();
     void addNewEntry ();
