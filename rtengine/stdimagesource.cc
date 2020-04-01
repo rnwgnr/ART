@@ -51,7 +51,14 @@ template<class T> T** allocArray (int W, int H)
 }
 
 #define HR_SCALE 2
-StdImageSource::StdImageSource () : ImageSource(), img(nullptr), plistener(nullptr), full(false), max{}, rgbSourceModified(false)
+StdImageSource::StdImageSource():
+    ImageSource(),
+    img(nullptr),
+    plistener(nullptr),
+    full(false),
+    max{},
+    rgbSourceModified(false),
+    imgCopy(nullptr)
 {
 
     embProfile = nullptr;
@@ -65,6 +72,14 @@ StdImageSource::~StdImageSource ()
 
     if (img) {
         delete img;
+    }
+
+    if (imgCopy) {
+        delete imgCopy;
+    }
+
+    if (embProfile) {
+        cmsCloseProfile(embProfile);
     }
 }
 
@@ -158,7 +173,13 @@ int StdImageSource::load (const Glib::ustring &fname)
         return error;
     }
 
-    embProfile = img->getEmbeddedProfile ();
+    if (embProfile) {
+        cmsCloseProfile(embProfile);
+    }
+    embProfile = nullptr;
+    if (img->getEmbeddedProfile()) {
+        embProfile = ProfileContent(img->getEmbeddedProfile()).toProfile();
+    }
 
     idata = new FramesData (fname);
 
@@ -340,6 +361,10 @@ ColorTemp StdImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
 
 void StdImageSource::flushRGB() {
     img->allocate(0, 0);
+    if (imgCopy) {
+        delete imgCopy;
+        imgCopy = nullptr;
+    }
 };
 
 

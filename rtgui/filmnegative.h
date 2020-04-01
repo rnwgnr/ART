@@ -34,7 +34,7 @@ public:
     virtual ~FilmNegProvider() = default;
 
     virtual bool getFilmNegativeExponents(rtengine::Coord spotA, rtengine::Coord spotB, std::array<float, 3>& newExps) = 0;
-    virtual bool getRawSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues) = 0;
+    virtual bool getImageSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues) = 0;
 };
 
 class FilmNegative final :

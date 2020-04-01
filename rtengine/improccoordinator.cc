@@ -853,11 +853,11 @@ bool ImProcCoordinator::getFilmNegativeExponents(int xA, int yA, int xB, int yB,
 }
 
 
-bool ImProcCoordinator::getRawSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues)
+bool ImProcCoordinator::getImageSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues)
 {
     MyMutex::MyLock lock(mProcessing);
 
-    return imgsrc->getRawSpotValues(translateCoord(ipf, fw, fh, x, y), spotSize,
+    return imgsrc->getImageSpotValues(translateCoord(ipf, fw, fh, x, y), spotSize,
         getCoarseBitMask(params.coarse), params.filmNegative, rawValues);
 }
 

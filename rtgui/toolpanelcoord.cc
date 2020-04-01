@@ -143,6 +143,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     addfavoritePanel(effectsPanel, gradient);
     addfavoritePanel(effectsPanel, dehaze);
     addfavoritePanel(effectsPanel, grain);
+    addfavoritePanel(effectsPanel, filmNegative);
 
     // transform
     addfavoritePanel(transformPanel, crop);
@@ -170,7 +171,6 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     addfavoritePanel(rawPanel, preprocess);
     addfavoritePanel(rawPanel, darkframe);
     addfavoritePanel(rawPanel, flatfield);
-    addfavoritePanel(rawPanel, filmNegative);
 
     int favoriteCount = 0;
     for(auto it = favorites.begin(); it != favorites.end(); ++it) {
@@ -349,7 +349,6 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                     sensorbayer->FoldableToolPanel::show();
                     preprocess->FoldableToolPanel::show();
                     flatfield->FoldableToolPanel::show();
-                    filmNegative->FoldableToolPanel::show();
 
                     return false;
                 }
@@ -364,7 +363,6 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                     sensorbayer->FoldableToolPanel::hide();
                     preprocess->FoldableToolPanel::show();
                     flatfield->FoldableToolPanel::show();
-                    filmNegative->FoldableToolPanel::show();
 
                     return false;
                 }
@@ -379,7 +377,6 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                     sensorxtrans->FoldableToolPanel::hide();
                     preprocess->FoldableToolPanel::hide();
                     flatfield->FoldableToolPanel::show();
-                    filmNegative->FoldableToolPanel::hide();
 
                     return false;
                 }
@@ -393,7 +390,6 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                     sensorxtrans->FoldableToolPanel::hide();
                     preprocess->FoldableToolPanel::hide();
                     flatfield->FoldableToolPanel::hide();
-                    filmNegative->FoldableToolPanel::hide();
 
                     return false;
                 }
@@ -404,7 +400,6 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
             [this]() -> bool
             {
                 rawPanelSW->set_sensitive(false);
-                filmNegative->FoldableToolPanel::hide();
 
                 return false;
             }
@@ -524,7 +519,7 @@ void ToolPanelCoordinator::profileChange(
         // pe.initFrom (lParams);
 
         // filterRawRefresh = pe.raw.isUnchanged() && pe.lensProf.isUnchanged();
-        filterRawRefresh = (params->raw == mergedParams.raw) && (params->lensProf == mergedParams.lensProf) && (params->filmNegative == mergedParams.filmNegative);
+        filterRawRefresh = (params->raw == mergedParams.raw) && (params->lensProf == mergedParams.lensProf);
     }
 
     *params = mergedParams;
@@ -1123,9 +1118,9 @@ bool ToolPanelCoordinator::getFilmNegativeExponents(rtengine::Coord spotA, rteng
 }
 
 
-bool ToolPanelCoordinator::getRawSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues)
+bool ToolPanelCoordinator::getImageSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues)
 {
-    return ipc && ipc->getRawSpotValues(spot.x, spot.y, spotSize, rawValues);
+    return ipc && ipc->getImageSpotValues(spot.x, spot.y, spotSize, rawValues);
 }
 
 

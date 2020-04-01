@@ -1,4 +1,4 @@
-/*
+/* -*- C++ -*-
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -21,8 +21,7 @@
 
 #include "imagesource.h"
 
-namespace rtengine
-{
+namespace rtengine {
 
 class StdImageSource : public ImageSource
 {
@@ -34,6 +33,7 @@ protected:
     bool full;
     int max[3];
     bool rgbSourceModified;
+    Imagefloat* imgCopy;
 
     //void transformPixel             (int x, int y, int tran, int& tx, int& ty);
     void getSampleFormat (const Glib::ustring &fname, IIOSampleFormat &sFormat, IIOSampleArrangement &sArrangement);
@@ -103,6 +103,10 @@ public:
 
     void        flushRGB          () override;
 
+    void filmNegativeProcess(const procparams::FilmNegativeParams &params, std::array<float, 3>& filmBaseValues) override;
+    bool getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const FilmNegativeParams& currentParams, std::array<float, 3>& newExps) override;
+    bool getImageSpotValues(Coord2D spot, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& rawValues) override;    
 };
-}
+
+} // namespace rtengine
 #endif

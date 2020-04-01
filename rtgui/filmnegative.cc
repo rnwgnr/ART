@@ -124,9 +124,9 @@ FilmNegative::FilmNegative() :
         "circle-blue-small.png"
     };
     for (int i = 0; i < 3; ++i) {
-        filmBase[i] = Gtk::manage(new Adjuster("", 0, 1, 0.0001, 0, Gtk::manage(new RTImage(icons[i]))));
+        filmBase[i] = Gtk::manage(new Adjuster("", 0, 1e6, 0.1, 0, Gtk::manage(new RTImage(icons[i]))));
         filmBase[i]->setAdjusterListener(this);
-        filmBase[i]->setLogScale(10, 0);
+        filmBase[i]->setLogScale(100, 0);
         hb->pack_start(*filmBase[i]);
     }
     // Gtk::Grid* const fbGrid = Gtk::manage(new Gtk::Grid());
@@ -187,6 +187,7 @@ void FilmNegative::read(const rtengine::procparams::ProcParams* pp)
     // filmBaseValuesLabel->set_text(formatBaseValues(filmBaseValues));
 
     filmBaseCheck->set_active(pp->filmNegative.redBase >= 0);
+    baseCheckToggled();
 
     enableListener();
 }
@@ -334,7 +335,7 @@ bool FilmNegative::button1Pressed(int modifierKey)
 
             std::array<float, 3> newBaseLev;
 
-            if (fnp->getRawSpotValues(provider->posImage, 32, newBaseLev)) {
+            if (fnp->getImageSpotValues(provider->posImage, 32, newBaseLev)) {
                 disableListener();
 
                 // filmBaseValues = newBaseLev;
@@ -426,6 +427,16 @@ void FilmNegative::baseCheckToggled()
         filmBase[i]->set_sensitive(en);
     }
     filmBaseSpotButton->set_sensitive(en);
+
+    if (listener && getEnabled()) {
+        // std::array<float, 3> vals = { -1.f, -1.f, -1.f };
+        // if (en) {
+        //     for (int i = 0; i < 3; ++i) {
+        //         vals[i] = filmBase[i]->getValue();
+        //     }
+        // }
+        listener->panelChanged(evFilmBaseValues, en ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+    }
 }
 
 

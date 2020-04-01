@@ -126,9 +126,9 @@ void Thumbnail::processFilmNegative(
     } else {
 
         // Read film-base values from params
-        float rbase = params.filmNegative.redBase * 65535.f;
-        float gbase = params.filmNegative.greenBase * 65535.f;
-        float bbase = params.filmNegative.blueBase * 65535.f;
+        float rbase = params.filmNegative.redBase;/// * 65535.f;
+        float gbase = params.filmNegative.greenBase;// * 65535.f;
+        float bbase = params.filmNegative.blueBase;// * 65535.f;
 
         // Reconstruct scale_mul coefficients from thumbnail metadata:
         //   redMultiplier / camwbRed is pre_mul[0]
@@ -183,7 +183,7 @@ void Thumbnail::processFilmNegative(
         // gmult /= gAvg / gAvg;  green chosen as reference channel
         bmult /= gavg / bavg;
 
-    } else {
+    } else if (isRaw) {
 
         // Get and un-apply multipliers to adapt the thumbnail to a known fixed WB setting,
         // as in the main image processing.
