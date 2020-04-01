@@ -126,9 +126,9 @@ void Thumbnail::processFilmNegative(
     } else {
 
         // Read film-base values from params
-        float rbase = params.filmNegative.redBase;
-        float gbase = params.filmNegative.greenBase;
-        float bbase = params.filmNegative.blueBase;
+        float rbase = params.filmNegative.redBase * 65535.f;
+        float gbase = params.filmNegative.greenBase * 65535.f;
+        float bbase = params.filmNegative.blueBase * 65535.f;
 
         // Reconstruct scale_mul coefficients from thumbnail metadata:
         //   redMultiplier / camwbRed is pre_mul[0]

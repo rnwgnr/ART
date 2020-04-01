@@ -288,6 +288,11 @@ bool RawImageSource::getRawSpotValues(Coord2D spotCoord, int spotSize, int tran,
         return false;
     }
 
+    // normalize to 0-1
+    for (auto &v : rawValues) {
+        v /= 65535.f;
+    }
+
     if (settings->verbose) {
         printf("Raw spot values: R=%g, G=%g, B=%g\n", rawValues[0], rawValues[1], rawValues[2]);
     }
@@ -372,6 +377,8 @@ void RawImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &p
                 filmBaseValues[c] /= pow_F((wb_mul[c] / autoGainComp), 1.f / exps[c]);// / autoGainComp;
             }
 
+            // normalize to 0-1
+            filmBaseValues[c] /= 65535.f;
         }
     }
 
@@ -380,9 +387,9 @@ void RawImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &p
 
     // Apply current scaling coefficients to raw, unscaled base values.
     std::array<float, 3> fb = {
-        filmBaseValues[0] * scale_mul[0],
-        filmBaseValues[1] * scale_mul[1],
-        filmBaseValues[2] * scale_mul[2]
+        filmBaseValues[0] * 65535.f * scale_mul[0],
+        filmBaseValues[1] * 65535.f * scale_mul[1],
+        filmBaseValues[2] * 65535.f * scale_mul[2]
     };
 
     if (settings->verbose) {

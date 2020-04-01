@@ -73,6 +73,7 @@ public:
 private:
     void editToggled();
     void baseSpotToggled();
+    void baseCheckToggled();
 
     const rtengine::ProcEvent evFilmNegativeExponents;
     const rtengine::ProcEvent evFilmNegativeEnabled;
@@ -80,7 +81,7 @@ private:
 
     std::vector<rtengine::Coord> refSpotCoords;
 
-    std::array<float, 3> filmBaseValues;
+    // std::array<float, 3> filmBaseValues;
 
     FilmNegProvider* fnp;
 
@@ -88,12 +89,15 @@ private:
     Adjuster* const redRatio;
     Adjuster* const blueRatio;
 
-    Gtk::Grid* const spotgrid;
+    //Gtk::Grid* const spotgrid;
     Gtk::ToggleButton* const spotbutton;
 
-    Gtk::Label* const filmBaseLabel;
-    Gtk::Label* const filmBaseValuesLabel;
+    // Gtk::Label* const filmBaseLabel;
+    // Gtk::Label* const filmBaseValuesLabel;
     Gtk::ToggleButton* const filmBaseSpotButton;
+
+    Gtk::CheckButton *filmBaseCheck;
+    std::array<Adjuster *, 3> filmBase;
 
     rtengine::procparams::FilmNegativeParams initial_params;
 };
