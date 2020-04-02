@@ -26,8 +26,7 @@
 
 #include "../rtengine/procparams.h"
 
-namespace
-{
+namespace {
 
 Adjuster* createExponentAdjuster(AdjusterListener* listener, const Glib::ustring& label, double minV, double maxV, double defaultVal)
 {
@@ -54,7 +53,8 @@ Glib::ustring formatBaseValues(const std::array<float, 3>& rgb)
     }
 }
 
-}
+} // namespace
+
 
 FilmNegative::FilmNegative() :
     FoldableToolPanel(this, "filmnegative", M("TP_FILMNEGATIVE_LABEL"), false, true, true),
@@ -71,7 +71,8 @@ FilmNegative::FilmNegative() :
     spotbutton(Gtk::manage(new Gtk::ToggleButton(M("TP_FILMNEGATIVE_PICK")))),
     // filmBaseLabel(Gtk::manage(new Gtk::Label(M("TP_FILMNEGATIVE_FILMBASE_VALUES"), Gtk::ALIGN_START))),
     // filmBaseValuesLabel(Gtk::manage(new Gtk::Label("- - -"))),
-    filmBaseSpotButton(Gtk::manage(new Gtk::ToggleButton(M("TP_FILMNEGATIVE_FILMBASE_PICK"))))
+    filmBaseSpotButton(Gtk::manage(new Gtk::ToggleButton(M("TP_FILMNEGATIVE_FILMBASE_PICK")))),
+    legacy_mode_(false)
 {
     EvToolReset.set_action(FIRST);
     
@@ -186,6 +187,7 @@ void FilmNegative::read(const rtengine::procparams::ProcParams* pp)
     // (after processing) via FilmNegListener
     // filmBaseValuesLabel->set_text(formatBaseValues(filmBaseValues));
 
+    legacy_mode_ = pp->filmNegative.redBase < 0;
     filmBaseCheck->set_active(pp->filmNegative.redBase >= 0);
     baseCheckToggled();
 
@@ -204,10 +206,14 @@ void FilmNegative::write(rtengine::procparams::ProcParams* pp)
         pp->filmNegative.redBase = filmBase[0]->getValue();
         pp->filmNegative.greenBase = filmBase[1]->getValue();
         pp->filmNegative.blueBase = filmBase[2]->getValue();
-    } else {
+    } else if (legacy_mode_) {
         pp->filmNegative.redBase = -1;
         pp->filmNegative.greenBase = -1;
         pp->filmNegative.blueBase = -1;
+    } else {
+        pp->filmNegative.redBase = 0;
+        pp->filmNegative.greenBase = 0;
+        pp->filmNegative.blueBase = 0;
     }
 }
 

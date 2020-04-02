@@ -2455,9 +2455,9 @@ FilmNegativeParams::FilmNegativeParams() :
     redRatio(1.36),
     greenExp(1.5),
     blueRatio(0.86),
-    redBase(-1),
-    greenBase(-1),
-    blueBase(-1)
+    redBase(0),
+    greenBase(0),
+    blueBase(0)
 {
 }
 

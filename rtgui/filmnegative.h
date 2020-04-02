@@ -100,4 +100,5 @@ private:
     std::array<Adjuster *, 3> filmBase;
 
     rtengine::procparams::FilmNegativeParams initial_params;
+    bool legacy_mode_;
 };

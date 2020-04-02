@@ -519,7 +519,7 @@ void ToolPanelCoordinator::profileChange(
         // pe.initFrom (lParams);
 
         // filterRawRefresh = pe.raw.isUnchanged() && pe.lensProf.isUnchanged();
-        filterRawRefresh = (params->raw == mergedParams.raw) && (params->lensProf == mergedParams.lensProf);
+        filterRawRefresh = (params->raw == mergedParams.raw) && (params->lensProf == mergedParams.lensProf) && (params->filmNegative == mergedParams.filmNegative);
     }
 
     *params = mergedParams;
