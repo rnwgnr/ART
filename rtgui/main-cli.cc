@@ -47,6 +47,7 @@
 #include <glibmm/threads.h>
 #else
 #include <glibmm/thread.h>
+#include <windows.h>
 #include "conio.h"
 #endif
 

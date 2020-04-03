@@ -21,8 +21,8 @@
 #pragma once
 
 #include <gtkmm.h>
-#include "toolpanel.h"
 #include "edit.h"
+#include "toolpanel.h"
 #include "adjuster.h"
 #include "../rtengine/procparams.h"
 #include "../rtengine/tweakoperator.h"
@@ -76,7 +76,7 @@ private:
     Circle sourceFeatherCircle;    // to show the Feather radius at the Source position
     Circle targetFeatherCircle;    // to show the Feather radius at the Target position
     Line link;                     // to show the link between the Source and Target position
-    Rectangle whole_area_rectangle; // dummy rectangle to always set a custom cursor
+    std::unique_ptr<Geometry> whole_area_rectangle; // dummy rectangle to always set a custom cursor
     
     OPIcon *getActiveSpotIcon ();
     void updateGeometry ();

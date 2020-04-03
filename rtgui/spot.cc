@@ -101,9 +101,11 @@ Spot::Spot() :
     link.datum = Geometry::IMAGE;
     link.setActive (false);
 
-    whole_area_rectangle.filled = true;
-    whole_area_rectangle.setActive(true);
-    whole_area_rectangle.datum = Geometry::IMAGE;
+    Rectangle *rect = new Rectangle();
+    whole_area_rectangle.reset(rect);
+    rect->filled = true;
+    rect->setActive(true);
+    rect->datum = Geometry::IMAGE;
 
     auto m = ProcEventMapper::getInstance();
     EvSpotEnabled = m->newEvent(ALLNORAW, "TP_SPOT_LABEL");
@@ -290,7 +292,7 @@ void Spot::createGeometry ()
     EditSubscriber::visibleGeometry.resize (nbrEntry + STATIC_VISIBLE_OBJ_NBR);
 
     size_t i = 0, j = 0;
-    mouseOverGeometry[i++] = &whole_area_rectangle;
+    mouseOverGeometry[i++] = whole_area_rectangle.get();
     mouseOverGeometry[i++] = &targetMODisc;
     mouseOverGeometry[i++] = &sourceMODisc;
     mouseOverGeometry[i++] = &targetCircle;
@@ -327,8 +329,8 @@ void Spot::updateGeometry()
         int imW, imH;
         dataProvider->getImageSize (imW, imH);
 
-        whole_area_rectangle.bottomRight.x = imW;
-        whole_area_rectangle.bottomRight.y = imH;
+        static_cast<Rectangle *>(whole_area_rectangle.get())->bottomRight.x = imW;
+        static_cast<Rectangle *>(whole_area_rectangle.get())->bottomRight.y = imH;
 
         source_x->setLimits(0, imW, 1, 0);
         target_x->setLimits(0, imW, 1, 0);
