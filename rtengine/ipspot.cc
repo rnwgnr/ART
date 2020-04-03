@@ -336,7 +336,7 @@ public:
             srcY(image->getWidth(), image->getHeight());
             dstY(dstImg->getWidth(), dstImg->getHeight());
             
-            const float eps = 0.001f;// * std::pow(5.f, detail-1);
+            const float eps = 0.0001f * std::pow(5.f, detail-1);
             //int gr = float(radius + (featherRadius - radius) / 2.f) / float(6 - LIM(detail, 1, 4));
             int gr = (radius * 0.2f); // * detail;
 
