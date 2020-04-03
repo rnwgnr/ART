@@ -5,6 +5,10 @@ Developer/Maintainer:
 
   Alberto Griggio
 
+Other developers:
+  
+  Daniel Catalina
+
 Other contributors (profiles, ideas, mockups, testing, forum activity, translations, etc.), in last name alphabetical order:
 
   Felipe Bouabci Simões
