@@ -1015,6 +1015,8 @@ struct ResizeParams {
     int get_width() const;
     int get_height() const;
 };
+
+
 /**
   * Parameters entry
   */
@@ -1024,6 +1026,7 @@ struct SpotEntry {
     int radius;
     float feather;
     float opacity;
+    int detail;
 
     SpotEntry();
     float getFeatherRadius() const;

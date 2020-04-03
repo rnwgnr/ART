@@ -116,11 +116,11 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     addfavoritePanel(exposurePanel, logenc);
 
     // details
+    addfavoritePanel(detailsPanel, spot);
     addfavoritePanel(detailsPanel, sharpening);
     addfavoritePanel(detailsPanel, denoise);
     addfavoritePanel(detailsPanel, impulsedenoise);
     addfavoritePanel(detailsPanel, defringe);
-    addfavoritePanel(detailsPanel, spot);
 
     // color
     addfavoritePanel(colorPanel, whitebalance);

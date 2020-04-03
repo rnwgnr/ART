@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2019 Jean-Christophe FRISCH <natureh.510@gmail.com>
@@ -17,12 +18,12 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SPOT_H_
-#define _SPOT_H_
+#pragma once
 
 #include <gtkmm.h>
 #include "toolpanel.h"
 #include "edit.h"
+#include "adjuster.h"
 #include "../rtengine/procparams.h"
 #include "../rtengine/tweakoperator.h"
 
@@ -53,7 +54,7 @@
  * (the point will be deleted on button release).
  */
 
-class Spot : public ToolParamBlock, public FoldableToolPanel, public rtengine::TweakOperator, public EditSubscriber
+class Spot : public ToolParamBlock, public FoldableToolPanel, public rtengine::TweakOperator, public EditSubscriber, public AdjusterListener
 {
 
 private:
@@ -67,7 +68,6 @@ private:
     int lastObject;                // current object that is hovered
     int activeSpot;                // currently active spot, being edited
     std::vector<rtengine::procparams::SpotEntry> spots; // list of edited spots
-#ifdef GUIVERSION
     OPIcon sourceIcon;             // to show the source location
     Circle sourceCircle;           // to show and change the Source radius
     Circle sourceMODisc;           // to change the Source position
@@ -76,11 +76,8 @@ private:
     Circle sourceFeatherCircle;    // to show the Feather radius at the Source position
     Circle targetFeatherCircle;    // to show the Feather radius at the Target position
     Line link;                     // to show the link between the Source and Target position
-#endif
-
-#ifdef GUIVERSION
+    
     OPIcon *getActiveSpotIcon ();
-#endif
     void updateGeometry ();
     void createGeometry ();
     void addNewEntry ();
@@ -99,19 +96,34 @@ protected:
     void editedToggled ();
     Geometry* getVisibleGeometryFromMO (int MOID);
 
+    Gtk::Frame *spot_frame;
+    Adjuster *source_x;
+    Adjuster *source_y;
+    Adjuster *target_x;
+    Adjuster *target_y;
+    Adjuster *radius;
+    Adjuster *feather;
+    Adjuster *opacity;
+    Adjuster *detail;
+    std::vector<Adjuster *> spot_adjusters;
+
+    rtengine::procparams::SpotParams initial_params;
+
+    void reset_adjusters();
+
 public:
 
-    Spot ();
-    ~Spot ();
+    Spot();
+    ~Spot();
 
-    void read (const rtengine::procparams::ProcParams* pp/*, const ParamsEdited* pedited = nullptr */) override;
-    void write (rtengine::procparams::ProcParams* pp/*, ParamsEdited* pedited = nullptr */) override;
+    void read(const rtengine::procparams::ProcParams *pp) override;
+    void write (rtengine::procparams::ProcParams *pp) override;
 
-    void enabledChanged () override;
+    void enabledChanged() override;
+    void toolReset(bool to_initial) override;
+    void setDefaults(const rtengine::procparams::ProcParams *pp) override;
 
-    void setEditProvider (EditDataProvider* provider) override;
-
-    void setBatchMode (bool batchMode) override;
+    void setEditProvider(EditDataProvider* provider) override;
 
     // EditSubscriber interface
     CursorShape getCursor (int objectID, int xPos, int yPos) const override;
@@ -130,10 +142,11 @@ public:
     //TweakOperator interface
     void tweakParams(rtengine::procparams::ProcParams& pparams) override;
 
+    void adjusterChanged(Adjuster *a, double newval) override;
+
     rtengine::ProcEvent EvSpotEnabled;
     rtengine::ProcEvent EvSpotEnabledOPA; // used to toggle-on the Spot 'On Preview Adjustment' mode
     rtengine::ProcEvent EvSpotEntry;
     rtengine::ProcEvent EvSpotEntryOPA;
 };
 
-#endif

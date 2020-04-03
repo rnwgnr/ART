@@ -23,14 +23,13 @@
 #include "imagesource.h"
 #include "imagefloat.h"
 #include "rt_math.h"
+#include "guidedfilter.h"
 #include <iostream>
 #include <set>
 
-namespace rtengine
-{
+namespace rtengine {
 
 class SpotBox {
-
 public:
     enum class Type {
         SOURCE,
@@ -132,6 +131,8 @@ public:
     Rectangle intersectionArea;
     float radius;
     float featherRadius;
+    float opacity;
+    int detail;
 
     SpotBox (int tl_x, int tl_y, int br_x, int br_y, int radius, int feather_radius, Imagefloat* image, Type type) :
        type(type),
@@ -140,7 +141,9 @@ public:
        imgArea(spotArea),
        intersectionArea(),
        radius(radius),
-       featherRadius(feather_radius)
+       featherRadius(feather_radius),
+       opacity(1.f),
+       detail(0)
     {}
 
     SpotBox (int tl_x, int tl_y, int radius, int feather_radius, Imagefloat* image, Type type) :
@@ -150,7 +153,9 @@ public:
        imgArea(spotArea),
        intersectionArea(),
        radius(radius),
-       featherRadius(feather_radius)
+       featherRadius(feather_radius),
+       opacity(1.f),
+       detail(0)
     {}
 
     SpotBox (SpotEntry &spot, Type type) :
@@ -158,7 +163,9 @@ public:
         image(nullptr),
         intersectionArea(),
         radius(spot.radius),
-        featherRadius(int(spot.getFeatherRadius() + 0.5f))  // rounding to int before resizing
+        featherRadius(int(spot.getFeatherRadius() + 0.5f)),  // rounding to int before resizing
+        opacity(spot.opacity),
+        detail(spot.detail)
     {
         spotArea.x1 = int ((type == Type::SOURCE ? spot.sourcePos.x : spot.targetPos.x) - featherRadius);
         spotArea.x2 = int ((type == Type::SOURCE ? spot.sourcePos.x : spot.targetPos.x) + featherRadius);
@@ -300,6 +307,31 @@ public:
             return false;
         }
 
+        array2D<float> srcY;
+        array2D<float> dstY;
+
+        if (detail > 0) {
+            srcY(image->getWidth(), image->getHeight());
+            dstY(dstImg->getWidth(), dstImg->getHeight());
+            
+            const float eps = 0.001f * std::pow(5.f, detail-1);
+            int gr = float(featherRadius) / float(6 - LIM(detail, 1, 4));
+
+            for (int y = 0; y < srcY.height(); ++y) {
+                for (int x = 0; x < srcY.width(); ++x) {
+                    srcY[y][x] = image->g(y, x) / 65535.f;
+                }
+            }
+            for (int y = 0; y < dstY.height(); ++y) {
+                for (int x = 0; x < dstY.width(); ++x) {
+                    dstY[y][x] = dstImg->g(y, x) / 65535.f;
+                }
+            }
+
+            guidedFilter(srcY, srcY, srcY, gr, eps, false);
+            guidedFilter(dstY, dstY, dstY, gr, eps, false);
+        }
+
         int srcImgY = intersectionArea.y1 - imgArea.y1;
         int dstImgY = destBox.intersectionArea.y1 - destBox.imgArea.y1;
         for (int y = intersectionArea.y1; y <= intersectionArea.y2; ++y) {
@@ -316,16 +348,57 @@ public:
                     ++dstImgX;
                     continue;
                 }
-                if (r <= radius) {
-                    dstImg->r(dstImgY, dstImgX) = image->r(srcImgY, srcImgX);
-                    dstImg->g(dstImgY, dstImgX) = image->g(srcImgY, srcImgX);
-                    dstImg->b(dstImgY, dstImgX) = image->b(srcImgY, srcImgX);
-                } else {
-                    float opacity = (featherRadius - r) / (featherRadius - radius);
-                    dstImg->r(dstImgY, dstImgX) = (image->r(srcImgY, srcImgX) - dstImg->r(dstImgY, dstImgX)) * opacity + dstImg->r(dstImgY,dstImgX);
-                    dstImg->g(dstImgY, dstImgX) = (image->g(srcImgY, srcImgX) - dstImg->g(dstImgY, dstImgX)) * opacity + dstImg->g(dstImgY,dstImgX);
-                    dstImg->b(dstImgY, dstImgX) = (image->b(srcImgY, srcImgX) - dstImg->b(dstImgY, dstImgX)) * opacity + dstImg->b(dstImgY,dstImgX);
+                float blend = opacity;
+                if (r > radius) {
+                    blend = LIM01(blend * (featherRadius - r) / (featherRadius - radius));
                 }
+
+                if (detail == 0) {
+                    dstImg->r(dstImgY, dstImgX) = intp(blend, image->r(srcImgY, srcImgX), dstImg->r(dstImgY, dstImgX));
+                    dstImg->g(dstImgY, dstImgX) = intp(blend, image->g(srcImgY, srcImgX), dstImg->g(dstImgY, dstImgX));
+                    dstImg->b(dstImgY, dstImgX) = intp(blend, image->b(srcImgY, srcImgX), dstImg->b(dstImgY, dstImgX));
+                } else {
+                    float &sr = image->r(srcImgY, srcImgX);
+                    float &sg = image->g(srcImgY, srcImgX);
+                    float &sb = image->b(srcImgY, srcImgX);
+
+                    float &dr = dstImg->r(dstImgY, dstImgX);
+                    float &dg = dstImg->g(dstImgY, dstImgX);
+                    float &db = dstImg->b(dstImgY, dstImgX);
+
+                    float sY = sg;
+                    float dY = dg;
+
+                    float su = sY - sb;
+                    float sv = sr - sY;
+                    float du = dY - db;
+                    float dv = dr - dY;
+
+                    float sY_base = srcY[srcImgY][srcImgX] * 65535.f;
+
+                    float dY_base = dstY[dstImgY][dstImgX] * 65535.f;
+                    float dY_detail = dY - dY_base;
+
+                    float res_Y = sY_base + dY_detail;
+                    dY = intp(blend, res_Y, dY);
+                    du = intp(blend, su, du);
+                    dv = intp(blend, sv, dv);
+
+                    dr = dv + dY;
+                    db = dY - du;
+                    dg = dY;
+                }
+                
+                // if (r <= radius) {
+                //     dstImg->r(dstImgY, dstImgX) = image->r(srcImgY, srcImgX);
+                //     dstImg->g(dstImgY, dstImgX) = image->g(srcImgY, srcImgX);
+                //     dstImg->b(dstImgY, dstImgX) = image->b(srcImgY, srcImgX);
+                // } else {
+                //     float opacity = (featherRadius - r) / (featherRadius - radius);
+                //     dstImg->r(dstImgY, dstImgX) = (image->r(srcImgY, srcImgX) - dstImg->r(dstImgY, dstImgX)) * opacity + dstImg->r(dstImgY,dstImgX);
+                //     dstImg->g(dstImgY, dstImgX) = (image->g(srcImgY, srcImgX) - dstImg->g(dstImgY, dstImgX)) * opacity + dstImg->g(dstImgY,dstImgX);
+                //     dstImg->b(dstImgY, dstImgX) = (image->b(srcImgY, srcImgX) - dstImg->b(dstImgY, dstImgX)) * opacity + dstImg->b(dstImgY,dstImgX);
+                // }
                 ++srcImgX;
                 ++dstImgX;
             }
@@ -418,13 +491,13 @@ void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsr
         *srcSpotBox /= pp.getSkip();
         srcSpotBox->allocImage();
         Imagefloat *srcImage = srcSpotBox->getImage();
-        for (int y = 0; y < (int)srcImage->getHeight(); ++y) {
-            for (int x = 0; x < (int)srcImage->getWidth(); ++x) {
-                srcImage->r(y, x) = 60000.f;
-                srcImage->g(y, x) = 500.f;
-                srcImage->b(y, x) = 500.f;
-            }
-        }
+        // for (int y = 0; y < (int)srcImage->getHeight(); ++y) {
+        //     for (int x = 0; x < (int)srcImage->getWidth(); ++x) {
+        //         srcImage->r(y, x) = 60000.f;
+        //         srcImage->g(y, x) = 500.f;
+        //         srcImage->b(y, x) = 500.f;
+        //     }
+        // }
 
         imgsrc->getImage(currWB, tr, srcSpotBox->getImage(), spp, params->exposure, params->raw);
         if (cmp) {
@@ -439,13 +512,13 @@ void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsr
         *dstSpotBox /= pp.getSkip();
         dstSpotBox->allocImage();
         Imagefloat *dstImage = dstSpotBox->getImage();
-        for (int y = 0; y < (int)dstImage->getHeight(); ++y) {
-            for (int x = 0; x < (int)dstImage->getWidth(); ++x) {
-                dstImage->r(y, x) = 500.f;
-                dstImage->g(y, x) = 500.f;
-                dstImage->b(y, x) = 60000.f;
-            }
-        }
+        // for (int y = 0; y < (int)dstImage->getHeight(); ++y) {
+        //     for (int x = 0; x < (int)dstImage->getWidth(); ++x) {
+        //         dstImage->r(y, x) = 500.f;
+        //         dstImage->g(y, x) = 500.f;
+        //         dstImage->b(y, x) = 60000.f;
+        //     }
+        // }
         imgsrc->getImage(currWB, tr, dstSpotBox->getImage(), spp, params->exposure, params->raw);
         if (cmp) {
             imgsrc->convertColorSpace(dstImage, *cmp, currWB);

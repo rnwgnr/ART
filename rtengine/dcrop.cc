@@ -194,21 +194,22 @@ void Crop::update(int todo)
             parent->adnListener->chromaChanged(params.denoise.chrominance, params.denoise.chrominanceRedGreen, params.denoise.chrominanceBlueYellow);
         }
 
-        parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
         
+        if ((todo & M_SPOT) && params.spot.enabled && !params.spot.entries.empty()) {
+            spotsDone = true;
+            PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
+            //parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.raw);
+            parent->ipf.removeSpots(origCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, nullptr, tr);
+        }
+
+        parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
+
         if ((todo & M_LINDENOISE) && show_denoise) {
             parent->ipf.denoise(parent->imgsrc, parent->currWB, origCrop, parent->denoiseInfoStore, params.denoise);
 
             if (parent->adnListener && params.denoise.chrominanceMethod == DenoiseParams::ChrominanceMethod::AUTOMATIC) {
                 parent->adnListener->chromaChanged(params.denoise.chrominance, params.denoise.chrominanceRedGreen, params.denoise.chrominanceBlueYellow);
             }                
-        }
-
-        if ((todo & M_SPOT) && params.spot.enabled && !params.spot.entries.empty()) {
-            spotsDone = true;
-            PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            //parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.raw);
-            parent->ipf.removeSpots(origCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, nullptr, tr);
         }
     }
 
@@ -221,7 +222,7 @@ void Crop::update(int todo)
             if(!spotCrop) {
                 spotCrop = new Imagefloat (cropw, croph);
             }
-            baseCrop->copyData (spotCrop);
+            baseCrop->copyTo(spotCrop);
             PreviewProps pp (trafx, trafy, trafw * skip, trafh * skip, skip);
             int tr = getCoarseBitMask(params.coarse);
             parent->ipf.removeSpots (spotCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, &params.icm, tr);
@@ -249,10 +250,11 @@ void Crop::update(int todo)
 
         if (trafx || trafy || trafw != fw || trafh != fh) {
             need_cropping = true;
+            const bool copy_from_earlier_steps = params.denoise.enabled || params.spot.enabled;
 
             // fattal needs to work on the full image. So here we get the full
             // image from imgsrc, and replace the denoised crop in case
-            if (!params.denoise.enabled && skip == 1 && parent->drcomp_11_dcrop_cache) {
+            if (!copy_from_earlier_steps && skip == 1 && parent->drcomp_11_dcrop_cache) {
                 f = parent->drcomp_11_dcrop_cache;
                 need_drcomp = false;
             } else {
@@ -263,7 +265,7 @@ void Crop::update(int todo)
                 parent->imgsrc->getImage(parent->currWB, tr, f, pp, params.exposure, params.raw);
                 parent->imgsrc->convertColorSpace(f, params.icm, parent->currWB);
 
-                if (params.denoise.enabled) {
+                if (copy_from_earlier_steps) {
                     // copy the denoised crop
                     int oy = trafy / skip;
                     int ox = trafx / skip;
@@ -330,7 +332,7 @@ void Crop::update(int todo)
                                   parent->imgsrc->getMetaData(),
                                   parent->imgsrc->getRotateDegree(), false);
         } else {
-            baseCrop->copyData(transCrop);
+            baseCrop->copyTo(transCrop);
         }
 
         if (transCrop) {

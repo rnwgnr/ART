@@ -28,7 +28,6 @@
 #include <giomm.h>
 #include <iostream>
 #include <tiffio.h>
-#include "rtwindow.h"
 #include <cstring>
 #include <cstdlib>
 #include <locale.h>
@@ -38,6 +37,8 @@
 #include "version.h"
 #include "extprog.h"
 #include "printhelp.h"
+#include "pathutils.h"
+#include "../rtengine/profilestore.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>

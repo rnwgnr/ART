@@ -369,25 +369,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 
         orig_prev->assignColorSpace(params.icm.workingProfile);
         readyphase++;
-    
-        if ((todo & M_HDR) && (params.fattal.enabled || params.dehaze.enabled)) {
-            if (drcomp_11_dcrop_cache) {
-                delete drcomp_11_dcrop_cache;
-                drcomp_11_dcrop_cache = nullptr;
-            }
-    
-            stop = ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_0, orig_prev);
-    
-            if (oprevi != orig_prev) {
-                delete oprevi;
-            }
-        }
-    
-        oprevi = orig_prev;
-    if (todo & M_SPOT) {
+
+        if (todo & M_SPOT) {
             if (params.spot.enabled && !params.spot.entries.empty()) {
                 allocCache(spotprev);
-                orig_prev->copyData(spotprev);
+                orig_prev->copyTo(spotprev);
                 PreviewProps pp(0, 0, fw, fh, scale);
                 ipf.removeSpots(spotprev, imgsrc, params.spot.entries, pp, currWB, &params.icm, tr);
             } else {
@@ -398,11 +384,30 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
         }
         if (spotprev) {
-            if (oprevi == orig_prev) {
-                oprevi = new Imagefloat(pW, pH);
-            }
-            spotprev->copyData(oprevi);
+            oprevi = spotprev;
+        } else {
+            oprevi = orig_prev;
+            // if (oprevi == orig_prev) {
+            //     oprevi = new Imagefloat(pW, pH);
+            // }
+            // spotprev->copyData(orig_prev);
         }
+    
+        if ((todo & M_HDR) && (params.fattal.enabled || params.dehaze.enabled)) {
+            if (drcomp_11_dcrop_cache) {
+                delete drcomp_11_dcrop_cache;
+                drcomp_11_dcrop_cache = nullptr;
+            }
+    
+            stop = ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_0, oprevi);//orig_prev);
+    
+            // if (oprevi != orig_prev) {
+            //     delete oprevi;
+            // }
+        }
+    
+        // oprevi = orig_prev;
+        
         progress("Rotate / Distortion...", 100 * readyphase / numofphases);
         // Remove transformation if unneeded
         if (ipf.needsTransform()) {
@@ -541,19 +546,20 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             hListener->histogramChanged(histRed, histGreen, histBlue, histLuma, histToneCurve, histLCurve, histCCurve, /*histCLurve, histLLCurve,*/ histLCAM, histCCAM, histRedRaw, histGreenRaw, histBlueRaw, histChroma, histLRETI);
         }
     }
-    if (orig_prev != oprevi) {
+    if (orig_prev != oprevi && oprevi != spotprev) {
         delete oprevi;
         oprevi = nullptr;
     }
-
-    
 }
+
+
 void ImProcCoordinator::setTweakOperator (TweakOperator *tOperator)
 {
     if (tOperator) {
         tweakOperator = tOperator;
     }
 }
+
 
 void ImProcCoordinator::unsetTweakOperator (TweakOperator *tOperator)
 {
@@ -1100,6 +1106,10 @@ void ImProcCoordinator::process()
         }
 
         paramsUpdateMutex.lock();
+    }
+
+    if (tweakOperator) {
+        restoreParams();
     }
 
     paramsUpdateMutex.unlock();

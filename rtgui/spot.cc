@@ -33,7 +33,7 @@ using namespace rtengine::procparams;
 #define STATIC_MO_OBJ_NBR 6
 
 Spot::Spot() :
-    FoldableToolPanel(this, "spot", M ("TP_SPOT_LABEL"), true, true),
+    FoldableToolPanel(this, "spot", M ("TP_SPOT_LABEL"), true, true, true),
     EditSubscriber(ET_OBJECTS),
     draggedSide(DraggedSide::NONE),
     lastObject(-1),
@@ -98,7 +98,43 @@ Spot::Spot() :
     EvSpotEnabledOPA = m->newEvent(SPOTADJUST, "");
     EvSpotEntry = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
     EvSpotEntryOPA = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
+    EvToolReset.set_action(ALLNORAW);
 
+    spot_frame = Gtk::manage(new Gtk::Frame(M("TP_SPOT_CUR_SPOT_LABEL")));
+    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+    const auto mkadj =
+        [](const Glib::ustring &lbl, double vmin, double vmax, double vstep, double vdefault) -> Adjuster *
+        {
+            return Gtk::manage(new Adjuster(lbl, vmin, vmax, vstep, vdefault, nullptr, nullptr, nullptr, nullptr, false, true));
+        };
+    source_x = mkadj(M("TP_SPOT_SOURCE_X") + ": ", 0, 10000, 1, 0);
+    source_y = mkadj(M("TP_SPOT_SOURCE_Y") + ": ", 0, 10000, 1, 0);
+    target_y = mkadj(M("TP_SPOT_TARGET_Y") + ": ", 0, 10000, 1, 0);
+    target_x = mkadj(M("TP_SPOT_TARGET_X") + ": ", 0, 10000, 1, 0);
+    radius = mkadj(M("TP_SPOT_RADIUS") + ": ", SpotParams::minRadius, SpotParams::maxRadius, 1, SpotParams::minRadius);
+    feather = mkadj(M("TP_SPOT_FEATHER") + ": ", 0, 1, 0.01, 0);
+    opacity = mkadj(M("TP_SPOT_OPACITY") + ": ", 0, 1, 0.01, 0);
+    detail = mkadj(M("TP_SPOT_DETAIL") + ": ", 0, 4, 1, 0);
+
+    spot_adjusters = {
+        source_x,
+        source_y,
+        target_x,
+        target_y,
+        radius,
+        feather,
+        opacity,
+        detail
+    };
+
+    for (auto a : spot_adjusters) {
+        a->setAdjusterListener(this);
+        vb->pack_start(*a, Gtk::PACK_SHRINK, 2);
+    }
+
+    spot_frame->add(*vb);
+    pack_start(*spot_frame);
+    
     show_all();
 }
 
@@ -131,16 +167,10 @@ void Spot::read (const ProcParams* pp/*, const ParamsEdited* pedited */)
     activeSpot = -1;
     lastObject = -1;
 
-    if (batchMode) {
-        editedCheckBox->set_label(Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), spots.size()));
+    if (spots.size() != oldSize) {
+        createGeometry();
     }
-    else {
-        if (spots.size() != oldSize) {
-            createGeometry();
-        }
-
-        updateGeometry();
-    }
+    updateGeometry();
 
     enableListener ();
 }
@@ -159,51 +189,19 @@ void Spot::write (ProcParams* pp /*, ParamsEdited* pedited */)
 
 void Spot::resetPressed()
 {
-    if (batchMode) {
-        // no need to handle the Geometry in batch mode, since point editing is disabled
+    if (!spots.empty()) {
         spots.clear();
-        editedConn.block (true);
-        editedCheckBox->set_active (true);
-        editedConn.block (false);
-
-        editedCheckBox->set_label(Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), spots.size()));
+        activeSpot = -1;
+        lastObject = -1;
+        createGeometry();
+        updateGeometry();
 
         if (listener) {
-            listener->panelChanged (EvSpotEntry, Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), 0));
-        }
-    } else {
-        if (!spots.empty()) {
-            spots.clear();
-            activeSpot = -1;
-            lastObject = -1;
-            createGeometry();
-            updateGeometry();
-
-            if (listener) {
-                listener->panelChanged (edit->get_active() ? EvSpotEntryOPA : EvSpotEntry, Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), 0));
-            }
+            listener->panelChanged (edit->get_active() ? EvSpotEntryOPA : EvSpotEntry, Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), 0));
         }
     }
 }
 
-void Spot::setBatchMode (bool batchMode)
-{
-    ToolPanel::setBatchMode (batchMode);
-
-    if (batchMode) {
-        removeIfThere (labelBox, edit, false);
-
-        if (!editedCheckBox) {
-            removeIfThere (labelBox, countLabel, false);
-            countLabel = nullptr;
-            editedCheckBox = Gtk::manage (new Gtk::CheckButton (Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), 0)));
-            labelBox->pack_start (*editedCheckBox, Gtk::PACK_SHRINK, 2);
-            labelBox->reorder_child (*editedCheckBox, 0);
-            editedConn = editedCheckBox->signal_toggled().connect ( sigc::mem_fun (*this, &Spot::editedToggled) );
-            editedCheckBox->show();
-        }
-    }
-}
 
 void Spot::editedToggled ()
 {
@@ -238,6 +236,7 @@ void Spot::editToggled ()
             listener->refreshPreview(EvSpotEnabledOPA); // reprocess the preview w/o creating History entry
             subscribe();
         } else {
+            reset_adjusters();
             unsubscribe();
             listener->unsetTweakOperator(this);
             listener->refreshPreview(EvSpotEnabled); // reprocess the preview w/o creating History entry
@@ -269,10 +268,7 @@ Geometry* Spot::getVisibleGeometryFromMO (int MOID)
 void Spot::createGeometry ()
 {
     int nbrEntry = spots.size();
-
-    if (!batchMode) {
-        countLabel->set_text (Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), nbrEntry));
-    }
+    countLabel->set_text (Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), nbrEntry));
 
     //printf("CreateGeometry(%d)\n", nbrEntry);
     // delete all dynamically allocated geometry
@@ -322,6 +318,11 @@ void Spot::updateGeometry()
     if (dataProvider) {
         int imW, imH;
         dataProvider->getImageSize (imW, imH);
+
+        source_x->setLimits(0, imW, 1, 0);
+        target_x->setLimits(0, imW, 1, 0);
+        source_y->setLimits(0, imH, 1, 0);
+        target_y->setLimits(0, imH, 1, 0);
 
         if (activeSpot > -1) {
             // Target point circle
@@ -379,6 +380,19 @@ void Spot::updateGeometry()
             sourceCircle.setVisible(draggedSide != DraggedSide::SOURCE);
             targetCircle.setVisible(draggedSide != DraggedSide::TARGET);
             link.setVisible(draggedSide == DraggedSide::NONE);
+
+            {
+                auto &s = spots[activeSpot];
+                spot_frame->set_sensitive(true);
+                source_x->setValue(s.sourcePos.x);
+                source_y->setValue(s.sourcePos.y);
+                target_x->setValue(s.targetPos.x);
+                target_y->setValue(s.targetPos.y);
+                radius->setValue(s.radius);
+                feather->setValue(s.feather);
+                opacity->setValue(s.opacity);
+                detail->setValue(s.detail);
+            }
         } else {
             targetCircle.setActive (false);
             targetMODisc.setActive (false);
@@ -388,6 +402,8 @@ void Spot::updateGeometry()
             targetFeatherCircle.setActive (false);
             sourceFeatherCircle.setActive (false);
             link.setActive (false);
+
+            reset_adjusters();
         }
 
         for (size_t i = 0; i < spots.size(); ++i) {
@@ -400,8 +416,11 @@ void Spot::updateGeometry()
                 geom->setHoverable (false);
             }
         }
+    } else {
+        reset_adjusters();
     }
 }
+
 
 OPIcon *Spot::getActiveSpotIcon()
 {
@@ -780,10 +799,13 @@ void Spot::switchOffEditMode ()
         }
     }
 
+    reset_adjusters();
+
     EditSubscriber::switchOffEditMode();  // disconnect
     listener->unsetTweakOperator(this);
     listener->refreshPreview(EvSpotEnabled); // reprocess the preview w/o creating History entry
 }
+
 
 void Spot::tweakParams(procparams::ProcParams& pparams)
 {
@@ -802,17 +824,69 @@ void Spot::tweakParams(procparams::ProcParams& pparams)
     // -> disabling standard crop
     pparams.crop.enabled = false;
 
-    // -> disabling time consuming and unnecessary tool
-//    pparams.sh.enabled = false;
-    pparams.blackwhite.enabled = false;
-    pparams.dehaze.enabled = false;
-//    pparams.wavelet.enabled = false;
-    pparams.filmSimulation.enabled = false;
-//    pparams.sharpenEdge.enabled = false;
-//    pparams.sharpenMicro.enabled = false;
-    pparams.sharpening.enabled = false;
-    pparams.softlight.enabled = false;
-    pparams.gradient.enabled = false;
-    pparams.pcvignette.enabled = false;
-//    pparams.colorappearance.enabled = false;
+//     // -> disabling time consuming and unnecessary tool
+// //    pparams.sh.enabled = false;
+//     pparams.blackwhite.enabled = false;
+//     pparams.dehaze.enabled = false;
+// //    pparams.wavelet.enabled = false;
+//     pparams.filmSimulation.enabled = false;
+// //    pparams.sharpenEdge.enabled = false;
+// //    pparams.sharpenMicro.enabled = false;
+//     pparams.sharpening.enabled = false;
+//     pparams.softlight.enabled = false;
+//     pparams.gradient.enabled = false;
+//     pparams.pcvignette.enabled = false;
+// //    pparams.colorappearance.enabled = false;
+}
+
+
+void Spot::adjusterChanged(Adjuster *a, double newval)
+{
+    if (activeSpot > -1) {
+        auto &s = spots[activeSpot];
+        s.sourcePos.x = source_x->getValue();
+        s.sourcePos.y = source_y->getValue();
+        s.targetPos.x = target_x->getValue();
+        s.targetPos.y = target_y->getValue();
+        s.radius = radius->getValue();
+        s.feather = feather->getValue();
+        s.opacity = opacity->getValue();
+        s.detail = detail->getValue();
+    }
+    
+    if (listener && getEnabled()) {
+        disableListener();
+        updateGeometry();
+        enableListener();
+
+        listener->panelChanged(EvSpotEntry, M("TP_SPOT_ENTRYCHANGED"));
+    }
+}
+
+
+void Spot::reset_adjusters()
+{
+    for (auto a : spot_adjusters) {
+        a->block(true);
+        a->resetValue(true);
+        a->block(false);
+    }
+    spot_frame->set_sensitive(false);
+}
+
+
+void Spot::setDefaults(const ProcParams *def)
+{
+    initial_params = def->spot;
+}
+
+
+void Spot::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.spot = initial_params;
+    }
+    pp.spot.enabled = getEnabled();
+    read(&pp);
 }

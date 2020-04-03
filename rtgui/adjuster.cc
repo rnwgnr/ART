@@ -32,7 +32,7 @@ static double one2one(double val)
     return val;
 }
 
-Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep, double vdefault, Gtk::Image *imgIcon1, Gtk::Image *imgIcon2, double2double_fun slider2value_, double2double_fun value2slider_, bool deprecated)
+Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep, double vdefault, Gtk::Image *imgIcon1, Gtk::Image *imgIcon2, double2double_fun slider2value_, double2double_fun value2slider_, bool deprecated, bool compact)
 {
 
     set_hexpand(true);
@@ -101,9 +101,15 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
     slider->set_draw_value (false);
     //slider->set_has_origin(false);  // ------------------ This will remove the colored part on the left of the slider's knob
 
-    if (vlabel.empty()) {
+    if (vlabel.empty() || compact) {
         // No label, everything goes in a single row
-        attach_next_to(*slider, Gtk::POS_LEFT, 1, 1);
+        if (vlabel.empty()) {
+            attach_next_to(*slider, Gtk::POS_LEFT, 1, 1);
+        } else {
+            setExpandAlignProperties(label, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);            
+            attach_next_to(*label, Gtk::POS_LEFT, 1, 1);
+            attach_next_to(*slider, *label, Gtk::POS_RIGHT, 1, 1);
+        }
 
         if (imageIcon1) {
             attach_next_to(*imageIcon1, *slider, Gtk::POS_LEFT, 1, 1);
