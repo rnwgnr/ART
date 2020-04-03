@@ -67,13 +67,15 @@ protected:
     bool setCropSizes (int cropX, int cropY, int cropW, int cropH, int skip, bool internal);
     void freeAll ();
 
+    friend class ImProcCoordinator;
+    void update(int todo);
+
 public:
-    Crop             (ImProcCoordinator* parent, EditDataProvider *editDataProvider, bool isDetailWindow);
-    ~Crop    () override;
+    Crop(ImProcCoordinator* parent, EditDataProvider *editDataProvider, bool isDetailWindow);
+    ~Crop() override;
 
     void setEditSubscriber(EditSubscriber* newSubscriber);
     bool hasListener();
-    void update      (int todo);
     void setWindow   (int cropX, int cropY, int cropW, int cropH, int skip) override
     {
         setCropSizes (cropX, cropY, cropW, cropH, skip, false);

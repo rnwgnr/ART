@@ -1290,6 +1290,11 @@ void CropWindow::updateCursor(int x, int y, int bstate)
             newType = CSArrow;
         } else if (onArea(CropToolBar, x, y)) {
             newType = CSMove;
+        } else if (iarea->getObject() > -1 && editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
+            int cursorX;
+            int cursorY;
+            screenCoordToImage (x, y, cursorX, cursorY);
+            newType = editSubscriber->getCursor(iarea->getObject(), cursorX, cursorY);
         } else if (onArea(CropResize, x, y)) {
             newType = CSResizeDiagonal;
         } else if (tm == TMColorPicker && hoveredPicker) {
@@ -1318,7 +1323,11 @@ void CropWindow::updateCursor(int x, int y, int bstate)
             }
 
             if (objectID > -1) {
-                newType = editSubscriber->getCursor(objectID);
+                int cursorX;
+                int cursorY;
+                screenCoordToImage (x, y, cursorX, cursorY);
+                newType = editSubscriber->getCursor(objectID, cursorX, cursorY);
+                // newType = editSubscriber->getCursor(objectID);
             } else if (area_updater_) {
                 newType = CSCropSelect;
             } else if (tm == TMHand) {
@@ -1352,7 +1361,11 @@ void CropWindow::updateCursor(int x, int y, int bstate)
             }
 
             if (objectID > -1) {
-                newType = editSubscriber->getCursor(objectID);
+                int cursorX;
+                int cursorY;
+                screenCoordToImage (x, y, cursorX, cursorY);
+                newType = editSubscriber->getCursor(objectID, cursorX, cursorY);
+                // newType = editSubscriber->getCursor(objectID);
             } else {
                 newType = CSArrow;
             }
@@ -1381,6 +1394,16 @@ void CropWindow::updateCursor(int x, int y, int bstate)
         newType = CSResizeDiagonal;
     } else if (state == SDragPicker) {
         newType = CSMove2D;
+    } else if (editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
+        int objectID = iarea->getObject();
+        if (objectID > -1) {
+            int cursorX;
+            int cursorY;
+            screenCoordToImage (x, y, cursorX, cursorY);
+            newType = editSubscriber->getCursor(objectID, cursorX, cursorY);
+        } else {
+            newType = CSArrow;
+        }
     }
 
     bool cursor_changed = (newType != cursor_type);

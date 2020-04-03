@@ -54,7 +54,7 @@
  * (the point will be deleted on button release).
  */
 
-class Spot : public ToolParamBlock, public FoldableToolPanel, public rtengine::TweakOperator, public EditSubscriber, public AdjusterListener
+class Spot: public ToolParamBlock, public FoldableToolPanel, public rtengine::TweakOperator, public EditSubscriber, public AdjusterListener
 {
 
 private:
@@ -76,6 +76,7 @@ private:
     Circle sourceFeatherCircle;    // to show the Feather radius at the Source position
     Circle targetFeatherCircle;    // to show the Feather radius at the Target position
     Line link;                     // to show the link between the Source and Target position
+    Rectangle whole_area_rectangle; // dummy rectangle to always set a custom cursor
     
     OPIcon *getActiveSpotIcon ();
     void updateGeometry ();
@@ -110,6 +111,8 @@ protected:
     rtengine::procparams::SpotParams initial_params;
 
     void reset_adjusters();
+    void on_fold(GdkEventButton *event);
+    void on_hide();
 
 public:
 
@@ -126,7 +129,7 @@ public:
     void setEditProvider(EditDataProvider* provider) override;
 
     // EditSubscriber interface
-    CursorShape getCursor (int objectID, int xPos, int yPos) const override;
+    CursorShape getCursor (int objectID, int xPos, int yPos) override;
     bool mouseOver (int modifierKey) override;
     bool button1Pressed (int modifierKey) override;
     bool button1Released () override;

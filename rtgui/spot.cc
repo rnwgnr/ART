@@ -30,7 +30,7 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 #define STATIC_VISIBLE_OBJ_NBR 6
-#define STATIC_MO_OBJ_NBR 6
+#define STATIC_MO_OBJ_NBR 7
 
 Spot::Spot() :
     FoldableToolPanel(this, "spot", M ("TP_SPOT_LABEL"), true, true, true),
@@ -93,6 +93,10 @@ Spot::Spot() :
     link.datum = Geometry::IMAGE;
     link.setActive (false);
 
+    whole_area_rectangle.filled = true;
+    whole_area_rectangle.setActive(true);
+    whole_area_rectangle.datum = Geometry::IMAGE;
+
     auto m = ProcEventMapper::getInstance();
     EvSpotEnabled = m->newEvent(ALLNORAW, "TP_SPOT_LABEL");
     EvSpotEnabledOPA = m->newEvent(SPOTADJUST, "");
@@ -107,14 +111,14 @@ Spot::Spot() :
         {
             return Gtk::manage(new Adjuster(lbl, vmin, vmax, vstep, vdefault, nullptr, nullptr, nullptr, nullptr, false, true));
         };
-    source_x = mkadj(M("TP_SPOT_SOURCE_X") + ": ", 0, 10000, 1, 0);
-    source_y = mkadj(M("TP_SPOT_SOURCE_Y") + ": ", 0, 10000, 1, 0);
-    target_y = mkadj(M("TP_SPOT_TARGET_Y") + ": ", 0, 10000, 1, 0);
-    target_x = mkadj(M("TP_SPOT_TARGET_X") + ": ", 0, 10000, 1, 0);
-    radius = mkadj(M("TP_SPOT_RADIUS") + ": ", SpotParams::minRadius, SpotParams::maxRadius, 1, SpotParams::minRadius);
-    feather = mkadj(M("TP_SPOT_FEATHER") + ": ", 0, 1, 0.01, 0);
-    opacity = mkadj(M("TP_SPOT_OPACITY") + ": ", 0, 1, 0.01, 0);
-    detail = mkadj(M("TP_SPOT_DETAIL") + ": ", 0, 4, 1, 0);
+    source_x = mkadj(M("TP_SPOT_SOURCE_X") + " ", 0, 10000, 1, 0);
+    source_y = mkadj(M("TP_SPOT_SOURCE_Y") + " ", 0, 10000, 1, 0);
+    target_y = mkadj(M("TP_SPOT_TARGET_Y") + " ", 0, 10000, 1, 0);
+    target_x = mkadj(M("TP_SPOT_TARGET_X") + " ", 0, 10000, 1, 0);
+    radius = mkadj(M("TP_SPOT_RADIUS") + " ", SpotParams::minRadius, SpotParams::maxRadius, 1, SpotParams::minRadius);
+    feather = mkadj(M("TP_SPOT_FEATHER") + " ", 0, 1, 0.01, 0);
+    opacity = mkadj(M("TP_SPOT_OPACITY") + " ", 0, 1, 0.01, 0);
+    detail = mkadj(M("TP_SPOT_DETAIL") + " ", 0, 4, 1, 0);
 
     spot_adjusters = {
         source_x,
@@ -134,6 +138,9 @@ Spot::Spot() :
 
     spot_frame->add(*vb);
     pack_start(*spot_frame);
+
+    getExpander()->signal_button_release_event().connect_notify(sigc::mem_fun(this, &Spot::on_fold));
+    signal_unmap().connect(sigc::mem_fun(*this, &Spot::on_hide));
     
     show_all();
 }
@@ -157,11 +164,6 @@ void Spot::read (const ProcParams* pp/*, const ParamsEdited* pedited */)
 
     size_t oldSize = spots.size();
     spots = pp->spot.entries;
-/*
-    if (pedited) {
-        set_inconsistent (multiImage && !pedited->spot);
-    }
-*/
     setEnabled (pp->spot.enabled);
     lastEnabled = pp->spot.enabled;
     activeSpot = -1;
@@ -225,7 +227,13 @@ void Spot::enabledChanged ()
 
 void Spot::setEditProvider (EditDataProvider* provider)
 {
-    EditSubscriber::setEditProvider (provider);
+    EditSubscriber::setEditProvider(provider);
+    if (provider) {
+        int imW, imH;
+        provider->getImageSize (imW, imH);
+        whole_area_rectangle.bottomRight.x = imW;
+        whole_area_rectangle.bottomRight.y = imH;
+    }
 }
 
 void Spot::editToggled ()
@@ -289,6 +297,7 @@ void Spot::createGeometry ()
     EditSubscriber::mouseOverGeometry.at (i++) = &sourceCircle;        // STATIC_MO_OBJ_NBR + 3
     EditSubscriber::mouseOverGeometry.at (i++) = &targetFeatherCircle; // STATIC_MO_OBJ_NBR + 4
     EditSubscriber::mouseOverGeometry.at (i++) = &sourceFeatherCircle; // STATIC_MO_OBJ_NBR + 5
+    mouseOverGeometry[i++] = &whole_area_rectangle;
 
     // recreate all spots geometry
     Cairo::RefPtr<RTSurface> normalImg   = sourceIcon.getNormalImg();
@@ -479,7 +488,7 @@ void Spot::deleteSelectedEntry()
     }
 }
 
-CursorShape Spot::getCursor (int objectID, int xPos, int yPos) const
+CursorShape Spot::getCursor(int objectID, int xPos, int yPos)
 {
     EditDataProvider* editProvider = getEditProvider();
     if (editProvider) {
@@ -889,4 +898,20 @@ void Spot::toolReset(bool to_initial)
     }
     pp.spot.enabled = getEnabled();
     read(&pp);
+}
+
+
+void Spot::on_fold(GdkEventButton *evt)
+{
+    if (isCurrentSubscriber()) {
+        switchOffEditMode();
+    }
+}
+
+
+void Spot::on_hide()
+{
+    if (isCurrentSubscriber()) {
+        switchOffEditMode();
+    }
 }

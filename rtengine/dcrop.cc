@@ -685,9 +685,16 @@ void Crop::fullUpdate()
     // If there are more update request, the following WHILE will collect it
     newUpdatePending = true;
 
+    if (parent->tweakOperator) {
+        parent->backupParams();
+        parent->tweakOperator->tweakParams(parent->params);
+    }
     while (newUpdatePending) {
         newUpdatePending = false;
         update(ALL);
+    }
+    if (parent->tweakOperator) {
+        parent->restoreParams();
     }
 
     updating = false;  // end of crop update

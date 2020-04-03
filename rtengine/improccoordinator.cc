@@ -1106,10 +1106,10 @@ void ImProcCoordinator::process()
         }
 
         paramsUpdateMutex.lock();
-    }
 
-    if (tweakOperator) {
-        restoreParams();
+        if (tweakOperator) {
+            restoreParams();
+        }
     }
 
     paramsUpdateMutex.unlock();

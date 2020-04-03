@@ -3316,14 +3316,14 @@ int ProcParams::save(bool save_general,
             saveToKeyfile("Spot Removal", "Enabled", spot.enabled, keyFile);
             for (size_t i = 0; i < spot.entries.size (); ++i) {
                 std::vector<double> entry = {
-                    spot.entries[i].sourcePos.x,
-                    spot.entries[i].sourcePos.y,
-                    spot.entries[i].targetPos.x,
-                    spot.entries[i].targetPos.y,
-                    spot.entries[i].radius,
-                    spot.entries[i].feather,
-                    spot.entries[i].opacity,
-                    spot.entries[i].detail
+                    double(spot.entries[i].sourcePos.x),
+                    double(spot.entries[i].sourcePos.y),
+                    double(spot.entries[i].targetPos.x),
+                    double(spot.entries[i].targetPos.y),
+                    double(spot.entries[i].radius),
+                    double(spot.entries[i].feather),
+                    double(spot.entries[i].opacity),
+                    double(spot.entries[i].detail)
                 };
 
                 std::stringstream ss;

@@ -66,12 +66,10 @@ protected:
     Glib::ustring toolName;
     ToolPanelListener* listener;
     ToolPanelListener* tmp;
-    bool batchMode;  // True if the ToolPanel is used in Batch mode
-    bool multiImage; // True if more than one image are being edited at the same time (also imply that batchMode=true), false otherwise
     bool need100Percent;
 
 public:
-    ToolPanel(Glib::ustring toolName = "", bool need11 = false) : toolName(toolName), listener(nullptr), tmp(nullptr), batchMode(false), multiImage(false), need100Percent(need11) {}
+    ToolPanel(Glib::ustring toolName = "", bool need11 = false) : toolName(toolName), listener(nullptr), tmp(nullptr), need100Percent(need11) {}
     virtual ~ToolPanel() {}
 
     virtual void setParent(Gtk::Box* parent) {}
@@ -116,11 +114,6 @@ public:
     }
 
     virtual Glib::ustring getToolName() { return toolName; }
-virtual void setBatchMode    (bool batchMode)
-    {
-        this->batchMode = batchMode;
-    }
-
     virtual PParamsChangeListener *getPParamsChangeListener() { return nullptr; }
 };
 

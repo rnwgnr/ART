@@ -1112,9 +1112,9 @@ bool EditSubscriber::isPicking()
     return action == ES_ACTION_PICKING;
 }
 
-CursorShape EditSubscriber::getCursor(int objectID, int xPos, int yPos) const
+CursorShape EditSubscriber::getCursor(int objectID, int xPos, int yPos)
 {
-    return CSHandOpen;
+    return getCursor(objectID);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1147,10 +1147,10 @@ void EditDataProvider::switchOffEditMode()
     }
 }
 
-CursorShape EditDataProvider::getCursor(int objectID)
+CursorShape EditDataProvider::getCursor(int objectID, int xPos, int yPos)
 {
     if (currSubscriber) {
-        currSubscriber->getCursor(objectID);
+        currSubscriber->getCursor(objectID, xPos, yPos);
     }
 
     return CSHandOpen;

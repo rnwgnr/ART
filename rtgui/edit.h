@@ -497,7 +497,7 @@ public:
     @param objectID object currently "hovered"
     @param xPos X cursor position in image space
     @param yPos Y cursor position in image space */
-    virtual CursorShape getCursor (int objectID, int xPos, int yPos) const;
+    virtual CursorShape getCursor (int objectID, int xPos, int yPos);
 
     /** @brief Triggered when the mouse is moving over an object
     This method is also triggered when the cursor is moving over the image in ET_PIPETTE mode
@@ -615,7 +615,8 @@ public:
     int getObject() const;
     void setObject(int newObject);
 
-    virtual CursorShape getCursor(int objectID);
+    virtual CursorShape getCursor(int objectID, int xPos, int yPos);
+    // virtual CursorShape getCursor(int objectID);
     int                 getPipetteRectSize ();
     EditSubscriber*     getCurrSubscriber();
     virtual void        getImageSize (int &w, int&h) = 0;

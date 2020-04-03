@@ -111,7 +111,7 @@ set(RTENGINESOURCEFILES
     rt_algo.cc
     rtthumbnail.cc
     simpleprocess.cc
-    spot.cc
+    ipspot.cc
     slicer.cc
     stdimagesource.cc
     utils.cc
