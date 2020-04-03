@@ -38,7 +38,7 @@ using namespace std;
 namespace rtengine { namespace procparams {
 
 const short SpotParams::minRadius = 5;
-const short SpotParams::maxRadius = 100;
+const short SpotParams::maxRadius = 200;
 
 //-----------------------------------------------------------------------------
 // KeyFile

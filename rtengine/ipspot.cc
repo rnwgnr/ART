@@ -307,15 +307,38 @@ public:
             return false;
         }
 
+        const auto find_sigma =
+            [](float r, float f) -> float
+            {
+                float m = 0.1f;
+                while (true) {
+                    float sigma = 5.f * SQR(f * m);
+                    float val = xexpf((-SQR(std::max(f - r, 0.f)) / sigma));
+                    if (val < 5e-3f) {
+                        return sigma;
+                    }
+                    m *= 0.9f;
+                }
+            };
+
+        const float sigma = find_sigma(radius, featherRadius); //2.f * SQR(featherRadius * 0.1f);
+        const auto feather_weight =
+            [=](float r) -> float
+            {
+                return LIM01(xexpf((-SQR(std::max(r - radius, 0.f)) / sigma)));
+            };
+
         array2D<float> srcY;
         array2D<float> dstY;
 
+        float detail_blend = 1.f;
         if (detail > 0) {
             srcY(image->getWidth(), image->getHeight());
             dstY(dstImg->getWidth(), dstImg->getHeight());
             
-            const float eps = 0.001f * std::pow(5.f, detail-1);
-            int gr = float(featherRadius) / float(6 - LIM(detail, 1, 4));
+            const float eps = 0.001f;// * std::pow(5.f, detail-1);
+            //int gr = float(radius + (featherRadius - radius) / 2.f) / float(6 - LIM(detail, 1, 4));
+            int gr = (radius * 0.2f); // * detail;
 
             for (int y = 0; y < srcY.height(); ++y) {
                 for (int x = 0; x < srcY.width(); ++x) {
@@ -330,6 +353,8 @@ public:
 
             guidedFilter(srcY, srcY, srcY, gr, eps, false);
             guidedFilter(dstY, dstY, dstY, gr, eps, false);
+
+            detail_blend = 0.4f + 0.2f * (detail - 1);
         }
 
         int srcImgY = intersectionArea.y1 - imgArea.y1;
@@ -343,14 +368,21 @@ public:
                 float dx = float(x - spotArea.x1) - featherRadius;
                 float r = sqrt(dx * dx + dy * dy);
 
-                if (r >= featherRadius) {
+                // if (r >= featherRadius) {
+                //     ++srcImgX;
+                //     ++dstImgX;
+                //     continue;
+                // }
+                float blend = opacity;
+                if (r > radius) {
+                    //blend = LIM01(blend * (featherRadius - r) / (featherRadius - radius));
+                    blend = LIM01(blend * feather_weight(r));
+                }
+
+                if (blend < 1e-3f) {
                     ++srcImgX;
                     ++dstImgX;
                     continue;
-                }
-                float blend = opacity;
-                if (r > radius) {
-                    blend = LIM01(blend * (featherRadius - r) / (featherRadius - radius));
                 }
 
                 if (detail == 0) {
@@ -375,11 +407,12 @@ public:
                     float dv = dr - dY;
 
                     float sY_base = srcY[srcImgY][srcImgX] * 65535.f;
+                    float sY_detail = sY - sY_base;
 
                     float dY_base = dstY[dstImgY][dstImgX] * 65535.f;
                     float dY_detail = dY - dY_base;
 
-                    float res_Y = sY_base + dY_detail;
+                    float res_Y = sY_base + intp(detail_blend, dY_detail, sY_detail);
                     dY = intp(blend, res_Y, dY);
                     du = intp(blend, su, du);
                     dv = intp(blend, sv, dv);
