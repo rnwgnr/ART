@@ -223,13 +223,6 @@ public:
     
         visibleGeometry.push_back(pen_);
 
-        // Stick a dummy rectangle over the whole image in mouseOverGeometry.
-        // This is to make sure the getCursor() call is fired everywhere.
-        Rectangle *imgRect = new Rectangle();
-        imgRect->filled = true;
-        mouseOverGeometry.push_back(imgRect);
-
-
         const auto set_btn_style =
             [](Gtk::Button *w) -> void
             {
@@ -356,10 +349,6 @@ public:
         for (auto geometry : visibleGeometry) {
             delete geometry;
         }
-
-        for (auto geometry : mouseOverGeometry) {
-            delete geometry;
-        }        
     }
 
     void adjusterChanged(Adjuster *a, double newval)
@@ -680,14 +669,13 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     list->set_model(list_model_);
     list->set_size_request(-1, 150);
     list->set_can_focus(false);
+    list->append_column(list_enabled_column_);
     list->append_column("#", list_model_columns_->id);
+    list->append_column(M("TP_LABMASKS_MASK"), list_model_columns_->mask);
     for (int i = 0; i < n; ++i) {
         int col = list->append_column(cp_->getColumnHeader(i), list_model_columns_->cols[i]);
         list->get_column(col-1)->set_expand(true);
     }
-    /*int col =*/ list->append_column(M("TP_LABMASKS_MASK"), list_model_columns_->mask);
-    //list->get_column(col-1)->set_expand(true);
-    list->append_column(list_enabled_column_);
     list->set_activate_on_single_click(true);
     selectionConn = list->get_selection()->signal_changed().connect(sigc::mem_fun(this, &LabMasksPanel::onSelectionChanged));
     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
