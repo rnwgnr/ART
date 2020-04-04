@@ -2638,6 +2638,8 @@ void ProcParams::setDefaults()
     exif.clear();
     iptc.clear();
 
+    spot = SpotParams();
+
     rank = 0;
     colorlabel = 0;
     inTrash = false;
