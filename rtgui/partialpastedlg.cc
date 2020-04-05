@@ -51,6 +51,7 @@ std::vector<ToggleInfo> get_toggles(ParamsEdited &pedited)
         {"PARTIALPASTE_TM_FATTAL", &pedited.fattal, 0},
         {"PARTIALPASTE_TM_LOG", &pedited.logenc, 0},
 
+        {"PARTIALPASTE_SPOT", &pedited.spot, 1},
         {"PARTIALPASTE_SHARPENING", &pedited.sharpening, 1},
         {"PARTIALPASTE_DIRPYRDENOISE", &pedited.denoise, 1},
         {"PARTIALPASTE_IMPULSEDENOISE", &pedited.impulseDenoise, 1},

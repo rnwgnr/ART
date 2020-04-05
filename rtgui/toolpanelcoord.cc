@@ -95,6 +95,8 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     smoothing = Gtk::manage(new Smoothing());
     // cbdl = Gtk::manage(new DirPyrEqualizer());
     filmNegative        = Gtk::manage (new FilmNegative ());
+    spot                = Gtk::manage (new Spot());
+
 
     // So Demosaic, Line noise filter, Green Equilibration, Ca-Correction (garder le nom de section identique!) and Black-Level will be moved in a "Bayer sensor" tool,
     // and a separate Demosaic and Black Level tool will be created in an "X-Trans sensor" tool
@@ -114,6 +116,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     addfavoritePanel(exposurePanel, logenc);
 
     // details
+    addfavoritePanel(detailsPanel, spot);
     addfavoritePanel(detailsPanel, sharpening);
     addfavoritePanel(detailsPanel, denoise);
     addfavoritePanel(detailsPanel, impulsedenoise);
@@ -407,6 +410,35 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
     }
 
 }
+
+void ToolPanelCoordinator::setTweakOperator (rtengine::TweakOperator *tOperator)
+{
+    if (ipc && tOperator) {
+        ipc->setTweakOperator(tOperator);
+    }
+}
+
+void ToolPanelCoordinator::unsetTweakOperator (rtengine::TweakOperator *tOperator)
+{
+    if (ipc && tOperator) {
+        ipc->unsetTweakOperator(tOperator);
+    }
+}
+
+void ToolPanelCoordinator::refreshPreview (const rtengine::ProcEvent& event)
+{
+    if (!ipc) {
+        return;
+    }
+
+    ProcParams* params = ipc->beginUpdateParams ();
+    for (auto toolPanel : toolPanels) {
+        toolPanel->write (params);
+    }
+
+    ipc->endUpdateParams (event);   // starts the IPC processing
+}
+
 
 
 void ToolPanelCoordinator::panelChanged(const rtengine::ProcEvent& event, const Glib::ustring& descr)

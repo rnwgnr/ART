@@ -37,6 +37,9 @@ using namespace std;
 
 namespace rtengine { namespace procparams {
 
+const short SpotParams::minRadius = 5;
+const short SpotParams::maxRadius = 200;
+
 //-----------------------------------------------------------------------------
 // KeyFile
 //-----------------------------------------------------------------------------
@@ -1364,6 +1367,59 @@ bool TextureBoostParams::Region::operator!=(const Region &other) const
     return !(*this == other);
 }
 
+SpotEntry::SpotEntry() :
+    radius(25),
+    feather(1.f),
+    opacity(1.f),
+    detail(0)
+{
+}
+float SpotEntry::getFeatherRadius() const
+{
+    return radius * (1.f + feather);
+}
+
+bool SpotEntry::operator ==(const SpotEntry& other) const
+{
+    return other.sourcePos == sourcePos
+        && other.targetPos == targetPos
+        && other.radius == radius
+        && other.feather == feather
+        && other.opacity == opacity
+        && other.detail == detail;
+}
+
+bool SpotEntry::operator !=(const SpotEntry& other) const
+{
+    return !(*this == other);
+}
+
+
+SpotParams::SpotParams() :
+    enabled(false)
+{
+    entries.clear ();
+}
+
+bool SpotParams::operator ==(const SpotParams& other) const
+{
+    if (enabled != other.enabled || entries.size() != other.entries.size()) {
+        return false;
+    }
+
+    size_t i = 0;
+    for (auto entry : entries) {
+        if (entry != other.entries[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool SpotParams::operator !=(const SpotParams& other) const
+{
+    return !(*this == other);
+}
 
 TextureBoostParams::TextureBoostParams() :
     enabled(false),
@@ -2548,6 +2604,8 @@ void ProcParams::setDefaults()
     exif.clear();
     iptc.clear();
 
+    spot = SpotParams();
+
     rank = 0;
     colorlabel = 0;
     inTrash = false;
@@ -3223,6 +3281,28 @@ int ProcParams::save(bool save_general,
                 }
             }
         }
+    //Spot Removal
+        if(RELEVANT_(spot)){
+            //Spot removal
+            saveToKeyfile("Spot Removal", "Enabled", spot.enabled, keyFile);
+            for (size_t i = 0; i < spot.entries.size (); ++i) {
+                std::vector<double> entry = {
+                    double(spot.entries[i].sourcePos.x),
+                    double(spot.entries[i].sourcePos.y),
+                    double(spot.entries[i].targetPos.x),
+                    double(spot.entries[i].targetPos.y),
+                    double(spot.entries[i].radius),
+                    double(spot.entries[i].feather),
+                    double(spot.entries[i].opacity),
+                    double(spot.entries[i].detail)
+                };
+
+                std::stringstream ss;
+                ss << "Spot" << (i + 1);
+
+                saveToKeyfile("Spot Removal", ss.str(), entry, keyFile);
+            }
+        }
     } catch (Glib::KeyFileError&) {
         return 1;
     }
@@ -3878,6 +3958,33 @@ int ProcParams::load(bool load_general,
                 }
             }
         }
+        
+	if (keyFile.has_group ("Spot Removal") && RELEVANT_(spot)) {
+            assignFromKeyfile(keyFile, "Spot Removal", "Enabled", spot.enabled);
+            int i = 0;
+            do {
+                std::stringstream ss;
+                ss << "Spot" << (i++ + 1);
+
+                if (keyFile.has_key ("Spot Removal", ss.str())) {
+                    Glib::ArrayHandle<double> entry = keyFile.get_double_list("Spot Removal", ss.str());
+                    const double epsilon = 0.001;  // to circumvent rounding of integer saved as double
+                    SpotEntry se;
+
+                    if (entry.size() == 8) {
+                        se.sourcePos.set(int(entry.data()[0] + epsilon), int(entry.data()[1] + epsilon));
+                        se.targetPos.set(int(entry.data()[2] + epsilon), int(entry.data()[3] + epsilon));
+                        se.radius  = LIM<int>(int(entry.data()[4] + epsilon), SpotParams::minRadius, SpotParams::maxRadius);
+                        se.feather = float(entry.data()[5]);
+                        se.opacity = float(entry.data()[6]);
+                        se.detail = entry.data()[7];
+                        spot.entries.push_back(se);
+                    }
+                } else {
+                    break;
+                }
+            } while (1);
+        }
 
         if (keyFile.has_group("PostResizeSharpening") && RELEVANT_(prsharpening)) {
             assignFromKeyfile(keyFile, "PostResizeSharpening", "Enabled", prsharpening.enabled);
@@ -4520,7 +4627,8 @@ bool ProcParams::operator ==(const ProcParams& other) const
         && grain == other.grain
         && smoothing == other.smoothing
         && colorcorrection == other.colorcorrection
-        && filmNegative == other.filmNegative;
+        && filmNegative == other.filmNegative
+        && spot == other.spot;
 }
 
 bool ProcParams::operator !=(const ProcParams& other) const

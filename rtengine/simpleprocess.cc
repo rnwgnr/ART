@@ -258,6 +258,11 @@ private:
             }
         }
 
+        // Spot Removal
+        if (params.spot.enabled && !params.spot.entries.empty ()) {
+            ipf.removeSpots (img, imgsrc, params.spot.entries, pp, currWB, nullptr, tr);
+        }
+
         if (flush) {
             imgsrc->flushRawData();
             imgsrc->flushRGB();

@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <map>
 #include <type_traits>
 #include <vector>
 #include <array>
@@ -28,6 +29,7 @@
 #include <glibmm.h>
 #include <lcms2.h>
 
+#include "coord.h"
 #include "noncopyable.h"
 #include "../rtgui/paramsedited.h"
 
@@ -1014,6 +1016,42 @@ struct ResizeParams {
     int get_height() const;
 };
 
+
+/**
+  * Parameters entry
+  */
+struct SpotEntry {
+    Coord sourcePos;
+    Coord targetPos;
+    int radius;
+    float feather;
+    float opacity;
+    int detail;
+
+    SpotEntry();
+    float getFeatherRadius() const;
+
+    bool operator ==(const SpotEntry& other) const;
+    bool operator !=(const SpotEntry& other) const;
+};
+
+/**
+  * Parameters of the dust removal tool
+  */
+struct SpotParams {
+    bool enabled;
+    std::vector<SpotEntry> entries;
+
+    // the following constant can be used for experimentation before the final merge
+    static const short minRadius;
+    static const short maxRadius;
+
+    SpotParams();
+
+    bool operator ==(const SpotParams& other) const;
+    bool operator !=(const SpotParams& other) const;
+};
+
 /**
   * Parameters of the color spaces used during the processing
   */
@@ -1422,6 +1460,7 @@ public:
     BlackWhiteParams        blackwhite;      ///< Black&  White parameters
     HSLEqualizerParams      hsl;
     ResizeParams            resize;          ///< Resize parameters
+    SpotParams              spot;            ///< Spot removal tool
     ColorManagementParams   icm;             ///< profiles/color spaces used during the image processing
     RAWParams               raw;             ///< RAW parameters before demosaicing
     FilmSimulationParams    filmSimulation;  ///< film simulation parameters

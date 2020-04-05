@@ -83,6 +83,7 @@
 #include "filmnegative.h"
 #include "guiutils.h"
 #include "../rtengine/noncopyable.h"
+#include "spot.h"
 
 class ImageEditorCoordinator;
 
@@ -128,6 +129,7 @@ protected:
     ToneCurve* toneCurve;
     ToneEqualizer *toneEqualizer;
     LocalContrast *localContrast;
+    Spot* spot;
     Defringe* defringe;
     ImpulseDenoise* impulsedenoise;
     Denoise* denoise;
@@ -244,7 +246,10 @@ public:
     }
 
     // toolpanellistener interface
+    void refreshPreview(const rtengine::ProcEvent& event) override;
     void panelChanged(const rtengine::ProcEvent& event, const Glib::ustring& descr) override;
+    void setTweakOperator (rtengine::TweakOperator *tOperator) override;
+    void unsetTweakOperator (rtengine::TweakOperator *tOperator) override;
 
     void imageTypeChanged (bool isRaw, bool isBayer, bool isXtrans, bool isMono = false) override;
 

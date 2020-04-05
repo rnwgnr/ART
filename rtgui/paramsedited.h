@@ -83,6 +83,8 @@ public:
     bool exif;
     bool iptc;
 
+    bool spot;
+
     explicit ParamsEdited(bool value = false);
 
     void set(bool v);

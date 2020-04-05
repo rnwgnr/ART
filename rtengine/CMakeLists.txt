@@ -33,6 +33,7 @@ set(RTENGINESOURCEFILES
     CA_correct_RT.cc
     FTblockDN.cc
     PF_correct_RT.cc
+    alpha.cc
     ahd_demosaic_RT.cc
     amaze_demosaic_RT.cc
     cJSON.c
@@ -110,6 +111,7 @@ set(RTENGINESOURCEFILES
     rt_algo.cc
     rtthumbnail.cc
     simpleprocess.cc
+    ipspot.cc
     slicer.cc
     stdimagesource.cc
     utils.cc

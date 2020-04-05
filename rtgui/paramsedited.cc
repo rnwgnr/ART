@@ -81,4 +81,5 @@ void ParamsEdited::set(bool v)
     metadata = v;
     exif = v;
     iptc = v;
+    spot = v;
 }
