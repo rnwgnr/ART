@@ -858,15 +858,19 @@ private:
             return false;
         }
 
-        char *buf = new char[length + 1];
-        fseek(f, 0, SEEK_SET);
-        length = fread(buf, 1, length, f);
-        buf[length] = 0;
+        cJSON *root = nullptr;
+        {
+            std::vector<char> bufvec(length + 1);
+            char *buf = &bufvec[0];
+            fseek(f, 0, SEEK_SET);
+            length = fread(buf, 1, length, f);
+            buf[length] = 0;
 
-        fclose(f);
+            fclose(f);
 
-        cJSON_Minify(buf);
-        cJSON *root = cJSON_Parse(buf);
+            cJSON_Minify(buf);
+            root = cJSON_Parse(buf);
+        }
 
         if (!root) {
             if (settings->verbose) {
@@ -875,8 +879,6 @@ private:
 
             return false;
         }
-
-        delete[] buf;
 
         cJSON *js = cJSON_GetObjectItem(root, "working_spaces");
 
