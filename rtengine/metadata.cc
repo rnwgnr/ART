@@ -23,12 +23,12 @@
 #include <iostream>
 #include <unistd.h>
 #include <giomm.h>
+#include <set>
 
 #ifdef WIN32
 #  include <windows.h>
 #  include <io.h>
 #  include <fcntl.h>
-#  include <set>
 #endif
 
 #include "metadata.h"
@@ -467,22 +467,87 @@ void Exiv2Metadata::remove_unwanted(Exiv2::ExifData &dst) const
     Exiv2::ExifThumb thumb(dst);
     thumb.erase();
 
+    static const std::set<std::string> badtags = {
+        "Exif.Image.Orientation",
+        "Exif.Image2.JPEGInterchangeFormat",
+        "Exif.Image2.JPEGInterchangeFormatLength",
+        "Exif.Image.NewSubfileType",
+        "Exif.Image.SubfileType",
+        "Exif.Image.ImageWidth",
+        "Exif.Image.ImageLength",
+        "Exif.Image.BitsPerSample",
+        "Exif.Image.Compression",
+        "Exif.Image.PhotometricInterpretation",
+        "Exif.Image.Thresholding",
+        "Exif.Image.CellWidth",
+        "Exif.Image.CellLength",
+        "Exif.Image.FillOrder",
+        "Exif.Image.StripOffsets",
+        "Exif.Image.Orientation",
+        "Exif.Image.SamplesPerPixel",
+        "Exif.Image.RowsPerStrip",
+        "Exif.Image.StripByteCounts",
+        "Exif.Image.XResolution",
+        "Exif.Image.YResolution",
+        "Exif.Image.PlanarConfiguration",
+        "Exif.Image.GrayResponseUnit",
+        "Exif.Image.GrayResponseCurve",
+        "Exif.Image.T4Options",
+        "Exif.Image.T6Options",
+        "Exif.Image.ResolutionUnit",
+        "Exif.Image.PageNumber",
+        "Exif.Image.Predictor",
+        "Exif.Image.TileWidth",
+        "Exif.Image.TileLength",
+        "Exif.Image.TileOffsets",
+        "Exif.Image.TileByteCounts",
+        "Exif.Image.SubIFDs",
+        "Exif.Image.ExtraSamples",
+        "Exif.Image.SampleFormat",
+        "Exif.Image.SMinSampleValue",
+        "Exif.Image.SMaxSampleValue",
+        "Exif.Image.Indexed",
+        "Exif.Image.JPEGTables",
+        "Exif.Image.OPIProxy",
+        "Exif.Image.JPEGProc",
+        "Exif.Image.JPEGInterchangeFormat",
+        "Exif.Image.JPEGInterchangeFormatLength",
+        "Exif.Image.JPEGRestartInterval",
+        "Exif.Image.JPEGLosslessPredictors",
+        "Exif.Image.JPEGPointTransforms",
+        "Exif.Image.JPEGQTables",
+        "Exif.Image.JPEGDCTables",
+        "Exif.Image.JPEGACTables",
+        "Exif.Image.TIFFEPStandardID",
+        "Exif.Image.DNGVersion",
+        "Exif.Image.DNGBackwardVersion",
+        "Exif.Image.DNGPrivateData",
+        "Exif.Image.OriginalRawFileData",
+        "Exif.Image.SubTileBlockSize",
+        "Exif.Image.RowInterleaveFactor",
+        "Exif.Photo.ComponentsConfiguration",
+        "Exif.Photo.CompressedBitsPerPixel"
+    };
+
     static const std::vector<std::string> badpatterns = {
-        "Exif.Image.",
         "Exif.SubImage"
     };
     
     for (auto it = dst.begin(); it != dst.end(); ) {
-        bool found = false;
-        for (auto &p : badpatterns) {
-            if (it->key().find(p) == 0) {
-                it = dst.erase(it);
-                found = true;
-                break;
+        if (badtags.find(it->key()) != badtags.end()) {
+            it = dst.erase(it);
+        } else {
+            bool found = false;
+            for (auto &p : badpatterns) {
+                if (it->key().find(p) == 0) {
+                    it = dst.erase(it);
+                    found = true;
+                    break;
+                }
             }
-        }
-        if (!found) {
-            ++it;
+            if (!found) {
+                ++it;
+            }
         }
     }    
 }
