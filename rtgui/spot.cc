@@ -232,9 +232,16 @@ void Spot::enabledChanged ()
     }
 }
 
-void Spot::setEditProvider (EditDataProvider* provider)
+void Spot::setEditProvider(EditDataProvider* provider)
 {
     EditSubscriber::setEditProvider(provider);
+    if (provider) {
+        int imW, imH;
+        provider->getImageSize(imW, imH);
+
+        static_cast<Rectangle *>(whole_area_rectangle.get())->bottomRight.x = imW;
+        static_cast<Rectangle *>(whole_area_rectangle.get())->bottomRight.y = imH;
+    }
 }
 
 void Spot::editToggled ()
@@ -331,7 +338,6 @@ void Spot::updateGeometry()
 
         static_cast<Rectangle *>(whole_area_rectangle.get())->bottomRight.x = imW;
         static_cast<Rectangle *>(whole_area_rectangle.get())->bottomRight.y = imH;
-
         source_x->setLimits(0, imW, 1, 0);
         target_x->setLimits(0, imW, 1, 0);
         source_y->setLimits(0, imH, 1, 0);
