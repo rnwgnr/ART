@@ -29,6 +29,215 @@
 
 namespace rtengine {
 
+namespace {
+
+inline float find_sigma(float r, float f)
+{
+    float m = 0.1f;
+    while (true) {
+        float sigma = 5.f * SQR(f * m);
+        float val = xexpf((-SQR(std::max(f - r, 0.f)) / sigma));
+        if (val < 5e-3f) {
+            return sigma;
+        }
+        m *= 0.9f;
+    }
+}
+
+inline float feather_factor(float x, float radius, float sigma)
+{
+    return LIM01(xexpf((-SQR(std::max(x - radius, 0.f)) / sigma)));
+}
+
+
+//-----------------------------------------------------------------------------
+// adapted from gimpheal.c in GIMP
+/* GIMP - The GNU Image Manipulation Program
+ * Copyright (C) 1995 Spencer Kimball and Peter Mattis
+ *
+ * gimpheal.c
+ * Copyright (C) Jean-Yves Couleaud <cjyves@free.fr>
+ * Copyright (C) 2013 Loren Merritt
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+float heal_laplace_iteration(float *pixels, float *Adiag, int *Aidx, float w,
+                             int nmask, int depth)
+{
+    int i, k;
+    float err = 0;
+
+    for (i = 0; i < nmask; i++) {
+        int j0 = Aidx[i * 5 + 0];
+        int j1 = Aidx[i * 5 + 1];
+        int j2 = Aidx[i * 5 + 2];
+        int j3 = Aidx[i * 5 + 3];
+        int j4 = Aidx[i * 5 + 4];
+        float a = Adiag[i];
+
+        for (k = 0; k < depth; k++) {
+            float diff = (a * pixels[j0 + k] -
+                          w * (pixels[j1 + k] +
+                               pixels[j2 + k] +
+                               pixels[j3 + k] +
+                               pixels[j4 + k]));
+
+            pixels[j0 + k] -= diff;
+            err += diff * diff;
+        }
+    }
+
+    return err;
+}
+
+// Solve the laplace equation for pixels and store the result in-place.
+void heal_laplace_loop(float *pixels, int height, /*int depth, */ int width /*, uchar *mask*/)
+{
+    const int depth = 3;
+    
+    /* Tolerate a total deviation-from-smoothness of 0.1 LSBs at 8bit depth. */
+    constexpr float EPSILON = 0.1f / 65535.f;
+    constexpr int MAX_ITER = 500;
+
+    int i, j, iter, parity, nmask, zero;
+    std::vector<float> Adiag_vec(width * height);
+    std::vector<int> Aidx_vec(5 * width * height);
+    float w;
+
+    float *Adiag = &Adiag_vec[0];
+    int *Aidx = &Aidx_vec[0];
+
+    /* All off-diagonal elements of A are either -1 or 0. We could store it as a
+     * general-purpose sparse matrix, but that adds some unnecessary overhead to
+     * the inner loop. Instead, assume exactly 4 off-diagonal elements in each
+     * row, all of which have value -1. Any row that in fact wants less than 4
+     * coefs can put them in a dummy column to be multiplied by an empty pixel.
+     */
+    zero = depth * width * height;
+    memset(pixels + zero, 0, depth * sizeof (float));
+
+    /* Construct the system of equations.
+     * 
+     * Arrange Aidx in checkerboard order, so that a single linear pass over
+     * that array results updating all of the red cells and then all of the
+     * black cells.
+     */
+    nmask = 0;
+    for (parity = 0; parity < 2; parity++) {
+        for (i = 0; i < height; i++) {
+            for (j = (i&1)^parity; j < width; j+=2) {
+                if (true) {//mask[j + i * width]) {
+#define A_NEIGHBOR(o,di,dj)                                             \
+                    if ((dj<0 && j==0) || (dj>0 && j==width-1) || (di<0 && i==0) || (di>0 && i==height-1)) \
+                        Aidx[o + nmask * 5] = zero;                     \
+                    else                                                \
+                        Aidx[o + nmask * 5] = ((i + di) * width + (j + dj)) * depth;
+
+                    /* Omit Dirichlet conditions for any neighbors off the
+                     * edge of the canvas.
+                     */
+                    Adiag[nmask] = 4 - (i==0) - (j==0) - (i==height-1) - (j==width-1);
+                    A_NEIGHBOR (0,  0,  0);
+                    A_NEIGHBOR (1,  0,  1);
+                    A_NEIGHBOR (2,  1,  0);
+                    A_NEIGHBOR (3,  0, -1);
+                    A_NEIGHBOR (4, -1,  0);
+                    nmask++;
+                }
+            }
+        }
+    }
+
+    /* Empirically optimal over-relaxation factor. (Benchmarked on
+     * round brushes, at least. I don't know whether aspect ratio
+     * affects it.)
+     */
+    w = 2.0 - 1.0 / (0.1575 * sqrt(nmask) + 0.8);
+    w *= 0.25;
+    for (i = 0; i < nmask; i++) {
+        Adiag[i] *= w;
+    }
+
+    /* Gauss-Seidel with successive over-relaxation */
+    for (iter = 0; iter < MAX_ITER; iter++) {
+        float err = heal_laplace_iteration(pixels, Adiag, Aidx, w, nmask, depth);
+        if (err < EPSILON * EPSILON * w * w) {
+            break;
+        }
+    }
+}
+
+
+void heal(Imagefloat *src, Imagefloat *dst,
+          int src_x, int src_y, int dst_x, int dst_y,
+          int x1, int x2, int y1, int y2,
+          int center_x, int center_y,
+          float radius, float featherRadius, float opacity)
+{
+    const int W = x2 - x1 + 1;
+    const int H = y2 - y1 + 1;
+
+    std::vector<float> diff_vec(4 + (W * H + 1) * 3);
+    float *diff = reinterpret_cast<float *>((reinterpret_cast<uintptr_t>(&diff_vec[0]) + 15) & ~15);
+    
+    int i = 0;
+    for (int y = 0; y < H; ++y) {
+        int sy = src_y + y;
+        int dy = dst_y + y;
+        for (int x = 0; x < W; ++x) {
+            int sx = src_x + x;
+            int dx = dst_x + x;
+            diff[i++] = dst->r(dy, dx) - src->r(sy, sx);
+            diff[i++] = dst->g(dy, dx) - src->g(sy, sx);
+            diff[i++] = dst->b(dy, dx) - src->b(sy, sx);
+        }
+    }
+    
+    heal_laplace_loop(diff, H, W);
+
+    const float sigma = find_sigma(radius, featherRadius);
+
+    i = 0;
+    int sy = src_y;
+    int dy = dst_y;
+    for (int y = y1; y <= y2; ++y) {
+        float ry = float(y - center_y) - featherRadius;
+
+        int sx = src_x;
+        int dx = dst_x;
+        for (int x = x1; x <= x2; ++x) {
+            float rx = float(x - center_x) - featherRadius;
+            float r = sqrt(SQR(rx) + SQR(ry));
+            float blend = opacity * (r <= radius ? 1.f : feather_factor(r, radius, sigma));
+            dst->r(dy, dx) = intp(blend, src->r(sy, sx) + diff[i++], dst->r(dy, dx));
+            dst->g(dy, dx) = intp(blend, src->g(sy, sx) + diff[i++], dst->g(dy, dx));
+            dst->b(dy, dx) = intp(blend, src->b(sy, sx) + diff[i++], dst->b(dy, dx));
+
+            ++sx;
+            ++dx;
+        }
+        ++sy;
+        ++dy;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+} // namespace
+
+
 class SpotBox {
 public:
     enum class Type {
@@ -307,25 +516,24 @@ public:
             return false;
         }
 
-        const auto find_sigma =
-            [](float r, float f) -> float
-            {
-                float m = 0.1f;
-                while (true) {
-                    float sigma = 5.f * SQR(f * m);
-                    float val = xexpf((-SQR(std::max(f - r, 0.f)) / sigma));
-                    if (val < 5e-3f) {
-                        return sigma;
-                    }
-                    m *= 0.9f;
-                }
-            };
+        if (detail == 4) {
+            int src_y = intersectionArea.y1 - imgArea.y1;
+            int dst_y = destBox.intersectionArea.y1 - destBox.imgArea.y1;
+            int src_x = intersectionArea.x1 - imgArea.x1;
+            int dst_x = destBox.intersectionArea.x1 - destBox.imgArea.x1;
+            int x1 = intersectionArea.x1, x2 = intersectionArea.x2;
+            int y1 = intersectionArea.y1, y2 = intersectionArea.y2;
+            int center_x = spotArea.x1, center_y = spotArea.y1;
+            
+            heal(image, dstImg, src_x, src_y, dst_x, dst_y, x1, x2, y1, y2, center_x, center_y, radius, featherRadius, opacity);
+            return true;
+        }
 
-        const float sigma = find_sigma(radius, featherRadius); //2.f * SQR(featherRadius * 0.1f);
+        const float sigma = find_sigma(radius, featherRadius);
         const auto feather_weight =
             [=](float r) -> float
             {
-                return LIM01(xexpf((-SQR(std::max(r - radius, 0.f)) / sigma)));
+                return feather_factor(r, radius, sigma);
             };
 
         array2D<float> srcY;
