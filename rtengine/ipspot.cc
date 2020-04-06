@@ -73,111 +73,77 @@ inline float feather_factor(float x, float radius, float sigma)
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-float heal_laplace_iteration(float *pixels, float *Adiag, int *Aidx, float w,
-                             int nmask, int depth)
+void heal_laplace_loop(Imagefloat *img)
 {
-    int i, k;
-    float err = 0;
+    constexpr float EPSILON = 0.1f;
+    constexpr int MAX_ITER = 1000;
 
-    for (i = 0; i < nmask; i++) {
-        int j0 = Aidx[i * 5 + 0];
-        int j1 = Aidx[i * 5 + 1];
-        int j2 = Aidx[i * 5 + 2];
-        int j3 = Aidx[i * 5 + 3];
-        int j4 = Aidx[i * 5 + 4];
-        float a = Adiag[i];
-
-        for (k = 0; k < depth; k++) {
-            float diff = (a * pixels[j0 + k] -
-                          w * (pixels[j1 + k] +
-                               pixels[j2 + k] +
-                               pixels[j3 + k] +
-                               pixels[j4 + k]));
-
-            pixels[j0 + k] -= diff;
-            err += diff * diff;
-        }
-    }
-
-    return err;
-}
-
-// Solve the laplace equation for pixels and store the result in-place.
-void heal_laplace_loop(float *pixels, int height, /*int depth, */ int width /*, uchar *mask*/)
-{
-    const int depth = 3;
+    const int width = img->getWidth();
+    const int height = img->getHeight();
     
-    /* Tolerate a total deviation-from-smoothness of 0.1 LSBs at 8bit depth. */
-    constexpr float EPSILON = 0.1f / 65535.f;
-    constexpr int MAX_ITER = 500;
+    constexpr float w = 1.2f;
+    constexpr float w1 = 1.f - w;
+    constexpr float w2 = w / 4.f;
 
-    int i, j, iter, parity, nmask, zero;
-    std::vector<float> Adiag_vec(width * height);
-    std::vector<int> Aidx_vec(5 * width * height);
-    float w;
+    const auto next =
+        [&](float **chan, int x, int y) -> float
+        {
+            float &cur = chan[y][x];
+            float left = chan[y][x-1];
+            float top = chan[y-1][x];
+            float right = chan[y][x+1];
+            float bottom = chan[y+1][x];
+            float upd = cur * w1 + (left + top + right + bottom) * w2;
+            float e = fabs(upd) > 1e-5f ? fabs(upd - cur) / fabs(upd) : 0.f;
+            cur = upd;
+            return e;
+        };
 
-    float *Adiag = &Adiag_vec[0];
-    int *Aidx = &Aidx_vec[0];
+#ifdef __SSE2__
+    const vfloat w1v = F2V(w1);
+    const vfloat w2v = F2V(w2);
+    const vfloat floorv = F2V(1e-5f);
 
-    /* All off-diagonal elements of A are either -1 or 0. We could store it as a
-     * general-purpose sparse matrix, but that adds some unnecessary overhead to
-     * the inner loop. Instead, assume exactly 4 off-diagonal elements in each
-     * row, all of which have value -1. Any row that in fact wants less than 4
-     * coefs can put them in a dummy column to be multiplied by an empty pixel.
-     */
-    zero = depth * width * height;
-    memset(pixels + zero, 0, depth * sizeof (float));
+    const auto vnext =
+        [&](float **chan, int x, int y) -> float
+        {
+            vfloat cur = LVFU(chan[y][x]);
+            vfloat left = LVFU(chan[y][x-1]);
+            vfloat top = LVFU(chan[y-1][x]);
+            vfloat right = LVFU(chan[y][x+1]);
+            vfloat bottom = LVFU(chan[y+1][x]);
+            vfloat upd = cur * w1v + (left + top + right + bottom) * w2v;
+            vfloat e = vabsf(upd) > floorv ? vabsf(upd - cur) / vabsf(upd) : ZEROV;
+            STVFU(chan[y][x], upd);
+            return max(e[0], e[1], e[2], e[3]);
+        };
+#endif
 
-    /* Construct the system of equations.
-     * 
-     * Arrange Aidx in checkerboard order, so that a single linear pass over
-     * that array results updating all of the red cells and then all of the
-     * black cells.
-     */
-    nmask = 0;
-    for (parity = 0; parity < 2; parity++) {
-        for (i = 0; i < height; i++) {
-            for (j = (i&1)^parity; j < width; j+=2) {
-                if (true) {//mask[j + i * width]) {
-#define A_NEIGHBOR(o,di,dj)                                             \
-                    if ((dj<0 && j==0) || (dj>0 && j==width-1) || (di<0 && i==0) || (di>0 && i==height-1)) \
-                        Aidx[o + nmask * 5] = zero;                     \
-                    else                                                \
-                        Aidx[o + nmask * 5] = ((i + di) * width + (j + dj)) * depth;
-
-                    /* Omit Dirichlet conditions for any neighbors off the
-                     * edge of the canvas.
-                     */
-                    Adiag[nmask] = 4 - (i==0) - (j==0) - (i==height-1) - (j==width-1);
-                    A_NEIGHBOR (0,  0,  0);
-                    A_NEIGHBOR (1,  0,  1);
-                    A_NEIGHBOR (2,  1,  0);
-                    A_NEIGHBOR (3,  0, -1);
-                    A_NEIGHBOR (4, -1,  0);
-                    nmask++;
-                }
+    for (int iter = 0; iter < MAX_ITER; ++iter) {
+        float err = 0.0;
+        for (int y = 1; y < height-1; ++y) {
+            int x = 1;
+#ifdef __SSE2__
+            for (; x < width-1-3; x+=4) {
+                float er = vnext(img->r.ptrs, x, y);
+                float eg = vnext(img->g.ptrs, x, y);
+                float eb = vnext(img->b.ptrs, x, y);
+                err = max(err, er, eg, eb);
+            }
+#endif
+            for (; x < width-1; ++x) {
+                float er = next(img->r.ptrs, x, y);
+                float eg = next(img->g.ptrs, x, y);
+                float eb = next(img->b.ptrs, x, y);
+                err = max(err, er, eg, eb);
             }
         }
-    }
-
-    /* Empirically optimal over-relaxation factor. (Benchmarked on
-     * round brushes, at least. I don't know whether aspect ratio
-     * affects it.)
-     */
-    w = 2.0 - 1.0 / (0.1575 * sqrt(nmask) + 0.8);
-    w *= 0.25;
-    for (i = 0; i < nmask; i++) {
-        Adiag[i] *= w;
-    }
-
-    /* Gauss-Seidel with successive over-relaxation */
-    for (iter = 0; iter < MAX_ITER; iter++) {
-        float err = heal_laplace_iteration(pixels, Adiag, Aidx, w, nmask, depth);
-        if (err < EPSILON * EPSILON * w * w) {
-            break;
+        if (err < EPSILON) {
+            return;
         }
     }
 }
+
 
 
 void heal(Imagefloat *src, Imagefloat *dst,
@@ -189,27 +155,22 @@ void heal(Imagefloat *src, Imagefloat *dst,
     const int W = x2 - x1 + 1;
     const int H = y2 - y1 + 1;
 
-    std::vector<float> diff_vec(4 + (W * H + 1) * 3);
-    float *diff = reinterpret_cast<float *>((reinterpret_cast<uintptr_t>(&diff_vec[0]) + 15) & ~15);
-    
-    int i = 0;
+    Imagefloat diff(W, H);
     for (int y = 0; y < H; ++y) {
         int sy = src_y + y;
         int dy = dst_y + y;
         for (int x = 0; x < W; ++x) {
             int sx = src_x + x;
             int dx = dst_x + x;
-            diff[i++] = dst->r(dy, dx) - src->r(sy, sx);
-            diff[i++] = dst->g(dy, dx) - src->g(sy, sx);
-            diff[i++] = dst->b(dy, dx) - src->b(sy, sx);
+            diff.r(y, x) = dst->r(dy, dx) - src->r(sy, sx);
+            diff.g(y, x) = dst->g(dy, dx) - src->g(sy, sx);
+            diff.b(y, x) = dst->b(dy, dx) - src->b(sy, sx);
         }
     }
-    
-    heal_laplace_loop(diff, H, W);
+    heal_laplace_loop(&diff);
 
     const float sigma = find_sigma(radius, featherRadius);
 
-    i = 0;
     int sy = src_y;
     int dy = dst_y;
     for (int y = y1; y <= y2; ++y) {
@@ -221,10 +182,17 @@ void heal(Imagefloat *src, Imagefloat *dst,
             float rx = float(x - center_x) - featherRadius;
             float r = sqrt(SQR(rx) + SQR(ry));
             float blend = opacity * (r <= radius ? 1.f : feather_factor(r, radius, sigma));
-            dst->r(dy, dx) = intp(blend, src->r(sy, sx) + diff[i++], dst->r(dy, dx));
-            dst->g(dy, dx) = intp(blend, src->g(sy, sx) + diff[i++], dst->g(dy, dx));
-            dst->b(dy, dx) = intp(blend, src->b(sy, sx) + diff[i++], dst->b(dy, dx));
+            float dr = diff.r(y-y1, x-x1);
+            float dg = diff.g(y-y1, x-x1);
+            float db = diff.b(y-y1, x-x1);
+            float res_r = src->r(sy, sx) + dr;
+            float res_g = src->g(sy, sx) + dg;
+            float res_b = src->b(sy, sx) + db;
 
+            dst->r(dy, dx) = intp(blend, res_r, dst->r(dy, dx));
+            dst->g(dy, dx) = intp(blend, res_g, dst->g(dy, dx));
+            dst->b(dy, dx) = intp(blend, res_b, dst->b(dy, dx));
+            
             ++sx;
             ++dx;
         }
