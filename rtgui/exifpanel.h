@@ -68,9 +68,9 @@ private:
 
     std::vector<std::pair<std::string, Glib::ustring>> editable_;
 
-    Gtk::TreeModel::Children addTag(const std::string &key, const Glib::ustring &label, const Glib::ustring &value, bool editable, bool edited);
+    void addTag(const std::string &key, const Glib::ustring &label, const Glib::ustring &value, bool editable, bool edited);
     void refreshTags();
-    void resetIt (Gtk::TreeModel::iterator iter);
+    void resetIt(Gtk::TreeModel::iterator iter);
     void resetPressed();
     void resetAllPressed();
     void addPressed();

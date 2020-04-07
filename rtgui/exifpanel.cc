@@ -170,11 +170,11 @@ void ExifPanel::setImageData (const FramesMetaData* id)
 }
 
 
-Gtk::TreeModel::Children ExifPanel::addTag(const std::string &key, const Glib::ustring &label, const Glib::ustring &value, bool editable, bool edited)
+void ExifPanel::addTag(const std::string &key, const Glib::ustring &label, const Glib::ustring &value, bool editable, bool edited)
 {
     auto root = exifTreeModel->children();
 
-    Gtk::TreeModel::Row row = * (exifTreeModel->append (root));
+    Gtk::TreeModel::Row row = *(exifTreeModel->append(root));
     row[exifColumns.editable] = editable;
     row[exifColumns.edited] = edited;
     row[exifColumns.key] = key;
@@ -190,8 +190,6 @@ Gtk::TreeModel::Children ExifPanel::addTag(const std::string &key, const Glib::u
     } else if (editable) {
         row[exifColumns.icon] = keepicon;
     }
-
-    return row.children();
 }
 
 
@@ -236,12 +234,21 @@ void ExifPanel::refreshTags()
                 addTag(pos->key(), pos->tagLabel(), pos->print(&exif), true, edited);
             }
         }
+        std::map<std::string, std::string> keymap;
         for (auto &tag : exif) {
             bool editable = ed.find(tag.key()) != ed.end();
             if (!editable && !tag.tagLabel().empty() && tag.typeId() != Exiv2::undefined &&
                 (tag.typeId() == Exiv2::asciiString || tag.size() < 256)) {
-                addTag(tag.key(), tag.tagLabel(), tag.print(&exif), false, false);
+                std::string lbl = tag.tagLabel();
+                for (auto &c : lbl) {
+                    c = std::tolower(c);
+                }
+                keymap[lbl] = tag.key();
             }
+        }
+        for (auto &p : keymap) {
+            auto &tag = *(exif.findKey(Exiv2::ExifKey(p.second)));
+            addTag(tag.key(), tag.tagLabel(), tag.print(&exif), false, false);
         }
     } catch (std::exception &exc) {
         return;
