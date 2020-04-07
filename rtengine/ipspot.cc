@@ -116,7 +116,7 @@ void heal_laplace_loop(Imagefloat *img)
             vfloat right = LVFU(chan[y][x+1]);
             vfloat bottom = LVFU(chan[y+1][x]);
             vfloat upd = cur * w1v + (left + top + right + bottom) * w2v;
-            vfloat e = vabsf(upd) > floorv ? vabsf(upd - cur) / vabsf(upd) : ZEROV;
+            vfloat e = (vabsf(upd) > floorv) ? (vabsf(upd - cur) / vabsf(upd)) : ZEROV;
             STVFU(chan[y][x], upd);
             return max(e[0], e[1], e[2], e[3]);
         };
