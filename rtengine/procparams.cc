@@ -2606,7 +2606,7 @@ void ProcParams::setDefaults()
 
     spot = SpotParams();
 
-    rank = 0;
+    rank = -1;
     colorlabel = 0;
     inTrash = false;
 
@@ -2662,7 +2662,9 @@ int ProcParams::save(bool save_general,
             keyFile.set_integer("Version", "Version", PPVERSION);
 
             if (RELEVANT_(general)) {
-                saveToKeyfile("General", "Rank", rank, keyFile);
+                if (rank >= 0) {
+                    saveToKeyfile("General", "Rank", rank, keyFile);
+                }
                 saveToKeyfile("General", "ColorLabel", colorlabel, keyFile);
                 saveToKeyfile("General", "InTrash", inTrash, keyFile);
             }
@@ -4807,7 +4809,9 @@ int ProcParamsWithSnapshots::save(const Glib::ustring &fname, const Glib::ustrin
 
         keyfile.set_string("Version", "AppVersion", RTVERSION);
         keyfile.set_integer("Version", "Version", PPVERSION);
-        saveToKeyfile("General", "Rank", master.rank, keyfile);
+        if (master.rank >= 0) {
+            saveToKeyfile("General", "Rank", master.rank, keyfile);
+        }
         saveToKeyfile("General", "ColorLabel", master.colorlabel, keyfile);
         saveToKeyfile("General", "InTrash", master.inTrash, keyfile);
         

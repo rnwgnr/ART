@@ -1129,16 +1129,20 @@ std::string xmp_color2label(int color)
 
 void Thumbnail::saveRating()
 {
+    if (!rating_.edited()) {
+        return;
+    }
+    
     if (options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS) {
-        if (rating_.rank != pparams.master.rank) {
+        if (rating_.rank.edited && rating_.rank != pparams.master.rank) {
             pparams.master.rank = rating_.rank;
             pparamsValid = true;
         }
-        if (rating_.color != pparams.master.colorlabel) {
+        if (rating_.color.edited && rating_.color != pparams.master.colorlabel) {
             pparams.master.colorlabel = rating_.color;
             pparamsValid = true;
         }
-        if (rating_.trash != pparams.master.inTrash) {
+        if (rating_.trash.edited && rating_.trash != pparams.master.inTrash) {
             pparams.master.inTrash = rating_.trash;
             pparamsValid = true;
         }
@@ -1155,20 +1159,6 @@ void Thumbnail::saveRating()
             rtengine::Exiv2Metadata meta;
             meta.xmpData() = std::move(xmp);
             meta.saveToXmp(fn);
-            // if (options.rtSettings.verbose) {
-            //     std::cout << "saving rating for " << fname << ": "
-            //               << "Xmp.xmp.Rating=";
-            //     if (rating_.trash ? rating_.trash.edited : rating_.rank.edited) {
-            //         std::cout << xmp["Xmp.xmp.Rating"].toString();
-            //     } else {
-            //         std::cout << "";
-            //     }
-            //     std::cout << ", Xmp.xmp.Label=";
-            //     if (rating_.color.edited) {
-            //         std::cout << xmp["Xmp.xmp.Label"].toString();
-            //     }
-            //     std::cout << std::endl;
-            // }
         } catch (std::exception &exc) {
             std::cerr << "ERROR saving thumbnail rating data to " << fn
                       << ": " << exc.what() << std::endl;
@@ -1180,9 +1170,19 @@ void Thumbnail::saveRating()
 void Thumbnail::loadRating()
 {
     rating_ = Rating();
+    auto md = getMetaData();
+    if (md && md->hasExif()) {
+        if (md->getRating() < 0) {
+            rating_.trash.value = true;
+        } else {
+            rating_.rank.value = rtengine::LIM(md->getRating(), 0, 5);
+        }
+    }
     if (options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS) {
         if (pparamsValid) {
-            rating_.rank.value = pparams.master.rank;
+            if (pparams.master.rank >= 0) {
+                rating_.rank.value = pparams.master.rank;
+            }
             rating_.color.value = pparams.master.colorlabel;
             rating_.trash.value = pparams.master.inTrash;
         }
