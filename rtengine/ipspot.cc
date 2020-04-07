@@ -597,8 +597,8 @@ public:
 
                     float res_Y = sY_base + intp(detail_blend, dY_detail, sY_detail);
                     dY = intp(blend, res_Y, dY);
-                    du = intp(blend / 2.f, su, du);
-                    dv = intp(blend / 2.f, sv, dv);
+                    du = intp(blend, su, du);
+                    dv = intp(blend, sv, dv);
 
                     dr = dv + dY;
                     db = dY - du;
