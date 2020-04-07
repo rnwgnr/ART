@@ -76,6 +76,11 @@ static INLINE vfloat LC2VFU(float &a)
 #define ZEROV _mm_setzero_ps()
 #define F2V(a) _mm_set1_ps((a))
 
+static INLINE bool vtest(vmask m)
+{
+    return _mm_movemask_ps((vfloat)m);
+}
+
 static INLINE vint vrint_vi_vd(vdouble vd)
 {
     return _mm_cvtpd_epi32(vd);

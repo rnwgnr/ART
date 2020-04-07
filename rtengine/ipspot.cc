@@ -76,12 +76,11 @@ inline float feather_factor(float x, float radius, float sigma)
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-void heal_laplace_loop(Imagefloat *img)
+void heal_laplace_loop(Imagefloat *img, const array2D<int32_t> &mask)
 {
     const int width = img->getWidth();
     const int height = img->getHeight();
     
-    constexpr float EPSILON = 0.01f;
     const int MAX_ITER = std::min(std::max(width, height) * 2, 1000);
 
     constexpr float w = 1.4f;
@@ -89,7 +88,7 @@ void heal_laplace_loop(Imagefloat *img)
     constexpr float w2 = w / 4.f;
 
     const auto next =
-        [&](float **chan, int x, int y) -> float
+        [&](float **chan, int x, int y) -> void
         {
             float &cur = chan[y][x];
             float left = chan[y][x-1];
@@ -97,18 +96,16 @@ void heal_laplace_loop(Imagefloat *img)
             float right = chan[y][x+1];
             float bottom = chan[y+1][x];
             float upd = cur * w1 + (left + top + right + bottom) * w2;
-            float e = (fabs(upd) > 1e-5f) ? fabs(upd - cur) / fabs(upd) : 0.f;
             cur = upd;
-            return e;
         };
 
 #ifdef __SSE2__
     const vfloat w1v = F2V(w1);
     const vfloat w2v = F2V(w2);
-    const vfloat floorv = F2V(1e-5f);
-
+    const vint iZEROv = vcast_vi_i(0);
+    
     const auto vnext =
-        [&](float **chan, int x, int y) -> vfloat
+        [&](float **chan, int x, int y) -> void
         {
             vfloat cur = LVFU(chan[y][x]);
             vfloat left = LVFU(chan[y][x-1]);
@@ -116,51 +113,36 @@ void heal_laplace_loop(Imagefloat *img)
             vfloat right = LVFU(chan[y][x+1]);
             vfloat bottom = LVFU(chan[y+1][x]);
             vfloat upd = cur * w1v + (left + top + right + bottom) * w2v;
-            vfloat err = vself(vmaskf_gt(vabsf(upd), floorv), vabsf(upd - cur) / vabsf(upd), ZEROV);
             STVFU(chan[y][x], upd);
-            return err;//max(err[0], err[1], err[2], err[3]);
         };
 #endif
 
     for (int iter = 0; iter < MAX_ITER; ++iter) {
-        float err = 0.0;
 #ifdef _OPENMP
 #       pragma omp parallel for schedule(dynamic,16)
 #endif
         for (int y = 1; y < height-1; ++y) {
             int x = 1;
-            float myerr = 0.f;
 #ifdef __SSE2__
-            vfloat myerrv = ZEROV;
             for (; x < width-1-3; x+=4) {
-                vfloat er = vnext(img->r.ptrs, x, y);
-                vfloat eg = vnext(img->g.ptrs, x, y);
-                vfloat eb = vnext(img->b.ptrs, x, y);
-                myerrv = vmaxf(vmaxf(vmaxf(myerrv, er), eg), eb); 
+                vint m = _mm_loadu_si128(reinterpret_cast<vint *>(&mask[y][x]));
+                if (vtest(vnotm(vmaski_eq(m, iZEROv)))) {
+                    vnext(img->r.ptrs, x, y);
+                    vnext(img->g.ptrs, x, y);
+                    vnext(img->b.ptrs, x, y);
+                }
             }
 #endif
             for (; x < width-1; ++x) {
-                float er = next(img->r.ptrs, x, y);
-                float eg = next(img->g.ptrs, x, y);
-                float eb = next(img->b.ptrs, x, y);
-                myerr = max(myerr, er, eg, eb);
+                if (mask[y][x]) {
+                    next(img->r.ptrs, x, y);
+                    next(img->g.ptrs, x, y);
+                    next(img->b.ptrs, x, y);
+                }
             }
-#ifdef _OPENMP
-#           pragma omp critical
-#endif
-            {
-#ifdef __SSE2__
-                err = max(err, myerrv[0], myerrv[1], myerrv[2], myerrv[3]);
-#endif
-                err = max(err, myerr);
-            }
-        }
-        if (err < EPSILON) {
-            return;
         }
     }
 }
-
 
 
 void heal(Imagefloat *src, Imagefloat *dst,
@@ -175,13 +157,22 @@ void heal(Imagefloat *src, Imagefloat *dst,
     const int H = y2 - y1 + 1;
 
     Imagefloat diff(W, H);
+    array2D<int32_t> mask(W, H);
+    
 #ifdef _OPENMP
 #   pragma omp parallel for schedule(dynamic,16)
 #endif
     for (int y = 0; y < H; ++y) {
         int sy = src_y + y;
         int dy = dst_y + y;
+        float ry = float(y+y1 - center_y) - featherRadius;
+        
         for (int x = 0; x < W; ++x) {
+            float rx = float(x+x1 - center_x) - featherRadius;
+            float r = sqrt(SQR(rx) + SQR(ry));
+
+            mask[y][x] = (r <= featherRadius);
+            
             int sx = src_x + x;
             int dx = dst_x + x;
             diff.r(y, x) = dst->r(dy, dx) - src->r(sy, sx);
@@ -189,7 +180,7 @@ void heal(Imagefloat *src, Imagefloat *dst,
             diff.b(y, x) = dst->b(dy, dx) - src->b(sy, sx);
         }
     }
-    heal_laplace_loop(&diff);
+    heal_laplace_loop(&diff, mask);
 
     const float sigma = find_sigma(radius, featherRadius);
 
@@ -506,13 +497,14 @@ public:
             return false;
         }
 
+        const int src_y = intersectionArea.y1 - imgArea.y1;
+        const int dst_y = destBox.intersectionArea.y1 - destBox.imgArea.y1;
+        const int src_x = intersectionArea.x1 - imgArea.x1;
+        const int dst_x = destBox.intersectionArea.x1 - destBox.imgArea.x1;
+        const int x1 = intersectionArea.x1, x2 = intersectionArea.x2;
+        const int y1 = intersectionArea.y1, y2 = intersectionArea.y2;
+        
         if (detail >= 2) {
-            int src_y = intersectionArea.y1 - imgArea.y1;
-            int dst_y = destBox.intersectionArea.y1 - destBox.imgArea.y1;
-            int src_x = intersectionArea.x1 - imgArea.x1;
-            int dst_x = destBox.intersectionArea.x1 - destBox.imgArea.x1;
-            int x1 = intersectionArea.x1, x2 = intersectionArea.x2;
-            int y1 = intersectionArea.y1, y2 = intersectionArea.y2;
             int center_x = spotArea.x1, center_y = spotArea.y1;
             heal(image, dstImg, src_x, src_y, dst_x, dst_y, x1, x2, y1, y2, center_x, center_y, radius, featherRadius, opacity);
             return true;
@@ -525,20 +517,22 @@ public:
 
         constexpr float detail_blend = 0.6f;
         if (detail > 0) {
-            srcY(image->getWidth(), image->getHeight());
-            dstY(dstImg->getWidth(), dstImg->getHeight());
+            int W = x2 - x1 + 1;
+            int H = y2 - y1 + 1;
+            srcY(W, H);
+            dstY(W, H);
             
             constexpr float eps = 0.0005f;
             const int gr = radius * 0.2f;
 
-            for (int y = 0; y < srcY.height(); ++y) {
-                for (int x = 0; x < srcY.width(); ++x) {
-                    srcY[y][x] = image->g(y, x) / 65535.f;
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    srcY[y][x] = image->g(y+src_y, x+src_x) / 65535.f;
                 }
             }
-            for (int y = 0; y < dstY.height(); ++y) {
-                for (int x = 0; x < dstY.width(); ++x) {
-                    dstY[y][x] = dstImg->g(y, x) / 65535.f;
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    dstY[y][x] = dstImg->g(y+dst_y, x+dst_x) / 65535.f;
                 }
             }
 
@@ -549,7 +543,7 @@ public:
         int srcImgY = intersectionArea.y1 - imgArea.y1;
         int dstImgY = destBox.intersectionArea.y1 - destBox.imgArea.y1;
         for (int y = intersectionArea.y1; y <= intersectionArea.y2; ++y) {
-            float  dy = float(y - spotArea.y1) - featherRadius;
+            float dy = float(y - spotArea.y1) - featherRadius;
 
             int srcImgX = intersectionArea.x1 - imgArea.x1;
             int dstImgX = destBox.intersectionArea.x1 - destBox.imgArea.x1;
@@ -595,16 +589,16 @@ public:
                     float du = dY - db;
                     float dv = dr - dY;
 
-                    float sY_base = srcY[srcImgY][srcImgX] * 65535.f;
+                    float sY_base = srcY[y-y1][x-x1] * 65535.f;
                     float sY_detail = sY - sY_base;
 
-                    float dY_base = dstY[dstImgY][dstImgX] * 65535.f;
+                    float dY_base = dstY[y-y1][x-x1] * 65535.f;
                     float dY_detail = dY - dY_base;
 
                     float res_Y = sY_base + intp(detail_blend, dY_detail, sY_detail);
                     dY = intp(blend, res_Y, dY);
-                    du = intp(blend, su, du);
-                    dv = intp(blend, sv, dv);
+                    du = intp(blend / 2.f, su, du);
+                    dv = intp(blend / 2.f, sv, dv);
 
                     dr = dv + dY;
                     db = dY - du;
