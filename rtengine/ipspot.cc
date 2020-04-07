@@ -97,7 +97,7 @@ void heal_laplace_loop(Imagefloat *img)
             float right = chan[y][x+1];
             float bottom = chan[y+1][x];
             float upd = cur * w1 + (left + top + right + bottom) * w2;
-            float e = fabs(upd) > 1e-5f ? fabs(upd - cur) / fabs(upd) : 0.f;
+            float e = (fabs(upd) > 1e-5f) ? fabs(upd - cur) / fabs(upd) : 0.f;
             cur = upd;
             return e;
         };
@@ -108,7 +108,7 @@ void heal_laplace_loop(Imagefloat *img)
     const vfloat floorv = F2V(1e-5f);
 
     const auto vnext =
-        [&](float **chan, int x, int y) -> float
+        [&](float **chan, int x, int y) -> vfloat
         {
             vfloat cur = LVFU(chan[y][x]);
             vfloat left = LVFU(chan[y][x-1]);
@@ -116,9 +116,9 @@ void heal_laplace_loop(Imagefloat *img)
             vfloat right = LVFU(chan[y][x+1]);
             vfloat bottom = LVFU(chan[y+1][x]);
             vfloat upd = cur * w1v + (left + top + right + bottom) * w2v;
-            vfloat e = (vabsf(upd) > floorv) ? (vabsf(upd - cur) / vabsf(upd)) : ZEROV;
+            vfloat err = vself(vmaskf_gt(vabsf(upd), floorv), vabsf(upd - cur) / vabsf(upd), ZEROV);
             STVFU(chan[y][x], upd);
-            return max(e[0], e[1], e[2], e[3]);
+            return err;//max(err[0], err[1], err[2], err[3]);
         };
 #endif
 
@@ -131,11 +131,12 @@ void heal_laplace_loop(Imagefloat *img)
             int x = 1;
             float myerr = 0.f;
 #ifdef __SSE2__
+            vfloat myerrv = ZEROV;
             for (; x < width-1-3; x+=4) {
-                float er = vnext(img->r.ptrs, x, y);
-                float eg = vnext(img->g.ptrs, x, y);
-                float eb = vnext(img->b.ptrs, x, y);
-                myerr = max(myerr, er, eg, eb);
+                vfloat er = vnext(img->r.ptrs, x, y);
+                vfloat eg = vnext(img->g.ptrs, x, y);
+                vfloat eb = vnext(img->b.ptrs, x, y);
+                myerrv = vmaxf(vmaxf(vmaxf(myerrv, er), eg), eb); 
             }
 #endif
             for (; x < width-1; ++x) {
@@ -148,6 +149,9 @@ void heal_laplace_loop(Imagefloat *img)
 #           pragma omp critical
 #endif
             {
+#ifdef __SSE2__
+                err = max(err, myerrv[0], myerrv[1], myerrv[2], myerrv[3]);
+#endif
                 err = max(err, myerr);
             }
         }
