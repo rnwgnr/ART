@@ -1371,7 +1371,7 @@ SpotEntry::SpotEntry() :
     radius(25),
     feather(1.f),
     opacity(1.f),
-    detail(0)
+    detail(2)
 {
 }
 float SpotEntry::getFeatherRadius() const

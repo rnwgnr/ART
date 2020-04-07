@@ -27,6 +27,9 @@
 #include <iostream>
 #include <set>
 
+#define BENCHMARK
+#include "StopWatch.h"
+
 namespace rtengine {
 
 namespace {
@@ -75,13 +78,13 @@ inline float feather_factor(float x, float radius, float sigma)
 
 void heal_laplace_loop(Imagefloat *img)
 {
-    constexpr float EPSILON = 0.1f;
-    constexpr int MAX_ITER = 1000;
-
     const int width = img->getWidth();
     const int height = img->getHeight();
     
-    constexpr float w = 1.2f;
+    constexpr float EPSILON = 0.01f;
+    const int MAX_ITER = std::min(std::max(width, height) * 2, 1000);
+
+    constexpr float w = 1.4f;
     constexpr float w1 = 1.f - w;
     constexpr float w2 = w / 4.f;
 
@@ -121,21 +124,31 @@ void heal_laplace_loop(Imagefloat *img)
 
     for (int iter = 0; iter < MAX_ITER; ++iter) {
         float err = 0.0;
+#ifdef _OPENMP
+#       pragma omp parallel for schedule(dynamic,16)
+#endif
         for (int y = 1; y < height-1; ++y) {
             int x = 1;
+            float myerr = 0.f;
 #ifdef __SSE2__
             for (; x < width-1-3; x+=4) {
                 float er = vnext(img->r.ptrs, x, y);
                 float eg = vnext(img->g.ptrs, x, y);
                 float eb = vnext(img->b.ptrs, x, y);
-                err = max(err, er, eg, eb);
+                myerr = max(myerr, er, eg, eb);
             }
 #endif
             for (; x < width-1; ++x) {
                 float er = next(img->r.ptrs, x, y);
                 float eg = next(img->g.ptrs, x, y);
                 float eb = next(img->b.ptrs, x, y);
-                err = max(err, er, eg, eb);
+                myerr = max(myerr, er, eg, eb);
+            }
+#ifdef _OPENMP
+#           pragma omp critical
+#endif
+            {
+                err = max(err, myerr);
             }
         }
         if (err < EPSILON) {
@@ -152,10 +165,15 @@ void heal(Imagefloat *src, Imagefloat *dst,
           int center_x, int center_y,
           float radius, float featherRadius, float opacity)
 {
+    BENCHFUN
+        
     const int W = x2 - x1 + 1;
     const int H = y2 - y1 + 1;
 
     Imagefloat diff(W, H);
+#ifdef _OPENMP
+#   pragma omp parallel for schedule(dynamic,16)
+#endif
     for (int y = 0; y < H; ++y) {
         int sy = src_y + y;
         int dy = dst_y + y;
@@ -484,7 +502,7 @@ public:
             return false;
         }
 
-        if (detail == 4) {
+        if (detail >= 2) {
             int src_y = intersectionArea.y1 - imgArea.y1;
             int dst_y = destBox.intersectionArea.y1 - destBox.imgArea.y1;
             int src_x = intersectionArea.x1 - imgArea.x1;
@@ -492,29 +510,22 @@ public:
             int x1 = intersectionArea.x1, x2 = intersectionArea.x2;
             int y1 = intersectionArea.y1, y2 = intersectionArea.y2;
             int center_x = spotArea.x1, center_y = spotArea.y1;
-            
             heal(image, dstImg, src_x, src_y, dst_x, dst_y, x1, x2, y1, y2, center_x, center_y, radius, featherRadius, opacity);
             return true;
         }
 
         const float sigma = find_sigma(radius, featherRadius);
-        const auto feather_weight =
-            [=](float r) -> float
-            {
-                return feather_factor(r, radius, sigma);
-            };
 
         array2D<float> srcY;
         array2D<float> dstY;
 
-        float detail_blend = 1.f;
+        constexpr float detail_blend = 0.6f;
         if (detail > 0) {
             srcY(image->getWidth(), image->getHeight());
             dstY(dstImg->getWidth(), dstImg->getHeight());
             
-            const float eps = 0.0001f * std::pow(5.f, detail-1);
-            //int gr = float(radius + (featherRadius - radius) / 2.f) / float(6 - LIM(detail, 1, 4));
-            int gr = (radius * 0.2f); // * detail;
+            constexpr float eps = 0.0005f;
+            const int gr = radius * 0.2f;
 
             for (int y = 0; y < srcY.height(); ++y) {
                 for (int x = 0; x < srcY.width(); ++x) {
@@ -529,8 +540,6 @@ public:
 
             guidedFilter(srcY, srcY, srcY, gr, eps, false);
             guidedFilter(dstY, dstY, dstY, gr, eps, false);
-
-            detail_blend = 0.4f + 0.2f * (detail - 1);
         }
 
         int srcImgY = intersectionArea.y1 - imgArea.y1;
@@ -544,15 +553,15 @@ public:
                 float dx = float(x - spotArea.x1) - featherRadius;
                 float r = sqrt(dx * dx + dy * dy);
 
-                // if (r >= featherRadius) {
-                //     ++srcImgX;
-                //     ++dstImgX;
-                //     continue;
-                // }
+                if (r >= featherRadius) {
+                    ++srcImgX;
+                    ++dstImgX;
+                    continue;
+                }
+                
                 float blend = opacity;
                 if (r > radius) {
-                    //blend = LIM01(blend * (featherRadius - r) / (featherRadius - radius));
-                    blend = LIM01(blend * feather_weight(r));
+                    blend = LIM01(blend * feather_factor(r, radius, sigma));
                 }
 
                 if (blend < 1e-3f) {
@@ -597,17 +606,7 @@ public:
                     db = dY - du;
                     dg = dY;
                 }
-                
-                // if (r <= radius) {
-                //     dstImg->r(dstImgY, dstImgX) = image->r(srcImgY, srcImgX);
-                //     dstImg->g(dstImgY, dstImgX) = image->g(srcImgY, srcImgX);
-                //     dstImg->b(dstImgY, dstImgX) = image->b(srcImgY, srcImgX);
-                // } else {
-                //     float opacity = (featherRadius - r) / (featherRadius - radius);
-                //     dstImg->r(dstImgY, dstImgX) = (image->r(srcImgY, srcImgX) - dstImg->r(dstImgY, dstImgX)) * opacity + dstImg->r(dstImgY,dstImgX);
-                //     dstImg->g(dstImgY, dstImgX) = (image->g(srcImgY, srcImgX) - dstImg->g(dstImgY, dstImgX)) * opacity + dstImg->g(dstImgY,dstImgX);
-                //     dstImg->b(dstImgY, dstImgX) = (image->b(srcImgY, srcImgX) - dstImg->b(dstImgY, dstImgX)) * opacity + dstImg->b(dstImgY,dstImgX);
-                // }
+
                 ++srcImgX;
                 ++dstImgX;
             }
