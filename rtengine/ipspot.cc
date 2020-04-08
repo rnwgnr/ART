@@ -149,7 +149,7 @@ void heal(Imagefloat *src, Imagefloat *dst,
           int src_x, int src_y, int dst_x, int dst_y,
           int x1, int x2, int y1, int y2,
           int center_x, int center_y,
-          float radius, float featherRadius, float opacity)
+          float radius, float featherRadius, float opacity, int detail)
 {
     BENCHFUN
         
@@ -158,6 +158,7 @@ void heal(Imagefloat *src, Imagefloat *dst,
 
     Imagefloat diff(W, H);
     array2D<int32_t> mask(W, H);
+    const float detail_exp = 0.125f * (detail + 1);
     
 #ifdef _OPENMP
 #   pragma omp parallel for schedule(dynamic,16)
@@ -172,12 +173,12 @@ void heal(Imagefloat *src, Imagefloat *dst,
             float r = sqrt(SQR(rx) + SQR(ry));
 
             mask[y][x] = (r <= featherRadius);
-            
+            float w = 1.f - pow_F(LIM01(radius - r)/radius, detail_exp);
             int sx = src_x + x;
             int dx = dst_x + x;
-            diff.r(y, x) = dst->r(dy, dx) - src->r(sy, sx);
-            diff.g(y, x) = dst->g(dy, dx) - src->g(sy, sx);
-            diff.b(y, x) = dst->b(dy, dx) - src->b(sy, sx);
+            diff.r(y, x) = w * (dst->r(dy, dx) - src->r(sy, sx));
+            diff.g(y, x) = w * (dst->g(dy, dx) - src->g(sy, sx));
+            diff.b(y, x) = w * (dst->b(dy, dx) - src->b(sy, sx));
         }
     }
     heal_laplace_loop(&diff, mask);
@@ -506,7 +507,7 @@ public:
         
         if (detail >= 2) {
             int center_x = spotArea.x1, center_y = spotArea.y1;
-            heal(image, dstImg, src_x, src_y, dst_x, dst_y, x1, x2, y1, y2, center_x, center_y, radius, featherRadius, opacity);
+            heal(image, dstImg, src_x, src_y, dst_x, dst_y, x1, x2, y1, y2, center_x, center_y, radius, featherRadius, opacity, detail - 2);
             return true;
         }
 

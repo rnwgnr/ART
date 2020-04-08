@@ -128,7 +128,7 @@ Spot::Spot() :
     radius = mkadj(M("TP_SPOT_RADIUS") + " ", SpotParams::minRadius, SpotParams::maxRadius, 1, SpotParams::minRadius);
     feather = mkadj(M("TP_SPOT_FEATHER") + " ", 0, 1, 0.01, 0);
     opacity = mkadj(M("TP_SPOT_OPACITY") + " ", 0, 1, 0.01, 0);
-    detail = mkadj(M("TP_SPOT_DETAIL") + " ", 0, 2, 1, 0);
+    detail = mkadj(M("TP_SPOT_DETAIL") + " ", 0, 5, 1, 0);
 
     spot_adjusters = {
         source_x,
