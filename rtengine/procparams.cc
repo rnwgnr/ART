@@ -277,6 +277,17 @@ void getFromKeyfile(
     value.assign(tmpval.begin(), tmpval.end());
 }
 
+void getFromKeyfile(
+    const KeyFile& keyfile,
+    const Glib::ustring& group_name,
+    const Glib::ustring& key,
+    std::vector<std::string>& value
+)
+{
+    auto tmpval = keyfile.get_string_list(group_name, key);
+    value.assign(tmpval.begin(), tmpval.end());
+}
+
 template<typename T>
 bool assignFromKeyfile(const KeyFile& keyfile, const Glib::ustring& group_name, const Glib::ustring& key, T &value)
 {
@@ -370,6 +381,17 @@ void putToKeyfile(
 {
     const Glib::ArrayHandle<double> list = value;
     keyfile.set_double_list(group_name, key, list);
+}
+
+void putToKeyfile(
+    const Glib::ustring& group_name,
+    const Glib::ustring& key,
+    const std::vector<std::string>& value,
+    KeyFile& keyfile
+)
+{
+    const Glib::ArrayHandle<Glib::ustring> list = value;
+    keyfile.set_string_list(group_name, key, list);
 }
 
 template<typename T>
@@ -2536,13 +2558,15 @@ bool FilmNegativeParams::operator !=(const FilmNegativeParams& other) const
 
 
 MetaDataParams::MetaDataParams():
-    mode(MetaDataParams::TUNNEL)
+    mode(MetaDataParams::TUNNEL),
+    exifKeys{"ALL"}
 {
 }
 
 bool MetaDataParams::operator==(const MetaDataParams &other) const
 {
-    return mode == other.mode;
+    return mode == other.mode
+        && exifKeys == other.exifKeys;
 }
 
 bool MetaDataParams::operator!=(const MetaDataParams &other) const
@@ -3253,6 +3277,7 @@ int ProcParams::save(bool save_general,
 // MetaData
         if (RELEVANT_(metadata)) {
             saveToKeyfile("MetaData", "Mode", metadata.mode, keyFile);
+            saveToKeyfile("MetaData", "ExifKeys", metadata.exifKeys, keyFile);
         }
 
 // EXIF change list
@@ -4501,6 +4526,8 @@ int ProcParams::load(bool load_general,
             if (mode >= int(MetaDataParams::TUNNEL) && mode <= int(MetaDataParams::STRIP)) {
                 metadata.mode = static_cast<MetaDataParams::Mode>(mode);
             }
+
+            assignFromKeyfile(keyFile, "MetaData", "ExifKeys", metadata.exifKeys);
         }
 
         if (keyFile.has_group("Exif") && RELEVANT_(exif)) {

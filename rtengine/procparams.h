@@ -1089,6 +1089,7 @@ struct MetaDataParams {
         STRIP
     };
     Mode mode;
+    std::vector<std::string> exifKeys;
 
     MetaDataParams();
 
