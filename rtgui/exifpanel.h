@@ -36,13 +36,14 @@ private:
     {
     public:
         Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > icon;
-        Gtk::TreeModelColumn<Glib::ustring> key;
+        Gtk::TreeModelColumn<std::string> key;
         Gtk::TreeModelColumn<Glib::ustring> label;
         Gtk::TreeModelColumn<Glib::ustring> value;
         Gtk::TreeModelColumn<Glib::ustring> value_nopango;
         Gtk::TreeModelColumn<bool> editable;
         Gtk::TreeModelColumn<bool> edited;
         Gtk::TreeModelColumn<bool> active;
+        Gtk::TreeModelColumn<bool> is_group;
 
         ExifColumns()
         {
@@ -54,6 +55,7 @@ private:
             add(value_nopango);
             add(editable);
             add(active);
+            add(is_group);
         }
     };
     Glib::RefPtr<Gdk::Pixbuf> keepicon;
@@ -78,7 +80,7 @@ private:
     std::unordered_set<std::string> initial_active_keys_;
     std::unordered_set<std::string> cur_active_keys_;
 
-    void addTag(const std::string &key, const Glib::ustring &label, const Glib::ustring &value, bool editable, bool edited);
+    void addTag(const std::string &key, const std::pair<Glib::ustring, Glib::ustring> &label, const Glib::ustring &value, bool editable, bool edited);
     void refreshTags();
     void resetIt(Gtk::TreeModel::iterator iter);
     void resetPressed();
