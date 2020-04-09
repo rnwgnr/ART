@@ -779,6 +779,7 @@ HISTORY_MSG_EPD_DRAWNMASK;TB - masque au pinceau
 HISTORY_MSG_EPD_PARAMETRICMASK;TB - masque paramétrique
 HISTORY_MSG_EXPOSURE_BLACK;Exposition - Point noir
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Négatif
+HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base couleur
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valeurs du Film Négatif
 HISTORY_MSG_GRAIN_ENABLED;Grain d'émulsion
 HISTORY_MSG_GRAIN_ISO;Grain d'émulsion - ISO
@@ -1581,6 +1582,9 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Standard Pondéré
 TP_EXPOS_BLACKPOINT_LABEL;Points Noir Raw
 TP_EXPOS_WHITEPOINT_LABEL;Points Blanc Raw
 TP_FILMNEGATIVE_BLUE;Ratio de bleu
+TP_FILMNEGATIVE_FILMBASE_PICK;Pick film base color
+TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Choisissez un point du film non exposé (eg. la bordure entre les cadres), pour obtenir les valeurs actuelles des couleurs de base du film, et les sauver dans le profile de traitement.\nCeci permet d'obtenir facilement une valeur plus consitente de la balance des couleurs lors du traitement par lot de plusieurs images.\nUtilisez-le également lorsque l'image convertie est extrêmement sombre, lumineuse ou asymétrique.
+TP_FILMNEGATIVE_FILMBASE_VALUES;Film base RGB:
 TP_FILMNEGATIVE_GREEN;Exposant de référence (contraste)
 TP_FILMNEGATIVE_GUESS_TOOLTIP;Calculer l'exposition en collectant 2 points de référence neutre dans l'image ; un blanc (gris léger) et un noir (gris foncé). L'ordre n'a pas d'importance. L'exposition sera mise à jour aprés la collecte du second point.
 TP_FILMNEGATIVE_LABEL;Film Négatif
@@ -1945,8 +1949,17 @@ TP_SOFTLIGHT_LABEL;Lumière douce
 TP_SOFTLIGHT_STRENGTH;Force
 TP_SPOT_COUNTLABEL;%1 point(s)
 TP_SPOT_ENTRYCHANGED;Modification d'un point
-TP_SPOT_HINT;Cliquez sur ce bouton pour pouvoir opérer sur la zone de prévisualisation.\n\nPour ajouter un spot, pressez Ctrl et le bouton gauche de la souris, tirez le cercle (la touche Ctrl peut être relâchée) vers la position source, puis relâchez le bouton de la souris.\n\nPour éditer un spot, placez le curseur au-dessus de la marque blanche situant une zone éditée, faisant apparaître la géométrie d'édition.\n\nPour déplacer le spot source ou destination, placez le curseur en son centre et tirez le.\n\nLe cercle intérieur (zone d'effet maximum) et le cercle "d'adoucicement" peuvent être redimmensionné en plaçant le curseur dessus (le cercle devient orange) et en le tirant (le cercle devient rouge).\n\nQuand les changements sont terminés, un clic droit en dehors de tout spot termine le mode d'édition, ou cliquez à nouveau sur ce bouton.
+TP_SPOT_HINT;Cliquez sur ce bouton pour pouvoir opérer sur la zone de prévisualisation.\nPour ajouter un spot, pressez Ctrl et le bouton gauche de la souris, tirez le cercle (la touche Ctrl peut être relâchée) vers la position source, puis relâchez le bouton de la souris.\nPour éditer un spot, placez le curseur au-dessus de la marque blanche situant une zone éditée, faisant apparaître la géométrie d'édition.\nPour déplacer le spot source ou destination, placez le curseur en son centre et tirez le.\nLe cercle intérieur (zone d'effet maximum) et le cercle "d'adoucissement" peuvent être redimmensionné en plaçant le curseur dessus (le cercle devient orange) et en le tirant (le cercle devient rouge).\nQuand les changements sont terminés, un clic droit en dehors de tout spot termine le mode d'édition, ou cliquez à nouveau sur ce bouton.
 TP_SPOT_LABEL;Retrait de taches
+TP_SPOT_CUR_SPOT_LABEL;Tache en cours
+TP_SPOT_SOURCE_X;Source X
+TP_SPOT_SOURCE_Y;Source Y
+TP_SPOT_TARGET_X;Cible X
+TP_SPOT_TARGET_Y;Cible Y
+TP_SPOT_RADIUS;Rayon
+TP_SPOT_FEATHER;Adoucissement
+TP_SPOT_OPACITY;Opacité
+TP_SPOT_DETAIL;Protection des détails
 TP_TM_FATTAL_AMOUNT;Quantité
 TP_TM_FATTAL_LABEL;Compression de la Plage Dynamique
 TP_TM_FATTAL_THRESHOLD;Détail
