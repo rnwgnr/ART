@@ -922,6 +922,14 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     areaMaskRemove->add(*Gtk::manage(new RTImage("remove-small.png")));
     areaMaskRemove->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onAreaShapeRemovePressed));
     add_button(areaMaskRemove, vb);
+    areaMaskUp = Gtk::manage(new Gtk::Button());
+    areaMaskUp->add(*Gtk::manage(new RTImage("arrow-up-small.png")));
+    areaMaskUp->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &LabMasksPanel::onAreaShapeUpDownPressed), true));
+    add_button(areaMaskUp, vb);
+    areaMaskDown = Gtk::manage(new Gtk::Button());
+    areaMaskDown->add(*Gtk::manage(new RTImage("arrow-down-small.png")));
+    areaMaskDown->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &LabMasksPanel::onAreaShapeUpDownPressed), false));
+    add_button(areaMaskDown, vb);
     hb->pack_start(*vb, Gtk::PACK_SHRINK);
     
     vb = Gtk::manage(new Gtk::VBox());
@@ -1735,6 +1743,24 @@ void LabMasksPanel::onAreaShapeRemovePressed()
         masks_[selected_].areaMask.shapes.erase(masks_[selected_].areaMask.shapes.begin() + area_shape_index_);
         populateShapeList(selected_, -1);
         areaShapeSelect(area_shape_index_ > 0 ? area_shape_index_ - 1 : 0, true);
+        maskShow(selected_, true);
+        auto l = getListener();
+        if (l) {
+            l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
+        }
+    }
+}
+
+
+void LabMasksPanel::onAreaShapeUpDownPressed(bool up)
+{
+    if (selected_ < masks_.size() && area_shape_index_ < masks_[selected_].areaMask.shapes.size() && (up ? area_shape_index_ > 0 : area_shape_index_ + 1 < masks_[selected_].areaMask.shapes.size()) && masks_[selected_].areaMask.shapes.size() > 1) {
+        listEdited = true;
+        auto &shapes = masks_[selected_].areaMask.shapes;
+        int off = up ? -1 : 1;
+        std::swap(shapes[area_shape_index_], shapes[area_shape_index_+off]);
+        populateShapeList(selected_, -1);
+        areaShapeSelect(area_shape_index_ + off, true);
         maskShow(selected_, true);
         auto l = getListener();
         if (l) {
