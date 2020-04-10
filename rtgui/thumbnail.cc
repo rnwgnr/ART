@@ -1224,7 +1224,7 @@ void Thumbnail::saveMetadata()
         return;
     }
 
-    if (pparams.master.exif.empty() && pparams.master.iptc.empty()) {
+    if (pparams.master.metadata.exif.empty() && pparams.master.metadata.iptc.empty()) {
         return;
     }
 
@@ -1233,8 +1233,8 @@ void Thumbnail::saveMetadata()
         auto xmp = rtengine::Exiv2Metadata::getXmpSidecar(fname);
         rtengine::Exiv2Metadata meta;
         meta.xmpData() = std::move(xmp);
-        meta.setExif(pparams.master.exif);
-        meta.setIptc(pparams.master.iptc);
+        meta.setExif(pparams.master.metadata.exif);
+        meta.setIptc(pparams.master.metadata.iptc);
         meta.saveToXmp(fn);
         if (options.rtSettings.verbose) {
             std::cout << "saved edited metadata for " << fname << " to "

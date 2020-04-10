@@ -533,8 +533,8 @@ void ToolPanelCoordinator::profileChange(
 
     // Reset IPTC values when switching procparams from the History
     if (event == rtengine::EvHistoryBrowsed) {
-        mergedParams.iptc.clear();
-        mergedParams.exif.clear();
+        mergedParams.metadata.iptc.clear();
+        mergedParams.metadata.exif.clear();
     }
 
     // And apply the partial profile nparams to mergedParams

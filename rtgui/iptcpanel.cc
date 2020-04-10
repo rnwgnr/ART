@@ -463,8 +463,8 @@ void IPTCPanel::read(const ProcParams* pp)
     disableListener ();
     changeList.clear();
 
-    if (!pp->iptc.empty()) {
-        changeList = pp->iptc;
+    if (!pp->metadata.iptc.empty()) {
+        changeList = pp->metadata.iptc;
     } else {
         changeList = embeddedData;
     }
@@ -476,13 +476,13 @@ void IPTCPanel::read(const ProcParams* pp)
 void IPTCPanel::write(ProcParams* pp)
 {
 
-    pp->iptc = changeList;
+    pp->metadata.iptc = changeList;
 }
 
 void IPTCPanel::setDefaults(const ProcParams* defParams)
 {
 
-    defChangeList = defParams->iptc;
+    defChangeList = defParams->metadata.iptc;
 }
 
 void IPTCPanel::setImageData (const FramesMetaData* id)

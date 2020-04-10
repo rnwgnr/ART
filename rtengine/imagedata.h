@@ -27,6 +27,7 @@
 #include <glibmm.h>
 #include "procparams.h"
 #include "rtengine.h"
+#include "metadata.h"
 
 namespace rtengine
 {
@@ -78,6 +79,8 @@ public:
     std::string getOrientation() const override;
     Glib::ustring getFileName() const override;
     int getRating() const override;
+
+    void fillBasicTags(Exiv2::ExifData &exif) const;
 };
 
 

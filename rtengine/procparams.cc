@@ -426,34 +426,6 @@ bool saveToKeyfile(
 }
 
 
-const std::map<Glib::ustring, Glib::ustring> exif_keys = {
-    {"Copyright", "Exif.Image.Copyright"},
-    {"Artist", "Exif.Image.Artist"},
-    {"ImageDescription", "Exif.Image.ImageDescription"},
-    {"Exif.UserComment", "Exif.Photo.UserComment"}
-};
-
-const std::map<Glib::ustring, Glib::ustring> iptc_keys = {
-    {"Title", "Iptc.Application2.ObjectName"},
-    {"Category", "Iptc.Application2.Category"},
-    {"SupplementalCategories", "Iptc.Application2.SuppCategory"},
-    {"Keywords", "Iptc.Application2.Keywords"},
-    {"Instructions", "Iptc.Application2.SpecialInstructions"},
-    {"DateCreated", "Iptc.Application2.DateCreated"},
-    {"Creator", "Iptc.Application2.Byline"},
-    {"CreatorJobTitle", "Iptc.Application2.BylineTitle"},
-    {"City", "Iptc.Application2.City"},
-    {"Province", "Iptc.Application2.ProvinceState"},
-    {"Country", "Iptc.Application2.CountryName"},
-    {"TransReference", "Iptc.Application2.TransmissionReference"},
-    {"Headline", "Iptc.Application2.Headline"},
-    {"Credit", "Iptc.Application2.Credit"},
-    {"Source", "Iptc.Application2.Source"},
-    {"Copyright", "Iptc.Application2.Copyright"},
-    {"Caption", "Iptc.Application2.Caption"},
-    {"CaptionWriter", "Iptc.Application2.Writer"}
-};
-
 } // namespace
 
 
@@ -2557,16 +2529,81 @@ bool FilmNegativeParams::operator !=(const FilmNegativeParams& other) const
 }
 
 
+namespace {
+
+const std::map<Glib::ustring, Glib::ustring> exif_keys = {
+    {"Copyright", "Exif.Image.Copyright"},
+    {"Artist", "Exif.Image.Artist"},
+    {"ImageDescription", "Exif.Image.ImageDescription"},
+    {"Exif.UserComment", "Exif.Photo.UserComment"},
+    {"ISOSpeed", "Exif.Photo.ISOSpeedRatings"},
+    {"FNumber", "Exif.Photo.FNumber"},
+    {"ShutterSpeed", "Exif.Photo.ExposureTime"},
+    {"FocalLength", "Exif.Photo.FocalLength"},
+    {"ExpComp", "Exif.Photo.ExposureBiasValue"},
+    {"Flash", "Exif.Photo.Flash"},
+    {"Make", "Exif.Image.Make"},
+    {"Model", "Exif.Image.Model"},
+    {"Lens", "Exif.Photo.LensModel"},
+    {"DateTime", "Exif.Photo.DateTimeOriginal"}
+};
+
+const std::map<Glib::ustring, Glib::ustring> iptc_keys = {
+    {"Title", "Iptc.Application2.ObjectName"},
+    {"Category", "Iptc.Application2.Category"},
+    {"SupplementalCategories", "Iptc.Application2.SuppCategory"},
+    {"Keywords", "Iptc.Application2.Keywords"},
+    {"Instructions", "Iptc.Application2.SpecialInstructions"},
+    {"DateCreated", "Iptc.Application2.DateCreated"},
+    {"Creator", "Iptc.Application2.Byline"},
+    {"CreatorJobTitle", "Iptc.Application2.BylineTitle"},
+    {"City", "Iptc.Application2.City"},
+    {"Province", "Iptc.Application2.ProvinceState"},
+    {"Country", "Iptc.Application2.CountryName"},
+    {"TransReference", "Iptc.Application2.TransmissionReference"},
+    {"Headline", "Iptc.Application2.Headline"},
+    {"Credit", "Iptc.Application2.Credit"},
+    {"Source", "Iptc.Application2.Source"},
+    {"Copyright", "Iptc.Application2.Copyright"},
+    {"Caption", "Iptc.Application2.Caption"},
+    {"CaptionWriter", "Iptc.Application2.Writer"}
+};
+
+} // namespace
+
+
+std::vector<std::string> MetaDataParams::basicExifKeys = {
+    "Exif.Image.Copyright",
+    "Exif.Image.Artist",
+    "Exif.Image.ImageDescription",
+    "Exif.Photo.UserComment",
+    "Exif.Image.Make",
+    "Exif.Image.Model",
+    "Exif.Photo.LensModel",
+    "Exif.Photo.FNumber",
+    "Exif.Photo.ExposureTime",
+    "Exif.Photo.FocalLength",
+    "Exif.Photo.ISOSpeedRatings",
+    "Exif.Photo.ExposureBiasValue",
+    "Exif.Photo.Flash",
+    "Exif.Photo.DateTimeOriginal"
+};
+
+
 MetaDataParams::MetaDataParams():
     mode(MetaDataParams::TUNNEL),
-    exifKeys{"ALL"}
+    exifKeys{"*"},
+    exif{},
+    iptc{}
 {
 }
 
 bool MetaDataParams::operator==(const MetaDataParams &other) const
 {
     return mode == other.mode
-        && exifKeys == other.exifKeys;
+        && exifKeys == other.exifKeys
+        && exif == other.exif
+        && iptc == other.iptc;
 }
 
 bool MetaDataParams::operator!=(const MetaDataParams &other) const
@@ -2625,8 +2662,8 @@ void ProcParams::setDefaults()
     raw = RAWParams();
     metadata = MetaDataParams();
     filmNegative = FilmNegativeParams();
-    exif.clear();
-    iptc.clear();
+    // exif.clear();
+    // iptc.clear();
 
     spot = SpotParams();
 
@@ -3286,10 +3323,10 @@ int ProcParams::save(bool save_general,
             for (auto &p : exif_keys) {
                 m[p.second] = p.first;
             }
-            for (ExifPairs::const_iterator i = exif.begin(); i != exif.end(); ++i) {
-                auto it = m.find(i->first);
+            for (auto &p : metadata.exif) {
+                auto it = m.find(p.first);
                 if (it != m.end()) {
-                    keyFile.set_string("Exif", it->second, i->second);
+                    keyFile.set_string("Exif", it->second, p.second);
                 }
             }
         }
@@ -3300,16 +3337,16 @@ int ProcParams::save(bool save_general,
             for (auto &p : iptc_keys) {
                 m[p.second] = p.first;
             }
-            for (IPTCPairs::const_iterator i = iptc.begin(); i != iptc.end(); ++i) {
-                auto it = m.find(i->first);
+            for (auto &p : metadata.iptc) {
+                auto it = m.find(p.first);
                 if (it != m.end()) {
-                    Glib::ArrayHandle<Glib::ustring> values = i->second;
+                    Glib::ArrayHandle<Glib::ustring> values = p.second;
                     keyFile.set_string_list("IPTC", it->second, values);
                 }
             }
         }
     //Spot Removal
-        if(RELEVANT_(spot)){
+        if (RELEVANT_(spot)) {
             //Spot removal
             saveToKeyfile("Spot Removal", "Enabled", spot.enabled, keyFile);
             for (size_t i = 0; i < spot.entries.size (); ++i) {
@@ -4534,7 +4571,7 @@ int ProcParams::load(bool load_general,
             for (const auto& key : keyFile.get_keys("Exif")) {
                 auto it = exif_keys.find(key);
                 if (it != exif_keys.end()) {
-                    exif[it->second] = keyFile.get_string("Exif", key);
+                    metadata.exif[it->second] = keyFile.get_string("Exif", key);
                 }
             }
         }
@@ -4559,16 +4596,16 @@ int ProcParams::load(bool load_general,
                     continue;
                 }
                 auto kk = it->second;
-                const IPTCPairs::iterator element = iptc.find(kk);
+                const IPTCPairs::iterator element = metadata.iptc.find(kk);
 
-                if (element != iptc.end()) {
+                if (element != metadata.iptc.end()) {
                     // it already exist so we cleanup the values
                     element->second.clear();
                 }
 
                 // TODO: look out if merging Keywords and SupplementalCategories from the procparams chain would be interesting
                 for (const auto& currLoadedTagValue : keyFile.get_string_list("IPTC", key)) {
-                    iptc[kk].push_back(currLoadedTagValue);
+                    metadata.iptc[kk].push_back(currLoadedTagValue);
                 }
             }
         }
@@ -4650,8 +4687,6 @@ bool ProcParams::operator ==(const ProcParams& other) const
         && softlight == other.softlight
         && rgbCurves == other.rgbCurves
         && metadata == other.metadata
-        && exif == other.exif
-        && iptc == other.iptc
         && dehaze == other.dehaze
         && grain == other.grain
         && smoothing == other.smoothing

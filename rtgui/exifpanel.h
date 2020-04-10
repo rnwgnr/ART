@@ -35,7 +35,8 @@ private:
     class ExifColumns : public Gtk::TreeModelColumnRecord
     {
     public:
-        Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > icon;
+        // Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> expander_icon;
+        Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> icon;
         Gtk::TreeModelColumn<std::string> key;
         Gtk::TreeModelColumn<Glib::ustring> label;
         Gtk::TreeModelColumn<Glib::ustring> value;
@@ -56,10 +57,13 @@ private:
             add(editable);
             add(active);
             add(is_group);
+            // add(expander_icon);
         }
     };
-    Glib::RefPtr<Gdk::Pixbuf> keepicon;
+    //Glib::RefPtr<Gdk::Pixbuf> keepicon;
     Glib::RefPtr<Gdk::Pixbuf> editicon;
+    Glib::RefPtr<Gdk::Pixbuf> open_icon_;
+    Glib::RefPtr<Gdk::Pixbuf> closed_icon_;
 
     ExifColumns exifColumns;
     Gtk::TreeView* exifTree;
@@ -91,7 +95,14 @@ private:
 
     void setKeyActive(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator &it);
     void onKeyActiveToggled(const Glib::ustring &path);
-    
+
+    bool all_keys_active() const;
+    std::unordered_set<std::string> get_active_keys() const;
+
+    void onExifTreeClick(GdkEventButton *event);
+    void onExifRowExpanded(const Gtk::TreeModel::iterator &it, const Gtk::TreeModel::Path &path);
+    void onExifRowCollapsed(const Gtk::TreeModel::iterator &it, const Gtk::TreeModel::Path &path);
+    void onExifRowActivated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column);
 
 public:
     ExifPanel();
