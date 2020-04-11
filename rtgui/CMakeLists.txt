@@ -284,7 +284,7 @@ target_link_libraries(rth rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${TCMALLOC_LIBRARIES}
+    ${MALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
 
@@ -306,7 +306,7 @@ target_link_libraries(rth-cli rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${TCMALLOC_LIBRARIES}
+    ${MALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
 

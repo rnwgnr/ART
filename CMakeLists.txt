@@ -138,6 +138,8 @@ option(AUTO_GDK_FLUSH "Use gdk_flush on all gdk_thread_leave other than the GUI 
 option(ENABLE_TCMALLOC "Use the tcmalloc library if available" OFF)
 set(TCMALLOC_LIB_DIR "" CACHE PATH "Custom path for the tcmalloc library")
 
+option(ENABLE_MIMALLOC "Use the mimalloc library if available" OFF)
+
 # Set installation directories:
 if(WIN32 OR APPLE)
     if(BUILD_BUNDLE)
@@ -598,6 +600,7 @@ int main()
 }" LENSFUN_HAS_LOAD_DIRECTORY)
 
 set(TCMALLOC_LIB_DIR)
+
 if(ENABLE_TCMALLOC)
     if(TCMALLOC_LIB_DIR)
         find_library(TCMALLOC_LIBRARIES tcmalloc PATHS ${TCMALLOC_LIB_DIR} NO_DEFAULT_PATH)
@@ -605,13 +608,24 @@ if(ENABLE_TCMALLOC)
         find_library(TCMALLOC_LIBRARIES tcmalloc)
     endif()
     if(TCMALLOC_LIBRARIES)
+        set(MALLOC_LIBRARIES "${TCMALLOC_LIBRARIES}" CACHE INTERNAL "" FORCE)
         message(STATUS "using tcmalloc library in ${TCMALLOC_LIBRARIES}")
     else()
-        set(TCMALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
+        set(MALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
         message(STATUS "tcmalloc not found")
     endif()
 else()
-    set(TCMALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
+    set(MALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
+endif()
+
+if(ENABLE_MIMALLOC)
+    find_package(mimalloc 1.4)
+    if(mimalloc_FOUND)
+        message(STATUS "using mimalloc library ${mimalloc_VERSION}")
+        set(MALLOC_LIBRARIES mimalloc CACHE INTERNAL "" FORCE)
+    else()
+        message(STATUS "mimalloc not found")
+    endif()
 endif()
 
 add_subdirectory(rtengine)
