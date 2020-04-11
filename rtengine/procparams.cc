@@ -2591,12 +2591,14 @@ std::vector<std::string> MetaDataParams::basicExifKeys = {
 
 
 MetaDataParams::MetaDataParams():
-    mode(MetaDataParams::TUNNEL),
-    exifKeys{"*"},
+    mode(MetaDataParams::EDIT),
+    exifKeys{},
     exif{},
     iptc{}
 {
+    exifKeys = basicExifKeys;
 }
+
 
 bool MetaDataParams::operator==(const MetaDataParams &other) const
 {
@@ -4557,14 +4559,18 @@ int ProcParams::load(bool load_general,
         }
 
         if (keyFile.has_group("MetaData") && RELEVANT_(metadata)) {
-            int mode = int(MetaDataParams::TUNNEL);
+            int mode = int(ppVersion < 1012 ? MetaDataParams::TUNNEL : MetaDataParams::EDIT);
             assignFromKeyfile(keyFile, "MetaData", "Mode", mode);
 
             if (mode >= int(MetaDataParams::TUNNEL) && mode <= int(MetaDataParams::STRIP)) {
                 metadata.mode = static_cast<MetaDataParams::Mode>(mode);
             }
 
-            assignFromKeyfile(keyFile, "MetaData", "ExifKeys", metadata.exifKeys);
+            if (!assignFromKeyfile(keyFile, "MetaData", "ExifKeys", metadata.exifKeys)) {
+                if (ppVersion < 1012) {
+                    metadata.exifKeys = { "*" };
+                }
+            }
         }
 
         if (keyFile.has_group("Exif") && RELEVANT_(exif)) {
