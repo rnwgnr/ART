@@ -84,6 +84,7 @@ InspectorArea::InspectorArea():
     currImage(nullptr),
     active(false),
     first_active_(true),
+    highlight_(false),
     info_text_("")
 {
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
@@ -172,26 +173,37 @@ bool InspectorArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
         // draw the background
         style->render_background(cr, 0, 0, get_width(), get_height());
 
-        /* --- old method
-        c = style->get_background_color (Gtk::STATE_FLAG_NORMAL);
-        cr->set_source_rgb (c.get_red(), c.get_green(), c.get_blue());
-        cr->set_line_width (0);
-        cr->rectangle (0, 0, availableSize.x, availableSize.y);
-        cr->fill ();
-        */
+        // /* --- old method */
+        // c = style->get_background_color (Gtk::STATE_FLAG_PRELIGHT);
+        // cr->set_source_rgb (c.get_red(), c.get_green(), c.get_blue());
+        // cr->set_line_width (5);
+        // cr->rectangle (0, 0, availableSize.x, availableSize.y);
+        // cr->fill ();
+        // /* */
 
         currImage->imgBuffer.copySurface(win);
 
         // draw the frame
-        c = style->get_border_color (Gtk::STATE_FLAG_NORMAL);
+        c = highlight_ ? style->get_color(Gtk::STATE_FLAG_SELECTED) : style->get_background_color(Gtk::STATE_FLAG_NORMAL);
         cr->set_source_rgb (c.get_red(), c.get_green(), c.get_blue());
-        cr->set_line_width (1);
-        cr->rectangle (0.5, 0.5, availableSize.x - 1, availableSize.y - 1);
-        cr->stroke ();
+        cr->set_line_width(3);
+        cr->rectangle(1.5, 1.5, availableSize.x - 2.5, availableSize.y - 2.5);
+        cr->stroke();
 
         if (options.thumbnail_inspector_show_info && info_text_ != "") {
             info_bb_.copySurface(cr);
         }
+    } else {
+        Gdk::RGBA c;
+        Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
+        style->render_background(cr, 0, 0, get_width(), get_height());
+
+        // draw the frame
+        c = highlight_ ? style->get_color(Gtk::STATE_FLAG_SELECTED) : style->get_background_color(Gtk::STATE_FLAG_NORMAL);
+        cr->set_source_rgb (c.get_red(), c.get_green(), c.get_blue());
+        cr->set_line_width(3);
+        cr->rectangle(1.5, 1.5, win->get_width() - 2.5, win->get_height() - 2.5);
+        cr->stroke();
     }
 
     if (first_active_) {
@@ -431,11 +443,58 @@ void InspectorArea::infoEnabled(bool yes)
 Inspector::Inspector(FileCatalog *filecatalog):
     filecatalog_(filecatalog)
 {
-    pack_start(ins_);
+    ibox_.pack_start(ins_[0], Gtk::PACK_EXPAND_WIDGET, 3);
+    ibox_.pack_start(ins_[1], Gtk::PACK_EXPAND_WIDGET, 3);
+    pack_start(ibox_);
     pack_start(*get_toolbar(), Gtk::PACK_SHRINK, 2);
+    removeIfThere(&ibox_, &ins_[1]);
     show_all_children();
 
     signal_key_press_event().connect(sigc::mem_fun(*this, &Inspector::keyPressed));
+
+    active_ = 0;
+    num_active_ = 1;
+    for (size_t i = 0; i < 2; ++i) {
+        ins_[i].set_can_focus(true);
+        ins_[i].add_events(Gdk::BUTTON_PRESS_MASK);
+        ins_[i].signal_button_press_event().connect_notify(sigc::bind(sigc::mem_fun(*this, &Inspector::onGrabFocus), i));
+    }
+}
+
+
+void Inspector::mouseMove(rtengine::Coord2D pos, int transform)
+{
+    for (size_t i = 0; i < num_active_; ++i) {
+        ins_[i].mouseMove(pos, transform);
+    }
+}
+    
+
+void Inspector::flushBuffers()
+{
+    for (size_t i = 0; i < 2; ++i) {
+        ins_[i].flushBuffers();
+    }
+}
+    
+
+void Inspector::setActive(bool state)
+{
+    for (size_t i = 0; i < num_active_; ++i) {
+        ins_[i].setActive(state);
+    }
+}
+
+
+bool Inspector::isActive() const
+{
+    return ins_[0].isActive();
+}
+
+
+sigc::signal<void> Inspector::signal_ready()
+{
+    return ins_[active_].signal_ready();
 }
 
 
@@ -450,11 +509,11 @@ bool Inspector::keyPressed(GdkEventKey *evt)
 
 void Inspector::switchImage(const Glib::ustring &fullPath)
 {
-    cur_image_ = fullPath;
+    cur_image_[active_] = fullPath;
     if (info_->get_active()) {
-        ins_.setInfoText(get_info_text());
+        ins_[active_].setInfoText(get_info_text(active_));
     }
-    ins_.switchImage(fullPath);
+    ins_[active_].switchImage(fullPath);
 }
 
 
@@ -475,9 +534,11 @@ Gtk::HBox *Inspector::get_toolbar()
             tb->pack_start(*ret, Gtk::PACK_SHRINK, 2);
             return ret;
         };
+
+    split_ = add_tool("beforeafter.png", "INSPECTOR_SPLIT");
+    tb->pack_start(*Gtk::manage(new Gtk::VSeparator()), Gtk::PACK_SHRINK, 4);
        
     info_ = add_tool("info.png", "INSPECTOR_INFO");
-
     tb->pack_start(*Gtk::manage(new Gtk::VSeparator()), Gtk::PACK_SHRINK, 4);
 
     jpg_ = add_tool("wb-camera.png", "INSPECTOR_PREVIEW");
@@ -496,6 +557,8 @@ Gtk::HBox *Inspector::get_toolbar()
     cms_ = add_tool("gamut-softproof.png", "INSPECTOR_ENABLE_CMS");
 
     //------------------------------------------------------------------------
+
+    split_->signal_toggled().connect(sigc::mem_fun(*this, &Inspector::split_toggled));
     
     info_->set_active(options.thumbnail_inspector_show_info);
     info_->signal_toggled().connect(sigc::mem_fun(*this, &Inspector::info_toggled));
@@ -529,18 +592,21 @@ Gtk::HBox *Inspector::get_toolbar()
 void Inspector::info_toggled()
 {
     if (!info_->get_active()) {
-        ins_.infoEnabled(false);
-        return;
+        for (size_t i = 0; i < num_active_; ++i) {
+            ins_[i].infoEnabled(false);
+        }
+    } else {
+        for (size_t i = 0; i < num_active_; ++i) {
+            ins_[i].setInfoText(get_info_text(i));
+            ins_[i].infoEnabled(true);
+        }
     }
-
-    ins_.setInfoText(get_info_text());
-    ins_.infoEnabled(true);
 }
 
 
-Glib::ustring Inspector::get_info_text()
+Glib::ustring Inspector::get_info_text(size_t i)
 {    
-    rtengine::FramesData meta(cur_image_);
+    rtengine::FramesData meta(cur_image_[i]);
 
     Glib::ustring infoString;
     Glib::ustring expcomp;
@@ -554,42 +620,18 @@ Glib::ustring Inspector::get_info_text()
                                               M("QINFO_ISO"), meta.getISOSpeed(),
                                               Glib::ustring::format(std::setw (3), std::fixed, std::setprecision (2), meta.getFocalLen()));
 
-        expcomp = Glib::ustring(meta.expcompToString(meta.getExpComp(), true)); // maskZeroexpcomp
+        expcomp = Glib::ustring(meta.expcompToString(meta.getExpComp(), true));
 
         if (!expcomp.empty ()) {
             infoString = Glib::ustring::compose ("%1  <span size=\"large\">%2</span><span size=\"small\">EV</span>",
                                                   infoString,
-                                                  expcomp /*Glib::ustring(meta.expcompToString(meta.getExpComp()))*/);
+                                                  expcomp);
         }
 
         infoString = Glib::ustring::compose("%1\n<span size=\"small\">%2</span><span>%3</span>",
                                               infoString,
-                                              escapeHtmlChars(Glib::path_get_dirname(cur_image_)) + G_DIR_SEPARATOR_S,
-                                              escapeHtmlChars(Glib::path_get_basename(cur_image_)));
-
-        // int ww = ipc->getFullWidth();
-        // int hh = ipc->getFullHeight();
-        // //megapixels
-        // infoString = Glib::ustring::compose ("%1\n<span size=\"small\">%2 MP (%3x%4)</span>",
-        //                                      infoString,
-        //                                      Glib::ustring::format (std::setw (4), std::fixed, std::setprecision (1), (float)ww * hh / 1000000),
-        //                                      ww, hh);
-
-        // //adding special characteristics
-        // bool isHDR = meta.getHDR();
-        // bool isPixelShift = meta.getPixelShift();
-        // unsigned int numFrames = meta.getFrameCount();
-        // if (isHDR) {
-        //     infoString = Glib::ustring::compose ("%1\n" + M("QINFO_HDR"), infoString, numFrames);
-        //     if (numFrames == 1) {
-        //         int sampleFormat = meta.getSampleFormat();
-        //         infoString = Glib::ustring::compose ("%1 / %2", infoString, M(Glib::ustring::compose("SAMPLEFORMAT_%1", sampleFormat)));
-        //     }
-        // } else if (isPixelShift) {
-        //     infoString = Glib::ustring::compose ("%1\n" + M("QINFO_PIXELSHIFT"), infoString, numFrames);
-        // } else if (numFrames > 1) {
-        //     infoString = Glib::ustring::compose ("%1\n" + M("QINFO_FRAMECOUNT"), infoString, numFrames);
-        // }
+                                              escapeHtmlChars(Glib::path_get_dirname(cur_image_[i])) + G_DIR_SEPARATOR_S,
+                                              escapeHtmlChars(Glib::path_get_basename(cur_image_[i])));
     } else {
         infoString = M("QINFO_NOEXIF");
     }
@@ -631,8 +673,10 @@ void Inspector::mode_toggled(Gtk::ToggleButton *b)
             options.rtSettings.thumbnail_inspector_raw_curve = rtengine::Settings::ThumbnailInspectorRawCurve::RAW_CLIPPING;
         }
 
-        ins_.flushBuffers();
-        ins_.switchImage(cur_image_);
+        for (size_t i = 0; i < num_active_; ++i) {
+            ins_[i].flushBuffers();
+            ins_[i].switchImage(cur_image_[i]);
+        }
     }
 }
 
@@ -650,8 +694,11 @@ void Inspector::zoom_toggled(Gtk::ToggleButton *b)
         b->set_active(true);
 
         options.thumbnail_inspector_zoom_fit = zoomfit_->get_active();
-        ins_.flushBuffers();
-        ins_.switchImage(cur_image_);
+
+        for (size_t i = 0; i < num_active_; ++i) {
+            ins_[i].flushBuffers();
+            ins_[i].switchImage(cur_image_[i]);
+        }
     }
 }
 
@@ -659,8 +706,10 @@ void Inspector::zoom_toggled(Gtk::ToggleButton *b)
 void Inspector::cms_toggled()
 {
     options.thumbnail_inspector_enable_cms = cms_->get_active();
-    ins_.flushBuffers();
-    ins_.switchImage(cur_image_);
+    for (size_t i = 0; i < num_active_; ++i) {
+        ins_[i].flushBuffers();
+        ins_[i].switchImage(cur_image_[i]);
+    }
 }
 
 
@@ -675,13 +724,14 @@ void Inspector::toggleUseCms()
     cms_->set_active(!cms_->get_active());
 }
 
-    enum class DisplayMode {
-        JPG,
-        RAW_LINEAR,
-        RAW_FILM_CURVE,
-        RAW_SHADOW_BOOST,
-        RAW_CLIP_WARNING
-    };
+enum class DisplayMode {
+    JPG,
+    RAW_LINEAR,
+    RAW_FILM_CURVE,
+    RAW_SHADOW_BOOST,
+    RAW_CLIP_WARNING
+};
+
 void Inspector::setDisplayMode(DisplayMode m)
 {
     switch (m) {
@@ -711,4 +761,96 @@ void Inspector::setZoomFit(bool yes)
     } else {
         zoom11_->set_active(true);
     }
+}
+
+
+void Inspector::onGrabFocus(GdkEventButton *evt, size_t i)
+{
+    if (evt->button == 1) {
+        ins_[active_].setHighlight(false);
+        ins_[i].setHighlight(true);
+        active_ = i;
+        queue_draw();
+    }
+}
+
+
+void Inspector::split_toggled()
+{
+    if (split_->get_active()) {
+        active_ = 1;
+        ibox_.pack_start(ins_[1], Gtk::PACK_EXPAND_WIDGET, 3);
+        ins_[1].show();
+        ins_[1].setActive(false);
+        num_active_ = 2;
+        ins_[0].setHighlight(false);
+        ins_[1].setHighlight(true);
+    } else {
+        active_ = 0;
+        ins_[1].setActive(false);
+        removeIfThere(&ibox_, &ins_[1]);
+        num_active_ = 1;
+        ins_[0].setHighlight(false);
+        ins_[1].setHighlight(false);
+    }
+    queue_draw();
+}
+
+
+bool Inspector::handleShortcutKey(GdkEventKey *event)
+{
+    bool ctrl  = event->state & GDK_CONTROL_MASK;
+    bool shift = event->state & GDK_SHIFT_MASK;
+    bool alt   = event->state & GDK_MOD1_MASK;
+#ifdef __WIN32__
+    bool altgr = event->state & GDK_MOD2_MASK;
+#else
+    bool altgr = false;
+#endif
+
+    if (!ctrl && !shift && !alt && !altgr) {
+        switch (event->keyval) {
+        case GDK_KEY_i:
+            toggleShowInfo(); 
+           return true;
+        case GDK_KEY_c:
+            toggleUseCms();
+            return true;
+        case GDK_KEY_z:
+            setZoomFit(false);
+            return true;
+        case GDK_KEY_x:
+            setZoomFit(true);
+            return true;
+        case GDK_KEY_j:
+            setDisplayMode(Inspector::DisplayMode::JPG);
+            return true;
+        case GDK_KEY_r:
+            setDisplayMode(Inspector::DisplayMode::RAW_LINEAR);
+            return true;
+        case GDK_KEY_f:
+            setDisplayMode(Inspector::DisplayMode::RAW_FILM_CURVE);
+            return true;
+        case GDK_KEY_s:
+            setDisplayMode(Inspector::DisplayMode::RAW_SHADOW_BOOST);
+            return true;
+        case GDK_KEY_w:
+            setDisplayMode(Inspector::DisplayMode::RAW_CLIP_WARNING);
+            return true;
+        case GDK_KEY_y:
+            split_->set_active(!split_->get_active());
+            return true;
+        case GDK_KEY_Tab:
+            if (split_->get_active()) {
+                ins_[active_].setHighlight(false);
+                active_ = 1 - active_;
+                ins_[active_].setHighlight(true);
+                queue_draw();
+                return true;
+            }
+            break;
+        }
+    }
+
+    return false;
 }

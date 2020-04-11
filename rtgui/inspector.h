@@ -75,6 +75,8 @@ public:
 
     sigc::signal<void> signal_ready() { return sig_ready_; }
 
+    void setHighlight(bool yes) { highlight_ = yes; }
+
 private:
     bool on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr) override;
     void deleteBuffers();
@@ -86,6 +88,7 @@ private:
     //double zoom;
     bool active;
     bool first_active_;
+    bool highlight_;
 
     sigc::connection delayconn;
     Glib::ustring next_image_path;
@@ -101,18 +104,12 @@ class Inspector: public Gtk::VBox {
 public:
     Inspector(FileCatalog *filecatalog);
 
-    void mouseMove(rtengine::Coord2D pos, int transform)
-    { ins_.mouseMove(pos, transform); }
-    
-    void switchImage(const Glib::ustring &fullPath);    
-    // void setTransformation(int transform);
-    
-    void flushBuffers() { ins_.flushBuffers(); }
-    
-    void setActive(bool state) { ins_.setActive(state); }
-    bool isActive() const { return ins_.isActive(); };
-
-    sigc::signal<void> signal_ready() { return ins_.signal_ready(); }
+    void mouseMove(rtengine::Coord2D pos, int transform);
+    void switchImage(const Glib::ustring &fullPath);
+    void flushBuffers();
+    void setActive(bool state);
+    bool isActive() const;
+    sigc::signal<void> signal_ready();
 
     void toggleShowInfo();
     void toggleUseCms();
@@ -125,21 +122,29 @@ public:
     };
     void setDisplayMode(DisplayMode m);
     void setZoomFit(bool yes);
+
+    bool handleShortcutKey(GdkEventKey *event);
     
 private:
     Gtk::HBox *get_toolbar();
-    Glib::ustring get_info_text();
+    Glib::ustring get_info_text(size_t i);
     void info_toggled();
     void mode_toggled(Gtk::ToggleButton *b);
     void zoom_toggled(Gtk::ToggleButton *b);
     void cms_toggled();
     bool keyPressed(GdkEventKey *evt);
+    void onGrabFocus(GdkEventButton *evt, size_t i);
+    void split_toggled();
 
     FileCatalog *filecatalog_;
 
-    Glib::ustring cur_image_;
-    InspectorArea ins_;
+    Gtk::HBox ibox_;
+    std::array<Glib::ustring, 2> cur_image_;
+    std::array<InspectorArea, 2> ins_;
+    size_t active_;
+    size_t num_active_;
 
+    Gtk::ToggleButton *split_;
     Gtk::ToggleButton *info_;
     Gtk::ToggleButton *jpg_;
     Gtk::ToggleButton *rawlinear_;

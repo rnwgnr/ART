@@ -1071,38 +1071,43 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
 #endif
 
     const bool in_inspector = inspector && inspector->isActive();
-    if (in_inspector && !ctrl && !alt && !altgr) {
-        // shortcuts for the inspector mode
-        switch (event->keyval) {
-        case GDK_KEY_i:
-            inspector->toggleShowInfo();
-            return true;
-        case GDK_KEY_c:
-            inspector->toggleUseCms();
-            return true;
-        case GDK_KEY_z:
-            inspector->setZoomFit(false);
-            return true;
-        case GDK_KEY_x:
-            inspector->setZoomFit(true);
-            return true;
-        case GDK_KEY_j:
-            inspector->setDisplayMode(Inspector::DisplayMode::JPG);
-            return true;
-        case GDK_KEY_r:
-            inspector->setDisplayMode(Inspector::DisplayMode::RAW_LINEAR);
-            return true;
-        case GDK_KEY_f:
-            inspector->setDisplayMode(Inspector::DisplayMode::RAW_FILM_CURVE);
-            return true;
-        case GDK_KEY_s:
-            inspector->setDisplayMode(Inspector::DisplayMode::RAW_SHADOW_BOOST);
-            return true;
-        case GDK_KEY_w:
-            inspector->setDisplayMode(Inspector::DisplayMode::RAW_CLIP_WARNING);
-            return true;
-        }
+    if (in_inspector && inspector->handleShortcutKey(event)) {
+        return true;
     }
+    // if (in_inspector && !ctrl && !alt && !altgr) {
+    //     // shortcuts for the inspector mode
+    //     switch (event->keyval) {
+    //     case GDK_KEY_i:
+    //         inspector->toggleShowInfo();
+    //         return true;
+    //     case GDK_KEY_c:
+    //         inspector->toggleUseCms();
+    //         return true;
+    //     case GDK_KEY_z:
+    //         inspector->setZoomFit(false);
+    //         return true;
+    //     case GDK_KEY_x:
+    //         inspector->setZoomFit(true);
+    //         return true;
+    //     case GDK_KEY_j:
+    //         inspector->setDisplayMode(Inspector::DisplayMode::JPG);
+    //         return true;
+    //     case GDK_KEY_r:
+    //         inspector->setDisplayMode(Inspector::DisplayMode::RAW_LINEAR);
+    //         return true;
+    //     case GDK_KEY_f:
+    //         inspector->setDisplayMode(Inspector::DisplayMode::RAW_FILM_CURVE);
+    //         return true;
+    //     case GDK_KEY_s:
+    //         inspector->setDisplayMode(Inspector::DisplayMode::RAW_SHADOW_BOOST);
+    //         return true;
+    //     case GDK_KEY_w:
+    //         inspector->setDisplayMode(Inspector::DisplayMode::RAW_CLIP_WARNING);
+    //         return true;
+    //     case GDK_KEY_y:
+            
+    //     }
+    // }
 
     if ((event->keyval == GDK_KEY_C || event->keyval == GDK_KEY_c) && ctrl && shift) {
         menuItemActivated (copyTo);
