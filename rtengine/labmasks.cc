@@ -628,7 +628,9 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
                 b /= 42000.f;
 #endif
                 guide[y][x] = LIM01(l);
-                l = LL[y][x];
+                if (has_lmask) {
+                    l = LL[y][x];
+                }
 
                 if (has_mask) {
 #ifdef __SSE2__
