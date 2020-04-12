@@ -61,6 +61,8 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Objectif
 EXIFFILTER_METADATAFILTER;Activer les filtres sur les métadonnées
 EXIFFILTER_SHUTTER;Vitesse d'obturation
+EXIFPANEL_ACTIVATE_ALL_HINT;Sélectionner toutes les étiquettes
+EXIFPANEL_ACTIVATE_NONE_HINT;Désélectionner toutes les étiquettes
 EXIFPANEL_ADDEDIT;Ajouter/Éditer
 EXIFPANEL_ADDEDITHINT;Ajouter ou éditer une étiquette
 EXIFPANEL_ADDTAGDLG_ENTERVALUE;Saisir une valeur
@@ -70,6 +72,8 @@ EXIFPANEL_RESET;Réinitialiser
 EXIFPANEL_RESETALL;Tout réinitialiser
 EXIFPANEL_RESETALLHINT;Réinitialiser toutes les étiquettes à leur valeur initiale
 EXIFPANEL_RESETHINT;Réinitialiser les étiquettes sélectionnées à la valeur initiale
+EXIFPANEL_BASIC_GROUP;De base
+EXIFPANEL_VALUE_NOT_SHOWN;Non montrée
 EXPORT_BYPASS;Étapes de traitement à ignorer
 EXPORT_BYPASS_ALL;Sélectionner / Désélectionner tout
 EXPORT_BYPASS_DEFRINGE;Ignorer la Correction des Franges Colorées
@@ -907,12 +911,13 @@ ICCPROFCREATOR_SAVEDIALOG_TITLE;Enregistrer le profil ICC sous...
 ICCPROFCREATOR_SLOPE;Pente
 ICCPROFCREATOR_TRC_PRESET;Courbe de réponse tonale :
 INSPECTOR_ENABLE_CMS;Activer gestion de la colorimétrie
-INSPECTOR_INFO;Info rapide
+INSPECTOR_INFO;Info rapide \nRaccourci : <b>i</b>.
 INSPECTOR_PREVIEW;Prévisualisation de l'image intégrée.\nRaccourci : <b>j</b>.
 INSPECTOR_RAW_LINEAR;Rendu raw rapide avec courbe tonale linéaire.\nRaccourci : <b>r</b>.
 INSPECTOR_RAW_FILM;Rendu raw rapide avec courbe tonale type 'film'.\nRaccourci : <b>f</b>.
 INSPECTOR_RAW_CLIP;Pixels raw écrêtés.\nRaccourci : <b>w</b>.
 INSPECTOR_RAW_SHADOW;Rendu raw rapide avec courbe tonale amplifiant les ombres.\nRaccourci : <b>s</b>.
+INSPECTOR_SPLIT;Vue dissociée. \nRaccourci : <b>y</b>.
 INSPECTOR_ZOOM_FIT;Ajuster à la fenêtre.\nRaccourci : <b>x</b>.
 INSPECTOR_ZOOM_11;Zoomer à 100%.\nRaccourci : <b>z</b>.
 IPTCPANEL_CATEGORY;Catégorie
@@ -1582,7 +1587,7 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Standard Pondéré
 TP_EXPOS_BLACKPOINT_LABEL;Points Noir Raw
 TP_EXPOS_WHITEPOINT_LABEL;Points Blanc Raw
 TP_FILMNEGATIVE_BLUE;Ratio de bleu
-TP_FILMNEGATIVE_FILMBASE_PICK;Pick film base color
+TP_FILMNEGATIVE_FILMBASE_PICK;Choisissez la couleur de base du film.
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Choisissez un point du film non exposé (eg. la bordure entre les cadres), pour obtenir les valeurs actuelles des couleurs de base du film, et les sauver dans le profile de traitement.\nCeci permet d'obtenir facilement une valeur plus consitente de la balance des couleurs lors du traitement par lot de plusieurs images.\nUtilisez-le également lorsque l'image convertie est extrêmement sombre, lumineuse ou asymétrique.
 TP_FILMNEGATIVE_FILMBASE_VALUES;Film base RGB:
 TP_FILMNEGATIVE_GREEN;Exposant de référence (contraste)
