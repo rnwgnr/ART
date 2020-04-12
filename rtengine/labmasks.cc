@@ -524,13 +524,15 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 
     assert(!abmask || abmask->size() == size_t(n));
     assert(!Lmask || Lmask->size() == size_t(n));
-    
+
+    bool has_lmask = false;
     for (int i = begin_idx; i < end_idx; ++i) {
         if (abmask) {
             (*abmask)[i](W, H);
         }
         if (Lmask) {
             (*Lmask)[i](W, H);
+            has_lmask = true;
         }
     }
 
@@ -541,6 +543,46 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
         for (int j = 0; j < 3; ++j) {
             wp[i][j] = ws[i][j];
         }
+    }
+
+    array2D<float> LL;
+    if (has_lmask) {
+        LL(W, H);
+
+        constexpr float base_posterization = 5.f;
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float a, b;
+                rgb2lab(mode, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), guide[y][x], a, b, wp);
+                guide[y][x] /= 32768.f;
+                float l = guide[y][x];
+                float ll = round(l * base_posterization) / base_posterization;
+                LL[y][x] = ll;
+                assert(std::isfinite(LL[y][x]));
+            }
+        }
+        const float radius = max(max(full_width, W), max(full_height, H)) / 30.f;
+        const float epsilon = 0.05f;
+        int r2 = 10.f / scale;
+        if (r2 > 0) {
+            rtengine::guidedFilter(guide, guide, guide, r2, 0.1f, multithread);
+        }
+        rtengine::guidedFilter(guide, LL, LL, radius, epsilon, multithread);
+
+#if 0
+        if (W > 300) {
+            Imagefloat tmp(W, H);
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    tmp.r(y, x) = tmp.g(y, x) = tmp.b(y, x) = LL[y][x] * 65535.f;
+                }
+            }
+            tmp.saveTIFF("/tmp/mask.tif", 16);
+        }
+#endif        
     }
     
     // magic constant c_factor: normally chromaticity is in [0; 42000] (see color.h), but here we use the constant to match how the chromaticity pipette works (see improcfun.cc lines 4705-4706 and color.cc line 1930
@@ -575,7 +617,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 #endif
             for (int x = 0; x < W; ++x) {
 #ifdef __SSE2__
-                const float l = lBuffer[x] / 32768.f;
+                float l = lBuffer[x] / 32768.f;
                 const float a = aBuffer[x] / 42000.f;
                 const float b = bBuffer[x] / 42000.f;
 #else
@@ -586,6 +628,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
                 b /= 42000.f;
 #endif
                 guide[y][x] = LIM01(l);
+                l = LL[y][x];
 
                 if (has_mask) {
 #ifdef __SSE2__
@@ -788,7 +831,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 }
 
 
-void fillPipetteLabMasks(Imagefloat *rgb, PlanarWhateverData<float>* editWhatever, LabMasksEditID id, bool multithread)
+void fillPipetteLabMasks(Imagefloat *rgb, PlanarWhateverData<float> *editWhatever, LabMasksEditID id, bool multithread)
 {
     TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(rgb->colorSpace());
     float wp[3][3];
