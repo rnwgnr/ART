@@ -75,7 +75,8 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
         
         # we emulate the behaviour of git with Mercurial
         execute_process(COMMAND ${HG_CMD} log -r .
-            --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{sub('^.*/.*:', '', tag)}{ifeq(distance, 0, '', '-')}{ifeq(distance, 0, '', distance)}{ifeq(distance, 0, '', '-g')}{ifeq(distance, 0, '', short(gitnode))}'}"
+            #--template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{sub('^.*/.*:', '', tag)}{ifeq(distance, 0, '', '-')}{ifeq(distance, 0, '', distance)}{ifeq(distance, 0, '', '-g')}{ifeq(distance, 0, '', short(gitnode))}'}"
+            --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{sub('^.*/.*:', '', tag)}{ifeq(distance, 0, '', '-')}{ifeq(distance, 0, '', count(revset('ancestors(\".\") and descendants(last(tag(r\"re:v?[0-9.]+(rc)?[0-9]+$\"), 1))'))-1)}{ifeq(distance, 0, '', '-g')}{ifeq(distance, 0, '', short(gitnode))}'}"
             OUTPUT_VARIABLE GIT_DESCRIBE
             OUTPUT_STRIP_TRAILING_WHITESPACE
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
@@ -95,7 +96,8 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
             OUTPUT_STRIP_TRAILING_WHITESPACE
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-        execute_process(COMMAND ${HG_CMD} log -r . --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{distance}'}"
+        execute_process(COMMAND #${HG_CMD} log -r . --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{distance}'}"
+            ${HG_CMD} log -r . --template "{count(revset('ancestors(\".\") and descendants(last(tag(r\"re:v?[0-9.]+(rc)?[0-9]+$\"), 1))'))-1}"
             OUTPUT_VARIABLE GIT_COMMITS_SINCE_TAG
             OUTPUT_STRIP_TRAILING_WHITESPACE
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
