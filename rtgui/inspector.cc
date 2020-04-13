@@ -458,6 +458,7 @@ Inspector::Inspector(FileCatalog *filecatalog):
         ins_[i].set_can_focus(true);
         ins_[i].add_events(Gdk::BUTTON_PRESS_MASK);
         ins_[i].signal_button_press_event().connect_notify(sigc::bind(sigc::mem_fun(*this, &Inspector::onGrabFocus), i));
+        ins_[i].signal_size_allocate().connect(sigc::mem_fun(*this, &Inspector::onInspectorResized));
     }
 }
 
@@ -853,4 +854,15 @@ bool Inspector::handleShortcutKey(GdkEventKey *event)
     }
 
     return false;
+}
+
+
+void Inspector::onInspectorResized(Gtk::Allocation &a)
+{
+    if (zoomfit_->get_active()) {
+        for (size_t i = 0; i < num_active_; ++i) {
+            ins_[i].flushBuffers();
+            ins_[i].switchImage(cur_image_[i]);
+        }
+    }        
 }

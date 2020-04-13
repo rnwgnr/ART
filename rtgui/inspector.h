@@ -134,6 +134,7 @@ private:
     void cms_toggled();
     bool keyPressed(GdkEventKey *evt);
     void onGrabFocus(GdkEventButton *evt, size_t i);
+    void onInspectorResized(Gtk::Allocation &a);
     void split_toggled();
 
     FileCatalog *filecatalog_;
