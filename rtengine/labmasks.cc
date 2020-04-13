@@ -492,6 +492,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     std::vector<std::unique_ptr<FlatCurve>> hmask(n);
     std::vector<std::unique_ptr<FlatCurve>> cmask(n);
     std::vector<std::unique_ptr<FlatCurve>> lmask(n);
+    std::vector<float> ldetail(n);
 
     const int W = rgb->getWidth();
     const int H = rgb->getHeight();
@@ -519,6 +520,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
         if (r.parametricMask.enabled && !r.parametricMask.lightness.empty() && r.parametricMask.lightness[0] != FCT_Linear && r.parametricMask.lightness != dflt.parametricMask.lightness) {
             lmask[i].reset(new FlatCurve(r.parametricMask.lightness, false));
             has_mask = true;
+            ldetail[i] = LIM01(float(r.parametricMask.lightnessDetail) / 100.f);
         }
     }
 
@@ -549,7 +551,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     if (has_lmask) {
         LL(W, H);
 
-        constexpr float base_posterization = 5.f;
+        constexpr float base_posterization = 40.f;
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
@@ -565,10 +567,10 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             }
         }
         const float radius = max(max(full_width, W), max(full_height, H)) / 30.f;
-        const float epsilon = 0.05f;
+        const float epsilon = 0.001f;
         int r2 = 10.f / scale;
         if (r2 > 0) {
-            rtengine::guidedFilter(guide, guide, guide, r2, 0.1f, multithread);
+            rtengine::guidedFilter(guide, guide, guide, r2, 0.01f, multithread);
         }
         rtengine::guidedFilter(guide, LL, LL, radius, epsilon, multithread);
 
@@ -628,9 +630,9 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
                 b /= 42000.f;
 #endif
                 guide[y][x] = LIM01(l);
-                if (has_lmask) {
-                    l = LL[y][x];
-                }
+                // if (has_lmask) {
+                //     l = intp(ldetail, LL[y][x], l);
+                // }
 
                 if (has_mask) {
 #ifdef __SSE2__
@@ -654,7 +656,8 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
                         auto &hm = hmask[i];
                         auto &cm = cmask[i];
                         auto &lm = lmask[i];
-                        float blend = LIM01(dE(i, l, a, b) * (hm ? hm->getVal(h) : 1.f) * (cm ? cm->getVal(c) : 1.f) * (lm ? lm->getVal(l) : 1.f));
+                        float ll = has_lmask ? intp(ldetail[i], LL[y][x], l) : l;
+                        float blend = LIM01(dE(i, l, a, b) * (hm ? hm->getVal(h) : 1.f) * (cm ? cm->getVal(c) : 1.f) * (lm ? lm->getVal(ll) : 1.f));
                         if (Lmask) {
                             (*Lmask)[i][y][x] = blend;
                         }

@@ -171,6 +171,7 @@ public:
     std::vector<double> hue;
     std::vector<double> chromaticity;
     std::vector<double> lightness;
+    int lightnessDetail;
     int contrastThreshold;
 
     ParametricMask();

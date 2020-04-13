@@ -685,6 +685,7 @@ ParametricMask::ParametricMask():
             0.35,
             0.35
             },
+    lightnessDetail(0),
     contrastThreshold(0)
 {
 }
@@ -697,6 +698,7 @@ bool ParametricMask::operator==(const ParametricMask &other) const
         && hue == other.hue
         && chromaticity == other.chromaticity
         && lightness == other.lightness
+        && lightnessDetail == other.lightnessDetail
         && contrastThreshold == other.contrastThreshold;
 }
 
@@ -780,6 +782,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "HueMask" + suffix, parametricMask.hue);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMask" + suffix, parametricMask.lightness);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMaskDetail" + suffix, parametricMask.lightnessDetail);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "ContrastThresholdMask" + suffix, parametricMask.contrastThreshold);
     if (ppVersion < 1008) {
         ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskBlur" + suffix, parametricMask.blur);
@@ -856,6 +859,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "HueMask" + suffix, parametricMask.hue, keyfile);
     putToKeyfile(group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity, keyfile);
     putToKeyfile(group_name, prefix + "LightnessMask" + suffix, parametricMask.lightness, keyfile);
+    putToKeyfile(group_name, prefix + "LightnessMaskDetail" + suffix, parametricMask.lightnessDetail, keyfile);
     putToKeyfile(group_name, prefix + "ContrastThresholdMask" + suffix, parametricMask.contrastThreshold, keyfile);
     putToKeyfile(group_name, prefix + "ParametricMaskBlur" + suffix, parametricMask.blur, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskEnabled" + suffix, areaMask.enabled, keyfile);

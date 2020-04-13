@@ -768,6 +768,10 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     maskEditorGroup->show();
     tb->pack_start(*maskEditorGroup);//, Gtk::PACK_SHRINK, 4);
 
+    lightnessMaskDetail = Gtk::manage(new Adjuster(M("TP_LABMASKS_LIGHTNESS_DETAIL"), 0, 100, 1, 0));
+    lightnessMaskDetail->setAdjusterListener(this);
+    tb->pack_start(*lightnessMaskDetail);
+
     Gtk::Image *cicon = Gtk::manage(new RTImage("one-to-one-small.png"));
     contrastThreshold = Gtk::manage(new Adjuster(M("TP_LABMASKS_CONTRASTTHRESHOLDMASK"), -150, 150, 1, 0, cicon));
     contrastThreshold->setAdjusterListener(this);
@@ -1078,6 +1082,7 @@ void LabMasksPanel::maskGet(int idx)
     r.parametricMask.hue = hueMask->getCurve();
     r.parametricMask.chromaticity = chromaticityMask->getCurve();
     r.parametricMask.lightness = lightnessMask->getCurve();
+    r.parametricMask.lightnessDetail = lightnessMaskDetail->getValue();
     r.parametricMask.blur = maskBlur->getValue();
     r.parametricMask.contrastThreshold = contrastThreshold->getValue();
     r.inverted = maskInverted->get_active();
@@ -1291,6 +1296,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         hueMask->setCurve(r.parametricMask.hue);
         chromaticityMask->setCurve(r.parametricMask.chromaticity);
         lightnessMask->setCurve(r.parametricMask.lightness);
+        lightnessMaskDetail->setValue(r.parametricMask.lightnessDetail);
         contrastThreshold->setValue(r.parametricMask.contrastThreshold);
         maskBlur->setValue(r.parametricMask.blur);
         maskInverted->set_active(r.inverted);
@@ -1494,6 +1500,10 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
     } else if (a == contrastThreshold) {
         if (l) {
             l->panelChanged(EvContrastThresholdMask, a->getTextValue());
+        }
+    } else if (a == lightnessMaskDetail) {
+        if (l) {
+            l->panelChanged(EvLMask, a->getTextValue());
         }
     }
     maskShow(selected_, true);

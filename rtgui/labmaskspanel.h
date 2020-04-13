@@ -248,6 +248,7 @@ private:
     FlatCurveEditor *hueMask;
     FlatCurveEditor *chromaticityMask;
     FlatCurveEditor *lightnessMask;
+    Adjuster *lightnessMaskDetail;
     Adjuster *maskBlur;
     Gtk::CheckButton *showMask;
     sigc::connection selectionConn;
