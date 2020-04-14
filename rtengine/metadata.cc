@@ -70,7 +70,7 @@ std::wstring to_wstr(const Glib::ustring &s)
 #endif // WIN32
 
 
-Exiv2::Image::AutoPtr open_exiv2(const Glib::ustring &fname)
+std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname)
 {
 #if defined WIN32 && defined EXV_UNICODE_PATH
     std::wstring wfname = to_wstr(fname);
@@ -277,7 +277,7 @@ bool exec_subprocess(const std::vector<Glib::ustring> &argv, std::string &out, s
 #endif // WIN32
 
 
-Exiv2::Image::AutoPtr exiftool_import(const Glib::ustring &fname, const std::exception &exc)
+std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const std::exception &exc)
 {
     Glib::ustring exiftool = settings->exiftool_path;
     if (exiftool == exiftool_default) {
@@ -351,7 +351,7 @@ Exiv2::Image::AutoPtr exiftool_import(const Glib::ustring &fname, const std::exc
         }
         throw exc;
     }
-    return Exiv2::Image::AutoPtr();
+    return std::unique_ptr<Exiv2::Image>();
 }
 
 } // namespace
