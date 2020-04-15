@@ -221,6 +221,8 @@ void update_tone_curve_histogram(Imagefloat *img, LUTu &hist, const Glib::ustrin
     hist.clear();
     const int compression = log2(65536 / hist.getSize());
 
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(profile);
+
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
@@ -230,9 +232,16 @@ void update_tone_curve_histogram(Imagefloat *img, LUTu &hist, const Glib::ustrin
             float g = CLIP(img->g(y, x));
             float b = CLIP(img->b(y, x));
 
-            int y = CLIP<int>(Color::gamma2curve[max(r, g, b)]);
+            int y = CLIP<int>(Color::gamma2curve[Color::rgbLuminance(r, g, b, ws)]);//max(r, g, b)]);
             hist[y >> compression]++;
         }
+    }
+
+    // we make this log encoded
+    int n = hist.getSize();
+    float f = float(n);
+    for (int i = 0; i < n; ++i) {
+        hist[i] = xlin2log(float(hist[i]) / f, 2.f) * f;
     }
 }
 

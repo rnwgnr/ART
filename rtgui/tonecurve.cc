@@ -365,7 +365,7 @@ void ToneCurve::updateCurveBackgroundHistogram(
 )
 {
     shape->updateBackgroundHistogram(histToneCurve);
-    satcurve->updateBackgroundHistogram(histToneCurve);
+    shape2->updateBackgroundHistogram(histToneCurve);
 }
 
 
