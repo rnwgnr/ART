@@ -509,7 +509,7 @@ CursorShape Spot::getCursor(int objectID, int xPos, int yPos)
         if (objectID == TARGET_DISC || objectID == SOURCE_DISC) {
             return CSMove2D;
         }
-        if (objectID >= 3 && objectID <= 6) {
+        if (objectID >= 3 && objectID <= 6 && activeSpot > -1) {
             Coord delta(Coord(xPos, yPos) - ((objectID == 4 || objectID == 6) ? spots.at(activeSpot).sourcePos : spots.at(activeSpot).targetPos));
             PolarCoord polarPos(delta);
             if (polarPos.angle < 0.) {
