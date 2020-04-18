@@ -729,6 +729,10 @@ HISTORY_MSG_LOCALCONTRAST_LIGHTNESSMASK;Local contrast - L mask
 HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Local contrast - mask blur
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Local contrast - show mask
 HISTORY_MSG_LOCALCONTRAST_AREAMASK;Local contrast - area mask
+HISTORY_MSG_CHMIXER_MODE;Channel mixer - mode
+HISTORY_MSG_CHMIXER_RED_PRIMARY;Channel mixer - Red primary
+HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Channel mixer - Green primary
+HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Channel mixer - Blue primary
 HISTORY_MSG_CLAMPOOG;Clip out-of-gamut colors
 HISTORY_MSG_COLORCORRECTION_AB;CC - hue correction
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - region area mask
@@ -1458,6 +1462,14 @@ TP_CHMIXER_BLUE;Blue channel
 TP_CHMIXER_GREEN;Green channel
 TP_CHMIXER_LABEL;Channel Mixer
 TP_CHMIXER_RED;Red channel
+TP_CHMIXER_MODE;Mode
+TP_CHMIXER_HUE;Hue correction
+TP_CHMIXER_SAT;Saturation correction
+TP_CHMIXER_PRIMARY_R;Red primary
+TP_CHMIXER_PRIMARY_G;Green primary
+TP_CHMIXER_PRIMARY_B;Blue primary
+TP_CHMIXER_MODE_RGB_MATRIX;RGB matrix
+TP_CHMIXER_MODE_PRIMARIES_CHROMA;Primaries correction
 TP_COARSETRAF_TOOLTIP_HFLIP;Flip horizontally.
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotate left.\n\nShortcuts:\n<b>[</b> - Multiple Editor Tabs Mode,\n<b>Alt-[</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotate right.\n\nShortcuts:\n<b>]</b> - Multiple Editor Tabs Mode,\n<b>Alt-]</b> - Single Editor Tab Mode.
