@@ -184,7 +184,18 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
                              chMixRR, chMixRG, chMixRB,
                              chMixGR, chMixGG, chMixGB,
                              chMixBR, chMixBG, chMixBB);
+            if (options.rtSettings.verbose) {
+                printf("Channel mixer matrix:\n"
+                       "   %.1f %.1f %.1f\n"
+                       "   %.1f %.1f %.1f\n"
+                       "   %.1f %.1f %.1f\n",
+                       chMixRR, chMixRG, chMixRB,
+                       chMixGR, chMixGG, chMixGB,
+                       chMixBR, chMixBG, chMixBB);
+                fflush(stdout);
+            }
         }
+
         
 #ifdef _OPENMP
 #       pragma omp parallel for if (multiThread)
