@@ -732,7 +732,7 @@ HISTORY_MSG_LOCALCONTRAST_AREAMASK;Local contrast - area mask
 HISTORY_MSG_CHMIXER_MODE;Channel mixer - mode
 HISTORY_MSG_CHMIXER_RED_PRIMARY;Channel mixer - Red primary
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Channel mixer - Green primary
-HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Channel mixer - Blue primary
+HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Channel mixer - Blue primary
 HISTORY_MSG_CLAMPOOG;Clip out-of-gamut colors
 HISTORY_MSG_COLORCORRECTION_AB;CC - hue correction
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - region area mask
