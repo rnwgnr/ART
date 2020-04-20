@@ -116,6 +116,11 @@ ChMixer::ChMixer (): FoldableToolPanel(this, "chmixer", M("TP_CHMIXER_LABEL"), f
     pack_start(*matrix_box);
 
     primaries_box = Gtk::manage(new Gtk::VBox());
+    std::array<std::pair<const char *, const char *>, 3> hue_imgs = {
+        std::make_pair("redpurple", "orange"),
+        std::make_pair("greenyellow", "greencyan"),
+        std::make_pair("bluecyan", "bluepurple")
+    };
     for (int c = 0; c < 3; ++c) {
         const char *chan = (c == 0 ? "R" : (c == 1 ? "G" : "B"));
         const char *img = (c == 0 ? "red" : (c == 1 ? "green" : "blue"));
@@ -129,7 +134,7 @@ ChMixer::ChMixer (): FoldableToolPanel(this, "chmixer", M("TP_CHMIXER_LABEL"), f
         vb->set_spacing(2);
         vb->set_border_width(2);
     
-        hue_tweak[c] = Gtk::manage(new Adjuster(M("TP_CHMIXER_HUE"), -100, 100, 1, 0));
+        hue_tweak[c] = Gtk::manage(new Adjuster(M("TP_CHMIXER_HUE"), -100, 100, 1, 0, Gtk::manage(new RTImage(std::string("circle-") + hue_imgs[c].first + "-small.png")), Gtk::manage(new RTImage(std::string("circle-") + hue_imgs[c].second + "-small.png"))));
         hue_tweak[c]->setAdjusterListener(this);
         vb->pack_start(*hue_tweak[c]);
         
