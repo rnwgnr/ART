@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1012
+#define PPVERSION 1013
 
 /*
   Log of version changes
+  1013  2020-04-21
+        do not use exposure compensation when computing auto settings for logenc
   1012  2020-04-11
         new defaults for metadata 
   1011  2020-03-31

@@ -3864,7 +3864,11 @@ int ProcParams::load(bool load_general,
 
         if (keyFile.has_group("LogEncoding") && RELEVANT_(logenc)) {
             assignFromKeyfile(keyFile, "LogEncoding", "Enabled", logenc.enabled);
-            assignFromKeyfile(keyFile, "LogEncoding", "Auto", logenc.autocompute);
+            if (ppVersion >= 1013) {
+                assignFromKeyfile(keyFile, "LogEncoding", "Auto", logenc.autocompute);
+            } else {
+                logenc.autocompute = false;
+            }
             assignFromKeyfile(keyFile, "LogEncoding", "AutoGray", logenc.autogray);
             if (ppVersion < 349) {
                 assignFromKeyfile(keyFile, "LogEncoding", "GrayPoint", logenc.sourceGray);
