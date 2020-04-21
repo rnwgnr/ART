@@ -93,23 +93,64 @@ struct AreaMask {
             SUBTRACT,
             INTERSECT
         };
+        enum Type {
+            RECTANGLE,
+            POLYGON
+        };
+        Mode mode;
+
+        Shape();
+        virtual ~Shape() {}
+        virtual Type getType() const = 0 ;
+        virtual bool operator==(const Shape &other) const;
+        virtual bool operator!=(const Shape &other) const;
+        static int toImgSpace(double v, int imSize);
+        static double toParamRange(int v, int imSize);
+    };
+    struct Rectangle : public Shape {
         double x; // [-100,100], with 0 as center of the image
         double y; // [-100,100]
         double width; // [0,200], with 100 as image width
         double height; // [0,200]
         double angle; // in degrees
         double roundness; // [0,100] (0 = rectangle, 100 = ellipse)
-        Mode mode;
-        Shape();
-        bool operator==(const Shape &other) const;
-        bool operator!=(const Shape &other) const;
+
+        Rectangle();
+        virtual ~Rectangle() {}
+        virtual Type getType() const { return Type::RECTANGLE; };
+        virtual bool operator==(const Rectangle &other) const;
+        virtual bool operator!=(const Rectangle &other) const;
+    };
+    struct Polygon : public Shape {
+        struct Knot {
+            double x; // [-200,200], with 0 as center of the image, 100 = half width of the image
+                      //             200 as a limit means that knot can be out of the image
+                      //             up to twice the image size
+            double y; // [-200,200]
+            double roundness; // [0,100] (0 = sharp corner, 100 = entirely round corner)
+
+            Knot();
+            void setPos(CoordD &pos);
+            bool operator==(const Knot &other) const;
+            bool operator!=(const Knot &other) const;
+        };
+        std::vector<Knot> knots;
+
+        virtual ~Polygon() {}
+
+        // Convert the Polygon object into a drawable polygon (for rtengine and rtgui)
+        static std::vector<CoordD> getTessellation(std::vector<Knot> &knots);
+
+        virtual Type getType() const { return Type::POLYGON; };
+        virtual bool operator==(const Polygon &other) const;
+        virtual bool operator!=(const Polygon &other) const;
     };
     bool enabled;
     double feather; // [0,100]
     double blur;
     std::vector<double> contrast; // curve
-    std::vector<Shape> shapes;
-        
+    std::vector<std::shared_ptr<Shape>> shapes;
+
     AreaMask();
     bool operator==(const AreaMask &other) const;
     bool operator!=(const AreaMask &other) const;

@@ -1696,8 +1696,9 @@ TP_LABMASKS_AREA_HEIGHT;Hauteur
 TP_LABMASKS_INVERTED;Inverser
 TP_LABMASKS_AREA_ROUNDNESS;Arrondi
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copier la zone courante dans le presse-papier
-TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Editer la zone courante en dessinant sur l'image de prévisualisation
-TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Ajouter une zone en dessinant sur l'image de prévisualisation 
+TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Editer la zone rectangulaire courante en dessinant sur l'image de prévisualisation
+TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Ajouter une zone rectangulaire en dessinant sur l'image de prévisualisation 
+TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Ajouter une zone polygonale en ajoutant des points sur l'image de prévisualisation 
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Afficher la forme de la zone courante dans l'image
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Coller une zone depuis le presse-papier
 TP_LABMASKS_AREA_SHAPE;Forme
@@ -1705,6 +1706,7 @@ TP_LABMASKS_AREA_SHAPE_MODE;Mode
 TP_LABMASKS_AREA_SHAPE_MODE_ADD;Ajout
 TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Soustraction
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Intersection
+TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 point(s)
 TP_LABMASKS_AREA_SHAPES;Formes des zones
 TP_LABMASKS_AREA_WIDTH;Largeur
 TP_LABMASKS_AREA_X;Centre X

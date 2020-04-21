@@ -66,16 +66,16 @@ public:
         UPDATE,
         END
     };
-    virtual void updateArea(Phase phase, int x1, int y1, int x2, int y2) = 0;
-    virtual void cancelUpdateArea() = 0;
+    virtual void updateRectangleArea(Phase phase, int x1, int y1, int x2, int y2) = 0;
+    virtual void cancelUpdateRectangleArea() = 0;
 };
 
 
 class AreaDrawListener {
 public:
     virtual ~AreaDrawListener() = default;
-    virtual void startDrawingArea(AreaDrawUpdater *updater) = 0;
-    virtual void stopDrawingArea() = 0;
+    virtual void startRectangleDrawingArea(AreaDrawUpdater *updater) = 0;
+    virtual void stopRectangleDrawingArea() = 0;
 };
 
 
@@ -115,6 +115,7 @@ public:
     float blendPipetteValues(CurveEditor *ce, float chan1, float chan2, float chan3) override;
 
     bool button1Released() override;
+    bool pick3 (const bool picked) override;
     void switchOffEditMode() override;
     void setEditProvider(EditDataProvider *provider);
     void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller) override;
@@ -124,8 +125,8 @@ public:
 
     void updateSelected();
 
-    void updateArea(AreaDrawUpdater::Phase phase, int x1, int y1, int x2, int y2) override;
-    void cancelUpdateArea() override;
+    void updateRectangleArea(AreaDrawUpdater::Phase phase, int x1, int y1, int x2, int y2) override;
+    void cancelUpdateRectangleArea() override;
     void setAreaDrawListener(AreaDrawListener *l);
 
     void setDeltaEColorProvider(DeltaEColorProvider *provider);
@@ -161,14 +162,17 @@ private:
     void onAreaMaskCopyPressed();
     void onAreaMaskPastePressed();
     void onAreaShapeModeChanged(int i);
-    void onAreaMaskDrawChanged();
-    void onAreaMaskDrawAddPressed();
+    void onRectangleAreaMaskDrawChanged();
+    void onAreaMaskDrawRectangleAddPressed();
+    void onAreaMaskDrawPolygonAddPressed();
     void onDeltaEMaskEnableToggled();
     void onParametricMaskEnableToggled();
     void onListEnabledToggled(const Glib::ustring &path);
     void setListEnabled(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator &it);
     
-    void updateAreaMask(bool from_mask);
+    void shapeAddPressed(rtengine::procparams::AreaMask::Shape::Type type, bool list_only);
+    void setRectangleAdjustersVisibility(bool isVisible);
+    void updateRectangleAreaMask(bool from_mask);
     void maskGet(int idx);
     void maskShow(int idx, bool list_only=false, bool unsub=true);
     void populateShapeList(int idx, int sel);
@@ -264,8 +268,9 @@ private:
     Gtk::Button *areaMaskDown;
     unsigned int area_shape_index_;
     Gtk::ToggleButton *areaMaskToggle;
-    Gtk::Button *areaMaskDrawAdd;
-    Gtk::ToggleButton *areaMaskDraw;
+    Gtk::Button *areaMaskDrawPolygonAdd;
+    Gtk::Button *areaMaskDrawRectangleAdd;
+    Gtk::ToggleButton *areaMaskDrawRectangle;
     sigc::connection areaMaskDrawConn;
     Gtk::Button *areaMaskCopy;
     Gtk::Button *areaMaskPaste;
@@ -283,7 +288,7 @@ private:
     Adjuster *areaMaskRoundness;
     std::vector<Adjuster *> areaMaskAdjusters;
     std::vector<bool> listenerDisabled;
-    rtengine::procparams::AreaMask::Shape defaultAreaShape;
+    rtengine::AreaMask::Rectangle defaultAreaShape;
     bool listEdited;
     AreaDrawListener *adl_;
 

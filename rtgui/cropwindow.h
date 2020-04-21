@@ -163,12 +163,26 @@ public:
     void deleteColorPickers ();
 
     void screenCoordToCropBuffer (int phyx, int phyy, int& cropx, int& cropy) override;
+    void screenCoordToCropBuffer (double phyx, double phyy, double& cropx, double& cropy) override;
+
     void screenCoordToImage (int phyx, int phyy, int& imgx, int& imgy) override;
+    void screenCoordToImage (double phyx, double phyy, double& imgx, double& imgy) override;
+
     void screenCoordToCropCanvas (int phyx, int phyy, int& prevx, int& prevy);
+    void screenCoordToCropCanvas (double phyx, double phyy, double& prevx, double& prevy);
+
     void imageCoordToCropCanvas (int imgx, int imgy, int& phyx, int& phyy) override;
+    void imageCoordToCropCanvas (double imgx, double imgy, double& phyx, double& phyy) override;
+
     void imageCoordToScreen (int imgx, int imgy, int& phyx, int& phyy) override;
+    void imageCoordToScreen (double imgx, double imgy, double& phyx, double& phyy) override;
+
     void imageCoordToCropBuffer (int imgx, int imgy, int& phyx, int& phyy) override;
+    void imageCoordToCropBuffer (double imgx, double imgy, double& phyx, double& phyy) override;
+
     void imageCoordToCropImage (int imgx, int imgy, int& phyx, int& phyy) override;
+    void imageCoordToCropImage (double imgx, double imgy, double& phyx, double& phyy) override;
+
     int scaleValueToImage (int value) override;
     float scaleValueToImage (float value) override;
     double scaleValueToImage (double value) override;
@@ -242,8 +256,8 @@ public:
 
     ImageArea* getImageArea();
 
-    void startDrawingArea(AreaDrawUpdater *updater) override;
-    void stopDrawingArea() override;
+    void startRectangleDrawingArea(AreaDrawUpdater *updater) override;
+    void stopRectangleDrawingArea() override;
 };
 
 #endif

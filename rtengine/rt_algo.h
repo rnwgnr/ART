@@ -21,6 +21,8 @@
 #pragma once
 
 #include <cstddef>
+#include "array2D.h"
+#include "coord.h"
 
 namespace rtengine {
 
@@ -35,4 +37,6 @@ void buildGradientsMask(int W, int H, float **luminance, float **out,
                         float amount, int nlevels, int detail_level,
                         float alfa, float beta, bool multithread);
 
+// Fills the polygon into the buffer ; Range has to be updated to the PorcParams's AreaMask::Polygon::x/y range
+void polyFill(array2D<float> &buffer, const std::vector<CoordD> &poly, const float color);
 } // namespace rtengine

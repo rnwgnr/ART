@@ -431,18 +431,74 @@ bool saveToKeyfile(
 
 
 AreaMask::Shape::Shape():
-    x(0),
-    y(0),
-    width(100),
-    height(100),
-    angle(0),
-    roundness(0),
     mode(ADD)
 {
 }
 
+AreaMask::Rectangle::Rectangle():
+    x(0.),
+    y(0.),
+    width(100.),
+    height(100.),
+    angle(0.),
+    roundness(0.)
+{
+}
+
+
+AreaMask::Polygon::Knot::Knot():
+    x(0.),
+    y(0.),
+    roundness(0.)
+{
+}
+
+void AreaMask::Polygon::Knot::setPos(CoordD &pos)
+{
+    x = pos.x;
+    y = pos.y;
+}
+
 
 bool AreaMask::Shape::operator==(const Shape &other) const
+{
+    return mode == other.mode;
+}
+
+
+bool AreaMask::Shape::operator!=(const Shape &other) const
+{
+    return !(*this == other);
+}
+
+
+bool AreaMask::Polygon::Knot::operator==(const Knot &other) const
+{
+    return
+        x == other.x
+        && y == other.y
+        && roundness == other.roundness;
+}
+
+int AreaMask::Shape::toImgSpace (double v, int imSize)
+{
+    double s2 = imSize / 2.;
+    return s2 + v / 100. * s2;
+}
+
+double AreaMask::Shape::toParamRange (int v, int imSize)
+{
+    double s2 = imSize / 2.;
+    return (double(v) - s2) * 100. / s2;
+}
+
+bool AreaMask::Polygon::Knot::operator!=(const Knot &other) const
+{
+    return !(*this == other);
+}
+
+
+bool AreaMask::Rectangle::operator==(const Rectangle &other) const
 {
     return
         x == other.x
@@ -451,11 +507,25 @@ bool AreaMask::Shape::operator==(const Shape &other) const
         && height == other.height
         && angle == other.angle
         && roundness == other.roundness
-        && mode == other.mode;
+        && AreaMask::Shape::operator==(other);
 }
 
 
-bool AreaMask::Shape::operator!=(const Shape &other) const
+bool AreaMask::Rectangle::operator!=(const Rectangle &other) const
+{
+    return !(*this == other);
+}
+
+
+bool AreaMask::Polygon::operator==(const Polygon &other) const
+{
+    return
+        knots == other.knots
+        && AreaMask::Shape::operator==(other);
+}
+
+
+bool AreaMask::Polygon::operator!=(const Polygon &other) const
 {
     return !(*this == other);
 }
@@ -466,7 +536,7 @@ AreaMask::AreaMask():
     feather(0),
     blur(0),
     contrast{DCT_Linear},
-    shapes{Shape()}
+    shapes{std::shared_ptr<Shape>(new Rectangle())}
 {
 }
 
@@ -765,6 +835,27 @@ Glib::ustring mode2str(AreaMask::Shape::Mode mode)
     }
 }
 
+AreaMask::Shape::Type str2type(const Glib::ustring &type)
+{
+    if (type == "rectangle") {
+        return AreaMask::Shape::RECTANGLE;
+    } else {
+        return AreaMask::Shape::POLYGON;
+    }
+}
+
+
+Glib::ustring type2str(AreaMask::Shape::Type type)
+{
+    switch (type) {
+    case AreaMask::Shape::RECTANGLE: return "rectangle";
+    case AreaMask::Shape::POLYGON: return "polygon";
+    default:
+        assert(false);
+        return "";
+    }
+}
+
 } // namespace
 
 
@@ -797,25 +888,63 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     if (areaMask.contrast.empty() || areaMask.contrast[0] < DCT_Linear || areaMask.contrast[0] >= DCT_Unchanged) {
         areaMask.contrast = {DCT_Linear};
     }
-    std::vector<AreaMask::Shape> s;
+    std::vector<std::shared_ptr<AreaMask::Shape>> s;
     for (int i = 0; ; ++i) {
-        AreaMask::Shape a;
-        bool found = false;
-        std::string n = i ? std::string("_") + std::to_string(i) + "_" : "";
-        found |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + suffix, a.x);
-        found |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Y" + suffix, a.y);
-        found |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Width" + suffix, a.width);
-        found |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Height" + suffix, a.height);
-        found |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Angle" + suffix, a.angle);
-        found |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Roundness" + suffix, a.roundness);
+        Glib::ustring type;
         Glib::ustring mode;
-        if (assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode)) {
-            found = true;
-            a.mode = str2mode(mode);
+        bool found = true; // skipping the entire element if one key is missing
+        std::string n = i ? std::string("_") + std::to_string(i) + "_" : "";
+        if (ppVersion >= 1013) {
+            found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Type" + suffix, type);
         }
-        if (found) {
-            s.emplace_back(a);
-            ret = true;
+        if (ppVersion < 1013 || found) {
+            std::shared_ptr<AreaMask::Shape> shape;
+            if (ppVersion < 1013 || str2type(type) == AreaMask::Shape::Type::RECTANGLE) {
+                AreaMask::Rectangle *rect = new AreaMask::Rectangle();
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + suffix, rect->x);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Y" + suffix, rect->y);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Width" + suffix, rect->width);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Height" + suffix, rect->height);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Angle" + suffix, rect->angle);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Roundness" + suffix, rect->roundness);
+                if (found) {
+                    shape.reset(rect);
+                } else {
+                    delete rect;
+                }
+            } else if (str2type(type) == AreaMask::Shape::Type::POLYGON) {
+                AreaMask::Polygon *poly = new AreaMask::Polygon();
+                int knotCount = 0;
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "KnotCount" + suffix, knotCount);
+                if (!found) {
+                    break;
+                }
+                for (int j = 1; j <= knotCount; ++j) {
+                    AreaMask::Polygon::Knot knot;
+                    std::string kn = "_" + std::to_string(j);
+                    found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + kn + suffix, knot.x);
+                    found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Y" + kn + suffix, knot.y);
+                    found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Roundness" + kn + suffix, knot.roundness);
+                    if (found) {
+                        poly->knots.push_back(knot);
+                    } else {
+                        break;
+                    }
+                }
+                if (found) {
+                    shape.reset(poly);
+                } else {
+                    delete poly;
+                }
+            }
+            found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
+            if (found) {
+                shape->mode = str2mode(mode);
+                s.emplace_back(shape);
+                ret = true;
+            } else {
+                break;
+            }
         } else {
             break;
         }
@@ -869,13 +998,33 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     for (size_t i = 0; i < areaMask.shapes.size(); ++i) {
         auto &a = areaMask.shapes[i];
         std::string n = i ? std::string("_") + std::to_string(i) + "_" : "";
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "X" + suffix, a.x, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Y" + suffix, a.y, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Width" + suffix, a.width, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Height" + suffix, a.height, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Angle" + suffix, a.angle, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Roundness" + suffix, a.roundness, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode2str(a.mode), keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "Type" + suffix, type2str(a->getType()), keyfile);
+        switch (a->getType()) {
+        case AreaMask::Shape::Type::POLYGON:
+        {
+            auto poly = static_cast<AreaMask::Polygon*>(a.get());
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "KnotCount" + suffix, (int)poly->knots.size(), keyfile);
+            for (size_t j = 0; j < poly->knots.size(); ++j) {
+                std::string kc = std::string("_") + std::to_string(j + 1);
+                putToKeyfile(group_name, prefix + "AreaMask" + n + "X" + kc + suffix, poly->knots[j].x, keyfile);
+                putToKeyfile(group_name, prefix + "AreaMask" + n + "Y" + kc + suffix, poly->knots[j].y, keyfile);
+                putToKeyfile(group_name, prefix + "AreaMask" + n + "Roundness" + kc + suffix, poly->knots[j].roundness, keyfile);
+            }
+            break;
+        }
+        case AreaMask::Shape::Type::RECTANGLE:
+        default:
+        {
+            auto rect = static_cast<AreaMask::Rectangle*>(a.get());
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "X" + suffix, rect->x, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Y" + suffix, rect->y, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Width" + suffix, rect->width, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Height" + suffix, rect->height, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Angle" + suffix, rect->angle, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Roundness" + suffix, rect->roundness, keyfile);
+        }
+        }
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode2str(a->mode), keyfile);
     }
 
     putToKeyfile(group_name, prefix + "DeltaEMaskEnabled" + suffix, deltaEMask.enabled, keyfile);

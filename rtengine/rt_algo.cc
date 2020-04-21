@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+#include <algorithm>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -579,6 +580,79 @@ void markImpulse(int width, int height, float **const src, char **impulse, float
     }
 
     delete [] lpf[0];
+}
+
+// taken and adapted from https://www.alienryderflex.com/polygon_fill/
+void polyFill(array2D<float> &buffer, const std::vector<CoordD> &poly, const float color)
+{
+
+    // First point of the polygon in image space
+    int xStart = int(poly[0].x + 0.5);
+    int yStart = int(poly[0].y + 0.5);
+    int xEnd = xStart;
+    int yEnd = yStart;
+
+    // Find boundaries
+    for (auto point : poly) {
+
+        // X bounds
+        if (int(point.x) < xStart) {
+            xStart = int(point.x);
+        } else if (int(point.x) > xEnd) {
+            xEnd = int(point.x);
+        }
+
+        // Y bounds
+        if (int(point.y) < yStart) {
+            yStart = int(point.y);
+        } else if (int(point.y) > yEnd) {
+            yEnd = int(point.y);
+        }
+    }
+
+    xStart = rtengine::LIM<int>(xStart, 0., buffer.width() - 1);
+    xEnd = rtengine::LIM<int>(xEnd, xStart, buffer.width() - 1);
+    yStart = rtengine::LIM<int>(yStart, 0., buffer.height() - 1);
+    yEnd = rtengine::LIM<int>(yEnd, yStart, buffer.height() - 1);
+
+    std::vector<int> nodeX;
+
+    //  Loop through the rows of the image.
+    for (int y = yStart; y <= yEnd; ++y) {
+        nodeX.clear();
+
+        //  Build a list of nodes.
+        size_t j = poly.size() - 1;
+        for (size_t i = 0; i < poly.size(); ++i) {
+            if ((poly[i].y < double(y) && poly[j].y >= double(y))
+            ||  (poly[j].y < double(y) && poly[i].y >= double(y)))
+            {
+                //TODO: Check rounding here ?
+                // Possibility to add antialiasing here by calculating the distance of the value from the middle of the pixel (0.5)
+                nodeX.push_back(int(poly[i].x + (double(y) - poly[i].y) / (poly[j].y - poly[i].y) * (poly[j].x - poly[i].x)));
+            }
+            j = i;
+        }
+
+        //  Sort the nodes
+        std::sort(nodeX.begin(), nodeX.end());
+
+        //  Fill the pixels between node pairs.
+        for (size_t i = 0; i < nodeX.size(); i += 2) {
+            if (nodeX.at(i) >= xEnd) break;
+            if (nodeX.at(i + 1) > xStart ) {
+                if (nodeX.at(i) < xStart ) {
+                    nodeX.at(i) = xStart;
+                }
+                if (nodeX.at(i + 1) > xEnd) {
+                    nodeX.at(i + 1) = xEnd;
+                }
+                for (int x = nodeX.at(i); x < nodeX.at(i + 1); ++x) {
+                    buffer[y][x] = color;
+                }
+            }
+        }
+    }
 }
 
 } // namespace rtengine

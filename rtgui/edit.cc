@@ -175,7 +175,7 @@ RGBColor Geometry::getOuterLineColor ()
 void Circle::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     double lineWidth = getOuterLineWidth();
-    if ((flags & F_VISIBLE) && state != INSENSITIVE && lineWidth > 0. && innerLineWidth > 0.) {
+    if (((flags & F_VISIBLE) && !(flags & F_FRAME)) && state != INSENSITIVE && lineWidth > 0. && innerLineWidth > 0.) {
         RGBColor color;
 
         if (flags & F_AUTO_COLOR) {
@@ -296,7 +296,7 @@ void Circle::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short 
 void Line::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     double lineWidth = getOuterLineWidth();
-    if ((flags & F_VISIBLE) && state != INSENSITIVE && lineWidth > 0. && innerLineWidth > 0.) {
+    if (((flags & F_VISIBLE) && !(flags & F_FRAME)) && state != INSENSITIVE && lineWidth > 0. && innerLineWidth > 0.) {
         RGBColor color;
 
         if (flags & F_AUTO_COLOR) {
@@ -406,10 +406,10 @@ void Line::drawToMOChannel(Cairo::RefPtr<Cairo::Context> &cr, unsigned short id,
     }
 }
 
-void Polyline::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
+void PolyLine::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     double lineWidth = getOuterLineWidth();
-    if ((flags & F_VISIBLE) && state != INSENSITIVE && points.size() > 1 && lineWidth > 0.) {
+    if (((flags & F_VISIBLE) && !(flags & F_FRAME)) && state != INSENSITIVE && points.size() > 1 && lineWidth > 0.) {
         RGBColor color;
 
         if (flags & F_AUTO_COLOR) {
@@ -423,7 +423,7 @@ void Polyline::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
         cr->set_line_cap(Cairo::LINE_CAP_ROUND);
         cr->set_line_join(Cairo::LINE_JOIN_ROUND);
 
-        rtengine::Coord currPos;
+        rtengine::CoordD currPos;
 
         for (unsigned int i = 0; i < points.size(); ++i) {
             currPos  = points.at(i);
@@ -440,6 +440,9 @@ void Polyline::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
                 cr->move_to(currPos.x + 0.5, currPos.y + 0.5);
             } else {
                 cr->line_to(currPos.x + 0.5, currPos.y + 0.5);
+                if (closed && i == points.size() - 1) {
+                    cr->close_path();
+                }
             }
         }
 
@@ -452,7 +455,7 @@ void Polyline::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
     }
 }
 
-void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
+void PolyLine::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     if ((flags & F_VISIBLE) && points.size() > 1) {
         if (state != INSENSITIVE) {
@@ -476,7 +479,7 @@ void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
         }
 
         if (filled && state != INSENSITIVE) {
-            rtengine::Coord currPos;
+            rtengine::CoordD currPos;
 
             for (unsigned int i = 0; i < points.size(); ++i) {
                 currPos  = points.at(i);
@@ -493,6 +496,9 @@ void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
                     cr->move_to(currPos.x + 0.5, currPos.y + 0.5);
                 } else {
                     cr->line_to(currPos.x + 0.5, currPos.y + 0.5);
+                    if (closed && i == points.size() - 1) {
+                        cr->close_path();
+                    }
                 }
             }
 
@@ -503,7 +509,7 @@ void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
                 cr->fill();
             }
         } else if (innerLineWidth > 0.) {
-            rtengine::Coord currPos;
+            rtengine::CoordD currPos;
 
             for (unsigned int i = 0; i < points.size(); ++i) {
                 currPos  = points.at(i);
@@ -520,6 +526,9 @@ void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
                     cr->move_to(currPos.x + 0.5, currPos.y + 0.5);
                 } else {
                     cr->line_to(currPos.x + 0.5, currPos.y + 0.5);
+                    if (closed && i == points.size() - 1) {
+                        cr->close_path();
+                    }
                 }
             }
             cr->stroke();
@@ -531,10 +540,10 @@ void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
     }
 }
 
-void Polyline::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
+void PolyLine::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     if ((flags & F_HOVERABLE) && points.size() > 1) {
-        rtengine::Coord currPos;
+        rtengine::CoordD currPos;
 
         // setting the color to the objet's ID
         if (objectBuffer->getObjectMode() == OM_255) {
@@ -562,6 +571,9 @@ void Polyline::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned shor
                 cr->move_to(currPos.x + 0.5, currPos.y + 0.5);
             } else {
                 cr->line_to(currPos.x + 0.5, currPos.y + 0.5);
+                if (closed && i == points.size() - 1) {
+                    cr->close_path();
+                }
             }
         }
 
@@ -605,7 +617,7 @@ void Rectangle::setXYXY(rtengine::Coord topLeft, rtengine::Coord bottomRight)
 void Rectangle::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     double lineWidth = getOuterLineWidth();
-    if ((flags & F_VISIBLE) && state != INSENSITIVE && lineWidth > 0. && innerLineWidth > 0.) {
+    if (((flags & F_VISIBLE) && !(flags & F_FRAME)) && state != INSENSITIVE && lineWidth > 0. && innerLineWidth > 0.) {
         RGBColor color;
 
         if (flags & F_AUTO_COLOR) {

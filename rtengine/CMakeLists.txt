@@ -109,6 +109,7 @@ set(RTENGINESOURCEFILES
     rcd_demosaic.cc
     refreshmap.cc
     rt_algo.cc
+    rt_polygon.cc
     rtthumbnail.cc
     simpleprocess.cc
     ipspot.cc

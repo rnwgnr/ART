@@ -205,28 +205,51 @@ class EditCoordSystem
 public:
     virtual ~EditCoordSystem() {}
 
-    /// Convert the widget's DrawingArea (i.e. preview area) coords to the edit buffer coords
+    /// Convert the widget's DrawingArea (i.e. preview area) coords to the edit buffer coords / int values
     virtual void screenCoordToCropBuffer (int phyx, int phyy, int& cropx, int& cropy) = 0;
-    /// Convert the widget's DrawingArea (i.e. preview area) coords to the full image coords
+    /// Convert the widget's DrawingArea (i.e. preview area) coords to the edit buffer coords / double values
+    virtual void screenCoordToCropBuffer (double phyx, double phyy, double& cropx, double& cropy) = 0;
+
+    /// Convert the widget's DrawingArea (i.e. preview area) coords to the full image coords / int values
     virtual void screenCoordToImage (int phyx, int phyy, int& imgx, int& imgy) = 0;
-    /// Convert the image coords to the widget's DrawingArea (i.e. preview area) coords
+    /// Convert the widget's DrawingArea (i.e. preview area) coords to the full image coords / double values
+    virtual void screenCoordToImage (double phyx, double phyy, double& imgx, double& imgy) = 0;
+
+    /// Convert the image coords to the widget's DrawingArea (i.e. preview area) coords / int values
     virtual void imageCoordToScreen (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert the image coords to the crop's canvas coords (full image + padding)
+    /// Convert the image coords to the widget's DrawingArea (i.e. preview area) coords / double values
+    virtual void imageCoordToScreen (double imgx, double imgy, double& phyx, double& phyy) = 0;
+
+    /// Convert the image coords to the crop's canvas coords (full image + padding) / int values
     virtual void imageCoordToCropCanvas (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert the image coords to the edit buffer coords  (includes borders)
+    /// Convert the image coords to the crop's canvas coords (full image + padding) / double values
+    virtual void imageCoordToCropCanvas (double imgx, double imgy, double& phyx, double& phyy) = 0;
+
+    /// Convert the image coords to the edit buffer coords  (includes borders) / int values
     virtual void imageCoordToCropBuffer (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert the image coords to the displayed image coords  (no borders here)
+    /// Convert the image coords to the edit buffer coords  (includes borders) / double values
+    virtual void imageCoordToCropBuffer (double imgx, double imgy, double& phyx, double& phyy) = 0;
+
+    /// Convert the image coords to the displayed image coords  (no borders here) / int values
     virtual void imageCoordToCropImage (int imgx, int imgy, int& phyx, int& phyy) = 0;
+    /// Convert the image coords to the displayed image coords  (no borders here) / double values
+    virtual void imageCoordToCropImage (double imgx, double imgy, double& phyx, double& phyy) = 0;
+
     /// Convert a size value from the preview's scale to the image's scale
     virtual int scaleValueToImage (int value) = 0;
+
     /// Convert a size value from the preview's scale to the image's scale
     virtual float scaleValueToImage (float value) = 0;
+
     /// Convert a size value from the preview's scale to the image's scale
     virtual double scaleValueToImage (double value) = 0;
+
     /// Convert a size value from the image's scale to the preview's scale
     virtual int scaleValueToCanvas (int value) = 0;
+
     /// Convert a size value from the image's scale to the preview's scale
     virtual float scaleValueToCanvas (float value) = 0;
+
     /// Convert a size value from the image's scale to the preview's scale
     virtual double scaleValueToCanvas (double value) = 0;
 };
@@ -289,6 +312,7 @@ public:
         F_HOVERABLE   = 1 << 1, /// true if the geometry have to be drawn on the "mouse over" layer
         F_AUTO_COLOR  = 1 << 2, /// true if the color depend on the state value, not the color field above
         F_DASHED      = 1 << 3, /// true if the geometry have to be drawn as a dash line
+        F_FRAME       = 1 << 4, /// true if the geometry represent a base shape used to compute a usable shape (e.g. : control cage)
     };
 
     /// @brief Key point of the image's rectangle that is used to locate the icon copy to the target point:
@@ -329,6 +353,8 @@ public:
     void setAutoColor (bool aColor);
     bool isVisible ();
     void setVisible (bool visible);
+    bool isFrame ();
+    void setFrame (bool frame);
     bool isHoverable ();
     void setHoverable (bool visible);
     bool isDashed ();
@@ -377,17 +403,18 @@ public:
     void drawToMOChannel   (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
 };
 
-class Polyline : public Geometry
+class PolyLine : public Geometry
 {
 public:
-    std::vector<rtengine::Coord> points;
+    std::vector<rtengine::CoordD> points;
     bool filled;
+    bool closed;
 
-    Polyline ();
+    PolyLine ();
 
     void drawOuterGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
     void drawInnerGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
-    void drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
+    void drawToMOChannel   (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
 };
 
 class Rectangle : public Geometry
@@ -405,7 +432,7 @@ public:
     void setXYXY(rtengine::Coord topLeft, rtengine::Coord bottomRight);
     void drawOuterGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
     void drawInnerGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
-    void drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
+    void drawToMOChannel   (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
 };
 
 class OPIcon : public Geometry    // OP stands for "On Preview"
@@ -442,7 +469,7 @@ public:
     const Cairo::RefPtr<RTSurface> getInsensitiveImg();
     void drawOuterGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
     void drawInnerGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
-    void drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
+    void drawToMOChannel   (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override;
 };
 
 class OPAdjuster : public Geometry    // OP stands for "On Preview"
@@ -721,6 +748,18 @@ inline void Geometry::setVisible (bool visible) {
     }
 }
 
+inline bool Geometry::isFrame () {
+    return flags & F_FRAME;
+}
+
+inline void Geometry::setFrame (bool frame) {
+    if (frame) {
+        flags |= F_FRAME;
+    } else {
+        flags &= ~F_FRAME;
+    }
+}
+
 inline bool Geometry::isHoverable () {
     return flags & F_HOVERABLE;
 }
@@ -872,8 +911,9 @@ inline Rectangle::Rectangle () :
         topLeft (0, 0), bottomRight (10, 10), filled (false) {
 }
 
-inline Polyline::Polyline () :
-        filled (false) {
+inline PolyLine::PolyLine () :
+        filled (false),
+        closed (true) {
 }
 
 inline Line::Line () :

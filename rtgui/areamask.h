@@ -22,17 +22,40 @@
 #include <gtkmm.h>
 #include "edit.h"
 
+using rteMaskShape = rtengine::AreaMask::Shape;
+using rteMaskRect = rtengine::AreaMask::Rectangle;
+using rteMaskPoly = rtengine::AreaMask::Polygon;
 
 class AreaMask: public EditSubscriber {
 public:
+    enum class DraggedElement {
+        NONE,
+        POINT,
+        ROUNDNESS,
+        SEGMENT,
+        WHOLE
+    };
+
     AreaMask();
+    ~AreaMask();
     
     CursorShape getCursor(const int objectID) override;
     bool mouseOver(const int modifierKey) override;
     bool button1Pressed(const int modifierKey) override;
     bool button1Released() override;
     bool drag1(const int modifierKey) override;
+    bool button3Pressed(const int modifierKey) override;
+    bool pick3 (const bool picked) override;
 
+    size_t getPolygonSize();
+    void setPolygon(const std::vector<rteMaskPoly::Knot> &new_poly);
+    std::vector<rteMaskPoly::Knot> getPolygon();
+    void clearPolygon();
+    void setGeometryType(rteMaskShape::Type newType);
+    rteMaskShape::Type getGeometryType();
+    void deleteGeometry();
+    void createRectangleGeometry();
+    void createPolygonGeometry();
     void updateGeometry(const int fullWidth=-1, const int fullHeight=-1);
     
 protected:
@@ -53,4 +76,27 @@ protected:
     int rotate_w_id_;
     int rotate_h_id_;
     int center_id_;
+
+    // Visible (and MouseOver) geometry for Polygon
+    Line* insertion_line;            // [0]    visible
+    PolyLine* curve;                 // [1]    visible
+    PolyLine* cage;                  // [2]    visible
+    std::vector<Line*> segments_MO;  // [3, n]           hoverable
+    Circle* sel_knot;                // [n+1]  visible / hoverable
+    Circle* prev_knot;               // [n+2]  visible / hoverable
+    Circle* next_knot;               // [n+3]  visible / hoverable
+
+    int hovered_line_id_;            // range identical to poly_knots_
+    int sel_poly_knot_id_;           // range identical to poly_knots_
+    int prev_poly_knot_id_;          // range identical to poly_knots_
+    int next_poly_knot_id_;          // range identical to poly_knots_
+    DraggedElement dragged_element_; // true if adjusting the Roundness value
+    std::vector<rtengine::CoordD> dragged_points_;  // copy of initial points for dragging and bounds handling
+
+private:
+    void setPolylineSize(size_t newSize);
+    void initHoverGeometry();
+
+    std::vector<rteMaskPoly::Knot> poly_knots_;
+    rteMaskShape::Type geomType;
 };

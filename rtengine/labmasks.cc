@@ -94,58 +94,62 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 
     float min_feather = RT_INFINITY;
 
-    for (const auto &area : areaMask.shapes) {
-        Coord center(w2 + area.x / 100.0 * w2, h2 + area.y / 100.0 * h2);
-        float area_w = area.width / 100.0 * width;
-        float area_h = area.height / 100.0 * height;
+    for (const auto &area_ : areaMask.shapes) {
+        if (area_->getType() == AreaMask::Shape::RECTANGLE) {
+            auto area = static_cast<AreaMask::Rectangle*>(area_.get());
+
+            Coord center(w2 + area->x / 100.0 * w2, h2 + area->y / 100.0 * h2);
+            float area_w = area->width / 100.0 * width;
+            float area_h = area->height / 100.0 * height;
+
+            float a_min = area_w / 2;
+            float b_min = area_h / 2;
+            float r = b_min / a_min;
+            float a_max = std::sqrt(2) * a_min;
+            float a = a_max - area->roundness / 100.0 * (a_max - a_min);
+
+            min_feather = std::min(a_min, b_min);
+
+            const auto get =
+                [&](int x, int y) -> Coord
+                {
+                    PolarCoord p(Coord(x, y));
+                    double r, a;
+                    p.get(r, a);
+                    p.set(r, a - area->angle);
+                    Coord ret(p);
+                    ret += center;
+                    ret -= origin;
+                    return ret;
+                };
+
+            float **marr = mask;
+            if (area->mode == AreaMask::Shape::INTERSECT) {
+                intersect(mask.width(), mask.height());
+                marr = intersect;
+                float *p = intersect;
+                std::fill(p, p + (mask.width() * mask.height()), bgcolor);
+            }
     
-        float a_min = area_w / 2;
-        float b_min = area_h / 2;
-        float r = b_min / a_min;
-        float a_max = std::sqrt(2) * a_min;
-        float a = a_max - area.roundness / 100.0 * (a_max - a_min);
-
-        min_feather = std::min(a_min, b_min);
-
-        const auto get =
-            [&](int x, int y) -> Coord
-            {
-                PolarCoord p(Coord(x, y));
-                double r, a;
-                p.get(r, a);
-                p.set(r, a - area.angle);
-                Coord ret(p);
-                ret += center;
-                ret -= origin;
-                return ret;
-            };
-
-        float **marr = mask;
-        if (area.mode == AreaMask::Shape::INTERSECT) {
-            intersect(mask.width(), mask.height());
-            marr = intersect;
-            float *p = intersect;
-            std::fill(p, p + (mask.width() * mask.height()), bgcolor);
-        }
-
-        // draw the (bounded) ellipse
-        for (int x = 0, n = int(a_min); x < n; ++x) {
-            int yy = r * std::sqrt(a*a - float(x*x));
-            for (int y = 0, m = std::min(yy, int(b_min)); y < m; ++y) {
-                for (int d = 0; d < 4; ++d) {
-                    int dx = dir[2*d], dy = dir[2*d+1];
-                    Coord point = get(dx * x, dy * y);
-                    for (int i = -1; i < 2; ++i) {
-                        for (int j = -1; j < 2; ++j) {
-                            if (inside(point.x+i, point.y+j)) {
-                                switch (area.mode) {
-                                case AreaMask::Shape::ADD:
-                                case AreaMask::Shape::INTERSECT:
-                                    marr[point.y+j][point.x+i] = fgcolor;
-                                    break;
-                                case AreaMask::Shape::SUBTRACT:
-                                    marr[point.y+j][point.x+i] = bgcolor;
-                                    break;
+            // draw the (bounded) ellipse
+            for (int x = 0, n = int(a_min); x < n; ++x) {
+                int yy = r * std::sqrt(a*a - float(x*x));
+                for (int y = 0, m = std::min(yy, int(b_min)); y < m; ++y) {
+                    for (int d = 0; d < 4; ++d) {
+                        int dx = dir[2*d], dy = dir[2*d+1];
+                        Coord point = get(dx * x, dy * y);
+                        for (int i = -1; i < 2; ++i) {
+                            for (int j = -1; j < 2; ++j) {
+                                if (inside(point.x+i, point.y+j)) {
+                                    switch (area->mode) {
+                                    case AreaMask::Shape::ADD:
+                                    case AreaMask::Shape::INTERSECT:
+                                        marr[point.y+j][point.x+i] = fgcolor;
+                                        break;
+                                    case AreaMask::Shape::SUBTRACT:
+                                        marr[point.y+j][point.x+i] = bgcolor;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -153,8 +157,23 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 }
             }
         }
+        else if (area_->getType() == AreaMask::Shape::POLYGON) {
+            auto area = static_cast<AreaMask::Polygon*>(area_.get());
+            if (area->knots.size() < 3) {
+                // Not enough knots to create an area
+                break;
+            }
+            std::vector<AreaMask::Polygon::Knot> imgSpacePoly(area->knots.size());
+            for (size_t i = 0; i < area->knots.size() ; ++i) {
+                imgSpacePoly.at(i).x = AreaMask::Shape::toImgSpace(area->knots.at(i).x, width) - origin.x;
+                imgSpacePoly.at(i).y = AreaMask::Shape::toImgSpace(area->knots.at(i).y, height) - origin.y;
+                imgSpacePoly.at(i).roundness = area->knots.at(i).roundness;
+            }
+            auto v = area->getTessellation(imgSpacePoly);
+            polyFill(mask, v, fgcolor);
+        }
 
-        if (area.mode == AreaMask::Shape::INTERSECT) {
+        if (area_->mode == AreaMask::Shape::INTERSECT) {
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
