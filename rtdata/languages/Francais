@@ -732,7 +732,7 @@ HISTORY_MSG_LOCALCONTRAST_AREAMASK;Contraste local - Masque de zone
 HISTORY_MSG_CHMIXER_MODE;Mixage des canaux - mode
 HISTORY_MSG_CHMIXER_RED_PRIMARY;Mixage des canaux - Primaire rouge
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Mixage des canaux - Primaire vert
-HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Mixage des canaux - Primaire bleu
+HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Mixage des canaux - Primaire bleu
 HISTORY_MSG_CLAMPOOG;Ecrêter les couleurs hors gamut
 HISTORY_MSG_COLORCORRECTION_AB;CC - Correction de teinte
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - Masque de zone
