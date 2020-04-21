@@ -138,7 +138,7 @@ public:
                 {
                     return Glib::ustring::compose("{%1,%2,%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("RGB s=%1 o=%2\np=%3 P=%4", lbl(r.slope), lbl(r.offset), lbl(r.power), lbl(r.pivot));
+            return Glib::ustring::compose("RGB S=%5\ns=%1 o=%2\np=%3 P=%4", lbl(r.slope), lbl(r.offset), lbl(r.power), lbl(r.pivot), r.saturation);
         }   break;
         case rtengine::procparams::ColorCorrectionParams::Mode::HSL: {
             const auto lbl =
@@ -146,7 +146,7 @@ public:
                 {
                     return Glib::ustring::compose("{s=%1,o=%2,p=%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("HSL H=%1\nS=%2 L=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor));
+            return Glib::ustring::compose("HSL S=%4\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.saturation);
         }   break;
         default: {
             const auto round_ab = [](float v) -> float
@@ -224,7 +224,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
 
     saturation = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SATURATION"), -100, 100, 1, 0));
     saturation->setAdjusterListener(this);
-    box_combined->pack_start(*saturation);
+    box/*_combined*/->pack_start(*saturation, Gtk::PACK_EXPAND_WIDGET, 4);
 
     slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1));
     slope->setLogScale(10, 1, true);
@@ -506,10 +506,10 @@ void ColorCorrection::regionGet(int idx)
     default:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::YUV;
     }
+    r.saturation = saturation->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         double la, lb;
         gridAB->getParams(la, lb, r.a, r.b);
-        r.saturation = saturation->getValue();
         for (int c = 0; c < 3; ++c) {
             r.slope[c] = slope->getValue();
             r.offset[c] = offset->getValue();
@@ -517,7 +517,6 @@ void ColorCorrection::regionGet(int idx)
             r.pivot[c] = pivot->getValue();
         }
     } else {
-        r.saturation = 0.f;
         r.a = r.b = 0.f;
         for (int c = 0; c < 3; ++c) {
             r.slope[c] = slope_rgb[c]->getValue();
@@ -553,9 +552,9 @@ void ColorCorrection::regionShow(int idx)
     default:
         mode->set_active(0);
     }
+    saturation->setValue(r.saturation);
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         gridAB->setParams(0, 0, r.a, r.b, false);
-        saturation->setValue(r.saturation);
         slope->setValue(r.slope[0]);
         offset->setValue(r.offset[0]);
         power->setValue(r.power[0]);
