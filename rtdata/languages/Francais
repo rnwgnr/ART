@@ -2048,6 +2048,6 @@ ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Ouvrir une (nouvelle) vue détaillée
 ZOOMPANEL_ZOOM100;Zoomer à 100%\nRaccourci : <b>z</b>
 ZOOMPANEL_ZOOMFITCROPSCREEN;Ajuster la zone rognée à l'écran\nRaccourci : <b>f</b>
-ZOOMPANEL_ZOOMFITSCREEN;Ajuster l'image entière à l'écran\nRaccourci : <b>Alt</b>-<b>f</b>
+ZOOMPANEL_ZOOMFITSCREEN;Ajuster l'image entière à l'écran\nRaccourci : <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoomer Avant\nRaccourci : <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoomer Arrière\nRaccourci : <b>-</b>

@@ -2027,6 +2027,6 @@ ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Abrir nova mini-janela de detalhe
 ZOOMPANEL_ZOOM100;Zoom para 100%\nAtalho: <b>z</b>
 ZOOMPANEL_ZOOMFITCROPSCREEN;Ajustar o corte à tela\nAtalho: <b>f</b>
-ZOOMPANEL_ZOOMFITSCREEN;Ajustar toda a imagem à tela\nAtalho: <b>Alt</b>-<b>f</b>
+ZOOMPANEL_ZOOMFITSCREEN;Ajustar toda a imagem à tela\nAtalho: <b>f</b>
 ZOOMPANEL_ZOOMIN;Mais Zoom\nAtalho: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Menos Zoom\nAtalho: <b>-</b>
