@@ -335,6 +335,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
         }   
     
+        setScale(scale);
         int tr = getCoarseBitMask(params.coarse);    
         imgsrc->getFullSize(fw, fh, tr);
         PreviewProps pp(0, 0, fw, fh, scale);
@@ -382,12 +383,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                 awbListener->WBChanged(params.wb.temperature, params.wb.green);
             }
     
-            // int tr = getCoarseBitMask(params.coarse);    
-            // imgsrc->getFullSize(fw, fh, tr);
-            // PreviewProps pp(0, 0, fw, fh, scale);
-            // ipf.setScale(scale);
-            // Will (re)allocate the preview's buffers
-            setScale(scale);
+            //setScale(scale);
             imgsrc->getImage(currWB, tr, orig_prev, pp, params.exposure, params.raw);
             denoiseInfoStore.valid = false;
             imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
