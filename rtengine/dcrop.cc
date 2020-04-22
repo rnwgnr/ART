@@ -216,6 +216,12 @@ void Crop::update(int todo)
     // has to be called after setCropSizes! Tools prior to this point can't handle the Edit mechanism, but that shouldn't be a problem.
     createBuffer(cropw, croph);
 
+    int offset_x = cropx / skip;
+    int offset_y = cropy / skip;
+    int full_width = parent->getFullWidth() / skip;
+    int full_height = parent->getFullHeight() / skip;
+    parent->ipf.setViewport(offset_x, offset_y, full_width, full_height);
+
     // Apply Spot removal
     if ((todo & M_SPOT) && !spotsDone) {
         if (params.spot.enabled && !params.spot.entries.empty()) {
@@ -346,11 +352,11 @@ void Crop::update(int todo)
         transCrop = nullptr;
     }
 
-    int offset_x = cropx / skip;
-    int offset_y = cropy / skip;
-    int full_width = parent->getFullWidth() / skip;
-    int full_height = parent->getFullHeight() / skip;
-    parent->ipf.setViewport(offset_x, offset_y, full_width, full_height);
+    // int offset_x = cropx / skip;
+    // int offset_y = cropy / skip;
+    // int full_width = parent->getFullWidth() / skip;
+    // int full_height = parent->getFullHeight() / skip;
+    // parent->ipf.setViewport(offset_x, offset_y, full_width, full_height);
 
     if (todo & M_RGBCURVE) {
         Imagefloat *workingCrop = baseCrop;

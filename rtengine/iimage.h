@@ -39,7 +39,11 @@
 #define TR_HFLIP    8
 #define TR_ROT      3
 
-#define CHECK_BOUNDS 0
+#ifndef NDEBUG
+#  define CHECK_BOUNDS 1
+#else
+#  define CHECK_BOUNDS 0
+#endif
 
 namespace rtengine
 {

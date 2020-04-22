@@ -267,9 +267,11 @@ void ImProcFunctions::dehaze(Imagefloat *img)
 #ifdef _OPENMP
 #       pragma omp parallel for if (multiThread)
 #endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                float r = img->r(y, x), g = img->g(y, x), b = img->b(y, x);
+        for (int y = 0; y < editWhatever->getHeight(); ++y) {
+            int yy = y + offset_y;
+            for (int x = 0; x < editWhatever->getWidth(); ++x) {
+                int xx = x + offset_x;
+                float r = img->r(yy, xx), g = img->g(yy, xx), b = img->b(yy, xx);
                 float Y = Color::rgbLuminance(r, g, b, ws) * maxchan;
                 float s = Color::gamma2curve[Y];
                 editWhatever->v(y, x) = LIM01(s / 65535.f);
