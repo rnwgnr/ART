@@ -481,6 +481,11 @@ void Inspector::flushBuffers()
 
 void Inspector::setActive(bool state)
 {
+    if (!state) {
+        toolbar_->hide();
+    } else {
+        toolbar_->show();
+    }
     for (size_t i = 0; i < num_active_; ++i) {
         ins_[i].setActive(state);
     }
@@ -521,6 +526,7 @@ void Inspector::switchImage(const Glib::ustring &fullPath)
 Gtk::HBox *Inspector::get_toolbar()
 {
     Gtk::HBox *tb = Gtk::manage(new Gtk::HBox());
+    toolbar_ = tb;
     tb->pack_start(*Gtk::manage(new Gtk::Label("")), Gtk::PACK_EXPAND_WIDGET, 2);
 
     const auto add_tool =

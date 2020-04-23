@@ -145,6 +145,7 @@ private:
     size_t active_;
     size_t num_active_;
 
+    Gtk::HBox *toolbar_;
     Gtk::ToggleButton *split_;
     Gtk::ToggleButton *info_;
     Gtk::ToggleButton *jpg_;

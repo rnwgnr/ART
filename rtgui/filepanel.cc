@@ -42,7 +42,7 @@ FilePanel::FilePanel () :
     // The whole left panel. Contains Places, Recent Folders and Folders.
     placespaned = Gtk::manage ( new Gtk::VPaned () );
     placespaned->set_name ("PlacesPaned");
-    placespaned->set_size_request(250, 100);
+    placespaned->set_size_request(200, 100);
     placespaned->set_position (options.dirBrowserHeight);
 
     Gtk::VBox* obox = Gtk::manage (new Gtk::VBox ());
@@ -74,7 +74,7 @@ FilePanel::FilePanel () :
     fileCatalog->setFileSelectionListener (this);
 
     rightBox = Gtk::manage ( new Gtk::HBox () );
-    rightBox->set_size_request(350, 100);
+    rightBox->set_size_request(250, 100);
     rightNotebook = Gtk::manage ( new Gtk::Notebook () );
     rightNotebookSwitchConn = rightNotebook->signal_switch_page().connect_notify( sigc::mem_fun(*this, &FilePanel::on_NB_switch_page) );
     //Gtk::VBox* taggingBox = Gtk::manage ( new Gtk::VBox () );
