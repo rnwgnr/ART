@@ -519,6 +519,9 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
     double bestscore = RT_INFINITY;
     for (size_t i = 0; i < candidates.size(); ++i) {
         double score = eval(candidates[i]);
+        if (i == 0) {
+            score *= 0.9; // give more weight to the luminance curve
+        }
         if (settings->verbose) {
             std::cout << "histogram matching: candidate " << i
                       << " has score " << score << std::endl;
