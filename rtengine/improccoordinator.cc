@@ -266,14 +266,14 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     
             highDetailPreprocessComputed = highDetailNeeded;
 
-            if (todo & M_RAW && params.filmNegative.enabled) {
+            if (todo & M_RAW) {
                 std::array<float, 3> filmBaseValues = {
                     static_cast<float>(params.filmNegative.redBase),
                     static_cast<float>(params.filmNegative.greenBase),
                     static_cast<float>(params.filmNegative.blueBase)
                 };
                 imgsrc->filmNegativeProcess(params.filmNegative, filmBaseValues);
-                if (filmNegListener && params.filmNegative.redBase <= 0.f) {
+                if (params.filmNegative.enabled && filmNegListener && params.filmNegative.redBase <= 0.f) {
                     filmNegListener->filmBaseValuesChanged(filmBaseValues);
                 }
             }
