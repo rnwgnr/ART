@@ -3232,7 +3232,7 @@ void RawImageSource::HLRecovery_blend(float* rin, float* gin, float* bin, int wi
     //some thresholds:
     const float clipthresh = 0.95;
     const float fixthresh = 0.5;
-    const float satthresh = 0.5;
+    // const float satthresh = 0.5;
 
     float clip[3];
     FOREACHCOLOR clip[c] = min(maxave, hlmax[c]);
@@ -3240,7 +3240,7 @@ void RawImageSource::HLRecovery_blend(float* rin, float* gin, float* bin, int wi
     // Determine the maximum level (clip) of all channels
     const float clippt = clipthresh * maxval;
     const float fixpt = fixthresh * minpt;
-    const float desatpt = satthresh * maxave + (1 - satthresh) * maxval;
+    // const float desatpt = satthresh * maxave + (1 - satthresh) * maxval;
 
     for (int col = 0; col < width; col++) {
         float rgb[ColorCount], cam[2][ColorCount], lab[2][ColorCount], sum[2], chratio, lratio = 0;
@@ -3323,22 +3323,32 @@ void RawImageSource::HLRecovery_blend(float* rin, float* gin, float* bin, int wi
             bin[col] = min(maxave, bfrac * rgb[2] + (1 - bfrac) * bin[col]);
         }
 
-        lratio /= (rin[col] + gin[col] + bin[col]);
-        L = (rin[col] + gin[col] + bin[col]) / 3;
+        // lratio /= (rin[col] + gin[col] + bin[col]);
+        // L = (rin[col] + gin[col] + bin[col]) / 3;
+        // C = lratio * 1.732050808 * (rin[col] - gin[col]);
+        // H = lratio * (2 * bin[col] - rin[col] - gin[col]);
+        //lratio /= (rin[col] + gin[col] + bin[col]);
+        // float den = rin[col] + gin[col] + bin[col];
+        // L = (rin[col] + gin[col] + bin[col]) / 3;
+        // C = lratio * 1.732050808 * SGN(rin[col] - gin[col]) * pow_F(fabsf(rin[col] - gin[col]) / den, 0.5);
+        // H = lratio / den * (2 * bin[col] - rin[col] - gin[col]);
+        float tot = (rin[col] + gin[col] + bin[col]);
+        lratio /= tot;
+        L = tot / 3 / lratio;
         C = lratio * 1.732050808 * (rin[col] - gin[col]);
         H = lratio * (2 * bin[col] - rin[col] - gin[col]);
         rin[col] = L - H / 6.0 + C / 3.464101615;
         gin[col] = L - H / 6.0 - C / 3.464101615;
         bin[col] = L + H / 3.0;
 
-        if ((L = (rin[col] + gin[col] + bin[col]) / 3) > desatpt) {
-            float Lfrac = max(0.0f, (maxave - L) / (maxave - desatpt));
-            C = Lfrac * 1.732050808 * (rin[col] - gin[col]);
-            H = Lfrac * (2 * bin[col] - rin[col] - gin[col]);
-            rin[col] = L - H / 6.0 + C / 3.464101615;
-            gin[col] = L - H / 6.0 - C / 3.464101615;
-            bin[col] = L + H / 3.0;
-        }
+        // if ((L = (rin[col] + gin[col] + bin[col]) / 3) > desatpt) {
+        //     float Lfrac = max(0.0f, (maxave - L) / (maxave - desatpt));
+        //     C = Lfrac * 1.732050808 * (rin[col] - gin[col]);
+        //     H = Lfrac * (2 * bin[col] - rin[col] - gin[col]);
+        //     rin[col] = L - H / 6.0 + C / 3.464101615;
+        //     gin[col] = L - H / 6.0 - C / 3.464101615;
+        //     bin[col] = L + H / 3.0;
+        // }
     }
 }
 
