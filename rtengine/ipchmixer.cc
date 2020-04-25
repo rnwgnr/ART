@@ -130,9 +130,9 @@ void get_mixer_matrix(const ChannelMixerParams &chmix, const Glib::ustring &work
             return ret;
         };
 
-    M33 N = get_matrix(tweak(red, chmix.hue_tweak[0], chmix.sat_tweak[0], 0.05f),
-                       tweak(green, chmix.hue_tweak[1], chmix.sat_tweak[1], 0.15f),
-                       tweak(blue, chmix.hue_tweak[2], chmix.sat_tweak[2], 0.15f),
+    M33 N = get_matrix(tweak(red, chmix.hue_tweak[0], chmix.sat_tweak[0], 0.075f),
+                       tweak(green, chmix.hue_tweak[1], chmix.sat_tweak[1], 0.075f),
+                       tweak(blue, chmix.hue_tweak[2], chmix.sat_tweak[2], 0.075f),
                        D65_bb_white);
 
     M33 Minv;
@@ -183,7 +183,7 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
 
 
         if (params->chmixer.mode == ChannelMixerParams::Mode::PRIMARIES_CHROMA){
-            get_mixer_matrix(params->chmixer, params->icm.workingProfile,
+            get_mixer_matrix(params->chmixer, "ProPhoto",//params->icm.workingProfile,
                              RR, RG, RB,
                              GR, GG, GB,
                              BR, BG, BB);
