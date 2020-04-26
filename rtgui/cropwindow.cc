@@ -1701,24 +1701,6 @@ void show_focus_mask(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf>
 }
 
 
-// false color key taken from
-// https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
-
-std::map<int, std::array<int, 3>> false_colors = {
-    {2, {255, 255, 255}},
-    {10, {0, 0, 255}},
-    {20, {34, 144, 255}},
-    {42, {75, 75, 75}},
-    {48, {255, 17, 252}},
-    {52, {123, 123, 123}},
-    {58, {0, 255, 0}},
-    {78, {173, 173, 173}},
-    {84, {174, 174, 0}},
-    {94, {255, 255, 0}},
-    {100, {255, 127, 0}},
-    {108, {255, 0, 0}}
-};
-
 void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf> pixbuftrue)
 {
     guint8* pix = pixbuf->get_pixels();
@@ -1731,7 +1713,22 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
         [](int val) -> int
         {
             constexpr float scale = (100.f - 7.5f) / (235.f - 16.f);
-            return std::min(int(val * scale), 108);
+            return rtengine::LIM(int((val - 16) * scale + 7.5f), 0, 108);
+        };
+
+    const auto get =
+        [](const char *color, int i) -> guint8
+        {
+            int v = std::toupper(color[i]);
+            return (v >= 65 ? 10 + v - 65 : v - 48);
+        };
+
+    const auto get_rgb =
+        [&](const char *color, guint8 &r, guint8 &g, guint8 &b) -> void
+        {
+            r = get(color, 1) * 16 + get(color, 2);
+            g = get(color, 3) * 16 + get(color, 4);
+            b = get(color, 5) * 16 + get(color, 6);
         };
 
 #ifdef _OPENMP
@@ -1742,13 +1739,8 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
         for (int j = 0; j < bWidth; j++) {
             int L = 0.299 * curr[0] + 0.587 * curr[1] + 0.114 * curr[2];
             int ire = L_to_IRE(L);
-            auto it1 = false_colors.lower_bound(ire);
-            int r = it1->second[0];
-            int g = it1->second[1];
-            int b = it1->second[2];
-            curr[0] = r;
-            curr[1] = g;
-            curr[2] = b;
+            auto it = IndicateClippedPanel::falseColorsMap.lower_bound(ire);
+            get_rgb(it->second, curr[0], curr[1], curr[2]);
             curr += 3;
         }
     }

@@ -35,6 +35,9 @@ protected:
     Gtk::Image *falseColorsOn, *falseColorsOff;
     ImageArea* imageArea;
 
+    sigc::connection connFocusMask, connSharpMask, connClippedS, connClippedH;
+    sigc::connection connFalseColors;
+
 public:
     explicit IndicateClippedPanel(ImageArea* ia);
     ~IndicateClippedPanel() override;
@@ -46,9 +49,10 @@ public:
     void toggleSharpMask();
     void toggleFalseColors();
 
-    sigc::connection connFocusMask, connSharpMask, connClippedS, connClippedH;
-    sigc::connection connFalseColors;
-
+    // maps a IRE value to a false color
+    // taken from
+    // https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
+    static std::map<int, const char *> falseColorsMap;
 
     bool showFocusMask ()
     {

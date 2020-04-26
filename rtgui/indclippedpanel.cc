@@ -21,9 +21,24 @@
 #include "imagearea.h"
 #include "rtimage.h"
 
+std::map<int, const char *> IndicateClippedPanel::falseColorsMap = {
+    {2, "#FFFFFF"},
+    {10, "#0000FF"},
+    {20, "#2290FF"},
+    {42, "#4B4B4B"},
+    {48, "#FF11FC"},
+    {52, "#7B7B7B"},
+    {58, "#00FF00"},
+    {78, "#ADADAD"},
+    {84, "#AEAE00"},
+    {94, "#FFFF00"},
+    {100, "#FF7F00"},
+    {108, "#FF0000"}
+};
+
+
 IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
 {
-
     iFon  = new RTImage ("focusscreen-on.png");
     iFoff = new RTImage ("focusscreen-off.png");
 
@@ -46,33 +61,25 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
 
     falseColors = Gtk::manage(new Gtk::ToggleButton());
     falseColors->set_relief(Gtk::RELIEF_NONE);
-    const std::array<const char *, 12> colors = {
-        "#FFFFFF",
-        "#0000FF",
-        "#2290FF",
-        "#4B4B4B",
-        "#FF11FC",
-        "#7B7B7B",
-        "#00FF00",
-        "#ADADAD",
-        "#AEAE00",
-        "#FFFF00",
-        "#FF7F00",
-        "#FF0000"
-    };
+
     Glib::ustring color_shadows;
     Glib::ustring color_midtones;
     Glib::ustring color_skin;
     Glib::ustring color_highlights;
+    auto it = falseColorsMap.begin();
     for (int i = 0; i < 4; ++i) {
-        color_shadows += Glib::ustring("<span foreground=\"") + colors[i] + "\">&#9724;</span>";
+        color_shadows += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+        ++it;
     }
     for (int i = 4; i < 7; ++i) {
-        color_midtones += Glib::ustring("<span foreground=\"") + colors[i] + "\">&#9724;</span>";
+        color_midtones += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+        ++it;
     }
-    color_skin += Glib::ustring("<span foreground=\"") + colors[7] + "\">&#9724;</span>";
+    color_skin += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+    ++it;
     for (int i = 8; i < 12; ++i) {
-        color_highlights += Glib::ustring("<span foreground=\"") + colors[i] + "\">&#9724;</span>";
+        color_highlights += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+        ++it;
     }    
     falseColors->set_tooltip_markup(Glib::ustring::compose(M("MAIN_TOOLTIP_FALSECOLORS"), color_shadows, color_midtones, color_skin, color_highlights));
     falseColors->set_image(*falseColorsOff);
