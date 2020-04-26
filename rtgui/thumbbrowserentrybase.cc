@@ -611,6 +611,8 @@ void ThumbBrowserEntryBase::draw (Cairo::RefPtr<Cairo::Context> cc)
 
     MYREADERLOCK(l, lockRW);  // No resizes, position moves etc. inbetween
 
+    calcThumbnailSize();
+
     int bbWidth, bbHeight;
 
     if (backBuffer) {
