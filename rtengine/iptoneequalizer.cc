@@ -192,7 +192,6 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
         cmsHTRANSFORM xform = cmsCreateTransform(in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
         lcmsMutex->unlock();
 
-        int i = 0;
         for (auto &c : colormap) {
             cur_colormap.push_back(c);
             auto &cc = cur_colormap.back();
