@@ -128,11 +128,10 @@ public:
     void dehaze(Imagefloat *rgb);
     void dynamicRangeCompression(Imagefloat *rgb);
     bool localContrast(Imagefloat *rgb);
-    void toneEqualizer(Imagefloat *rgb);
+    bool toneEqualizer(Imagefloat *rgb);
     void softLight(Imagefloat *rgb);
     bool colorCorrection(Imagefloat *rgb);
     void logEncoding(Imagefloat *rgb);
-    // bool contrastByDetailLevels(Imagefloat *rgb);
     void filmGrain(Imagefloat *rgb);
     bool guidedSmoothing(Imagefloat *rgb);
     void hslEqualizer(Imagefloat *rgb);
@@ -200,6 +199,7 @@ public:
     void removeSpots (rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
 
 private:
+    cmsHPROFILE monitor;
     cmsHTRANSFORM monitorTransform;
     std::unique_ptr<GamutWarning> gamutWarning;
 

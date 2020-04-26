@@ -51,6 +51,7 @@ using namespace procparams;
 extern const Settings* settings;
 
 ImProcFunctions::ImProcFunctions(const ProcParams* iparams, bool imultiThread):
+    monitor(nullptr),
     monitorTransform(nullptr),
     params(iparams),
     scale(1),
@@ -97,8 +98,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
     gamutWarning.reset(nullptr);
 
     monitorTransform = nullptr;
-
-    cmsHPROFILE monitor = nullptr;
+    monitor = nullptr;
 
     if (!monitorProfile.empty()) {
 #if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
@@ -869,7 +869,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
         STEP_(channelMixer);
         STEP_(exposure);
         STEP_(hslEqualizer);
-        STEP_(toneEqualizer);
+        stop = STEP_s_(toneEqualizer);
         if (params->icm.workingProfile == "ProPhoto") {
             proPhotoBlue(img, multiThread);
         }

@@ -39,11 +39,16 @@ public:
     void toolReset(bool to_initial) override;
 
 private:
+    void colormapToggled();
+    
     std::array<Adjuster *, 5> bands;
     Adjuster *regularization;
+    Gtk::CheckButton *show_colormap;
+    
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvBands;
     rtengine::ProcEvent EvRegularization;
+    rtengine::ProcEvent EvColormap;
 
     rtengine::procparams::ToneEqualizerParams inital_params;
 };

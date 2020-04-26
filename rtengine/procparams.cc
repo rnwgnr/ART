@@ -1497,7 +1497,8 @@ bool FattalToneMappingParams::operator !=(const FattalToneMappingParams& other) 
 ToneEqualizerParams::ToneEqualizerParams():
     enabled(false),
     bands{0,0,0,0,0},
-    regularization(1)
+    regularization(1),
+    show_colormap(false)
 {
 }
 
@@ -1507,7 +1508,8 @@ bool ToneEqualizerParams::operator ==(const ToneEqualizerParams& other) const
     return
         enabled == other.enabled
         && bands == other.bands
-        && regularization == other.regularization;
+        && regularization == other.regularization
+        && show_colormap == other.show_colormap;
 }
 
 

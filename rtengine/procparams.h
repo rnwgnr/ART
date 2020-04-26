@@ -745,6 +745,7 @@ struct ToneEqualizerParams {
     bool enabled;
     std::array<int, 5> bands;
     int regularization;
+    bool show_colormap;
 
     ToneEqualizerParams();
 
