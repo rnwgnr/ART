@@ -1033,6 +1033,7 @@ MAIN_TOOLTIP_BACKCOLOR1;Background color of the preview: <b>black</b>\nShortcut:
 MAIN_TOOLTIP_BACKCOLOR2;Background color of the preview: <b>white</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\nUseful to evaluate the cumulative effect of multiple tools.\nAdditionally, comparisons can be made to any state in the History.\n\n<b>Unlock</b>: the <b>Before</b> view will follow the <b>After</b> view one step behind, showing the image before the effect of the currently used tool.
+MAIN_TOOLTIP_FALSECOLORS;Toggle exposure indication using false color.\nShortcut: <b>e</b>\n\nKey: %1 (shadows) %2 (midtones) %3 (skin tones) %4 (highlights)
 MAIN_TOOLTIP_HIDEHP;Show/Hide the left panel (including the history).\nShortcut: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Clipped highlight indication.\nShortcut: <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Clipped shadow indication.\nShortcut: <b>&lt;</b>

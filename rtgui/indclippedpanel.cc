@@ -31,6 +31,9 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
     iSon  = new RTImage ("contrastmask-on.png");
     iSoff = new RTImage ("contrastmask-off.png");
 
+    falseColorsOff = new RTImage("false-colors-off.png");
+    falseColorsOn = new RTImage("false-colors.png");
+
     previewFocusMask = Gtk::manage (new Gtk::ToggleButton ());
     previewFocusMask->set_relief(Gtk::RELIEF_NONE);
     previewFocusMask->set_tooltip_markup (M("MAIN_TOOLTIP_PREVIEWFOCUSMASK"));
@@ -41,6 +44,39 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
     previewSharpMask->set_tooltip_markup (M("MAIN_TOOLTIP_PREVIEWSHARPMASK"));
     previewSharpMask->set_image(*iSoff);
 
+    falseColors = Gtk::manage(new Gtk::ToggleButton());
+    falseColors->set_relief(Gtk::RELIEF_NONE);
+    const std::array<const char *, 12> colors = {
+        "#FFFFFF",
+        "#0000FF",
+        "#2290FF",
+        "#4B4B4B",
+        "#FF11FC",
+        "#7B7B7B",
+        "#00FF00",
+        "#ADADAD",
+        "#AEAE00",
+        "#FFFF00",
+        "#FF7F00",
+        "#FF0000"
+    };
+    Glib::ustring color_shadows;
+    Glib::ustring color_midtones;
+    Glib::ustring color_skin;
+    Glib::ustring color_highlights;
+    for (int i = 0; i < 4; ++i) {
+        color_shadows += Glib::ustring("<span foreground=\"") + colors[i] + "\">&#9724;</span>";
+    }
+    for (int i = 4; i < 7; ++i) {
+        color_midtones += Glib::ustring("<span foreground=\"") + colors[i] + "\">&#9724;</span>";
+    }
+    color_skin += Glib::ustring("<span foreground=\"") + colors[7] + "\">&#9724;</span>";
+    for (int i = 8; i < 12; ++i) {
+        color_highlights += Glib::ustring("<span foreground=\"") + colors[i] + "\">&#9724;</span>";
+    }    
+    falseColors->set_tooltip_markup(Glib::ustring::compose(M("MAIN_TOOLTIP_FALSECOLORS"), color_shadows, color_midtones, color_skin, color_highlights));
+    falseColors->set_image(*falseColorsOff);
+    
     Glib::ustring tt;
 
     indClippedH = Gtk::manage (new Gtk::ToggleButton ());
@@ -65,16 +101,19 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
         indClippedS->set_tooltip_markup (tt);
     }
 
+    falseColors->set_active(false);
     previewFocusMask->set_active (false);
     previewSharpMask->set_active (false);
     indClippedH->set_active (options.showClippedHighlights);
     indClippedS->set_active (options.showClippedShadows);
 
+    pack_start(*falseColors, Gtk::PACK_SHRINK, 0);
     pack_start (*previewFocusMask, Gtk::PACK_SHRINK, 0);
     pack_start (*previewSharpMask, Gtk::PACK_SHRINK, 0);
     pack_start (*indClippedS, Gtk::PACK_SHRINK, 0);
     pack_start (*indClippedH, Gtk::PACK_SHRINK, 0);
 
+    connFalseColors = falseColors->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &IndicateClippedPanel::buttonToggled), falseColors));
     connSharpMask = previewSharpMask->signal_toggled().connect( sigc::bind(sigc::mem_fun(*this, &IndicateClippedPanel::buttonToggled), previewSharpMask) );
     connFocusMask = previewFocusMask->signal_toggled().connect( sigc::bind(sigc::mem_fun(*this, &IndicateClippedPanel::buttonToggled), previewFocusMask) );
     connClippedS = indClippedS->signal_toggled().connect( sigc::bind(sigc::mem_fun(*this, &IndicateClippedPanel::buttonToggled), indClippedS) );
@@ -111,13 +150,20 @@ void IndicateClippedPanel::toggleSharpMask ()
     previewSharpMask->set_active(!previewSharpMask->get_active());
 }
 
+
+void IndicateClippedPanel::toggleFalseColors()
+{
+    falseColors->set_active(!falseColors->get_active());
+}
+
+
 void IndicateClippedPanel::buttonToggled (Gtk::ToggleButton* tb)
 {
-
-    connFocusMask.block(true);
-    connSharpMask.block(true);
-    connClippedS.block(true);
-    connClippedH.block(true);
+    ConnectionBlocker b1(connFalseColors);
+    ConnectionBlocker b2(connFocusMask);
+    ConnectionBlocker b3(connSharpMask);
+    ConnectionBlocker b4(connClippedS);
+    ConnectionBlocker b5(connClippedH);
 
     bool shm = previewSharpMask->get_active();
 
@@ -129,6 +175,7 @@ void IndicateClippedPanel::buttonToggled (Gtk::ToggleButton* tb)
             indClippedH->set_active(false);
         }
         previewSharpMask->set_active(false);
+        falseColors->set_active(false);
     } else if (tb == previewSharpMask) {
         if (indClippedS->get_active()) {
             indClippedS->set_active(false);
@@ -137,9 +184,16 @@ void IndicateClippedPanel::buttonToggled (Gtk::ToggleButton* tb)
             indClippedH->set_active(false);
         }
         previewFocusMask->set_active(false);
+        falseColors->set_active(false);
+    } else if (tb == falseColors) {
+        indClippedH->set_active(false);
+        indClippedS->set_active(false);
+        previewFocusMask->set_active(false);
+        previewSharpMask->set_active(false);
     } else {
         previewFocusMask->set_active(false);
         previewSharpMask->set_active(false);
+        falseColors->set_active(false);
     }
 
     if (tb == previewSharpMask || previewSharpMask->get_active() != shm) {
@@ -147,11 +201,12 @@ void IndicateClippedPanel::buttonToggled (Gtk::ToggleButton* tb)
     }
     previewFocusMask->set_image(previewFocusMask->get_active() ? *iFon : *iFoff);
     previewSharpMask->set_image(previewSharpMask->get_active() ? *iSon : *iSoff);
+    falseColors->set_image(falseColors->get_active() ? *falseColorsOn : *falseColorsOff);
 
-    connFocusMask.block(false);
-    connSharpMask.block(false);
-    connClippedS.block(false);
-    connClippedH.block(false);
+    // connFocusMask.block(false);
+    // connSharpMask.block(false);
+    // connClippedS.block(false);
+    // connClippedH.block(false);
 
     imageArea->queue_draw ();
 
@@ -168,4 +223,6 @@ IndicateClippedPanel::~IndicateClippedPanel ()
     delete iFoff;
     delete iSon;
     delete iSoff;
+    delete falseColorsOn;
+    delete falseColorsOff;
 }

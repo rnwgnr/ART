@@ -1628,6 +1628,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->indClippedPanel->toggleFocusMask();
                     return true;
 
+                case GDK_KEY_e: // preview mode false colors
+                    iareapanel->imageArea->indClippedPanel->toggleFalseColors();
+                    return true;
+
                 case GDK_KEY_less:
                     iareapanel->imageArea->indClippedPanel->toggleClipped (false);
                     return true;

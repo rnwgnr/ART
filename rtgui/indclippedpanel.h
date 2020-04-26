@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *
@@ -22,8 +23,7 @@
 #include <iostream>
 
 class ImageArea;
-class IndicateClippedPanel : public Gtk::HBox
-{
+class IndicateClippedPanel: public Gtk::HBox {
 
 protected:
     Gtk::Image* iFon, *iFoff, *iSon, *iSoff;
@@ -31,6 +31,8 @@ protected:
     Gtk::ToggleButton* previewFocusMask;
     Gtk::ToggleButton* indClippedH;
     Gtk::ToggleButton* indClippedS;
+    Gtk::ToggleButton *falseColors;
+    Gtk::Image *falseColorsOn, *falseColorsOff;
     ImageArea* imageArea;
 
 public:
@@ -42,8 +44,10 @@ public:
     void toggleFocusMask();
     void silentlyDisableSharpMask();  // toggle the button off without throwing a toggle event
     void toggleSharpMask();
+    void toggleFalseColors();
 
     sigc::connection connFocusMask, connSharpMask, connClippedS, connClippedH;
+    sigc::connection connFalseColors;
 
 
     bool showFocusMask ()
@@ -57,6 +61,11 @@ public:
     bool showClippedHighlights()
     {
         return indClippedH->get_active();
+    }
+
+    bool showFalseColors()
+    {
+        return falseColors->get_active();
     }
 };
 
