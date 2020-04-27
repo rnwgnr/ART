@@ -54,7 +54,7 @@ class FileBrowserEntry : public ThumbBrowserEntryBase,
     bool wasInside;
     int press_x, press_y, action_x, action_y;
     double rot_deg;
-    bool landscape;
+    int coarse_rotate;
     rtengine::procparams::CropParams cropParams;
     CropGUIListener* cropgl;
     FileBrowserEntryIdleHelper* feih;

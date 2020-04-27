@@ -42,7 +42,7 @@ Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::hdr;
 Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::ps;
 
 FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
-    : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), landscape(true), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
+    : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
 {
     refresh_status_ = RefreshStatus::READY;
     thumbnail = thm;
@@ -55,6 +55,8 @@ FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
     italicstyle = thumbnail->getType() != FT_Raw;
     datetimeline = thumbnail->getDateTimeString ();
     exifline = thumbnail->getExifString ();
+
+    coarse_rotate = thumbnail->getProcParams().coarse.rotate;
 
     scale = 1;
 
@@ -194,6 +196,12 @@ FileThumbnailButtonSet* FileBrowserEntry::getThumbButtonSet ()
 
 void FileBrowserEntry::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 {
+    MYWRITERLOCK(l, lockRW);
+
+    if (preview) {
+        delete[] preview;
+        preview = nullptr;
+    }
 
     if ( thumbnail->isQuick() ) {
         refreshQuickThumbnailImage ();
@@ -203,9 +211,9 @@ void FileBrowserEntry::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 
     if (whoChangedIt == EDITOR) {
         update_refresh_status();
-        parent->redrawEntryNeeded(this);
     }
 }
+
 
 void FileBrowserEntry::updateImage(rtengine::IImage8* img, double scale, const rtengine::procparams::CropParams& cropParams)
 {
@@ -246,16 +254,18 @@ void FileBrowserEntry::_updateImage(rtengine::IImage8* img, double s, const rten
     scale = s;
     this->cropParams = cropParams;
 
-    bool newLandscape = img->getWidth() > img->getHeight();
     bool rotated = false;
+
+    if (thumbnail) {
+        int new_coarse_rotate = thumbnail->getProcParams().coarse.rotate;
+        rotated = new_coarse_rotate != coarse_rotate;
+        coarse_rotate = new_coarse_rotate;
+    }
 
     if (preh == img->getHeight ()) {
         prew = img->getWidth ();
 
         GThreadLock lock;
-
-        // Check if image has been rotated since last time
-        rotated = preview != nullptr && newLandscape != landscape;
 
         guint8* temp = preview;
         preview = nullptr;
@@ -265,8 +275,6 @@ void FileBrowserEntry::_updateImage(rtengine::IImage8* img, double s, const rten
         preview = temp;
         updateBackBuffer ();
     }
-
-    landscape = newLandscape;
 
     img->free ();
 
