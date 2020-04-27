@@ -68,17 +68,17 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
     Glib::ustring color_highlights;
     auto it = falseColorsMap.begin();
     for (int i = 0; i < 4; ++i) {
-        color_shadows += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+        color_shadows += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
         ++it;
     }
     for (int i = 4; i < 7; ++i) {
-        color_midtones += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+        color_midtones += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
         ++it;
     }
-    color_skin += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+    color_skin += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
     ++it;
     for (int i = 8; i < 12; ++i) {
-        color_highlights += Glib::ustring("<span foreground=\"") + it->second + "\">&#9724;</span>";
+        color_highlights += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
         ++it;
     }    
     falseColors->set_tooltip_markup(Glib::ustring::compose(M("MAIN_TOOLTIP_FALSECOLORS"), color_shadows, color_midtones, color_skin, color_highlights));
