@@ -120,7 +120,12 @@ void FileBrowserEntry::calcThumbnailSize ()
 {
 
     if (thumbnail) {
-        thumbnail->getThumbnailSize (prew, preh);
+        int ow = prew, oh = preh;
+        thumbnail->getThumbnailSize(prew, preh);
+        if (preview && (ow != prew || oh != preh)) {
+            delete[] preview;
+            preview = nullptr;
+        }
     }
 }
 
