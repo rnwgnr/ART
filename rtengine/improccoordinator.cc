@@ -124,6 +124,9 @@ ImProcCoordinator::ImProcCoordinator():
     for (int i = 0; i < 3; ++i) {
         bufs_[i] = nullptr;
     }
+    for (auto &s : pipeline_stop_) {
+        s = false;
+    }
 }
 
 void ImProcCoordinator::assign(ImageSource* imgsrc)
@@ -423,12 +426,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                 drcomp_11_dcrop_cache = nullptr;
             }
     
-            stop = ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_0, oprevi);//orig_prev);
+            pipeline_stop_[0] = ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_0, oprevi);//orig_prev);
     
             // if (oprevi != orig_prev) {
             //     delete oprevi;
             // }
         }
+        stop = pipeline_stop_[0];
     
         // oprevi = orig_prev;
         
@@ -494,26 +498,28 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             if (todo & M_RGBCURVE) {
                 //initialize rrm bbm ggm different from zero to avoid black screen in some cases
                 oprevi->copyTo(bufs_[0]);
-                stop = stop || ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_1, bufs_[0]);
-                
+                pipeline_stop_[1] = stop || ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_1, bufs_[0]);
             }
     
             // compute L channel histogram
             int x1, y1, x2, y2;
             params.crop.mapToResized(pW, pH, scale, x1, x2,  y1, y2);
         }
+        stop = stop || pipeline_stop_[1];
     
         readyphase++;
     
         if (todo & M_LUMACURVE) {
             bufs_[0]->copyTo(bufs_[1]);
-            stop = stop || ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_2, bufs_[1]);
+            pipeline_stop_[2] = stop || ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_2, bufs_[1]);
         }
+        stop = stop || pipeline_stop_[2];
 
         if (todo & (M_LUMINANCE | M_COLOR)) {
             bufs_[1]->copyTo(bufs_[2]);
-            stop = stop || ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_3, bufs_[2]);
+            pipeline_stop_[3] = stop || ipf.process(ImProcFunctions::Pipeline::NAVIGATOR, ImProcFunctions::Stage::STAGE_3, bufs_[2]);
         }
+        stop = stop || pipeline_stop_[3];
     
         // Update the monitor color transform if necessary
         if ((todo & M_MONITOR) || (lastOutputProfile != params.icm.outputProfile) || lastOutputIntent != params.icm.outputIntent || lastOutputBPC != params.icm.outputBPC) {
