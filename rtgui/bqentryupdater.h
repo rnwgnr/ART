@@ -41,6 +41,8 @@ class BatchQueueEntryUpdater
         BQEntryUpdateListener* listener;
         rtengine::ProcParams* pparams;
         Thumbnail* thumbnail;
+
+        Job() = default;
     };
 
 protected:

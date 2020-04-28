@@ -34,11 +34,8 @@ struct BatchQueueEntryIdleHelper {
 
 class BatchQueueEntry : public ThumbBrowserEntryBase, public BQEntryUpdateListener
 {
-
-    guint8* opreview;
     int origpw, origph;
     BatchQueueEntryIdleHelper* bqih;
-    bool opreviewDone;
     static bool iconsLoaded;
 
 public:

@@ -122,9 +122,8 @@ void FileBrowserEntry::calcThumbnailSize ()
     if (thumbnail) {
         int ow = prew, oh = preh;
         thumbnail->getThumbnailSize(prew, preh);
-        if (preview && (ow != prew || oh != preh)) {
-            delete[] preview;
-            preview = nullptr;
+        if (ow != prew || oh != preh || preview.size() != size_t(prew * preh * 3)) {
+            preview.clear();
         }
     }
 }
@@ -196,17 +195,14 @@ void FileBrowserEntry::getIconSize (int& w, int& h) const
 FileThumbnailButtonSet* FileBrowserEntry::getThumbButtonSet ()
 {
 
-    return (static_cast<FileThumbnailButtonSet*>(buttonSet));
+    return (static_cast<FileThumbnailButtonSet*>(buttonSet.get()));
 }
 
 void FileBrowserEntry::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 {
     MYWRITERLOCK(l, lockRW);
 
-    if (preview) {
-        delete[] preview;
-        preview = nullptr;
-    }
+    preview.clear();
 
     if ( thumbnail->isQuick() ) {
         refreshQuickThumbnailImage ();
@@ -270,15 +266,12 @@ void FileBrowserEntry::_updateImage(rtengine::IImage8* img, double s, const rten
     if (preh == img->getHeight ()) {
         prew = img->getWidth ();
 
-        GThreadLock lock;
-
-        guint8* temp = preview;
-        preview = nullptr;
-        delete [] temp;
-        temp = new guint8 [prew * preh * 3];
-        memcpy (temp, img->getData(), prew * preh * 3);
-        preview = temp;
-        updateBackBuffer ();
+        preview.resize(prew * preh * 3);
+        std::copy(img->getData(), img->getData() + preview.size(), preview.begin());
+        {
+            GThreadLock lock;
+            updateBackBuffer();
+        }
     }
 
     img->free ();
@@ -440,7 +433,7 @@ bool FileBrowserEntry::releaseNotify (int button, int type, int bstate, int x, i
 bool FileBrowserEntry::onArea (CursorArea a, int x, int y)
 {
 
-    if (!drawable || !preview) {
+    if (!drawable || preview.empty()) {
         return false;
     }
 
