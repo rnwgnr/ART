@@ -864,9 +864,10 @@ HISTORY_MSG_SOFTLIGHT_STRENGTH;Lumière douce - Force
 HISTORY_MSG_SPOT;Retrait de taches
 HISTORY_MSG_SPOT_ENTRY;Retrait de taches - Modif. de points
 HISTORY_MSG_TM_FATTAL_ANCHOR;CPD - Point d'ancrage
-HISTORY_MSG_TONE_EQUALIZER_ENABLED;Egaliseur tonal
-HISTORY_MSG_TONE_EQUALIZER_BANDS;Egaliseur tonal - Bandes
-HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Egaliseur tonal - Régularisation
+HISTORY_MSG_TONE_EQUALIZER_ENABLED;Égaliseur Tonal
+HISTORY_MSG_TONE_EQUALIZER_BANDS;Égaliseur Tonal - Bandes
+HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Égaliseur Tonal - Régularisation
+HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Égaliseur Tonal - Carte tonale
 HISTORY_MSG_TONECURVE_SATCURVE;Courbe tonale - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Courbe tonale - Force perceptuelle 
 HISTORY_NEWSNAPSHOT;Ajouter
@@ -1033,9 +1034,10 @@ MAIN_TOOLTIP_BACKCOLOR1;Couleur de fond de l'aperçu: <b>Noir</b>\nRaccourci : <
 MAIN_TOOLTIP_BACKCOLOR2;Couleur de fond de l'aperçu: <b>Blanc</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Couleur de fond de l'aperçu: <b>Gris moyen</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vérouiller</b> / <b>Déverouiller</b> la vue <b>Avant</b>\n\n<b>Vérouiller</b>: garder la vue <b>Avant</b> inchangée - \nutile pour évaluer l'effet cumulatif de plusieurs outils.\nDe plus, une comparaison peut être faite à partir de n'importe quelle étape de l'historique\n\n<b>Déverouiller</b>: la vue <b>Avant</b> représentera l'étape précédant la vue <b>Après</b>, montrant l'effet qui vient d'être modifié
+MAIN_TOOLTIP_FALSECOLORS;Indicateur d'expositions utilisant de fausses couleurs.\nRaccourci : <b>e</b>\n\nClés : %1 (ombres) %2 (tons moyens) %3 (tons chairs) %4 (hautes lumiéres)
 MAIN_TOOLTIP_HIDEHP;Montrer/Cacher le panneau gauche (incluant l'historique)\nRaccourci : <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indication des zones Hautes Lumières écrêtées\nRaccourci : <b>&gt;</b>
-MAIN_TOOLTIP_INDCLIPPEDS;Indication des zones Ombres écrêtées\nRaccourci : <b>&lgt;</b>
+MAIN_TOOLTIP_INDCLIPPEDS;Indication des zones Ombres écrêtées\nRaccourci : <b>&lt;</b>
 MAIN_TOOLTIP_PREVIEWB;Affichage du <b>canal Bleu</b>\nRaccourci : <b>b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Affichage du <b>Masque du focus</b>\nRaccourci : <b>Shift-f</b>\n\nPlus précis sur les images avec une faible profondeur de champ, à faible bruit et à des niveaux de zoom élevés\n\nPour améliorer la précision de détection des images bruitées, évaluez les à un facteur de zoom de 10-30%\n\nLa prévisualisation met plus de temps à se calculer lorsque cet outil est actif.
 MAIN_TOOLTIP_PREVIEWG;Affichage du <b>canal Vert</b>\nRaccourci : <b>g</b>
@@ -1991,6 +1993,7 @@ TP_TONE_EQUALIZER_BAND_3;Hautes lumières
 TP_TONE_EQUALIZER_BAND_4;Blancs
 TP_TONE_EQUALIZER_DETAIL;Régularisation
 TP_TONE_EQUALIZER_LABEL;Égaliseur Tonal
+TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Montrer la carte tonale
 TP_VIGNETTING_AMOUNT;Quantité
 TP_VIGNETTING_CENTER_X;Centre X
 TP_VIGNETTING_CENTER_Y;Centre Y
