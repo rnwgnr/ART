@@ -103,7 +103,7 @@ FILEBROWSER_APPLYPROFILE;Apply
 FILEBROWSER_APPLYPROFILE_PARTIAL;Apply - partial
 FILEBROWSER_AUTODARKFRAME;Auto dark-frame
 FILEBROWSER_AUTOFLATFIELD;Auto flat-field
-FILEBROWSER_BROWSEPATHBUTTONHINT;Click to browse to the chosen path.
+FILEBROWSER_BROWSEPATHBUTTONHINT;Refresh the list of thumbnails.\nShortcut: <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Type a path to navigate to.\n\nKeyboard shortcuts:\n<b>Ctrl-o</b> to focus to the path text box.\n<b>Enter</b> / <b>Ctrl-Enter</b> to browse there;\n<b>Esc</b> to clear changes.\n<b>Shift-Esc</b> to remove focus.\n\nPath shortcuts:\n<b>~</b>	- user's home directory.\n<b>!</b>	- user's pictures directory
 FILEBROWSER_CACHE;Cache
 FILEBROWSER_CACHECLEARFROMFULL;Clear all including cached profiles

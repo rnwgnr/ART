@@ -1938,35 +1938,13 @@ void FileCatalog::updateFBToolBarVisibility (bool showFilmStripToolBar)
 
 void FileCatalog::buttonBrowsePathPressed ()
 {
-    // Glib::ustring BrowsePathValue = BrowsePath->get_text();
-    // Glib::ustring DecodedPathPrefix = "";
-    // Glib::ustring FirstChar;
-
-    // // handle shortcuts in the BrowsePath -- START
-    // // read the 1-st character from the path
-    // FirstChar = BrowsePathValue.substr (0, 1);
-
-    // if (FirstChar == "~") { // home directory
-    //     DecodedPathPrefix = PlacesBrowser::userHomeDir ();
-    // } else if (FirstChar == "!") { // user's pictures directory
-    //     DecodedPathPrefix = PlacesBrowser::userPicturesDir ();
-    // }
-
-    // if (!DecodedPathPrefix.empty()) {
-    //     BrowsePathValue = Glib::ustring::compose ("%1%2", DecodedPathPrefix, BrowsePathValue.substr (1, BrowsePath->get_text_length() - 1));
-    //     BrowsePath->set_text(BrowsePathValue);
-    // }
-
-    // // handle shortcuts in the BrowsePath -- END
     auto BrowsePathValue = getBrowsePath();
     BrowsePath->set_text(BrowsePathValue);
 
     // validate the path
     if (Glib::file_test(BrowsePathValue, Glib::FILE_TEST_IS_DIR) && selectDir) {
-        selectDir (BrowsePathValue);
-    } else
-        // error, likely path not found: show red arrow
-    {
+        selectDir(BrowsePathValue);
+    } else { // error, likely path not found: show red arrow
         buttonBrowsePath->set_image (*iRefreshRed);
     }
 }

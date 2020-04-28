@@ -1644,10 +1644,6 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->zoomPanel->zoomFitClicked();
                     return true;
 
-                case GDK_KEY_F5:
-                    openThm->openDefaultViewer ((event->state & GDK_SHIFT_MASK) ? 2 : 1);
-                    return true;
-
                 case GDK_KEY_y: // synchronize filebrowser with image in Editor
                     if (!simpleEditor && fPanel && !fname.empty()) {
                         fPanel->fileCatalog->selectImage (fname, false);
@@ -1708,10 +1704,6 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                 case GDK_KEY_Z:
                 case GDK_KEY_y:
                     history->redo ();
-                    return true;
-
-                case GDK_KEY_F5:
-                    openThm->openDefaultViewer (3);
                     return true;
             }
         } //if (!ctrl)
