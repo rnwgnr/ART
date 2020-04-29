@@ -1020,6 +1020,7 @@ MAIN_TAB_FAVORITES;Favorites
 MAIN_TAB_FAVORITES_TOOLTIP;Shortcut: <b>Alt-u</b>
 MAIN_TAB_FILTER; Filter 
 MAIN_TAB_INSPECT; Inspect 
+MAIN_TAB_INSPECT_TOOLTIP;Activate the inspector.\nShortcut: <b>Ctrl-i</b>
 MAIN_TAB_IPTC;IPTC
 MAIN_TAB_LOCAL;Local editing
 MAIN_TAB_LOCAL_TOOLTIP;Shortcut: <b>Alt-x</b>

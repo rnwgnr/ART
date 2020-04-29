@@ -317,6 +317,7 @@ void Options::setDefaults()
     browserToolPanelOpened = true;
     browserDirPanelOpened = true;
     editorFilmStripOpened = true;
+    inspectorDirPanelOpened = true;
     historyPanelWidth = 330;
     fontFamily = "default";
     fontSize = 10;
@@ -1232,6 +1233,10 @@ void Options::readFromFile(Glib::ustring fname)
                     editorFilmStripOpened = keyFile.get_boolean("GUI", "EditorFilmStripOpened");
                 }
 
+                if (keyFile.has_key("GUI", "InspectorDirPanelOpened")) {
+                    inspectorDirPanelOpened = keyFile.get_boolean("GUI", "InspectorDirPanelOpened");
+                }
+
                 if (keyFile.has_key("GUI", "HistoryPanelWidth")) {
                     historyPanelWidth = keyFile.get_integer("GUI", "HistoryPanelWidth");
                 }
@@ -2051,6 +2056,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("GUI", "BrowserToolPanelOpened", browserToolPanelOpened);
         keyFile.set_boolean("GUI", "EditorFilmStripOpened", editorFilmStripOpened);
         keyFile.set_boolean("GUI", "BrowserDirPanelOpened", browserDirPanelOpened);
+        keyFile.set_boolean("GUI", "InspectorDirPanelOpened", inspectorDirPanelOpened);
         keyFile.set_integer("GUI", "HistoryPanelWidth", historyPanelWidth);
         keyFile.set_string("GUI", "FontFamily", fontFamily);
         keyFile.set_integer("GUI", "FontSize", fontSize);

@@ -1994,26 +1994,38 @@ void FileCatalog::tbRightPanel_1_visible (bool visible)
 }
 void FileCatalog::tbLeftPanel_1_toggled ()
 {
-    removeIfThere (filepanel->dirpaned, filepanel->placespaned, false);
+//    removeIfThere (filepanel->dirpaned, filepanel->placespaned, false);
+
+    bool in_inspector = fileBrowser && fileBrowser->getInspector() && fileBrowser->getInspector()->isActive();
 
     if (tbLeftPanel_1->get_active()) {
-        filepanel->dirpaned->pack1 (*filepanel->placespaned, false, true);
+//        filepanel->dirpaned->pack1 (*filepanel->placespaned, false, true);
+        filepanel->placespaned->show();
         tbLeftPanel_1->set_image (*iLeftPanel_1_Hide);
-        options.browserDirPanelOpened = true;
+        if (in_inspector) {
+            options.inspectorDirPanelOpened = true;
+        } else {
+            options.browserDirPanelOpened = true;
+        }
     } else {
+        filepanel->placespaned->hide();
         tbLeftPanel_1->set_image (*iLeftPanel_1_Show);
-        options.browserDirPanelOpened = false;
+        if (in_inspector) {
+            options.inspectorDirPanelOpened = false;
+        } else {
+            options.browserDirPanelOpened = false;
+        }
     }
 }
 
 void FileCatalog::tbRightPanel_1_toggled ()
 {
     if (tbRightPanel_1->get_active()) {
-        filepanel->rightBox->show();
+        filepanel->showRightBox(true);
         tbRightPanel_1->set_image (*iRightPanel_1_Hide);
         options.browserToolPanelOpened = true;
     } else {
-        filepanel->rightBox->hide();
+        filepanel->showRightBox(false);
         tbRightPanel_1->set_image (*iRightPanel_1_Show);
         options.browserToolPanelOpened = false;
     }
@@ -2485,4 +2497,36 @@ void FileCatalog::onBrowsePathChanged()
         auto root = txt.substr(0, pos+1);
         Glib::RefPtr<DirCompletion>::cast_static(browsePathCompletion)->refresh(root);
     }
+}
+
+
+void FileCatalog::disableInspector()
+{
+    if (fileBrowser) {
+        fileBrowser->disableInspector();
+        tbRightPanel_1->show();
+        tbRightPanel_1->set_active(options.browserToolPanelOpened);
+        tbLeftPanel_1->set_active(options.browserDirPanelOpened);
+    }
+}
+
+
+void FileCatalog::enableInspector()
+{
+    if (fileBrowser) {
+        fileBrowser->enableInspector();
+        tbLeftPanel_1->set_active(options.inspectorDirPanelOpened);
+        if (!tbRightPanel_1->get_active()) {
+            toggleRightPanel();
+            options.browserToolPanelOpened = false;
+        }
+        tbRightPanel_1->hide();
+    }
+}
+
+
+void FileCatalog::setupSidePanels()
+{
+    tbLeftPanel_1->set_active(options.browserDirPanelOpened);
+    tbRightPanel_1->set_active(options.browserToolPanelOpened);
 }

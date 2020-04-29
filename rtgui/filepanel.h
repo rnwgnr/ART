@@ -74,11 +74,13 @@ public:
     bool fileSelected(Thumbnail* thm) override;
     bool addBatchQueueJobs(const std::vector<BatchQueueEntry*>& entries) override;
 
-    void optionsChanged         ();
+    void optionsChanged();
     bool imageLoaded( Thumbnail* thm, ProgressConnector<rtengine::InitialImage*> * );
 
     bool handleShortcutKey (GdkEventKey* event);
     void updateTPVScrollbar (bool hide);
+
+    void showRightBox(bool yes);
 
 private:
     void on_NB_switch_page(Gtk::Widget* page, guint page_num);

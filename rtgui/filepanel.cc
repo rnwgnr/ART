@@ -110,6 +110,7 @@ FilePanel::FilePanel () :
     Gtk::Label* inspectLab = Gtk::manage ( new Gtk::Label (M("MAIN_TAB_INSPECT")) );
     inspectLab->set_name ("LabelRightNotebook");
     inspectLab->set_angle (270);
+    inspectLab->set_tooltip_markup(M("MAIN_TAB_INSPECT_TOOLTIP"));
     Gtk::Label* filtLab = Gtk::manage ( new Gtk::Label (M("MAIN_TAB_FILTER")) );
     filtLab->set_name ("LabelRightNotebook");
     filtLab->set_angle (270);
@@ -178,13 +179,15 @@ void FilePanel::setAspect ()
     // tpcPaned->set_position(options.browserToolPanelHeight);
     set_position(winW - options.browserToolPanelWidth);
 
-    if (!options.browserDirPanelOpened) {
-        fileCatalog->toggleLeftPanel();
-    }
+    rightNotebook->set_current_page(0);
+    fileCatalog->setupSidePanels();
+    // if (!options.browserDirPanelOpened) {
+    //     fileCatalog->toggleLeftPanel();
+    // }
 
-    if (!options.browserToolPanelOpened) {
-        fileCatalog->toggleRightPanel();
-    }
+    // if (!options.browserToolPanelOpened) {
+    //     fileCatalog->toggleRightPanel();
+    // }
 }
 
 void FilePanel::init ()
@@ -449,4 +452,10 @@ void FilePanel::loadingThumbs(Glib::ustring str, double rate)
 void FilePanel::updateTPVScrollbar (bool hide)
 {
 //    tpc->updateTPVScrollbar (hide);
+}
+
+
+void FilePanel::showRightBox(bool yes)
+{
+    rightBox->set_visible(yes);
 }
