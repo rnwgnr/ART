@@ -103,7 +103,7 @@ FILEBROWSER_APPLYPROFILE;Appliquer le profil
 FILEBROWSER_APPLYPROFILE_PARTIAL;Appliquer le profil (partiel)
 FILEBROWSER_AUTODARKFRAME;Soustraction auto. de Trame Noire
 FILEBROWSER_AUTOFLATFIELD;Champ Uniforme auto.
-FILEBROWSER_BROWSEPATHBUTTONHINT;Cliquer pour parcourir le chemin choisi.
+FILEBROWSER_BROWSEPATHBUTTONHINT;Rafriachir la liste des vignettes.\nRaccourci : <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Saisir le chemin à parcourir\n<b>Ctrl-O</b> pour placer le focus sur le champ de saisie.\n<b>Entrée</b> / <b>Ctrl-Entrée</b> pour y naviguer;\n<b>Esc</b> pour effacer les modifications.\n<b>Shift-Esc</b> pour enlever le focus.\n\n\nRaccourcis pour les chemins:\n  <b>~</b> - le dossier utilisateur\n  <b>!</b> - le dossier Images de l'utilisateur
 FILEBROWSER_CACHE;Cache
 FILEBROWSER_CACHECLEARFROMFULL;Vider tout y-compris les profils mis en cache
@@ -114,9 +114,9 @@ FILEBROWSER_COPYPROFILE;Copier le profil
 FILEBROWSER_CURRENT_NAME;Nom courant :
 FILEBROWSER_DARKFRAME;Trame Noire
 FILEBROWSER_DELETEDIALOG_HEADER;Confirmation de la suppression de fichier
-FILEBROWSER_DELETEDIALOG_ALL;Etes-vous sûr de vouloir effacer tous les <b>%1</b> fichiers de la corbeille ?
-FILEBROWSER_DELETEDIALOG_SELECTED;Etes-vous sûr de voulor effacer les <b>%1</b> fichiers sélectionnés ?
-FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Etes-vous sûr de vouloir effacer les fichiers <b>%1</b> sélectionnés <b>y-compris</b> une version en file de traitement ?
+FILEBROWSER_DELETEDIALOG_ALL;Êtes-vous sûr de vouloir effacer tous les <b>%1</b> fichiers de la corbeille ?
+FILEBROWSER_DELETEDIALOG_SELECTED;Êtes-vous sûr de voulor effacer les <b>%1</b> fichiers sélectionnés ?
+FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Êtes-vous sûr de vouloir effacer les fichiers <b>%1</b> sélectionnés <b>y-compris</b> une version en file de traitement ?
 FILEBROWSER_EMPTYTRASHHINT;Effacer définitivement les fichiers de la corbeille.
 FILEBROWSER_EXTPROGMENU;Ouvrir avec
 FILEBROWSER_FLATFIELD;Champ Uniforme
