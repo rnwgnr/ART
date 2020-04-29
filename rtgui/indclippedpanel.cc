@@ -62,26 +62,31 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
     falseColors = Gtk::manage(new Gtk::ToggleButton());
     falseColors->set_relief(Gtk::RELIEF_NONE);
 
-    Glib::ustring color_shadows;
-    Glib::ustring color_midtones;
-    Glib::ustring color_skin;
-    Glib::ustring color_highlights;
-    auto it = falseColorsMap.begin();
-    for (int i = 0; i < 4; ++i) {
-        color_shadows += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
-        ++it;
+    const auto to_key =
+        [](int v1, int v2) -> Glib::ustring
+        {
+            std::ostringstream out;
+            out << v1 << "-" << v2;
+            auto s = out.str();
+            if (s.length() < 8) {
+                out << std::string(8 - s.length(), ' ');
+                s = out.str();
+            }
+            return s;
+        };
+    Glib::ustring color_key;
+    int prev = 0;
+    int c = 0;
+    for (auto &p : falseColorsMap) {
+        if (c == 3) {
+            color_key += "\n";
+            c = 0;
+        }
+        ++c;
+        color_key += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + p.second + "\">&#9632;</span>: <tt>" + to_key(prev, p.first) + "</tt>";
+        prev = p.first;
     }
-    for (int i = 4; i < 7; ++i) {
-        color_midtones += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
-        ++it;
-    }
-    color_skin += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
-    ++it;
-    for (int i = 8; i < 12; ++i) {
-        color_highlights += Glib::ustring("<span font_family=\"Arial\" size=\"larger\" foreground=\"") + it->second + "\">&#9632;</span>";
-        ++it;
-    }    
-    falseColors->set_tooltip_markup(Glib::ustring::compose(M("MAIN_TOOLTIP_FALSECOLORS"), color_shadows, color_midtones, color_skin, color_highlights));
+    falseColors->set_tooltip_markup(Glib::ustring::compose(M("MAIN_TOOLTIP_FALSECOLORS"), color_key));
     falseColors->set_image(*falseColorsOff);
     
     Glib::ustring tt;
