@@ -190,6 +190,8 @@ private:
     bool onMaskNameFocusOut(GdkEventFocus *e);
     void on_hide() override;
 
+    void onMaskExpanded(GdkEventButton *evt, MyExpander *exp);
+
     LabMasksContentProvider *cp_;
     std::vector<rtengine::procparams::Mask> masks_;
     unsigned int selected_;
@@ -299,6 +301,8 @@ private:
     Adjuster *contrastThreshold;
     DeltaEColorProvider *deltaE_provider_;
     MyExpander *drawnMask;
+
+    std::vector<MyExpander *> mask_expanders_;
 
     Gtk::Entry *maskName;
 };
