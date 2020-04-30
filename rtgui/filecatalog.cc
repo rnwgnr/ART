@@ -112,7 +112,6 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     previewsLoaded(0),
     modifierKey(0)
 {
-
     inTabMode = false;
 
     set_name ("FileBrowser");
@@ -2174,9 +2173,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
         switch(event->keyval) {
         case GDK_KEY_Escape:
             BrowsePath->set_text(selectedDirectory);
-            // set focus on something neutral, this is useful to remove focus from BrowsePath and Query
-            // when need to execute a shortcut, which otherwise will be typed into those fields
-            filepanel->grab_focus();
+            fileBrowser->getFocus();
             return true;
         }
     }
@@ -2390,13 +2387,21 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
     if (ctrl && !alt) {
         switch (event->keyval) {
         case GDK_KEY_o:
-            BrowsePath->select_region(0, BrowsePath->get_text_length());
-            BrowsePath->grab_focus();
+            if (!BrowsePath->has_focus()) {
+                BrowsePath->select_region(0, BrowsePath->get_text_length());
+                BrowsePath->grab_focus();
+            } else {
+                fileBrowser->getFocus();
+            }
             return true;
 
         case GDK_KEY_f:
-            Query->select_region(0, Query->get_text_length());
-            Query->grab_focus();
+            if (!Query->has_focus()) {
+                Query->select_region(0, Query->get_text_length());
+                Query->grab_focus();
+            } else {
+                fileBrowser->getFocus();
+            }
             return true;
 
         case GDK_KEY_t:

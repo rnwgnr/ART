@@ -165,6 +165,8 @@ public:
         return location;
     }
 
+    void getFocus() { internal.grab_focus(); }
+
 protected:
 
     int eventTime;
