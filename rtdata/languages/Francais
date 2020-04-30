@@ -1020,6 +1020,7 @@ MAIN_TAB_FAVORITES;Favoris
 MAIN_TAB_FAVORITES_TOOLTIP;Raccourci : <b>Alt-u</b>
 MAIN_TAB_FILTER; Filtrer 
 MAIN_TAB_INSPECT; Inspecter 
+MAIN_TAB_INSPECT_TOOLTIP;Activer le mode Inspecter.\nRaccourci : <b>Ctrl-i</b>
 MAIN_TAB_IPTC;IPTC
 MAIN_TAB_LOCAL;Traitement Local
 MAIN_TAB_LOCAL_TOOLTIP;Raccourci : <b>Alt-x</b>
