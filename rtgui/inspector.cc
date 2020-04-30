@@ -107,9 +107,9 @@ bool InspectorArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
     }
 
     if (!active) {
+        sig_active_.emit();
         active = true;
     }
-
 
     // cleanup the region
 
@@ -459,6 +459,7 @@ Inspector::Inspector(FileCatalog *filecatalog):
         ins_[i].add_events(Gdk::BUTTON_PRESS_MASK);
         ins_[i].signal_button_press_event().connect_notify(sigc::bind(sigc::mem_fun(*this, &Inspector::onGrabFocus), i));
         ins_[i].signal_size_allocate().connect(sigc::mem_fun(*this, &Inspector::onInspectorResized));
+        ins_[i].signal_active().connect(sigc::bind(sigc::mem_fun(*this, &Inspector::setActive), true));
     }
 }
 

@@ -74,6 +74,7 @@ public:
     void get_preferred_width_for_height_vfunc (int height, int &minimum_width, int &natural_width) const override;
 
     sigc::signal<void> signal_ready() { return sig_ready_; }
+    sigc::signal<void> signal_active() { return sig_active_; }
 
     void setHighlight(bool yes) { highlight_ = yes; }
 
@@ -97,6 +98,7 @@ private:
     BackBuffer info_bb_;
 
     sigc::signal<void> sig_ready_;
+    sigc::signal<void> sig_active_;
 };
 
 
