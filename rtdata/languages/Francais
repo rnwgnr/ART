@@ -1035,7 +1035,7 @@ MAIN_TOOLTIP_BACKCOLOR1;Couleur de fond de l'aperçu: <b>Noir</b>\nRaccourci : <
 MAIN_TOOLTIP_BACKCOLOR2;Couleur de fond de l'aperçu: <b>Blanc</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Couleur de fond de l'aperçu: <b>Gris moyen</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vérouiller</b> / <b>Déverouiller</b> la vue <b>Avant</b>\n\n<b>Vérouiller</b>: garder la vue <b>Avant</b> inchangée - \nutile pour évaluer l'effet cumulatif de plusieurs outils.\nDe plus, une comparaison peut être faite à partir de n'importe quelle étape de l'historique\n\n<b>Déverouiller</b>: la vue <b>Avant</b> représentera l'étape précédant la vue <b>Après</b>, montrant l'effet qui vient d'être modifié
-MAIN_TOOLTIP_FALSECOLORS;Indicateur d'expositions utilisant de fausses couleurs.\nRaccourci : <b>e</b>\n\nClés (IRE gamme):\n%1
+MAIN_TOOLTIP_FALSECOLORS;Indicateur d'expositions utilisant de fausses couleurs.\nRaccourci : <b>e</b>\n\nClés (Plage IRE) : \n%1
 MAIN_TOOLTIP_HIDEHP;Montrer/Cacher le panneau gauche (incluant l'historique)\nRaccourci : <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indication des zones Hautes Lumières écrêtées\nRaccourci : <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Indication des zones Ombres écrêtées\nRaccourci : <b>&lt;</b>
