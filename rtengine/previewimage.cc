@@ -126,7 +126,7 @@ Cairo::RefPtr<Cairo::ImageSurface> PreviewImage::getImage()
 Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
 {
     StdImageSource imgSrc;
-    if (imgSrc.load (fname)) {
+    if (imgSrc.load(fname)) {
         return nullptr;
     }
 
@@ -136,7 +136,6 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
         w = img->getWidth();
         h = img->getHeight();
     } else {
-        std::cout << "BOUNDING BOX: " << w << "x" << h << std::endl;
         // (w, h) is a bounding box
         double sw = std::max(double(img->getWidth()) / w, 1.0);
         double sh = std::max(double(img->getHeight()) / h, 1.0);
