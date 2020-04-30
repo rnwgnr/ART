@@ -1703,11 +1703,17 @@ void show_focus_mask(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf>
 
 void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf> pixbuftrue)
 {
-    guint8* pix = pixbuf->get_pixels();
+    guint8 *pix = pixbuf->get_pixels();
 
     const int pixRowStride = pixbuf->get_rowstride();
     const int bHeight = pixbuf->get_height();
     const int bWidth = pixbuf->get_width();
+
+    const auto get_L =
+        [](guint8 *rgb) -> int
+        {
+            return 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+        };
 
     const auto L_to_IRE =
         [](int val) -> int
@@ -1724,11 +1730,11 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
         };
 
     const auto get_rgb =
-        [&](const char *color, guint8 &r, guint8 &g, guint8 &b) -> void
+        [&](const char *color, guint8 *rgb) -> void
         {
-            r = get(color, 1) * 16 + get(color, 2);
-            g = get(color, 3) * 16 + get(color, 4);
-            b = get(color, 5) * 16 + get(color, 6);
+            for (int c = 0; c < 3; ++c) {
+                rgb[c] = get(color, 2*c+1) * 16 + get(color, 2*c+2);
+            }
         };
 
 #ifdef _OPENMP
@@ -1737,10 +1743,10 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
     for (int i = 0; i < bHeight; i++) {
         guint8 *curr = pix + i * pixRowStride;
         for (int j = 0; j < bWidth; j++) {
-            int L = 0.299 * curr[0] + 0.587 * curr[1] + 0.114 * curr[2];
+            int L = get_L(curr);
             int ire = L_to_IRE(L);
             auto it = IndicateClippedPanel::falseColorsMap.lower_bound(ire);
-            get_rgb(it->second, curr[0], curr[1], curr[2]);
+            get_rgb(it->second, curr);
             curr += 3;
         }
     }
