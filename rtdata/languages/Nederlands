@@ -16,7 +16,8 @@
 #16 2017-04-21 update by wim ter meer
 
 #17 2020-01-28 First translation of ART v1.0 by paul.matthijsse/paulmatth, based on existing Dutch translation of RawTherapee 2007-2017, see above for credits
-#18 2020-03-14 update to art v1.2 by paul.matthijsse
+#18 2020-03-14 update to ART v1.2 by paul.matthijsse
+#19 2020-04-30 update to ART v1.3 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -24,8 +25,8 @@ ABOUT_TAB_LICENSE;Licentie
 ABOUT_TAB_RELEASENOTES;Uitgave-opmerkingen
 ABOUT_TAB_SPLASH;Welkom
 
-ADJUSTER_RESET_TO_DEFAULT;<b>Klik</b> - terug naar standaardwaarde.\n<b>Ctrl+klik</b> - terug naar laatst bewaarde waarde.
-BATCH_PROCESSING;Batch-verwerking
+ADJUSTER_RESET_TO_DEFAULT;<b>Klik</b> - terug naar standaardwaarde.\n<b>Ctrl+klik</b> - terug naar laatst opgeslagen waarde.
+###BATCH_PROCESSING;Batch-verwerking
 
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
@@ -59,7 +60,7 @@ DONT_SHOW_AGAIN;Dit bericht niet meer tonen
 DYNPROFILEEDITOR_DELETE;Verwijder
 DYNPROFILEEDITOR_EDIT;Bewerk
 DYNPROFILEEDITOR_EDIT_RULE;Bewerk dynamische profielregel
-DYNPROFILEEDITOR_ENTRY_TOOLTIP;Het zoeken is niet hoofdlettergevoelig.\nGebruik het "re:" voorvoegsel om\n een reguliere expressie uit te voeren
+DYNPROFILEEDITOR_ENTRY_TOOLTIP;Het zoeken is niet hoofdlettergevoelig.\nGebruik het "re:" voorvoegsel om\n een reguliere expressie in te voeren
 DYNPROFILEEDITOR_IMGTYPE_ANY;Alles
 DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
 DYNPROFILEEDITOR_IMGTYPE_PS;Pixel-shift
@@ -67,8 +68,8 @@ DYNPROFILEEDITOR_IMGTYPE_STD;Standaard
 DYNPROFILEEDITOR_MOVE_DOWN;Naar beneden
 DYNPROFILEEDITOR_MOVE_UP;Naar boven
 DYNPROFILEEDITOR_NEW;Nieuw
-DYNPROFILEEDITOR_NEW_RULE;Nieuw dynamische profiel
-DYNPROFILEEDITOR_PROFILE;Profiel verwerken
+DYNPROFILEEDITOR_NEW_RULE;Nieuwe dynamische profielregel
+DYNPROFILEEDITOR_PROFILE;Verwerkingsprofiel
 
 EDITWINDOW_TITLE;Bewerk afbeelding
 EDIT_OBJECT_TOOLTIP;Toont een widget in het voorbeeldscherm waarmee de werking van dit gereedschap aangepast kan worden
@@ -85,15 +86,19 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Objectief
 EXIFFILTER_METADATAFILTER;Activeer metadatafilters
 EXIFFILTER_SHUTTER;Sluitertijd
+EXIFPANEL_ACTIVATE_ALL_HINT;Selecteer alle labels
+EXIFPANEL_ACTIVATE_NONE_HINT;Deselecteer alle labels
 EXIFPANEL_ADDEDIT;Voeg toe/bewerk
-EXIFPANEL_ADDEDITHINT;Voeg nieuwe tag toe of bewerk tag
+EXIFPANEL_ADDEDITHINT;Voeg nieuw label toe of bewerk deze
 EXIFPANEL_ADDTAGDLG_ENTERVALUE;Geef waarde op
-EXIFPANEL_ADDTAGDLG_SELECTTAG;Selecteer tag
-EXIFPANEL_ADDTAGDLG_TITLE;Voeg tag toe of bewerk
+EXIFPANEL_ADDTAGDLG_SELECTTAG;Selecteer label
+EXIFPANEL_ADDTAGDLG_TITLE;Voeg label toe of bewerk deze
 EXIFPANEL_RESET;Terug naar standaardwaarden
 EXIFPANEL_RESETALL;Alles terug naar standaardwaarden
-EXIFPANEL_RESETALLHINT;Zet alle tags terug naar oorspronkelijke waarden
-EXIFPANEL_RESETHINT;Zet geselecteerde tags terug naar oorspronkelijke waarden
+EXIFPANEL_RESETALLHINT;Zet alle labels terug naar hun oorspronkelijke waarden
+EXIFPANEL_RESETHINT;Zet geselecteerde labels terug naar hun oorspronkelijke waarden
+EXIFPANEL_BASIC_GROUP;Basis
+EXIFPANEL_VALUE_NOT_SHOWN;Niet weergegeven
 
 # Voorkeuren - Snelle export
 EXPORT_BYPASS;Verwerkingsstappen die worden overgeslagen
@@ -119,7 +124,7 @@ EXPORT_PIPELINE;Verwerkingslijn
 EXPORT_PUTTOQUEUEFAST;Plaats in verwerkingsrij voor Snelle export
 EXPORT_RAW_DMETHOD;Demozaïekmethode
 EXPORT_USE_FAST_PIPELINE;Snel (volledige verwerking op gewijzigd formaat van de afbeelding)
-EXPORT_USE_FAST_PIPELINE_TIP;Gebruikt een speciale verwerkingslijn waarbij snelheid voorrang heeft op kwaliteit. Het formaat van de afbeelding wordt zo snel mogelijk gewijzigd in plaats van aan het eind van de verwerking, zoals gebruikelijk. De snelheidswinst is aanzienlijk, maar de kwaliteit van de afbeelding zal minder zijn.
+EXPORT_USE_FAST_PIPELINE_TIP;Gebruikt een speciale verwerkingslijn waarbij snelheid voorrang heeft op kwaliteit. Het formaat van de afbeelding wordt zo snel mogelijk gewijzigd in plaats van aan het eind van de verwerking, zoals gebruikelijk. De snelheidswinst kan hierdoor aanzienlijk zijn, maar de kwaliteit van de afbeelding is minder.
 EXPORT_USE_NORMAL_PIPELINE;Standaard (sommige stappen worden overgeslagen, wijzigt grootte aan het eind)
 
 # Filebrowser / Bestandsnavigator
@@ -127,7 +132,7 @@ FILEBROWSER_APPLYPROFILE;Pas profiel toe
 FILEBROWSER_APPLYPROFILE_PARTIAL;Pas profiel toe - gedeeltelijk
 FILEBROWSER_AUTODARKFRAME;Automatisch donkerframe
 FILEBROWSER_AUTOFLATFIELD;Automatisch vlakveld
-FILEBROWSER_BROWSEPATHBUTTONHINT;Klik om naar het gekozen pad te navigeren
+FILEBROWSER_BROWSEPATHBUTTONHINT;Ververs de lijst met miniaturen. \nSneltoets <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Typ het pad naar de doelmap.\n\nSneltoetsen:\n<b>Ctrl+O</b> richt focus op tekstveld.\n<b>Enter</b> / <b>Ctrl+Enter</b> open die map.\n<b>Esc</b> maak het tekstveld leeg.\n<b>Shift-Esc</b> haal focus weg.\n\nSneltoetsen:\n<b>~</b> - thuismap gebruiker\n <b>!</b> - afbeeldingenmap gebruiker
 FILEBROWSER_CACHE;Cache
 FILEBROWSER_CACHECLEARFROMFULL;Wis alles inclusief opgeslagen profielen
@@ -137,11 +142,11 @@ FILEBROWSER_COLORLABEL_TOOLTIP;Labelkleur\n\nGebruik keuzemenu of sneltoets:\n<b
 FILEBROWSER_COPYPROFILE;Kopieer
 FILEBROWSER_CURRENT_NAME;Huidige naam:
 FILEBROWSER_DARKFRAME;Donkerframe
-FILEBROWSER_DELETEDIALOG_HEADER;Verwijderen bestand bevestigen
+FILEBROWSER_DELETEDIALOG_HEADER;Verwijderen bestand bevestigen:
 FILEBROWSER_DELETEDIALOG_ALL;Alle <b>%1</b> bestanden in de prullenbak verwijderen?
 FILEBROWSER_DELETEDIALOG_SELECTED;Geselecteerde <b>%1</b> bestanden verwijderen?
 FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Geselecteerde <b>%1</b> bestanden <b>inclusief</b> een versie die door de verwerkingsrij is gemaakt verwijderen?
-FILEBROWSER_EMPTYTRASH;Leeg prullenbak
+###FILEBROWSER_EMPTYTRASH;Leeg prullenbak definitief
 FILEBROWSER_EMPTYTRASHHINT;Alle bestanden in de prullenbak permanent verwijderen
 FILEBROWSER_EXTPROGMENU;Open met
 FILEBROWSER_FLATFIELD;Vlakveld
@@ -378,10 +383,10 @@ HISTORY_MSG_97;L*a*b* - b*-curve
 HISTORY_MSG_98;Demozaïekmethode
 HISTORY_MSG_99;Hetepixelsfilter
 HISTORY_MSG_100;Verz/Lev. - verzadiging
-HISTORY_MSG_101;HSL - tint
-HISTORY_MSG_102;HSL - verzadiging
-HISTORY_MSG_103;HSL - lichtheid
-HISTORY_MSG_104;HSL-equalizer
+HISTORY_MSG_101;Kleur-equalizer - tint
+HISTORY_MSG_102;Kleur-equalizer - verzadiging
+HISTORY_MSG_103;Kleur-equalizer - lichtheid
+HISTORY_MSG_104;Kleur-equalizer
 HISTORY_MSG_105;Randverzachting
 HISTORY_MSG_106;RV - Straal
 HISTORY_MSG_107;RV - Drempel
@@ -636,6 +641,12 @@ HISTORY_MSG_LOCALCONTRAST_LIGHTNESSMASK;Lokaal contrast - L-masker
 HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Lokaal contrast - maskervervaging
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Lokaal contrast - toon masker
 HISTORY_MSG_LOCALCONTRAST_AREAMASK;Lokaal contrast - gebiedsmasker
+
+HISTORY_MSG_CHMIXER_MODE;Kanaalmixer - modus
+HISTORY_MSG_CHMIXER_RED_PRIMARY;Kanaalmixer - Rode primaat
+HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Kanaalmixer - Groene primaat
+HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Kanaalmixer - Blauwe primaat
+
 HISTORY_MSG_CLAMPOOG;Kleuren afkappen die buiten het gamma vallen
 HISTORY_MSG_COLORCORRECTION_AB;CC - tintcorrectie
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - gebiedsmasker
@@ -666,27 +677,29 @@ HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Nevelvermindering - Toon dieptemap
 HISTORY_MSG_DEHAZE_STRENGTH;Nevelvermindering - Sterkte
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Dual-demozaïek - auto-drempel
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dual-demozaïek - Contrastdrempel
-HISTORY_MSG_EPD_ITERATIONS;TB - iteraties
-HISTORY_MSG_EPD_LIST;TB - gebieden
-HISTORY_MSG_EPD_HUEMASK;TB - H-masker
-HISTORY_MSG_EPD_CHROMATICITYMASK;TB - C-masker
-HISTORY_MSG_EPD_LIGHTNESSMASK;TB - L-masker
-HISTORY_MSG_EPD_MASKBLUR;TB - maskervervaging
-HISTORY_MSG_EPD_SHOWMASK;TB - toon masker
-HISTORY_MSG_EPD_AREAMASK;TB - gebiedsmasker
-HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - Masker contrastdrempel
-HISTORY_MSG_EPD_DELTAEMASK;TB - dE-masker
-HISTORY_MSG_EPD_DRAWNMASK;TB - penseelmasker
-HISTORY_MSG_EPD_PARAMETRICMASK;TB - parametrisch masker
+HISTORY_MSG_EPD_DETAIL_THRESHOLD;TV - detailschaal
+HISTORY_MSG_EPD_ITERATIONS;TV - iteraties
+HISTORY_MSG_EPD_LIST;TV - gebieden
+HISTORY_MSG_EPD_HUEMASK;TV - H-masker
+HISTORY_MSG_EPD_CHROMATICITYMASK;TV - C-masker
+HISTORY_MSG_EPD_LIGHTNESSMASK;TV - L-masker
+HISTORY_MSG_EPD_MASKBLUR;TV - maskervervaging
+HISTORY_MSG_EPD_SHOWMASK;TV - toon masker
+HISTORY_MSG_EPD_AREAMASK;TV - gebiedsmasker
+HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TV - Masker contrastdrempel
+HISTORY_MSG_EPD_DELTAEMASK;TV - dE-masker
+HISTORY_MSG_EPD_DRAWNMASK;TV - penseelmasker
+HISTORY_MSG_EPD_PARAMETRICMASK;TV - parametrisch masker
 HISTORY_MSG_EXPOSURE_BLACK;Belichting - Zwartpunt
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatief
+HISTORY_MSG_FILMNEGATIVE_FILMBASE;Basiskleur film
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
 HISTORY_MSG_GRAIN_ENABLED;Filmkorrel
 HISTORY_MSG_GRAIN_ISO;Filmkorrel - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Filmkorrel - Kracht
 HISTORY_MSG_GRAIN_SCALE;Filmkorrel - Schaal
 HISTORY_MSG_HISTMATCHING;Auto-matched tooncurve
-HISTORY_MSG_HSL_SMOOTHING;HSL - Verzachten
+HISTORY_MSG_HSL_SMOOTHING;Kleur-equalizer - Verzachten
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Uitvoer - Primaries
 HISTORY_MSG_ICM_OUTPUT_TEMP;Uitvoer - ICC-v4 illuminant D
 HISTORY_MSG_ICM_OUTPUT_TYPE;Uitvoer - Type
@@ -711,7 +724,7 @@ HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Lokaal contrast - parametrisch masker
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
 HISTORY_MSG_LOGENC_AUTOGRAY;Log - Auto-grijs
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Reguleer
-HISTORY_MSG_LOGENC_ENABLED;Logcodering
+HISTORY_MSG_LOGENC_ENABLED;Log toonmappen
 HISTORY_MSG_LOGENC_BLACK_EV;Log - Zwart EV
 HISTORY_MSG_LOGENC_SOURCE_GRAY;Log - Oorspronkelijk grijspunt
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Wit EV
@@ -755,10 +768,14 @@ HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Verzachten - parametrisch masker
 
 HISTORY_MSG_SOFTLIGHT_ENABLED;Zacht licht
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Zacht licht - Sterkte
+HISTORY_MSG_SPOT;Vlekken verwijderen
+HISTORY_MSG_SPOT_ENTRY;Vlekken verwijderen - punt veranderd
+
 HISTORY_MSG_TM_FATTAL_ANCHOR;DRC - Anker
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Toonequalizer
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Toonequalizer - Banden
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Toonequalizer - Regulariseer
+HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Toonequalizer - Kleurenkaart
 HISTORY_MSG_TONECURVE_SATCURVE;Tooncurve - Verzadiging
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tooncurve - Perceptuele kracht
 HISTORY_NEWSNAPSHOT;Voeg toe
@@ -785,7 +802,7 @@ ICCPROFCREATOR_ILL_80;D80
 ICCPROFCREATOR_ILL_DEF;Standaard
 ICCPROFCREATOR_ILL_INC;StdA 2856K
 ICCPROFCREATOR_ILL_TOOLTIP;U kunt alleen de illuminant instellen voor ICC v4-profielen.
-ICCPROFCREATOR_PRIMARIES;Primaries:
+ICCPROFCREATOR_PRIMARIES;Primaire kleuren:
 ICCPROFCREATOR_PRIM_ACESP0;ACES AP0
 ICCPROFCREATOR_PRIM_ACESP1;ACES AP1
 ICCPROFCREATOR_PRIM_ADOBE;Adobe RGB (1998)
@@ -810,12 +827,13 @@ ICCPROFCREATOR_SLOPE;Helling
 ICCPROFCREATOR_TRC_PRESET;Toonresponscurve:
 
 INSPECTOR_ENABLE_CMS;Activeer kleurbeheer.
-INSPECTOR_INFO;Snelle info.
+INSPECTOR_INFO;Snelle info.\nSneltoets: <b>i</b>
 INSPECTOR_PREVIEW;Ingebed voorbeeld.\nSneltoets: <b>j</b>.
 INSPECTOR_RAW_LINEAR;Snelle raw-rendering met lineaire tooncurve.\nSneltoets: <b>r</b>.
 INSPECTOR_RAW_FILM;Snelle raw-rendering met filmachtige tooncurve.\nSneltoets: <b>f</b>.
 INSPECTOR_RAW_CLIP;Raw afgekapte pixels.\nSneltoets: <b>w</b>.
 INSPECTOR_RAW_SHADOW;Snelle raw-rendering met tooncurve die de schaduwen versterkt.\nSneltoets: <b>s</b>.
+INSPECTOR_SPLIT;Splits weergave.\nSneltoets: <b>y</b>.
 INSPECTOR_ZOOM_FIT;Pas in venster.\nSneltoets: <b>x</b>.
 INSPECTOR_ZOOM_11;Zoom tot 100%.\nSneltoets: <b>z</b>.
 
@@ -915,6 +933,7 @@ MAIN_TAB_FAVORITES;Favorieten
 MAIN_TAB_FAVORITES_TOOLTIP;Sneltoets: <b>Alt+u</b>
 MAIN_TAB_FILTER; Filter 
 MAIN_TAB_INSPECT; Inspecteer 
+MAIN_TAB_INSPECT_TOOLTIP;Activeer de inspecteur.\nSneltoets: <b>Ctrl+i</b>
 MAIN_TAB_IPTC;IPTC
 MAIN_TAB_LOCAL;Lokaal bewerken
 MAIN_TAB_LOCAL_TOOLTIP;Sneltoets: <b>Alt+x</b>
@@ -929,6 +948,8 @@ MAIN_TOOLTIP_BACKCOLOR1;Achtergrondkleur van het voorbeeld: <b>Zwart</b>\nSnelto
 MAIN_TOOLTIP_BACKCOLOR2;Achtergrondkleur van het voorbeeld: <b>Wit</b>\nSneltoets: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Achtergrondkleur van het voorbeeld: <b>middelgrijs</b>\nSneltoets: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vergrendel</b>/<b>ontgrendel</b> de <b>Voor</b>-afbeelding.\n\n<b>Vergrendel</b>: laat de <b>Voor</b>-afbeelding ongewijzigd.\nDit is handig om het cumulatieve effect van meerdere gereedschappen te beoordelen.\nBovendien kan er worden vergeleken met elke stap in de geschiedenislijst.\n\n<b>Ontgrendel</b>: de <b>Voor</b>-afbeelding volgt een stap achter de <b>Na</b>-afbeelding en laat de afbeelding zien zonder het effect van het huidige gereedschap.
+MAIN_TOOLTIP_FALSECOLORS;Toon belichtingsindicatie op basis van <b>valse kleuren</b>.\nSneltoets: <b>e</b>\n\nSleutel (IRE-reeks):\n%1
+
 MAIN_TOOLTIP_HIDEHP;Toon/verberg linkerpaneel (incl. geschiedenis)\nSneltoets: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Overbelichtingsindicatie.\nSneltoets: <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Onderbelichtingsindicatie.\nSneltoets: <b>&lt;</b>
@@ -1001,7 +1022,7 @@ PARTIALPASTE_FLATFIELDCLIPCONTROL;Vlakveld clipcontrole
 PARTIALPASTE_FLATFIELDFILE;Vlakveldbestand
 PARTIALPASTE_GRADIENT;Grijsverloopfilter
 PARTIALPASTE_GRAIN;Filmkorrel
-PARTIALPASTE_HSLEQUALIZER;HSL-equalizer
+PARTIALPASTE_HSLEQUALIZER;Kleur-equalizer
 PARTIALPASTE_ICMSETTINGS;Kleurbeheer
 PARTIALPASTE_IMPULSEDENOISE;Spotruisonderdrukking
 PARTIALPASTE_IPTCINFO;IPTC
@@ -1035,8 +1056,9 @@ PARTIALPASTE_ROTATION;Roteren
 PARTIALPASTE_SHARPENING;Verscherpen
 PARTIALPASTE_SMOOTHING;Verzachten
 PARTIALPASTE_SOFTLIGHT;Zacht licht
+PARTIALPASTE_SPOT;Vlekken verwijderen
 PARTIALPASTE_TM_FATTAL;Compressie dynamisch bereik
-PARTIALPASTE_TM_LOG;Logcodering
+PARTIALPASTE_TM_LOG;Log toonmapping
 PARTIALPASTE_TONE_EQUALIZER;Toonequalizer
 PARTIALPASTE_VIBRANCE;Levendigheid
 PARTIALPASTE_VIGNETTING;Vignetteringscorrectie
@@ -1241,6 +1263,7 @@ PREFERENCES_THUMBNAIL_INSPECTOR_RAW_FILM_CURVE;Gebruik standaard filmcurve voor 
 
 PREFERENCES_THUMBNAIL_RATING;Laad/bewaar miniatuurmarkeringen van/naar XMP-sidecars
 PREFERENCES_TP_LABEL;Gereedschapspaneel:
+PREFERENCES_TP_DISABLE;Maak inactieve gereedschappen grijs
 PREFERENCES_TP_VSCROLLBAR;Verberg verticale schuifbalk
 PREFERENCES_TUNNELMETADATA;Kopieer Exif/IPTC/XMP onveranderd naar uitvoerbestand
 PREFERENCES_USEBUNDLEDPROFILES;Gebruik gebundelde profielen
@@ -1293,6 +1316,7 @@ QINFO_ISO;ISO
 QINFO_NOEXIF;Exif-data niet beschikbaar.
 QINFO_PIXELSHIFT;Pixel-shift / %2 frame(s)
 
+QUEUE_APPLY_BATCH_PROFILE;Pas het volgende profiel toe bij exporteren
 QUEUE_AUTOSTART;Auto-start
 QUEUE_AUTOSTART_TOOLTIP;Auto-start verwerking wanneer nieuwe foto arriveert
 QUEUE_DESTFILENAME;Pad en bestandsnaam
@@ -1399,10 +1423,17 @@ TP_CACORRECTION_BLUE;Blauw
 TP_CACORRECTION_LABEL;Corrigeer Chromatische aberratie
 TP_CACORRECTION_RED;Rood
 
-
 # Kleur - Kanalenmixer
 TP_CHMIXER_BLUE;Blauw
 TP_CHMIXER_GREEN;Groen
+TP_CHMIXER_MODE;Modus
+TP_CHMIXER_HUE;Tintcorrectie
+TP_CHMIXER_SAT;Verzadigingscorrectie
+TP_CHMIXER_PRIMARY_R;Rood primair
+TP_CHMIXER_PRIMARY_G;Groen primair
+TP_CHMIXER_PRIMARY_B;Blauw primair
+TP_CHMIXER_MODE_RGB_MATRIX;RGB-matrix
+TP_CHMIXER_MODE_PRIMARIES_CHROMA;Correctie primaire kleuren
 TP_CHMIXER_LABEL;Kanalenmixer
 TP_CHMIXER_RED;Rood
 
@@ -1576,6 +1607,7 @@ TP_EXPOSURE_BRIGHTNESS;Helderheid
 
 # Texture boost
 TP_EPD_EDGESTOPPING;Randbehandeling
+TP_EPD_DETAIL_THRESHOLD;Schaal details
 TP_EPD_LABEL;Textuurversterking
 TP_EPD_SCALE;Schaal
 TP_EPD_STRENGTH;Kracht
@@ -1651,7 +1683,7 @@ TP_HLREC_LABEL;Hoge lichten herstellen
 # module HSV Equalizer
 TP_HSVEQUALIZER_CHANNEL;Kanaal
 TP_HSVEQUALIZER_HUE;Tint
-TP_HSVEQUALIZER_LABEL;HSV-equalizer
+TP_HSVEQUALIZER_LABEL;Kleurequalizer
 TP_HSVEQUALIZER_SAT;Verz.
 TP_HSVEQUALIZER_VAL;Waarde
 TP_HSL_SMOOTHING;Verzachten
@@ -1661,10 +1693,14 @@ TP_EXPOSURE_HISTMATCHING_TOOLTIP;Automatische aanpassing van schuiven en curves 
 
 # RAW - Film Negative / Filmnegatief
 TP_FILMNEGATIVE_BLUE;Blauwe ratio
+TP_FILMNEGATIVE_FILMBASE_PICK;Kies basiskleur film
+TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Klik op een stuk onbelichte film (bijvoorbeeld de verticale strook tussen twee foto's) om de basiskleur van deze film te bepalen, en bewaar deze waarden in een verwerkingsprofiel.\nDit maakt de kleurbalans consistentere wanneer meerdere foto's van dezelfde filmrol worden verwerkt. \nGebruik dit ook als het geconverteerde beeld erg donker of te helder is, of wanneer de kleuren uit balans zijn.
+TP_FILMNEGATIVE_FILMBASE_VALUES;Basiskleur film RGB:
 TP_FILMNEGATIVE_GREEN;Referentie-exponent (contrast)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Berekent exponenten door twee neutrale referentieplekken in het beeld te kiezen: een witte (lichtgrijs) en een zwarte (donkergrijs). De volgorde doet er niet toe. De exponenten worden opgewaardeerd nadat het tweede punt is gekozen.
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Stel automatisch de rode en blauwe 
+ratio's in door twee punten in de foto te kiezen met een neutrale tint (geen kleur). Deze punten moeten verschillen in helderheid. Stel kleurbalans nadien in. 
 TP_FILMNEGATIVE_LABEL;Filmnegatief
-TP_FILMNEGATIVE_PICK;Kies witte en zwarte punten
+TP_FILMNEGATIVE_PICK;Kies neutrale punten
 TP_FILMNEGATIVE_RED;Rode ratio
 
 # module Color Management / Kleurbeheer
@@ -1747,8 +1783,9 @@ TP_LABMASKS_BLUR;Vervagen
 TP_LABMASKS_CHROMATICITY;C
 TP_LABMASKS_HUE;H
 TP_LABMASKS_LIGHTNESS;L
+TP_LABMASKS_LIGHTNESS_DETAIL;L-masker detailbescherming
 TP_LABMASKS_MASK;Masker
-TP_LABMASKS_MASK_UNNAMED;Onbenoemd
+TP_LABMASKS_MASK_UNNAMED;Geen_naam
 TP_LABMASKS_SHOW;Toon masker
 TP_LABMASKS_CONTRASTTHRESHOLDMASK;Contrastdrempelmasker
 TP_LABMASKS_DELTAE;ΔE masker
@@ -1761,7 +1798,8 @@ TP_LABMASKS_DELTAE_PICK;Kies kleur
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Gewicht in de ΔE-berekening
 TP_LABMASKS_DELTAE_TOOLTIP;Kies gebieden van gelijke kleur\n(volgens de CIELAB ΔE*-metriek)
 TP_LABMASKS_DRAWNMASK;Penseelmasker
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Schakel canvastekenen aan/uit
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Schakelt het tekenen met de kwast in of uit.\nHoud de <b>Shift</b>-toets ingedrukt om tijdelijk naar de Gum-modus om te schakelen.\nGebruik <b>Ctrl+muiswiel</b> om de kwastgrootte te veranderen,\n<b>Ctrl+Shift+muiswiel</b> om de hardheid te wijzigen,\nen <b>Ctrl+klik</b> om een nieuwe 'penseelgroep' te starten zonder de perameters te veranderen\n(zodat meerdere kwaststreken in hetzelfde gebied elkaar versterken).
+
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Penseelinstellingen
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Wis alles penseelstreken
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Verwijder laatste groep penseelstreken
@@ -1867,7 +1905,7 @@ TP_LOGENC_EV_LEVELS;Relatieve belichtingsniveaus
 TP_LOGENC_SOURCE_GRAY;Grijspunt bron
 TP_LOGENC_WHITE_EV;Wit EV
 TP_LOGENC_TARGET_GRAY;Grijspunt doel
-TP_LOGENC_LABEL;Logcodering
+TP_LOGENC_LABEL;Log Toonmappen
 TP_LOGENC_REGULARIZATION;Regulariseer
 
 # Meta
@@ -1950,6 +1988,8 @@ TP_RAW_SENSOR_XTRANS_DMETHOD_TOOLTIP;3-pass geeft het beste resultaat (aanbevole
 TP_RAW_SENSOR_XTRANS_LABEL;Sensor met X-Trans-matrix
 TP_RAW_NONE;None (Shows sensor pattern)
 
+TP_RESET_DEFAULT;Terug naar standaardwaarden
+TP_RESET_SAVED;Terug naar laatst bewaarde staat
 TP_RESIZE_APPLIESTO;Toepassen op:
 TP_RESIZE_ALLOW_UPSCALING;Sta opschalen toe
 TP_RESIZE_CROPPEDAREA;Uitsnede
@@ -1995,6 +2035,21 @@ TP_SHARPENING_RLD_CORNERRADIUS;Straalvergroting
 TP_SHARPENING_THRESHOLD;Drempel
 TP_SHARPENING_USM;Onscherpmasker
 
+# module Spot removal
+TP_SPOT_COUNTLABEL;%1 punt(en)
+TP_SPOT_ENTRYCHANGED;Punt veranderd
+TP_SPOT_HINT;Klik op deze knop om te kunnen werken in het voorbeeldvenster.\n\nOm een plek te bewerken schuift u de muis over het witte kruis dat een plek markeert, waarna de geometrie ervan verschijnt.\n\nOm een plek toe te voegen doe Ctrl+linkermuisklik, sleep de cirkel (u kunt Ctrl loslaten nu) naar een bronbestemming en laat dan de muisknop los.\n\nOm een bron of bestemming te verplaatsen, ga met de muis naar het centrum en sleep dit ergens heen.\n\nDe binnenste cirkel (gebied met maximaal effect) en de 'verzachtingscirkel' kunnen worden geschaald door er met de muis over te gaan (de cirkel wordt oranje) en ze te verslepen (de cirkel wordt rood).\n\nAls u klaar bent met de veranderingen volstaat een rechtsklik met de muis buiten een plek om de Vlekverwijdermodus te verlaten, of klik opnieuw op deze knop. 
+TP_SPOT_LABEL;Vlekken verwijderen
+TP_SPOT_CUR_SPOT_LABEL;Huidige plek
+TP_SPOT_SOURCE_X;Bron X
+TP_SPOT_SOURCE_Y;Bron Y
+TP_SPOT_TARGET_X;Doel X
+TP_SPOT_TARGET_Y;Doel Y
+TP_SPOT_RADIUS;Straal
+TP_SPOT_FEATHER;Verzachten
+TP_SPOT_OPACITY;Doorzichtigheid
+TP_SPOT_DETAIL;Detailbescherming
+
 TP_VIBRANCE_AVOIDCOLORSHIFT;Vermijd kleurverschuiving
 TP_TM_FATTAL_AMOUNT;Hoeveelheid
 TP_TM_FATTAL_LABEL;Compressie dynamisch bereik
@@ -2012,6 +2067,7 @@ TP_TONE_EQUALIZER_BAND_3;Hoge lichten
 TP_TONE_EQUALIZER_BAND_4;Witten
 TP_TONE_EQUALIZER_DETAIL;Regulariseer
 TP_TONE_EQUALIZER_LABEL;Toon-equalizer
+TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Toon kleurenkaart
 
 # module Vignetteringscorrectie
 TP_VIGNETTING_AMOUNT;Hoeveelheid
