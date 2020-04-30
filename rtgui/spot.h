@@ -71,6 +71,7 @@ private:
     OPIcon sourceIcon;             // to show the source location
     Circle sourceCircle;           // to show and change the Source radius
     Circle sourceMODisc;           // to change the Source position
+    OPIcon targetIcon;             // to show the target location
     Circle targetCircle;           // to show and change the Target radius
     Circle targetMODisc;           // to change the Target position
     Circle sourceFeatherCircle;    // to show the Feather radius at the Source position
