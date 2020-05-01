@@ -159,7 +159,7 @@ FILEBROWSER_POPUPTRASH;Déplacer dans la corbeille
 FILEBROWSER_POPUPUNRANK;Effacer le rang
 FILEBROWSER_POPUPUNTRASH;Retirer de la corbeille
 FILEBROWSER_QUERYBUTTONHINT;Effacer la recherche
-FILEBROWSER_QUERYHINT;Taper les noms de fichier à chercher. Supporte les noms partiels. Séparer les termes à chercher des virgules, ex. :\n<i>1001,1004,1199</i>\n\nRaccourcis :\n<b>Ctrl-F</b> - placer le curseur dans le champ de saisie.\n<b>Entrée</b> - lancer la recherche\n<b>Esc</b> - effacer.\n<b>Shift-Esc</b> - retirer le focus.
+FILEBROWSER_QUERYHINT;Taper les noms de fichier à chercher. Supporte les noms partiels. Séparer les termes à chercher des virgules, ex. :\n<i>1001,1004,1199</i>\n\nRaccourcis :\n<b>Ctrl-F</b> - placer le curseur dans le champ de saisie.\n<b>Entrée</b> - lancer la recherche\n<b>Shift-Esc</b> - effacer.\n<b>Esc</b> - retirer le focus.
 FILEBROWSER_QUERYLABEL;Chercher : 
 FILEBROWSER_RANK1_TOOLTIP;Assigner le rang 1 *\nRaccourci : <b>Shift-1</b>
 FILEBROWSER_RANK2_TOOLTIP;Assigner le rang 2 *\nRaccourci : <b>Shift-2</b>

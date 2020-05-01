@@ -189,7 +189,7 @@ FILEBROWSER_POPUPTRASH;Verplaats naar prullenbak
 FILEBROWSER_POPUPUNRANK;Verwijder sterwaardering
 FILEBROWSER_POPUPUNTRASH;Haal terug uit prullenbak
 FILEBROWSER_QUERYBUTTONHINT;Wis zoekopdracht
-FILEBROWSER_QUERYHINT;Zoek op bestandsnamen. Ondersteunt gedeeltelijke bestandsnamen. Scheid zoektermen door komma's, zoals \n1001,1004,1199\n\nSluit zoektermen uit met een 'is niet' ofwel !=, zoals in\n!=1001,1004,1199\n\nSneltoetsen:\n<b>Ctrl+f</b> - focus op zoekveld,\n<b>Enter</b> - zoek,\n<b>Esc</b> - maak zoekveld leeg, \n<b>Shift+Esc</b> - verwijder focus van het zoekveld.
+FILEBROWSER_QUERYHINT;Zoek op bestandsnamen. Ondersteunt gedeeltelijke bestandsnamen. Scheid zoektermen door komma's, zoals \n1001,1004,1199\n\nSluit zoektermen uit met een 'is niet' ofwel !=, zoals in\n!=1001,1004,1199\n\nSneltoetsen:\n<b>Ctrl+f</b> - focus op zoekveld,\n<b>Enter</b> - zoek,\n<b>Shift+Esc</b> - maak zoekveld leeg, \n<b>Esc</b> - verwijder focus van het zoekveld.
 FILEBROWSER_QUERYLABEL; Zoek:
 FILEBROWSER_RANK1_TOOLTIP;Waardering 1 *\nSneltoets: Shift+1
 FILEBROWSER_RANK2_TOOLTIP;Waardering 2 *\nSneltoets: Shift+2

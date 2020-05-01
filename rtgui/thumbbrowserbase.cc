@@ -1183,3 +1183,10 @@ void ThumbBrowserBase::redrawEntryNeeded(ThumbBrowserEntryBase* entry)
 }
 
 
+void ThumbBrowserBase::getFocus()
+{
+    internal.grab_focus();
+    if (!fd.empty() && selected.empty()) {
+        selectFirst(false);
+    }
+}

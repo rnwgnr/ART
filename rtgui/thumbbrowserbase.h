@@ -165,7 +165,7 @@ public:
         return location;
     }
 
-    void getFocus() { internal.grab_focus(); }
+    void getFocus();
 
 protected:
 

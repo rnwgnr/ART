@@ -1884,7 +1884,7 @@ bool FileCatalog::Query_key_pressed (GdkEventKey *event)
     case GDK_KEY_Escape:
 
         // Clear Query if the Escape character is pressed within it
-        if (!shift) {
+        if (shift) {
             FileCatalog::buttonQueryClearPressed ();
             return true;
         }
@@ -1957,7 +1957,7 @@ bool FileCatalog::BrowsePath_key_pressed (GdkEventKey *event)
     case GDK_KEY_Escape:
 
         // On Escape character Reset BrowsePath to selectedDirectory
-        if (!shift) {
+        if (shift) {
             BrowsePath->set_text(selectedDirectory);
             // place cursor at the end
             BrowsePath->select_region(BrowsePath->get_text_length(), BrowsePath->get_text_length());
@@ -2169,7 +2169,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
         return true;
     }
 
-    if (shift) {
+    if (!shift) {
         switch(event->keyval) {
         case GDK_KEY_Escape:
             BrowsePath->set_text(selectedDirectory);

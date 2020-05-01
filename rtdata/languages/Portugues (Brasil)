@@ -152,7 +152,7 @@ FILEBROWSER_POPUPTRASH;Mover para a lixeira
 FILEBROWSER_POPUPUNRANK;Desclassificar
 FILEBROWSER_POPUPUNTRASH;Remover da lixeira
 FILEBROWSER_QUERYBUTTONHINT;Limpar a consulta Localizar
-FILEBROWSER_QUERYHINT;Digite nomes de arquivos para procurar. Suporta nomes de arquivos parciais. Separe os termos de pesquisa usando vírgulas, por exemplo\n<i>1001,1004,1199</i>\n\nExcluir termos de pesquisa prefixando-os com <i>!=</i>\npor ex.\n<i>!=1001,1004,1199</i>\n\nAtalhos:\n<b>Ctrl-f</b> - foque a caixa Localizar,\n<b>Enter</b> - pesquisa,\n<b>Esc</b> - Limpe a caixa Localizar,\n<b>Shift-Esc</b> - desfoque a caixa Localizar.
+FILEBROWSER_QUERYHINT;Digite nomes de arquivos para procurar. Suporta nomes de arquivos parciais. Separe os termos de pesquisa usando vírgulas, por exemplo\n<i>1001,1004,1199</i>\n\nExcluir termos de pesquisa prefixando-os com <i>!=</i>\npor ex.\n<i>!=1001,1004,1199</i>\n\nAtalhos:\n<b>Ctrl-f</b> - foque a caixa Localizar,\n<b>Enter</b> - pesquisa,\n<b>Shift-Esc</b> - Limpe a caixa Localizar,\n<b>Esc</b> - desfoque a caixa Localizar.
 FILEBROWSER_QUERYLABEL; Localizar:
 FILEBROWSER_RANK1_TOOLTIP;Classificação 1 *\nAtalho: <b>Shift-1</b>
 FILEBROWSER_RANK2_TOOLTIP;Classificação 2 *\nAtalho: <b>Shift-2</b>
