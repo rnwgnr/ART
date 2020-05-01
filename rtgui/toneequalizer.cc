@@ -43,6 +43,7 @@ ToneEqualizer::ToneEqualizer(): FoldableToolPanel(this, "toneequalizer", M("TP_T
         bands[i] = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_BAND_" + std::to_string(i)), -100, 100, 1, 0, Gtk::manage(new RTImage(Glib::ustring("circle-") + images[i] + "-small.png"))));
         bands[i]->setAdjusterListener(this);
         pack_start(*bands[i]);
+        bands[i]->showIcons(false);
     }
     pack_start(*Gtk::manage(new Gtk::HSeparator()));
     regularization = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_DETAIL"), -5, 5, 1, 0));
@@ -64,6 +65,7 @@ void ToneEqualizer::read(const ProcParams *pp)
 
     for (size_t i = 0; i < bands.size(); ++i) {
         bands[i]->setValue(pp->toneEqualizer.bands[i]);
+        bands[i]->showIcons(pp->toneEqualizer.show_colormap);
     }
     regularization->setValue(pp->toneEqualizer.regularization);
 
@@ -132,6 +134,9 @@ void ToneEqualizer::enabledChanged()
 
 void ToneEqualizer::colormapToggled()
 {
+    for (size_t i = 0; i < bands.size(); ++i) {
+        bands[i]->showIcons(show_colormap->get_active());
+    }
     if (listener && getEnabled()) {
         listener->panelChanged(EvColormap, show_colormap->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }

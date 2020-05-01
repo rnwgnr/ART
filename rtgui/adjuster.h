@@ -183,6 +183,8 @@ public:
     void trimValue (int &val);
 
     void setLogScale(double base, double pivot, bool anchorMiddle=false);
+
+    void showIcons(bool yes);
 };
 
 #endif
