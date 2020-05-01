@@ -173,6 +173,7 @@ void FilePanel::on_realize ()
 void FilePanel::setAspect ()
 {
     int winW, winH;
+    fileCatalog->setupSidePanels();
     parent->get_size(winW, winH);
     placespaned->set_position(options.dirBrowserHeight);
     dirpaned->set_position(options.dirBrowserWidth);
@@ -180,7 +181,6 @@ void FilePanel::setAspect ()
     set_position(winW - options.browserToolPanelWidth);
 
     rightNotebook->set_current_page(0);
-    fileCatalog->setupSidePanels();
     // if (!options.browserDirPanelOpened) {
     //     fileCatalog->toggleLeftPanel();
     // }
