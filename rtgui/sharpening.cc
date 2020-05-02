@@ -332,7 +332,6 @@ void Sharpening::adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newT
 
 void Sharpening::enabledChanged ()
 {
-
     if (listener) {
         if (get_inconsistent()) {
             listener->panelChanged (EvShrEnabled, M("GENERAL_UNCHANGED"));
@@ -341,6 +340,12 @@ void Sharpening::enabledChanged ()
         } else {
             listener->panelChanged (EvShrEnabled, M("GENERAL_DISABLED"));
         }
+    }
+    if (options.toolpanels_disable) {
+        rld->set_sensitive(getEnabled());
+        usm->set_sensitive(getEnabled());
+        edgebox->set_sensitive(getEnabled());
+        hcbox->set_sensitive(getEnabled());
     }
 }
 

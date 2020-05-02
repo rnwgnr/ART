@@ -465,6 +465,11 @@ void ColorCorrection::enabledChanged ()
             listener->panelChanged(EvEnabled, M("GENERAL_DISABLED"));
         }
     }
+    if (options.toolpanels_disable) {
+        box_combined->set_sensitive(getEnabled());
+        box_rgb->set_sensitive(getEnabled());
+        box_hsl->set_sensitive(getEnabled());
+    }
 }
 
 
