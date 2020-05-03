@@ -1992,14 +1992,18 @@ void Color::AllMunsellLch(bool lumaMuns, float Lprov1, float Loldd, float HH, fl
 
                 if(correctionHue != 0.0) {
                     int idx = zo - 1;
+#ifdef _OPENMP                    
                     #pragma omp critical (maxdhue)
+#endif
                     {
                         munsDbgInfo->maxdhue[idx] = MAX(munsDbgInfo->maxdhue[idx], absCorrectionHue);
                     }
                 }
 
                 if(absCorrectionHue > 0.45)
+#ifdef _OPENMP
                     #pragma omp atomic
+#endif
                     munsDbgInfo->depass++;        //verify if no bug in calculation
 
 #endif
@@ -2040,14 +2044,18 @@ void Color::AllMunsellLch(bool lumaMuns, float Lprov1, float Loldd, float HH, fl
 
                         if(correctlum != 0.0) {
                             int idx = zo - 1;
+#ifdef _OPENMP                            
                             #pragma omp critical (maxdhuelum)
+#endif
                             {
                                 munsDbgInfo->maxdhuelum[idx] = MAX(munsDbgInfo->maxdhuelum[idx], absCorrectLum);
                             }
                         }
 
                         if(absCorrectLum > 0.35)
+#ifdef _OPENMP
                             #pragma omp atomic
+#endif              
                             munsDbgInfo->depassLum++;    //verify if no bug in calculation
 
 #endif
