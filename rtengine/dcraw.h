@@ -205,9 +205,11 @@ public:
             uint32_t MediaSize;
             INT64 MediaOffset;
             uint32_t MediaType; /* 1 -> /C/RAW, 2-> JPEG */
+
+            crx_data_header_t() = default;
         };
         static constexpr size_t CRXTRACKS_MAXCOUNT = 16;
-        crx_data_header_t crx_header[CRXTRACKS_MAXCOUNT];
+        std::array<crx_data_header_t, CRXTRACKS_MAXCOUNT> crx_header;
         int crx_track_selected;
         short CR3_CTMDtag;
     };
