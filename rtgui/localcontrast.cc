@@ -194,7 +194,7 @@ LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_L
 
     const LocalContrastParams default_params;
     
-    cg = Gtk::manage(new CurveEditorGroup(options.lastColorToningCurvesDir, M("TP_LOCALCONTRAST_CURVE"), 0.7));
+    cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LOCALCONTRAST_CURVE"), 0.7));
     cg->setCurveListener(this);
     curve = static_cast<FlatCurveEditor *>(cg->addCurve(CT_Flat, "", nullptr, false, false));
     curve->setIdentityValue(0.);

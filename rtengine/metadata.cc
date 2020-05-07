@@ -79,7 +79,7 @@ std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname)
     auto image = Exiv2::ImageFactory::open(Glib::filename_from_utf8(fname));
 #endif
     image->readMetadata();
-    if (!image->good()) {
+    if (!image->good() || image->exifData().empty()) {
 #if EXIV2_TEST_VERSION(0,27,0)
         auto error_code = Exiv2::kerErrorMessage;
 #else
@@ -87,7 +87,8 @@ std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname)
 #endif
         throw Exiv2::Error(error_code, "exiv2: invalid image");
     }
-    return image;
+    std::unique_ptr<Exiv2::Image> ret(image.release());
+    return ret;
 }
 
 
@@ -323,6 +324,7 @@ std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const 
         }
         throw exc;
     }
+    std::unique_ptr<Exiv2::Image> ret;
     try {
         auto image = Exiv2::ImageFactory::open(outname);
         image->readMetadata();
@@ -344,14 +346,14 @@ std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const 
         set_from("Xmp.exifEX.LensModel", "Exif.Photo.LensModel");
         xmp.clear();
         g_remove(outname.c_str());
-        return image;
+        ret.reset(image.release());
     } catch (std::exception &) {
         if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
             g_remove(outname.c_str());
         }
         throw exc;
     }
-    return std::unique_ptr<Exiv2::Image>();
+    return ret;
 }
 
 } // namespace

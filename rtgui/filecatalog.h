@@ -172,18 +172,8 @@ public:
             fileBrowser->setInspector(inspector);
         }
     }
-    void disableInspector()
-    {
-        if (fileBrowser) {
-            fileBrowser->disableInspector();
-        }
-    }
-    void enableInspector()
-    {
-        if (fileBrowser) {
-            fileBrowser->enableInspector();
-        }
-    }
+    void disableInspector();
+    void enableInspector();
 
     // filterpanel interface
     void exifFilterChanged () override;
@@ -272,6 +262,7 @@ public:
     void toggleSidePanels();
     void toggleLeftPanel();
     void toggleRightPanel();
+    void setupSidePanels();
 
     void showToolBar();
     void hideToolBar();

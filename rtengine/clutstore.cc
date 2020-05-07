@@ -10,8 +10,9 @@
 
 #include "../rtgui/options.h"
 
-namespace
-{
+
+namespace rtengine {
+namespace {
 
 bool loadFile(
     const Glib::ustring& filename,
@@ -340,8 +341,6 @@ rtengine::CLUTStore::CLUTStore() :
 //-----------------------------------------------------------------------------
 // HaldCLUTApplication
 //-----------------------------------------------------------------------------
-
-namespace rtengine {
 
 HaldCLUTApplication::HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile):
     clut_filename_(clut_filename),

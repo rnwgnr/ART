@@ -165,6 +165,8 @@ public:
         return location;
     }
 
+    void getFocus();
+
 protected:
 
     int eventTime;

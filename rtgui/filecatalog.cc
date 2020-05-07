@@ -112,7 +112,6 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     previewsLoaded(0),
     modifierKey(0)
 {
-
     inTabMode = false;
 
     set_name ("FileBrowser");
@@ -1885,7 +1884,7 @@ bool FileCatalog::Query_key_pressed (GdkEventKey *event)
     case GDK_KEY_Escape:
 
         // Clear Query if the Escape character is pressed within it
-        if (!shift) {
+        if (shift) {
             FileCatalog::buttonQueryClearPressed ();
             return true;
         }
@@ -1938,35 +1937,13 @@ void FileCatalog::updateFBToolBarVisibility (bool showFilmStripToolBar)
 
 void FileCatalog::buttonBrowsePathPressed ()
 {
-    // Glib::ustring BrowsePathValue = BrowsePath->get_text();
-    // Glib::ustring DecodedPathPrefix = "";
-    // Glib::ustring FirstChar;
-
-    // // handle shortcuts in the BrowsePath -- START
-    // // read the 1-st character from the path
-    // FirstChar = BrowsePathValue.substr (0, 1);
-
-    // if (FirstChar == "~") { // home directory
-    //     DecodedPathPrefix = PlacesBrowser::userHomeDir ();
-    // } else if (FirstChar == "!") { // user's pictures directory
-    //     DecodedPathPrefix = PlacesBrowser::userPicturesDir ();
-    // }
-
-    // if (!DecodedPathPrefix.empty()) {
-    //     BrowsePathValue = Glib::ustring::compose ("%1%2", DecodedPathPrefix, BrowsePathValue.substr (1, BrowsePath->get_text_length() - 1));
-    //     BrowsePath->set_text(BrowsePathValue);
-    // }
-
-    // // handle shortcuts in the BrowsePath -- END
     auto BrowsePathValue = getBrowsePath();
     BrowsePath->set_text(BrowsePathValue);
 
     // validate the path
     if (Glib::file_test(BrowsePathValue, Glib::FILE_TEST_IS_DIR) && selectDir) {
-        selectDir (BrowsePathValue);
-    } else
-        // error, likely path not found: show red arrow
-    {
+        selectDir(BrowsePathValue);
+    } else { // error, likely path not found: show red arrow
         buttonBrowsePath->set_image (*iRefreshRed);
     }
 }
@@ -1980,7 +1957,7 @@ bool FileCatalog::BrowsePath_key_pressed (GdkEventKey *event)
     case GDK_KEY_Escape:
 
         // On Escape character Reset BrowsePath to selectedDirectory
-        if (!shift) {
+        if (shift) {
             BrowsePath->set_text(selectedDirectory);
             // place cursor at the end
             BrowsePath->select_region(BrowsePath->get_text_length(), BrowsePath->get_text_length());
@@ -2016,26 +1993,38 @@ void FileCatalog::tbRightPanel_1_visible (bool visible)
 }
 void FileCatalog::tbLeftPanel_1_toggled ()
 {
-    removeIfThere (filepanel->dirpaned, filepanel->placespaned, false);
+//    removeIfThere (filepanel->dirpaned, filepanel->placespaned, false);
+
+    bool in_inspector = fileBrowser && fileBrowser->getInspector() && fileBrowser->getInspector()->isActive();
 
     if (tbLeftPanel_1->get_active()) {
-        filepanel->dirpaned->pack1 (*filepanel->placespaned, false, true);
+//        filepanel->dirpaned->pack1 (*filepanel->placespaned, false, true);
+        filepanel->placespaned->show();
         tbLeftPanel_1->set_image (*iLeftPanel_1_Hide);
-        options.browserDirPanelOpened = true;
+        if (in_inspector) {
+            options.inspectorDirPanelOpened = true;
+        } else {
+            options.browserDirPanelOpened = true;
+        }
     } else {
+        filepanel->placespaned->hide();
         tbLeftPanel_1->set_image (*iLeftPanel_1_Show);
-        options.browserDirPanelOpened = false;
+        if (in_inspector) {
+            options.inspectorDirPanelOpened = false;
+        } else {
+            options.browserDirPanelOpened = false;
+        }
     }
 }
 
 void FileCatalog::tbRightPanel_1_toggled ()
 {
     if (tbRightPanel_1->get_active()) {
-        filepanel->rightBox->show();
+        filepanel->showRightBox(true);
         tbRightPanel_1->set_image (*iRightPanel_1_Hide);
         options.browserToolPanelOpened = true;
     } else {
-        filepanel->rightBox->hide();
+        filepanel->showRightBox(false);
         tbRightPanel_1->set_image (*iRightPanel_1_Show);
         options.browserToolPanelOpened = false;
     }
@@ -2180,13 +2169,11 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
         return true;
     }
 
-    if (shift) {
+    if (!shift) {
         switch(event->keyval) {
         case GDK_KEY_Escape:
             BrowsePath->set_text(selectedDirectory);
-            // set focus on something neutral, this is useful to remove focus from BrowsePath and Query
-            // when need to execute a shortcut, which otherwise will be typed into those fields
-            filepanel->grab_focus();
+            fileBrowser->getFocus();
             return true;
         }
     }
@@ -2400,13 +2387,21 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
     if (ctrl && !alt) {
         switch (event->keyval) {
         case GDK_KEY_o:
-            BrowsePath->select_region(0, BrowsePath->get_text_length());
-            BrowsePath->grab_focus();
+            if (!BrowsePath->has_focus()) {
+                BrowsePath->select_region(0, BrowsePath->get_text_length());
+                BrowsePath->grab_focus();
+            } else {
+                fileBrowser->getFocus();
+            }
             return true;
 
         case GDK_KEY_f:
-            Query->select_region(0, Query->get_text_length());
-            Query->grab_focus();
+            if (!Query->has_focus()) {
+                Query->select_region(0, Query->get_text_length());
+                Query->grab_focus();
+            } else {
+                fileBrowser->getFocus();
+            }
             return true;
 
         case GDK_KEY_t:
@@ -2507,4 +2502,38 @@ void FileCatalog::onBrowsePathChanged()
         auto root = txt.substr(0, pos+1);
         Glib::RefPtr<DirCompletion>::cast_static(browsePathCompletion)->refresh(root);
     }
+}
+
+
+void FileCatalog::disableInspector()
+{
+    if (fileBrowser) {
+        fileBrowser->disableInspector();
+        tbRightPanel_1->show();
+        tbRightPanel_1->set_active(options.browserToolPanelOpened);
+        tbLeftPanel_1->set_active(options.browserDirPanelOpened);
+    }
+}
+
+
+void FileCatalog::enableInspector()
+{
+    if (fileBrowser) {
+        fileBrowser->enableInspector();
+        tbLeftPanel_1->set_active(options.inspectorDirPanelOpened);
+        if (!tbRightPanel_1->get_active()) {
+            toggleRightPanel();
+            options.browserToolPanelOpened = false;
+        }
+        tbRightPanel_1->hide();
+    }
+}
+
+
+void FileCatalog::setupSidePanels()
+{
+    tbLeftPanel_1->set_active(options.browserDirPanelOpened);
+    tbRightPanel_1->set_active(options.browserToolPanelOpened);
+    filepanel->showRightBox(options.browserToolPanelOpened);
+    filepanel->placespaned->set_visible(options.browserDirPanelOpened);
 }

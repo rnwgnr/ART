@@ -53,6 +53,9 @@ Crop::Crop(ImProcCoordinator* parent, EditDataProvider *editDataProvider, bool i
     for (int i = 0; i < 3; ++i) {
         bufs_[i] = nullptr;
     }
+    for (auto &s : pipeline_stop_) {
+        s = false;
+    }
     parent->crops.push_back(this);
 }
 
@@ -216,6 +219,12 @@ void Crop::update(int todo)
     // has to be called after setCropSizes! Tools prior to this point can't handle the Edit mechanism, but that shouldn't be a problem.
     createBuffer(cropw, croph);
 
+    int offset_x = cropx / skip;
+    int offset_y = cropy / skip;
+    int full_width = parent->getFullWidth() / skip;
+    int full_height = parent->getFullHeight() / skip;
+    parent->ipf.setViewport(offset_x, offset_y, full_width, full_height);
+
     // Apply Spot removal
     if ((todo & M_SPOT) && !spotsDone) {
         if (params.spot.enabled && !params.spot.entries.empty()) {
@@ -257,6 +266,7 @@ void Crop::update(int todo)
             if (!copy_from_earlier_steps && skip == 1 && parent->drcomp_11_dcrop_cache) {
                 f = parent->drcomp_11_dcrop_cache;
                 need_drcomp = false;
+                pipeline_stop_[0] = parent->pipeline_stop_[0];
             } else {
                 f = new Imagefloat(fw, fh, origCrop);
                 drCompCrop.reset(f);
@@ -291,8 +301,9 @@ void Crop::update(int todo)
         }
 
         if (need_drcomp) {
-            stop = parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_0, f);
+            pipeline_stop_[0] = parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_0, f);
         }
+        stop = pipeline_stop_[0];
 
         // crop back to the size expected by the rest of the pipeline
         if (need_cropping) {
@@ -346,33 +357,36 @@ void Crop::update(int todo)
         transCrop = nullptr;
     }
 
-    int offset_x = cropx / skip;
-    int offset_y = cropy / skip;
-    int full_width = parent->getFullWidth() / skip;
-    int full_height = parent->getFullHeight() / skip;
-    parent->ipf.setViewport(offset_x, offset_y, full_width, full_height);
+    // int offset_x = cropx / skip;
+    // int offset_y = cropy / skip;
+    // int full_width = parent->getFullWidth() / skip;
+    // int full_height = parent->getFullHeight() / skip;
+    // parent->ipf.setViewport(offset_x, offset_y, full_width, full_height);
 
     if (todo & M_RGBCURVE) {
         Imagefloat *workingCrop = baseCrop;
         workingCrop->copyTo(bufs_[0]);
-        stop = stop || parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_1, bufs_[0]);
+        pipeline_stop_[1] = stop || parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_1, bufs_[0]);
         
         if (workingCrop != baseCrop) {
             delete workingCrop;
         }
     }
+    stop = stop || pipeline_stop_[1];
 
     if (todo & M_LUMACURVE) {
         bufs_[0]->copyTo(bufs_[1]);
         
-        stop = stop || parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_2, bufs_[1]);
+        pipeline_stop_[2] = stop || parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_2, bufs_[1]);
     }
+    stop = stop || pipeline_stop_[2];
     
     if (todo & (M_LUMINANCE | M_COLOR)) {
         bufs_[1]->copyTo(bufs_[2]);
 
-        stop = stop || parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_3, bufs_[2]);
+        pipeline_stop_[3] = stop || parent->ipf.process(ImProcFunctions::Pipeline::PREVIEW, ImProcFunctions::Stage::STAGE_3, bufs_[2]);
     }
+    stop = stop || pipeline_stop_[3];
 
     // all pipette buffer processing should be finished now
     PipetteBuffer::setReady();

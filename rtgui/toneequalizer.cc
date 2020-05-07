@@ -29,17 +29,29 @@ ToneEqualizer::ToneEqualizer(): FoldableToolPanel(this, "toneequalizer", M("TP_T
     EvEnabled = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_ENABLED");
     EvBands = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_BANDS");
     EvRegularization = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION");
+    EvColormap = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP");
     EvToolReset.set_action(RGBCURVE);
 
+    std::array<const char *, 5> images = {
+        "purple",
+        "blue",
+        "gray",
+        "yellow",
+        "red"
+    };
     for (size_t i = 0; i < bands.size(); ++i) {
-        bands[i] = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_BAND_" + std::to_string(i)), -100, 100, 1, 0));
+        bands[i] = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_BAND_" + std::to_string(i)), -100, 100, 1, 0, Gtk::manage(new RTImage(Glib::ustring("circle-") + images[i] + "-small.png"))));
         bands[i]->setAdjusterListener(this);
         pack_start(*bands[i]);
+        bands[i]->showIcons(false);
     }
     pack_start(*Gtk::manage(new Gtk::HSeparator()));
     regularization = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_DETAIL"), -5, 5, 1, 0));
     regularization->setAdjusterListener(this);
     pack_start(*regularization);
+    show_colormap = Gtk::manage(new Gtk::CheckButton(M("TP_TONE_EQUALIZER_SHOW_COLOR_MAP")));
+    pack_start(*show_colormap);
+    show_colormap->signal_toggled().connect(sigc::mem_fun(this, &ToneEqualizer::colormapToggled));
     
     show_all_children ();
 }
@@ -53,8 +65,11 @@ void ToneEqualizer::read(const ProcParams *pp)
 
     for (size_t i = 0; i < bands.size(); ++i) {
         bands[i]->setValue(pp->toneEqualizer.bands[i]);
+        bands[i]->showIcons(pp->toneEqualizer.show_colormap);
     }
     regularization->setValue(pp->toneEqualizer.regularization);
+
+    show_colormap->set_active(pp->toneEqualizer.show_colormap);
     
     enableListener();
 }
@@ -67,6 +82,7 @@ void ToneEqualizer::write(ProcParams *pp)
     }
     pp->toneEqualizer.enabled = getEnabled();
     pp->toneEqualizer.regularization = regularization->getValue();
+    pp->toneEqualizer.show_colormap = show_colormap->get_active();
 }
 
 
@@ -112,6 +128,17 @@ void ToneEqualizer::enabledChanged()
         } else {
             listener->panelChanged(EvEnabled, M("GENERAL_DISABLED"));
         }
+    }
+}
+
+
+void ToneEqualizer::colormapToggled()
+{
+    for (size_t i = 0; i < bands.size(); ++i) {
+        bands[i]->showIcons(show_colormap->get_active());
+    }
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvColormap, show_colormap->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
 }
 

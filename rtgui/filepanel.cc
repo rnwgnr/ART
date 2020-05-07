@@ -42,7 +42,7 @@ FilePanel::FilePanel () :
     // The whole left panel. Contains Places, Recent Folders and Folders.
     placespaned = Gtk::manage ( new Gtk::VPaned () );
     placespaned->set_name ("PlacesPaned");
-    placespaned->set_size_request(250, 100);
+    placespaned->set_size_request(200, 100);
     placespaned->set_position (options.dirBrowserHeight);
 
     Gtk::VBox* obox = Gtk::manage (new Gtk::VBox ());
@@ -74,7 +74,7 @@ FilePanel::FilePanel () :
     fileCatalog->setFileSelectionListener (this);
 
     rightBox = Gtk::manage ( new Gtk::HBox () );
-    rightBox->set_size_request(350, 100);
+    rightBox->set_size_request(250, 100);
     rightNotebook = Gtk::manage ( new Gtk::Notebook () );
     rightNotebookSwitchConn = rightNotebook->signal_switch_page().connect_notify( sigc::mem_fun(*this, &FilePanel::on_NB_switch_page) );
     //Gtk::VBox* taggingBox = Gtk::manage ( new Gtk::VBox () );
@@ -110,6 +110,7 @@ FilePanel::FilePanel () :
     Gtk::Label* inspectLab = Gtk::manage ( new Gtk::Label (M("MAIN_TAB_INSPECT")) );
     inspectLab->set_name ("LabelRightNotebook");
     inspectLab->set_angle (270);
+    inspectLab->set_tooltip_markup(M("MAIN_TAB_INSPECT_TOOLTIP"));
     Gtk::Label* filtLab = Gtk::manage ( new Gtk::Label (M("MAIN_TAB_FILTER")) );
     filtLab->set_name ("LabelRightNotebook");
     filtLab->set_angle (270);
@@ -172,19 +173,21 @@ void FilePanel::on_realize ()
 void FilePanel::setAspect ()
 {
     int winW, winH;
+    fileCatalog->setupSidePanels();
     parent->get_size(winW, winH);
     placespaned->set_position(options.dirBrowserHeight);
     dirpaned->set_position(options.dirBrowserWidth);
     // tpcPaned->set_position(options.browserToolPanelHeight);
     set_position(winW - options.browserToolPanelWidth);
 
-    if (!options.browserDirPanelOpened) {
-        fileCatalog->toggleLeftPanel();
-    }
+    rightNotebook->set_current_page(0);
+    // if (!options.browserDirPanelOpened) {
+    //     fileCatalog->toggleLeftPanel();
+    // }
 
-    if (!options.browserToolPanelOpened) {
-        fileCatalog->toggleRightPanel();
-    }
+    // if (!options.browserToolPanelOpened) {
+    //     fileCatalog->toggleRightPanel();
+    // }
 }
 
 void FilePanel::init ()
@@ -449,4 +452,10 @@ void FilePanel::loadingThumbs(Glib::ustring str, double rate)
 void FilePanel::updateTPVScrollbar (bool hide)
 {
 //    tpc->updateTPVScrollbar (hide);
+}
+
+
+void FilePanel::showRightBox(bool yes)
+{
+    rightBox->set_visible(yes);
 }

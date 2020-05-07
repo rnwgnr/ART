@@ -31,7 +31,7 @@ extern const Settings *settings;
 namespace {
 
 class PDAFGreenEqulibrateThreshold: public RawImageSource::GreenEqulibrateThreshold {
-    static constexpr float BASE_THRESHOLD = 0.5f;
+    static constexpr float BASE_THRESHOLD = 0.6f;
     static constexpr int TILE_SIZE = 200;
     static constexpr float AREA = TILE_SIZE * TILE_SIZE;
     static constexpr int PIXEL_COUNT_FACTOR = 12;

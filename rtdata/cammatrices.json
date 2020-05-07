@@ -781,6 +781,21 @@ NIKON D780
 ONEPLUS 7T FRONT CAMERA
 ONEPLUS 7T REAR MAIN CAMERA
 PHASE ONE IQ4 150MP
+
+Updated on Fri May  1 21:09:26 2020 (with Adobe DNG converter 12.2.1.417):
+CANON EOS 850D
+FUJIFILM X-T200
+FUJIFILM X-T4
+FUJIFILM X100V
+NIKON D6
+OLYMPUS E-M1 MARK III
+SAMSUNG GALAXY S20 FRONT CAMERA
+SAMSUNG GALAXY S20 REAR MAIN CAMERA
+SAMSUNG GALAXY S20 ULTRA FRONT CAMERA
+SAMSUNG GALAXY S20 ULTRA REAR MAIN CAMERA
+SAMSUNG GALAXY S20+ FRONT CAMERA
+SAMSUNG GALAXY S20+ REAR MAIN CAMERA
+YUNEEC ION L1 PRO
 */
 {"camera_constants": [
     {
@@ -950,6 +965,10 @@ PHASE ONE IQ4 150MP
     {
         "make_model" : "CANON EOS 80D",
         "dcraw_matrix" : [7457, -671, -937, -4849, 12495, 2643, -1213, 2354, 5492]
+    },
+    {
+        "make_model" : "CANON EOS 850D",
+        "dcraw_matrix" : [9079, -1923, -1236, -4677, 12454, 2492, -922, 2319, 5565]
     },
     {
         "make_model" : "CANON EOS 90D",
@@ -1476,11 +1495,19 @@ PHASE ONE IQ4 150MP
         "dcraw_matrix" : [11434, -4948, -1210, -3746, 12042, 1903, -666, 1479, 5235]
     },
     {
+        "make_model" : "FUJIFILM X-T200",
+        "dcraw_matrix" : [15055, -7391, -1274, -4062, 12071, 2238, -610, 1217, 6147]
+    },
+    {
         "make_model" : "FUJIFILM X-T3",
         "dcraw_matrix" : [13426, -6334, -1177, -4244, 12136, 2371, -580, 1303, 5980]
     },
     {
         "make_model" : "FUJIFILM X-T30",
+        "dcraw_matrix" : [13426, -6334, -1177, -4244, 12136, 2371, -580, 1303, 5980]
+    },
+    {
+        "make_model" : "FUJIFILM X-T4",
         "dcraw_matrix" : [13426, -6334, -1177, -4244, 12136, 2371, -580, 1303, 5980]
     },
     {
@@ -1494,6 +1521,10 @@ PHASE ONE IQ4 150MP
     {
         "make_model" : "FUJIFILM X100T",
         "dcraw_matrix" : [10592, -4262, -1008, -3514, 11355, 2465, -869, 2025, 6385]
+    },
+    {
+        "make_model" : "FUJIFILM X100V",
+        "dcraw_matrix" : [13717, -6490, -1154, -4348, 12266, 2335, -690, 1286, 6133]
     },
     {
         "make_model" : "FUJIFILM X20",
@@ -2432,6 +2463,10 @@ PHASE ONE IQ4 150MP
         "dcraw_matrix" : [8821, -2938, -785, -4178, 12142, 2287, -824, 1651, 6860]
     },
     {
+        "make_model" : "NIKON D6",
+        "dcraw_matrix" : [9028, -3423, -1035, -6321, 14265, 2217, -1013, 1683, 6928]
+    },
+    {
         "make_model" : "NIKON D60",
         "dcraw_matrix" : [8736, -2458, -935, -9075, 16894, 2251, -1354, 1242, 8263]
     },
@@ -2618,6 +2653,10 @@ PHASE ONE IQ4 150MP
     {
         "make_model" : ["OLYMPUS E-M1 MARK II", "OLYMPUS E-M1MARKII"],
         "dcraw_matrix" : [9383, -3170, -763, -2457, 10702, 2020, -383, 1236, 5552]
+    },
+    {
+        "make_model" : "OLYMPUS E-M1 MARK III",
+        "dcraw_matrix" : [11896, -5110, -1076, -3181, 11378, 2048, -519, 1224, 5165]
     },
     {
         "make_model" : "OLYMPUS E-M10",
@@ -3408,6 +3447,30 @@ PHASE ONE IQ4 150MP
         "dcraw_matrix" : [13292, -6142, -1268, -4094, 12890, 1283, -557, 1930, 5163]
     },
     {
+        "make_model" : "SAMSUNG GALAXY S20 FRONT CAMERA",
+        "dcraw_matrix" : [14589, -7309, -1408, -2075, 10845, 1401, 696, 1431, 5299]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S20 REAR MAIN CAMERA",
+        "dcraw_matrix" : [12300, -5795, -1224, -3685, 12623, 1128, -359, 2058, 5335]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S20 ULTRA FRONT CAMERA",
+        "dcraw_matrix" : [15584, -7124, -1324, -971, 10014, 1118, 1324, 585, 4193]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S20 ULTRA REAR MAIN CAMERA",
+        "dcraw_matrix" : [16108, -7804, -1287, -1514, 10539, 1116, 864, 864, 4609]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S20+ FRONT CAMERA",
+        "dcraw_matrix" : [14589, -7309, -1408, -2075, 10845, 1401, 696, 1431, 5299]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S20+ REAR MAIN CAMERA",
+        "dcraw_matrix" : [12300, -5795, -1224, -3685, 12623, 1128, -359, 2058, 5335]
+    },
+    {
         "make_model" : "SAMSUNG GALAXY S6",
         "dcraw_matrix" : [13698, -5767, -1384, -4449, 13879, 499, -467, 1691, 5891]
     },
@@ -3870,6 +3933,10 @@ PHASE ONE IQ4 150MP
     {
         "make_model" : "SONY SLT-A99V",
         "dcraw_matrix" : [6344, -1612, -462, -4863, 12477, 2681, -864, 1786, 6899]
+    },
+    {
+        "make_model" : "YUNEEC ION L1 PRO",
+        "dcraw_matrix" : [13478, -6098, -1545, -2507, 11545, 1057, -238, 1192, 4974]
     },
     {
         "make_model" : "ZEISS ZX1",

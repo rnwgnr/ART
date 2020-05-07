@@ -42,6 +42,7 @@ ThumbBrowserBase::ThumbBrowserBase ()
     attach (hscroll, 0, 1, 1, 1);
 
     internal.setParent (this);
+    internal.set_can_focus(true);
 
     show_all ();
 
@@ -1182,3 +1183,10 @@ void ThumbBrowserBase::redrawEntryNeeded(ThumbBrowserEntryBase* entry)
 }
 
 
+void ThumbBrowserBase::getFocus()
+{
+    internal.grab_focus();
+    if (!fd.empty() && selected.empty()) {
+        selectFirst(false);
+    }
+}

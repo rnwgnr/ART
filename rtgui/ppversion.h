@@ -5,8 +5,10 @@
 
 /*
   Log of version changes
-  1013  2020-04-17
+  1014  2020-05-07
         added support of Polygon shape for masks, Rectangle are now saved with an additional Type parameter
+  1013  2020-04-21
+        do not use exposure compensation when computing auto settings for logenc
   1012  2020-04-11
         new defaults for metadata 
   1011  2020-03-31

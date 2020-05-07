@@ -1026,6 +1026,11 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     mask_exp_->signal_button_release_event().connect_notify(sigc::mem_fun(this, &LabMasksPanel::onMaskFold));
         
     maskBlur->delay = options.adjusterMaxDelay;
+
+    mask_expanders_ = { parametricMask, areaMask, deltaEMask, drawnMask };
+    for (auto e : mask_expanders_) {
+        e->signal_button_release_event().connect_notify(sigc::bind(sigc::mem_fun(this, &LabMasksPanel::onMaskExpanded), e));
+    }
 }
 
 
@@ -2302,4 +2307,17 @@ bool LabMasksPanel::onMaskNameFocusOut(GdkEventFocus *e)
     }
     maskShow(selected_, true);
     return false;
+}
+
+
+void LabMasksPanel::onMaskExpanded(GdkEventButton *evt, MyExpander *exp)
+{
+    if (evt->button == 3) {
+        exp->set_expanded(true);
+        for (auto e : mask_expanders_) {
+            if (e != exp) {
+                e->set_expanded(false);
+            }
+        }
+    }
 }

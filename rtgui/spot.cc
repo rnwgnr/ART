@@ -47,6 +47,7 @@ Spot::Spot() :
     lastObject(-1),
     activeSpot(-1),
     sourceIcon("spot-normal.png", "spot-active.png", "spot-prelight.png", "", "", Geometry::DP_CENTERCENTER),
+    targetIcon("spot-normal-target.png", "spot-active-target.png", "spot-prelight-target.png", "", "", Geometry::DP_CENTERCENTER),
     editedCheckBox(nullptr)
 {
     countLabel = Gtk::manage (new Gtk::Label (Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), 0)));
@@ -308,9 +309,9 @@ void Spot::createGeometry ()
     mouseOverGeometry[i++] = &sourceFeatherCircle;
 
     // recreate all spots geometry
-    Cairo::RefPtr<RTSurface> normalImg   = sourceIcon.getNormalImg();
-    Cairo::RefPtr<RTSurface> prelightImg = sourceIcon.getPrelightImg();
-    Cairo::RefPtr<RTSurface> activeImg   = sourceIcon.getActiveImg();
+    Cairo::RefPtr<RTSurface> normalImg   = targetIcon.getNormalImg();
+    Cairo::RefPtr<RTSurface> prelightImg = targetIcon.getPrelightImg();
+    Cairo::RefPtr<RTSurface> activeImg   = targetIcon.getActiveImg();
 
     for (; j < EditSubscriber::visibleGeometry.size() - STATIC_VISIBLE_OBJ_NBR; ++i, ++j) {
         EditSubscriber::mouseOverGeometry.at (i) = EditSubscriber::visibleGeometry.at (j) = new OPIcon (normalImg, activeImg, prelightImg, Cairo::RefPtr<RTSurface> (nullptr), Cairo::RefPtr<RTSurface> (nullptr), Geometry::DP_CENTERCENTER);
@@ -509,7 +510,7 @@ CursorShape Spot::getCursor(int objectID, int xPos, int yPos)
         if (objectID == TARGET_DISC || objectID == SOURCE_DISC) {
             return CSMove2D;
         }
-        if (objectID >= 3 && objectID <= 6) {
+        if (objectID >= 3 && objectID <= 6 && activeSpot > -1) {
             Coord delta(Coord(xPos, yPos) - ((objectID == 4 || objectID == 6) ? spots.at(activeSpot).sourcePos : spots.at(activeSpot).targetPos));
             PolarCoord polarPos(delta);
             if (polarPos.angle < 0.) {

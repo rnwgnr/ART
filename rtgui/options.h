@@ -183,6 +183,7 @@ public:
     bool browserToolPanelOpened;
     bool browserDirPanelOpened;
     bool editorFilmStripOpened;
+    bool inspectorDirPanelOpened;
     int historyPanelWidth;
     int windowX;
     int windowY;

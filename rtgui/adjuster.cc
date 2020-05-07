@@ -702,3 +702,14 @@ void Adjuster::setLogScale(double base, double pivot, bool anchorMiddle)
     sliderChange.block (false);
     spinChange.block (false);
 }
+
+
+void Adjuster::showIcons(bool yes)
+{
+    if (imageIcon1) {
+        imageIcon1->set_visible(yes);
+    }
+    if (imageIcon2) {
+        imageIcon2->set_visible(yes);
+    }
+}

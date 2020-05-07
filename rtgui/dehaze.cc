@@ -40,7 +40,7 @@ Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false,
     bottomMilestones.push_back(GradientMilestone(0., 0., 0., 0.));
     bottomMilestones.push_back(GradientMilestone(1., 1., 1., 1.));
 
-    CurveEditorGroup *strength_group = Gtk::manage(new CurveEditorGroup(options.lastColorToningCurvesDir, M("TP_DEHAZE_STRENGTH"), 0.7));
+    CurveEditorGroup *strength_group = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_DEHAZE_STRENGTH"), 0.7));
     strength_group->setCurveListener(this);
     strength = static_cast<FlatCurveEditor *>(strength_group->addCurve(CT_Flat, "", nullptr, false, false));
     ProcParams pp;

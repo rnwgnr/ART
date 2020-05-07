@@ -58,6 +58,8 @@ protected:
     Imagefloat *oprevi;
     Imagefloat *spotprev;
     Imagefloat *bufs_[3];
+    std::array<bool, 4> pipeline_stop_;
+    
     Imagefloat *drcomp_11_dcrop_cache; // global cache for dynamicRangeCompression used in 1:1 detail windows (except when denoise is active)
     Image8 *previmg;  // displayed image in monitor color space, showing the output profile as well (soft-proofing enabled, which then correspond to workimg) or not
     Image8 *workimg;  // internal image in output color space for analysis

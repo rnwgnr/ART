@@ -1628,6 +1628,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->indClippedPanel->toggleFocusMask();
                     return true;
 
+                case GDK_KEY_e: // preview mode false colors
+                    iareapanel->imageArea->indClippedPanel->toggleFalseColors();
+                    return true;
+
                 case GDK_KEY_less:
                     iareapanel->imageArea->indClippedPanel->toggleClipped (false);
                     return true;
@@ -1638,10 +1642,6 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
 
                 case GDK_KEY_f:
                     iareapanel->imageArea->zoomPanel->zoomFitClicked();
-                    return true;
-
-                case GDK_KEY_F5:
-                    openThm->openDefaultViewer ((event->state & GDK_SHIFT_MASK) ? 2 : 1);
                     return true;
 
                 case GDK_KEY_y: // synchronize filebrowser with image in Editor
@@ -1704,10 +1704,6 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                 case GDK_KEY_Z:
                 case GDK_KEY_y:
                     history->redo ();
-                    return true;
-
-                case GDK_KEY_F5:
-                    openThm->openDefaultViewer (3);
                     return true;
             }
         } //if (!ctrl)
