@@ -2167,6 +2167,7 @@ void LabMasksPanel::onAreaMaskDrawRectangleAddPressed()
 void LabMasksPanel::onAreaMaskDrawPolygonAddPressed()
 {
     shapeAddPressed(Shape::Type::POLYGON, false);
+    areaMaskToggle->set_active(true);
 }
 
 
