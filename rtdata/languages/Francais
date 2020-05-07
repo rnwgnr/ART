@@ -103,7 +103,7 @@ FILEBROWSER_APPLYPROFILE;Appliquer le profil
 FILEBROWSER_APPLYPROFILE_PARTIAL;Appliquer le profil (partiel)
 FILEBROWSER_AUTODARKFRAME;Soustraction auto. de Trame Noire
 FILEBROWSER_AUTOFLATFIELD;Champ Uniforme auto.
-FILEBROWSER_BROWSEPATHBUTTONHINT;Cliquer pour parcourir le chemin choisi.
+FILEBROWSER_BROWSEPATHBUTTONHINT;Rafriachir la liste des vignettes.\nRaccourci : <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Saisir le chemin à parcourir\n<b>Ctrl-O</b> pour placer le focus sur le champ de saisie.\n<b>Entrée</b> / <b>Ctrl-Entrée</b> pour y naviguer;\n<b>Esc</b> pour effacer les modifications.\n<b>Shift-Esc</b> pour enlever le focus.\n\n\nRaccourcis pour les chemins:\n  <b>~</b> - le dossier utilisateur\n  <b>!</b> - le dossier Images de l'utilisateur
 FILEBROWSER_CACHE;Cache
 FILEBROWSER_CACHECLEARFROMFULL;Vider tout y-compris les profils mis en cache
@@ -114,9 +114,9 @@ FILEBROWSER_COPYPROFILE;Copier le profil
 FILEBROWSER_CURRENT_NAME;Nom courant :
 FILEBROWSER_DARKFRAME;Trame Noire
 FILEBROWSER_DELETEDIALOG_HEADER;Confirmation de la suppression de fichier
-FILEBROWSER_DELETEDIALOG_ALL;Etes-vous sûr de vouloir effacer tous les <b>%1</b> fichiers de la corbeille ?
-FILEBROWSER_DELETEDIALOG_SELECTED;Etes-vous sûr de voulor effacer les <b>%1</b> fichiers sélectionnés ?
-FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Etes-vous sûr de vouloir effacer les fichiers <b>%1</b> sélectionnés <b>y-compris</b> une version en file de traitement ?
+FILEBROWSER_DELETEDIALOG_ALL;Êtes-vous sûr de vouloir effacer tous les <b>%1</b> fichiers de la corbeille ?
+FILEBROWSER_DELETEDIALOG_SELECTED;Êtes-vous sûr de voulor effacer les <b>%1</b> fichiers sélectionnés ?
+FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Êtes-vous sûr de vouloir effacer les fichiers <b>%1</b> sélectionnés <b>y-compris</b> une version en file de traitement ?
 FILEBROWSER_EMPTYTRASHHINT;Effacer définitivement les fichiers de la corbeille.
 FILEBROWSER_EXTPROGMENU;Ouvrir avec
 FILEBROWSER_FLATFIELD;Champ Uniforme
@@ -159,7 +159,7 @@ FILEBROWSER_POPUPTRASH;Déplacer dans la corbeille
 FILEBROWSER_POPUPUNRANK;Effacer le rang
 FILEBROWSER_POPUPUNTRASH;Retirer de la corbeille
 FILEBROWSER_QUERYBUTTONHINT;Effacer la recherche
-FILEBROWSER_QUERYHINT;Taper les noms de fichier à chercher. Supporte les noms partiels. Séparer les termes à chercher des virgules, ex. :\n<i>1001,1004,1199</i>\n\nRaccourcis :\n<b>Ctrl-F</b> - placer le curseur dans le champ de saisie.\n<b>Entrée</b> - lancer la recherche\n<b>Esc</b> - effacer.\n<b>Shift-Esc</b> - retirer le focus.
+FILEBROWSER_QUERYHINT;Taper les noms de fichier à chercher. Supporte les noms partiels. Séparer les termes à chercher des virgules, ex. :\n<i>1001,1004,1199</i>\n\nRaccourcis :\n<b>Ctrl-F</b> - placer le curseur dans le champ de saisie.\n<b>Entrée</b> - lancer la recherche\n<b>Shift-Esc</b> - effacer.\n<b>Esc</b> - retirer le focus.
 FILEBROWSER_QUERYLABEL;Chercher : 
 FILEBROWSER_RANK1_TOOLTIP;Assigner le rang 1 *\nRaccourci : <b>Shift-1</b>
 FILEBROWSER_RANK2_TOOLTIP;Assigner le rang 2 *\nRaccourci : <b>Shift-2</b>
@@ -729,6 +729,10 @@ HISTORY_MSG_LOCALCONTRAST_LIGHTNESSMASK;Contraste local - Masque L
 HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Contraste local - Masque flou
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Contraste local - Montrer le masque
 HISTORY_MSG_LOCALCONTRAST_AREAMASK;Contraste local - Masque de zone
+HISTORY_MSG_CHMIXER_MODE;Mixage des canaux - mode
+HISTORY_MSG_CHMIXER_RED_PRIMARY;Mixage des canaux - Primaire rouge
+HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Mixage des canaux - Primaire vert
+HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Mixage des canaux - Primaire bleu
 HISTORY_MSG_CLAMPOOG;Ecrêter les couleurs hors gamut
 HISTORY_MSG_COLORCORRECTION_AB;CC - Correction de teinte
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - Masque de zone
@@ -860,9 +864,10 @@ HISTORY_MSG_SOFTLIGHT_STRENGTH;Lumière douce - Force
 HISTORY_MSG_SPOT;Retrait de taches
 HISTORY_MSG_SPOT_ENTRY;Retrait de taches - Modif. de points
 HISTORY_MSG_TM_FATTAL_ANCHOR;CPD - Point d'ancrage
-HISTORY_MSG_TONE_EQUALIZER_ENABLED;Egaliseur tonal
-HISTORY_MSG_TONE_EQUALIZER_BANDS;Egaliseur tonal - Bandes
-HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Egaliseur tonal - Régularisation
+HISTORY_MSG_TONE_EQUALIZER_ENABLED;Égaliseur Tonal
+HISTORY_MSG_TONE_EQUALIZER_BANDS;Égaliseur Tonal - Bandes
+HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Égaliseur Tonal - Régularisation
+HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Égaliseur Tonal - Carte tonale
 HISTORY_MSG_TONECURVE_SATCURVE;Courbe tonale - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Courbe tonale - Force perceptuelle 
 HISTORY_NEWSNAPSHOT;Ajouter
@@ -1015,6 +1020,7 @@ MAIN_TAB_FAVORITES;Favoris
 MAIN_TAB_FAVORITES_TOOLTIP;Raccourci : <b>Alt-u</b>
 MAIN_TAB_FILTER; Filtrer 
 MAIN_TAB_INSPECT; Inspecter 
+MAIN_TAB_INSPECT_TOOLTIP;Activer le mode Inspecter.\nRaccourci : <b>Ctrl-i</b>
 MAIN_TAB_IPTC;IPTC
 MAIN_TAB_LOCAL;Traitement Local
 MAIN_TAB_LOCAL_TOOLTIP;Raccourci : <b>Alt-x</b>
@@ -1029,9 +1035,10 @@ MAIN_TOOLTIP_BACKCOLOR1;Couleur de fond de l'aperçu: <b>Noir</b>\nRaccourci : <
 MAIN_TOOLTIP_BACKCOLOR2;Couleur de fond de l'aperçu: <b>Blanc</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Couleur de fond de l'aperçu: <b>Gris moyen</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vérouiller</b> / <b>Déverouiller</b> la vue <b>Avant</b>\n\n<b>Vérouiller</b>: garder la vue <b>Avant</b> inchangée - \nutile pour évaluer l'effet cumulatif de plusieurs outils.\nDe plus, une comparaison peut être faite à partir de n'importe quelle étape de l'historique\n\n<b>Déverouiller</b>: la vue <b>Avant</b> représentera l'étape précédant la vue <b>Après</b>, montrant l'effet qui vient d'être modifié
+MAIN_TOOLTIP_FALSECOLORS;Indicateur d'expositions utilisant de fausses couleurs.\nRaccourci : <b>e</b>\n\nClés (Plage IRE) : \n%1
 MAIN_TOOLTIP_HIDEHP;Montrer/Cacher le panneau gauche (incluant l'historique)\nRaccourci : <b>l</b>
-MAIN_TOOLTIP_INDCLIPPEDH;Indication des zones Hautes Lumières écrêtées\nRaccourci : <b>&lt;</b>
-MAIN_TOOLTIP_INDCLIPPEDS;Indication des zones Ombres écrêtées\nRaccourci : <b>&gt;</b>
+MAIN_TOOLTIP_INDCLIPPEDH;Indication des zones Hautes Lumières écrêtées\nRaccourci : <b>&gt;</b>
+MAIN_TOOLTIP_INDCLIPPEDS;Indication des zones Ombres écrêtées\nRaccourci : <b>&lt;</b>
 MAIN_TOOLTIP_PREVIEWB;Affichage du <b>canal Bleu</b>\nRaccourci : <b>b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Affichage du <b>Masque du focus</b>\nRaccourci : <b>Shift-f</b>\n\nPlus précis sur les images avec une faible profondeur de champ, à faible bruit et à des niveaux de zoom élevés\n\nPour améliorer la précision de détection des images bruitées, évaluez les à un facteur de zoom de 10-30%\n\nLa prévisualisation met plus de temps à se calculer lorsque cet outil est actif.
 MAIN_TOOLTIP_PREVIEWG;Affichage du <b>canal Vert</b>\nRaccourci : <b>g</b>
@@ -1458,6 +1465,14 @@ TP_CHMIXER_BLUE;Canal Bleu
 TP_CHMIXER_GREEN;Canal Vert
 TP_CHMIXER_LABEL;Mixage des canaux
 TP_CHMIXER_RED;Canal Rouge
+TP_CHMIXER_MODE;Mode
+TP_CHMIXER_HUE;Correction de teinte
+TP_CHMIXER_SAT;Correction de saturation
+TP_CHMIXER_PRIMARY_R;Primaire rouge
+TP_CHMIXER_PRIMARY_G;Primaire vert
+TP_CHMIXER_PRIMARY_B;Primaire bleu
+TP_CHMIXER_MODE_RGB_MATRIX;Matrice RVB
+TP_CHMIXER_MODE_PRIMARIES_CHROMA;Corrections primaires
 TP_COARSETRAF_TOOLTIP_HFLIP;Miroir horizontal.
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotation antihoraire\nRaccourci : <b>[</b> - Mode Onglets Éditeurs Multiples,\n<b>Alt-[</b> - Mode Onglet Éditeur nique.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotation horaire\nRaccourci : <b>]</b> - Mode Onglets Éditeurs Multiples,\n<b>Alt-]</b> - Mode Onglet Éditeur nique.
@@ -1713,6 +1728,7 @@ TP_LABMASKS_BLUR;Flouter
 TP_LABMASKS_CHROMATICITY;C
 TP_LABMASKS_HUE;T
 TP_LABMASKS_LIGHTNESS;L
+TP_LABMASKS_LIGHTNESS_DETAIL;L Masque L protection des détails
 TP_LABMASKS_MASK;Masques
 TP_LABMASKS_MASK_UNNAMED;Sans nom
 TP_LABMASKS_SHOW;Montrer masque
@@ -1978,6 +1994,7 @@ TP_TONE_EQUALIZER_BAND_3;Hautes lumières
 TP_TONE_EQUALIZER_BAND_4;Blancs
 TP_TONE_EQUALIZER_DETAIL;Régularisation
 TP_TONE_EQUALIZER_LABEL;Égaliseur Tonal
+TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Montrer la carte tonale
 TP_VIGNETTING_AMOUNT;Quantité
 TP_VIGNETTING_CENTER_X;Centre X
 TP_VIGNETTING_CENTER_Y;Centre Y
@@ -2035,6 +2052,6 @@ ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Ouvrir une (nouvelle) vue détaillée
 ZOOMPANEL_ZOOM100;Zoomer à 100%\nRaccourci : <b>z</b>
 ZOOMPANEL_ZOOMFITCROPSCREEN;Ajuster la zone rognée à l'écran\nRaccourci : <b>f</b>
-ZOOMPANEL_ZOOMFITSCREEN;Ajuster l'image entière à l'écran\nRaccourci : <b>Alt</b>-<b>f</b>
+ZOOMPANEL_ZOOMFITSCREEN;Ajuster l'image entière à l'écran\nRaccourci : <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoomer Avant\nRaccourci : <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoomer Arrière\nRaccourci : <b>-</b>

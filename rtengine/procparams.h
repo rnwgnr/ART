@@ -745,6 +745,7 @@ struct ToneEqualizerParams {
     bool enabled;
     std::array<int, 5> bands;
     int regularization;
+    bool show_colormap;
 
     ToneEqualizerParams();
 
@@ -933,9 +934,18 @@ struct VignettingParams {
   */
 struct ChannelMixerParams {
     bool enabled;
+    enum Mode {
+        RGB_MATRIX,
+        PRIMARIES_CHROMA
+    };
+    Mode mode;
+    
     int red[3];
     int green[3];
     int blue[3];
+
+    int hue_tweak[3];
+    int sat_tweak[3];
 
     ChannelMixerParams();
 

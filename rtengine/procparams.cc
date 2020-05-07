@@ -1497,7 +1497,8 @@ bool FattalToneMappingParams::operator !=(const FattalToneMappingParams& other) 
 ToneEqualizerParams::ToneEqualizerParams():
     enabled(false),
     bands{0,0,0,0,0},
-    regularization(1)
+    regularization(1),
+    show_colormap(false)
 {
 }
 
@@ -1507,7 +1508,8 @@ bool ToneEqualizerParams::operator ==(const ToneEqualizerParams& other) const
     return
         enabled == other.enabled
         && bands == other.bands
-        && regularization == other.regularization;
+        && regularization == other.regularization
+        && show_colormap == other.show_colormap;
 }
 
 
@@ -1809,27 +1811,18 @@ bool VignettingParams::operator !=(const VignettingParams& other) const
 
 ChannelMixerParams::ChannelMixerParams() :
     enabled(false),
-    red{
-        1000,
-        0,
-        0
-    },
-    green{
-        0,
-        1000,
-        0
-    },
-    blue{
-        0,
-        0,
-        1000
-    }
+    mode(RGB_MATRIX),
+    red{1000, 0, 0},
+    green{0, 1000, 0},
+    blue{0, 0, 1000},
+    hue_tweak{0, 0, 0},
+    sat_tweak{0, 0, 0}
 {
 }
 
 bool ChannelMixerParams::operator ==(const ChannelMixerParams& other) const
 {
-    if (enabled != other.enabled) {
+    if (enabled != other.enabled || mode != other.mode) {
         return false;
     }
 
@@ -1838,6 +1831,8 @@ bool ChannelMixerParams::operator ==(const ChannelMixerParams& other) const
             red[i] != other.red[i]
             || green[i] != other.green[i]
             || blue[i] != other.blue[i]
+            || hue_tweak[i] != other.hue_tweak[i]
+            || sat_tweak[i] != other.sat_tweak[i]
         ) {
             return false;
         }
@@ -2800,12 +2795,17 @@ int ProcParams::save(bool save_general,
 // Channel mixer
         if (RELEVANT_(chmixer)) {
             saveToKeyfile("Channel Mixer", "Enabled", chmixer.enabled, keyFile);
+            saveToKeyfile("Channel Mixer", "Mode", int(chmixer.mode), keyFile);
             Glib::ArrayHandle<int> rmix(chmixer.red, 3, Glib::OWNERSHIP_NONE);
             keyFile.set_integer_list("Channel Mixer", "Red", rmix);
             Glib::ArrayHandle<int> gmix(chmixer.green, 3, Glib::OWNERSHIP_NONE);
             keyFile.set_integer_list("Channel Mixer", "Green", gmix);
             Glib::ArrayHandle<int> bmix(chmixer.blue, 3, Glib::OWNERSHIP_NONE);
             keyFile.set_integer_list("Channel Mixer", "Blue", bmix);
+            Glib::ArrayHandle<int> h(chmixer.hue_tweak, 3, Glib::OWNERSHIP_NONE);
+            keyFile.set_integer_list("Channel Mixer", "HueTweak", h);
+            Glib::ArrayHandle<int> s(chmixer.sat_tweak, 3, Glib::OWNERSHIP_NONE);
+            keyFile.set_integer_list("Channel Mixer", "SatTweak", s);
         }
 
 // Black & White
@@ -3558,6 +3558,11 @@ int ProcParams::load(bool load_general,
                 chmixer.enabled = true;
             }
 
+            int mode = 0;
+            if (assignFromKeyfile(keyFile, "Channel Mixer", "Mode", mode)) {
+                chmixer.mode = ChannelMixerParams::Mode(mode);
+            }
+
             if (keyFile.has_key("Channel Mixer", "Red") && keyFile.has_key("Channel Mixer", "Green") && keyFile.has_key("Channel Mixer", "Blue")) {
                 const std::vector<int> rmix = keyFile.get_integer_list("Channel Mixer", "Red");
                 const std::vector<int> gmix = keyFile.get_integer_list("Channel Mixer", "Green");
@@ -3573,6 +3578,23 @@ int ProcParams::load(bool load_general,
                         chmixer.red[i] *= 10;
                         chmixer.green[i] *= 10;
                         chmixer.blue[i] *= 10;
+                    }
+                }
+            }
+
+            if (keyFile.has_key("Channel Mixer", "HueTweak")) {
+                const std::vector<int> h = keyFile.get_integer_list("Channel Mixer", "HueTweak");
+                if (h.size() == 3) {
+                    for (int i = 0; i < 3; ++i) {
+                        chmixer.hue_tweak[i] = h[i];
+                    }
+                }
+            }
+            if (keyFile.has_key("Channel Mixer", "SatTweak")) {
+                const std::vector<int> s = keyFile.get_integer_list("Channel Mixer", "SatTweak");
+                if (s.size() == 3) {
+                    for (int i = 0; i < 3; ++i) {
+                        chmixer.sat_tweak[i] = s[i];
                     }
                 }
             }
@@ -3844,7 +3866,11 @@ int ProcParams::load(bool load_general,
 
         if (keyFile.has_group("LogEncoding") && RELEVANT_(logenc)) {
             assignFromKeyfile(keyFile, "LogEncoding", "Enabled", logenc.enabled);
-            assignFromKeyfile(keyFile, "LogEncoding", "Auto", logenc.autocompute);
+            if (ppVersion >= 1013) {
+                assignFromKeyfile(keyFile, "LogEncoding", "Auto", logenc.autocompute);
+            } else {
+                logenc.autocompute = false;
+            }
             assignFromKeyfile(keyFile, "LogEncoding", "AutoGray", logenc.autogray);
             if (ppVersion < 349) {
                 assignFromKeyfile(keyFile, "LogEncoding", "GrayPoint", logenc.sourceGray);

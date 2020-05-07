@@ -39,29 +39,16 @@
 
 using namespace rtengine::procparams;
 
-Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf)
+Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf)
     : fname(fname), cfs(*cf), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr),
       pparamsValid(false), needsReProcessing(true), imageLoading(false), lastImg(nullptr),
       lastW(0), lastH(0), lastScale(0), initial_(false)
 {
-
-    loadProcParams (false);
+    loadProcParams(false);
 
     // should be safe to use the unprotected version of loadThumbnail, since we are in the constructor
-    _loadThumbnail ();
-    generateExifDateTimeStrings ();
-
-    // if (cfs.rankOld >= 0) {
-    //     // rank and inTrash were found in cache (old style), move them over to pparams
-
-    //     // try to load the last saved parameters from the cache or from the paramfile file
-    //     createProcParamsForUpdate(false, false); // this can execute customprofilebuilder to generate param file
-
-    //     // TODO? should we call notifylisterners_procParamsChanged here?
-
-    //     setRank(cfs.rankOld);
-    //     setInTrash(cfs.inTrashOld);
-    // }
+    _loadThumbnail();
+    generateExifDateTimeStrings();
 
     loadRating();
 
@@ -1170,12 +1157,20 @@ void Thumbnail::saveRating()
 void Thumbnail::loadRating()
 {
     rating_ = Rating();
-    auto md = getMetaData();
-    if (md && md->hasExif()) {
-        if (md->getRating() < 0) {
+    if (cfs.exifValid) {
+        if (cfs.getRating() < 0) {
             rating_.trash.value = true;
         } else {
-            rating_.rank.value = rtengine::LIM(md->getRating(), 0, 5);
+            rating_.rank.value = rtengine::LIM(cfs.getRating(), 0, 5);
+        }
+    } else {
+        auto md = getMetaData();
+        if (md && md->hasExif()) {
+            if (md->getRating() < 0) {
+                rating_.trash.value = true;
+            } else {
+                rating_.rank.value = rtengine::LIM(md->getRating(), 0, 5);
+            }
         }
     }
     if (options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS) {
@@ -1187,13 +1182,6 @@ void Thumbnail::loadRating()
             rating_.trash.value = pparams.master.inTrash;
         }
     } else {
-        // if (cfs.exifValid) {
-        //     if (cfs.rating < 0) {
-        //         rating_.trash.value = true;
-        //     } else {
-        //         rating_.rank.value = rtengine::LIM(cfs.rating, 0, 5);
-        //     }
-        // }
         try {
             auto xmp = rtengine::Exiv2Metadata::getXmpSidecar(fname);
             auto pos = xmp.findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
@@ -1249,7 +1237,7 @@ void Thumbnail::saveMetadata()
 
 std::shared_ptr<rtengine::FramesMetaData> Thumbnail::getMetaData()
 {
-    rtengine::FramesMetaData* imageMetaData = rtengine::FramesMetaData::fromFile (fname);
+    rtengine::FramesMetaData* imageMetaData = rtengine::FramesMetaData::fromFile(fname);
     return std::shared_ptr<rtengine::FramesMetaData>(imageMetaData);
 }
 

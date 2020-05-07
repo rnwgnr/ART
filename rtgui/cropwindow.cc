@@ -1458,6 +1458,303 @@ void CropWindow::updateCursor(int x, int y, int bstate)
     }
 }
 
+
+namespace {
+
+void show_focus_mask(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf> pixbuftrue)
+{
+    guint8* pix = pixbuf->get_pixels();
+    guint8* pixWrkSpace = pixbuftrue->get_pixels();
+
+    const int pixRowStride = pixbuf->get_rowstride();
+    const int pixWSRowStride = pixbuftrue->get_rowstride ();
+
+    const int bHeight = pixbuf->get_height();
+    const int bWidth = pixbuf->get_width();
+
+    const int blur_radius2 = 1;                             // radius of small kernel. 1 => 3x3 kernel
+    const int blur_dim2 = 2 * blur_radius2 + 1;             // dimension of small kernel
+    const int blur_radius = (blur_dim2 * blur_dim2) / 2;    // radius of big kernel
+    const float kernel_size = SQR(2.f * blur_radius + 1.f); // count of pixels in the big blur kernel
+    const float rkernel_size = 1.0f / kernel_size;          // reciprocal of kernel_size to avoid divisions
+    const float kernel_size2 = SQR(2.f * blur_radius2 + 1.f); // count of pixels in the small blur kernel
+    const float rkernel_size2 = 1.0f / kernel_size2;        // reciprocal of kernel_size to avoid divisions
+
+    // aloocate buffer for precalculated Luminance
+    float* tmpL = (float*)malloc(bHeight * bWidth * sizeof(float) );
+    // aloocate buffers for sums and sums of squares of small kernel
+    float* tmpLsum = (float*)malloc((bHeight) * (bWidth) * sizeof(float) );
+    float* tmpLsumSq = (float*)malloc((bHeight) * (bWidth) * sizeof(float) );
+    float* tmpstdDev2 = (float*)malloc((bHeight) * (bWidth) * sizeof(float) );
+    float maxstdDev_L2 = 0.f;
+
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+    {
+#ifdef _OPENMP
+#pragma omp for
+#endif
+
+        // precalculate Luminance
+        for(int i = 0; i < bHeight; i++) {
+            guint8* currWS = pixWrkSpace + i * pixWSRowStride;
+            float*  currL = tmpL + i * bWidth;
+
+            for(int j = 0; j < bWidth; j++) {
+                *currL = 0.299f * (currWS)[0] + 0.587f * (currWS)[1] + 0.114f * (currWS)[2];
+                currL++;
+                currWS += 3;
+            }
+        }
+
+        float maxthrstdDev_L2 = 0.f;
+#ifdef _OPENMP
+#pragma omp for nowait
+#endif
+
+        // precalculate sum and sum of squares of small kernel
+        for(int i = blur_radius2; i < bHeight - blur_radius2; i++) {
+            for(int j = blur_radius2; j < bWidth - blur_radius2; j++) {
+                float sumL = 0.f;
+                float sumLSqu = 0.f;
+
+                for(int kh = -blur_radius2; kh <= blur_radius2; kh++) {
+                    for(int kw = -blur_radius2; kw <= blur_radius2; kw++) {
+                        float curL = tmpL[(i + kh) * bWidth + j + kw];
+                        sumL += curL;
+                        sumLSqu += SQR(curL);
+                    }
+                }
+
+                tmpLsum[i * bWidth + j] = sumL;
+                tmpLsumSq[i * bWidth + j] = sumLSqu;
+                float stdDev_L2 = rkernel_size2 * sqrtf(sumLSqu * kernel_size2 - sumL * sumL);
+
+                if(stdDev_L2 > maxthrstdDev_L2) {
+                    maxthrstdDev_L2 = stdDev_L2;
+                }
+
+                tmpstdDev2[i * bWidth + j] = stdDev_L2;
+            }
+        }
+
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+        {
+            if(maxthrstdDev_L2 > maxstdDev_L2) {
+                maxstdDev_L2 = maxthrstdDev_L2;
+            }
+        }
+    }
+
+    const float focus_thresh = 80.f;
+    maxstdDev_L2 = std::min(maxstdDev_L2, focus_thresh);
+    const float focus_threshby10 = focus_thresh / 10.f;
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic,16)
+#endif
+
+    for (int i = blur_radius + 1; i < bHeight - blur_radius; i++) {
+        guint8* curr = pix + i * pixRowStride + 3 * (blur_radius + 1);
+        guint8* currWs = pixWrkSpace + i * pixWSRowStride + 3 * (blur_radius + 1);
+
+        for (int j = blur_radius + 1; j < bWidth - blur_radius; j++) {
+
+            //*************
+            // Copyright (c) 2011 Michael Ezra michael@michaelezra.com
+            // determine if pixel is in the sharp area of the image using
+            // standard deviation analysis on two different scales
+            //float focus_thresh2;
+            //float opacity = 0.9;//TODO: implement opacity
+            //TODO: evaluate effects of altering sampling frequency
+
+
+            //TODO: dynamically determine appropriate values based on image analysis
+
+            // calculate average in +-blur_radius pixels area around the current pixel
+            // speed up: calculate sum of squares in the same loops
+
+            float sum_L = 0.f;
+            float sumsq_L = 0.f;
+
+            // use precalculated values of small kernel to reduce number of iterations
+            for (int kh = -blur_radius + blur_radius2; kh <= blur_radius - blur_radius2; kh += blur_dim2) {
+                float* currLsum = &tmpLsum[(i + kh) * bWidth + j - blur_radius + 1];
+                float* currLsumSqu = &tmpLsumSq[(i + kh) * bWidth + j - blur_radius + 1];
+
+                for (int k = -blur_radius + blur_radius2; k <= blur_radius - blur_radius2; k += blur_dim2, currLsum += blur_dim2, currLsumSqu += blur_dim2) {
+                    sum_L += *currLsum;
+                    sumsq_L += *currLsumSqu;
+                }
+            }
+
+            //float sum_L2 = tmpLsum[i * bWidth + j];
+            //float sumsq_L2 = tmpLsumSq[i * bWidth + j];
+            //*************
+            // averages
+            // Optimized formulas to avoid divisions
+            float stdDev_L = rkernel_size * sqrtf(sumsq_L * kernel_size - sum_L * sum_L);
+            float stdDev_L2 = tmpstdDev2[i * bWidth + j];
+//                          float stdDev_L2 = rkernel_size2 * sqrtf(sumsq_L2 * kernel_size2 - sum_L2 * sum_L2);
+
+            //TODO: try to normalize by average L of the entire (preview) image
+
+            //detection method 1: detect focus in features
+            //there is no strict condition between stdDev_L and stdDev_L2 themselves
+            /*                                if (stdDev_L2>focus_thresh2
+                                              && (stdDev_L <focus_thresh)){ // this excludes false positives due to high contrast edges
+
+                                              curr[1]=255;
+                                              curr[0]=0;
+                                              curr[2]=0;
+
+                                              }*/
+
+            //detection method 2: detect focus in texture
+            // key point is std deviation on lower scale is higher than for the larger scale
+            // plus some boundary conditions
+            if (focus_thresh >= stdDev_L2 //TODO: could vary this to bypass noise better
+                && stdDev_L2 > stdDev_L //this is the key to select fine detail within lower contrast on larger scale
+                && stdDev_L > focus_threshby10 //options.highlightThreshold
+                ) {
+                // transpareny depends on sdtDev_L2 and maxstdDev_L2
+                float transparency = 1.f - std::min(stdDev_L2 / maxstdDev_L2, 1.0f) ;
+                // first row of circle
+                guint8* currtmp = &curr[0] + (-3 * pixRowStride);
+                guint8* currtmpWS = &currWs[0] + (-3 * pixWSRowStride);
+
+                for(int jj = -3; jj <= 3; jj += 3) {
+                    guint8* currtmpl = currtmp + jj;
+                    guint8* currtmpWSl = currtmpWS + jj;
+                    //transparent green
+                    currtmpl[0] = transparency * currtmpWSl[0];
+                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
+                    currtmpl[2] = transparency * currtmpWSl[2];
+                }
+
+                // second row of circle
+                currtmp = &curr[0] + (-2 * pixRowStride);
+                currtmpWS = &currWs[0] + (-2 * pixWSRowStride);
+
+                for(int jj = -6; jj <= 6; jj += 3) {
+                    guint8* currtmpl = currtmp + jj;
+                    guint8* currtmpWSl = currtmpWS + jj;
+                    //transparent green
+                    currtmpl[0] = transparency * currtmpWSl[0];
+                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
+                    currtmpl[2] = transparency * currtmpWSl[2];
+                }
+
+                // three middle row of circle
+                for(int ii = -1; ii <= 1; ii++) {
+                    currtmp = &curr[0] + (ii * pixRowStride);
+                    currtmpWS = &currWs[0] + (ii * pixWSRowStride);
+
+                    for(int jj = -9; jj <= 9; jj += 3) {
+                        guint8* currtmpl = currtmp + jj;
+                        guint8* currtmpWSl = currtmpWS + jj;
+                        //transparent green
+                        currtmpl[0] = transparency * currtmpWSl[0];
+                        currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
+                        currtmpl[2] = transparency * currtmpWSl[2];
+                    }
+                }
+
+                // second last row of circle
+                currtmp = &curr[0] + (2 * pixRowStride);
+                currtmpWS = &currWs[0] + (2 * pixWSRowStride);
+
+                for(int jj = -6; jj <= 6; jj += 3) {
+                    guint8* currtmpl = currtmp + jj;
+                    guint8* currtmpWSl = currtmpWS + jj;
+                    //transparent green
+                    currtmpl[0] = transparency * currtmpWSl[0];
+                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
+                    currtmpl[2] = transparency * currtmpWSl[2];
+                }
+
+                // last row of circle
+                currtmp = &curr[0] + (3 * pixRowStride);
+                currtmpWS = &currWs[0] + (3 * pixWSRowStride);
+
+                for(int jj = -3; jj <= 3; jj += 3) {
+                    guint8* currtmpl = currtmp + jj;
+                    guint8* currtmpWSl = currtmpWS + jj;
+                    //transparent green
+                    currtmpl[0] = transparency * currtmpWSl[0];
+                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
+                    currtmpl[2] = transparency * currtmpWSl[2];
+                }
+            }
+
+            curr += 3;
+            currWs += 3;
+        }
+    }
+
+    free(tmpL);
+    free(tmpLsum);
+    free(tmpLsumSq);
+    free(tmpstdDev2);
+}
+
+
+void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf> pixbuftrue)
+{
+    guint8 *pix = pixbuf->get_pixels();
+
+    const int pixRowStride = pixbuf->get_rowstride();
+    const int bHeight = pixbuf->get_height();
+    const int bWidth = pixbuf->get_width();
+
+    const auto get_L =
+        [](guint8 *rgb) -> int
+        {
+            return 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+        };
+
+    const auto L_to_IRE =
+        [](int val) -> int
+        {
+            constexpr float scale = (100.f - 7.5f) / (235.f - 16.f);
+            return rtengine::LIM(int((val - 16) * scale + 7.5f), 0, 108);
+        };
+
+    const auto get =
+        [](const char *color, int i) -> guint8
+        {
+            int v = std::toupper(color[i]);
+            return (v >= 65 ? 10 + v - 65 : v - 48);
+        };
+
+    const auto get_rgb =
+        [&](const char *color, guint8 *rgb) -> void
+        {
+            for (int c = 0; c < 3; ++c) {
+                rgb[c] = get(color, 2*c+1) * 16 + get(color, 2*c+2);
+            }
+        };
+
+#ifdef _OPENMP
+#   pragma omp parallel for schedule(dynamic,16)
+#endif
+    for (int i = 0; i < bHeight; i++) {
+        guint8 *curr = pix + i * pixRowStride;
+        for (int j = 0; j < bWidth; j++) {
+            int L = get_L(curr);
+            int ire = L_to_IRE(L);
+            auto it = IndicateClippedPanel::falseColorsMap.lower_bound(ire);
+            get_rgb(it->second, curr);
+            curr += 3;
+        }
+    }
+}
+
+
+} // namespace
+
 void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
 {
     MyMutex::MyLock lock(cropHandler.cimg);
@@ -1555,6 +1852,7 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
             const bool showB  = iarea->previewModePanel->showB(); // will show clipping if B channel is clipped
             const bool showL  = iarea->previewModePanel->showL(); // will show clipping if L value   is clipped
             const bool showFocusMask  = iarea->indClippedPanel->showFocusMask();
+            const bool showFalseColors = iarea->indClippedPanel->showFalseColors() && !(showL || showR || showG || showB);
             bool showcs = iarea->indClippedPanel->showClippedShadows();
             bool showch = iarea->indClippedPanel->showClippedHighlights();
 
@@ -1569,7 +1867,7 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
 
 #endif
 
-            if (showcs || showch || showR || showG || showB || showL || showFocusMask) {
+            if (showcs || showch || showR || showG || showB || showL || showFocusMask || showFalseColors) {
                 Glib::RefPtr<Gdk::Pixbuf> tmp = cropHandler.cropPixbuf->copy ();
                 guint8* pix = tmp->get_pixels();
                 guint8* pixWrkSpace = cropHandler.cropPixbuftrue->get_pixels();
@@ -1581,233 +1879,9 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
                 const int bWidth = tmp->get_width();
 
                 if (showFocusMask) { // modulate preview to display focus mask
-                    const int blur_radius2 = 1;                             // radius of small kernel. 1 => 3x3 kernel
-                    const int blur_dim2 = 2 * blur_radius2 + 1;             // dimension of small kernel
-                    const int blur_radius = (blur_dim2 * blur_dim2) / 2;    // radius of big kernel
-                    const float kernel_size = SQR(2.f * blur_radius + 1.f); // count of pixels in the big blur kernel
-                    const float rkernel_size = 1.0f / kernel_size;          // reciprocal of kernel_size to avoid divisions
-                    const float kernel_size2 = SQR(2.f * blur_radius2 + 1.f); // count of pixels in the small blur kernel
-                    const float rkernel_size2 = 1.0f / kernel_size2;        // reciprocal of kernel_size to avoid divisions
-
-                    // aloocate buffer for precalculated Luminance
-                    float* tmpL = (float*)malloc(bHeight * bWidth * sizeof(float) );
-                    // aloocate buffers for sums and sums of squares of small kernel
-                    float* tmpLsum = (float*)malloc((bHeight) * (bWidth) * sizeof(float) );
-                    float* tmpLsumSq = (float*)malloc((bHeight) * (bWidth) * sizeof(float) );
-                    float* tmpstdDev2 = (float*)malloc((bHeight) * (bWidth) * sizeof(float) );
-                    float maxstdDev_L2 = 0.f;
-
-#ifdef _OPENMP
-                    #pragma omp parallel
-#endif
-                    {
-#ifdef _OPENMP
-                        #pragma omp for
-#endif
-
-                        // precalculate Luminance
-                        for(int i = 0; i < bHeight; i++) {
-                            guint8* currWS = pixWrkSpace + i * pixWSRowStride;
-                            float*  currL = tmpL + i * bWidth;
-
-                            for(int j = 0; j < bWidth; j++) {
-                                *currL = 0.299f * (currWS)[0] + 0.587f * (currWS)[1] + 0.114f * (currWS)[2];
-                                currL++;
-                                currWS += 3;
-                            }
-                        }
-
-                        float maxthrstdDev_L2 = 0.f;
-#ifdef _OPENMP
-                        #pragma omp for nowait
-#endif
-
-                        // precalculate sum and sum of squares of small kernel
-                        for(int i = blur_radius2; i < bHeight - blur_radius2; i++) {
-                            for(int j = blur_radius2; j < bWidth - blur_radius2; j++) {
-                                float sumL = 0.f;
-                                float sumLSqu = 0.f;
-
-                                for(int kh = -blur_radius2; kh <= blur_radius2; kh++) {
-                                    for(int kw = -blur_radius2; kw <= blur_radius2; kw++) {
-                                        float curL = tmpL[(i + kh) * bWidth + j + kw];
-                                        sumL += curL;
-                                        sumLSqu += SQR(curL);
-                                    }
-                                }
-
-                                tmpLsum[i * bWidth + j] = sumL;
-                                tmpLsumSq[i * bWidth + j] = sumLSqu;
-                                float stdDev_L2 = rkernel_size2 * sqrtf(sumLSqu * kernel_size2 - sumL * sumL);
-
-                                if(stdDev_L2 > maxthrstdDev_L2) {
-                                    maxthrstdDev_L2 = stdDev_L2;
-                                }
-
-                                tmpstdDev2[i * bWidth + j] = stdDev_L2;
-                            }
-                        }
-
-#ifdef _OPENMP
-                        #pragma omp critical
-#endif
-                        {
-                            if(maxthrstdDev_L2 > maxstdDev_L2) {
-                                maxstdDev_L2 = maxthrstdDev_L2;
-                            }
-                        }
-                    }
-
-                    const float focus_thresh = 80.f;
-                    maxstdDev_L2 = std::min(maxstdDev_L2, focus_thresh);
-                    const float focus_threshby10 = focus_thresh / 10.f;
-#ifdef _OPENMP
-                    #pragma omp parallel for schedule(dynamic,16)
-#endif
-
-                    for (int i = blur_radius + 1; i < bHeight - blur_radius; i++) {
-                        guint8* curr = pix + i * pixRowStride + 3 * (blur_radius + 1);
-                        guint8* currWs = pixWrkSpace + i * pixWSRowStride + 3 * (blur_radius + 1);
-
-                        for (int j = blur_radius + 1; j < bWidth - blur_radius; j++) {
-
-                            //*************
-                            // Copyright (c) 2011 Michael Ezra michael@michaelezra.com
-                            // determine if pixel is in the sharp area of the image using
-                            // standard deviation analysis on two different scales
-                            //float focus_thresh2;
-                            //float opacity = 0.9;//TODO: implement opacity
-                            //TODO: evaluate effects of altering sampling frequency
-
-
-                            //TODO: dynamically determine appropriate values based on image analysis
-
-                            // calculate average in +-blur_radius pixels area around the current pixel
-                            // speed up: calculate sum of squares in the same loops
-
-                            float sum_L = 0.f;
-                            float sumsq_L = 0.f;
-
-                            // use precalculated values of small kernel to reduce number of iterations
-                            for (int kh = -blur_radius + blur_radius2; kh <= blur_radius - blur_radius2; kh += blur_dim2) {
-                                float* currLsum = &tmpLsum[(i + kh) * bWidth + j - blur_radius + 1];
-                                float* currLsumSqu = &tmpLsumSq[(i + kh) * bWidth + j - blur_radius + 1];
-
-                                for (int k = -blur_radius + blur_radius2; k <= blur_radius - blur_radius2; k += blur_dim2, currLsum += blur_dim2, currLsumSqu += blur_dim2) {
-                                    sum_L += *currLsum;
-                                    sumsq_L += *currLsumSqu;
-                                }
-                            }
-
-                            //float sum_L2 = tmpLsum[i * bWidth + j];
-                            //float sumsq_L2 = tmpLsumSq[i * bWidth + j];
-                            //*************
-                            // averages
-                            // Optimized formulas to avoid divisions
-                            float stdDev_L = rkernel_size * sqrtf(sumsq_L * kernel_size - sum_L * sum_L);
-                            float stdDev_L2 = tmpstdDev2[i * bWidth + j];
-//                          float stdDev_L2 = rkernel_size2 * sqrtf(sumsq_L2 * kernel_size2 - sum_L2 * sum_L2);
-
-                            //TODO: try to normalize by average L of the entire (preview) image
-
-                            //detection method 1: detect focus in features
-                            //there is no strict condition between stdDev_L and stdDev_L2 themselves
-                            /*                                if (stdDev_L2>focus_thresh2
-                                                            && (stdDev_L <focus_thresh)){ // this excludes false positives due to high contrast edges
-
-                                                                curr[1]=255;
-                                                                curr[0]=0;
-                                                                curr[2]=0;
-
-                                                            }*/
-
-                            //detection method 2: detect focus in texture
-                            // key point is std deviation on lower scale is higher than for the larger scale
-                            // plus some boundary conditions
-                            if (focus_thresh >= stdDev_L2 //TODO: could vary this to bypass noise better
-                                    && stdDev_L2 > stdDev_L //this is the key to select fine detail within lower contrast on larger scale
-                                    && stdDev_L > focus_threshby10 //options.highlightThreshold
-                               ) {
-                                // transpareny depends on sdtDev_L2 and maxstdDev_L2
-                                float transparency = 1.f - std::min(stdDev_L2 / maxstdDev_L2, 1.0f) ;
-                                // first row of circle
-                                guint8* currtmp = &curr[0] + (-3 * pixRowStride);
-                                guint8* currtmpWS = &currWs[0] + (-3 * pixWSRowStride);
-
-                                for(int jj = -3; jj <= 3; jj += 3) {
-                                    guint8* currtmpl = currtmp + jj;
-                                    guint8* currtmpWSl = currtmpWS + jj;
-                                    //transparent green
-                                    currtmpl[0] = transparency * currtmpWSl[0];
-                                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
-                                    currtmpl[2] = transparency * currtmpWSl[2];
-                                }
-
-                                // second row of circle
-                                currtmp = &curr[0] + (-2 * pixRowStride);
-                                currtmpWS = &currWs[0] + (-2 * pixWSRowStride);
-
-                                for(int jj = -6; jj <= 6; jj += 3) {
-                                    guint8* currtmpl = currtmp + jj;
-                                    guint8* currtmpWSl = currtmpWS + jj;
-                                    //transparent green
-                                    currtmpl[0] = transparency * currtmpWSl[0];
-                                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
-                                    currtmpl[2] = transparency * currtmpWSl[2];
-                                }
-
-                                // three middle row of circle
-                                for(int ii = -1; ii <= 1; ii++) {
-                                    currtmp = &curr[0] + (ii * pixRowStride);
-                                    currtmpWS = &currWs[0] + (ii * pixWSRowStride);
-
-                                    for(int jj = -9; jj <= 9; jj += 3) {
-                                        guint8* currtmpl = currtmp + jj;
-                                        guint8* currtmpWSl = currtmpWS + jj;
-                                        //transparent green
-                                        currtmpl[0] = transparency * currtmpWSl[0];
-                                        currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
-                                        currtmpl[2] = transparency * currtmpWSl[2];
-                                    }
-                                }
-
-                                // second last row of circle
-                                currtmp = &curr[0] + (2 * pixRowStride);
-                                currtmpWS = &currWs[0] + (2 * pixWSRowStride);
-
-                                for(int jj = -6; jj <= 6; jj += 3) {
-                                    guint8* currtmpl = currtmp + jj;
-                                    guint8* currtmpWSl = currtmpWS + jj;
-                                    //transparent green
-                                    currtmpl[0] = transparency * currtmpWSl[0];
-                                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
-                                    currtmpl[2] = transparency * currtmpWSl[2];
-                                }
-
-                                // last row of circle
-                                currtmp = &curr[0] + (3 * pixRowStride);
-                                currtmpWS = &currWs[0] + (3 * pixWSRowStride);
-
-                                for(int jj = -3; jj <= 3; jj += 3) {
-                                    guint8* currtmpl = currtmp + jj;
-                                    guint8* currtmpWSl = currtmpWS + jj;
-                                    //transparent green
-                                    currtmpl[0] = transparency * currtmpWSl[0];
-                                    currtmpl[1] = transparency * currtmpWSl[1] + (1.f - transparency) * 255.f;
-                                    currtmpl[2] = transparency * currtmpWSl[2];
-                                }
-                            }
-
-                            curr += 3;
-                            currWs += 3;
-                        }
-                    }
-
-                    free(tmpL);
-                    free(tmpLsum);
-                    free(tmpLsumSq);
-                    free(tmpstdDev2);
-
+                    show_focus_mask(tmp, cropHandler.cropPixbuftrue);
+                } else if (showFalseColors) {
+                    show_false_colors(tmp, cropHandler.cropPixbuftrue);
                 } else { // !showFocusMask
 
                     const int hlThreshold = options.highlightThreshold;

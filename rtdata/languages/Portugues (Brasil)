@@ -152,7 +152,7 @@ FILEBROWSER_POPUPTRASH;Mover para a lixeira
 FILEBROWSER_POPUPUNRANK;Desclassificar
 FILEBROWSER_POPUPUNTRASH;Remover da lixeira
 FILEBROWSER_QUERYBUTTONHINT;Limpar a consulta Localizar
-FILEBROWSER_QUERYHINT;Digite nomes de arquivos para procurar. Suporta nomes de arquivos parciais. Separe os termos de pesquisa usando vírgulas, por exemplo\n<i>1001,1004,1199</i>\n\nExcluir termos de pesquisa prefixando-os com <i>!=</i>\npor ex.\n<i>!=1001,1004,1199</i>\n\nAtalhos:\n<b>Ctrl-f</b> - foque a caixa Localizar,\n<b>Enter</b> - pesquisa,\n<b>Esc</b> - Limpe a caixa Localizar,\n<b>Shift-Esc</b> - desfoque a caixa Localizar.
+FILEBROWSER_QUERYHINT;Digite nomes de arquivos para procurar. Suporta nomes de arquivos parciais. Separe os termos de pesquisa usando vírgulas, por exemplo\n<i>1001,1004,1199</i>\n\nExcluir termos de pesquisa prefixando-os com <i>!=</i>\npor ex.\n<i>!=1001,1004,1199</i>\n\nAtalhos:\n<b>Ctrl-f</b> - foque a caixa Localizar,\n<b>Enter</b> - pesquisa,\n<b>Shift-Esc</b> - Limpe a caixa Localizar,\n<b>Esc</b> - desfoque a caixa Localizar.
 FILEBROWSER_QUERYLABEL; Localizar:
 FILEBROWSER_RANK1_TOOLTIP;Classificação 1 *\nAtalho: <b>Shift-1</b>
 FILEBROWSER_RANK2_TOOLTIP;Classificação 2 *\nAtalho: <b>Shift-2</b>
@@ -1022,8 +1022,8 @@ MAIN_TOOLTIP_BACKCOLOR2;Cor de fundo da pré-visualização: <b>Branco</b>\nAtal
 MAIN_TOOLTIP_BACKCOLOR3;Cor de fundo da pré-visualização: <b>Cinza médio</b>\nAtalho: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Travar</b> / <b>Destravar</b> a <b>Antes</b> visualização\n\n<b>Travar</b>: mantenha o <b>Antes</b> visualização inalterada.\nÚtil para avaliar o efeito cumulativo de várias ferramentas.\nAlém disso, comparações podem ser feitas a qualquer momento.\n\n<b>Destravar</b>: o <b>Antes</b> visualização seguinte <b>Depois</b> visualização anterior, mostrando a imagem antes do efeito da ferramenta atualmente utilizada.
 MAIN_TOOLTIP_HIDEHP;Mostrar/Ocultar o painel esquerdo (incluindo o histórico).\nAtalho: <b>l</b>
-MAIN_TOOLTIP_INDCLIPPEDH;Indicação de realce recortado.\nAtalho: <b><</b>
-MAIN_TOOLTIP_INDCLIPPEDS;Indicação de sombra recortada.\nAtalho: <b>></b>
+MAIN_TOOLTIP_INDCLIPPEDH;Indicação de realce recortado.\nAtalho: <b>&gt;</b>
+MAIN_TOOLTIP_INDCLIPPEDS;Indicação de sombra recortada.\nAtalho: <b>&lt;</b>
 MAIN_TOOLTIP_PREVIEWB;Pré-visualize o <b>Canal Azul</b>.\nAtalho: <b>b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Pré-visualize a <b>Máscara de Foco</b>.\nAtalho: <b>Shift-f</b>\n\nMais preciso em imagens com pouca profundidade de campo, baixo ruído e níveis de zoom mais altos.\n\nPara melhorar a precisão da detecção de imagens ruidosas, avalie com zoom menor, cerca de 10-30%.
 MAIN_TOOLTIP_PREVIEWG;Pré-visualize o <b>Canal verde</b>.\nAtalho: <b>g</b>
@@ -2027,6 +2027,6 @@ ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Abrir nova mini-janela de detalhe
 ZOOMPANEL_ZOOM100;Zoom para 100%\nAtalho: <b>z</b>
 ZOOMPANEL_ZOOMFITCROPSCREEN;Ajustar o corte à tela\nAtalho: <b>f</b>
-ZOOMPANEL_ZOOMFITSCREEN;Ajustar toda a imagem à tela\nAtalho: <b>Alt</b>-<b>f</b>
+ZOOMPANEL_ZOOMFITSCREEN;Ajustar toda a imagem à tela\nAtalho: <b>f</b>
 ZOOMPANEL_ZOOMIN;Mais Zoom\nAtalho: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Menos Zoom\nAtalho: <b>-</b>

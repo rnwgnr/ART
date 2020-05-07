@@ -32,10 +32,8 @@ Glib::RefPtr<Gdk::Pixbuf> BatchQueueEntry::fastExportIcon;
 
 BatchQueueEntry::BatchQueueEntry (rtengine::ProcessingJob* pjob, const rtengine::procparams::ProcParams& pparams, Glib::ustring fname, int prevw, int prevh, Thumbnail* thm) :
     ThumbBrowserEntryBase(fname),
-    opreview(nullptr),
     origpw(prevw),
     origph(prevh),
-    opreviewDone(false),
     job(pjob),
     params(pparams),
     progress(0),
@@ -71,11 +69,11 @@ BatchQueueEntry::~BatchQueueEntry ()
 
     batchQueueEntryUpdater.removeJobs (this);
 
-    if (opreview) {
-        delete [] opreview;
-    }
+    // if (opreview) {
+    //     delete [] opreview;
+    // }
 
-    opreview = nullptr;
+    // opreview = nullptr;
 
     if (thumbnail) {
         thumbnail->decreaseRef ();
@@ -90,16 +88,7 @@ BatchQueueEntry::~BatchQueueEntry ()
 
 void BatchQueueEntry::refreshThumbnailImage ()
 {
-
-    if (!opreviewDone) {
-        // creating the image buffer first
-        //if (!opreview) opreview = new guint8[(origpw+1) * origph * 3];
-        // this will asynchronously compute the original preview and land at this.updateImage
-        batchQueueEntryUpdater.process (nullptr, origpw, origph, preh, this, &params, thumbnail);
-    } else {
-        // this will asynchronously land at this.updateImage
-        batchQueueEntryUpdater.process (opreview, origpw, origph, preh, this);
-    }
+    batchQueueEntryUpdater.process (nullptr, origpw, origph, preh, this, &params, thumbnail);
 }
 
 void BatchQueueEntry::calcThumbnailSize ()
@@ -142,9 +131,7 @@ void BatchQueueEntry::drawProgressBar (Glib::RefPtr<Gdk::Window> win, const Gdk:
 
 void BatchQueueEntry::removeButtonSet ()
 {
-
-    delete buttonSet;
-    buttonSet = nullptr;
+    buttonSet.reset(nullptr);
 }
 
 std::vector<Glib::RefPtr<Gdk::Pixbuf>> BatchQueueEntry::getIconsOnImageArea ()
@@ -260,9 +247,8 @@ void BatchQueueEntry::_updateImage (guint8* img, int w, int h)
         MYWRITERLOCK(l, lockRW);
 
         prew = w;
-        assert (preview == nullptr);
-        preview = new guint8 [prew * preh * 3];
-        memcpy (preview, img, prew * preh * 3);
+        preview.resize(prew * preh * 3);
+        std::copy(img, img + preview.size(), preview.begin());
 
         if (parent) {
             parent->redrawEntryNeeded(this);

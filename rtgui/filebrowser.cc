@@ -1141,19 +1141,6 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
         }
 
         openRequested(mselected);
-#ifdef WIN32
-    } else if (event->keyval == GDK_KEY_F5) {
-        int dest = 1;
-
-        if (event->state & GDK_SHIFT_MASK) {
-            dest = 2;
-        } else if (event->state & GDK_CONTROL_MASK) {
-            dest = 3;
-        }
-
-        openDefaultViewer (dest);
-        return true;
-#endif
     } else if (event->keyval == GDK_KEY_Page_Up) {
         scrollPage(GDK_SCROLL_UP);
         return true;

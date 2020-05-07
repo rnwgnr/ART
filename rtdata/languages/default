@@ -103,7 +103,7 @@ FILEBROWSER_APPLYPROFILE;Apply
 FILEBROWSER_APPLYPROFILE_PARTIAL;Apply - partial
 FILEBROWSER_AUTODARKFRAME;Auto dark-frame
 FILEBROWSER_AUTOFLATFIELD;Auto flat-field
-FILEBROWSER_BROWSEPATHBUTTONHINT;Click to browse to the chosen path.
+FILEBROWSER_BROWSEPATHBUTTONHINT;Refresh the list of thumbnails.\nShortcut: <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Type a path to navigate to.\n\nKeyboard shortcuts:\n<b>Ctrl-o</b> to focus to the path text box.\n<b>Enter</b> / <b>Ctrl-Enter</b> to browse there;\n<b>Esc</b> to clear changes.\n<b>Shift-Esc</b> to remove focus.\n\nPath shortcuts:\n<b>~</b>	- user's home directory.\n<b>!</b>	- user's pictures directory
 FILEBROWSER_CACHE;Cache
 FILEBROWSER_CACHECLEARFROMFULL;Clear all including cached profiles
@@ -159,7 +159,7 @@ FILEBROWSER_POPUPTRASH;Move to trash
 FILEBROWSER_POPUPUNRANK;Unrank
 FILEBROWSER_POPUPUNTRASH;Remove from trash
 FILEBROWSER_QUERYBUTTONHINT;Clear the Find query
-FILEBROWSER_QUERYHINT;Type filenames to search for. Supports partial filenames. Separate the search terms using commas, e.g.\n<i>1001,1004,1199</i>\n\nExclude search terms by prefixing them with <i>!=</i>\ne.g.\n<i>!=1001,1004,1199</i>\n\nShortcuts:\n<b>Ctrl-f</b> - focus the Find box,\n<b>Enter</b> - search,\n<b>Esc</b> - clear the Find box,\n<b>Shift-Esc</b> - defocus the Find box.
+FILEBROWSER_QUERYHINT;Type filenames to search for. Supports partial filenames. Separate the search terms using commas, e.g.\n<i>1001,1004,1199</i>\n\nExclude search terms by prefixing them with <i>!=</i>\ne.g.\n<i>!=1001,1004,1199</i>\n\nShortcuts:\n<b>Ctrl-f</b> - focus the find box,\n<b>Enter</b> - search,\n<b>Shift-Esc</b> - clear the find box,\n<b>Esc</b> - defocus the find box.
 FILEBROWSER_QUERYLABEL; Find:
 FILEBROWSER_RANK1_TOOLTIP;Rank 1 *\nShortcut: <b>Shift-1</b>
 FILEBROWSER_RANK2_TOOLTIP;Rank 2 *\nShortcut: <b>Shift-2</b>
@@ -729,6 +729,10 @@ HISTORY_MSG_LOCALCONTRAST_LIGHTNESSMASK;Local contrast - L mask
 HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Local contrast - mask blur
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Local contrast - show mask
 HISTORY_MSG_LOCALCONTRAST_AREAMASK;Local contrast - area mask
+HISTORY_MSG_CHMIXER_MODE;Channel mixer - mode
+HISTORY_MSG_CHMIXER_RED_PRIMARY;Channel mixer - Red primary
+HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Channel mixer - Green primary
+HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Channel mixer - Blue primary
 HISTORY_MSG_CLAMPOOG;Clip out-of-gamut colors
 HISTORY_MSG_COLORCORRECTION_AB;CC - hue correction
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - region area mask
@@ -863,6 +867,7 @@ HISTORY_MSG_TM_FATTAL_ANCHOR;DRC - Anchor
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Tone equalizer
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Tone equalizer - Bands
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tone equalizer - Regularization
+HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Tone equalizer - Tonal map
 HISTORY_MSG_TONECURVE_SATCURVE;Tone curve - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tone curve - Perceptual strength
 HISTORY_NEWSNAPSHOT;Add
@@ -1015,6 +1020,7 @@ MAIN_TAB_FAVORITES;Favorites
 MAIN_TAB_FAVORITES_TOOLTIP;Shortcut: <b>Alt-u</b>
 MAIN_TAB_FILTER; Filter 
 MAIN_TAB_INSPECT; Inspect 
+MAIN_TAB_INSPECT_TOOLTIP;Activate the inspector.\nShortcut: <b>Ctrl-i</b>
 MAIN_TAB_IPTC;IPTC
 MAIN_TAB_LOCAL;Local editing
 MAIN_TAB_LOCAL_TOOLTIP;Shortcut: <b>Alt-x</b>
@@ -1029,9 +1035,10 @@ MAIN_TOOLTIP_BACKCOLOR1;Background color of the preview: <b>black</b>\nShortcut:
 MAIN_TOOLTIP_BACKCOLOR2;Background color of the preview: <b>white</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\nUseful to evaluate the cumulative effect of multiple tools.\nAdditionally, comparisons can be made to any state in the History.\n\n<b>Unlock</b>: the <b>Before</b> view will follow the <b>After</b> view one step behind, showing the image before the effect of the currently used tool.
+MAIN_TOOLTIP_FALSECOLORS;Toggle exposure indication using false color.\nShortcut: <b>e</b>\n\nKey (IRE range):\n%1
 MAIN_TOOLTIP_HIDEHP;Show/Hide the left panel (including the history).\nShortcut: <b>l</b>
-MAIN_TOOLTIP_INDCLIPPEDH;Clipped highlight indication.\nShortcut: <b>&lt;</b>
-MAIN_TOOLTIP_INDCLIPPEDS;Clipped shadow indication.\nShortcut: <b>&gt;</b>
+MAIN_TOOLTIP_INDCLIPPEDH;Clipped highlight indication.\nShortcut: <b>&gt;</b>
+MAIN_TOOLTIP_INDCLIPPEDS;Clipped shadow indication.\nShortcut: <b>&lt;</b>
 MAIN_TOOLTIP_PREVIEWB;Preview the <b>blue channel</b>.\nShortcut: <b>b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Preview the <b>focus mask</b>.\nShortcut: <b>Shift-f</b>\n\nMore accurate on images with shallow depth of field, low noise and at higher zoom levels.\nZoom out to 10-30% to improve detection accuracy on noisy images.
 MAIN_TOOLTIP_PREVIEWG;Preview the <b>green channel</b>.\nShortcut: <b>g</b>
@@ -1458,6 +1465,14 @@ TP_CHMIXER_BLUE;Blue channel
 TP_CHMIXER_GREEN;Green channel
 TP_CHMIXER_LABEL;Channel Mixer
 TP_CHMIXER_RED;Red channel
+TP_CHMIXER_MODE;Mode
+TP_CHMIXER_HUE;Hue correction
+TP_CHMIXER_SAT;Saturation correction
+TP_CHMIXER_PRIMARY_R;Red primary
+TP_CHMIXER_PRIMARY_G;Green primary
+TP_CHMIXER_PRIMARY_B;Blue primary
+TP_CHMIXER_MODE_RGB_MATRIX;RGB matrix
+TP_CHMIXER_MODE_PRIMARIES_CHROMA;Primaries correction
 TP_COARSETRAF_TOOLTIP_HFLIP;Flip horizontally.
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotate left.\n\nShortcuts:\n<b>[</b> - Multiple Editor Tabs Mode,\n<b>Alt-[</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotate right.\n\nShortcuts:\n<b>]</b> - Multiple Editor Tabs Mode,\n<b>Alt-]</b> - Single Editor Tab Mode.
@@ -1955,7 +1970,7 @@ TP_SOFTLIGHT_LABEL;Soft Light
 TP_SOFTLIGHT_STRENGTH;Strength
 TP_SPOT_COUNTLABEL;%1 point(s)
 TP_SPOT_ENTRYCHANGED;Point changed
-TP_SPOT_HINT;Click on this button to be able to operate on the preview area.\n\nTo edit a spot, hover the white mark locating an edited aera, making the editing geometry appear.\n\nTo add a spot, press Ctrl and left mouse button, drag the circle (Ctrl key can be released) to a source location, then release the mouse button.\n\nTo move the source or destination spot, hover its center then drag it.\n\nThe inner circle (maximum effect area) and the "feather" circle can be resized by hovering them (the circle becomes orange) and draging it (the circle becomes red).\n\nWhen the changes are done, right click outside any spot to end the Spot editing mode, or click on this button again.
+TP_SPOT_HINT;Click on this button to be able to operate on the preview area.\n\nTo edit a spot, hover the white mark locating an edited aera, making the editing geometry appear.\n\nTo add a spot, press Ctrl and left mouse button, drag the circle (Ctrl key can be released) to a source location, then release the mouse button.\n\nTo move the source or destination spot, hover its center then drag it.\n\nThe inner circle (maximum effect area) and the "feather" circle can be resized by hovering them (the circle becomes orange) and dragging it (the circle becomes red).\n\nWhen the changes are done, right click outside any spot to end the Spot editing mode, or click on this button again.
 TP_SPOT_LABEL;Spot removal
 TP_SPOT_CUR_SPOT_LABEL;Current Spot
 TP_SPOT_SOURCE_X;Source X
@@ -1979,6 +1994,7 @@ TP_TONE_EQUALIZER_BAND_3;Highlights
 TP_TONE_EQUALIZER_BAND_4;Whites
 TP_TONE_EQUALIZER_DETAIL;Regularization
 TP_TONE_EQUALIZER_LABEL;Tone Equalizer
+TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Show tonal map
 TP_VIGNETTING_AMOUNT;Amount
 TP_VIGNETTING_CENTER_X;Center X
 TP_VIGNETTING_CENTER_Y;Center Y
@@ -2036,6 +2052,6 @@ ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Open (new) detail window
 ZOOMPANEL_ZOOM100;Zoom to 100%\nShortcut: <b>z</b>
 ZOOMPANEL_ZOOMFITCROPSCREEN;Fit crop to screen\nShortcut: <b>f</b>
-ZOOMPANEL_ZOOMFITSCREEN;Fit whole image to screen\nShortcut: <b>Alt</b>-<b>f</b>
+ZOOMPANEL_ZOOMFITSCREEN;Fit whole image to screen\nShortcut: <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoom In\nShortcut: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoom Out\nShortcut: <b>-</b>

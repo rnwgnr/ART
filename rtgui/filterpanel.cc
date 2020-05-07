@@ -165,7 +165,7 @@ FilterPanel::FilterPanel () : listener (nullptr)
     sChange[conns++] = enabled->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
     sChange[conns++] = enaFiletype->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
 
-    set_size_request (0, -1);
+    //set_size_request (0, -1);
 
     show_all ();
 }

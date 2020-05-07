@@ -103,13 +103,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         if (rgbmode[i]) {
             abca[i] = 0.f;
             abcb[i] = 0.f;
-            rs[i] = 1.f;
+            //rs[i] = 1.f;
         } else {
             abca[i] = abcoord(r.a);
             abcb[i] = abcoord(r.b);
-            rs[i] = 1.f + r.saturation / 100.f;
+            //rs[i] = 1.f + r.saturation / 100.f;
         }
-        enabled[i] = false;
+        rs[i] = 1.f + r.saturation / 100.f;
+        enabled[i] = r.saturation != 0;
         if (r.mode == ColorCorrectionParams::Mode::HSL) {
             float R, G, B;
             float u, v;
