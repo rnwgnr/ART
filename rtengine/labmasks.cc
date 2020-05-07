@@ -95,6 +95,26 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
     float min_feather = RT_INFINITY;
 
     for (const auto &area_ : areaMask.shapes) {
+        float **marr = mask;
+        float color;
+
+        switch (area_->mode) {
+        case AreaMask::Shape::ADD:
+        case AreaMask::Shape::INTERSECT:
+            color = fgcolor;
+            break;
+        case AreaMask::Shape::SUBTRACT:
+            color = bgcolor;
+            break;
+        }
+
+        if (area_->mode == AreaMask::Shape::INTERSECT) {
+            intersect(mask.width(), mask.height());
+            marr = intersect;
+            float *p = intersect;
+            std::fill(p, p + (mask.width() * mask.height()), bgcolor);
+        }
+
         if (area_->getType() == AreaMask::Shape::RECTANGLE) {
             auto area = static_cast<AreaMask::Rectangle*>(area_.get());
 
@@ -123,14 +143,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                     return ret;
                 };
 
-            float **marr = mask;
-            if (area->mode == AreaMask::Shape::INTERSECT) {
-                intersect(mask.width(), mask.height());
-                marr = intersect;
-                float *p = intersect;
-                std::fill(p, p + (mask.width() * mask.height()), bgcolor);
-            }
-    
             // draw the (bounded) ellipse
             for (int x = 0, n = int(a_min); x < n; ++x) {
                 int yy = r * std::sqrt(a*a - float(x*x));
@@ -141,15 +153,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                         for (int i = -1; i < 2; ++i) {
                             for (int j = -1; j < 2; ++j) {
                                 if (inside(point.x+i, point.y+j)) {
-                                    switch (area->mode) {
-                                    case AreaMask::Shape::ADD:
-                                    case AreaMask::Shape::INTERSECT:
-                                        marr[point.y+j][point.x+i] = fgcolor;
-                                        break;
-                                    case AreaMask::Shape::SUBTRACT:
-                                        marr[point.y+j][point.x+i] = bgcolor;
-                                        break;
-                                    }
+                                    marr[point.y+j][point.x+i] = color;
                                 }
                             }
                         }
@@ -170,7 +174,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 imgSpacePoly.at(i).roundness = area->knots.at(i).roundness;
             }
             auto v = area->getTessellation(imgSpacePoly);
-            polyFill(mask, v, fgcolor);
+            polyFill(marr, mask.width(), mask.height(), v, color);
         }
 
         if (area_->mode == AreaMask::Shape::INTERSECT) {

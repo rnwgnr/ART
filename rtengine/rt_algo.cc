@@ -583,7 +583,7 @@ void markImpulse(int width, int height, float **const src, char **impulse, float
 }
 
 // taken and adapted from https://www.alienryderflex.com/polygon_fill/
-void polyFill(array2D<float> &buffer, const std::vector<CoordD> &poly, const float color)
+void polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color)
 {
 
     // First point of the polygon in image space
@@ -610,10 +610,10 @@ void polyFill(array2D<float> &buffer, const std::vector<CoordD> &poly, const flo
         }
     }
 
-    xStart = rtengine::LIM<int>(xStart, 0., buffer.width() - 1);
-    xEnd = rtengine::LIM<int>(xEnd, xStart, buffer.width() - 1);
-    yStart = rtengine::LIM<int>(yStart, 0., buffer.height() - 1);
-    yEnd = rtengine::LIM<int>(yEnd, yStart, buffer.height() - 1);
+    xStart = rtengine::LIM<int>(xStart, 0., width - 1);
+    xEnd = rtengine::LIM<int>(xEnd, xStart, width - 1);
+    yStart = rtengine::LIM<int>(yStart, 0., height - 1);
+    yEnd = rtengine::LIM<int>(yEnd, yStart, height - 1);
 
     std::vector<int> nodeX;
 
