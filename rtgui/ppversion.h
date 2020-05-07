@@ -1,7 +1,7 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1013
+#define PPVERSION 1014
 
 /*
   Log of version changes

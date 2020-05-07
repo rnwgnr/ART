@@ -583,7 +583,7 @@ void markImpulse(int width, int height, float **const src, char **impulse, float
 }
 
 // taken and adapted from https://www.alienryderflex.com/polygon_fill/
-void polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color)
+float polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color)
 {
 
     // First point of the polygon in image space
@@ -653,6 +653,8 @@ void polyFill(float **buffer, int width, int height, const std::vector<CoordD> &
             }
         }
     }
+
+    return float(rtengine::min<int>(xEnd - xStart, yEnd - yStart));
 }
 
 } // namespace rtengine

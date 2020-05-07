@@ -38,5 +38,6 @@ void buildGradientsMask(int W, int H, float **luminance, float **out,
                         float alfa, float beta, bool multithread);
 
 // Fills the polygon into the buffer ; Range has to be updated to the PorcParams's AreaMask::Polygon::x/y range
-void polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color);
+// Return the smallest dimension of the resulting bounding box
+float polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color);
 } // namespace rtengine

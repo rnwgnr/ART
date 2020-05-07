@@ -93,6 +93,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
     array2D<float> intersect;
 
     float min_feather = RT_INFINITY;
+    int radius = 0;
 
     for (const auto &area_ : areaMask.shapes) {
         float **marr = mask;
@@ -104,6 +105,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
             color = fgcolor;
             break;
         case AreaMask::Shape::SUBTRACT:
+        default:
             color = bgcolor;
             break;
         }
@@ -115,7 +117,9 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
             std::fill(p, p + (mask.width() * mask.height()), bgcolor);
         }
 
-        if (area_->getType() == AreaMask::Shape::RECTANGLE) {
+        switch (area_->getType()) {
+        case AreaMask::Shape::RECTANGLE:
+        {
             auto area = static_cast<AreaMask::Rectangle*>(area_.get());
 
             Coord center(w2 + area->x / 100.0 * w2, h2 + area->y / 100.0 * h2);
@@ -160,8 +164,13 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                     }
                 }
             }
+
+            radius = std::max(int(areaMask.feather / 100.0 * min_feather), 1);
+
+            break;
         }
-        else if (area_->getType() == AreaMask::Shape::POLYGON) {
+        case AreaMask::Shape::POLYGON:
+        {
             auto area = static_cast<AreaMask::Polygon*>(area_.get());
             if (area->knots.size() < 3) {
                 // Not enough knots to create an area
@@ -174,7 +183,14 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 imgSpacePoly.at(i).roundness = area->knots.at(i).roundness;
             }
             auto v = area->getTessellation(imgSpacePoly);
-            polyFill(marr, mask.width(), mask.height(), v, color);
+            min_feather = polyFill(marr, mask.width(), mask.height(), v, color);
+
+            radius = std::max(int(areaMask.feather / 100.0 * min_feather), 1);
+
+            break;
+        }
+        default:
+            break;
         }
 
         if (area_->mode == AreaMask::Shape::INTERSECT) {
@@ -192,7 +208,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
     }
 
     // guided feathering and contrast
-    int radius = std::max(int(areaMask.feather / 100.0 * min_feather), 1);
     guidedFilter(guide, mask, mask, radius, 1e-7, multithread);
 
     DiagonalCurve curve(areaMask.contrast);

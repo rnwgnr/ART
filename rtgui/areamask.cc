@@ -458,13 +458,13 @@ bool AreaMask::button1Pressed(const int modifierKey)
         break;
     case rteMaskShape::Type::POLYGON:
         if ((modifierKey & GDK_CONTROL_MASK)
-             && !(modifierKey & GDK_SHIFT_MASK)
              && sel_poly_knot_id_ == -1)
         {
             // add a new point
             rteMaskPoly::Knot newKnot;
             newKnot.x = rteMaskShape::toParamRange(provider->posImage.x, imW);
             newKnot.y = rteMaskShape::toParamRange(provider->posImage.y, imH);
+            newKnot.roundness = modifierKey & GDK_SHIFT_MASK ? 100. : 0.;
             if (hovered_line_id_ == -1) {
                 // no selected knot & no hovered line = one of the 1 first point creation
                 poly_knots_.push_back(newKnot);
