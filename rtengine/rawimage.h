@@ -28,7 +28,7 @@
 
 namespace rtengine {
 
-class RawImage: public DCraw
+class RawImage: protected DCraw
 {
 public:
 
