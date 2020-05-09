@@ -65,6 +65,8 @@ protected:
         return is_foveon;
     }
 
+    void apply_gain_map(); // in rawimage_gainmap.cc
+
 public:
 
     static void initCameraConstants(Glib::ustring baseDir);
