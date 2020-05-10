@@ -851,6 +851,10 @@ void AreaMask::updateGeometry(const int fullWidth, const int fullHeight)
     switch (geomType) {
     case rteMaskShape::Type::RECTANGLE:
     {
+        if (mouseOverGeometry.empty() || visibleGeometry.empty()) {
+            return;
+        }
+        
         rtengine::Coord origin(rteMaskShape::toImgSpace(center_x_, imW),
                                rteMaskShape::toImgSpace(center_y_, imH));
 

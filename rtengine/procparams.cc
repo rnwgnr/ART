@@ -568,7 +568,7 @@ AreaMask::AreaMask():
     feather(0),
     blur(0),
     contrast{DCT_Linear},
-    shapes{std::shared_ptr<Shape>(new Rectangle())}
+    shapes{}//std::shared_ptr<Shape>(new Rectangle())}
 {
 }
 

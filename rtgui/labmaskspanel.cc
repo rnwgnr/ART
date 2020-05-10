@@ -1359,6 +1359,13 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
                 setPolygon(poly->knots);
             }
             toggleAreaShapeMode(int(a->mode));
+
+            if (r.areaMask.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE) {
+                updateRectangleAreaMask(false);
+                setRectangleAdjustersVisibility(true);
+            } else if (r.areaMask.shapes[area_shape_index_]->getType() == Shape::Type::POLYGON) {
+                setRectangleAdjustersVisibility(false);
+            }
         }
 
         deltaEMask->setEnabled(r.deltaEMask.enabled);
@@ -1367,14 +1374,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaEH->setValue(r.deltaEMask.weight_H, r.deltaEMask.H);
         deltaERange->setValue(r.deltaEMask.range);
         deltaEDecay->setValue(r.deltaEMask.decay);
-        static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
-        
-        if (r.areaMask.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE) {
-            updateRectangleAreaMask(false);
-            setRectangleAdjustersVisibility(true);
-        } else if (r.areaMask.shapes[area_shape_index_]->getType() == Shape::Type::POLYGON) {
-            setRectangleAdjustersVisibility(false);
-        }
+        static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);        
     }
     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&r.drawnMask);
 
@@ -1832,7 +1832,7 @@ void LabMasksPanel::onAreaShapeResetPressed()
             areaMaskToggle->set_active(false);
         }
         listEdited = true;
-        masks_[selected_].areaMask.shapes = {std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
+        masks_[selected_].areaMask.shapes = {};//std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
         area_shape_index_ = 0;
         center_x_ = defaultAreaShape.x;
         center_y_ = defaultAreaShape.y;
@@ -1880,7 +1880,7 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
 void LabMasksPanel::onAreaShapeAddPressed()
 {
     // shape type automatically chosen, depending on the currently selected shape
-    Shape::Type t = Shape::Type::POLYGON;
+    Shape::Type t = Shape::Type::RECTANGLE;
     if (selected_ < masks_.size() && area_shape_index_ < masks_[selected_].areaMask.shapes.size() && masks_[selected_].areaMask.shapes.size() > 0) {
         t = masks_[selected_].areaMask.shapes[area_shape_index_]->getType();
     }
@@ -1890,7 +1890,7 @@ void LabMasksPanel::onAreaShapeAddPressed()
 
 void LabMasksPanel::onAreaShapeRemovePressed()
 {
-    if (selected_ < masks_.size() && area_shape_index_ < masks_[selected_].areaMask.shapes.size() && masks_[selected_].areaMask.shapes.size() > 1) {
+    if (selected_ < masks_.size() && area_shape_index_ < masks_[selected_].areaMask.shapes.size()) {// && masks_[selected_].areaMask.shapes.size() > 1) {
         listEdited = true;
         masks_[selected_].areaMask.shapes.erase(masks_[selected_].areaMask.shapes.begin() + area_shape_index_);
         populateShapeList(selected_, -1);
@@ -2001,7 +2001,7 @@ void LabMasksPanel::populateShapeList(int idx, int sel)
         }
         }
     }
-    if (sel >= 0) {
+    if (sel >= 0 && size_t(sel) < r.areaMask.shapes.size()) {
         Gtk::TreePath pth;
         pth.push_back(sel);
         areaMaskShapes->get_selection()->select(pth);
@@ -2070,36 +2070,43 @@ void LabMasksPanel::onAreaMaskPastePressed()
 void LabMasksPanel::areaShapeSelect(int sel, bool update_list)
 {
     area_shape_index_ = sel;
-    auto &ns = masks_[selected_].areaMask.shapes[sel];
-    switch (ns->getType()) {
-    case rtengine::AreaMask::Shape::Type::POLYGON:
-    {
-        auto s = static_cast<rtengine::AreaMask::Polygon*>(ns.get());
-        setPolygon(s->knots);
+    if (size_t(sel) < masks_[selected_].areaMask.shapes.size()) {
+        auto &ns = masks_[selected_].areaMask.shapes[sel];
+        switch (ns->getType()) {
+        case rtengine::AreaMask::Shape::Type::POLYGON:
+        {
+            auto s = static_cast<rtengine::AreaMask::Polygon*>(ns.get());
+            setPolygon(s->knots);
+            setRectangleAdjustersVisibility(false);
+            setGeometryType(rtengine::AreaMask::Shape::Type::POLYGON);
+            break;
+        }
+        case rtengine::AreaMask::Shape::Type::RECTANGLE:
+        default:
+        {
+            auto s = static_cast<rtengine::AreaMask::Rectangle*>(ns.get());
+            setRectangleAdjustersVisibility(true);
+            center_x_ = s->x;
+            center_y_ = s->y;
+            width_ = s->width;
+            height_ = s->height;
+            angle_ = s->angle;
+            areaMaskRoundness->setValue(s->roundness);
+            setGeometryType(rtengine::AreaMask::Shape::Type::RECTANGLE);
+            updateRectangleAreaMask(true);
+        }
+        }
+        updateGeometry();
+        toggleAreaShapeMode(int(ns->mode));
+        if (areaMaskToggle->get_active()) {
+            areaMaskToggle->set_active(false);
+            areaMaskToggle->set_active(true);
+        }
+    } else {
+        updateGeometry();
+        toggleAreaShapeMode(0);
         setRectangleAdjustersVisibility(false);
-        setGeometryType(rtengine::AreaMask::Shape::Type::POLYGON);
-        break;
-    }
-    case rtengine::AreaMask::Shape::Type::RECTANGLE:
-    default:
-    {
-        auto s = static_cast<rtengine::AreaMask::Rectangle*>(ns.get());
-        setRectangleAdjustersVisibility(true);
-        center_x_ = s->x;
-        center_y_ = s->y;
-        width_ = s->width;
-        height_ = s->height;
-        angle_ = s->angle;
-        areaMaskRoundness->setValue(s->roundness);
-        setGeometryType(rtengine::AreaMask::Shape::Type::RECTANGLE);
-        updateRectangleAreaMask(true);
-    }
-    }
-    updateGeometry();
-    toggleAreaShapeMode(int(ns->mode));
-    if (areaMaskToggle->get_active()) {
-        areaMaskToggle->set_active(false);
-        areaMaskToggle->set_active(true);
+        update_list = false;
     }
 
     if (update_list) {
