@@ -1826,6 +1826,7 @@ void LabMasksPanel::onAreaShapeResetPressed()
 {
     if (selected_ < masks_.size()) {
         disableListener();
+        setGeometryType(rteMaskShape::Type::RECTANGLE);
         deleteGeometry();
         if (areaMaskToggle->get_active()) {
             unsubscribe();
