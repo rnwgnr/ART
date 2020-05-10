@@ -467,6 +467,10 @@ void rgb2lab(Imagefloat::Mode mode, float R, float G, float B, float &L, float &
         a = R;
         b = B;
         return;
+    default:
+        assert(false);
+        L = a = b = 0.f;
+        return;
     }
 }
 
