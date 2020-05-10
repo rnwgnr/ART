@@ -28,7 +28,7 @@
 
 namespace rtengine {
 
-class RawImage: public DCraw
+class RawImage: protected DCraw
 {
 public:
 
@@ -64,6 +64,8 @@ protected:
     {
         return is_foveon;
     }
+
+    void apply_gain_map(); // in rawimage_gainmap.cc
 
 public:
 
