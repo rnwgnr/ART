@@ -1155,7 +1155,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
     }
 
     if (settings->verbose) {
-        printf("Raw As Shot White balance: temp %f, tint %f\n", camera_wb.getTemp(), camera_wb.getGreen());
+        printf("Raw As Shot White balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", camera_wb.getTemp(), camera_wb.getGreen(), cam_r, cam_g, cam_b, camwb_red, camwb_green, camwb_blue);
         printf("Raw Reference (auto) white balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", ReferenceWB.getTemp(), ReferenceWB.getGreen(), ref_r, ref_g, ref_b, refwb_red, refwb_blue, refwb_green);
     }
 

@@ -70,7 +70,8 @@ std::wstring to_wstr(const Glib::ustring &s)
 #endif // WIN32
 
 
-std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname)
+std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname,
+                                         bool check_exif)
 {
 #if defined WIN32 && defined EXV_UNICODE_PATH
     std::wstring wfname = to_wstr(fname);
@@ -79,7 +80,7 @@ std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname)
     auto image = Exiv2::ImageFactory::open(Glib::filename_from_utf8(fname));
 #endif
     image->readMetadata();
-    if (!image->good() || image->exifData().empty()) {
+    if (!image->good() || (check_exif && image->exifData().empty())) {
 #if EXIV2_TEST_VERSION(0,27,0)
         auto error_code = Exiv2::kerErrorMessage;
 #else
@@ -395,7 +396,7 @@ void Exiv2Metadata::load() const
             image_ = val.first;
         } else {
             try {
-                auto img = open_exiv2(src_);
+                auto img = open_exiv2(src_, true);
                 image_.reset(img.release());
             } catch (std::exception &exc) {
                 auto img = exiftool_import(src_, exc);
@@ -442,7 +443,7 @@ void Exiv2Metadata::do_merge_xmp(Exiv2::Image *dst) const
 
 void Exiv2Metadata::saveToImage(const Glib::ustring &path) const
 {
-    auto dst = open_exiv2(path);
+    auto dst = open_exiv2(path, false);
     if (image_.get()) {
         dst->setIptcData(image_->iptcData());
         dst->setXmpData(image_->xmpData());
@@ -656,7 +657,7 @@ Exiv2::XmpData Exiv2Metadata::getXmpSidecar(const Glib::ustring &path)
     Exiv2::XmpData ret;
     auto fname = xmpSidecarPath(path);
     if (Glib::file_test(fname, Glib::FILE_TEST_EXISTS)) {
-        auto image = open_exiv2(fname);
+        auto image = open_exiv2(fname, false);
         ret = image->xmpData();
     }
     return ret;

@@ -93,22 +93,40 @@ void RawImage::get_colorsCoeff( float *pre_mul_, float *scale_mul_, float *cblac
     if(isXtrans()) {
         // for xtrans files dcraw stores black levels in cblack[6] .. cblack[41], but all are equal, so we just use cblack[6]
         for (int c = 0; c < 4; c++) {
-            cblack_[c] = (float) this->get_cblack(6);
-            pre_mul_[c] = this->get_pre_mul(c);
+            if (cblack_ ) {
+                cblack_[c] = (float) this->get_cblack(6);
+            }
+            if (pre_mul_) {
+                pre_mul_[c] = this->get_pre_mul(c);
+            }
         }
     } else if ((this->get_cblack(4) + 1) / 2 == 1 && (this->get_cblack(5) + 1) / 2 == 1) {
-        for (int c = 0; c < 4; c++) {
-            cblack_[c] = this->get_cblack(c);
+        if (cblack_) {
+            for (int c = 0; c < 4; c++) {
+                cblack_[c] = this->get_cblack(c);
+            }
         }
         for (int c = 0; c < 4; c++) {
-            cblack_[FC(c / 2, c % 2)] = this->get_cblack(6 + c / 2 % this->get_cblack(4) * this->get_cblack(5) + c % 2 % this->get_cblack(5));
-            pre_mul_[c] = this->get_pre_mul(c);
+            if (cblack_) {
+                cblack_[FC(c / 2, c % 2)] = this->get_cblack(6 + c / 2 % this->get_cblack(4) * this->get_cblack(5) + c % 2 % this->get_cblack(5));
+            }
+            if (pre_mul_) {
+                pre_mul_[c] = this->get_pre_mul(c);
+            }
         }
     } else {
         for (int c = 0; c < 4; c++) {
-            cblack_[c] = (float) this->get_cblack(c);
-            pre_mul_[c] = this->get_pre_mul(c);
+            if (cblack_) {
+                cblack_[c] = (float) this->get_cblack(c);
+            }
+            if (pre_mul_) {
+                pre_mul_[c] = this->get_pre_mul(c);
+            }
         }
+    }
+
+    if (!cblack_ || !pre_mul_ || !scale_mul_) {
+        return;
     }
 
     if (this->get_cam_mul(0) == -1 || forceAutoWB) {
@@ -526,6 +544,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         CameraConst *cc = ccs->get(make, model);
 
         if (raw_image) {
+            if (isBayer() && load_raw == &RawImage::lossless_dng_load_raw && RT_has_OpcodeList2) {
+                apply_gain_map();
+            }
             if (cc && cc->has_rawCrop()) {
                 int lm, tm, w, h;
                 cc->get_rawCrop(lm, tm, w, h);

@@ -152,6 +152,7 @@ set(RTENGINESOURCEFILES
     filmnegativethumb.cc
     canon_cr3_decoder.cc
     pyramids.cc
+    rawimage_gainmap.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)
