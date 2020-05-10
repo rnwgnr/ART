@@ -600,10 +600,15 @@ public:
     /**
      * triggered for scroll wheel events. Only for ET_OBJECTS types
      * 
+     * @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
+     * @param direction Direction of the scroll (see Gtk documentation for more information)
+     * @param deltaX values sent by Gtk on scroll events
+     * @param deltaY values sent by Gtk on scroll events
+     * @param propagateEvent value to state whether the event has been catched (false) or should be propagated (true)
      * @return false if the scroll event has to be propagated to the crop
      * window, true if the event has been processed
      */
-    virtual bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY);
+    virtual bool scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent);
 
     /** @brief Get the geometry to be shown to the user */
     const std::vector<Geometry*>& getVisibleGeometry ();
@@ -852,8 +857,9 @@ inline bool EditSubscriber::pick3 (const bool picked) {
     return false;
 }
 
-inline bool EditSubscriber::scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY)
+inline bool EditSubscriber::scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent)
 {
+    propagateEvent = true;
     return false;
 }
 

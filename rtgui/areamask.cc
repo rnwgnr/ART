@@ -498,7 +498,6 @@ bool AreaMask::button1Pressed(const int modifierKey)
             last_object_ = segments_MO.size() + SEL_DISC;
         }
         else if(sel_poly_knot_id_ >= 0) {
-            // TODO: Looking for the Control key for fine adjustment of Roundness and point location ?
             if (modifierKey & GDK_SHIFT_MASK) {
                 if (poly_knots_.size() > 2) {
                     dragged_element_ = DraggedElement::ROUNDNESS;
@@ -506,7 +505,6 @@ bool AreaMask::button1Pressed(const int modifierKey)
                 }
             }
             else {
-                // else adjusting the point location
                 dragged_element_ = DraggedElement::POINT;
                 rtengine::CoordD pt(poly_knots_.at(sel_poly_knot_id_).x,
                                     poly_knots_.at(sel_poly_knot_id_).y);
@@ -760,6 +758,41 @@ bool AreaMask::pick3 (const bool picked)
     return false;
 }
 
+bool AreaMask::scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent)
+{
+    EditDataProvider *provider = getEditProvider();
+    if (!provider
+        || geomType != rteMaskShape::Type::POLYGON
+        || sel_poly_knot_id_ == -1
+        || (direction == GDK_SCROLL_SMOOTH && deltaY == 0.)
+        || (direction != GDK_SCROLL_SMOOTH && direction != GDK_SCROLL_UP && direction != GDK_SCROLL_DOWN))
+    {
+        propagateEvent = true;
+        return false;
+    }
+
+    // scroll event is catched!
+    propagateEvent = false;
+
+    int imW, imH;
+    provider->getImageSize(imW, imH);
+
+    // Since 'ImageArea::on_realize()' sets 'SMOOTH_SCROLL_MASK' to 'add_events' on Linux and Window system,
+    // they'll always receive 'GDK_SCROLL_SMOOTH events', even with standard mouses. Only MacOS will receive discrete
+    // scroll values ('GDK_SCROLL_UP' / 'GDK_SCROLL_DOWN')
+    double delta = (direction == GDK_SCROLL_SMOOTH ?
+                   deltaY
+                 : (direction == GDK_SCROLL_UP ? 3. : -3.)) / (modifierKey & GDK_CONTROL_MASK ? 8. : 0.1);
+    double old_val = poly_knots_.at(sel_poly_knot_id_).roundness;
+    double new_val = old_val - delta;
+    poly_knots_.at(sel_poly_knot_id_).roundness = new_val = rtengine::LIM<double>( new_val, 0., 100.);
+    if (old_val != new_val) {
+        updateGeometry();
+        return true;
+    }
+    return false;
+}
+
 void AreaMask::setPolylineSize(size_t newSize)
 {
     if (newSize == segments_MO.size()) {
@@ -962,7 +995,7 @@ void AreaMask::updateGeometry(const int fullWidth, const int fullHeight)
         updateKnot(prev_poly_knot_id_, prev_knot);
         updateKnot(next_poly_knot_id_, next_knot);
 
-        curve->points = rtengine::procparams::AreaMask::Polygon::getTessellation(imgSpacePoly);
+        curve->points = rtengine::procparams::AreaMask::Polygon::get_tessellation(imgSpacePoly);
         curve->setVisible(poly_knots_.size() > 1);
         break;
     }

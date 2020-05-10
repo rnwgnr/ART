@@ -46,6 +46,7 @@ public:
     bool drag1(const int modifierKey) override;
     bool button3Pressed(const int modifierKey) override;
     bool pick3 (const bool picked) override;
+    bool scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override;
 
     size_t getPolygonSize();
     void setPolygon(const std::vector<rteMaskPoly::Knot> &new_poly);

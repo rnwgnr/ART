@@ -582,7 +582,8 @@ void markImpulse(int width, int height, float **const src, char **impulse, float
     delete [] lpf[0];
 }
 
-// taken and adapted from https://www.alienryderflex.com/polygon_fill/
+// Code adapted from Blender's project
+// https://developer.blender.org/diffusion/B/browse/master/source/blender/blenlib/intern/math_geom.c;3b4a8f1cfa7339f3db9ddd4a7974b8cc30d7ff0b$2411
 float polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color)
 {
 

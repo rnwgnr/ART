@@ -182,7 +182,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 imgSpacePoly.at(i).y = AreaMask::Shape::toImgSpace(area->knots.at(i).y, height) - origin.y;
                 imgSpacePoly.at(i).roundness = area->knots.at(i).roundness;
             }
-            auto v = area->getTessellation(imgSpacePoly);
+            auto v = area->get_tessellation(imgSpacePoly);
             min_feather = polyFill(marr, mask.width(), mask.height(), v, color);
 
             radius = std::max(int(areaMask.feather / 100.0 * min_feather), 1);

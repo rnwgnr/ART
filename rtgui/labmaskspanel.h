@@ -116,6 +116,7 @@ public:
 
     bool button1Released() override;
     bool pick3 (const bool picked) override;
+    bool scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override;
     void switchOffEditMode() override;
     void setEditProvider(EditDataProvider *provider);
     void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller) override;
@@ -165,6 +166,7 @@ private:
     void onRectangleAreaMaskDrawChanged();
     void onAreaMaskDrawRectangleAddPressed();
     void onAreaMaskDrawPolygonAddPressed();
+    bool onKnotRoundnessUpdated();
     void onDeltaEMaskEnableToggled();
     void onParametricMaskEnableToggled();
     void onListEnabledToggled(const Glib::ustring &path);
@@ -293,6 +295,7 @@ private:
     rtengine::AreaMask::Rectangle defaultAreaShape;
     bool listEdited;
     AreaDrawListener *adl_;
+    sigc::connection scrollDelayConn;
 
     MyExpander *deltaEMask;
     Gtk::DrawingArea *deltaEColor;

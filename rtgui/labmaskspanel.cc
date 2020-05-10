@@ -420,7 +420,7 @@ public:
         return true;
     }
 
-    bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY) override
+    bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override
     {
         double delta = (abs(deltaX) > abs(deltaY)) ? deltaX : deltaY;
         bool isUp = direction == GDK_SCROLL_UP || (direction == GDK_SCROLL_SMOOTH && delta < 0.0);
@@ -431,12 +431,15 @@ public:
         if (ctrl && !shift) {
             radius_->setValue(std::max(radius_->getValue() + incr, 0.0));
             update_pen(false);
+            propagateEvent = false;
             return true;
         } else if (ctrl && shift) {
             hardness_->setValue(std::max(hardness_->getValue() + incr, 0.0));
+            propagateEvent = false;
             return true;
         }
         
+        propagateEvent = true;
         return false;
     }
 
@@ -1521,6 +1524,27 @@ bool LabMasksPanel::pick3 (const bool picked)
             l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
         }
         return true;
+    }
+    return false;
+}
+
+bool LabMasksPanel::scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent)
+{
+    if (AreaMask::scroll(modifierKey, direction, deltaX, deltaY, propagateEvent)) {
+        if (scrollDelayConn.connected()) {
+            scrollDelayConn.disconnect ();
+        }
+        scrollDelayConn = Glib::signal_timeout().connect (sigc::mem_fun(*this, &LabMasksPanel::onKnotRoundnessUpdated), 500);
+        return true;
+    }
+    return false;
+}
+
+bool LabMasksPanel::onKnotRoundnessUpdated()
+{
+    auto l = getListener();
+    if (l) {
+        l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
     }
     return false;
 }

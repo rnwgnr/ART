@@ -104,6 +104,7 @@ struct AreaMask {
         virtual Type getType() const = 0 ;
         virtual bool operator==(const Shape &other) const;
         virtual bool operator!=(const Shape &other) const;
+
         static int toImgSpace(double v, int imSize);
         static double toParamRange(int v, int imSize);
     };
@@ -139,7 +140,9 @@ struct AreaMask {
         virtual ~Polygon() {}
 
         // Convert the Polygon object into a drawable polygon (for rtengine and rtgui)
-        static std::vector<CoordD> getTessellation(std::vector<Knot> &knots);
+        static std::vector<CoordD> get_tessellation(std::vector<Knot> &knots);
+        void knots_to_list(std::vector<double> &out) const;
+        void knots_from_list(const std::vector<double> &v);
 
         virtual Type getType() const { return Type::POLYGON; };
         virtual bool operator==(const Polygon &other) const;

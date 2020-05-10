@@ -31,7 +31,7 @@ namespace rtengine { namespace procparams {
 
 #if POLY_ALGO == 1
 
-std::vector<CoordD> AreaMask::Polygon::getTessellation(std::vector<Knot> &knots)
+std::vector<CoordD> AreaMask::Polygon::get_tessellation(std::vector<Knot> &knots)
 {
     //TODO: Find a way to have the appropriate number of points for each subcurve
     constexpr int nbrPoints = 10;  // Number of points per curve ;
@@ -114,7 +114,7 @@ std::vector<CoordD> AreaMask::Polygon::getTessellation(std::vector<Knot> &knots)
 
 #if POLY_ALGO == 2
 
-std::vector<CoordD> AreaMask::Polygon::getTessellation(std::vector<Knot> &knots)
+std::vector<CoordD> AreaMask::Polygon::get_tessellation(std::vector<Knot> &knots)
 {
     std::vector<CoordD> poly;
     if (knots.size() < 3) {
@@ -177,7 +177,7 @@ std::vector<CoordD> AreaMask::Polygon::getTessellation(std::vector<Knot> &knots)
         else {
             // prev knot roundness and current knot roundness are not overlaping,
             // adding the conection line
-            //poly.push_back(currStart);
+            poly.push_back(currStart);
         }
 
         if ((nextRoundness + roundness) > 1.) {
@@ -213,9 +213,6 @@ std::vector<CoordD> AreaMask::Polygon::getTessellation(std::vector<Knot> &knots)
 
         // adding the last point of the sub-curve
         poly.push_back(currEnd);
-
-        // adding the remaining segment
-        //poly.push_back(middleEnd);
     }
 
     return poly;

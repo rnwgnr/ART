@@ -298,10 +298,12 @@ void CropWindow::scroll (int state, GdkScrollDirection direction, int x, int y, 
     }
 
     const auto editSubscriber = iarea->getCurrSubscriber();
-    if (iarea->getToolMode () == TMHand && editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS && cropgl && cropgl->inImageArea(iarea->posImage.x, iarea->posImage.y)) {
-        bool done = editSubscriber->scroll(state, direction, deltaX, deltaY);
-        if (done) {
+    if (iarea->getToolMode () == TMHand && editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS && cropgl) {
+        bool propagate = true;
+        if (editSubscriber->scroll(state, direction, deltaX, deltaY, propagate)) {
             iarea->redraw();
+        }
+        if (!propagate) {
             return;
         }
     }

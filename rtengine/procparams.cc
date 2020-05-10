@@ -492,6 +492,38 @@ double AreaMask::Shape::toParamRange (int v, int imSize)
     return (double(v) - s2) * 100. / s2;
 }
 
+void AreaMask::Polygon::knots_to_list(std::vector<double> &out) const
+{
+    if (knots.empty()) {
+        out.clear();
+        return;
+    }
+
+    out.resize(knots.size() * 3);
+
+    for (size_t i = 0, j = 0; i < knots.size() ; ++i) {
+        out[j++] = knots[i].x;
+        out[j++] = knots[i].y;
+        out[j++] = knots[i].roundness;
+    }
+}
+
+
+void AreaMask::Polygon::knots_from_list(const std::vector<double> &v)
+{
+    size_t size = v.size() / 3;
+    knots.resize(size);
+
+    for (size_t i = 0, j = 0; i < size ; ++i) {
+        knots[i].x = v.at(j++);
+        knots[i].y = v.at(j++);
+        knots[i].roundness = v.at(j++);
+    }
+}
+
+
+
+
 bool AreaMask::Polygon::Knot::operator!=(const Knot &other) const
 {
     return !(*this == other);
@@ -914,22 +946,11 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                 }
             } else if (str2type(type) == AreaMask::Shape::Type::POLYGON) {
                 AreaMask::Polygon *poly = new AreaMask::Polygon();
-                int knotCount = 0;
-                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "KnotCount" + suffix, knotCount);
-                if (!found) {
-                    break;
-                }
-                for (int j = 1; j <= knotCount; ++j) {
-                    AreaMask::Polygon::Knot knot;
-                    std::string kn = "_" + std::to_string(j);
-                    found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + kn + suffix, knot.x);
-                    found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Y" + kn + suffix, knot.y);
-                    found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Roundness" + kn + suffix, knot.roundness);
-                    if (found) {
-                        poly->knots.push_back(knot);
-                    } else {
-                        break;
-                    }
+                std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
+                if ((found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Knots" + suffix, v))) {
+                    ret = true;
+                    std::vector<double> vv(v.begin(), v.end());
+                    poly->knots_from_list(vv);
                 }
                 if (found) {
                     shape.reset(poly);
@@ -1003,13 +1024,9 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
         case AreaMask::Shape::Type::POLYGON:
         {
             auto poly = static_cast<AreaMask::Polygon*>(a.get());
-            putToKeyfile(group_name, prefix + "AreaMask" + n + "KnotCount" + suffix, (int)poly->knots.size(), keyfile);
-            for (size_t j = 0; j < poly->knots.size(); ++j) {
-                std::string kc = std::string("_") + std::to_string(j + 1);
-                putToKeyfile(group_name, prefix + "AreaMask" + n + "X" + kc + suffix, poly->knots[j].x, keyfile);
-                putToKeyfile(group_name, prefix + "AreaMask" + n + "Y" + kc + suffix, poly->knots[j].y, keyfile);
-                putToKeyfile(group_name, prefix + "AreaMask" + n + "Roundness" + kc + suffix, poly->knots[j].roundness, keyfile);
-            }
+            std::vector<double> v;
+            poly->knots_to_list(v);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Knots" + suffix, v, keyfile);
             break;
         }
         case AreaMask::Shape::Type::RECTANGLE:
