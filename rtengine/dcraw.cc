@@ -6961,7 +6961,10 @@ it under the terms of the one of two licenses as you choose:
         }
       case 51009:			/* OpcodeList2 */
 	meta_offset = ftell(ifp);
-        RT_has_OpcodeList2 = true;
+        if (RT_OpcodeList2_start < 0) {
+            RT_OpcodeList2_start = meta_offset;
+            RT_OpcodeList2_len = len;
+        }
 	break;
       case 64772:			/* Kodak P-series */
 	if (len < 13) break;

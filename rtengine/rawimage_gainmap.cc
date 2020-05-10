@@ -167,15 +167,13 @@ std::vector<GainMap> extract_gain_maps(const std::vector<Exiv2::byte> &buf)
 
 void RawImage::apply_gain_map()
 {
-    std::vector<Exiv2::byte> buf;
-    try {
-        auto image = Exiv2::ImageFactory::open(filename);
-        image->readMetadata();
-        auto exif = image->exifData();
-        auto &tag = exif["Exif.SubImage1.OpcodeList2"];
-        buf.resize(tag.value().size());
-        tag.value().copy(&buf[0], Exiv2::invalidByteOrder);
-    } catch (std::exception &exc) {
+    if (!(isBayer() && load_raw == &RawImage::lossless_dng_load_raw && RT_OpcodeList2_len > 0)) {
+        return;
+    }
+    
+    std::vector<Exiv2::byte> buf(RT_OpcodeList2_len);
+    fseek(ifp, RT_OpcodeList2_start, SEEK_SET);
+    if (fread(&buf[0], 1, RT_OpcodeList2_len, ifp) != RT_OpcodeList2_len) {
         return;
     }
 

@@ -61,7 +61,8 @@ public:
     ,RT_blacklevel_from_constant(ThreeValBool::X)
     ,RT_matrix_from_constant(ThreeValBool::X)
     ,RT_baseline_exposure(0)
-    ,RT_has_OpcodeList2(false)
+    ,RT_OpcodeList2_start(-1)
+    ,RT_OpcodeList2_len(0)
 	,getbithuff(this,ifp,zero_after_ff)
 	,nikbithuff(ifp)
     {
@@ -160,7 +161,8 @@ protected:
     ThreeValBool RT_matrix_from_constant;
     std::string RT_software;
     double RT_baseline_exposure;
-    bool RT_has_OpcodeList2;
+    int RT_OpcodeList2_start;
+    int RT_OpcodeList2_len;
 
     struct PanasonicRW2Info {
         ushort bpp;

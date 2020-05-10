@@ -544,9 +544,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         CameraConst *cc = ccs->get(make, model);
 
         if (raw_image) {
-            if (isBayer() && load_raw == &RawImage::lossless_dng_load_raw && RT_has_OpcodeList2) {
-                apply_gain_map();
-            }
+            apply_gain_map();
             if (cc && cc->has_rawCrop()) {
                 int lm, tm, w, h;
                 cc->get_rawCrop(lm, tm, w, h);
