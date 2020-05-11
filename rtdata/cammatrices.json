@@ -1563,7 +1563,8 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13158, -5947, -1297, -3615, 12175, 1591, -237, 1469, 5319]
     },
     {
-        "make_model" : "GOOGLE PIXEL 3 REAR CAMERA",
+        "make_model" : ["GOOGLE PIXEL 3 REAR CAMERA",
+                        "GOOGLE PIXEL 3"], // manually aliased
         "dcraw_matrix" : [13931, -7010, -1360, -3008, 11519, 1674, -191, 1523, 5598]
     },
     {
@@ -1575,7 +1576,8 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13158, -5947, -1297, -3615, 12175, 1591, -237, 1469, 5319]
     },
     {
-        "make_model" : "GOOGLE PIXEL 3 XL REAR CAMERA",
+        "make_model" : ["GOOGLE PIXEL 3 XL REAR CAMERA",
+                        "GOOGLE PIXEL 3 XL"], // manually aliased
         "dcraw_matrix" : [13931, -7010, -1360, -3008, 11519, 1674, -191, 1523, 5598]
     },
     {
@@ -1587,7 +1589,8 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13274, -5957, -1337, -3459, 12159, 1427, -380, 1561, 4870]
     },
     {
-        "make_model" : "GOOGLE PIXEL 4 REAR WIDE CAMERA",
+        "make_model" : ["GOOGLE PIXEL 4 REAR WIDE CAMERA",
+                        "GOOGLE PIXEL 4"], // manually aliased
         "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
     },
     {
@@ -1599,7 +1602,8 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13274, -5957, -1337, -3459, 12159, 1427, -380, 1561, 4870]
     },
     {
-        "make_model" : "GOOGLE PIXEL 4 XL REAR WIDE CAMERA",
+        "make_model" : ["GOOGLE PIXEL 4 XL REAR WIDE CAMERA",
+                        "GOOGLE PIXEL 4 XL"], // manually aliased
         "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
     },
     {
@@ -3367,11 +3371,13 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [8035, 434, -961, -6001, 13872, 2320, -1159, 3065, 5434]
     },
     {
-        "make_model" : "PIXEL 2 XL-GOOGLE-GOOGLE",
+        "make_model" : ["PIXEL 2 XL-GOOGLE-GOOGLE",
+                        "GOOGLE PIXEL 2 XL"], // manually aliased
         "dcraw_matrix" : [10612, -4169, -1001, -3982, 12675, 1412, -558, 1620, 5205]
     },
     {
-        "make_model" : "PIXEL 2-GOOGLE-GOOGLE",
+        "make_model" : ["PIXEL 2-GOOGLE-GOOGLE",
+                        "GOOGLE PIXEL 2"], // manually aliased
         "dcraw_matrix" : [10612, -4169, -1001, -3982, 12675, 1412, -558, 1620, 5205]
     },
     {
@@ -3383,11 +3389,13 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13931, -7010, -1360, -3008, 11519, 1674, -191, 1523, 5598]
     },
     {
-        "make_model" : "PIXEL XL-GOOGLE-GOOGLE",
+        "make_model" : ["PIXEL XL-GOOGLE-GOOGLE",
+                        "GOOGLE PIXEL XL"], // manually aliased
         "dcraw_matrix" : [9293, -3484, -871, -2482, 10928, 1776, -256, 1479, 5145]
     },
     {
-        "make_model" : "PIXEL-GOOGLE-GOOGLE",
+        "make_model" : ["PIXEL-GOOGLE-GOOGLE",
+                        "GOOGLE PIXEL"], // manually aliased
         "dcraw_matrix" : [9293, -3484, -871, -2482, 10928, 1776, -256, 1479, 5145]
     },
     {
