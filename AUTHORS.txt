@@ -8,6 +8,7 @@ Developer/Maintainer:
 Other developers:
   
   Daniel Catalina
+  Jean-Christophe Frisch  
 
 Other contributors (profiles, ideas, mockups, testing, forum activity, translations, etc.), in last name alphabetical order:
 
@@ -35,7 +36,6 @@ Development contributors, in last name alphabetical order:
   Maciek Dworak
   Michael Ezra
   Flössie
-  Jean-Christophe Frisch
   Ilias Giarimis
   Alberto Griggio
   Steve Herrell
