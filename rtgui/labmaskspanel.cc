@@ -2029,7 +2029,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
         area_shape_index_ = 0;
         if (area_shape_index_ < masks_[selected_].areaMask.shapes.size()) {
             auto &a = masks_[selected_].areaMask;
-            switch (a.shapes.at(area_shape_index_)->getType()) {
+            switch (a.shapes[area_shape_index_]->getType()) {
             case rtengine::AreaMask::Shape::Type::POLYGON:
             {
                 auto s = static_cast<rtengine::AreaMask::Polygon*>(a.shapes[area_shape_index_].get());
@@ -2052,6 +2052,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
             }
             }
             auto &s = a.shapes[area_shape_index_];
+            setGeometryType(a.shapes[area_shape_index_]->getType());
             updateGeometry();
             areaMaskFeather->setValue(a.feather);
             areaMaskBlur->setValue(a.blur);
