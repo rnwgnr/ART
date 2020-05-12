@@ -894,6 +894,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     
     areaMaskFeather = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
     add_adjuster(areaMaskFeather, area);
+    areaMaskFeather->setLogScale(100.0, 0.0);
 
     areaMaskBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), 0, 500, 0.1, 0));
     add_adjuster(areaMaskBlur, area);
