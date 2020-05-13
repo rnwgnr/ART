@@ -107,8 +107,10 @@ struct AreaMask {
 
         static int toImgSpace(double v, int imSize);
         static double toParamRange(int v, int imSize);
+        virtual std::unique_ptr<Shape> clone() const = 0;
     };
-    struct Rectangle : public Shape {
+    
+    struct Rectangle: public Shape {
         double x; // [-100,100], with 0 as center of the image
         double y; // [-100,100]
         double width; // [0,200], with 100 as image width
@@ -117,12 +119,13 @@ struct AreaMask {
         double roundness; // [0,100] (0 = rectangle, 100 = ellipse)
 
         Rectangle();
-        virtual ~Rectangle() {}
-        virtual Type getType() const { return Type::RECTANGLE; };
-        virtual bool operator==(const Rectangle &other) const;
-        virtual bool operator!=(const Rectangle &other) const;
+        Type getType() const override { return Type::RECTANGLE; };
+        bool operator==(const Shape &other) const override;
+        bool operator!=(const Shape &other) const override;
+        std::unique_ptr<Shape> clone() const override;
     };
-    struct Polygon : public Shape {
+    
+    struct Polygon: public Shape {
         struct Knot {
             double x; // [-200,200], with 0 as center of the image, 100 = half width of the image
                       //             200 as a limit means that knot can be out of the image
@@ -137,24 +140,26 @@ struct AreaMask {
         };
         std::vector<Knot> knots;
 
-        virtual ~Polygon() {}
-
         // Convert the Polygon object into a drawable polygon (for rtengine and rtgui)
         static std::vector<CoordD> get_tessellation(std::vector<Knot> &knots);
         void knots_to_list(std::vector<double> &out) const;
         void knots_from_list(const std::vector<double> &v);
 
-        virtual Type getType() const { return Type::POLYGON; };
-        virtual bool operator==(const Polygon &other) const;
-        virtual bool operator!=(const Polygon &other) const;
+        Type getType() const override { return Type::POLYGON; };
+        bool operator==(const Shape &other) const override;
+        bool operator!=(const Shape &other) const override;
+        std::unique_ptr<Shape> clone() const override;
     };
     bool enabled;
     double feather; // [0,100]
     double blur;
     std::vector<double> contrast; // curve
-    std::vector<std::shared_ptr<Shape>> shapes;
+    std::vector<std::unique_ptr<Shape>> shapes;
 
     AreaMask();
+    AreaMask(const AreaMask &other);
+    AreaMask &operator=(const AreaMask &other);
+    
     bool operator==(const AreaMask &other) const;
     bool operator!=(const AreaMask &other) const;
     bool isTrivial() const;
