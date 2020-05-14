@@ -318,6 +318,16 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     //fprevdemo->add (*hbprevdemo);
     Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
     vb->pack_start(*hbprevdemo);
+
+    hbprevdemo = Gtk::manage(new Gtk::HBox(false, 4));
+    hbprevdemo->pack_start(*Gtk::manage(new Gtk::Label(M("PREFERENCES_WBPREVIEW_LABEL"))), Gtk::PACK_SHRINK);
+    wbpreview = Gtk::manage(new Gtk::ComboBoxText());
+    wbpreview->append(M("PREFERENCES_WBPREVIEW_AFTER"));
+    wbpreview->append(M("PREFERENCES_WBPREVIEW_BEFORE"));
+    wbpreview->append(M("PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL"));
+    hbprevdemo->pack_start(*wbpreview);
+    vb->pack_start(*hbprevdemo);
+    
     denoiseZoomedOut = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_DENOISE_ZOOM_OUT")));
     denoiseZoomedOut->set_tooltip_text(M("PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP"));
     vb->pack_start(*denoiseZoomedOut);
@@ -1475,6 +1485,7 @@ void Preferences::storePreferences ()
     moptions.prevdemo = (prevdemo_t)cprevdemo->get_active_row_number ();
     moptions.serializeTiffRead = ctiffserialize->get_active();
     moptions.denoiseZoomedOut = denoiseZoomedOut->get_active();
+    moptions.wb_preview_mode = Options::WBPreviewMode(wbpreview->get_active_row_number());
 
     if (sdcurrent->get_active ()) {
         moptions.startupDir = STARTUPDIR_CURRENT;
@@ -1573,6 +1584,7 @@ void Preferences::fillPreferences ()
     rememberZoomPanCheckbutton->set_active (moptions.rememberZoomAndPan);
     ctiffserialize->set_active (moptions.serializeTiffRead);
     denoiseZoomedOut->set_active(moptions.denoiseZoomedOut);
+    wbpreview->set_active(int(moptions.wb_preview_mode));
 
     setActiveTextOrIndex (*prtProfile, moptions.rtSettings.printerProfile, 0);
 

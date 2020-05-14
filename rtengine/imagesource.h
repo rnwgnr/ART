@@ -66,7 +66,7 @@ public:
 
     ~ImageSource() override {}
     virtual int load(const Glib::ustring &fname) = 0;
-    virtual void preprocess(const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise = true) {};
+    virtual void preprocess(const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise=true, const ColorTemp &wb=ColorTemp()) {};
     virtual void demosaic(const RAWParams &raw, bool autoContrast, double &contrastThreshold) {};
     virtual void flushRawData() {};
     virtual void flushRGB() {};

@@ -133,6 +133,7 @@ protected:
     void updateLRGBHistograms();
     void setScale (int prevscale);
     void updatePreviewImage (int todo, bool panningRelatedChange);
+    void updateWB();
 
     MyMutex mProcessing;
     ProcParams params;

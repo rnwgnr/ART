@@ -145,7 +145,7 @@ static double wbTemp2Slider(double temp)
 
 WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true, true), wbp(nullptr), wblistener(nullptr)
 {
-    EvToolReset.set_action(ALLNORAW);
+    EvToolReset.set_action(WHITEBALANCE);
 
     Gtk::Grid* methodgrid = Gtk::manage(new Gtk::Grid());
     methodgrid->get_style_context()->add_class("grid-spacing");

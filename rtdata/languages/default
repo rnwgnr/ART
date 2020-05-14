@@ -1323,6 +1323,10 @@ PREFERENCES_TP_LABEL;Tool panel:
 PREFERENCES_TP_DISABLE;Grey out inactive tools
 PREFERENCES_TP_VSCROLLBAR;Hide vertical scrollbar
 PREFERENCES_USEBUNDLEDPROFILES;Use bundled profiles
+PREFERENCES_WBPREVIEW_LABEL;White balance position in the preview pipeline:
+PREFERENCES_WBPREVIEW_AFTER;After demosaicing (faster)
+PREFERENCES_WBPREVIEW_BEFORE;Before demosaicing (more accurate)
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Before demosaicing at <100% zoom, after otherwise
 PREFERENCES_WORKFLOW;Layout
 PREFERENCES_XMP_SIDECAR_MODE;XMP sidecar style
 PREFERENCES_XMP_SIDECAR_MODE_STD;Standard (FILENAME.xmp for FILENAME.ext)

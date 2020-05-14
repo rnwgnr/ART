@@ -190,6 +190,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::ComboBoxText *metadataSyncCombo;
     Gtk::ComboBoxText *xmpSidecarCombo;
     Gtk::Entry *exiftoolPath;
+    Gtk::ComboBoxText *wbpreview;
 
     Glib::ustring storedValueRaw;
     Glib::ustring storedValueImg;

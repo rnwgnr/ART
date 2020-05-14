@@ -64,9 +64,9 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DARKFRAME,        // EvLCPUseVign,
     TRANSFORM,        // EvLCPUseCA,
     M_VOID,           // EvFixedExp
-    ALLNORAW,         // EvWBMethod,
-    ALLNORAW,         // EvWBTemp,
-    ALLNORAW,         // EvWBGreen,
+    WHITEBALANCE,     // EvWBMethod,
+    WHITEBALANCE,     // EvWBTemp,
+    WHITEBALANCE,     // EvWBGreen,
     LUMINANCECURVE,   // EvToneCurveMode1,
     LUMINANCECURVE,   // EvToneCurve2,
     LUMINANCECURVE,   // EvToneCurveMode2,
@@ -76,13 +76,13 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     0,                // free entry
     RGBCURVE|M_AUTOEXP, // EvDCPToneCurve,
     ALLNORAW,         // EvDCPIlluminant,
-    RETINEX,          // EvSHEnabled,
+    0,          // EvSHEnabled,
     RGBCURVE,         // EvSHHighlights,
     RGBCURVE,         // EvSHShadows,
     RGBCURVE,         // EvSHHLTonalW,
     RGBCURVE,         // EvSHSHTonalW,
     RGBCURVE,         // EvSHLContrast,
-    RETINEX,          // EvSHRadius,
+    0,          // EvSHRadius,
     ALLNORAW,         // EvCTRotate,
     ALLNORAW,         // EvCTHFlip,
     ALLNORAW,         // EvCTVFlip,
@@ -109,7 +109,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     RESIZE,           // EvResizeHeight
     RESIZE,           // EvResizeEnabled
     ALL,              // EvProfileChangeNotification
-    RETINEX,          // EvShrHighQuality
+    0,          // EvShrHighQuality
     TRANSFORM,        // EvPerspCorr
     DARKFRAME,        // EvLCPFile
     RGBCURVE,         // EvRGBrCurveLumamode
@@ -234,8 +234,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     LUMINANCECURVE,   // EvCATbadpix
     LUMINANCECURVE,   // EvCATAutoadap
     DEFRINGE,         // EvPFCurve
-    ALLNORAW,         // EvWBequal
-    ALLNORAW,         // EvWBequalbo
+    WHITEBALANCE,     // EvWBequal
+    WHITEBALANCE,     // EvWBequalbo
     LUMINANCECURVE,   // EvGradientDegree
     LUMINANCECURVE,   // EvGradientEnabled
     LUMINANCECURVE,   // EvPCVignetteStrength
@@ -434,43 +434,43 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,  // EvWavlev3nois
     DIRPYREQUALIZER,  // EvWavNPmet
     DEMOSAIC,         // EvretinexMethod
-    RETINEX,          // EvLneigh
-    RETINEX,          // EvLgain
-    RETINEX,          // EvLoffs
-    RETINEX,          // EvLstr
-    RETINEX,          // EvLscal
-    RETINEX,          // EvLvart
+    0,          // EvLneigh
+    0,          // EvLgain
+    0,          // EvLoffs
+    0,          // EvLstr
+    0,          // EvLscal
+    0,          // EvLvart
     DEMOSAIC,         // EvLCDCurve
-    RETINEX,          // EvRetinextransmission
+    0,          // EvRetinextransmission
     DEMOSAIC,         // EvRetinexEnabled
-    RETINEX,          // EvRetinexmedianmap
-    RETINEX,          // EvLlimd
+    0,          // EvRetinexmedianmap
+    0,          // EvLlimd
     DEMOSAIC,         // Evretinexcolorspace
     DEMOSAIC,         // EvLCDHCurve
     DEMOSAIC,         // Evretinexgamma
     DEMOSAIC,         // EvLgam
     DEMOSAIC,         // EvLslope
-    RETINEX,          // EvLhighl
+    0,          // EvLhighl
     0,                // --unused--
     DEMOSAIC,         // EvRetinexlhcurve
     OUTPUTPROFILE,    // EvOIntent
     MONITORTRANSFORM, // EvMonitorTransform: no history message
-    RETINEX,          // EvLiter
-    RETINEX,          // EvLgrad
-    RETINEX,          // EvLgrads
-    RETINEX,          // EvLhighlights
-    RETINEX,          // EvLh_tonalwidth
-    RETINEX,          // EvLshadows
-    RETINEX,          // EvLs_tonalwidth
-    RETINEX,          // EvLradius
-    RETINEX,          // EvmapMethod
+    0,          // EvLiter
+    0,          // EvLgrad
+    0,          // EvLgrads
+    0,          // EvLhighlights
+    0,          // EvLh_tonalwidth
+    0,          // EvLshadows
+    0,          // EvLs_tonalwidth
+    0,          // EvLradius
+    0,          // EvmapMethod
     DEMOSAIC,         // EvRetinexmapcurve
     DEMOSAIC,         // EvviewMethod
     ALLNORAW,         // EvcbdlMethod
-    RETINEX,          // EvRetinexgaintransmission
-    RETINEX,          // EvLskal
+    0,          // EvRetinexgaintransmission
+    0,          // EvLskal
     OUTPUTPROFILE,    // EvOBPCompens
-    ALLNORAW,          // EvWBtempBias
+    WHITEBALANCE,      // EvWBtempBias
     DARKFRAME,        // EvRawImageNum
     0,                // unused
     0,                // unused
@@ -517,8 +517,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     ALLNORAW,         // EvTMFattalEnabled
     HDR,              // EvTMFattalThreshold
     HDR,              // EvTMFattalAmount
-    ALLNORAW,         // EvWBEnabled
-    LUMINANCECURVE,         // EvRGBEnabled
+    WHITEBALANCE,     // EvWBEnabled
+    LUMINANCECURVE,   // EvRGBEnabled
     LUMINANCECURVE    // EvLEnabled
 };
 

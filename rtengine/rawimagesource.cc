@@ -1138,26 +1138,33 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
     double cam_b = imatrices.rgb_cam[2][0] * camwb_red + imatrices.rgb_cam[2][1] * camwb_green + imatrices.rgb_cam[2][2] * camwb_blue;
     camera_wb = ColorTemp (cam_r, cam_g, cam_b, 1.); // as shot WB
 
-    ColorTemp ReferenceWB;
-    double ref_r, ref_g, ref_b;
-    {
-        // ...then we re-get the constants but now with auto which gives us better demosaicing and CA auto-correct
-        // performance for strange white balance settings (such as UniWB)
-        ri->get_colorsCoeff( ref_pre_mul, scale_mul, c_black, true);
-        refwb_red = ri->get_pre_mul(0) / ref_pre_mul[0];
-        refwb_green = ri->get_pre_mul(1) / ref_pre_mul[1];
-        refwb_blue = ri->get_pre_mul(2) / ref_pre_mul[2];
-        initialGain = max(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]) / min(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]);
-        ref_r = imatrices.rgb_cam[0][0] * refwb_red + imatrices.rgb_cam[0][1] * refwb_green + imatrices.rgb_cam[0][2] * refwb_blue;
-        ref_g = imatrices.rgb_cam[1][0] * refwb_red + imatrices.rgb_cam[1][1] * refwb_green + imatrices.rgb_cam[1][2] * refwb_blue;
-        ref_b = imatrices.rgb_cam[2][0] * refwb_red + imatrices.rgb_cam[2][1] * refwb_green + imatrices.rgb_cam[2][2] * refwb_blue;
-        ReferenceWB = ColorTemp (ref_r, ref_g, ref_b, 1.);
-    }
+    // ColorTemp ReferenceWB;
+    // double ref_r, ref_g, ref_b;
+    // {
+    //     // ...then we re-get the constants but now with auto which gives us better demosaicing and CA auto-correct
+    //     // performance for strange white balance settings (such as UniWB)
+    //     ri->get_colorsCoeff( ref_pre_mul, scale_mul, c_black, true);
+    //     // ref_pre_mul[0] = 1.0;
+    //     // ref_pre_mul[1] = 1.0;
+    //     // ref_pre_mul[2] = 1.0;
+    //     // ref_pre_mul[3] = 1.0;
+    //     // initialGain = calculate_scale_mul(scale_mul, ref_pre_mul, c_white, c_black, false, ri->get_colors()); // recalculate scale colors with adjusted levels
+        
+    //     refwb_red = ri->get_pre_mul(0) / ref_pre_mul[0];
+    //     refwb_green = ri->get_pre_mul(1) / ref_pre_mul[1];
+    //     refwb_blue = ri->get_pre_mul(2) / ref_pre_mul[2];
+    //     initialGain = max(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]) / min(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]);
+    //     ref_r = imatrices.rgb_cam[0][0] * refwb_red + imatrices.rgb_cam[0][1] * refwb_green + imatrices.rgb_cam[0][2] * refwb_blue;
+    //     ref_g = imatrices.rgb_cam[1][0] * refwb_red + imatrices.rgb_cam[1][1] * refwb_green + imatrices.rgb_cam[1][2] * refwb_blue;
+    //     ref_b = imatrices.rgb_cam[2][0] * refwb_red + imatrices.rgb_cam[2][1] * refwb_green + imatrices.rgb_cam[2][2] * refwb_blue;
+    //     ReferenceWB = ColorTemp (ref_r, ref_g, ref_b, 1.);
+    // }
 
     if (settings->verbose) {
         printf("Raw As Shot White balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", camera_wb.getTemp(), camera_wb.getGreen(), cam_r, cam_g, cam_b, camwb_red, camwb_green, camwb_blue);
-        printf("Raw Reference (auto) white balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", ReferenceWB.getTemp(), ReferenceWB.getGreen(), ref_r, ref_g, ref_b, refwb_red, refwb_blue, refwb_green);
     }
+    //     printf("Raw Reference (auto) white balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", ReferenceWB.getTemp(), ReferenceWB.getGreen(), ref_r, ref_g, ref_b, refwb_red, refwb_blue, refwb_green);
+    // }
 
     /*{
             // Test code: if you want to test a specific white balance
@@ -1219,11 +1226,44 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void RawImageSource::preprocess  (const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise)
+void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise, const ColorTemp &wb)
 {
 //    BENCHFUN
     MyTime t1, t2;
     t1.set();
+
+    { // recompute the pre multipliers with the chosen wb
+        float tmp_scale_mul[4];
+        float tmp_black[4];
+        ri->get_colorsCoeff(ref_pre_mul, tmp_scale_mul, tmp_black, true);
+
+        double rm, gm, bm;
+        ColorTemp refwb;
+        if (wb.getTemp() > 0) {
+            wb.getMultipliers(rm, gm, bm);
+            if (max(rm, gm, bm) <= 3 * min(rm, gm, bm)) {
+                ref_pre_mul[0] = ri->get_pre_mul(0) / rm;
+                ref_pre_mul[1] = ri->get_pre_mul(1) / gm;
+                ref_pre_mul[2] = ri->get_pre_mul(2) / bm;
+                ref_pre_mul[3] = ref_pre_mul[1];
+            }
+            refwb = wb;
+        }
+        refwb_red = ri->get_pre_mul(0) / ref_pre_mul[0];
+        refwb_green = ri->get_pre_mul(1) / ref_pre_mul[1];
+        refwb_blue = ri->get_pre_mul(2) / ref_pre_mul[2];
+
+        if (wb.getTemp() <= 0) {
+            rm = imatrices.rgb_cam[0][0] * refwb_red + imatrices.rgb_cam[0][1] * refwb_green + imatrices.rgb_cam[0][2] * refwb_blue;
+            gm = imatrices.rgb_cam[1][0] * refwb_red + imatrices.rgb_cam[1][1] * refwb_green + imatrices.rgb_cam[1][2] * refwb_blue;
+            bm = imatrices.rgb_cam[2][0] * refwb_red + imatrices.rgb_cam[2][1] * refwb_green + imatrices.rgb_cam[2][2] * refwb_blue;
+            refwb = ColorTemp(rm, gm, bm, 1.);
+        }
+            
+        if (settings->verbose) {
+            printf("Raw preprocessing white balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", refwb.getTemp(), refwb.getGreen(), rm, gm, bm, refwb_red, refwb_blue, refwb_green);
+        }
+    }
 
     Glib::ustring newDF = raw.dark_frame;
     RawImage *rid = nullptr;

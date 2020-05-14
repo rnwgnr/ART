@@ -321,6 +321,12 @@ public:
     prevdemo_t prevdemo; // Demosaicing method used for the <100% preview
     bool serializeTiffRead;
     bool denoiseZoomedOut;
+    enum WBPreviewMode {
+        WB_AFTER, // apply WB after demosaicing (faster)
+        WB_BEFORE, // always apply WB before demosaicing
+        WB_BEFORE_HIGH_DETAIL // apply WB before demosaicing only at 1:1
+    };
+    WBPreviewMode wb_preview_mode;
 
     bool menuGroupRank;
     bool menuGroupLabel;
