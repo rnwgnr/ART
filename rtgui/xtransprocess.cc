@@ -197,8 +197,6 @@ void XTransProcess::methodChanged ()
     const int curSelection = method->get_active_row_number();
     const RAWParams::XTransSensor::Method currentMethod = RAWParams::XTransSensor::Method(curSelection);
 
-    oldSelection = curSelection;
-
     if (currentMethod == procparams::RAWParams::XTransSensor::Method::FOUR_PASS || currentMethod == procparams::RAWParams::XTransSensor::Method::TWO_PASS) {
         dualDemosaicOptions->show();
     } else {
@@ -210,6 +208,8 @@ void XTransProcess::methodChanged ()
             ? EvDemosaicMethodPreProc
             : EvDemosaicMethod, method->get_active_text());
     }
+
+    oldSelection = curSelection;
 }
 
 void XTransProcess::checkBoxToggled (CheckBox* c, CheckValue newval)
