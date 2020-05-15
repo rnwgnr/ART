@@ -460,7 +460,8 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
         neutral.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO);
     }
 
-    src.preprocess(neutral.raw, neutral.lensProf, neutral.coarse, false);
+    ColorTemp wb = src.getWB();
+    src.preprocess(neutral.raw, neutral.lensProf, neutral.coarse, false, wb);
     double thresholdDummy = 0.f;
 
     src.rescale();
@@ -497,7 +498,6 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
     int ih = fh / int(scale);
 
     Imagefloat tmp(iw, ih);
-    ColorTemp wb = src.getWB();
     if (show_clip) {
         wb = ColorTemp();
     }
