@@ -1241,12 +1241,10 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         ColorTemp refwb;
         if (wb.getTemp() > 0) {
             wb.getMultipliers(rm, gm, bm);
-            if (max(rm, gm, bm) <= 3 * min(rm, gm, bm)) {
-                ref_pre_mul[0] = ri->get_pre_mul(0) / rm;
-                ref_pre_mul[1] = ri->get_pre_mul(1) / gm;
-                ref_pre_mul[2] = ri->get_pre_mul(2) / bm;
-                ref_pre_mul[3] = ref_pre_mul[1];
-            }
+            ref_pre_mul[0] = ri->get_pre_mul(0) / rm;
+            ref_pre_mul[1] = ri->get_pre_mul(1) / gm;
+            ref_pre_mul[2] = ri->get_pre_mul(2) / bm;
+            ref_pre_mul[3] = ref_pre_mul[1];
             refwb = wb;
         }
         refwb_red = ri->get_pre_mul(0) / ref_pre_mul[0];
