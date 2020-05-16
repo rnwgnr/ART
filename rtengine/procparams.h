@@ -98,6 +98,8 @@ struct AreaMask {
             POLYGON
         };
         Mode mode;
+        double feather; // [0,100]
+        double blur;
 
         Shape();
         virtual ~Shape() {}
@@ -149,6 +151,7 @@ struct AreaMask {
         virtual bool operator!=(const Polygon &other) const;
     };
     bool enabled;
+    bool per_shape_feather;
     double feather; // [0,100]
     double blur;
     std::vector<double> contrast; // curve

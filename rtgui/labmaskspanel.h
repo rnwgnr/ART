@@ -163,6 +163,7 @@ private:
     void onAreaMaskCopyPressed();
     void onAreaMaskPastePressed();
     void onAreaShapeModeChanged(int i);
+    void onAreaShapeModePSFChanged();
     void onRectangleAreaMaskDrawChanged();
     void onAreaMaskDrawRectangleAddPressed();
     void onAreaMaskDrawPolygonAddPressed();
@@ -282,7 +283,11 @@ private:
     Adjuster *areaMaskBlur;
     DiagonalCurveEditor *areaMaskContrast;
     Gtk::ToggleButton *areaMaskMode[3];
+    Gtk::ToggleButton *areaMaskModePSF; // Per Shape Feather
+    std::shared_ptr<RTImage> modePSFOn;
+    std::shared_ptr<RTImage> modePSFOff;
     sigc::connection areaMaskModeConn[3];
+    sigc::connection areaMaskModePSFConn; // Per Shape Feather
     // MyComboBoxText *areaMaskMode;
     Adjuster *areaMaskX;
     Adjuster *areaMaskY;

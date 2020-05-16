@@ -59,44 +59,91 @@ void fastlin2log(float *x, float factor, float base, int w)
 }
 #endif
 
-
-bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &mask)
+void feather_and_blur_mask(const array2D<float> &guide, array2D<float> &mask, const DiagonalCurve &curve, int radius, float blur, bool multithread)
 {
-    bool enabled = areaMask.enabled;
-    float blur = areaMask.blur / scale;
-    
-    if (!enabled || areaMask.shapes.empty() || (areaMask.isTrivial() && blur <= 0.f)) {
+    // guided feathering and contrast
+    guidedFilter(guide, mask, mask, radius, 1e-7, multithread);
+
+    const auto contrast =
+        [&curve](float x) -> float
+        {
+            return curve.getVal(x);
+        };
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < mask.height(); ++y) {
+        for (int x = 0; x < mask.width(); ++x) {
+            float v = 1.f - LIM01(mask[y][x]);
+            // if (!areaMask.inverted) {
+            //     v = 1.f - v;
+            // }
+            mask[y][x] = contrast(v);
+            assert(mask[y][x] == mask[y][x]);
+        }
+    }
+
+    // and blur
+    if (blur > 0.f) {
+#ifdef _OPENMP
+#       pragma omp parallel if (multithread)
+#endif
+        gaussianBlur(mask, mask, mask.width(), mask.height(), blur);
+    }
+}
+
+bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &global_mask)
+{
+    if (!areaMask.enabled || areaMask.shapes.empty() || (areaMask.isTrivial() && areaMask.blur <= 0.f)) {
         return false;
     }
 
-    float w2 = float(width) / 2;
-    float h2 = float(height) / 2;
+    float w2 = float(width) / 2.f;
+    float h2 = float(height) / 2.f;
 
     Coord origin(ox, oy);
 
     const auto inside =
         [&](int x, int y) -> bool
         {
-            return (x >= 0 && x < mask.width() &&
-                    y >= 0 && y < mask.height());
+            return (x >= 0 && x < global_mask.width() &&
+                    y >= 0 && y < global_mask.height());
         };
 
     const int dir[] = { 1, 1, 1, -1, -1, 1, -1, -1 };
 
-    constexpr float bgcolor = 1.f;
-    constexpr float fgcolor = 1.f - bgcolor;
+    constexpr float bgcolor = 1.f;           // mask 100% transparent, = seing the background layer
+    constexpr float fgcolor = 1.f - bgcolor; // mask 0% transparent, = seing the foreground layer
 
     // first fill with background
-    mask(guide.width(), guide.height());
-    float *maskdata = mask;
-    std::fill(maskdata, maskdata + (mask.width() * mask.height()), bgcolor);
-    array2D<float> intersect;
+    global_mask(guide.width(), guide.height());
+    std::fill(global_mask[0], global_mask[0] + (global_mask.width() * global_mask.height()), areaMask.per_shape_feather ? fgcolor : bgcolor);
 
     float min_feather = RT_INFINITY;
     int radius = 0;
 
+    // will either hold a pointer to the global mask
+    // or allocate data for rendering each shape
+    // or used for intersecting shapes in single value mode
+    array2D<float> shape_mask;
+    DiagonalCurve constrast_curve(areaMask.contrast);
+
     for (const auto &area_ : areaMask.shapes) {
-        float **marr = mask;
+        float **marr = nullptr;
+
+        if (areaMask.per_shape_feather || area_->mode == AreaMask::Shape::INTERSECT) {
+            if (!shape_mask.width()) {
+                // allocated once, when needed
+                shape_mask(global_mask.width(), global_mask.height());
+            }
+            std::fill(shape_mask[0],
+                      shape_mask[0] + (shape_mask.width() * shape_mask.height()),
+                      area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+            marr = shape_mask;
+        }
+        else {
+            marr = global_mask;
+        }
         float color;
 
         switch (area_->mode) {
@@ -108,13 +155,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
         default:
             color = bgcolor;
             break;
-        }
-
-        if (area_->mode == AreaMask::Shape::INTERSECT) {
-            intersect(mask.width(), mask.height());
-            marr = intersect;
-            float *p = intersect;
-            std::fill(p, p + (mask.width() * mask.height()), bgcolor);
         }
 
         switch (area_->getType()) {
@@ -165,7 +205,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 }
             }
 
-            radius = std::max(int(areaMask.feather / 100.0 * min_feather), 1);
+            radius = std::max(int((areaMask.per_shape_feather ? area->feather : areaMask.feather) / 100.0 * min_feather), 1);
 
             break;
         }
@@ -183,9 +223,9 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 imgSpacePoly.at(i).roundness = area->knots.at(i).roundness;
             }
             auto v = area->get_tessellation(imgSpacePoly);
-            min_feather = polyFill(marr, mask.width(), mask.height(), v, color);
+            min_feather = polyFill(marr, global_mask.width(), global_mask.height(), v, color);
 
-            radius = std::max(int(areaMask.feather / 100.0 * min_feather), 1);
+            radius = std::max(int((areaMask.per_shape_feather ? area->feather : areaMask.feather) / 100.0 * min_feather), 1);
 
             break;
         }
@@ -193,54 +233,136 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
             break;
         }
 
-        if (area_->mode == AreaMask::Shape::INTERSECT) {
+        if (!areaMask.per_shape_feather && area_->mode == AreaMask::Shape::INTERSECT) {
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
-            for (int y = 0; y < mask.height(); ++y) {
-                for (int x = 0; x < mask.width(); ++x) {
-                    if (mask[y][x] == fgcolor && intersect[y][x] != fgcolor) {
-                        mask[y][x] = bgcolor;
+            for (int y = 0; y < global_mask.height(); ++y) {
+                for (int x = 0; x < global_mask.width(); ++x) {
+                    if (global_mask[y][x] == fgcolor && shape_mask[y][x] != fgcolor) {
+                        global_mask[y][x] = bgcolor;
                     }
                 }
             }
         }
-    }
 
-    // guided feathering and contrast
-    guidedFilter(guide, mask, mask, radius, 1e-7, multithread);
+        if (areaMask.per_shape_feather) {
+            // feather and blur the shape's mask
+            feather_and_blur_mask(guide, shape_mask, constrast_curve, radius, area_->blur / scale, multithread);
 
-    DiagonalCurve curve(areaMask.contrast);
-    const auto contrast =
-        [&curve](float x) -> float
-        {
-            return curve.getVal(x);
-        };
+            // WARNING: mask has been inverted (1.0 <-> 0.0) by feather_and_blur_mask
+
+            // merge the shape's mask into the global mask
+            switch (area_->mode) {
+            case AreaMask::Shape::ADD:
 #ifdef _OPENMP
-#   pragma omp parallel for if (multithread)
+#               pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < mask.height(); ++y) {
-        for (int x = 0; x < mask.width(); ++x) {
-            float v = 1.f - LIM01(mask[y][x]);
-            // if (!areaMask.inverted) {
-            //     v = 1.f - v;
-            // }
-            mask[y][x] = contrast(v);
-            assert(mask[y][x] == mask[y][x]);
+                /*
+                for (int y = 0; y < global_mask.height(); ++y) {
+                    for (int x = 0; x < global_mask.width(); ++x) {
+                        if (shape_mask[y][x] == fgcolor || global_mask[y][x] == bgcolor) {
+                            continue;
+                        }
+                        else if (shape_mask[y][x] == bgcolor) {
+                            global_mask[y][x] = bgcolor;
+                        }
+                        else {
+                            global_mask[y][x] = rtengine::min<float>(global_mask[y][x] + shape_mask[y][x], 1.);
+                        }
+                    }
+                }
+                */
+                for (int y = 0; y < global_mask.height(); ++y) {
+                    float *s = shape_mask[y];
+                    float *g = global_mask[y];
+                    for (int x = 0; x < global_mask.width(); ++x) {
+                        if (*s == fgcolor || *g == bgcolor) {
+                            ++s;
+                            ++g;
+                            continue;
+                        }
+                        else if (*s == bgcolor) {
+                            *(g++) = bgcolor;
+                            ++s;
+                        }
+                        else {
+                            *g = rtengine::min<float>(*g + *(s++), 1.);
+                            ++g;
+                        }
+                    }
+                }
+                break;
+            case AreaMask::Shape::INTERSECT:
+#ifdef _OPENMP
+#               pragma omp parallel for if (multithread)
+#endif
+                /*
+                for (int y = 0; y < global_mask.height(); ++y) {
+                    for (int x = 0; x < global_mask.width(); ++x) {
+                        global_mask[y][x] *= shape_mask[y][x];
+                    }
+                }
+                */
+                for (int y = 0; y < global_mask.height(); ++y) {
+                    float *s = shape_mask[y];
+                    float *g = global_mask[y];
+                    for (int x = 0; x < global_mask.width(); ++x) {
+                        *(g++) *= *(s++);
+                    }
+                }
+                break;
+            case AreaMask::Shape::SUBTRACT:
+            default:
+#ifdef _OPENMP
+#               pragma omp parallel for if (multithread)
+#endif
+                /*
+                for (int y = 0; y < global_mask.height(); ++y) {
+                    for (int x = 0; x < global_mask.width(); ++x) {
+                        if (shape_mask[y][x] == bgcolor || global_mask[y][x] == fgcolor) {
+                            continue;
+                        }
+                        else if (shape_mask[y][x] == fgcolor) {
+                            global_mask[y][x] = fgcolor;
+                        }
+                        else {
+                            global_mask[y][x] = rtengine::max<float>(global_mask[y][x] - (1. - shape_mask[y][x]), 0.);
+                        }
+                    }
+                }
+                */
+                for (int y = 0; y < global_mask.height(); ++y) {
+                    float *s = shape_mask[y];
+                    float *g = global_mask[y];
+                    for (int x = 0; x < global_mask.width(); ++x) {
+                        if (*s == bgcolor || *g == fgcolor) {
+                            ++s;
+                            ++g;
+                            continue;
+                        }
+                        else if (*s == fgcolor) {
+                            *(g++) = fgcolor;
+                            ++s;
+                        }
+                        else {
+                            *g = rtengine::max<float>(*g - (1. - *(s++)), 0.);
+                            ++g;
+                        }
+                    }
+                }
+                break;
+            }
         }
     }
 
-    // and blur
-    if (blur > 0.f) {
-#ifdef _OPENMP
-#       pragma omp parallel if (multithread)
-#endif
-        gaussianBlur(mask, mask, mask.width(), mask.height(), blur);
+    if (!areaMask.per_shape_feather) {
+        // feather and blur only the global mask
+        feather_and_blur_mask(guide, global_mask, constrast_curve, radius, areaMask.blur / scale, multithread);
     }
 
     return true;
 }
-
 
 bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask &drawnMask, const array2D<float> &guide, bool multithread, array2D<float> &mask)
 {

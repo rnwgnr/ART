@@ -431,7 +431,9 @@ bool saveToKeyfile(
 
 
 AreaMask::Shape::Shape():
-    mode(ADD)
+    mode(ADD),
+    feather(0.),
+    blur(0.)
 {
 }
 
@@ -462,7 +464,9 @@ void AreaMask::Polygon::Knot::setPos(CoordD &pos)
 
 bool AreaMask::Shape::operator==(const Shape &other) const
 {
-    return mode == other.mode;
+    return mode == other.mode
+           && feather == other.feather
+           && blur == other.blur;
 }
 
 
@@ -565,6 +569,7 @@ bool AreaMask::Polygon::operator!=(const Polygon &other) const
 
 AreaMask::AreaMask():
     enabled(false),
+    per_shape_feather(false),
     feather(0),
     blur(0),
     contrast{DCT_Linear},
@@ -917,6 +922,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskEnabled" + suffix, areaMask.enabled);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskFeather" + suffix, areaMask.feather);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskContrast" + suffix, areaMask.contrast);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "AreaMaskPerShapeFeather" + suffix, areaMask.per_shape_feather);
     if (areaMask.contrast.empty() || areaMask.contrast[0] < DCT_Linear || areaMask.contrast[0] >= DCT_Unchanged) {
         areaMask.contrast = {DCT_Linear};
     }
@@ -959,6 +965,10 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                 }
             }
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
+            if (ppVersion >= 1015) {
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Feather" + suffix, shape->feather);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Blur" + suffix, shape->blur);
+            }
             if (found) {
                 shape->mode = str2mode(mode);
                 s.emplace_back(shape);
@@ -1016,6 +1026,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "AreaMaskFeather" + suffix, areaMask.feather, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskBlur" + suffix, areaMask.blur, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskContrast" + suffix, areaMask.contrast, keyfile);
+    putToKeyfile(group_name, prefix + "AreaMaskPerShapeFeather" + suffix, areaMask.per_shape_feather, keyfile);
+
     for (size_t i = 0; i < areaMask.shapes.size(); ++i) {
         auto &a = areaMask.shapes[i];
         std::string n = i ? std::string("_") + std::to_string(i) + "_" : "";
@@ -1042,6 +1054,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
         }
         }
         putToKeyfile(group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode2str(a->mode), keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "Feather" + suffix, a->feather, keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "Blur" + suffix, a->blur, keyfile);
     }
 
     putToKeyfile(group_name, prefix + "DeltaEMaskEnabled" + suffix, deltaEMask.enabled, keyfile);

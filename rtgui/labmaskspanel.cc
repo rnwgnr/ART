@@ -643,7 +643,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     CurveListener::setMulti(true);
     
     const auto add_button =
-        [](Gtk::Button *btn, Gtk::Box *box, int h=20) -> void
+        [](Gtk::Button *btn, Gtk::Box *box, int h=20, Gtk::PackType type=Gtk::PackType::PACK_START) -> void
         {
             setExpandAlignProperties(btn, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
             btn->set_relief(Gtk::RELIEF_NONE);
@@ -652,7 +652,12 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
             if (h > 0) {
                 btn->set_size_request(-1, h);
             }
-            box->pack_start(*btn, false, false);
+            if (type == Gtk::PackType::PACK_START) {
+                box->pack_start(*btn, false, false);
+            }
+            else {
+                box->pack_end(*btn, false, false);
+            }
         };
     
     int n = cp_->getColumnCount();
@@ -952,7 +957,10 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
 
     hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_LABMASKS_AREA_SHAPE_MODE") + ":")), Gtk::PACK_SHRINK, 4);
-    hb->pack_start(*Gtk::manage(new Gtk::Label("")), Gtk::PACK_EXPAND_WIDGET);
+
+    modePSFOn  = std::shared_ptr<RTImage>(new RTImage ("area-shape-psf-on.png"));
+    modePSFOff = std::shared_ptr<RTImage>(new RTImage ("area-shape-psf-off.png"));
+
     const char *img[3] = {
         "area-shape-add.png",
         "area-shape-subtract.png",
@@ -963,13 +971,24 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         "TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT",
         "TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT"
     };
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 2; i >= 0; --i) {
         areaMaskMode[i] = Gtk::manage(new Gtk::ToggleButton());
         areaMaskMode[i]->add(*Gtk::manage(new RTImage(img[i])));
         areaMaskMode[i]->set_tooltip_text(M(tips[i]));
         areaMaskModeConn[i] = areaMaskMode[i]->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &LabMasksPanel::onAreaShapeModeChanged), i));
-        add_button(areaMaskMode[i], hb, 24);
+        add_button(areaMaskMode[i], hb, 24, Gtk::PackType::PACK_END);
     }
+
+    Gtk::Separator *sep = Gtk::manage(new Gtk::Separator(Gtk::Orientation::ORIENTATION_VERTICAL));
+    setExpandAlignProperties(sep, false, true, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
+    hb->pack_end(*sep, false, false);
+
+    areaMaskModePSF = Gtk::manage(new Gtk::ToggleButton());
+    areaMaskModePSF->set_image(*modePSFOff);
+    areaMaskModePSF->set_tooltip_text(M("TP_LABMASKS_AREA_SHAPE_MODE_PSF"));
+    areaMaskModePSFConn = areaMaskModePSF->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onAreaShapeModePSFChanged));
+    add_button(areaMaskModePSF, hb, 24, Gtk::PackType::PACK_END);
+
     vb->pack_start(*hb);
     
     areaMaskRoundness = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_ROUNDNESS"), 0, 100, 0.1, 0));
@@ -1102,12 +1121,15 @@ void LabMasksPanel::maskGet(int idx)
     r.parametricMask.contrastThreshold = contrastThreshold->getValue();
     r.inverted = maskInverted->get_active();
     r.areaMask.enabled = areaMask->getEnabled();
-    r.areaMask.feather = areaMaskFeather->getValue();
-    r.areaMask.blur = areaMaskBlur->getValue();
+    r.areaMask.per_shape_feather = areaMaskModePSF->get_active();
+    if (!areaMaskModePSF->get_active()) {
+        r.areaMask.feather = areaMaskFeather->getValue();
+        r.areaMask.blur = areaMaskBlur->getValue();
+    }
     r.areaMask.contrast = areaMaskContrast->getCurve();
     if (area_shape_index_ < r.areaMask.shapes.size()) {
         auto &a = r.areaMask.shapes[area_shape_index_];
-        switch (r.areaMask.shapes[area_shape_index_]->getType()) {
+        switch (a->getType()) {
             case Shape::Type::POLYGON:
             {
                 auto poly = static_cast<rtengine::AreaMask::Polygon*>(a.get());
@@ -1128,6 +1150,11 @@ void LabMasksPanel::maskGet(int idx)
                 rect->mode = Shape::Mode(getAreaShapeMode());
             }
         }
+        if (areaMaskModePSF->get_active()) {
+            a->feather = areaMaskFeather->getValue();
+            a->blur = areaMaskBlur->getValue();
+        }
+
     }
     r.deltaEMask.enabled = deltaEMask->getEnabled();
     double b, t;
@@ -1340,8 +1367,15 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
 
         areaMaskToggle->set_active(false);
         areaMask->setEnabled(r.areaMask.enabled);
-        areaMaskFeather->setValue(r.areaMask.feather);
-        areaMaskBlur->setValue(r.areaMask.blur);
+        {
+        ConnectionBlocker blocker(areaMaskModePSFConn);
+        areaMaskModePSF->set_active(r.areaMask.per_shape_feather);
+        areaMaskModePSF->set_image(r.areaMask.per_shape_feather ? *modePSFOn : *modePSFOff);
+        }
+        if (!r.areaMask.per_shape_feather) {
+            areaMaskFeather->setValue(r.areaMask.feather);
+            areaMaskBlur->setValue(r.areaMask.blur);
+        }
         areaMaskContrast->setCurve(r.areaMask.contrast);
         if (area_shape_index_ < r.areaMask.shapes.size()) {
             auto &a = r.areaMask.shapes[area_shape_index_];
@@ -1360,12 +1394,17 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
             }
             toggleAreaShapeMode(int(a->mode));
 
-            if (r.areaMask.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE) {
+            if (a->getType() == Shape::Type::RECTANGLE) {
                 updateRectangleAreaMask(false);
                 setRectangleAdjustersVisibility(true);
-            } else if (r.areaMask.shapes[area_shape_index_]->getType() == Shape::Type::POLYGON) {
+            } else if (a->getType() == Shape::Type::POLYGON) {
                 setRectangleAdjustersVisibility(false);
             }
+            if (r.areaMask.per_shape_feather) {
+                areaMaskFeather->setValue(a->feather);
+                areaMaskBlur->setValue(a->blur);
+            }
+
         }
 
         deltaEMask->setEnabled(r.deltaEMask.enabled);
@@ -1961,6 +2000,18 @@ void LabMasksPanel::onAreaShapeModeChanged(int i)
 }
 
 
+void LabMasksPanel::onAreaShapeModePSFChanged()
+{
+    onAreaShapeSelectionChanged();
+    populateShapeList(selected_, area_shape_index_);
+    auto l = getListener();
+    if (l) {
+        l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
+    }
+    maskShow(selected_, true);
+}
+
+
 void LabMasksPanel::populateShapeList(int idx, int sel)
 {
     ConnectionBlocker b(shapeSelectionConn);
@@ -2025,9 +2076,9 @@ void LabMasksPanel::onAreaMaskPastePressed()
         listEdited = true;
         disableListener();
         masks_[selected_].areaMask = clipboard.getAreaMask();
+        auto &a = masks_[selected_].areaMask;
         area_shape_index_ = 0;
-        if (area_shape_index_ < masks_[selected_].areaMask.shapes.size()) {
-            auto &a = masks_[selected_].areaMask;
+        if (area_shape_index_ < a.shapes.size()) {
             switch (a.shapes.at(area_shape_index_)->getType()) {
             case rtengine::AreaMask::Shape::Type::POLYGON:
             {
@@ -2052,10 +2103,16 @@ void LabMasksPanel::onAreaMaskPastePressed()
             }
             auto &s = a.shapes[area_shape_index_];
             updateGeometry();
-            areaMaskFeather->setValue(a.feather);
-            areaMaskBlur->setValue(a.blur);
+            if (a.per_shape_feather) {
+                areaMaskFeather->setValue(s->feather);
+                areaMaskBlur->setValue(s->blur);
+            }
             areaMaskContrast->setCurve(a.contrast);
             toggleAreaShapeMode(int(s->mode));
+        }
+        if (!a.per_shape_feather) {
+            areaMaskFeather->setValue(a.feather);
+            areaMaskBlur->setValue(a.blur);
         }
         populateShapeList(selected_, area_shape_index_);
         maskShow(selected_, true);        
@@ -2098,6 +2155,19 @@ void LabMasksPanel::areaShapeSelect(int sel, bool update_list)
         }
         }
         updateGeometry();
+
+        {
+        ConnectionBlocker blocker(areaMaskModePSFConn);
+        areaMaskModePSF->set_active(masks_[selected_].areaMask.per_shape_feather);
+        areaMaskModePSF->set_image(masks_[selected_].areaMask.per_shape_feather ? *modePSFOn : *modePSFOff);
+        }
+        if (masks_[selected_].areaMask.per_shape_feather) {
+            disableListener();
+            areaMaskFeather->setValue(ns->feather);
+            areaMaskBlur->setValue(ns->blur);
+            enableListener();
+        }
+
         toggleAreaShapeMode(int(ns->mode));
         if (areaMaskToggle->get_active()) {
             areaMaskToggle->set_active(false);
