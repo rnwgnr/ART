@@ -277,6 +277,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
                 preproc_wb = currWB;
                 todo |= M_PREPROC | M_RAW;
+                if (todo & M_HIGHQUAL) {
+                    todo |= M_AUTOEXP;
+                }
             }
             break;
         case Options::WB_AFTER:
