@@ -899,6 +899,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     
     areaMaskFeather = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
     add_adjuster(areaMaskFeather, area);
+    areaMaskFeather->setLogScale(100.0, 0.0);
 
     areaMaskBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), 0, 500, 0.1, 0));
     add_adjuster(areaMaskBlur, area);
@@ -1182,7 +1183,7 @@ void LabMasksPanel::onAddPressed()
     listEdited = true;
     selected_ = masks_.size();
     masks_.push_back(rtengine::procparams::Mask());
-    masks_.back().areaMask.shapes = {std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
+//    masks_.back().areaMask.shapes = {std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
     populateList();
     area_shape_index_ = 0;
     maskShow(selected_);
@@ -1872,7 +1873,7 @@ void LabMasksPanel::onAreaShapeResetPressed()
             areaMaskToggle->set_active(false);
         }
         listEdited = true;
-        masks_[selected_].areaMask.shapes = {};//std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
+        masks_[selected_].areaMask.shapes.clear();// = {};//std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
         area_shape_index_ = 0;
         center_x_ = defaultAreaShape.x;
         center_y_ = defaultAreaShape.y;
@@ -1899,12 +1900,11 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
         listEdited = true;
         auto &am = masks_[selected_].areaMask;
         // TODO: Find a way to copy the last known Rectangle (feature removed by Hombre)
+        am.shapes.emplace_back();
         if (type == Shape::Type::RECTANGLE) {
-            std::shared_ptr<rtengine::AreaMask::Rectangle> s(new rtengine::AreaMask::Rectangle(defaultAreaShape));
-            am.shapes.push_back(s);
+            am.shapes.back().reset(new rtengine::AreaMask::Rectangle(defaultAreaShape));
         } else if (type == Shape::Type::POLYGON) {
-            std::shared_ptr<rtengine::AreaMask::Polygon> s(new rtengine::AreaMask::Polygon());
-            am.shapes.push_back(s);
+            am.shapes.back().reset(new rtengine::AreaMask::Polygon());
         }
         populateShapeList(selected_, -1);
         areaShapeSelect(am.shapes.size()-1, true);
@@ -2079,7 +2079,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
         auto &a = masks_[selected_].areaMask;
         area_shape_index_ = 0;
         if (area_shape_index_ < a.shapes.size()) {
-            switch (a.shapes.at(area_shape_index_)->getType()) {
+            switch (a.shapes[area_shape_index_]->getType()) {
             case rtengine::AreaMask::Shape::Type::POLYGON:
             {
                 auto s = static_cast<rtengine::AreaMask::Polygon*>(a.shapes[area_shape_index_].get());
@@ -2102,6 +2102,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
             }
             }
             auto &s = a.shapes[area_shape_index_];
+            setGeometryType(a.shapes[area_shape_index_]->getType());
             updateGeometry();
             if (a.per_shape_feather) {
                 areaMaskFeather->setValue(s->feather);

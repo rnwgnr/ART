@@ -114,14 +114,14 @@ public:
 
     int load(const Glib::ustring &fname) override { return load(fname, false); }
     int load(const Glib::ustring &fname, bool firstFrameOnly);
-    void        preprocess  (const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise = true) override;
-    void        demosaic    (const RAWParams &raw, bool autoContrast, double &contrastThreshold) override;
-    void        flushRawData      () override;
-    void        flushRGB          () override;
-    void        HLRecovery_Global (const ExposureParams &hrp) override;
-    void        refinement(int PassCount);
-    void        setBorder(unsigned int rawBorder) override {border = rawBorder;}
-    bool        isRGBSourceModified() const override
+    void preprocess(const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise=true, const ColorTemp &wb=ColorTemp()) override;
+    void demosaic(const RAWParams &raw, bool autoContrast, double &contrastThreshold) override;
+    void flushRawData() override;
+    void flushRGB() override;
+    void HLRecovery_Global(const ExposureParams &hrp) override;
+    void refinement(int PassCount);
+    void setBorder(unsigned int rawBorder) override {border = rawBorder;}
+    bool isRGBSourceModified() const override
     {
         return rgbSourceModified;   // tracks whether cached rgb output of demosaic has been modified
     }

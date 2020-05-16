@@ -101,6 +101,10 @@ if(HAVE_X86_SSE_MATH)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -mfpmath=sse")
 endif()
 
+# Do net set math errno, as we never check its value.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-math-errno")
+
 # On i386 Linux we can fix unaligned SSE malloc (see GitHub issue #4432)
 include(FindUnalignedMalloc)
 

@@ -429,6 +429,7 @@ void Options::setDefaults()
     inspectorDelay = 0;
     serializeTiffRead = true;
     denoiseZoomedOut = true;
+    wb_preview_mode = WB_BEFORE_HIGH_DETAIL;
 
     FileBrowserToolbarSingleRow = false;
     hideTPVScrollbar = false;
@@ -1087,6 +1088,11 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("Performance", "DenoiseZoomedOut")) {
                     denoiseZoomedOut = keyFile.get_boolean("Performance", "DenoiseZoomedOut");
+                }
+
+                if (keyFile.has_key("Performance", "WBPreviewMode")) {
+                    int v = keyFile.get_integer("Performance", "WBPreviewMode");
+                    wb_preview_mode = WBPreviewMode(rtengine::LIM(v, int(WB_AFTER), int(WB_BEFORE_HIGH_DETAIL)));
                 }
             }
 
@@ -1978,6 +1984,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("Performance", "PreviewDemosaicFromSidecar", prevdemo);
         keyFile.set_boolean("Performance", "SerializeTiffRead", serializeTiffRead);
         keyFile.set_boolean("Performance", "DenoiseZoomedOut", denoiseZoomedOut);
+        keyFile.set_integer("Performance", "WBPreviewMode", wb_preview_mode);
         keyFile.set_integer("Inspector", "Mode", int(rtSettings.thumbnail_inspector_mode));
         keyFile.set_integer("Inspector", "RawCurve", int(rtSettings.thumbnail_inspector_raw_curve));
         keyFile.set_boolean("Inspector", "ZoomFit", thumbnail_inspector_zoom_fit);

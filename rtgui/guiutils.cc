@@ -992,39 +992,26 @@ bool MyScrolledWindow::on_scroll_event (GdkEventScroll* event)
     Gtk::Scrollbar *scroll = get_vscrollbar();
 
     if (adjust && scroll) {
-        double upper = adjust->get_upper();
-        double lower = adjust->get_lower();
+        const double upperBound = adjust->get_upper();
+        const double lowerBound = adjust->get_lower();
         double value = adjust->get_value();
         double step  = adjust->get_step_increment();
-        double value2 = 0.;
-
-//        printf("MyScrolledwindow::on_scroll_event / delta_x=%.5f, delta_y=%.5f, direction=%d, type=%d, send_event=%d\n",
-//                event->delta_x, event->delta_y, (int)event->direction, (int)event->type, event->send_event);
 
         if (event->direction == GDK_SCROLL_DOWN) {
-            value2 = value + step;
-
-            if (value2 > upper) {
-                value2 = upper;
-            }
+            const double value2 = rtengine::min<double>(value + step, upperBound);
 
             if (value2 != value) {
                 scroll->set_value(value2);
             }
         } else if (event->direction == GDK_SCROLL_UP) {
-            value2 = value - step;
-
-            if (value2 < lower) {
-                value2 = lower;
-            }
+            const double value2 = rtengine::max<double>(value - step, lowerBound);
 
             if (value2 != value) {
                 scroll->set_value(value2);
             }
         } else if (event->direction == GDK_SCROLL_SMOOTH) {
-            if (abs(event->delta_y) > 0.1) {
-                value2 = rtengine::LIM<double>(value + (event->delta_y > 0 ? step : -step), lower, upper);
-            }
+            const double value2 = rtengine::LIM<double>(value + event->delta_y * step, lowerBound, upperBound);
+
             if (value2 != value) {
                 scroll->set_value(value2);
             }

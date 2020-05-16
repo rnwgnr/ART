@@ -438,7 +438,7 @@ void ICMPanel::read(const ProcParams* pp)
         updateDCP(pp->icm.dcpIlluminant, "");
     } else if (pp->icm.inputProfile == "(embedded)" || ((pp->icm.inputProfile == "(camera)" || pp->icm.inputProfile == "") && icamera->get_state() == Gtk::STATE_INSENSITIVE)) {
         iembedded->set_active(true);
-        updateDCP(pp->icm.dcpIlluminant, "");
+        updateDCP(pp->icm.dcpIlluminant, "(embedded)");
     } else if ((pp->icm.inputProfile == "(cameraICC)") && icameraICC->get_state() != Gtk::STATE_INSENSITIVE) {
         icameraICC->set_active(true);
         updateDCP(pp->icm.dcpIlluminant, "(cameraICC)");

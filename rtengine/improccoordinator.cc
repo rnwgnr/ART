@@ -209,13 +209,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     }
 
     bool highDetailNeeded = false;
-
-    if (options.prevdemo == PD_Sidecar) {
-        highDetailNeeded = true;    //i#2664
-    } else {
-        highDetailNeeded = (todo & M_HIGHQUAL);
-    }
-
     // Check if any detail crops need high detail. If not, take a fast path short cut
     if (!highDetailNeeded) {
         for (size_t i = 0; i < crops.size(); i++)
@@ -223,6 +216,10 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                 highDetailNeeded = true;
                 break;
             }
+    }
+    bool highDetailNeeded_WB = highDetailNeeded;
+    if ((todo & M_HIGHQUAL) || options.prevdemo == PD_Sidecar) {
+        highDetailNeeded = true;
     }
 
     ipf.setPipetteBuffer(nullptr);
@@ -256,12 +253,40 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         if (frameCountListener) {
             frameCountListener->FrameCountChanged(imgsrc->getFrameCount(), params.raw.bayersensor.imageNum);
         }
-    
+
+        imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
+
+        ColorTemp preproc_wb;
+        const bool wb_todo = todo & (M_WHITEBALANCE | M_PREPROC);
+
+        if (wb_todo) {
+            updateWB();
+            if (options.wb_preview_mode != Options::WB_AFTER) {
+                highQualityComputed = false;
+            }
+        }
+        
+        switch (options.wb_preview_mode) {
+        case Options::WB_BEFORE:
+            if (wb_todo) {
+                preproc_wb = currWB;
+                todo |= M_PREPROC | M_RAW;
+            }
+            break;
+        case Options::WB_BEFORE_HIGH_DETAIL:
+            if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
+                preproc_wb = currWB;
+                todo |= M_PREPROC | M_RAW;
+            }
+            break;
+        case Options::WB_AFTER:
+        default:
+            break;
+        }
+        
         // raw auto CA is bypassed if no high detail is needed, so we have to compute it when high detail is needed
         if ((todo & M_PREPROC) || (!highDetailPreprocessComputed && highDetailNeeded)) {
-            imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
-    
-            imgsrc->preprocess(rp, params.lensProf, params.coarse);
+            imgsrc->preprocess(rp, params.lensProf, params.coarse, true, preproc_wb);
             if (flatFieldAutoClipListener && rp.ff_AutoClipControl) {
                 flatFieldAutoClipListener->flatFieldAutoClipValueChanged(imgsrc->getFlatFieldAutoClipValue());
             }
@@ -330,12 +355,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     
             // if a demosaic happened we should also call getimage later, so we need to set the M_INIT flag
             todo |= M_INIT;
-    
-            if (highDetailNeeded) {
-                highDetailRawComputed = true;
-            } else {
-                highDetailRawComputed = false;
-            }
+            highDetailRawComputed = highDetailNeeded;
         }   
     
         setScale(scale);
@@ -353,14 +373,8 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             if (settings->verbose) {
                 printf("Applying white balance, color correction & sRBG conversion...\n");
             }
-    
-            currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
-    
-            if (!params.wb.enabled) {
-                currWB = ColorTemp();
-            } else if (params.wb.method == "Camera") {
-                currWB = imgsrc->getWB();
-            } else if (params.wb.method == "Auto") {
+
+            if (params.wb.method == "Auto") {
                 if (lastAwbEqual != params.wb.equal) {
                     double rm, gm, bm;
                     imgsrc->getAutoWBMultipliers(rm, gm, bm);
@@ -373,10 +387,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                         autoWB.useDefaults(params.wb.equal);
                     }
                 }
-    
+                
                 currWB = autoWB;
             }
-    
             if (params.wb.enabled) {
                 params.wb.temperature = currWB.getTemp();
                 params.wb.green = currWB.getGreen();
@@ -579,6 +592,20 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     if (orig_prev != oprevi && oprevi != spotprev) {
         delete oprevi;
         oprevi = nullptr;
+    }
+}
+
+
+void ImProcCoordinator::updateWB()
+{
+    MyMutex::MyLock initLock(minit);
+    
+    currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+    
+    if (!params.wb.enabled || params.wb.method == "Auto") {
+        currWB = ColorTemp();
+    } else if (params.wb.method == "Camera") {
+        currWB = imgsrc->getWB();
     }
 }
 
@@ -1187,7 +1214,7 @@ bool ImProcCoordinator::getHighQualComputed()
 {
     // this function may only be called from detail windows
     if (!highQualityComputed) {
-        if (options.prevdemo == PD_Sidecar) {
+        if (options.prevdemo == PD_Sidecar && options.wb_preview_mode != Options::WB_BEFORE_HIGH_DETAIL) {
             // we already have high quality preview
             setHighQualComputed();
         } else {

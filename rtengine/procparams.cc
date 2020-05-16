@@ -448,6 +448,12 @@ AreaMask::Rectangle::Rectangle():
 }
 
 
+std::unique_ptr<AreaMask::Shape> AreaMask::Rectangle::clone() const
+{
+    return std::unique_ptr<Shape>(new Rectangle(*this));
+}
+
+
 AreaMask::Polygon::Knot::Knot():
     x(0.),
     y(0.),
@@ -459,6 +465,12 @@ void AreaMask::Polygon::Knot::setPos(CoordD &pos)
 {
     x = pos.x;
     y = pos.y;
+}
+
+
+std::unique_ptr<AreaMask::Shape> AreaMask::Polygon::clone() const
+{
+    return std::unique_ptr<Shape>(new Polygon(*this));
 }
 
 
@@ -484,17 +496,20 @@ bool AreaMask::Polygon::Knot::operator==(const Knot &other) const
         && roundness == other.roundness;
 }
 
-int AreaMask::Shape::toImgSpace (double v, int imSize)
+
+int AreaMask::Shape::toImgSpace(double v, int imSize)
 {
     double s2 = imSize / 2.;
     return s2 + v / 100. * s2;
 }
 
-double AreaMask::Shape::toParamRange (int v, int imSize)
+
+double AreaMask::Shape::toParamRange(int v, int imSize)
 {
     double s2 = imSize / 2.;
     return (double(v) - s2) * 100. / s2;
 }
+
 
 void AreaMask::Polygon::knots_to_list(std::vector<double> &out) const
 {
@@ -526,42 +541,50 @@ void AreaMask::Polygon::knots_from_list(const std::vector<double> &v)
 }
 
 
-
-
 bool AreaMask::Polygon::Knot::operator!=(const Knot &other) const
 {
     return !(*this == other);
 }
 
 
-bool AreaMask::Rectangle::operator==(const Rectangle &other) const
+bool AreaMask::Rectangle::operator==(const Shape &other) const
 {
+    const Rectangle *o = dynamic_cast<const Rectangle *>(&other);
+    if (!o) {
+        return false;
+    }
+    
     return
-        x == other.x
-        && y == other.y
-        && width == other.width
-        && height == other.height
-        && angle == other.angle
-        && roundness == other.roundness
+        x == o->x
+        && y == o->y
+        && width == o->width
+        && height == o->height
+        && angle == o->angle
+        && roundness == o->roundness
         && AreaMask::Shape::operator==(other);
 }
 
 
-bool AreaMask::Rectangle::operator!=(const Rectangle &other) const
+bool AreaMask::Rectangle::operator!=(const Shape &other) const
 {
     return !(*this == other);
 }
 
 
-bool AreaMask::Polygon::operator==(const Polygon &other) const
+bool AreaMask::Polygon::operator==(const Shape &other) const
 {
+    const Polygon *o = dynamic_cast<const Polygon *>(&other);
+    if (!o) {
+        return false;
+    }
+    
     return
-        knots == other.knots
+        knots == o->knots
         && AreaMask::Shape::operator==(other);
 }
 
 
-bool AreaMask::Polygon::operator!=(const Polygon &other) const
+bool AreaMask::Polygon::operator!=(const Shape &other) const
 {
     return !(*this == other);
 }
@@ -573,7 +596,7 @@ AreaMask::AreaMask():
     feather(0),
     blur(0),
     contrast{DCT_Linear},
-    shapes{}//std::shared_ptr<Shape>(new Rectangle())}
+    shapes{}
 {
 }
 
@@ -599,6 +622,33 @@ bool AreaMask::isTrivial() const
     AreaMask n;
     n.enabled = true;
     return (!enabled || *this == n);
+}
+
+
+AreaMask::AreaMask(const AreaMask &other):
+    enabled(other.enabled),
+    feather(other.feather),
+    blur(other.blur),
+    contrast(other.contrast)
+{
+    for (const auto &s : other.shapes) {
+        shapes.emplace_back(s->clone());
+    }
+}
+
+
+AreaMask &AreaMask::operator=(const AreaMask &other)
+{
+    enabled = other.enabled;
+    feather = other.feather;
+    blur = other.blur;
+    contrast = other.contrast;
+
+    shapes.clear();
+    for (const auto &s : other.shapes) {
+        shapes.emplace_back(s->clone());
+    }
+    return *this;
 }
 
 
@@ -926,7 +976,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     if (areaMask.contrast.empty() || areaMask.contrast[0] < DCT_Linear || areaMask.contrast[0] >= DCT_Unchanged) {
         areaMask.contrast = {DCT_Linear};
     }
-    std::vector<std::shared_ptr<AreaMask::Shape>> s;
+    std::vector<std::unique_ptr<AreaMask::Shape>> s;
     for (int i = 0; ; ++i) {
         Glib::ustring type;
         Glib::ustring mode;
@@ -936,7 +986,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Type" + suffix, type);
         }
         if (ppVersion < 1014 || found) {
-            std::shared_ptr<AreaMask::Shape> shape;
+            std::unique_ptr<AreaMask::Shape> shape;
             if (ppVersion < 1014 || str2type(type) == AreaMask::Shape::Type::RECTANGLE) {
                 AreaMask::Rectangle *rect = new AreaMask::Rectangle();
                 found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + suffix, rect->x);
@@ -971,7 +1021,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
             }
             if (found) {
                 shape->mode = str2mode(mode);
-                s.emplace_back(shape);
+                s.emplace_back(std::move(shape));
                 ret = true;
             } else {
                 break;
