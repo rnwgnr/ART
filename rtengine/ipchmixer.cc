@@ -183,7 +183,7 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
 
 
         if (params->chmixer.mode == ChannelMixerParams::Mode::PRIMARIES_CHROMA){
-            get_mixer_matrix(params->chmixer, "ProPhoto",//params->icm.workingProfile,
+            get_mixer_matrix(params->chmixer, params->icm.workingProfile,
                              RR, RG, RB,
                              GR, GG, GB,
                              BR, BG, BB);
