@@ -257,8 +257,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
 
         ColorTemp preproc_wb;
+        const bool wb_todo = todo & (M_WHITEBALANCE | M_PREPROC);
 
-        if (todo & M_WHITEBALANCE) {
+        if (wb_todo) {
             updateWB();
             if (options.wb_preview_mode != Options::WB_AFTER) {
                 highQualityComputed = false;
@@ -267,13 +268,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         
         switch (options.wb_preview_mode) {
         case Options::WB_BEFORE:
-            if (todo & M_WHITEBALANCE) {
+            if (wb_todo) {
                 preproc_wb = currWB;
                 todo |= M_PREPROC | M_RAW;
             }
             break;
         case Options::WB_BEFORE_HIGH_DETAIL:
-            if (((todo & M_WHITEBALANCE) && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
+            if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
                 preproc_wb = currWB;
                 todo |= M_PREPROC | M_RAW;
             }
