@@ -103,7 +103,7 @@ FILEBROWSER_APPLYPROFILE;Appliquer le profil
 FILEBROWSER_APPLYPROFILE_PARTIAL;Appliquer le profil (partiel)
 FILEBROWSER_AUTODARKFRAME;Soustraction auto. de Trame Noire
 FILEBROWSER_AUTOFLATFIELD;Champ Uniforme auto.
-FILEBROWSER_BROWSEPATHBUTTONHINT;Rafriachir la liste des vignettes.\nRaccourci : <b>F5</b>
+FILEBROWSER_BROWSEPATHBUTTONHINT;Rafraichir la liste des vignettes.\nRaccourci : <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Saisir le chemin à parcourir\n<b>Ctrl-O</b> pour placer le focus sur le champ de saisie.\n<b>Entrée</b> / <b>Ctrl-Entrée</b> pour y naviguer;\n<b>Esc</b> pour effacer les modifications.\n<b>Shift-Esc</b> pour enlever le focus.\n\n\nRaccourcis pour les chemins:\n  <b>~</b> - le dossier utilisateur\n  <b>!</b> - le dossier Images de l'utilisateur
 FILEBROWSER_CACHE;Cache
 FILEBROWSER_CACHECLEARFROMFULL;Vider tout y-compris les profils mis en cache
@@ -1323,6 +1323,10 @@ PREFERENCES_TP_LABEL;Panneau Outils :
 PREFERENCES_TP_DISABLE;Griser les outils inactifs
 PREFERENCES_TP_VSCROLLBAR;Cacher la barre de défilement vertical
 PREFERENCES_USEBUNDLEDPROFILES;Utiliser les profils de traitement fournis
+PREFERENCES_WBPREVIEW_LABEL;Position de la balance des blancs dans la chaîne de traitement de l'aperçu :
+PREFERENCES_WBPREVIEW_AFTER;Après le dématriçage (plus rapide)
+PREFERENCES_WBPREVIEW_BEFORE;Avant le dématriçage (plus précis)
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Avant le dématriçage si le zoom <100% sinon après
 PREFERENCES_WORKFLOW;Agencement
 PREFERENCES_XMP_SIDECAR_MODE;Style des fichiers XMP associés
 PREFERENCES_XMP_SIDECAR_MODE_STD;Standard (NOMDEFICHIER.xmp pour NOMDEFICHIER.ext)

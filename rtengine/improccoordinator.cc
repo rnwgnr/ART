@@ -266,22 +266,29 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
         }
         
-        switch (options.wb_preview_mode) {
-        case Options::WB_BEFORE:
-            if (wb_todo) {
-                preproc_wb = currWB;
-                todo |= M_PREPROC | M_RAW;
+        if (params.filmNegative.enabled) {
+            preproc_wb = ColorTemp();
+        } else {
+            switch (options.wb_preview_mode) {
+            case Options::WB_BEFORE:
+                if (wb_todo) {
+                    preproc_wb = currWB;
+                    todo |= M_PREPROC | M_RAW;
+                }
+                break;
+            case Options::WB_BEFORE_HIGH_DETAIL:
+                if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
+                    preproc_wb = currWB;
+                    todo |= M_PREPROC | M_RAW;
+                    if (todo & M_HIGHQUAL) {
+                        todo |= M_AUTOEXP;
+                    }
+                }
+                break;
+            case Options::WB_AFTER:
+            default:
+                break;
             }
-            break;
-        case Options::WB_BEFORE_HIGH_DETAIL:
-            if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
-                preproc_wb = currWB;
-                todo |= M_PREPROC | M_RAW;
-            }
-            break;
-        case Options::WB_AFTER:
-        default:
-            break;
         }
         
         // raw auto CA is bypassed if no high detail is needed, so we have to compute it when high detail is needed

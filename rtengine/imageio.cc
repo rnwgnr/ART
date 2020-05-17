@@ -1349,7 +1349,7 @@ bool ImageIO::saveMetadata(const Glib::ustring &fname) const
             metadataInfo.saveToImage(fname);
         } catch (std::exception &exc) {
             std::cout << "EXIF ERROR: " << exc.what() << std::endl;
-            return false;
+            //return false;
         }
     }
 

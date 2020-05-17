@@ -193,8 +193,7 @@ private:
         } else if (params.wb.method == "Camera") {
             currWB = imgsrc->getWB ();
         }
-        
-        imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, currWB);
+        imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, params.filmNegative.enabled ? ColorTemp() : currWB);
 
         if (params.filmNegative.enabled) {
             std::array<float, 3> filmBaseValues = {
