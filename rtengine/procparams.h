@@ -153,7 +153,6 @@ struct AreaMask {
         std::unique_ptr<Shape> clone() const override;
     };
     bool enabled;
-    bool per_shape_feather;
     double feather; // [0,100]
     double blur;
     std::vector<double> contrast; // curve

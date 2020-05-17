@@ -163,7 +163,6 @@ private:
     void onAreaMaskCopyPressed();
     void onAreaMaskPastePressed();
     void onAreaShapeModeChanged(int i);
-    void onAreaShapeModePSFChanged();
     void onRectangleAreaMaskDrawChanged();
     void onAreaMaskDrawRectangleAddPressed();
     void onAreaMaskDrawPolygonAddPressed();
@@ -174,7 +173,7 @@ private:
     void setListEnabled(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator &it);
     
     void shapeAddPressed(rtengine::procparams::AreaMask::Shape::Type type, bool list_only);
-    void setRectangleAdjustersVisibility(bool isVisible);
+    void setAdjustersVisibility(bool rectangleAjusterVisible);
     void updateRectangleAreaMask(bool from_mask);
     void maskGet(int idx);
     void maskShow(int idx, bool list_only=false, bool unsub=true);
@@ -182,6 +181,7 @@ private:
     void areaShapeSelect(int idx, bool update_list);
 
     void toggleAreaShapeMode(int i);
+    void updateShapeButtonsSensitivity();
     int getAreaShapeMode();
 
     void disableListener();
@@ -283,12 +283,10 @@ private:
     Adjuster *areaMaskBlur;
     DiagonalCurveEditor *areaMaskContrast;
     Gtk::ToggleButton *areaMaskMode[3];
-    Gtk::ToggleButton *areaMaskModePSF; // Per Shape Feather
-    std::shared_ptr<RTImage> modePSFOn;
-    std::shared_ptr<RTImage> modePSFOff;
     sigc::connection areaMaskModeConn[3];
-    sigc::connection areaMaskModePSFConn; // Per Shape Feather
     // MyComboBoxText *areaMaskMode;
+    Adjuster *areaMaskShapeFeather;
+    Adjuster *areaMaskShapeBlur;
     Adjuster *areaMaskX;
     Adjuster *areaMaskY;
     Adjuster *areaMaskWidth;
