@@ -1973,6 +1973,7 @@ void LabMasksPanel::updateShapeButtonsSensitivity()
     if (!has_shape && areaMaskToggle->get_active()) {
         switchOffEditMode();
     }
+    areaMaskCopy->set_sensitive(has_shape);
     areaMaskToggle->set_sensitive(has_shape);
     areaMaskDrawRectangle->set_sensitive(is_rectangle);
     for (int i = 0; i < 3; i++) {
