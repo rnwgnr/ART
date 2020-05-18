@@ -1014,8 +1014,8 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
             }
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
             if (ppVersion >= 1015) {
-                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Feather" + suffix, shape->feather);
-                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Blur" + suffix, shape->blur);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "ShapeFeather" + suffix, shape->feather);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "ShapeBlur" + suffix, shape->blur);
             }
             if (found) {
                 shape->mode = str2mode(mode);
@@ -1101,8 +1101,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
         }
         }
         putToKeyfile(group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode2str(a->mode), keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Feather" + suffix, a->feather, keyfile);
-        putToKeyfile(group_name, prefix + "AreaMask" + n + "Blur" + suffix, a->blur, keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "ShapeFeather" + suffix, a->feather, keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "ShapeBlur" + suffix, a->blur, keyfile);
     }
 
     putToKeyfile(group_name, prefix + "DeltaEMaskEnabled" + suffix, deltaEMask.enabled, keyfile);
