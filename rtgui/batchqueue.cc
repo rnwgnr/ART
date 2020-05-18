@@ -202,8 +202,9 @@ void BatchQueue::addEntries (const std::vector<BatchQueueEntry*>& entries, bool 
             // recovery save
             const auto tempFile = getTempFilenameForParams (entry->filename);
 
-            if (!entry->params.save (tempFile))
+            if (!entry->params.save(this, tempFile)) {
                 entry->savedParamsFile = tempFile;
+            }
 
             entry->selected = false;
 
@@ -335,8 +336,9 @@ bool BatchQueue::loadBatchQueue ()
 
             rtengine::procparams::ProcParams pparams;
 
-            if (pparams.load (paramsFile))
+            if (pparams.load(this, paramsFile)) {
                 continue;
+            }
 
             auto thumb = CacheManager::getInstance ()->getEntry (source);
 
@@ -692,6 +694,9 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
 
     if (img && fname != "") {
         int err = 0;
+        processing->processing = false;
+
+        img->setSaveProgressListener(this);
 
         if (saveFormat.format == "tif") {
             err = img->saveAsTIFF (fname, saveFormat.tiffBits, saveFormat.tiffFloat, saveFormat.tiffUncompressed);
@@ -704,7 +709,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
         img->free ();
 
         if (err) {
-            throw Glib::FileError(Glib::FileError::FAILED, M("MAIN_MSG_CANNOTSAVE") + "\n" + fname);
+            throw Glib::FileError(Glib::FileError::FAILED, M("MAIN_MSG_CANNOTSAVE") + ": " + fname);
         }
 
         if (saveFormat.saveParams) {
@@ -714,7 +719,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
             if (batch_profile_) {
                 batch_profile_->applyTo(processing->params);
             }
-            processing->params.save (fname + ".out" + paramFileExtension);
+            processing->params.save(this, fname + ".out" + paramFileExtension);
         }
 
         if (processing->thumbnail) {
@@ -895,7 +900,7 @@ Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileNam
                     char rank;
                     rtengine::procparams::ProcParams pparams;
 
-                    if( pparams.load(origFileName + paramFileExtension) == 0 ) {
+                    if( pparams.load(nullptr, origFileName + paramFileExtension) == 0 ) {
                         if (!pparams.inTrash) {
                             rank = pparams.rank + '0';
                         } else {

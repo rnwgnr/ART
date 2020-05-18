@@ -36,6 +36,7 @@
 #include "imagedata.h"
 #include "../rtgui/version.h"
 #include "../rtgui/pathutils.h"
+#include "../rtgui/multilangmgr.h"
 
 
 namespace rtengine {
@@ -441,7 +442,7 @@ void Exiv2Metadata::do_merge_xmp(Exiv2::Image *dst) const
 }
 
 
-void Exiv2Metadata::saveToImage(const Glib::ustring &path) const
+void Exiv2Metadata::saveToImage(ProgressListener *pl, const Glib::ustring &path) const
 {
     auto dst = open_exiv2(path, false);
     if (image_.get()) {
@@ -462,7 +463,38 @@ void Exiv2Metadata::saveToImage(const Glib::ustring &path) const
     dst->exifData()["Exif.Image.Software"] = RTNAME " " RTVERSION;
     import_exif_pairs(dst->exifData());
     import_iptc_pairs(dst->iptcData());
-    dst->writeMetadata();    
+    bool xmp_tried = false;
+    bool iptc_tried = false;
+    for (int i = 0; i < 3; ++i) {
+        try {
+            dst->writeMetadata();
+            return;
+        } catch (Exiv2::Error &exc) {
+            if (exc.code() == 37) {
+                std::string msg = exc.what();
+                if (pl) {
+                    pl->error(Glib::ustring::compose(M("METADATA_SAVE_ERROR"), path, "WARNING: " + msg));
+                }
+                if (msg.find("XMP") != std::string::npos &&
+                    !dst->xmpData().empty()) {
+                    dst->xmpData().clear();
+                    if (!xmp_tried && merge_xmp_) {
+                        do_merge_xmp(dst.get());
+                        xmp_tried = true;
+                    }
+                } else if (msg.find("IPTC") != std::string::npos &&
+                           !dst->iptcData().empty()) {
+                    dst->iptcData().clear();
+                    if (!iptc_tried) {
+                        import_iptc_pairs(dst->iptcData());
+                        iptc_tried = true;
+                    }
+                }
+            } else {
+                throw exc;
+            }
+        }
+    }
 }
 
 

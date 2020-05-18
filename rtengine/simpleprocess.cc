@@ -41,7 +41,7 @@ namespace {
 
 class ImageProcessor {
 public:
-    ImageProcessor(ProcessingJob* pjob,int &errorCode,ProgressListener *pl,
+    ImageProcessor(ProcessingJob* pjob,int &errorCode, ProgressListener *pl,
                    bool flush):
         job(static_cast<ProcessingJobImpl*>(pjob)),
         errorCode(errorCode),
@@ -96,7 +96,7 @@ private:
             std::cout << "Processing with the fast pipeline" << std::endl;
         }
 
-        pl = nullptr;
+        //pl = nullptr;
 
         if (!stage_init(true)) {
             return nullptr;
@@ -193,8 +193,7 @@ private:
         } else if (params.wb.method == "Camera") {
             currWB = imgsrc->getWB ();
         }
-        
-        imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, currWB);
+        imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, params.filmNegative.enabled ? ColorTemp() : currWB);
 
         if (params.filmNegative.enabled) {
             std::array<float, 3> filmBaseValues = {

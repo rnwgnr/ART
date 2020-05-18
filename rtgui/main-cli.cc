@@ -338,7 +338,7 @@ int processLineParams ( int argc, char **argv )
                             return -3;
                         }
 
-                        PartialProfile currentParams(new rtengine::procparams::FilePartialProfile(fname));
+                        PartialProfile currentParams(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
                         if (check_partial_profile(currentParams)) {
                             processingParams.push_back(std::move(currentParams));
@@ -590,7 +590,7 @@ int processLineParams ( int argc, char **argv )
             Glib::build_filename(profPath,
                                  Glib::path_get_basename(options.defProfRaw) +
                                  paramFileExtension);
-        rawParams.reset(new rtengine::procparams::FilePartialProfile(fname));
+        rawParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
         if (options.is_defProfRawMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
             std::cerr << "Error: default raw processing profile not found." << std::endl;
@@ -604,7 +604,7 @@ int processLineParams ( int argc, char **argv )
             Glib::build_filename(profPath,
                                  Glib::path_get_basename(options.defProfImg) +
                                  paramFileExtension);
-        imgParams.reset(new rtengine::procparams::FilePartialProfile(fname));
+        imgParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
         if (options.is_defProfImgMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
             std::cerr << "Error: default non-raw processing profile not found." << std::endl;
@@ -704,7 +704,7 @@ int processLineParams ( int argc, char **argv )
                 Glib::ustring sideProcessingParams = inputFile + paramFileExtension;
 
                 // the "load" method don't reset the procparams values anymore, so values found in the procparam file override the one of currentParams
-                if ( !Glib::file_test ( sideProcessingParams, Glib::FILE_TEST_EXISTS ) || currentParams.load ( sideProcessingParams )) {
+                if ( !Glib::file_test ( sideProcessingParams, Glib::FILE_TEST_EXISTS ) || currentParams.load(nullptr, sideProcessingParams )) {
                     std::cerr << "Warning: sidecar file requested but not found for: " << sideProcessingParams << std::endl;
                 } else {
                     sideCarFound = true;
@@ -763,7 +763,7 @@ int processLineParams ( int argc, char **argv )
         } else {
             if ( copyParamsFile ) {
                 Glib::ustring outputProcessingParams = outputFile + paramFileExtension;
-                currentParams.save ( outputProcessingParams );
+                currentParams.save(nullptr, outputProcessingParams);
             }
         }
 

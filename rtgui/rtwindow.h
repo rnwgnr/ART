@@ -31,41 +31,7 @@
 #include <gtkosxapplication.h>
 #endif
 
-class RTWindow : public Gtk::Window, public rtengine::ProgressListener
-{
-
-private:
-    Gtk::Notebook* mainNB;
-    BatchQueuePanel* bpanel;
-    std::set<Glib::ustring> filesEdited;
-    std::map<Glib::ustring, EditorPanel*> epanels;
-
-    Splash* splash;
-    Gtk::ProgressBar prProgBar;
-    PLDBridge* pldBridge;
-    bool is_fullscreen;
-    bool on_delete_has_run;
-    Gtk::Button * btn_fullscreen;
-
-    Gtk::Image *iFullscreen, *iFullscreen_exit;
-
-    bool isSingleTabMode()
-    {
-        return !options.tabbedUI && ! (options.multiDisplayMode > 0);
-    };
-
-    bool on_expose_event_epanel (GdkEventExpose* event);
-    bool on_expose_event_fpanel (GdkEventExpose* event);
-    bool splashClosed (GdkEventAny* event);
-    bool isEditorPanel (Widget* panel);
-    bool isEditorPanel (guint pageNum);
-    void showErrors ();
-
-    Glib::ustring versionStr;
-#if defined(__APPLE__)
-    GtkosxApplication *osxApp;
-#endif
-
+class RTWindow: public Gtk::Window, public rtengine::ProgressListener {
 public:
     RTWindow ();
     ~RTWindow() override;
@@ -124,6 +90,45 @@ public:
     void createSetmEditor();
 
     void writeToolExpandedStatus (std::vector<int> &tpOpen);
+
+private:
+    bool hide_info_msg();
+    Gtk::Overlay *main_overlay_;
+    Gtk::Revealer *msg_revealer_;
+    Gtk::Label *info_label_;
+    Glib::ustring info_msg_;
+    sigc::connection reveal_conn_;
+    
+    Gtk::Notebook* mainNB;
+    BatchQueuePanel* bpanel;
+    std::set<Glib::ustring> filesEdited;
+    std::map<Glib::ustring, EditorPanel*> epanels;
+
+    Splash* splash;
+    Gtk::ProgressBar prProgBar;
+    PLDBridge* pldBridge;
+    bool is_fullscreen;
+    bool on_delete_has_run;
+    Gtk::Button * btn_fullscreen;
+
+    Gtk::Image *iFullscreen, *iFullscreen_exit;
+
+    bool isSingleTabMode()
+    {
+        return !options.tabbedUI && ! (options.multiDisplayMode > 0);
+    };
+
+    bool on_expose_event_epanel (GdkEventExpose* event);
+    bool on_expose_event_fpanel (GdkEventExpose* event);
+    bool splashClosed (GdkEventAny* event);
+    bool isEditorPanel (Widget* panel);
+    bool isEditorPanel (guint pageNum);
+    void showErrors ();
+
+    Glib::ustring versionStr;
+#if defined(__APPLE__)
+    GtkosxApplication *osxApp;
+#endif
 };
 
 #endif

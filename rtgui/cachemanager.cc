@@ -41,6 +41,12 @@ constexpr const char* cacheDirs[] = { "profiles", "images", "aehistograms", "emb
 
 }
 
+CacheManager::CacheManager():
+    pl_(nullptr)
+{
+}
+
+
 CacheManager* CacheManager::getInstance ()
 {
     static CacheManager instance;
@@ -66,6 +72,7 @@ void CacheManager::init ()
         std::cerr << "Failed to create all cache directories: " << g_strerror(errno) << std::endl;
     }
 }
+
 
 Thumbnail* CacheManager::getEntry (const Glib::ustring& fname)
 {
@@ -104,7 +111,7 @@ Thumbnail* CacheManager::getEntry (const Glib::ustring& fname)
         const auto error = imageData.load (cacheName);
         if (error == 0 && imageData.supported) {
 
-            thumbnail.reset (new Thumbnail (this, fname, &imageData));
+            thumbnail.reset (new Thumbnail(this, fname, &imageData));
             if (!thumbnail->isSupported ()) {
                 thumbnail.reset ();
             }

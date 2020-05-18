@@ -27,6 +27,7 @@
 #include "rt_math.h"
 #include "../rtgui/options.h"
 #include "../rtgui/version.h"
+#include "../rtgui/multilangmgr.h"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -1338,18 +1339,24 @@ bool ImageIO::saveMetadata(const Glib::ustring &fname) const
     try {
         metadataInfo.load();
     } catch (std::exception &exc) {
-        if (settings->verbose) {
-            std::cout << "EXIF LOAD ERROR: " << exc.what() << std::endl;
+        // if (settings->verbose) {
+        //     std::cout << "EXIF LOAD ERROR: " << exc.what() << std::endl;
+        // }
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("METADATA_LOAD_ERROR"), metadataInfo.filename(), exc.what()));
         }
         has_meta = false;
     }
 
     if (has_meta) {
         try {
-            metadataInfo.saveToImage(fname);
+            metadataInfo.saveToImage(pl, fname);
         } catch (std::exception &exc) {
-            std::cout << "EXIF ERROR: " << exc.what() << std::endl;
-            return false;
+            //std::cout << "EXIF ERROR: " << exc.what() << std::endl;
+            //return false;
+            if (pl) {
+                pl->error(Glib::ustring::compose(M("METADATA_SAVE_ERROR"), fname, exc.what()));
+            }
         }
     }
 

@@ -1263,17 +1263,18 @@ void EditorPanel::error(const Glib::ustring& title, const Glib::ustring& descr)
 
 void EditorPanel::displayError(const Glib::ustring& title, const Glib::ustring& descr)
 {
-    GtkWidget* msgd = gtk_message_dialog_new_with_markup (nullptr,
-                      GTK_DIALOG_DESTROY_WITH_PARENT,
-                      GTK_MESSAGE_ERROR,
-                      GTK_BUTTONS_OK,
-                      "<b>%s</b>",
-                      descr.data());
-    gtk_window_set_title ((GtkWindow*)msgd, title.data());
-    g_signal_connect_swapped (msgd, "response",
-                              G_CALLBACK (gtk_widget_destroy),
-                              msgd);
-    gtk_widget_show_all (msgd);
+    parent->error(title + ": " + descr);
+    // GtkWidget* msgd = gtk_message_dialog_new_with_markup (nullptr,
+    //                   GTK_DIALOG_DESTROY_WITH_PARENT,
+    //                   GTK_MESSAGE_ERROR,
+    //                   GTK_BUTTONS_OK,
+    //                   "<b>%s</b>",
+    //                   descr.data());
+    // gtk_window_set_title ((GtkWindow*)msgd, title.data());
+    // g_signal_connect_swapped (msgd, "response",
+    //                           G_CALLBACK (gtk_widget_destroy),
+    //                           msgd);
+    // gtk_widget_show_all (msgd);
 }
 
 // This is only called from the ThreadUI, so within the gtk thread
@@ -1820,7 +1821,7 @@ bool EditorPanel::idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImagef
         if (sf.saveParams) {
             // We keep the extension to avoid overwriting the profile when we have
             // the same output filename with different extension
-            pparams.save (fname + ".out" + paramFileExtension);
+            pparams.save(parent, fname + ".out" + paramFileExtension);
         }
     } else {
         error (M ("MAIN_MSG_CANNOTSAVE"), fname);
@@ -2010,6 +2011,9 @@ bool EditorPanel::saveImmediately (const Glib::ustring &filename, const SaveForm
 
     // save immediately
     rtengine::IImagefloat *img = rtengine::processImage (job, err, nullptr, false);
+    if (img) {
+        img->setSaveProgressListener(parent);
+    }
 
     int err = 0;
 

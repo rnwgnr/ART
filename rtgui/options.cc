@@ -52,7 +52,6 @@ Glib::ustring paramFileExtension = ".arp";
 
 Options::Options()
 {
-
     defProfError = 0;
     setDefaults();
 }
@@ -618,6 +617,8 @@ void Options::setDefaults()
     batch_queue_profile_path = "";
 
     toolpanels_disable = false;
+
+    error_message_duration = 5000;
 }
 
 Options* Options::copyFrom(Options* other)
@@ -717,6 +718,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("General", "Verbose")) {
                     rtSettings.verbose = keyFile.get_boolean("General", "Verbose");
+                }
+
+                if (keyFile.has_key("General", "ErrorMessageDuration")) {
+                    error_message_duration = keyFile.get_integer("General", "ErrorMessageDuration");
                 }
             }
 
@@ -1915,6 +1920,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("General", "DarkFramesPath", rtSettings.darkFramesPath);
         keyFile.set_string("General", "FlatFieldsPath", rtSettings.flatFieldsPath);
         keyFile.set_boolean("General", "Verbose", rtSettings.verbose);
+        keyFile.set_integer("General", "ErrorMessageDuration", error_message_duration);
         keyFile.set_integer("External Editor", "EditorKind", editorToSendTo);
         keyFile.set_string("External Editor", "GimpDir", gimpDir);
         keyFile.set_string("External Editor", "PhotoshopDir", psDir);

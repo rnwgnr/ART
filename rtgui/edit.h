@@ -640,7 +640,7 @@ public:
     rtengine::Coord deltaPrevImage;  /// Delta relative to the previous mouse location, in the full image space
 
     EditDataProvider();
-    virtual ~EditDataProvider() {}
+    virtual ~EditDataProvider();
 
     virtual void        subscribe(EditSubscriber *subscriber);
     virtual void        unsubscribe();         /// Occurs when the subscriber has been switched off first

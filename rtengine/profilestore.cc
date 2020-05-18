@@ -30,7 +30,8 @@ ProfileStore::ProfileStore():
     internalDefaultProfile(nullptr),
     internalDefaultEntry(nullptr),
     internalDynamicEntry(nullptr),
-    loadAll(true)
+    loadAll(true),
+    pl_(nullptr)
 {
 }
 
@@ -143,7 +144,7 @@ void ProfileStore::_parseProfiles ()
     // entries and partProfiles are empty, but the entry and profiles already exist (they have survived to clearFileList and clearProfileList)
     if (!internalDefaultEntry) {
         assert(!internalDefaultProfile);
-        internalDefaultProfile = new rtengine::procparams::FilePartialProfile("", true);
+        internalDefaultProfile = new rtengine::procparams::FilePartialProfile(nullptr, "", true);
         internalDefaultEntry = new ProfileStoreEntry (Glib::ustring ("(") + M ("PROFILEPANEL_PINTERNAL") + Glib::ustring (")"), PSET_FILE, 0, 0);
     }
 
@@ -227,7 +228,7 @@ bool ProfileStore::parseDir (Glib::ustring& realPath, Glib::ustring& virtualPath
 
                     // create the partial profile
                     rtengine::procparams::ProcParams pp;
-                    int res = pp.load(fname);
+                    int res = pp.load(pl_, fname);
 
                     if (!res && pp.ppVersion >= 220) {
                         fileFound = true;
@@ -241,7 +242,7 @@ bool ProfileStore::parseDir (Glib::ustring& realPath, Glib::ustring& virtualPath
                         entries.push_back (filePSE);
 
                         // map the partial profile
-                        partProfiles[filePSE] = FilePartialProfile(fname);
+                        partProfiles[filePSE] = FilePartialProfile(pl_, fname);
                     } else if ( options.rtSettings.verbose ) {
                         printf ("failed!\n");
                     }
@@ -515,7 +516,7 @@ std::unique_ptr<PartialProfile> ProfileStore::loadDynamicProfile(const FramesMet
                 printf("found matching profile %s\n", rule.profilepath.c_str());
             }
 
-            FilePartialProfile fp(pth);
+            FilePartialProfile fp(pl_, pth);
             if (!fp.applyTo(pp)) {
                 printf ("ERROR loading matching profile from: %s\n", pth.c_str());
             }

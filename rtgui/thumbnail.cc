@@ -290,13 +290,13 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
             auto imageMetaData = getMetaData();
             auto pp = ProfileStore::getInstance()->loadDynamicProfile(imageMetaData.get());
             ProcParams params;
-            if (pp->applyTo(params) && params.save(outFName) == 0) {
+            if (pp->applyTo(params) && params.save(cachemgr->getProgressListener(), outFName) == 0) {
                 loadProcParams();
             }
         } else if (create && defProf != DEFPROFILE_DYNAMIC) {
             const PartialProfile *p = ProfileStore::getInstance()->getProfile(defProf);
             ProcParams params;
-            if (p && p->applyTo(params) && params.save(outFName) == 0) {
+            if (p && p->applyTo(params) && params.save(cachemgr->getProgressListener(), outFName) == 0) {
                 loadProcParams();
             }
         }
@@ -358,20 +358,20 @@ void Thumbnail::loadProcParams(bool load_rating)
 
     if (options.paramsLoadLocation == PLL_Input) {
         // try to load it from params file next to the image file
-        int ppres = pparams.load (fname + paramFileExtension);
+        int ppres = pparams.load (cachemgr->getProgressListener(), fname + paramFileExtension);
         pparamsValid = !ppres && pparams.master.ppVersion >= 220;
 
         // if no success, try to load the cached version of the procparams
         if (!pparamsValid) {
-            pparamsValid = !pparams.load (getCacheFileName ("profiles", paramFileExtension));
+            pparamsValid = !pparams.load (cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
         }
     } else {
         // try to load it from cache
-        pparamsValid = !pparams.load (getCacheFileName ("profiles", paramFileExtension));
+        pparamsValid = !pparams.load (cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
 
         // if no success, try to load it from params file next to the image file
         if (!pparamsValid) {
-            int ppres = pparams.load (fname + paramFileExtension);
+            int ppres = pparams.load (cachemgr->getProgressListener(), fname + paramFileExtension);
             pparamsValid = !ppres && pparams.master.ppVersion >= 220;
         }
     }
@@ -502,7 +502,7 @@ void Thumbnail::imageDeveloped ()
     cfs.save (getCacheFileName ("data", ".txt"));
 
     if (options.saveParamsCache) {
-        pparams.save (getCacheFileName ("profiles", paramFileExtension));
+        pparams.save (cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
     }
 }
 
@@ -940,6 +940,7 @@ void Thumbnail::updateCache (bool updatePParams, bool updateCacheImageData)
 
     if (updatePParams && pparamsValid) {
         pparams.save (
+            cachemgr->getProgressListener(),
             options.saveParamsFile  ? fname + paramFileExtension : "",
             options.saveParamsCache ? getCacheFileName ("profiles", paramFileExtension) : "",
             true
@@ -1149,6 +1150,9 @@ void Thumbnail::saveRating()
         } catch (std::exception &exc) {
             std::cerr << "ERROR saving thumbnail rating data to " << fn
                       << ": " << exc.what() << std::endl;
+            if (cachemgr->getProgressListener()) {
+                cachemgr->getProgressListener()->error(Glib::ustring::compose(M("METADATA_SAVE_ERROR"), fn, exc.what()));
+            }
         }
     }
 }
@@ -1201,6 +1205,9 @@ void Thumbnail::loadRating()
             std::cerr << "ERROR loading thumbnail rating data from "
                       << getXmpSidecarPath(fname)
                       << ": " << exc.what() << std::endl;
+            if (cachemgr->getProgressListener()) {
+                cachemgr->getProgressListener()->error(Glib::ustring::compose(M("METADATA_LOAD_ERROR"), getXmpSidecarPath(fname), exc.what()));
+            }
         }        
     }
 }
@@ -1231,6 +1238,9 @@ void Thumbnail::saveMetadata()
     } catch (std::exception &exc) {
         std::cerr << "ERROR saving metadata for " << fname << " to " << fn
                   << ": " << exc.what() << std::endl;
+        if (cachemgr->getProgressListener()) {
+            cachemgr->getProgressListener()->error(Glib::ustring::compose(M("METADATA_SAVE_ERROR"), fn, exc.what()));
+        }
     }
 }
 

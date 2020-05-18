@@ -26,6 +26,7 @@
 
 #include "curves.h"
 #include "procparams.h"
+#include "rtengine.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -431,7 +432,9 @@ bool saveToKeyfile(
 
 
 AreaMask::Shape::Shape():
-    mode(ADD)
+    mode(ADD),
+    feather(0.),
+    blur(0.)
 {
 }
 
@@ -474,7 +477,9 @@ std::unique_ptr<AreaMask::Shape> AreaMask::Polygon::clone() const
 
 bool AreaMask::Shape::operator==(const Shape &other) const
 {
-    return mode == other.mode;
+    return mode == other.mode
+           && feather == other.feather
+           && blur == other.blur;
 }
 
 
@@ -1009,6 +1014,10 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                 }
             }
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
+            if (ppVersion >= 1015) {
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "ShapeFeather" + suffix, shape->feather);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "ShapeBlur" + suffix, shape->blur);
+            }
             if (found) {
                 shape->mode = str2mode(mode);
                 s.emplace_back(std::move(shape));
@@ -1066,6 +1075,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "AreaMaskFeather" + suffix, areaMask.feather, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskBlur" + suffix, areaMask.blur, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskContrast" + suffix, areaMask.contrast, keyfile);
+
     for (size_t i = 0; i < areaMask.shapes.size(); ++i) {
         auto &a = areaMask.shapes[i];
         std::string n = i ? std::string("_") + std::to_string(i) + "_" : "";
@@ -1092,6 +1102,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
         }
         }
         putToKeyfile(group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode2str(a->mode), keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "ShapeFeather" + suffix, a->feather, keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "ShapeBlur" + suffix, a->blur, keyfile);
     }
 
     putToKeyfile(group_name, prefix + "DeltaEMaskEnabled" + suffix, deltaEMask.enabled, keyfile);
@@ -2892,7 +2904,7 @@ void ProcParams::setDefaults()
 }
 
 
-int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bool fnameAbsolute, const ParamsEdited *pedited)
+int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Glib::ustring& fname2, bool fnameAbsolute, const ParamsEdited *pedited)
 {
     if (fname.empty() && fname2.empty()) {
         return 0;
@@ -2902,24 +2914,28 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
 
     try {
         KeyFile keyFile;
-        int ret = save(keyFile, pedited, fname, fnameAbsolute);
+        int ret = save(pl, keyFile, pedited, fname, fnameAbsolute);
         if (ret != 0) {
             return ret;
         }
 
         sPParams = keyFile.to_data();
-    } catch (Glib::KeyFileError&) {}
+    } catch (Glib::KeyFileError &exc) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_SAVE_ERROR"), fname, exc.what()));
+        }
+    }
 
     if (sPParams.empty()) {
         return 1;
     }
 
     int error1, error2;
-    error1 = write(fname, sPParams);
+    error1 = write(pl, fname, sPParams);
 
     if (!fname2.empty()) {
 
-        error2 = write(fname2, sPParams);
+        error2 = write(pl, fname2, sPParams);
         // If at least one file has been saved, it's a success
         return error1 & error2;
     } else {
@@ -2928,7 +2944,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
 }
 
 
-int ProcParams::save(bool save_general,
+int ProcParams::save(ProgressListener *pl, bool save_general,
                      KeyFile &keyFile, const ParamsEdited *pedited,
                      const Glib::ustring &fname, bool fnameAbsolute) const
 {
@@ -3589,7 +3605,10 @@ int ProcParams::save(bool save_general,
                 saveToKeyfile("Spot Removal", ss.str(), entry, keyFile);
             }
         }
-    } catch (Glib::KeyFileError&) {
+    } catch (Glib::KeyFileError &exc) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_SAVE_ERROR"), fname, exc.what()));
+        }
         return 1;
     }
 
@@ -3598,14 +3617,16 @@ int ProcParams::save(bool save_general,
 }
 
 
-int ProcParams::save(KeyFile &keyFile, const ParamsEdited *pedited,
+int ProcParams::save(ProgressListener *pl,
+                     KeyFile &keyFile, const ParamsEdited *pedited,
                      const Glib::ustring &fname, bool fnameAbsolute) const
 {
-    return save(true, keyFile, pedited, fname, fnameAbsolute);
+    return save(pl, true, keyFile, pedited, fname, fnameAbsolute);
 }
 
 
-int ProcParams::load(const Glib::ustring& fname, const ParamsEdited *pedited)
+int ProcParams::load(ProgressListener *pl,
+                     const Glib::ustring& fname, const ParamsEdited *pedited)
 {
     setlocale(LC_NUMERIC, "C");  // to set decimal point to "."
 
@@ -3618,23 +3639,36 @@ int ProcParams::load(const Glib::ustring& fname, const ParamsEdited *pedited)
     try {
         if (!Glib::file_test(fname, Glib::FILE_TEST_EXISTS) ||
                 !keyFile.load_from_file(fname)) {
+            // not an error to report
             return 1;
         }
 
-        return load(keyFile, pedited, true, fname);
+        return load(pl, keyFile, pedited, true, fname);
     } catch (const Glib::Error& e) {
-        printf("-->%s\n", e.what().c_str());
+        //printf("-->%s\n", e.what().c_str());
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+        }
+        setDefaults();
+        return 1;
+    } catch (std::exception &e) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+        }
         setDefaults();
         return 1;
     } catch (...) {
-        printf("-->unknown exception!\n");
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, "unknown exception"));
+        }
+        //printf("-->unknown exception!\n");
         setDefaults();
         return 1;
     }
 }
 
 
-int ProcParams::load(bool load_general,
+int ProcParams::load(ProgressListener *pl, bool load_general,
                      const KeyFile &keyFile, const ParamsEdited *pedited,
                      bool resetOnError, const Glib::ustring &fname)
 {
@@ -4864,13 +4898,27 @@ int ProcParams::load(bool load_general,
 
         return 0;
     } catch (const Glib::Error& e) {
-        printf("-->%s\n", e.what().c_str());
+        //printf("-->%s\n", e.what().c_str());
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+        }
         if (resetOnError) {
             setDefaults();
         }
         return 1;
+    } catch (std::exception &e) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+        }            
+        if (resetOnError) {
+            setDefaults();
+        }
+        return 1;        
     } catch (...) {
-        printf("-->unknown exception!\n");
+        //printf("-->unknown exception!\n");
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, "unknown exception"));
+        }
         if (resetOnError) {
             setDefaults();
         }
@@ -4883,10 +4931,11 @@ int ProcParams::load(bool load_general,
 }
 
 
-int ProcParams::load(const KeyFile &keyFile, const ParamsEdited *pedited,
+int ProcParams::load(ProgressListener *pl,
+                     const KeyFile &keyFile, const ParamsEdited *pedited,
                      bool resetOnError, const Glib::ustring &fname)
 {
-    return load(true, keyFile, pedited, resetOnError, fname);
+    return load(pl, true, keyFile, pedited, resetOnError, fname);
 }
 
 
@@ -4960,7 +5009,8 @@ void ProcParams::cleanup()
 {
 }
 
-int ProcParams::write(const Glib::ustring& fname, const Glib::ustring& content) const
+int ProcParams::write(ProgressListener *pl,
+                      const Glib::ustring& fname, const Glib::ustring& content) const
 {
     int error = 0;
 
@@ -4969,6 +5019,9 @@ int ProcParams::write(const Glib::ustring& fname, const Glib::ustring& content) 
         f = g_fopen(fname.c_str(), "wt");
 
         if (f == nullptr) {
+            if (pl) {
+                pl->error(Glib::ustring::compose(M("PROCPARAMS_SAVE_ERROR"), fname, "write error"));
+            }
             error = 1;
         } else {
             fprintf(f, "%s", content.c_str());
@@ -4993,7 +5046,8 @@ bool FullPartialProfile::applyTo(ProcParams &pp) const
 }
 
 
-FilePartialProfile::FilePartialProfile(const Glib::ustring &fname, bool full):
+FilePartialProfile::FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool full):
+    pl_(pl),
     fname_(fname),
     full_(full)
 {
@@ -5005,11 +5059,12 @@ bool FilePartialProfile::applyTo(ProcParams &pp) const
     if (full_) {
         pp.setDefaults();
     }
-    return fname_.empty() || (pp.load(fname_) == 0);
+    return fname_.empty() || (pp.load(pl_, fname_) == 0);
 }
 
 
-PEditedPartialProfile::PEditedPartialProfile(const Glib::ustring &fname, const ParamsEdited &pe):
+PEditedPartialProfile::PEditedPartialProfile(ProgressListener *pl, const Glib::ustring &fname, const ParamsEdited &pe):
+    pl_(pl),
     fname_(fname),
     pp_(),
     pe_(pe)
@@ -5018,6 +5073,7 @@ PEditedPartialProfile::PEditedPartialProfile(const Glib::ustring &fname, const P
 
 
 PEditedPartialProfile::PEditedPartialProfile(const ProcParams &pp, const ParamsEdited &pe):
+    pl_(nullptr),
     fname_(""),
     pp_(pp),
     pe_(pe)
@@ -5032,17 +5088,21 @@ bool PEditedPartialProfile::applyTo(ProcParams &pp) const
         try {
             if (!Glib::file_test(fname_, Glib::FILE_TEST_EXISTS) ||
                 !keyfile.load_from_file(fname_)) {
+                // not an error to repor
                 return false;
             }
         } catch (const Glib::Error& e) {
-            printf("-->%s\n", e.what().c_str());
+            //printf("-->%s\n", e.what().c_str());
+            if (pl_) {
+                pl_->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname_, e.what()));
+            }
             return false;
         }
-        return pp.load(keyfile, &pe_, false) == 0;
+        return pp.load(pl_, keyfile, &pe_, false) == 0;
     } else {
         KeyFile keyfile;
-        if (pp_.save(keyfile, &pe_) == 0) {
-            return pp.load(keyfile, &pe_, false) == 0;
+        if (pp_.save(pl_, keyfile, &pe_) == 0) {
+            return pp.load(pl_, keyfile, &pe_, false) == 0;
         }
     }
     return false;
@@ -5053,7 +5113,8 @@ bool PEditedPartialProfile::applyTo(ProcParams &pp) const
 // ProcParamsWithSnapshots
 //-----------------------------------------------------------------------------
 
-int ProcParamsWithSnapshots::load(const Glib::ustring &fname)
+int ProcParamsWithSnapshots::load(ProgressListener *pl,
+                                  const Glib::ustring &fname)
 {
     setlocale(LC_NUMERIC, "C");  // to set decimal point to "."
 
@@ -5067,9 +5128,10 @@ int ProcParamsWithSnapshots::load(const Glib::ustring &fname)
     try {
         if (!Glib::file_test(fname, Glib::FILE_TEST_EXISTS) ||
             !keyfile.load_from_file(fname)) {
+            // not an error to report
             return 1;
         }
-        if (master.load(true, keyfile, nullptr, true, fname) != 0) {
+        if (master.load(pl, true, keyfile, nullptr, true, fname) != 0) {
             return 1;
         }
         const std::string sn = "Snapshot_";
@@ -5089,7 +5151,7 @@ int ProcParamsWithSnapshots::load(const Glib::ustring &fname)
             keyfile.set_prefix(sn + std::to_string(i+1) + " ");
             snapshots[i].second.appVersion = master.appVersion;
             snapshots[i].second.ppVersion = master.ppVersion;
-            if (snapshots[i].second.load(false, keyfile, nullptr, true, fname) != 0) {
+            if (snapshots[i].second.load(pl, false, keyfile, nullptr, true, fname) != 0) {
                 snapshots.resize(i);
                 break;
             }
@@ -5097,12 +5159,18 @@ int ProcParamsWithSnapshots::load(const Glib::ustring &fname)
 
         return 0;
     } catch (const Glib::Error &e) {
-        printf("-->%s\n", e.what().c_str());
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+        }
+        //printf("-->%s\n", e.what().c_str());
         master.setDefaults();
         snapshots.clear();
         return 1;
     } catch (...) {
-        printf("-->unknown exception!\n");
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, "unknown exception"));
+        }
+        //printf("-->unknown exception!\n");
         master.setDefaults();
         snapshots.clear();
         return 1;
@@ -5110,7 +5178,8 @@ int ProcParamsWithSnapshots::load(const Glib::ustring &fname)
 }
 
 
-int ProcParamsWithSnapshots::save(const Glib::ustring &fname, const Glib::ustring &fname2, bool fnameAbsolute)
+int ProcParamsWithSnapshots::save(ProgressListener *pl,
+                                  const Glib::ustring &fname, const Glib::ustring &fname2, bool fnameAbsolute)
 {
     if (fname.empty() && fname2.empty()) {
         return 0;
@@ -5135,31 +5204,35 @@ int ProcParamsWithSnapshots::save(const Glib::ustring &fname, const Glib::ustrin
             keyfile.set_string("Snapshots", key, snapshots[i].first);
         }
 
-        int ret = master.save(false, keyfile, nullptr, fname, fnameAbsolute);
+        int ret = master.save(pl, false, keyfile, nullptr, fname, fnameAbsolute);
         if (ret != 0) {
             return ret;
         }
 
         for (size_t i = 0; i < snapshots.size(); ++i) {
             keyfile.set_prefix(sn + std::to_string(i+1) + " ");
-            ret = snapshots[i].second.save(false, keyfile, nullptr, fname, fnameAbsolute);
+            ret = snapshots[i].second.save(pl, false, keyfile, nullptr, fname, fnameAbsolute);
             if (ret != 0) {
                 return ret;
             }
         }
         
         data = keyfile.to_data();
-    } catch (Glib::KeyFileError&) {}
+    } catch (Glib::KeyFileError &exc) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_SAVE_ERROR"), fname, exc.what()));
+        }
+    }
 
     if (data.empty()) {
         return 1;
     }
 
     int error1, error2;
-    error1 = master.write(fname, data);
+    error1 = master.write(pl, fname, data);
 
     if (!fname2.empty()) {
-        error2 = master.write(fname2, data);
+        error2 = master.write(pl, fname2, data);
         // If at least one file has been saved, it's a success
         return error1 & error2;
     } else {
