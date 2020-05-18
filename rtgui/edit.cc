@@ -1138,6 +1138,15 @@ EditDataProvider::EditDataProvider() : currSubscriber(nullptr), object(0), posSc
     pipetteVal[0] = pipetteVal[1] = pipetteVal[2] = 0.f;
 }
 
+
+EditDataProvider::~EditDataProvider()
+{
+    if (currSubscriber) {
+        currSubscriber->setEditProvider(nullptr);
+    }
+}
+
+
 void EditDataProvider::subscribe(EditSubscriber *subscriber)
 {
     if (currSubscriber) {
