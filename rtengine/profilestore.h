@@ -142,6 +142,8 @@ private:
     /** whereas we have to load all profile at init time or one by one upon request */
     bool loadAll;
 
+    rtengine::ProgressListener *pl_;
+
     /** @brief Method to recursively parse a profile folder with a level depth arbitrarily limited to 3
       *
       * @param realPath       current full path of the scanned directory ; e.g.:  ~/MyProfiles/
@@ -199,6 +201,8 @@ public:
     std::unique_ptr<rtengine::procparams::PartialProfile> loadDynamicProfile(const rtengine::FramesMetaData *im);
 
     void dumpFolderList();
+
+    void setProgressListener(rtengine::ProgressListener *pl) { pl_ = pl; }
 };
 
 #endif

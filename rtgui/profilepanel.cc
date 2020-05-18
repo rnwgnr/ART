@@ -376,10 +376,10 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
                     // ppTemp.deleteInstance();
                     ProcParams pparams;
                     toSave->applyTo(pparams);
-                    int retCode = pparams.save(fname, "", true, &pe);
+                    int retCode = pparams.save(dynamic_cast<rtengine::ProgressListener *>(parent), fname, "", true, &pe);
 
                     if (retCode) {
-                        writeFailed(dialog, fname);
+                        //writeFailed(dialog, fname);
                     } else {
                         done = true;
                         bool ccPrevState = changeconn.block(true);
@@ -390,10 +390,10 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
                     // saving a full profile
                     ProcParams pparams;
                     toSave->applyTo(pparams);
-                    int retCode = pparams.save(fname);
+                    int retCode = pparams.save(dynamic_cast<rtengine::ProgressListener *>(parent), fname);
 
                     if (retCode) {
-                        writeFailed(dialog, fname);
+                        //writeFailed(dialog, fname);
                     } else {
                         done = true;
                         bool ccPrevState = changeconn.block(true);
@@ -543,7 +543,7 @@ void ProfilePanel::load_clicked (GdkEventButton* event)
         ProcParams pp;
         // ParamsEdited pe;
         // int err = pp.load (fname, &pe);
-        int err = pp.load(fname);
+        int err = pp.load(dynamic_cast<rtengine::ProgressListener *>(parent), fname);
 
         if (!err) {
             // if (!customCreated && fillMode->get_active()) {
@@ -561,6 +561,7 @@ void ProfilePanel::load_clicked (GdkEventButton* event)
             // Now we have procparams initialized to default if fillMode is on
             // and paramsedited initialized to default in all cases
 
+            auto pl = dynamic_cast<rtengine::ProgressListener *>(parent);
             if (event->state & Gdk::CONTROL_MASK)
                 // custom.pparams = loadedFile.pparams filtered by ( loadedFile.pedited & partialPaste.pedited )
             {
@@ -568,9 +569,9 @@ void ProfilePanel::load_clicked (GdkEventButton* event)
                     partialProfileDlg = new PartialPasteDlg (Glib::ustring (), parent);
                 }
                 //partialProfileDlg->applyPaste (custom->pparams, !fillMode->get_active() ? custom->pedited : nullptr, &pp, &pe);
-                custom = new PEditedPartialProfile(fname, partialProfileDlg->getParamsEdited());
+                custom = new PEditedPartialProfile(pl, fname, partialProfileDlg->getParamsEdited());
             } else {
-                custom = new FilePartialProfile(fname, fillMode->get_active());
+                custom = new FilePartialProfile(pl, fname, fillMode->get_active());
                 // custom.pparams = loadedFile.pparams filtered by ( loadedFile.pedited )
                 // pe.combine(*custom->pparams, pp, true);
 

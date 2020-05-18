@@ -415,6 +415,8 @@ public:
     bool batch_queue_use_profile;
 
     bool toolpanels_disable;
+    
+    int error_message_duration; // in milliseconds
 
     Options();
 

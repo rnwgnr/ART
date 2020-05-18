@@ -285,8 +285,9 @@ void BatchQueuePanel::queueSizeChanged(int qsize, bool queueRunning, bool queueE
     }
 
     if (queueError) {
-        Gtk::MessageDialog msgd (queueErrorMessage, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
-        msgd.run ();
+        parent->error(queueErrorMessage);
+        // Gtk::MessageDialog msgd (queueErrorMessage, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        // msgd.run ();
     }
 }
 

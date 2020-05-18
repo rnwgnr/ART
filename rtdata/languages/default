@@ -1051,6 +1051,8 @@ MAIN_TOOLTIP_SHOWHIDERP1;Show/Hide the right panel.\nShortcut: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Show/Hide the top panel.\nShortcut: <b>Shift-l</b>
 MAIN_TOOLTIP_THRESHOLD;Threshold
 MAIN_TOOLTIP_TOGGLE;Toggle the <b>Before</b>/<b>After</b> view.\nShortcut: <b>Shift-b</b>
+METADATA_LOAD_ERROR;Error loading metadata from %1: %2
+METADATA_SAVE_ERROR;Error saving metadata to %1: %2
 MONITOR_PROFILE_SYSTEM;System default
 NAVIGATOR_B;B:
 NAVIGATOR_C;C:
@@ -1331,6 +1333,8 @@ PREFERENCES_WORKFLOW;Layout
 PREFERENCES_XMP_SIDECAR_MODE;XMP sidecar style
 PREFERENCES_XMP_SIDECAR_MODE_STD;Standard (FILENAME.xmp for FILENAME.ext)
 PREFERENCES_XMP_SIDECAR_MODE_EXT;darktable/digiKam-like (FILENAME.ext.xmp for FILENAME.ext)
+PROCPARAMS_LOAD_ERROR;Error loading parameters from %1: %2
+PROCPARAMS_SAVE_ERROR;Error saving parameters to %1: %2
 PROFILEPANEL_COPYPPASTE;Parameters to copy
 PROFILEPANEL_GLOBALPROFILES;Bundled profiles
 PROFILEPANEL_LABEL;Processing Profiles

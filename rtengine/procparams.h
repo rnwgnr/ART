@@ -37,6 +37,8 @@ class ParamsEdited;
 
 namespace rtengine {
 
+class ProgressListener;
+
 enum RenderingIntent {
     RI_PERCEPTUAL = INTENT_PERCEPTUAL,
     RI_RELATIVE = INTENT_RELATIVE_COLORIMETRIC,
@@ -1548,6 +1550,22 @@ public:
       * Sets the hand-wired defaults parameters.
       */
     void setDefaults();
+
+    /**
+      * Loads the parameters from a file.
+      * @param fname the name of the file
+      * @params pedited pointer to a ParamsEdited object (optional) to store which values has been loaded
+      * @return Error code (=0 if no error)
+      */
+    int load(ProgressListener *pl,
+             const Glib::ustring& fname, const ParamsEdited *pedited=nullptr);
+
+    int load(ProgressListener *pl,
+             const KeyFile &keyFile, const ParamsEdited *pedited=nullptr,
+             bool resetOnError=true, const Glib::ustring &fname="");
+    int save(ProgressListener *pl,
+             KeyFile &keyFile, const ParamsEdited *pedited=nullptr,
+             const Glib::ustring &fname="", bool fnameAbsolute=true) const;
     /**
       * Saves the parameters to possibly two files. This is a performance improvement if a function has to
       * save the same file in two different location, i.e. the cache and the image's directory
@@ -1558,19 +1576,8 @@ public:
       * @param pedited pointer to a ParamsEdited object (optional) to store which values has to be saved
       * @return Error code (=0 if all supplied filenames where created correctly)
       */
-    int save(const Glib::ustring& fname, const Glib::ustring& fname2 = Glib::ustring(), bool fnameAbsolute = true, const ParamsEdited *pedited = nullptr);
-    /**
-      * Loads the parameters from a file.
-      * @param fname the name of the file
-      * @params pedited pointer to a ParamsEdited object (optional) to store which values has been loaded
-      * @return Error code (=0 if no error)
-      */
-    int load(const Glib::ustring& fname, const ParamsEdited *pedited=nullptr);
-
-    int load(const KeyFile &keyFile, const ParamsEdited *pedited=nullptr,
-             bool resetOnError=true, const Glib::ustring &fname="");
-    int save(KeyFile &keyFile, const ParamsEdited *pedited=nullptr,
-             const Glib::ustring &fname="", bool fnameAbsolute=true) const;
+    int save(ProgressListener *pl,
+             const Glib::ustring& fname, const Glib::ustring& fname2 = Glib::ustring(), bool fnameAbsolute = true, const ParamsEdited *pedited = nullptr);
 
     /** Creates a new instance of ProcParams.
       * @return a pointer to the new ProcParams instance. */
@@ -1592,12 +1599,15 @@ private:
     * @param content the text to write
     * @return Error code (=0 if no error)
     * */
-    int write(const Glib::ustring& fname, const Glib::ustring& content) const;
+    int write(ProgressListener *pl,
+              const Glib::ustring& fname, const Glib::ustring& content) const;
 
-    int load(bool load_general,
+    int load(ProgressListener *pl,
+             bool load_general,
              const KeyFile &keyFile, const ParamsEdited *pedited,
              bool resetOnError, const Glib::ustring &fname);
-    int save(bool save_general,
+    int save(ProgressListener *pl,
+             bool save_general,
              KeyFile &keyFile, const ParamsEdited *pedited,
              const Glib::ustring &fname, bool fnameAbsolute) const;
 
@@ -1607,8 +1617,8 @@ private:
 
 class ProcParamsWithSnapshots {
 public:
-    int load(const Glib::ustring &fname);
-    int save(const Glib::ustring &fname, const Glib::ustring &fname2=Glib::ustring(), bool fnameAbsolute=true);
+    int load(ProgressListener *pl, const Glib::ustring &fname);
+    int save(ProgressListener *pl, const Glib::ustring &fname, const Glib::ustring &fname2=Glib::ustring(), bool fnameAbsolute=true);
 
     ProcParams master;
     std::vector<std::pair<Glib::ustring, ProcParams>> snapshots;
@@ -1634,11 +1644,12 @@ private:
 
 class FilePartialProfile: public PartialProfile {
 public:
-    FilePartialProfile(): fname_(""), full_(true) {}
-    explicit FilePartialProfile(const Glib::ustring &fname, bool full=false);
+    FilePartialProfile(): pl_(nullptr), fname_(""), full_(true) {}
+    explicit FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool full=false);
     bool applyTo(ProcParams &pp) const override;
 
 private:
+    ProgressListener *pl_;
     Glib::ustring fname_;
     bool full_;
 };
@@ -1646,11 +1657,12 @@ private:
 
 class PEditedPartialProfile: public PartialProfile {
 public:
-    PEditedPartialProfile(const Glib::ustring &fname, const ParamsEdited &pe);
+    PEditedPartialProfile(ProgressListener *pl, const Glib::ustring &fname, const ParamsEdited &pe);
     PEditedPartialProfile(const ProcParams &pp, const ParamsEdited &pe);
     bool applyTo(ProcParams &pp) const override;
 
 private:
+    ProgressListener *pl_;
     Glib::ustring fname_;
     ProcParams pp_;
     ParamsEdited pe_;

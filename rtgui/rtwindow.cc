@@ -26,6 +26,7 @@
 #include "cursormanager.h"
 #include "rtimage.h"
 #include "whitebalance.h"
+#include "../rtengine/profilestore.h"
 
 float fontScale = 1.f;
 Glib::RefPtr<Gtk::CssProvider> cssForced;
@@ -88,13 +89,16 @@ osx_open_file_cb (GtkosxApplication *app, gchar *path_, gpointer data)
 }
 #endif // __APPLE__
 
-RTWindow::RTWindow ()
-    : mainNB (nullptr)
-    , bpanel (nullptr)
-    , splash (nullptr)
-    , btn_fullscreen (nullptr)
-    , epanel (nullptr)
-    , fpanel (nullptr)
+RTWindow::RTWindow():
+    epanel(nullptr),
+    fpanel(nullptr),
+    main_overlay_(nullptr),
+    msg_revealer_(nullptr),
+    info_label_(nullptr),
+    mainNB(nullptr),
+    bpanel(nullptr),
+    splash(nullptr),
+    btn_fullscreen(nullptr)
 {
 
     if (options.is_new_version()) {
@@ -304,11 +308,14 @@ RTWindow::RTWindow ()
     signal_window_state_event().connect ( sigc::mem_fun (*this, &RTWindow::on_window_state_event) );
     signal_key_press_event().connect ( sigc::mem_fun (*this, &RTWindow::keyPressed) );
 
+    main_overlay_ = Gtk::manage(new Gtk::Overlay());
+    add(*main_overlay_);
+
     if (simpleEditor) {
         epanel = Gtk::manage ( new EditorPanel (nullptr) );
         epanel->setParent (this);
         epanel->setParentWindow (this);
-        add (*epanel);
+        main_overlay_->add(*epanel);
         show_all ();
 
         pldBridge = nullptr; // No progress listener
@@ -434,7 +441,7 @@ RTWindow::RTWindow ()
 
         pldBridge = new PLDBridge (static_cast<rtengine::ProgressListener*> (this));
 
-        add (*mainNB);
+        main_overlay_->add(*mainNB);
         show_all ();
 
         bpanel->init (this);
@@ -447,10 +454,38 @@ RTWindow::RTWindow ()
             }
         }
     }
+
+    msg_revealer_ = Gtk::manage(new Gtk::Revealer());
+    {
+        info_label_ = Gtk::manage(new Gtk::Label());
+        Gtk::HBox *box = Gtk::manage(new Gtk::HBox());
+        box->set_spacing(4);
+
+        box->get_style_context()->add_class("app-notification");
+        RTImage *icon = Gtk::manage(new RTImage("warning.png"));
+        setExpandAlignProperties(icon, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
+        box->pack_start(*icon, false, false, 20);
+        box->pack_start(*info_label_, false, true, 10);
+        msg_revealer_->add(*box);
+        msg_revealer_->set_transition_type(Gtk::REVEALER_TRANSITION_TYPE_CROSSFADE);
+        msg_revealer_->property_halign() = Gtk::ALIGN_CENTER;
+        msg_revealer_->property_valign() = Gtk::ALIGN_END;
+        msg_revealer_->property_margin_bottom() = 70;
+    }
+    main_overlay_->add_overlay(*msg_revealer_);
+    show_all_children();
+    msg_revealer_->set_reveal_child(false);
+
+    cacheMgr->setProgressListener(this);
+    ProfileStore::getInstance()->setProgressListener(this);
 }
+
 
 RTWindow::~RTWindow()
 {
+    cacheMgr->setProgressListener(nullptr);
+    ProfileStore::getInstance()->setProgressListener(nullptr);
+    
     if (!simpleEditor) {
         delete pldBridge;
     }
@@ -974,8 +1009,26 @@ void RTWindow::setProgressState(bool inProcessing)
 
 void RTWindow::error(const Glib::ustring& descr)
 {
-    prProgBar.set_text(descr);
+    if (reveal_conn_.connected()) {
+        reveal_conn_.disconnect();
+        info_msg_ += "\n" + escapeHtmlChars(descr);
+    } else {
+        info_msg_ = escapeHtmlChars(descr);
+    }
+    //prProgBar.set_text(descr);
+    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", info_msg_));
+    msg_revealer_->set_reveal_child(true);
+    reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
 }
+
+
+bool RTWindow::hide_info_msg()
+{
+    msg_revealer_->set_reveal_child(false);
+    info_msg_ = "";
+    return false;
+}
+
 
 void RTWindow::toggle_fullscreen ()
 {
