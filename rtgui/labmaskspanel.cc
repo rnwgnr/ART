@@ -2042,22 +2042,20 @@ void LabMasksPanel::populateShapeList(int idx, int sel)
     for (size_t i = 0; i < r.areaMask.shapes.size(); ++i) {
         auto &a = r.areaMask.shapes[i];
         auto j = areaMaskShapes->append(std::to_string(i+1));
+        Glib::ustring label;
         switch (a->getType()){
-        case Shape::Type::POLYGON:
-        {
+        case Shape::Type::POLYGON: {
             auto poly = static_cast<rtengine::AreaMask::Polygon*>(a.get());
-            areaMaskShapes->set_text(j, 1, Glib::ustring::compose(M("TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY") + "%2",
-                                           poly->knots.size(), m(poly->mode)));
-        }
-        break;
+            label = Glib::ustring::compose(M("TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY") + "%2", poly->knots.size(), m(poly->mode));
+        } break;
         case Shape::Type::RECTANGLE:
-        default:
-        {
+        default: {
             auto rect = static_cast<rtengine::AreaMask::Rectangle*>(a.get());
-            areaMaskShapes->set_text(j, 1, Glib::ustring::compose("%1 %2 %3 %4 %5 %6 %7", rd(rect->x), rd(rect->y),
-                                           rd(rect->width), rd(rect->height), rd(rect->angle), rd(rect->roundness), m(rect->mode)));
+            label = Glib::ustring::compose("%1 %2 %3 %4 %5 %6 %7", rd(rect->x), rd(rect->y), rd(rect->width), rd(rect->height), rd(rect->angle), rd(rect->roundness), m(rect->mode));
+        } break;
         }
-        }
+        label += Glib::ustring::compose(" | %1 %2", rd(a->feather), rd(a->blur));
+        areaMaskShapes->set_text(j, 1, label);
     }
     if (sel >= 0 && size_t(sel) < r.areaMask.shapes.size()) {
         Gtk::TreePath pth;
