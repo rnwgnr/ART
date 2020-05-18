@@ -1887,10 +1887,17 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
     if (selected_ < masks_.size()) {
         listEdited = true;
         auto &am = masks_[selected_].areaMask;
-        // TODO: Find a way to copy the last known Rectangle (feature removed by Hombre)
         am.shapes.emplace_back();
         if (type == Shape::Type::RECTANGLE) {
             am.shapes.back().reset(new rtengine::AreaMask::Rectangle(defaultAreaShape));
+            for (size_t j = am.shapes.size()-1; j > 0; --j) {
+                if (am.shapes[j-1]->getType() == Shape::Type::RECTANGLE) {
+                    am.shapes.back() = std::move(am.shapes[j-1]->clone());
+                    am.shapes.back()->feather = 0;
+                    am.shapes.back()->blur = 0;
+                    break;
+                }
+            }
         } else if (type == Shape::Type::POLYGON) {
             am.shapes.back().reset(new rtengine::AreaMask::Polygon());
         }
