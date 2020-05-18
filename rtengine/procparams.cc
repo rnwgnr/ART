@@ -431,7 +431,9 @@ bool saveToKeyfile(
 
 
 AreaMask::Shape::Shape():
-    mode(ADD)
+    mode(ADD),
+    feather(0.),
+    blur(0.)
 {
 }
 
@@ -474,7 +476,9 @@ std::unique_ptr<AreaMask::Shape> AreaMask::Polygon::clone() const
 
 bool AreaMask::Shape::operator==(const Shape &other) const
 {
-    return mode == other.mode;
+    return mode == other.mode
+           && feather == other.feather
+           && blur == other.blur;
 }
 
 
@@ -1009,6 +1013,10 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                 }
             }
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
+            if (ppVersion >= 1015) {
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Feather" + suffix, shape->feather);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Blur" + suffix, shape->blur);
+            }
             if (found) {
                 shape->mode = str2mode(mode);
                 s.emplace_back(std::move(shape));
@@ -1066,6 +1074,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "AreaMaskFeather" + suffix, areaMask.feather, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskBlur" + suffix, areaMask.blur, keyfile);
     putToKeyfile(group_name, prefix + "AreaMaskContrast" + suffix, areaMask.contrast, keyfile);
+
     for (size_t i = 0; i < areaMask.shapes.size(); ++i) {
         auto &a = areaMask.shapes[i];
         std::string n = i ? std::string("_") + std::to_string(i) + "_" : "";
@@ -1092,6 +1101,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
         }
         }
         putToKeyfile(group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode2str(a->mode), keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "Feather" + suffix, a->feather, keyfile);
+        putToKeyfile(group_name, prefix + "AreaMask" + n + "Blur" + suffix, a->blur, keyfile);
     }
 
     putToKeyfile(group_name, prefix + "DeltaEMaskEnabled" + suffix, deltaEMask.enabled, keyfile);

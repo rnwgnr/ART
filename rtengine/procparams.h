@@ -98,6 +98,8 @@ struct AreaMask {
             POLYGON
         };
         Mode mode;
+        double feather; // [0,100]
+        double blur;
 
         Shape();
         virtual ~Shape() {}
