@@ -81,7 +81,7 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
     tpp = nullptr;
     delete [] lastImg;
     lastImg = nullptr;
-    tw = -1;
+    tw = options.maxThumbnailWidth;
     th = options.maxThumbnailHeight;
     imgRatio = -1.;
 
@@ -98,20 +98,20 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
 
     if (ext.lowercase() == "jpg" || ext.lowercase() == "jpeg") {
         infoFromImage (fname);
-        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, 1, pparams.master.wb.equal);
+        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
 
         if (tpp) {
             cfs.format = FT_Jpeg;
         }
     } else if (ext.lowercase() == "png") {
-        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, 1, pparams.master.wb.equal);
+        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
 
         if (tpp) {
             cfs.format = FT_Png;
         }
     } else if (ext.lowercase() == "tif" || ext.lowercase() == "tiff") {
         infoFromImage (fname);
-        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, 1, pparams.master.wb.equal);
+        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
 
         if (tpp) {
             cfs.format = FT_Tiff;
@@ -592,6 +592,12 @@ void Thumbnail::getThumbnailSize (int &w, int &h, const rtengine::procparams::Pr
         w = (int)(imgRatio_ * (float)h);
     } else {
         w = tw_ * h / th_;
+    }
+
+    if (w > options.maxThumbnailWidth) {
+        float s = float(options.maxThumbnailWidth)/w;
+        w = options.maxThumbnailWidth;
+        h = std::max(int(h * s), 1);
     }
 }
 
