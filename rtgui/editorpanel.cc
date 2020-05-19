@@ -847,13 +847,13 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
 
 }
 
+
 EditorPanel::~EditorPanel ()
 {
     idle_register.destroy();
 
     history->setHistoryBeforeAfterListener (nullptr);
     // the order is important!
-    tpc->setEditProvider(nullptr);
     
     iareapanel->setBeforeAfterViews (nullptr, iareapanel);
     delete iareapanel;
@@ -932,6 +932,15 @@ EditorPanel::~EditorPanel ()
         delete iRightPanel_1_Hide;
     }
 }
+
+
+void EditorPanel::cleanup()
+{
+    if (tpc) {
+        tpc->setEditProvider(nullptr);
+    }
+}   
+
 
 void EditorPanel::leftPaneButtonReleased (GdkEventButton *event)
 {

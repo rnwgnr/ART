@@ -165,6 +165,8 @@ public:
 
     Gtk::Paned* catalogPane;
 
+    void cleanup();
+
 private:
     void close ();
 
