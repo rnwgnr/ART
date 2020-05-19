@@ -25,6 +25,8 @@
 #include "rawimagesource.h"
 #include "stdimagesource.h"
 #include "iccstore.h"
+#define BENCHMARK
+#include "StopWatch.h"
 
 
 namespace rtengine {
@@ -240,103 +242,9 @@ public:
     PreviewRawImageSource(int bw, int bh):
         RawImageSource(),
         bbox_W_(bw),
-        bbox_H_(bh)
+        bbox_H_(bh),
+        demosaiced_(false)
     {
-    }
-
-    void rescale()
-    {
-        if (bbox_W_ < 0 || bbox_H_ < 0) {
-            return;
-        }
-        if (fuji || d1x) {
-            return;
-        }
-        if (numFrames != 1) {
-            return;
-        }
-
-        // (w, h) is a bounding box
-        double sw = std::max(double(W) / bbox_W_, 1.0);
-        double sh = std::max(double(H) / bbox_H_, 1.0);
-        int skip = std::max(sw, sh);
-        
-        if (skip <= 1) {
-            return;
-        }
-
-        if (ri->getSensorType() == ST_BAYER) {
-            skip /= 2;
-            if (skip & 1) {
-                --skip;
-            }
-            if (skip <= 1) {
-                return;
-            }
-
-            if (settings->verbose) {
-                std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
-                          << " to " << (W/skip) << "x" << (H/skip) << std::endl;
-            }
-            
-            array2D<float> tmp;
-            tmp(W, H, static_cast<float *>(rawData), 0);
-            W /= skip;
-            H /= skip;
-            rawData.free();
-            rawData(W, H);
-            
-#ifdef _OPENMP
-#           pragma omp parallel for
-#endif
-            for (int y = 0; y < H; ++y) {
-                int yy = y * skip + int(y & 1);
-                for (int x = 0; x < W; ++x) {
-                    int xx = x * skip + int(x & 1);
-                    rawData[y][x] = tmp[yy][xx];
-                }
-            }
-            flushRGB();
-            red(W, H);
-            green(W, H);
-            blue(W, H);
-        } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
-            return; // TODO
-        } else {
-            int c = ri->get_colors();
-            if (c > 3) {
-                return;
-            }
-
-            if (settings->verbose) {
-                std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
-                          << " to " << (W/skip) << "x" << (H/skip) << std::endl;
-            }
-            
-            array2D<float> tmp;
-            tmp(W * c, H, static_cast<float *>(rawData), 0);
-            W /= skip;
-            H /= skip;
-            rawData.free();
-            rawData(W * c, H);
-            
-#ifdef _OPENMP
-#           pragma omp parallel for
-#endif
-            for (int y = 0; y < H; ++y) {
-                int yy = y * skip;
-                for (int x = 0; x < W; ++x) {
-                    int xx = x * skip;
-                    for (int j = 0; j < c; ++j) {
-                        rawData[y][c * x + j] = tmp[yy][c * xx + j];
-                    }
-                }
-            }
-            flushRGB();
-            red(W, H);
-            green(W, H);
-            blue(W, H);
-        }
     }
 
     bool mark_clipped()
@@ -431,9 +339,214 @@ public:
         }
     }
 
+    void fast_demosaic(bool mono)
+    {
+        BENCHFUNMICRO
+            
+        bool scaled = rescale(mono);
+        
+        if (demosaiced_) {
+            return;
+        } else if (!mono && scaled && ri->isBayer()) {
+            bayer_bilinear_demosaic(rawData, red, green, blue);
+            return;
+        }
+
+        ProcParams pp;
+        pp.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::FAST);
+        pp.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST);
+
+        if (mono) {
+            pp.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO);
+            pp.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO);
+        }
+
+        double t = 0;
+        RawImageSource::demosaic(pp.raw, false, t);
+    }
+
 private:
+    bool rescale(bool mono)
+    {
+        if (bbox_W_ < 0 || bbox_H_ < 0) {
+            return false;
+        }
+        if (fuji || d1x) {
+            return false;
+        }
+        if (numFrames != 1) {
+            return false;
+        }
+
+        // (w, h) is a bounding box
+        double sw = std::max(double(W) / bbox_W_, 1.0);
+        double sh = std::max(double(H) / bbox_H_, 1.0);
+        int skip = std::max(sw, sh);
+        
+        if (skip <= 1) {
+            return false;
+        }
+
+        if (ri->getSensorType() == ST_BAYER) {
+            skip /= 2;
+            if (skip & 1) {
+                --skip;
+            }
+            if (skip <= 1) {
+                return false;
+            }
+
+            if (settings->verbose) {
+                std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
+                          << " to " << (W/skip) << "x" << (H/skip) << std::endl;
+            }
+
+            if (!mono) {
+                // direct half-size demosaic
+                int ww = W / skip;
+                int hh = H / skip;
+                flushRGB();
+                red(ww, hh);
+                green(ww, hh);
+                blue(ww, hh);
+
+                int yr = 0, xr = 0;
+                int yg = 0, xg = 0;
+                int yb = 0, xb = 0;
+                switch (FC(0, 0)) {
+                case 0:
+                    xg = 1;
+                    xb = 1;
+                    yb = 1;
+                    break;
+                case 1:
+                    if (FC(0, 1) == 2) {
+                        xb = 1;
+                        yr = 1;
+                    } else {
+                        xr = 1;
+                        yb = 1;
+                    }
+                    break;
+                default:
+                    xg = 1;
+                    xr = 1;
+                    yr = 1;
+                    break;
+                }
+
+#ifdef _OPENMP
+#               pragma omp parallel for
+#endif
+                for (int y = 0; y < hh; ++y) {
+                    int yy = y * skip;
+                    for (int x = 0; x < ww; ++x) {
+                        int xx = x * skip;
+                        red[y][x] = rawData[yy+yr][xx+xr];
+                        green[y][x] = rawData[yy+yg][xx+xg];
+                        blue[y][x] = rawData[yy+yb][xx+xb];
+                    }
+                }
+
+                rawData.free();
+                W = ww;
+                H = hh;
+                demosaiced_ = true;
+            } else {
+                array2D<float> tmp;
+                tmp(W, H, static_cast<float *>(rawData), 0);
+                W /= skip;
+                H /= skip;
+                rawData.free();
+                rawData(W, H);
+            
+#ifdef _OPENMP
+#               pragma omp parallel for
+#endif
+                for (int y = 0; y < H; ++y) {
+                    int yy = y * skip + int(y & 1);
+                    for (int x = 0; x < W; ++x) {
+                        int xx = x * skip + int(x & 1);
+                        rawData[y][x] = tmp[yy][xx];
+                    }
+                }
+                flushRGB();
+                red(W, H);
+                green(W, H);
+                blue(W, H);
+            }
+        } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
+            return false; // TODO
+        } else {
+            int c = ri->get_colors();
+            if (c > 3) {
+                return false;
+            }
+
+            if (settings->verbose) {
+                std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
+                          << " to " << (W/skip) << "x" << (H/skip) << std::endl;
+            }
+            
+            array2D<float> tmp;
+            tmp(W * c, H, static_cast<float *>(rawData), 0);
+            W /= skip;
+            H /= skip;
+            rawData.free();
+            rawData(W * c, H);
+            
+#ifdef _OPENMP
+#           pragma omp parallel for
+#endif
+            for (int y = 0; y < H; ++y) {
+                int yy = y * skip;
+                for (int x = 0; x < W; ++x) {
+                    int xx = x * skip;
+                    for (int j = 0; j < c; ++j) {
+                        rawData[y][c * x + j] = tmp[yy][c * xx + j];
+                    }
+                }
+            }
+            flushRGB();
+            red(W, H);
+            green(W, H);
+            blue(W, H);
+        }
+        return true;
+    }
+
+    void bayer_bilinear_demosaic(const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue)
+    {
+        //BENCHFUN
+    #ifdef _OPENMP
+        #pragma omp parallel for
+    #endif
+        for (int i = 1; i < H - 1; ++i) {
+            float **nonGreen1 = red;
+            float **nonGreen2 = blue;
+            if (FC(i, 0) == 2 || FC(i, 1) == 2) { // blue row => swap pointers
+                std::swap(nonGreen1, nonGreen2);
+            }
+    #if defined(__clang__)
+            #pragma clang loop vectorize(assume_safety)
+    #elif defined(__GNUC__)
+            #pragma GCC ivdep
+    #endif
+            for (int j = 2 - (FC(i, 1) & 1); j < W - 2; j += 2) { // always begin with a green pixel
+                green[i][j] = rawData[i][j];
+                nonGreen1[i][j] = (rawData[i][j - 1] + rawData[i][j + 1]) * 0.5f;
+                nonGreen2[i][j] = (rawData[i - 1][j] + rawData[i + 1][j]) * 0.5f;
+                green[i][j + 1] = ((rawData[i - 1][j + 1] + rawData[i][j]) + (rawData[i][j + 2] + rawData[i + 1][j + 1])) * 0.25f;
+                nonGreen1[i][j + 1] = rawData[i][j + 1];
+                nonGreen2[i][j + 1] = ((rawData[i - 1][j] + rawData[i - 1][j + 2]) + (rawData[i + 1][j] + rawData[i + 1][j + 2])) * 0.25f;
+            }
+        }
+        border_interpolate2(W, H, 2, rawData, red, green, blue);
+    }
+    
     int bbox_W_;
     int bbox_H_;
+    bool demosaiced_;
 };
 
 } // namespace
@@ -450,27 +563,20 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
     const bool show_clip = settings->thumbnail_inspector_raw_curve == Settings::ThumbnailInspectorRawCurve::RAW_CLIPPING;
 
     ProcParams neutral;
-    neutral.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::FAST);
-    neutral.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST);
     neutral.icm.inputProfile = "(camera)";
     neutral.icm.workingProfile = options.rtSettings.srgb;
-
     if (show_clip) {
         neutral.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO);
         neutral.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO);
     }
 
-    ColorTemp wb = src.getWB();
+    ColorTemp wb = show_clip ? ColorTemp() : src.getWB();
     src.preprocess(neutral.raw, neutral.lensProf, neutral.coarse, false, wb);
-    double thresholdDummy = 0.f;
 
-    src.rescale();
-    src.demosaic(neutral.raw, false, thresholdDummy);
+    //src.rescale();
+    src.fast_demosaic(show_clip);
 
     bool marked = show_clip && src.mark_clipped();
-    // if (show_clip) {
-    //     src.mark_clipped();
-    // }
 
     int fw, fh;
     src.getFullSize(fw, fh);
