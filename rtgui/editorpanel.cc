@@ -853,6 +853,8 @@ EditorPanel::~EditorPanel ()
 
     history->setHistoryBeforeAfterListener (nullptr);
     // the order is important!
+    tpc->setEditProvider(nullptr);
+    
     iareapanel->setBeforeAfterViews (nullptr, iareapanel);
     delete iareapanel;
     iareapanel = nullptr;

@@ -239,6 +239,9 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
         buttonSet->getAllocatedDimensions (tmp, bsHeight);
     }
 
+    int infow, infoh;
+    getTextSizes (infow, infoh);
+
     // draw preview frame
     //backBuffer->draw_rectangle (cc, false, (exp_width-prew)/2, upperMargin+bsHeight, prew+1, preh+1);
     // draw thumbnail image
@@ -246,7 +249,8 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
         assert(preview.size() == size_t(prew * 3 * preh));
         
         prex = borderWidth + (exp_width - prew) / 2;
-        prey = upperMargin + bsHeight + borderWidth;
+        int hh = exp_height - (upperMargin + bsHeight + borderWidth + infoh + lowerMargin);
+        prey = upperMargin + bsHeight + borderWidth + std::max((hh - preh) / 2, 0);
         backBuffer->copyRGBCharData(&preview[0], 0, 0, prew, preh, prew * 3, prex, prey);
     }
 
@@ -255,9 +259,6 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
     // draw icons onto the thumbnail area
     bbIcons = getIconsOnImageArea ();
     bbSpecificityIcons = getSpecificityIconsOnImageArea ();
-
-    int infow, infoh;
-    getTextSizes (infow, infoh);
 
     int iofs_x = 4, iofs_y = 4;
     int istartx = prex;
@@ -357,7 +358,7 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
                 textposx_dt = 0;
             }
 
-            textposy = upperMargin + bsHeight + 2 * borderWidth + preh + borderWidth + textGap;
+            textposy = exp_height - lowerMargin - infoh; //upperMargin + bsHeight + 2 * borderWidth + preh + borderWidth + textGap;
             textw = exp_width - 2 * textGap;
 
             if (selected) {

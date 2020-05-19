@@ -193,9 +193,9 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
     ImageIO* img = imgSrc.getImageIO();
 
     // agriggio -- hotfix for #3794, to be revised once a proper solution is implemented
-    if (std::max(img->getWidth(), img->getHeight()) / std::min(img->getWidth(), img->getHeight()) >= 10) {
-        return nullptr;
-    }
+    // if (std::max(img->getWidth(), img->getHeight()) / std::min(img->getWidth(), img->getHeight()) >= 10) {
+    //     return nullptr;
+    // }
     
     Thumbnail* tpp = new Thumbnail ();
 
@@ -217,7 +217,17 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
     tpp->colorMatrix[1][1] = 1.0;
     tpp->colorMatrix[2][2] = 1.0;
 
-    if (fixwh == 1) {
+    if (fixwh < 0 && w > 0 && h > 0) {
+        int ww = h * img->getWidth() / img->getHeight();
+        int hh = w * img->getHeight() / img->getWidth();
+        if (ww <= w) {
+            w = ww;
+            tpp->scale = double(img->getHeight()) / h;
+        } else {
+            h = hh;
+            tpp->scale = double(img->getWidth()) / w;
+        }
+    } else if (fixwh == 1) {
         w = h * img->getWidth() / img->getHeight();
         tpp->scale = (double)img->getHeight() / h;
     } else {

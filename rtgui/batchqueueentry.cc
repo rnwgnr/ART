@@ -93,8 +93,12 @@ void BatchQueueEntry::refreshThumbnailImage ()
 
 void BatchQueueEntry::calcThumbnailSize ()
 {
-
     prew = preh * origpw / origph;
+    if (prew > options.maxThumbnailWidth) {
+        float s = float(options.maxThumbnailWidth) / prew;
+        prew = options.maxThumbnailWidth;
+        preh = std::max(int(preh * s), 1);
+    }
 }
 
 
