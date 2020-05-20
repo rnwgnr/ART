@@ -878,6 +878,10 @@ bool RawImage::checkThumbOk() const
         return false;
     }
 
+    if (get_thumbOffset() >= get_file()->size) {
+        return false;
+    }
+
     const ssize_t length =
         fdata (get_thumbOffset(), get_file())[1] != 0xD8 && is_ppmThumb()
         ? get_thumbWidth() * get_thumbHeight() * (get_thumbBPS() / 8) * 3
