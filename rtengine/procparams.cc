@@ -2399,6 +2399,7 @@ bool GuidedSmoothingParams::operator!=(const GuidedSmoothingParams &other) const
 ColorCorrectionParams::Region::Region():
     a(0),
     b(0),
+    abscale(1),
     saturation(0),
     slope{1,1,1},
     offset{0,0,0},
@@ -2416,6 +2417,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
 {
     return a == other.a
         && b == other.b
+        && abscale == other.abscale
         && saturation == other.saturation
         && slope == other.slope
         && offset == other.offset
@@ -3434,6 +3436,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 {
                     putToKeyfile("ColorCorrection", Glib::ustring("A_") + n, l.a, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("B_") + n, l.b, keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("ABScale_") + n, l.abscale, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Saturation_") + n, l.saturation, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Slope_") + n, l.slope[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Offset_") + n, l.offset[0], keyFile);
@@ -4551,6 +4554,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 
                 get("A_", cur.a);
                 get("B_", cur.b);
+                get("ABScale_", cur.abscale);
                 get("Saturation_", cur.saturation);
                 if (ppVersion < 1005) {
                     int c = -1;

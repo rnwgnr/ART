@@ -153,7 +153,7 @@ public:
                                   {
                                       return int(v * 1000) / 1000.f;
                                   };
-            return Glib::ustring::compose("a=%1 b=%2 S=%3\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.saturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0]);            
+            return Glib::ustring::compose("x=%1 y=%2 S=%3\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.saturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0]);            
         }   break;
         }
     }
@@ -514,7 +514,7 @@ void ColorCorrection::regionGet(int idx)
     r.saturation = saturation->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         double la, lb;
-        gridAB->getParams(la, lb, r.a, r.b);
+        gridAB->getParams(la, lb, r.a, r.b, r.abscale);
         for (int c = 0; c < 3; ++c) {
             r.slope[c] = slope->getValue();
             r.offset[c] = offset->getValue();
@@ -559,7 +559,7 @@ void ColorCorrection::regionShow(int idx)
     }
     saturation->setValue(r.saturation);
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
-        gridAB->setParams(0, 0, r.a, r.b, false);
+        gridAB->setParams(0, 0, r.a, r.b, r.abscale, false);
         slope->setValue(r.slope[0]);
         offset->setValue(r.offset[0]);
         power->setValue(r.power[0]);

@@ -54,7 +54,7 @@ bool LabGridArea::notifyListener()
             {
                 return int(v * 1000) / 1000.f;
             };
-        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(high_a), round(high_b), round(low_a), round(low_b)));
+        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(high_a * scale), round(high_b * scale), round(low_a * scale), round(low_b * scale)));
     }
     return false;
 }
@@ -70,7 +70,9 @@ LabGridArea::LabGridArea(rtengine::ProcEvent evt, const Glib::ustring &msg, bool
     edited(false),
     isDragged(false),
     low_enabled(enable_low),
-    logscale(0)
+    logscale(0),
+    scale(1),
+    defaultScale(1)
 {
     set_can_focus(false); // prevent moving the grid while you're moving a point
     add_events(Gdk::EXPOSURE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
@@ -101,12 +103,30 @@ void LabGridArea::setParams(double la, double lb, double ha, double hb, bool not
     }
 }
 
-void LabGridArea::setDefault (double la, double lb, double ha, double hb)
+
+void LabGridArea::setScale(double s, bool notify)
+{
+    scale = s;
+    queue_draw();
+    if (notify) {
+        notifyListener();
+    }
+}
+
+
+double LabGridArea::getScale() const
+{
+    return scale;
+}
+
+
+void LabGridArea::setDefault(double la, double lb, double ha, double hb, double s)
 {
     defaultLow_a = la;
     defaultLow_b = lb;
     defaultHigh_a = ha;
     defaultHigh_b = hb;
+    defaultScale = s;
 }
 
 
@@ -186,10 +206,10 @@ bool LabGridArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         cr->set_line_cap(Cairo::LINE_CAP_SQUARE);
 
         // clear background
-        cr->set_source_rgba (0., 0., 0., 0.);
-        cr->set_operator (Cairo::OPERATOR_CLEAR);
-        cr->paint ();
-        cr->set_operator (Cairo::OPERATOR_OVER);
+        cr->set_source_rgba(0., 0., 0., 0.);
+        cr->set_operator(Cairo::OPERATOR_CLEAR);
+        cr->paint();
+        cr->set_operator(Cairo::OPERATOR_OVER);
         style->render_background(cr,
                 inset * s + padding.get_left() - s,
                 inset * s + padding.get_top() - s,
@@ -225,7 +245,7 @@ bool LabGridArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
                 int jj = j - cells/2;
                 float v = step * (ii + 0.5);
                 float u = step * (jj + 0.5);
-                Color::yuv2rgb(Y, Y * u, Y * v, R, G, B, ws);
+                Color::yuv2rgb(Y, Y * u * scale, Y * v * scale, R, G, B, ws);
                 // Color::Lab2XYZ(23000.f, a, b, x, y, z);
                 // Color::xyz2srgb(x, y, z, R, G, B);
                 //cr->set_source_rgb(R / 65535.f, G / 65535.f, B / 65535.f);
@@ -462,10 +482,22 @@ LabGrid::LabGrid(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_
     reset->set_can_focus(false);
     reset->set_size_request(-1, 20);
 
+    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+    vb->pack_start(*reset, false, false, 4);
+    scale = Gtk::manage(new Gtk::VScale(0.5, 2.5, 0.01));
+    scale->set_inverted(true);
+    scale->set_value(1.0);
+    scale->set_draw_value(false);
+    RTImage *icon = Gtk::manage(new RTImage("volume-small.png"));
+    vb->pack_start(*icon, false, false);
+    vb->pack_start(*scale, true, true);
+
     pack_start(grid, true, true);
-    pack_start(*reset, false, false);
+    pack_start(*vb, false, false);
 
     grid.setLogScale(10);
+
+    scaleconn = scale->signal_value_changed().connect(sigc::mem_fun(*this, &LabGrid::scaleChanged));
     
     show_all_children();
 }
@@ -475,4 +507,38 @@ bool LabGrid::resetPressed(GdkEventButton *event)
 {
     grid.reset(event->state & GDK_CONTROL_MASK);
     return false;    
+}
+
+void LabGrid::scaleChanged()
+{
+    if (timerconn.connected()) {
+        timerconn.disconnect();
+    }
+    timerconn = Glib::signal_timeout().connect(sigc::slot<bool>([this]() -> bool { grid.setScale(scale->get_value(), true); return false; }), options.adjusterMaxDelay);
+}
+
+
+void LabGrid::getParams(double &la, double &lb, double &ha, double &hb, double &s) const
+{
+    grid.getParams(la, lb, ha, hb);
+    s = grid.getScale();
+    la *= s;
+    lb *= s;
+    ha *= s;
+    hb *= s;
+}
+
+
+void LabGrid::setParams(double la, double lb, double ha, double hb, double s, bool notify)
+{
+    ConnectionBlocker sb(scaleconn);
+    scale->set_value(s);
+    grid.setScale(s, false);
+    grid.setParams(la / s, lb / s, ha / s, hb / s, notify);
+}
+
+
+void LabGrid::setDefault(double la, double lb, double ha, double hb, double s)
+{
+    grid.setDefault(la, lb, ha, hb, s);
 }

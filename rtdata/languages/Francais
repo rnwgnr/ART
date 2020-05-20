@@ -1051,6 +1051,8 @@ MAIN_TOOLTIP_SHOWHIDERP1;Afficher/Cacher le panneau droit\nRaccourci : <b>Alt-l<
 MAIN_TOOLTIP_SHOWHIDETP1;Afficher/Cacher le panneau supérieur\nRaccourci : <b>Shift-L</b>
 MAIN_TOOLTIP_THRESHOLD;Seuil
 MAIN_TOOLTIP_TOGGLE;Comparer Avant/Après\nRaccourci : <b>Shift-b</b>
+METADATA_LOAD_ERROR;Erreur lors du chargement des métadonnées depuis %1: %2
+METADATA_SAVE_ERROR;Erreur lors de la sauvegarde des métadonnées vers %1: %2
 MONITOR_PROFILE_SYSTEM;Par défault système d'exploitation
 NAVIGATOR_B;B :
 NAVIGATOR_C;C :
@@ -1331,6 +1333,8 @@ PREFERENCES_WORKFLOW;Agencement
 PREFERENCES_XMP_SIDECAR_MODE;Style des fichiers XMP associés
 PREFERENCES_XMP_SIDECAR_MODE_STD;Standard (NOMDEFICHIER.xmp pour NOMDEFICHIER.ext)
 PREFERENCES_XMP_SIDECAR_MODE_EXT;Comme darktable/digiKam (NOMDEFICHIER.ext.xmp pour NOMDEFICHIER.ext)
+PROCPARAMS_LOAD_ERROR;Erreur lors du chargement des paramètres depuis %1: %2
+PROCPARAMS_SAVE_ERROR;Erreur lors de la sauvegarde des paramètres vers %1: %2
 PROFILEPANEL_COPYPPASTE;Paramètres à copier
 PROFILEPANEL_GLOBALPROFILES;Profils de traitement fournis
 PROFILEPANEL_LABEL;Profils de traitement
