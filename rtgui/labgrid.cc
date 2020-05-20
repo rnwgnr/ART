@@ -54,7 +54,7 @@ bool LabGridArea::notifyListener()
             {
                 return int(v * 1000) / 1000.f;
             };
-        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(high_a), round(high_b), round(low_a), round(low_b)));
+        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(high_a * scale), round(high_b * scale), round(low_a * scale), round(low_b * scale)));
     }
     return false;
 }
@@ -511,7 +511,10 @@ bool LabGrid::resetPressed(GdkEventButton *event)
 
 void LabGrid::scaleChanged()
 {
-    grid.setScale(scale->get_value(), true);
+    if (timerconn.connected()) {
+        timerconn.disconnect();
+    }
+    timerconn = Glib::signal_timeout().connect(sigc::slot<bool>([this]() -> bool { grid.setScale(scale->get_value(), true); return false; }), options.adjusterMaxDelay);
 }
 
 

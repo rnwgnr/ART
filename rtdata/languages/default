@@ -734,7 +734,7 @@ HISTORY_MSG_CHMIXER_RED_PRIMARY;Channel mixer - Red primary
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Channel mixer - Green primary
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Channel mixer - Blue primary
 HISTORY_MSG_CLAMPOOG;Clip out-of-gamut colors
-HISTORY_MSG_COLORCORRECTION_AB;CC - hue correction
+HISTORY_MSG_COLORCORRECTION_AB;CC - chrominance
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - region area mask
 HISTORY_MSG_COLORCORRECTION_MODE;CC - mode
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - region C mask
@@ -1485,7 +1485,7 @@ TP_COARSETRAF_TOOLTIP_HFLIP;Flip horizontally.
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotate left.\n\nShortcuts:\n<b>[</b> - Multiple Editor Tabs Mode,\n<b>Alt-[</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotate right.\n\nShortcuts:\n<b>]</b> - Multiple Editor Tabs Mode,\n<b>Alt-]</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_VFLIP;Flip vertically.
-TP_COLORCORRECTION_ABVALUES;a=%1 b=%2
+TP_COLORCORRECTION_ABVALUES;x=%1 y=%2
 TP_COLORCORRECTION_MODE;Mode
 TP_COLORCORRECTION_MODE_COMBINED;Standard
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Separate RGB channels

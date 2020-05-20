@@ -126,5 +126,6 @@ private:
     LabGridArea grid;
     Gtk::VScale *scale;
     sigc::connection scaleconn;
+    sigc::connection timerconn;
 };
 
