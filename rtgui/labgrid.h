@@ -49,7 +49,7 @@ public:
 
     void getParams(double &la, double &lb, double &ha, double &hb) const;
     void setParams(double la, double lb, double ha, double hb, bool notify);
-    void setDefault (double la, double lb, double ha, double hb);
+    void setDefault (double la, double lb, double ha, double hb, double s);
     void setEdited(bool yes);
     bool getEdited() const;
     void reset(bool toInitial);
@@ -60,6 +60,9 @@ public:
 
     void setLogScale(int scale);
     int getLogScale() const;
+
+    void setScale(double s, bool notify);
+    double getScale() const;
 
     bool on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf) override;
     void on_style_updated () override;
@@ -94,6 +97,8 @@ private:
 
     bool low_enabled;
     int logscale;
+    double scale;
+    double defaultScale;
 
     bool notifyListener();
     void getLitPoint();
@@ -101,22 +106,25 @@ private:
 
 
 class LabGrid: public Gtk::HBox {
-private:
-    LabGridArea grid;
-
-    bool resetPressed(GdkEventButton *event);
-    
 public:
     LabGrid(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low=true);
 
-    void getParams(double &la, double &lb, double &ha, double &hb) const { return grid.getParams(la, lb, ha, hb); }
-    void setParams(double la, double lb, double ha, double hb, bool notify) { grid.setParams(la, lb, ha, hb, notify); }
-    void setDefault (double la, double lb, double ha, double hb) { grid.setDefault(la, lb, ha, hb); }
+    void getParams(double &la, double &lb, double &ha, double &hb, double &s) const;
+    void setParams(double la, double lb, double ha, double hb, double s, bool notify);
+    void setDefault(double la, double lb, double ha, double hb, double s);
     void setEdited(bool yes) { grid.setEdited(yes); }
     bool getEdited() const { return grid.getEdited(); }
     void reset(bool toInitial) { grid.reset(toInitial); }
     void setListener(ToolPanelListener *l) { grid.setListener(l); }
     bool lowEnabled() const { return grid.lowEnabled(); }
     void setLowEnabled(bool yes) { grid.setLowEnabled(yes); }
+
+private:
+    bool resetPressed(GdkEventButton *event);
+    void scaleChanged();
+
+    LabGridArea grid;
+    Gtk::VScale *scale;
+    sigc::connection scaleconn;
 };
 

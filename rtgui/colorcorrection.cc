@@ -514,7 +514,7 @@ void ColorCorrection::regionGet(int idx)
     r.saturation = saturation->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         double la, lb;
-        gridAB->getParams(la, lb, r.a, r.b);
+        gridAB->getParams(la, lb, r.a, r.b, r.abscale);
         for (int c = 0; c < 3; ++c) {
             r.slope[c] = slope->getValue();
             r.offset[c] = offset->getValue();
@@ -559,7 +559,7 @@ void ColorCorrection::regionShow(int idx)
     }
     saturation->setValue(r.saturation);
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
-        gridAB->setParams(0, 0, r.a, r.b, false);
+        gridAB->setParams(0, 0, r.a, r.b, r.abscale, false);
         slope->setValue(r.slope[0]);
         offset->setValue(r.offset[0]);
         power->setValue(r.power[0]);

@@ -1260,6 +1260,7 @@ struct ColorCorrectionParams {
     struct Region {
         double a;
         double b;
+        double abscale;
         double saturation;
         std::array<double, 3> slope;
         std::array<double, 3> offset;
