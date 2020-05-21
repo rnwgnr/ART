@@ -32,8 +32,7 @@ public:
     Glib::ustring command;
     Glib::ustring label;
     
-    Glib::ustring make;
-    Glib::ustring model;
+    Glib::ustring camera;
     Glib::ustring extension;
     size_t min_args;
     size_t max_args;
@@ -43,8 +42,7 @@ public:
         ANY
     };
     FileType filetype;
-    bool match_make;
-    bool match_model;
+    bool match_camera;
     bool match_lens;
     bool match_shutter;
     bool match_iso;

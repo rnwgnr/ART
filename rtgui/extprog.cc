@@ -37,14 +37,12 @@
 UserCommand::UserCommand():
     command(""),
     label(""),
-    make("^.*$"),
-    model("^.*$"),
+    camera("^.*$"),
     extension(""),
     min_args(1),
     max_args(std::numeric_limits<size_t>::max()),
     filetype(ANY),
-    match_make(false),
-    match_model(false),
+    match_camera(false),
     match_lens(false),
     match_shutter(false),
     match_iso(false),
@@ -66,10 +64,8 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
     for (size_t i = 0; i < n; ++i) {
         auto mdi = args[i]->getMetaData();
         if (i > 0) {
-            if (match_make && md->getMake() != mdi->getMake()) {
-                return false;
-            }
-            if (match_model && md->getModel() != mdi->getModel()) {
+            if (match_camera && (md->getMake() != mdi->getMake() ||
+                                 md->getModel() != mdi->getModel())) {
                 return false;
             }
             if (match_lens && md->getLens() != mdi->getLens()) {
@@ -89,10 +85,7 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
             }
         }
 
-        if (!Glib::Regex::match_simple(make, mdi->getMake(), Glib::REGEX_CASELESS)) {
-            return false;
-        }
-        if (!Glib::Regex::match_simple(model, mdi->getModel(), Glib::REGEX_CASELESS)) {
+        if (!Glib::Regex::match_simple(camera, mdi->getMake() + " " + mdi->getModel(), Glib::REGEX_CASELESS)) {
             return false;
         }
         if (filetype != ANY && (args[i]->getType() == FT_Raw) != (filetype == RAW)) {
@@ -191,16 +184,12 @@ void UserCommandStore::init(const Glib::ustring &dirname)
                     continue;
                 }
 
-                if (kf.has_key(group, "Make")) {
-                    cmd.make = kf.get_string(group, "Make");
-                }
-
-                if (kf.has_key(group, "Model")) {
-                    cmd.model = kf.get_string(group, "Model");
+                if (kf.has_key(group, "Camera")) {
+                    cmd.camera = kf.get_string(group, "Camera");
                 }
 
                 if (kf.has_key(group, "Extension")) {
-                    cmd.model = kf.get_string(group, "Extension").lowercase();
+                    cmd.extension = kf.get_string(group, "Extension").lowercase();
                 }
 
                 if (kf.has_key(group, "MinArgs")) {
@@ -231,8 +220,7 @@ void UserCommandStore::init(const Glib::ustring &dirname)
                     {
                         return kf.has_key(group, k) && kf.get_boolean(group, k);
                     };
-                cmd.match_make = getbool("MatchMake");
-                cmd.match_model = getbool("MatchModel");
+                cmd.match_camera = getbool("MatchCamera");
                 cmd.match_lens = getbool("MatchLens");
                 cmd.match_shutter = getbool("MatchShutter");
                 cmd.match_iso = getbool("MatchISO");
