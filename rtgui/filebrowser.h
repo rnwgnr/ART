@@ -83,10 +83,11 @@ protected:
     Gtk::MenuItem* menuLabel;
     Gtk::MenuItem* menuFileOperations;
     Gtk::MenuItem* menuProfileOperations;
-    Gtk::MenuItem* menuExtProg;
+    // Gtk::MenuItem* menuExtProg;
     // Gtk::MenuItem** amiExtProg;
-    Gtk::MenuItem* miOpenDefaultViewer;
-    std::vector<std::pair<std::unique_ptr<Gtk::MenuItem>, UserCommand>> userCommandMenu;
+    Gtk::MenuItem *mi_usercommands_;
+    Gtk::SeparatorMenuItem *mi_usercommands_sep_;
+    std::vector<std::pair<std::unique_ptr<Gtk::MenuItem>, UserCommand>> usercommands_menu_;
 
     Gtk::MenuItem* menuDF;
     Gtk::MenuItem* selectDF;
@@ -133,7 +134,8 @@ protected:
 
     type_trash_changed m_trash_changed;
 
-    void refresh_menu();
+    void build_menu();
+    void refresh_usercommands_menu();
 
 public:
     FileBrowser ();

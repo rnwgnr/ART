@@ -148,11 +148,10 @@ void UserCommandStore::init(const Glib::ustring &dirname)
 
     try {
         Glib::Dir dir(dirname);
+        std::vector<std::string> dirlist(dir.begin(), dir.end());
+        std::sort(dirlist.begin(), dirlist.end());
 
-        for (auto filename : dir) {
-            if (!filename.empty() && filename.back() == '~') {
-                continue;
-            }
+        for (auto &filename : dirlist) {
             auto ext = rtengine::getFileExtension(filename).lowercase();
             if (ext != "txt") {
                 continue;

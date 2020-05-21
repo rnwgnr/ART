@@ -61,6 +61,7 @@ public:
     void init(const Glib::ustring &dir);
 
     std::vector<UserCommand> getCommands(const std::vector<Thumbnail *> &sel) const;
+    const std::vector<UserCommand> &getAllCommands() const { return commands_; }
     const std::string &dir() const { return dir_; }
 
 private:
