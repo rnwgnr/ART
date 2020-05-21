@@ -133,8 +133,10 @@ void LabGridArea::setDefault(double la, double lb, double ha, double hb, double 
 void LabGridArea::reset(bool toInitial)
 {
     if (toInitial) {
+        setScale(defaultScale, false);
         setParams(defaultLow_a, defaultLow_b, defaultHigh_a, defaultHigh_b, true);
     } else {
+        setScale(1.0, false);
         setParams(0., 0., 0., 0., true);
     }
 }
@@ -506,6 +508,8 @@ LabGrid::LabGrid(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_
 bool LabGrid::resetPressed(GdkEventButton *event)
 {
     grid.reset(event->state & GDK_CONTROL_MASK);
+    ConnectionBlocker sb(scaleconn);
+    scale->set_value(grid.getScale());
     return false;    
 }
 
