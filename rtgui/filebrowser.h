@@ -84,9 +84,9 @@ protected:
     Gtk::MenuItem* menuFileOperations;
     Gtk::MenuItem* menuProfileOperations;
     Gtk::MenuItem* menuExtProg;
-    Gtk::MenuItem** amiExtProg;
+    // Gtk::MenuItem** amiExtProg;
     Gtk::MenuItem* miOpenDefaultViewer;
-    std::map<Glib::ustring, const ExtProgAction*> mMenuExtProgs;  // key is menuitem label
+    std::vector<std::pair<std::unique_ptr<Gtk::MenuItem>, UserCommand>> userCommandMenu;
 
     Gtk::MenuItem* menuDF;
     Gtk::MenuItem* selectDF;
@@ -132,6 +132,8 @@ protected:
     // ExportPanel* exportPanel;
 
     type_trash_changed m_trash_changed;
+
+    void refresh_menu();
 
 public:
     FileBrowser ();

@@ -20,6 +20,8 @@
 
 #include <cstring>
 #include <iostream>
+#include <limits>
+#include <thread>
 
 #ifdef WIN32
 #include <windows.h>
@@ -28,179 +30,252 @@
 
 #include "options.h"
 #include "multilangmgr.h"
+#include "../rtengine/utils.h"
+#include "../rtengine/subprocess.h"
 
-Glib::ustring ExtProgAction::getFullName () const
+
+UserCommand::UserCommand():
+    command(""),
+    label(""),
+    make("^.*$"),
+    model("^.*$"),
+    extension(""),
+    min_args(1),
+    max_args(std::numeric_limits<size_t>::max()),
+    filetype(ANY),
+    match_make(false),
+    match_model(false),
+    match_lens(false),
+    match_shutter(false),
+    match_iso(false),
+    match_aperture(false),
+    match_focallen(false)
 {
-    return name + " [" + M(Glib::ustring::compose("EXTPROGTARGET_%1", target)) + "]";
 }
 
-bool ExtProgAction::execute (const std::vector<Glib::ustring>& fileNames) const
+
+bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
 {
-    if (fileNames.empty ()) {
+    size_t n = args.size();
+    if (!n || n < min_args || n > max_args) {
         return false;
     }
 
-    // Check if they all exists as they may not be processed yet.
-    for (const auto& fileName : fileNames) {
+    auto md = args[0]->getMetaData();
 
-        if (Glib::file_test (fileName, Glib::FILE_TEST_EXISTS)) {
-            continue;
+    for (size_t i = 0; i < n; ++i) {
+        auto mdi = args[i]->getMetaData();
+        if (i > 0) {
+            if (match_make && md->getMake() != mdi->getMake()) {
+                return false;
+            }
+            if (match_model && md->getModel() != mdi->getModel()) {
+                return false;
+            }
+            if (match_lens && md->getLens() != mdi->getLens()) {
+                return false;
+            }
+            if (match_shutter && md->getShutterSpeed() != mdi->getShutterSpeed()) {
+                return false;
+            }
+            if (match_iso && md->getISOSpeed() != mdi->getISOSpeed()) {
+                return false;
+            }
+            if (match_aperture && md->getFNumber() != mdi->getFNumber()) {
+                return false;
+            }
+            if (match_focallen && md->getFocalLen() != mdi->getFocalLen()) {
+                return false;
+            }
         }
 
-        Gtk::MessageDialog (M("MAIN_MSG_IMAGEUNPROCESSED"), true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true).run ();
-        return false;
+        if (!Glib::Regex::match_simple(make, mdi->getMake(), Glib::REGEX_CASELESS)) {
+            return false;
+        }
+        if (!Glib::Regex::match_simple(model, mdi->getModel(), Glib::REGEX_CASELESS)) {
+            return false;
+        }
+        if (filetype != ANY && (args[i]->getType() == FT_Raw) != (filetype == RAW)) {
+            return false;
+        }
+        if (!extension.empty()) {
+            auto ext = rtengine::getFileExtension(args[i]->getFileName());
+            if (extension != ext.lowercase()) {
+                return false;
+            }
+        }
     }
 
-    Glib::ustring cmdLine = "\"" + filePathEXE + "\"";
-
-    if (!preparams.empty()) {
-        cmdLine += " " + preparams;
-    }
-
-    for (const auto& fileName : fileNames) {
-        cmdLine += " \"" + fileName + "\"";
-    }
-
-    return ExtProgStore::spawnCommandAsync (cmdLine);
+    return true;
 }
 
-ExtProgStore* ExtProgStore::getInstance()
+
+void UserCommand::execute(const std::vector<Thumbnail *> &args) const
 {
-    static ExtProgStore instance_;
-    return &instance_;
-}
-
-// Reads all profiles from the given profiles dir
-void ExtProgStore::init ()
-{
-    MyMutex::MyLock lock(mtx);
-
-    actions.clear ();
-
-#ifdef WIN32
-
-    // Please do not add obscure little tools here, only widely used programs.
-    // They should also have a proper setup program and therefore a standard path.
-
-    searchProgram ("Photoshop", "Adobe\\Adobe Photoshop CS%1 (64 Bit)\\Photoshop.exe", "Adobe\\Adobe Photoshop CS%1\\Photoshop.exe", 9, false, true);
-    searchProgram ("Photomatix Pro", "PhotomatixPro%1\\PhotomatixPro.exe", "", 9, true, true);
-    searchProgram ("Paint.NET", "Paint.NET\\PaintDotNet.exe", "", 0, false, true);
-    searchProgram ("MS Image Composition Editor", "Microsoft Research\\Image Composite Editor\\ICE.exe", "", 0, false, true);
-    searchProgram ("PTGui", "PTGui\\PTGui.exe", "", 0, false, true);
-    searchProgram ("GeoSetter", "GeoSetter\\GeoSetter.exe", "", 0, true, true);
-    searchProgram ("FastStone Image Viewer", "FastStone Image Viewer\\FSViewer.exe", "", 0, true, true);
-    searchProgram ("FastPictureViewer", "FastPictureViewer\\FastPictureViewer.exe", "", 0, true, true);
-
-    if (!searchProgram ("Autopano Giga 3", "Kolor\\Autopano Giga 3.%1\\AutopanoGiga_x64.exe", "Kolor\\Autopano Giga 3.%1\\AutopanoGiga.exe", 15, true, true)) {
-        if (!searchProgram ("Autopano Pro 3", "Kolor\\Autopano Pro 3.%1\\AutopanoPro_x64.exe", "Kolor\\Autopano Pro 3.%1\\AutopanoPro.exe", 15, true, true))   {
-            if (!searchProgram ("Autopano Giga 2", "Kolor\\Autopano Giga 2.%1\\AutopanoGiga_x64.exe", "Kolor\\Autopano Giga 2.%1\\AutopanoGiga.exe", 6, true, true)) {
-                searchProgram ("Autopano Pro 2", "Kolor\\Autopano Pro 2.%1\\AutopanoPro_x64.exe", "Kolor\\Autopano Pro 2.%1\\AutopanoPro.exe", 6, true, true);
-            }
-        }
+    if (args.empty()) {
+        return;
     }
 
-#endif
-
-}
-#ifdef WIN32
-bool ExtProgStore::searchProgram (const Glib::ustring& name,
-                                  const Glib::ustring& exePath,
-                                  const Glib::ustring& exePath86,
-                                  int maxVer,
-                                  bool allowRaw,
-                                  bool allowQueueProcess)
-{
-
-    // get_user_special_dir crashes on some Windows configurations.
-    static Glib::ustring progFilesDir, progFilesDirx86;
-
-    if (progFilesDir.empty ()) {
-        WCHAR pathW[MAX_PATH];
-        char pathA[MAX_PATH];
-
-        if (SHGetSpecialFolderPathW (NULL, pathW, CSIDL_PROGRAM_FILES, false)) {
-            if (WideCharToMultiByte (CP_UTF8, 0, pathW, -1, pathA, MAX_PATH, 0, 0)) {
-                progFilesDir = pathA;
-            }
-        }
-
-        if (SHGetSpecialFolderPathW (NULL, pathW, CSIDL_PROGRAM_FILESX86, false)) {
-            if (WideCharToMultiByte (CP_UTF8, 0, pathW, -1, pathA, MAX_PATH, 0, 0)) {
-                progFilesDirx86 = pathA;
-            }
-        }
+    std::vector<Glib::ustring> argv = rtengine::subprocess::split_command_line(command);
+    
+    for (auto &t : args) {
+        argv.push_back(t->getFileName());
     }
 
-    ExtProgAction action;
-    action.name = name;
-    action.target = (allowRaw ? 1 : 2);
-
-    auto& filePath = action.filePathEXE;
-
-    if (maxVer > 0) {
-
-        for (auto ver = maxVer; ver >= 0; ver--) {
-
-            filePath = progFilesDir + "\\" + Glib::ustring::compose(exePath, ver);
-
-            if (Glib::file_test (filePath, Glib::FILE_TEST_EXISTS)) {
-                break;
-            }
-
-            if (!exePath86.empty ()) {
-
-                filePath = progFilesDirx86 + "\\" + Glib::ustring::compose(exePath86, ver);
-
-                if (Glib::file_test (filePath, Glib::FILE_TEST_EXISTS)) {
-                    break;
+    const auto doit =
+        [=](bool verb) -> void
+        {
+            try {
+                rtengine::subprocess::exec_sync(UserCommandStore::getInstance()->dir(), argv, false, nullptr, nullptr);
+            } catch (rtengine::subprocess::error &exc) {
+                if (verb) {
+                    std::cerr << "Failed to execute \"" << command << "\": " << exc.what() << std::endl;
                 }
             }
+        };
 
-            filePath.clear ();
-        }
-    } else {
-
-        do {
-
-            filePath = progFilesDir + "\\" + exePath;
-
-            if (Glib::file_test (filePath, Glib::FILE_TEST_EXISTS)) {
-                break;
-            }
-
-            if (!exePath86.empty ()) {
-
-                filePath = progFilesDirx86 + "\\" + exePath86;
-
-                if (Glib::file_test (filePath, Glib::FILE_TEST_EXISTS)) {
-                    break;
-                }
-            }
-
-            filePath.clear ();
-
-        } while (false);
-    }
-
-    if (!action.filePathEXE.empty ()) {
-
-        actions.push_back (action);
-
-        if (allowRaw && allowQueueProcess) {
-
-            action.target = 2;
-            actions.push_back (action);
-        }
-
-        return true;
-    }
-
-
-    return false;
+    std::thread(doit, options.rtSettings.verbose).detach();
 }
-#endif
 
-bool ExtProgStore::spawnCommandAsync (const Glib::ustring& cmd)
+
+
+UserCommandStore *UserCommandStore::getInstance()
+{
+    static UserCommandStore instance;
+    return &instance;
+}
+
+
+void UserCommandStore::init(const Glib::ustring &dirname)
+{
+    MyMutex::MyLock lock(mtx_);
+
+    dir_ = Glib::filename_from_utf8(dirname);
+    commands_.clear();
+
+    try {
+        Glib::Dir dir(dirname);
+
+        for (auto filename : dir) {
+            if (!filename.empty() && filename.back() == '~') {
+                continue;
+            }
+            auto ext = rtengine::getFileExtension(filename).lowercase();
+            if (ext != "txt") {
+                continue;
+            }
+            
+            const Glib::ustring pth = Glib::build_filename(dirname, filename);
+
+            if (!Glib::file_test(pth, Glib::FILE_TEST_IS_REGULAR)) {
+                continue;
+            }
+
+            try {
+                const Glib::ustring group = "ART UserCommand";
+                Glib::KeyFile kf;
+                if (!kf.load_from_file(pth)) {
+                    continue;
+                }
+
+                UserCommand cmd;
+                if (kf.has_key(group, "Command")) {
+                    cmd.command = kf.get_string(group, "Command");
+                } else {
+                    continue;
+                }
+
+                if (kf.has_key(group, "Label")) {
+                    cmd.label = kf.get_string(group, "Label");
+                } else {
+                    continue;
+                }
+
+                if (kf.has_key(group, "Make")) {
+                    cmd.make = kf.get_string(group, "Make");
+                }
+
+                if (kf.has_key(group, "Model")) {
+                    cmd.model = kf.get_string(group, "Model");
+                }
+
+                if (kf.has_key(group, "Extension")) {
+                    cmd.model = kf.get_string(group, "Extension").lowercase();
+                }
+
+                if (kf.has_key(group, "MinArgs")) {
+                    cmd.min_args = kf.get_integer(group, "MinArgs");
+                }
+
+                if (kf.has_key(group, "MaxArgs")) {
+                    cmd.max_args = kf.get_integer(group, "MaxArgs");
+                }
+
+                if (kf.has_key(group, "NumArgs")) {
+                    cmd.min_args = cmd.max_args = kf.get_integer(group, "NumArgs");
+                }
+
+                if (kf.has_key(group, "FileType")) {
+                    auto tp = kf.get_string(group, "FileType").lowercase();
+                    if (tp == "raw") {
+                        cmd.filetype = UserCommand::RAW;
+                    } else if (tp == "nonraw") {
+                        cmd.filetype = UserCommand::NONRAW;
+                    } else {
+                        cmd.filetype = UserCommand::ANY;
+                    }
+                }
+
+                const auto getbool =
+                    [&](const char *k) -> bool
+                    {
+                        return kf.has_key(group, k) && kf.get_boolean(group, k);
+                    };
+                cmd.match_make = getbool("MatchMake");
+                cmd.match_model = getbool("MatchModel");
+                cmd.match_lens = getbool("MatchLens");
+                cmd.match_shutter = getbool("MatchShutter");
+                cmd.match_iso = getbool("MatchISO");
+                cmd.match_aperture = getbool("MatchAperture");
+                cmd.match_focallen = getbool("MatchFocalLen");
+            
+                commands_.push_back(cmd);
+
+                if (options.rtSettings.verbose) {
+                    std::cout << "Found user command \"" << cmd.label << "\": "
+                              << cmd.command << std::endl;
+                }
+            } catch (Glib::Exception &exc) {
+                std::cout << "ERROR loading " << pth << ": " << exc.what()
+                          << std::endl;
+            }
+        }
+    } catch (Glib::Exception &exc) {
+        std::cout << "ERROR scanning " << dirname << ": " << exc.what() << std::endl;
+    }
+
+    if (options.rtSettings.verbose) {
+        std::cout << "Loaded " << commands_.size() << " user commands"
+                  << std::endl;
+    }
+}
+
+
+std::vector<UserCommand> UserCommandStore::getCommands(const std::vector<Thumbnail *> &sel) const
+{
+    std::vector<UserCommand> ret;
+    for (auto &c : commands_) {
+        if (c.matches(sel)) {
+            ret.push_back(c);
+        }
+    }
+    return ret;
+}
+
+
+namespace ExtProg {
+
+bool spawnCommandAsync(const Glib::ustring &cmd)
 {
     try {
 
@@ -220,7 +295,8 @@ bool ExtProgStore::spawnCommandAsync (const Glib::ustring& cmd)
     }
 }
 
-bool ExtProgStore::spawnCommandSync (const Glib::ustring& cmd)
+
+bool spawnCommandSync(const Glib::ustring &cmd)
 {
     auto exitStatus = -1;
 
@@ -239,7 +315,8 @@ bool ExtProgStore::spawnCommandSync (const Glib::ustring& cmd)
     return exitStatus == 0;
 }
 
-bool ExtProgStore::openInGimp (const Glib::ustring& fileName)
+
+bool openInGimp(const Glib::ustring &fileName)
 {
 #if defined WIN32
 
@@ -287,19 +364,20 @@ bool ExtProgStore::openInGimp (const Glib::ustring& fileName)
 #elif defined __APPLE__
 
     cmdLine = Glib::ustring("open -a GIMP-dev \'") + fileName + Glib::ustring("\'");
-    success = ExtProgStore::spawnCommandAsync (cmdLine);
+    success = spawnCommandAsync (cmdLine);
 
 #else
 
     cmdLine = Glib::ustring("gimp-remote \"") + fileName + Glib::ustring("\"");
-    success = ExtProgStore::spawnCommandAsync (cmdLine);
+    success = spawnCommandAsync (cmdLine);
 
 #endif
 
     return success;
 }
 
-bool ExtProgStore::openInPhotoshop (const Glib::ustring& fileName)
+
+bool openInPhotoshop(const Glib::ustring& fileName)
 {
 #if defined WIN32
 
@@ -319,7 +397,8 @@ bool ExtProgStore::openInPhotoshop (const Glib::ustring& fileName)
     return spawnCommandAsync (cmdLine);
 }
 
-bool ExtProgStore::openInCustomEditor (const Glib::ustring& fileName)
+
+bool openInCustomEditor(const Glib::ustring& fileName)
 {
 #if defined WIN32
 
@@ -338,5 +417,6 @@ bool ExtProgStore::openInCustomEditor (const Glib::ustring& fileName)
     return spawnCommandAsync (cmdLine);
 
 #endif
-
 }
+
+} // namespace ExtProg

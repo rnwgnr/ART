@@ -118,7 +118,7 @@ FILEBROWSER_DELETEDIALOG_ALL;Are you sure you want to delete all <b>%1</b> files
 FILEBROWSER_DELETEDIALOG_SELECTED;Are you sure you want to delete the selected <b>%1</b> files?
 FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Are you sure you want to delete the selected <b>%1</b> files <b>including</b> a queue-processed version?
 FILEBROWSER_EMPTYTRASHHINT;Permanently delete all files in trash.
-FILEBROWSER_EXTPROGMENU;Open with
+FILEBROWSER_EXTPROGMENU;User commands
 FILEBROWSER_FLATFIELD;Flat-Field
 FILEBROWSER_MOVETODARKFDIR;Move to dark-frames directory
 FILEBROWSER_MOVETOFLATFIELDDIR;Move to flat-fields directory

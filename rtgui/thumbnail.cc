@@ -314,7 +314,7 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
             printf("Custom profile builder's command line: %s\n", Glib::ustring(cmdLine).c_str());
         }
 
-        bool success = ExtProgStore::spawnCommandSync (cmdLine);
+        bool success = ExtProg::spawnCommandSync(cmdLine);
 
         // Now they SHOULD be there (and potentially "partial"), so try to load them and store it as a full procparam
         if (success) {

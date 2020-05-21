@@ -154,6 +154,7 @@ set(RTENGINESOURCEFILES
     canon_cr3_decoder.cc
     pyramids.cc
     rawimage_gainmap.cc
+    subprocess.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)

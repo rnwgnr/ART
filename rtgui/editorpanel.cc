@@ -2152,11 +2152,11 @@ bool EditorPanel::idle_sentToGimp (ProgressConnector<int> *pc, rtengine::IImagef
         bool success = false;
 
         if (options.editorToSendTo == 1) {
-            success = ExtProgStore::openInGimp (filename);
+            success = ExtProg::openInGimp (filename);
         } else if (options.editorToSendTo == 2) {
-            success = ExtProgStore::openInPhotoshop (filename);
+            success = ExtProg::openInPhotoshop (filename);
         } else if (options.editorToSendTo == 3) {
-            success = ExtProgStore::openInCustomEditor (filename);
+            success = ExtProg::openInCustomEditor (filename);
         }
 
         if (!success) {
