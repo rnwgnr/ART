@@ -837,7 +837,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 
     if (has_mask) {
         for (int i = begin_idx; i < end_idx; ++i) {
-            float blur = masks[i].parametricMask.blur;
+            float blur = masks[i].parametricMask.enabled ? masks[i].parametricMask.blur : 0.f;
             blur = blur < 0.f ? -1.f/blur : 1.f + blur;
             int r1 = max(int(4 / scale * blur + 0.5), 1);
             int r2 = max(int(25 / scale * blur + 0.5), 1);

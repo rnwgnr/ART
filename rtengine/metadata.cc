@@ -25,18 +25,13 @@
 #include <giomm.h>
 #include <set>
 
-#ifdef WIN32
-#  include <windows.h>
-#  include <io.h>
-#  include <fcntl.h>
-#endif
-
 #include "metadata.h"
 #include "settings.h"
 #include "imagedata.h"
 #include "../rtgui/version.h"
 #include "../rtgui/pathutils.h"
 #include "../rtgui/multilangmgr.h"
+#include "subprocess.h"
 
 
 namespace rtengine {
@@ -60,22 +55,11 @@ private:
 
 constexpr size_t IMAGE_CACHE_SIZE = 200;
 
-#ifdef WIN32
-std::wstring to_wstr(const Glib::ustring &s)
-{
-    auto *ws = g_utf8_to_utf16(s.c_str(), -1, NULL, NULL, NULL);
-    std::wstring ret(reinterpret_cast<wchar_t *>(ws));
-    g_free(ws);
-    return ret;
-}
-#endif // WIN32
-
-
 std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname,
                                          bool check_exif)
 {
 #if defined WIN32 && defined EXV_UNICODE_PATH
-    std::wstring wfname = to_wstr(fname);
+    std::wstring wfname = subprocess::to_wstr(fname);
     auto image = Exiv2::ImageFactory::open(wfname);
 #else
     auto image = Exiv2::ImageFactory::open(Glib::filename_from_utf8(fname));
@@ -100,184 +84,6 @@ Glib::ustring exiftool_base_dir;
 #else
   const Glib::ustring exiftool_default = "exiftool";
 #endif
-
-
-#ifdef WIN32
-
-// Glib::spawn_sync opens a console window for command-line apps, I wasn't
-// able to find out how not to do that (see also:
-// http://gtk.10911.n7.nabble.com/g-spawn-on-windows-td84743.html).
-// Therefore, we roll our own
-bool exec_subprocess(const std::vector<Glib::ustring> &argv, std::string &out, std::string &err)
-{
-    const auto add_quoted =
-        [](std::wostream &out, const std::wstring &ws) -> void
-        {
-            out << '"';
-            for (size_t j = 0; j < ws.size(); ) {
-                int backslashes = 0;
-                while (j < ws.size() && ws[j] == '\\') {
-                    ++backslashes;
-                    ++j;
-                }
-                if (j == ws.size()) {
-                    backslashes = backslashes * 2;
-                } else if (ws[j] == '"') {
-                    backslashes = backslashes * 2 + 1;
-                }
-                for (int i = 0; i < backslashes; ++i) {
-                    out << '\\';
-                }
-                if (j < ws.size()) {
-                    out << ws[j];
-                    ++j;
-                } else {
-                    break;
-                }
-            }
-            out << '"';
-        };
-
-    struct HandleCloser {
-        ~HandleCloser()
-        {
-            for (auto h : toclose) {
-                CloseHandle(h);
-            }
-        }
-        std::set<HANDLE> toclose;
-    };
-
-    HANDLE fds_from[2];
-    HANDLE fds_from_e[2];
-    SECURITY_ATTRIBUTES sa;
-    HandleCloser hc;
-
-    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-    sa.lpSecurityDescriptor = NULL;
-    sa.bInheritHandle = TRUE;
-
-    const auto mkpipe =
-        [&](HANDLE *fd) -> bool
-        {
-            if (!CreatePipe(&(fd[0]), &(fd[1]), &sa, 0)) {
-                return false;
-            }
-            hc.toclose.insert(fd[0]);
-            hc.toclose.insert(fd[1]);
-            if (!SetHandleInformation(fd[0], HANDLE_FLAG_INHERIT, 0)) {
-                return false;
-            }
-            return true;
-        };
-
-    if (!mkpipe(fds_from) || !mkpipe(fds_from_e)) {
-        return false;
-    }
-
-    PROCESS_INFORMATION pi;
-    STARTUPINFOW si;
-
-    ZeroMemory(&si, sizeof(STARTUPINFOW));
-    si.cb = sizeof(STARTUPINFOW);
-    si.dwFlags = STARTF_USESTDHANDLES;
-    si.wShowWindow = SW_HIDE;
-    si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-    si.hStdOutput = fds_from[1];
-    si.hStdError = fds_from_e[1];
-
-    std::wstring pth = to_wstr(argv[0]);
-    if (Glib::path_get_basename(argv[0]) == argv[0]) {
-        wchar_t pathbuf[MAX_PATH+1];
-        int n = SearchPathW(nullptr, pth.c_str(), nullptr, MAX_PATH+1, pathbuf, nullptr);
-        if (n > 0) {
-            pth = pathbuf;
-        }
-    }
-
-    wchar_t *cmdline = nullptr;
-    {
-        std::wostringstream cmdlinebuf;
-        add_quoted(cmdlinebuf, pth);
-        for (size_t i = 1; i < argv.size(); ++i) {
-            cmdlinebuf << ' ';
-            add_quoted(cmdlinebuf, to_wstr(argv[i]));
-        }
-        std::wstring s = cmdlinebuf.str();
-        cmdline = new wchar_t[s.size()+1];
-        memcpy(cmdline, s.c_str(), s.size() * sizeof(wchar_t));
-        cmdline[s.size()] = 0;
-    }
-
-    if (!CreateProcessW(pth.c_str(), cmdline, nullptr, nullptr, TRUE,
-                        CREATE_NO_WINDOW,
-                        (LPVOID)nullptr, nullptr, &si, &pi)) {
-        delete[] cmdline;
-        return false;
-    } else {
-        hc.toclose.insert(pi.hProcess);
-        hc.toclose.insert(pi.hThread);
-    }
-    delete[] cmdline;
-
-    const auto read_pipe =
-        [&](HANDLE *fd) -> std::string
-        {
-            constexpr size_t bufsize = 4096;
-            unsigned char buf[bufsize];
-            std::ostringstream sbuf;
-            DWORD n;
-
-            hc.toclose.erase(fd[1]);
-            CloseHandle(fd[1]);
-
-            while (ReadFile(fd[0], buf, bufsize, &n, nullptr)) {
-                buf[n] = 0;
-                sbuf << buf;
-                if (n < bufsize) {
-                    break;
-                }
-            }
-            return sbuf.str();
-        };
-
-    out = read_pipe(fds_from);
-    err = read_pipe(fds_from_e);
-
-    unsigned int status = 255;
-    const DWORD wait_timeout_ms = 1000; // INFINITE
-    if (WaitForSingleObject(pi.hProcess, wait_timeout_ms) != WAIT_OBJECT_0) {
-        TerminateProcess(pi.hProcess, status);
-    }
-    if (!GetExitCodeProcess(pi.hProcess, (LPDWORD)&status)) {
-        status = 255;
-    }
-
-    return status == 0;
-}
-
-#else // WIN32
-
-bool exec_subprocess(const std::vector<Glib::ustring> &argv, std::string &out, std::string &err)
-{
-    std::vector<std::string> args;
-    args.reserve(argv.size());
-    for (auto &s : argv) {
-        args.push_back(Glib::filename_from_utf8(s));
-    }
-    try {
-        int exit_status = -1;
-        Glib::spawn_sync("", args, Glib::SPAWN_DEFAULT|Glib::SPAWN_SEARCH_PATH, Glib::SlotSpawnChildSetup(), &out, &err, &exit_status);
-        return WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0;
-    } catch (Glib::Exception &e) {
-        if (settings->verbose) {
-            std::cout << "Glib::spawn_sync error: " << e.what() << std::endl;
-        }
-        return false;
-    }
-}
-
-#endif // WIN32
 
 
 std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const std::exception &exc)
@@ -309,7 +115,15 @@ std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const 
                   << std::endl;
     }
     std::string out, err;
-    bool ok = exec_subprocess(argv, out, err);
+    bool ok = true;
+    try {
+        subprocess::exec_sync("", argv, true, &out, &err);
+    } catch (subprocess::error &err) {
+        if (settings->verbose) {
+            std::cout << "  exec error: " << err.what() << std::endl;
+        }
+        ok = false;
+    }
     close(fd);
     g_remove(templ.c_str());
     if (settings->verbose) {

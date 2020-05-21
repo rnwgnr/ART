@@ -221,7 +221,7 @@ int processLineParams ( int argc, char **argv )
 
 bool init_rt()
 {
-    extProgStore->init();
+    UserCommandStore::getInstance()->init(Glib::build_filename(options.rtdir, "usercommands"));
     SoundManager::init();
 
     if ( !options.rtSettings.verbose ) {
