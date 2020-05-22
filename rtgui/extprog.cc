@@ -38,7 +38,7 @@ UserCommand::UserCommand():
     command(""),
     label(""),
     camera("^.*$"),
-    extension(""),
+    extensions(),
     min_args(1),
     max_args(std::numeric_limits<size_t>::max()),
     filetype(ANY),
@@ -47,7 +47,8 @@ UserCommand::UserCommand():
     match_shutter(false),
     match_iso(false),
     match_aperture(false),
-    match_focallen(false)
+    match_focallen(false),
+    match_dimensions(false)
 {
 }
 
@@ -60,6 +61,10 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
     }
 
     auto md = args[0]->getMetaData();
+    int ow = 0, oh = 0;
+    if (match_dimensions) {
+        args[0]->getOriginalSize(ow, oh);
+    }
 
     for (size_t i = 0; i < n; ++i) {
         auto mdi = args[i]->getMetaData();
@@ -83,6 +88,13 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
             if (match_focallen && md->getFocalLen() != mdi->getFocalLen()) {
                 return false;
             }
+            if (match_dimensions) {
+                int w = 0, h = 0;
+                args[i]->getOriginalSize(w, h);
+                if (w != ow || h != oh) {
+                    return false;
+                }
+            }
         }
 
         if (!Glib::Regex::match_simple(camera, mdi->getMake() + " " + mdi->getModel(), Glib::REGEX_CASELESS)) {
@@ -91,9 +103,9 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
         if (filetype != ANY && (args[i]->getType() == FT_Raw) != (filetype == RAW)) {
             return false;
         }
-        if (!extension.empty()) {
-            auto ext = rtengine::getFileExtension(args[i]->getFileName());
-            if (extension != ext.lowercase()) {
+        if (!extensions.empty()) {
+            auto ext = std::string(rtengine::getFileExtension(args[i]->getFileName()).lowercase());
+            if (std::find(extensions.begin(), extensions.end(), ext) == extensions.end()) {
                 return false;
             }
         }
@@ -141,8 +153,6 @@ UserCommandStore *UserCommandStore::getInstance()
 
 void UserCommandStore::init(const Glib::ustring &dirname)
 {
-    MyMutex::MyLock lock(mtx_);
-
     dir_ = Glib::filename_from_utf8(dirname);
     commands_.clear();
 
@@ -188,7 +198,15 @@ void UserCommandStore::init(const Glib::ustring &dirname)
                 }
 
                 if (kf.has_key(group, "Extension")) {
-                    cmd.extension = kf.get_string(group, "Extension").lowercase();
+                    cmd.extensions.clear();
+                    try {
+                        auto el = kf.get_string_list(group, "Extension");
+                        for (const auto &e : el) {
+                            cmd.extensions.emplace_back(e.lowercase());
+                        }
+                    } catch (Glib::KeyFileError &) {
+                        cmd.extensions.emplace_back(kf.get_string(group, "Extension").lowercase());
+                    }
                 }
 
                 if (kf.has_key(group, "MinArgs")) {
@@ -225,6 +243,7 @@ void UserCommandStore::init(const Glib::ustring &dirname)
                 cmd.match_iso = getbool("MatchISO");
                 cmd.match_aperture = getbool("MatchAperture");
                 cmd.match_focallen = getbool("MatchFocalLen");
+                cmd.match_dimensions = getbool("MatchDimensions");
             
                 commands_.push_back(cmd);
 

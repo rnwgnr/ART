@@ -23,7 +23,6 @@
 #include <vector>
 #include <glibmm/ustring.h>
 #include <glibmm/regex.h>
-#include "threadutils.h"
 #include "thumbnail.h"
 
 
@@ -32,8 +31,8 @@ public:
     Glib::ustring command;
     Glib::ustring label;
     
-    Glib::ustring camera;
-    Glib::ustring extension;
+    std::string camera;
+    std::vector<std::string> extensions;
     size_t min_args;
     size_t max_args;
     enum FileType {
@@ -48,6 +47,7 @@ public:
     bool match_iso;
     bool match_aperture;
     bool match_focallen;
+    bool match_dimensions;
 
     UserCommand();
     bool matches(const std::vector<Thumbnail *> &args) const;
@@ -65,7 +65,6 @@ public:
     const std::string &dir() const { return dir_; }
 
 private:
-    MyMutex mtx_;  // covers actions
     std::string dir_;
     std::vector<UserCommand> commands_;
 };
