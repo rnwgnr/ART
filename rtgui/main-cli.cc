@@ -109,7 +109,7 @@ bool check_partial_profile(const PartialProfile &pp)
  *  -3 if at least one required procparam file was not found */
 int processLineParams ( int argc, char **argv );
 
-bool dontLoadCache ( int argc, char **argv );
+std::pair<bool, bool> dontLoadCache(int argc, char **argv);
 
 int main (int argc, char **argv)
 {
@@ -165,14 +165,14 @@ int main (int argc, char **argv)
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
 #endif
 
-    bool quickstart = dontLoadCache (argc, argv);
+    auto p = dontLoadCache(argc, argv);
+    bool quickstart = p.first, verbose = p.second;
 
     try {
-        Options::load (quickstart);
+        Options::load(quickstart, verbose);
     } catch (Options::Error &e) {
         std::cerr << std::endl
-                  << "FATAL ERROR:" << std::endl
-                  << e.get_msg() << std::endl;
+                  << "Error:" << e.get_msg() << std::endl;
         return -2;
     }
 
@@ -234,9 +234,11 @@ int main (int argc, char **argv)
 }
 
 
-bool dontLoadCache ( int argc, char **argv )
+std::pair<bool, bool> dontLoadCache(int argc, char **argv)
 {
-    bool ret = false;
+    bool quick = false;
+    bool verbose = false;
+    
     for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
 #if ECLIPSE_ARGS
@@ -245,7 +247,7 @@ bool dontLoadCache ( int argc, char **argv )
         if (currParam.length() > 1 && currParam[0] == '-') {
             switch (currParam[1]) {
             case 'q':
-                ret = true;
+                quick = true;
                 break;
             case 'v':
                 std::cout << RTNAME << ", version " << RTVERSION << ", command line." << std::endl;
@@ -254,13 +256,15 @@ bool dontLoadCache ( int argc, char **argv )
             case 'h':
                 ART_print_help(argv[0], false);
                 exit(0);
+            case 'V':
+                verbose = true;
             default:
                 break;
             }
         }
     }
 
-    return ret;
+    return std::make_pair(quick, verbose);
 }
 
 
