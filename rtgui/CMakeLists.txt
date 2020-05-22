@@ -8,6 +8,7 @@ set(CLISOURCEFILES
     paramsedited.cc
     pathutils.cc
     threadutils.cc
+    fastexport.cc
     )
 
 set(NONCLISOURCEFILES

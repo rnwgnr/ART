@@ -39,6 +39,7 @@
 #include "printhelp.h"
 #include "pathutils.h"
 #include "../rtengine/profilestore.h"
+#include "fastexport.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -795,7 +796,7 @@ int processLineParams ( int argc, char **argv )
             continue;
         }
 
-        job = rtengine::ProcessingJob::create(ii, currentParams, fast_export);
+        job = create_processing_job(ii, currentParams, fast_export);
 
         if (!job) {
             errors++;
