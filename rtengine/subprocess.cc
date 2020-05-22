@@ -256,7 +256,10 @@ std::vector<Glib::ustring> split_command_line(const Glib::ustring &cmdl)
 {
     try {
         auto argv = Glib::shell_parse_argv(cmdl);
-        std::vector<Glib::ustring> ret(argv.begin(), argv.end());
+        std::vector<Glib::ustring> ret;
+        for (const auto &a : argv) {
+            ret.push_back(Glib::filename_to_utf8(a));
+        }
         return ret;
     } catch (Glib::Error &e) {
         throw (error() << e.what());
