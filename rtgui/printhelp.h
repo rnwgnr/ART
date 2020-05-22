@@ -85,6 +85,8 @@ inline void ART_print_help(std::ostream &out, const char *progname, bool gui)
         out << "                   Compression is hard-coded to PNG_FILTER_PAETH, Z_RLE." << std::endl;
         out << "  -Y               Overwrite output if present." << std::endl;
         out << "  -f               Use the custom fast-export processing pipeline." << std::endl;
+        out << "  -V               Verbose output." << std::endl;
+        out << "  --progress       Show progress info in a format compatible with zenity." << std::endl;
         out << std::endl;
         out << "Your " << pparamsExt << " files can be incomplete, ART will build the final values as follows:" << std::endl;
         out << "  1- A new processing profile is created using neutral values," << std::endl;
