@@ -131,7 +131,7 @@ void UserCommand::execute(const std::vector<Thumbnail *> &args) const
         [=](bool verb) -> void
         {
             try {
-                rtengine::subprocess::exec_sync(UserCommandStore::getInstance()->dir(), argv, false, nullptr, nullptr);
+                rtengine::subprocess::exec_sync(UserCommandStore::getInstance()->dir(), argv, true, nullptr, nullptr);
             } catch (rtengine::subprocess::error &exc) {
                 if (verb) {
                     std::cerr << "Failed to execute \"" << command << "\": " << exc.what() << std::endl;
