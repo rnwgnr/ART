@@ -28,6 +28,7 @@
 #include "../rtgui/options.h"
 #include "../rtgui/version.h"
 #include "../rtgui/multilangmgr.h"
+#include "myfile.h"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -644,6 +645,57 @@ int ImageIO::getTIFFSampleFormat (const Glib::ustring &fname, IIOSampleFormat &s
     return IMIO_VARIANTNOTSUPPORTED;
 }
 
+
+namespace {
+
+tsize_t tiff_Read(thandle_t st, tdata_t buffer, tsize_t size)
+{
+    IMFILE *f = static_cast<IMFILE *>(st);
+    return fread(buffer, 1, size, f);
+}
+
+
+tsize_t tiff_Write(thandle_t st, tdata_t buffer, tsize_t size)
+{
+    return 0;
+}
+
+
+int tiff_Close(thandle_t st)
+{
+    IMFILE *f = static_cast<IMFILE *>(st);
+    fclose(f);
+    return 0;
+}
+
+
+toff_t tiff_Seek(thandle_t st, toff_t pos, int whence)
+{
+    IMFILE *f = static_cast<IMFILE *>(st);
+    fseek(f, pos, whence);
+    return ftell(f);
+}
+
+
+toff_t tiff_Size(thandle_t st)
+{
+    IMFILE *f = static_cast<IMFILE *>(st);
+    return f->size;
+}
+
+
+int tiff_Map(thandle_t, tdata_t*, toff_t*)
+{
+    return 0;
+}
+
+void tiff_Unmap(thandle_t, tdata_t, toff_t)
+{
+    return;
+}
+
+} // namespace
+
 int ImageIO::loadTIFF (const Glib::ustring &fname)
 {
 
@@ -654,13 +706,11 @@ int ImageIO::loadTIFF (const Glib::ustring &fname)
         lock.release();
     }
 
-#ifdef WIN32
-    wchar_t *wfilename = (wchar_t*)g_utf8_to_utf16 (fname.c_str(), -1, NULL, NULL, NULL);
-    TIFF* in = TIFFOpenW (wfilename, "r");
-    g_free (wfilename);
-#else
-    TIFF* in = TIFFOpen(fname.c_str(), "r");
-#endif
+    IMFILE *src = fopen(fname.c_str());
+    TIFF *in = TIFFClientOpen(
+        fname.c_str(), "r", static_cast<thandle_t>(src),
+        tiff_Read, tiff_Write, tiff_Seek, tiff_Close, tiff_Size,
+        tiff_Map, tiff_Unmap);
 
     if (in == nullptr) {
         return IMIO_CANNOTREADFILE;
