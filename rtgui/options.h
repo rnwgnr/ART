@@ -426,7 +426,7 @@ public:
     void setDefaults();
     void readFromFile(Glib::ustring fname);
     void saveToFile(Glib::ustring fname);
-    static void load(bool lightweight = false);
+    static void load(bool lightweight=false, int verbose=-1);
     static void save();
 
     // if multiUser=false, send back the global profile path

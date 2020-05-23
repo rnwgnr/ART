@@ -2272,9 +2272,12 @@ void Options::saveToFile(Glib::ustring fname)
     }
 }
 
-void Options::load(bool lightweight)
+void Options::load(bool lightweight, int verbose)
 {
-
+    if (verbose >= 0) {
+        options.rtSettings.verbose = verbose;
+    }
+    
     // Find the application data path
 
     const gchar* path;
@@ -2346,6 +2349,9 @@ void Options::load(bool lightweight)
     // Those values supersets those of the global option file
     try {
         options.readFromFile(Glib::build_filename(rtdir, "options"));
+        if (verbose >= 0) {
+            options.rtSettings.verbose = verbose;
+        }
     } catch (Options::Error &) {
         // If the local option file does not exist or is broken, and the local cache folder does not exist, recreate it
         if (!g_mkdir_with_parents(rtdir.c_str(), 511)) {
