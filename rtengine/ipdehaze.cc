@@ -236,6 +236,45 @@ void extract_channels(Imagefloat *img, array2D<float> &r, array2D<float> &g, arr
     rtengine::guidedFilter(imgB, imgB, b, radius, epsilon, multithread);
 }
 
+
+void subtract_black(Imagefloat *img, bool multithread)
+{
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+    
+    constexpr int sizecap = 200;
+    float r = float(W)/float(H);
+    int ww = r >= 1.f ? sizecap : float(sizecap) / r;
+    int hh = r >= 1.f ? float(sizecap) / r : sizecap;
+    int skip_w = std::max(int(W / ww + 0.5), 1);
+    int skip_h = std::max(int(H / hh + 0.5), 1);
+
+    float black[3] = { RT_INFINITY_F, RT_INFINITY_F, RT_INFINITY_F };
+    for (int y = 0; y < H; y += skip_h) {
+        for (int x = 0; x < W; x += skip_w) {
+            black[0] = std::min(black[0], img->r(y, x));
+            black[1] = std::min(black[1], img->g(y, x));
+            black[2] = std::min(black[2], img->b(y, x));
+        }
+    }
+
+    const float headroom = 1e-4f;
+    for (int c = 0; c < 3; ++c) {
+        black[c] = std::max(0.f, black[c] - headroom);
+    }
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            img->r(y, x) = std::max(img->r(y, x) - black[0], 0.f);
+            img->g(y, x) = std::max(img->g(y, x) - black[1], 0.f);
+            img->b(y, x) = std::max(img->b(y, x) - black[2], 0.f);
+        }
+    }
+}
+
 } // namespace
 
 
@@ -277,6 +316,10 @@ void ImProcFunctions::dehaze(Imagefloat *img)
                 editWhatever->v(y, x) = LIM01(s / 65535.f);
             }
         }
+    }
+
+    if (params->dehaze.blackpoint) {
+        subtract_black(img, multiThread);
     }
     
     // const float strength = LIM01(float(std::abs(params->dehaze.strength)) / 100.f * 0.9f);

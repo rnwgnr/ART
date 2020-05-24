@@ -2306,7 +2306,8 @@ DehazeParams::DehazeParams() :
     },
     showDepthMap(false),
     depth(25),
-    luminance(false)
+    luminance(false),
+    blackpoint(false)
 {
 }
 
@@ -2317,7 +2318,8 @@ bool DehazeParams::operator ==(const DehazeParams& other) const
         && strength == other.strength
         && showDepthMap == other.showDepthMap
         && depth == other.depth
-        && luminance == other.luminance;
+        && luminance == other.luminance
+        && blackpoint == other.blackpoint;
 }
 
 bool DehazeParams::operator !=(const DehazeParams& other) const
@@ -3127,6 +3129,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Dehaze", "ShowDepthMap", dehaze.showDepthMap, keyFile);        
             saveToKeyfile("Dehaze", "Depth", dehaze.depth, keyFile);
             saveToKeyfile("Dehaze", "Luminance", dehaze.luminance, keyFile);
+            saveToKeyfile("Dehaze", "Blackpoint", dehaze.blackpoint, keyFile);
         }
 
 // Denoising
@@ -4443,6 +4446,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "Dehaze", "ShowDepthMap", dehaze.showDepthMap);
             assignFromKeyfile(keyFile, "Dehaze", "Depth", dehaze.depth);
             assignFromKeyfile(keyFile, "Dehaze", "Luminance", dehaze.luminance);
+            assignFromKeyfile(keyFile, "Dehaze", "Blackpoint", dehaze.blackpoint);
         }
         
         if (keyFile.has_group("Film Simulation") && RELEVANT_(filmSimulation)) {
