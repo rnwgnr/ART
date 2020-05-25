@@ -174,16 +174,13 @@ void Spot::read (const ProcParams *pp)
 {
     disableListener ();
 
-    size_t oldSize = spots.size();
     spots = pp->spot.entries;
     setEnabled (pp->spot.enabled);
     lastEnabled = pp->spot.enabled;
     activeSpot = -1;
     lastObject = -1;
 
-    if (spots.size() != oldSize) {
-        createGeometry();
-    }
+    createGeometry();
     updateGeometry();
 
     enableListener ();
