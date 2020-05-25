@@ -33,6 +33,7 @@
 #include "rt_math.h"
 #include "rt_algo.h"
 #include "rescale.h"
+#include "gauss.h"
 #include <iostream>
 #include <queue>
 
@@ -246,21 +247,41 @@ void subtract_black(Imagefloat *img, bool multithread)
     float r = float(W)/float(H);
     int ww = r >= 1.f ? sizecap : float(sizecap) / r;
     int hh = r >= 1.f ? float(sizecap) / r : sizecap;
-    int skip_w = std::max(int(W / ww + 0.5), 1);
-    int skip_h = std::max(int(H / hh + 0.5), 1);
 
     float black[3] = { RT_INFINITY_F, RT_INFINITY_F, RT_INFINITY_F };
-    for (int y = 0; y < H; y += skip_h) {
-        for (int x = 0; x < W; x += skip_w) {
-            black[0] = std::min(black[0], img->r(y, x));
-            black[1] = std::min(black[1], img->g(y, x));
-            black[2] = std::min(black[2], img->b(y, x));
+    {
+        array2D<float> rr(ww, hh);
+        array2D<float> gg(ww, hh);
+        array2D<float> bb(ww, hh);
+        rescaleNearest(img->r.ptrs, W, H, static_cast<float **>(rr), ww, hh, multithread);
+        rescaleNearest(img->g.ptrs, W, H, static_cast<float **>(gg), ww, hh, multithread);
+        rescaleNearest(img->b.ptrs, W, H, static_cast<float **>(bb), ww, hh, multithread);
+
+#ifdef _OPENMP
+#       pragma omp parallel if (multithread)
+#endif
+        {
+            gaussianBlur(rr, rr, ww, hh, std::max(ww, hh) * 0.1);
+            gaussianBlur(gg, gg, ww, hh, std::max(ww, hh) * 0.1);
+            gaussianBlur(bb, bb, ww, hh, std::max(ww, hh) * 0.1);
+        }
+    
+        for (int y = 0; y < hh; ++y) {
+            for (int x = 0; x < ww; ++x) {
+                black[0] = std::min(black[0], rr[y][x]);
+                black[1] = std::min(black[1], gg[y][x]);
+                black[2] = std::min(black[2], bb[y][x]);
+            }
         }
     }
 
-    const float headroom = 1e-4f;
+    const float headroom = 1e-3f;
     for (int c = 0; c < 3; ++c) {
         black[c] = std::max(0.f, black[c] - headroom);
+    }
+
+    if (options.rtSettings.verbose) {
+        std::cout << "BLACK POINTS: " << black[0] << " " << black[1] << " " << black[2] << std::endl;
     }
 
 #ifdef _OPENMP
