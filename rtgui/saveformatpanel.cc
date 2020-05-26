@@ -66,7 +66,7 @@ SaveFormatPanel::SaveFormatPanel () : listener (nullptr)
     // ---------------------  JPEG OPTIONS
 
 
-    jpegOpts = Gtk::manage (new Gtk::Grid ());
+    jpegOpts = new Gtk::Grid();
     jpegOpts->set_column_spacing(15);
     jpegOpts->set_row_spacing(5);
     setExpandAlignProperties(jpegOpts, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
@@ -112,14 +112,20 @@ SaveFormatPanel::SaveFormatPanel () : listener (nullptr)
     set_row_spacing(5);
 
     attach (*hb1, 0, 0, 1, 1);
-    attach (*jpegOpts, 0, 1, 1, 1);
-    attach (*tiffUncompressed, 0, 2, 1, 1);
+    //attach (*jpegOpts, 0, 1, 1, 1);
+    //attach (*tiffUncompressed, 0, 2, 1, 1);
     attach (*savesPP, 0, 4, 1, 2);
+
+    format->set_active(0);
+    formatChanged();
 }
+
+
 SaveFormatPanel::~SaveFormatPanel ()
 {
-    delete jpegQual;
     delete tiffUncompressed;
+    delete jpegOpts;
+    delete jpegQual;
 }
 
 void SaveFormatPanel::init (SaveFormat &sf)
@@ -159,8 +165,11 @@ void SaveFormatPanel::init (SaveFormat &sf)
     savesPP->set_active(sf.saveParams);
     tiffUncompressed->set_active(sf.tiffUncompressed);
 
+    formatChanged();
+
     listener = tmp;
 }
+
 
 SaveFormat SaveFormatPanel::getFormat ()
 {
@@ -190,15 +199,20 @@ void SaveFormatPanel::formatChanged ()
 
     const Glib::ustring& fr = sf_templates[act].second.format;
 
+    removeIfThere(this, jpegOpts, false);
+    removeIfThere(this, tiffUncompressed, false);
+
     if (fr == "jpg") {
-        jpegOpts->show_all();
-        tiffUncompressed->hide();
+        attach (*jpegOpts, 0, 1, 1, 1);
+        // jpegOpts->show_all();
+        // tiffUncompressed->hide();
     } else if (fr == "png") {
-        jpegOpts->hide();
-        tiffUncompressed->hide();
+        // jpegOpts->hide();
+        // tiffUncompressed->hide();
     } else if (fr == "tif") {
-        jpegOpts->hide();
-        tiffUncompressed->show_all();
+        attach (*tiffUncompressed, 0, 2, 1, 1);
+        // jpegOpts->hide();
+        // tiffUncompressed->show_all();
     }
 
     if (listener) {
