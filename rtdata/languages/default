@@ -251,7 +251,7 @@ HISTORY_MSG_1;Photo loaded
 HISTORY_MSG_2;ARP loaded
 HISTORY_MSG_3;ARP changed
 HISTORY_MSG_4;History browsing
-HISTORY_MSG_5;B, C &amp; S - Brightness
+HISTORY_MSG_5;B, C & S - Brightness
 HISTORY_MSG_6;Tone Curve - Contrast
 HISTORY_MSG_7;Exposure - Black
 HISTORY_MSG_8;Exposure - Compensation
@@ -346,7 +346,7 @@ HISTORY_MSG_96;L*a*b* - a* curve
 HISTORY_MSG_97;L*a*b* - b* curve
 HISTORY_MSG_98;Demosaicing method
 HISTORY_MSG_99;Hot pixel filter
-HISTORY_MSG_100;S&amp;V - Saturation
+HISTORY_MSG_100;S & V - Saturation
 HISTORY_MSG_101;Color equalizer - Hue
 HISTORY_MSG_102;Color equalizer - Saturation
 HISTORY_MSG_103;Color equalizer - Lightness
@@ -444,8 +444,8 @@ HISTORY_MSG_197;CAM02 - Color curve
 HISTORY_MSG_198;CAM02 - Color curve
 HISTORY_MSG_199;CAM02 - Output histograms
 HISTORY_MSG_200;CAM02 - Tone mapping
-HISTORY_MSG_201;NR - Chrominance - R&amp;G
-HISTORY_MSG_202;NR - Chrominance - B&amp;Y
+HISTORY_MSG_201;NR - Chrominance - R&G
+HISTORY_MSG_202;NR - Chrominance - B&Y
 HISTORY_MSG_203;NR - Color space
 HISTORY_MSG_204;LMMSE enhancement steps
 HISTORY_MSG_205;CAM02 - Hot/bad pixel filter
@@ -457,29 +457,29 @@ HISTORY_MSG_211;Graduated Filter
 HISTORY_MSG_212;VF - Strength
 HISTORY_MSG_213;Vignette Filter
 HISTORY_MSG_214;Black-and-White
-HISTORY_MSG_215;B&amp;W - CM - Red
-HISTORY_MSG_216;B&amp;W - CM - Green
-HISTORY_MSG_217;B&amp;W - CM - Blue
-HISTORY_MSG_218;B&amp;W - Gamma - Red
-HISTORY_MSG_219;B&amp;W - Gamma - Green
-HISTORY_MSG_220;B&amp;W - Gamma - Blue
-HISTORY_MSG_221;B&amp;W - Color filter
-HISTORY_MSG_222;B&amp;W - Presets
-HISTORY_MSG_223;B&amp;W - CM - Orange
-HISTORY_MSG_224;B&amp;W - CM - Yellow
-HISTORY_MSG_225;B&amp;W - CM - Cyan
-HISTORY_MSG_226;B&amp;W - CM - Magenta
-HISTORY_MSG_227;B&amp;W - CM - Purple
-HISTORY_MSG_228;B&amp;W - Luminance equalizer
-HISTORY_MSG_229;B&amp;W - Luminance equalizer
-HISTORY_MSG_230;B&amp;W - Mode
-HISTORY_MSG_231;B&amp;W - 'Before' curve
-HISTORY_MSG_232;B&amp;W - 'Before' curve type
-HISTORY_MSG_233;B&amp;W - 'After' curve
-HISTORY_MSG_234;B&amp;W - 'After' curve type
-HISTORY_MSG_235;B&amp;W - CM - Auto
+HISTORY_MSG_215;B&W - CM - Red
+HISTORY_MSG_216;B&W - CM - Green
+HISTORY_MSG_217;B&W - CM - Blue
+HISTORY_MSG_218;B&W - Gamma - Red
+HISTORY_MSG_219;B&W - Gamma - Green
+HISTORY_MSG_220;B&W - Gamma - Blue
+HISTORY_MSG_221;B&W - Color filter
+HISTORY_MSG_222;B&W - Presets
+HISTORY_MSG_223;B&W - CM - Orange
+HISTORY_MSG_224;B&W - CM - Yellow
+HISTORY_MSG_225;B&W - CM - Cyan
+HISTORY_MSG_226;B&W - CM - Magenta
+HISTORY_MSG_227;B&W - CM - Purple
+HISTORY_MSG_228;B&W - Luminance equalizer
+HISTORY_MSG_229;B&W - Luminance equalizer
+HISTORY_MSG_230;B&W - Mode
+HISTORY_MSG_231;B&W - 'Before' curve
+HISTORY_MSG_232;B&W - 'Before' curve type
+HISTORY_MSG_233;B&W - 'After' curve
+HISTORY_MSG_234;B&W - 'After' curve type
+HISTORY_MSG_235;B&W - CM - Auto
 HISTORY_MSG_236;--unused--
-HISTORY_MSG_237;B&amp;W - CM
+HISTORY_MSG_237;B&W - CM
 HISTORY_MSG_238;GF - Feather
 HISTORY_MSG_239;GF - Strength
 HISTORY_MSG_240;GF - Center
@@ -493,7 +493,7 @@ HISTORY_MSG_247;L*a*b* - LH curve
 HISTORY_MSG_248;L*a*b* - HH curve
 HISTORY_MSG_249;CbDL - Threshold
 HISTORY_MSG_250;NR - Enhanced
-HISTORY_MSG_251;B&amp;W - Algorithm
+HISTORY_MSG_251;B&W - Algorithm
 HISTORY_MSG_252;CbDL - Skin tar/prot
 HISTORY_MSG_253;CbDL - Reduce artifacts
 HISTORY_MSG_254;CbDL - Skin hue
@@ -720,8 +720,8 @@ HISTORY_MSG_490;DRC - Amount
 HISTORY_MSG_491;White Balance
 HISTORY_MSG_492;RGB Curves
 HISTORY_MSG_493;L*a*b* Adjustments
-HISTORY_MSG_BWMIX_COLORCAST;B&amp;W - Tint
-HISTORY_MSG_SATURATION_VIBRANCE;S&amp;V - Vibrance
+HISTORY_MSG_BWMIX_COLORCAST;B & W - Tint
+HISTORY_MSG_SATURATION_VIBRANCE;S & V - Vibrance
 HISTORY_MSG_LOCALCONTRAST_LIST;Local contrast - regions
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;Local contrast - H mask
 HISTORY_MSG_LOCALCONTRAST_CHROMATICITYMASK;Local contrast - C mask
