@@ -46,14 +46,13 @@ public:
 private:
     void showDepthMapChanged();
     void luminanceChanged();
-    void blackpointChanged();
 
     FlatCurveEditor *strength;
     //Adjuster *strength;
     Adjuster *depth;
     Gtk::CheckButton *showDepthMap;
     MyComboBoxText *luminance;
-    Gtk::CheckButton *blackpoint;
+    Adjuster *blackpoint;
 
     rtengine::ProcEvent EvDehazeEnabled;
     rtengine::ProcEvent EvDehazeStrength;

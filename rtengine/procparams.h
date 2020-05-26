@@ -1202,7 +1202,7 @@ struct DehazeParams {
     bool showDepthMap;
     int depth;
     bool luminance;
-    bool blackpoint;
+    int blackpoint;
 
     DehazeParams();
 

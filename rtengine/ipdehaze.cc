@@ -238,7 +238,7 @@ void extract_channels(Imagefloat *img, array2D<float> &r, array2D<float> &g, arr
 }
 
 
-void subtract_black(Imagefloat *img, bool multithread)
+void subtract_black(Imagefloat *img, int percent, bool multithread)
 {
     const int W = img->getWidth();
     const int H = img->getHeight();
@@ -275,9 +275,9 @@ void subtract_black(Imagefloat *img, bool multithread)
         }
     }
 
-    const float headroom = 1e-3f;
+    const float scaling = float(percent) / 100.f;
     for (int c = 0; c < 3; ++c) {
-        black[c] = std::max(0.f, black[c] - headroom);
+        black[c] = std::max(0.f, black[c] * scaling);
     }
 
     if (options.rtSettings.verbose) {
@@ -340,7 +340,7 @@ void ImProcFunctions::dehaze(Imagefloat *img)
     }
 
     if (params->dehaze.blackpoint) {
-        subtract_black(img, multiThread);
+        subtract_black(img, params->dehaze.blackpoint, multiThread);
     }
     
     // const float strength = LIM01(float(std::abs(params->dehaze.strength)) / 100.f * 0.9f);

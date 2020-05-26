@@ -2307,7 +2307,7 @@ DehazeParams::DehazeParams() :
     showDepthMap(false),
     depth(25),
     luminance(false),
-    blackpoint(false)
+    blackpoint(0)
 {
 }
 
