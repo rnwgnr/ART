@@ -131,7 +131,7 @@ void get_mixer_matrix(const ChannelMixerParams &chmix, const Glib::ustring &work
         };
 
     M33 N = get_matrix(tweak(red, chmix.hue_tweak[0], chmix.sat_tweak[0], 0.075f),
-                       tweak(green, chmix.hue_tweak[1], chmix.sat_tweak[1], 0.075f),
+                       tweak(green, chmix.hue_tweak[1], chmix.sat_tweak[1], 0.12f),
                        tweak(blue, chmix.hue_tweak[2], chmix.sat_tweak[2], 0.075f),
                        D65_bb_white);
 

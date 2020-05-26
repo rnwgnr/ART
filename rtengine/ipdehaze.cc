@@ -33,6 +33,7 @@
 #include "rt_math.h"
 #include "rt_algo.h"
 #include "rescale.h"
+#include "gauss.h"
 #include <iostream>
 #include <queue>
 
@@ -236,6 +237,65 @@ void extract_channels(Imagefloat *img, array2D<float> &r, array2D<float> &g, arr
     rtengine::guidedFilter(imgB, imgB, b, radius, epsilon, multithread);
 }
 
+
+void subtract_black(Imagefloat *img, bool multithread)
+{
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+    
+    constexpr int sizecap = 200;
+    float r = float(W)/float(H);
+    int ww = r >= 1.f ? sizecap : float(sizecap) / r;
+    int hh = r >= 1.f ? float(sizecap) / r : sizecap;
+
+    float black[3] = { RT_INFINITY_F, RT_INFINITY_F, RT_INFINITY_F };
+    {
+        array2D<float> rr(ww, hh);
+        array2D<float> gg(ww, hh);
+        array2D<float> bb(ww, hh);
+        rescaleNearest(img->r.ptrs, W, H, static_cast<float **>(rr), ww, hh, multithread);
+        rescaleNearest(img->g.ptrs, W, H, static_cast<float **>(gg), ww, hh, multithread);
+        rescaleNearest(img->b.ptrs, W, H, static_cast<float **>(bb), ww, hh, multithread);
+
+#ifdef _OPENMP
+#       pragma omp parallel if (multithread)
+#endif
+        {
+            gaussianBlur(rr, rr, ww, hh, std::max(ww, hh) * 0.1);
+            gaussianBlur(gg, gg, ww, hh, std::max(ww, hh) * 0.1);
+            gaussianBlur(bb, bb, ww, hh, std::max(ww, hh) * 0.1);
+        }
+    
+        for (int y = 0; y < hh; ++y) {
+            for (int x = 0; x < ww; ++x) {
+                black[0] = std::min(black[0], rr[y][x]);
+                black[1] = std::min(black[1], gg[y][x]);
+                black[2] = std::min(black[2], bb[y][x]);
+            }
+        }
+    }
+
+    const float headroom = 1e-3f;
+    for (int c = 0; c < 3; ++c) {
+        black[c] = std::max(0.f, black[c] - headroom);
+    }
+
+    if (options.rtSettings.verbose) {
+        std::cout << "BLACK POINTS: " << black[0] << " " << black[1] << " " << black[2] << std::endl;
+    }
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            img->r(y, x) = std::max(img->r(y, x) - black[0], 0.f);
+            img->g(y, x) = std::max(img->g(y, x) - black[1], 0.f);
+            img->b(y, x) = std::max(img->b(y, x) - black[2], 0.f);
+        }
+    }
+}
+
 } // namespace
 
 
@@ -277,6 +337,10 @@ void ImProcFunctions::dehaze(Imagefloat *img)
                 editWhatever->v(y, x) = LIM01(s / 65535.f);
             }
         }
+    }
+
+    if (params->dehaze.blackpoint) {
+        subtract_black(img, multiThread);
     }
     
     // const float strength = LIM01(float(std::abs(params->dehaze.strength)) / 100.f * 0.9f);

@@ -34,6 +34,7 @@ Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false,
     EvDehazeShowDepthMap = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP");
     EvDehazeDepth = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_DEPTH");
     EvDehazeLuminance = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_LUMINANCE");
+    EvDehazeBlackpoint = m->newEvent(HDR, "HISTORY_MSG_DEHAZE_BLACKPOINT");
     EvToolReset.set_action(HDR);
     
     std::vector<GradientMilestone> bottomMilestones;
@@ -69,13 +70,17 @@ Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false,
     hb->show();
     luminance->show();
 
+    blackpoint = Gtk::manage(new Gtk::CheckButton(M("TP_DEHAZE_BLACKPOINT")));
+    blackpoint->signal_toggled().connect(sigc::mem_fun(*this, &Dehaze::blackpointChanged));
+    blackpoint->show();
+    
     showDepthMap = Gtk::manage(new Gtk::CheckButton(M("TP_DEHAZE_SHOW_DEPTH_MAP")));
     showDepthMap->signal_toggled().connect(sigc::mem_fun(*this, &Dehaze::showDepthMapChanged));
     showDepthMap->show();
 
     pack_start(*strength_group);
     pack_start(*depth);
-    //pack_start(*luminance);
+    pack_start(*blackpoint);
     pack_start(*showDepthMap);
 }
 
@@ -89,6 +94,7 @@ void Dehaze::read(const ProcParams *pp)
     depth->setValue(pp->dehaze.depth);
     showDepthMap->set_active(pp->dehaze.showDepthMap);
     luminance->set_active(pp->dehaze.luminance ? 1 : 0);
+    blackpoint->set_active(pp->dehaze.blackpoint);
 
     enableListener();
 }
@@ -101,6 +107,7 @@ void Dehaze::write(ProcParams *pp)
     pp->dehaze.enabled = getEnabled();
     pp->dehaze.showDepthMap = showDepthMap->get_active();
     pp->dehaze.luminance = luminance->get_active_row_number() == 1;
+    pp->dehaze.blackpoint = blackpoint->get_active();
 }
 
 void Dehaze::setDefaults(const ProcParams *defParams)
@@ -147,6 +154,14 @@ void Dehaze::luminanceChanged()
 {
     if (listener) {
         listener->panelChanged(EvDehazeLuminance, luminance->get_active_row_number() == 1 ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+    }
+}
+
+
+void Dehaze::blackpointChanged()
+{
+    if (listener) {
+        listener->panelChanged(EvDehazeBlackpoint, blackpoint->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
 }
 

@@ -52,6 +52,9 @@
 #include "conio.h"
 #endif
 
+#include <thread>
+#include <chrono>
+
 // Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
 #define ECLIPSE_ARGS 0
 
@@ -287,6 +290,7 @@ public:
 
     void incr()
     {
+        MyMutex::MyLock l(mutex_);
         percent_ += 100.f / num_steps_;
     }
     
@@ -294,7 +298,7 @@ public:
     {
         MyMutex::MyLock l(mutex_);
         int pct = (p * 100) / num_steps_;
-        std::cout << rtengine::LIM(percent_ + pct, 0, 99) << std::endl;
+        std::cout << "\n" << rtengine::LIM(percent_ + pct, 0, 99) << std::endl;
     }
     
     void setProgressStr(const Glib::ustring &str) {}
@@ -315,8 +319,18 @@ public:
     void msg(const Glib::ustring &msg)
     {
         MyMutex::MyLock l(mutex_);
-        std::cout << "#" << msg << std::endl;
-    }        
+        std::cout << "\n#" << msg << std::endl;
+    }
+
+    void ping()
+    {
+        MyMutex::MyLock l(mutex_);
+        std::cout.put(' ');
+        std::cout.flush();
+        if (!std::cout) {
+            _exit(0);
+        }
+    }
     
 private:
     MyMutex mutex_;
@@ -675,6 +689,18 @@ int processLineParams ( int argc, char **argv )
 
     ConsoleProgressListener cpl(inputFiles.size()+1);
     rtengine::ProgressListener *pl = progress ? &cpl : nullptr;
+
+    if (progress) {
+        const auto monitor =
+            [&]() -> void
+            {
+                while (true) {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    cpl.ping();
+                }
+            };
+        std::thread(monitor).detach();
+    }
 
     for ( size_t iFile = 0; iFile < inputFiles.size(); iFile++) {
         cpl.incr();

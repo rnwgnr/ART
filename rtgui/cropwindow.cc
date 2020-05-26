@@ -1290,7 +1290,7 @@ void CropWindow::updateCursor(int x, int y, int bstate)
 
     CursorShape newType = cursor_type;
     const bool crop_mode = iarea->getToolMode() == TMCropSelect;
-    const bool crop_resize_allowed = (crop_mode ? true : (bstate & GDK_CONTROL_MASK)) && !(bstate & GDK_SHIFT_MASK);
+    const bool crop_resize_allowed = (crop_mode ? true : (bstate & GDK_CONTROL_MASK)) && !(bstate & GDK_SHIFT_MASK) && !(editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS);
     const bool crop_move_allowed = crop_mode ? (!(bstate & GDK_CONTROL_MASK) && !(bstate & GDK_SHIFT_MASK)) : (bstate & GDK_SHIFT_MASK);
 
     if (state == SNormal) {

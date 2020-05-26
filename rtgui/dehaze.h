@@ -28,23 +28,7 @@
 
 class Dehaze: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel, public CurveListener
 {
-private:
-    FlatCurveEditor *strength;
-    //Adjuster *strength;
-    Adjuster *depth;
-    Gtk::CheckButton *showDepthMap;
-    MyComboBoxText *luminance;
-
-    rtengine::ProcEvent EvDehazeEnabled;
-    rtengine::ProcEvent EvDehazeStrength;
-    rtengine::ProcEvent EvDehazeDepth;
-    rtengine::ProcEvent EvDehazeShowDepthMap;
-    rtengine::ProcEvent EvDehazeLuminance;
-
-    rtengine::procparams::DehazeParams initial_params;
-    
 public:
-
     Dehaze();
 
     void read(const rtengine::procparams::ProcParams *pp) override;
@@ -52,8 +36,6 @@ public:
     void setDefaults(const rtengine::procparams::ProcParams *defParams) override;
     void adjusterChanged(Adjuster *a, double newval) override;
     void enabledChanged() override;
-    void showDepthMapChanged();
-    void luminanceChanged();
     void adjusterAutoToggled(Adjuster *a, bool newval) override {}
     void curveChanged() override;
     void autoOpenCurve() override;
@@ -61,5 +43,25 @@ public:
 
     void toolReset(bool to_initial) override;
 
+private:
+    void showDepthMapChanged();
+    void luminanceChanged();
+    void blackpointChanged();
+
+    FlatCurveEditor *strength;
+    //Adjuster *strength;
+    Adjuster *depth;
+    Gtk::CheckButton *showDepthMap;
+    MyComboBoxText *luminance;
+    Gtk::CheckButton *blackpoint;
+
+    rtengine::ProcEvent EvDehazeEnabled;
+    rtengine::ProcEvent EvDehazeStrength;
+    rtengine::ProcEvent EvDehazeDepth;
+    rtengine::ProcEvent EvDehazeShowDepthMap;
+    rtengine::ProcEvent EvDehazeLuminance;
+    rtengine::ProcEvent EvDehazeBlackpoint;
+
+    rtengine::procparams::DehazeParams initial_params;
 };
 
