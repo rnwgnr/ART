@@ -149,6 +149,7 @@ void KeyFile::set_double_list(const Glib::ustring &grp, const Glib::ustring &key
 
 bool KeyFile::load_from_file(const Glib::ustring &fn)
 {
+    filename_ = fn;
     return kf_.load_from_file(fn);
 }
 
@@ -292,10 +293,20 @@ void getFromKeyfile(
 template<typename T>
 bool assignFromKeyfile(const KeyFile& keyfile, const Glib::ustring& group_name, const Glib::ustring& key, T &value)
 {
-    if (keyfile.has_key(group_name, key)) {
-        getFromKeyfile(keyfile, group_name, key, value);
+    try {
+        if (keyfile.has_key(group_name, key)) {
+            getFromKeyfile(keyfile, group_name, key, value);
 
-        return true;
+            return true;
+        }
+    } catch (Glib::KeyFileError &exc) {
+        auto pl = keyfile.progressListener();
+        if (pl) {
+            pl->error(Glib::ustring::compose("WARNING: %1: %2", keyfile.filename(), exc.what()));
+            return false;
+        } else {
+            throw exc;
+        }
     }
 
     return false;
@@ -304,21 +315,31 @@ bool assignFromKeyfile(const KeyFile& keyfile, const Glib::ustring& group_name, 
 template<typename T, typename = typename std::enable_if<std::is_enum<T>::value>::type>
 bool assignFromKeyfile(const KeyFile& keyfile, const Glib::ustring& group_name, const Glib::ustring& key, const std::map<std::string, T>& mapping, T& value)
 {
-    if (keyfile.has_key(group_name, key)) {
-        Glib::ustring v;
-        getFromKeyfile(keyfile, group_name, key, v);
+    try {
+        if (keyfile.has_key(group_name, key)) {
+            Glib::ustring v;
+            getFromKeyfile(keyfile, group_name, key, v);
 
-        const typename std::map<std::string, T>::const_iterator m = mapping.find(v);
+            const typename std::map<std::string, T>::const_iterator m = mapping.find(v);
 
-        if (m != mapping.end()) {
-            value = m->second;
-        } else {
-            return false;
+            if (m != mapping.end()) {
+                value = m->second;
+            } else {
+                return false;
+            }
+
+            return true;
         }
-
-        return true;
+    } catch (Glib::KeyFileError &exc) {
+        auto pl = keyfile.progressListener();
+        if (pl) {
+            pl->error(Glib::ustring::compose("WARNING: %1: %2", keyfile.filename(), exc.what()));
+            return false;
+        } else {
+            throw exc;
+        }
     }
-
+    
     return false;
 }
 
@@ -3641,6 +3662,7 @@ int ProcParams::load(ProgressListener *pl,
     }
 
     KeyFile keyFile;
+    keyFile.setProgressListener(pl);
 
     try {
         if (!Glib::file_test(fname, Glib::FILE_TEST_EXISTS) ||
@@ -5131,6 +5153,8 @@ int ProcParamsWithSnapshots::load(ProgressListener *pl,
     }
 
     KeyFile keyfile;
+    keyfile.setProgressListener(pl);
+    
     snapshots.clear();
 
     try {

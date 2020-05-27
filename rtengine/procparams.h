@@ -52,7 +52,10 @@ namespace procparams {
 
 class KeyFile {
 public:
-    explicit KeyFile(const Glib::ustring &prefix=""): prefix_(prefix) {}
+    explicit KeyFile(const Glib::ustring &prefix=""):
+        prefix_(prefix), pl_(nullptr) {}
+    void setProgressListener(ProgressListener *pl) { pl_ = pl; }
+    ProgressListener *progressListener() const { return pl_; }
     
     bool has_group(const Glib::ustring &grp) const;
     bool has_key(const Glib::ustring &grp, const Glib::ustring &key) const;
@@ -79,12 +82,17 @@ public:
 
     Glib::ustring get_prefix() const { return prefix_; }
     void set_prefix(const Glib::ustring &prefix) { prefix_ = prefix; }
+
+    const Glib::ustring &filename() const { return filename_; }
     
 private:
     Glib::ustring GRP(const Glib::ustring &g) const { return prefix_ + g; }
     
     Glib::ustring prefix_;
     Glib::KeyFile kf_;
+
+    Glib::ustring filename_;
+    mutable ProgressListener *pl_;
 };
 
 
