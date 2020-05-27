@@ -70,8 +70,8 @@ Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false,
     hb->show();
     luminance->show();
 
-    blackpoint = Gtk::manage(new Gtk::CheckButton(M("TP_DEHAZE_BLACKPOINT")));
-    blackpoint->signal_toggled().connect(sigc::mem_fun(*this, &Dehaze::blackpointChanged));
+    blackpoint = Gtk::manage(new Adjuster(M("TP_DEHAZE_BLACKPOINT"), 0, 100, 1, 0));
+    blackpoint->setAdjusterListener(this);
     blackpoint->show();
     
     showDepthMap = Gtk::manage(new Gtk::CheckButton(M("TP_DEHAZE_SHOW_DEPTH_MAP")));
@@ -94,7 +94,7 @@ void Dehaze::read(const ProcParams *pp)
     depth->setValue(pp->dehaze.depth);
     showDepthMap->set_active(pp->dehaze.showDepthMap);
     luminance->set_active(pp->dehaze.luminance ? 1 : 0);
-    blackpoint->set_active(pp->dehaze.blackpoint);
+    blackpoint->setValue(pp->dehaze.blackpoint);
 
     enableListener();
 }
@@ -107,7 +107,7 @@ void Dehaze::write(ProcParams *pp)
     pp->dehaze.enabled = getEnabled();
     pp->dehaze.showDepthMap = showDepthMap->get_active();
     pp->dehaze.luminance = luminance->get_active_row_number() == 1;
-    pp->dehaze.blackpoint = blackpoint->get_active();
+    pp->dehaze.blackpoint = blackpoint->getValue();
 }
 
 void Dehaze::setDefaults(const ProcParams *defParams)
@@ -123,6 +123,8 @@ void Dehaze::adjusterChanged(Adjuster* a, double newval)
     if (listener && getEnabled()) {
         if (a == depth) {
             listener->panelChanged(EvDehazeDepth, a->getTextValue());
+        } else if (a == blackpoint) {
+            listener->panelChanged(EvDehazeBlackpoint, a->getTextValue());
         }
     }
 }
@@ -154,14 +156,6 @@ void Dehaze::luminanceChanged()
 {
     if (listener) {
         listener->panelChanged(EvDehazeLuminance, luminance->get_active_row_number() == 1 ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
-    }
-}
-
-
-void Dehaze::blackpointChanged()
-{
-    if (listener) {
-        listener->panelChanged(EvDehazeBlackpoint, blackpoint->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
 }
 
