@@ -34,6 +34,25 @@
 #include "../rtengine/subprocess.h"
 
 
+namespace {
+
+class S: public Glib::ustring {
+public:
+    explicit S(const Glib::ustring &s): Glib::ustring(s) {}
+};
+
+std::ostream &operator<<(std::ostream &out, const S &s)
+{
+    try {
+        return out << std::string(s);
+    } catch (Glib::ConvertError &e) {
+        return out << s.raw();
+    }
+}
+
+} // namespace
+
+
 UserCommand::UserCommand():
     command(""),
     label(""),
@@ -153,8 +172,12 @@ UserCommandStore *UserCommandStore::getInstance()
 
 void UserCommandStore::init(const Glib::ustring &dirname)
 {
-    dir_ = Glib::filename_from_utf8(dirname);
     commands_.clear();
+
+    if (!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
+        return;
+    }
+    dir_ = Glib::filename_from_utf8(dirname);
 
     try {
         Glib::Dir dir(dirname);
@@ -248,16 +271,16 @@ void UserCommandStore::init(const Glib::ustring &dirname)
                 commands_.push_back(cmd);
 
                 if (options.rtSettings.verbose) {
-                    std::cout << "Found user command \"" << cmd.label << "\": "
-                              << cmd.command << std::endl;
+                    std::cout << "Found user command \"" << S(cmd.label)
+                              << "\": " << S(cmd.command) << std::endl;
                 }
             } catch (Glib::Exception &exc) {
-                std::cout << "ERROR loading " << pth << ": " << exc.what()
+                std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what())
                           << std::endl;
             }
         }
     } catch (Glib::Exception &exc) {
-        std::cout << "ERROR scanning " << dirname << ": " << exc.what() << std::endl;
+        std::cout << "ERROR scanning " << S(dirname) << ": " << S(exc.what()) << std::endl;
     }
 
     if (options.rtSettings.verbose) {
