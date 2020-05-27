@@ -459,11 +459,17 @@ RTWindow::RTWindow():
     {
         info_label_ = Gtk::manage(new Gtk::Label());
         Gtk::HBox *box = Gtk::manage(new Gtk::HBox());
+        info_box_ = box;
         box->set_spacing(4);
+
+        info_label_->set_can_focus(false);
+        info_box_->set_can_focus(false);
 
         box->get_style_context()->add_class("app-notification");
         RTImage *icon = Gtk::manage(new RTImage("warning.png"));
         setExpandAlignProperties(icon, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
+        icon->set_can_focus(false);
+        
         box->pack_start(*icon, false, false, 20);
         box->pack_start(*info_label_, false, true, 10);
         msg_revealer_->add(*box);
@@ -1024,6 +1030,7 @@ void RTWindow::error(const Glib::ustring& descr)
     }
     //prProgBar.set_text(descr);
     info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", info_msg_));
+    info_box_->show();
     msg_revealer_->set_reveal_child(true);
     reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
 }
@@ -1032,6 +1039,14 @@ void RTWindow::error(const Glib::ustring& descr)
 bool RTWindow::hide_info_msg()
 {
     msg_revealer_->set_reveal_child(false);
+    const auto hidebox =
+        [this]() -> bool
+        {
+            info_box_->hide();
+            return false;
+        };
+    Glib::signal_timeout().connect(sigc::slot<bool>(hidebox), msg_revealer_->get_transition_duration());
+    //info_box_->hide();
     info_msg_ = "";
     return false;
 }
