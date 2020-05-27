@@ -78,7 +78,9 @@ Dehaze::Dehaze(): FoldableToolPanel(this, "dehaze", M("TP_DEHAZE_LABEL"), false,
     showDepthMap->signal_toggled().connect(sigc::mem_fun(*this, &Dehaze::showDepthMapChanged));
     showDepthMap->show();
 
-    pack_start(*strength_group);
+    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+    vb->pack_start(*strength_group);
+    pack_start(*vb);
     pack_start(*depth);
     pack_start(*blackpoint);
     pack_start(*showDepthMap);
@@ -113,6 +115,7 @@ void Dehaze::write(ProcParams *pp)
 void Dehaze::setDefaults(const ProcParams *defParams)
 {
     depth->setDefault(defParams->dehaze.depth);
+    blackpoint->setDefault(defParams->dehaze.blackpoint);
 
     initial_params = defParams->dehaze;
 }
