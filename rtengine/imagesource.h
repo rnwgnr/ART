@@ -58,11 +58,11 @@ protected:
     Glib::ustring fileName;
     FramesData* idata;
     ImageMatrices imatrices;
-    double dirpyrdenoiseExpComp;
+    // double dirpyrdenoiseExpComp;
 
 public:
     ImageSource(): references (1), redAWBMul(-1.), greenAWBMul(-1.), blueAWBMul(-1.),
-        embProfile(nullptr), idata(nullptr), dirpyrdenoiseExpComp(INFINITY) {}
+                   embProfile(nullptr), idata(nullptr) {} //, dirpyrdenoiseExpComp(INFINITY) {}
 
     ~ImageSource() override {}
     virtual int load(const Glib::ustring &fname) = 0;
@@ -135,10 +135,10 @@ public:
         outCurve = { 0.0 };
     }
     
-    double getDirPyrDenoiseExpComp()
-    {
-        return dirpyrdenoiseExpComp;
-    }
+    // double getDirPyrDenoiseExpComp()
+    // {
+    //     return dirpyrdenoiseExpComp;
+    // }
     // functions inherited from the InitialImage interface
     Glib::ustring getFileName() override
     {
