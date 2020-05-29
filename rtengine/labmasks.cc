@@ -474,6 +474,23 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         uint16_t curflag_;
     };
 
+    const auto DUMP =
+        [&](const char *name) -> void
+        {
+#if 0
+            if (mask_w > 400) {
+                Imagefloat tmp(mask_w, mask_h);
+                for (int y = 0; y < mask_h; ++y) {
+                    for (int x = 0; x < mask_w; ++x) {
+                        tmp.r(y, x) = tmp.g(y, x) = tmp.b(y, x) = (mask[y][x] + 1.f) / 2.f * 65535.f;
+                    }
+                }
+                tmp.saveTIFF(name, 16);
+            }
+#endif
+        };
+    
+
     double maxradius = 0.0;
     StrokeEval se(ox, oy, width, height, mask_w, mask_h);
 
@@ -483,7 +500,7 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         maxradius = std::max(maxradius, s.radius);
         for (int y = se.ly; y <= se.uy; ++y) {
             for (int x = se.lx; x <= se.ux; ++x) {
-                float v;
+                float v = 0.f;
                 if (se(x, y, v)) {
                     //mask[y][x] = LIM(mask[y][x] + v, -1.f, 1.f);
                     if (add) {
@@ -499,6 +516,7 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
             }
         }
     }
+    DUMP("/tmp/after-strokes.tif");
 
     DiagonalCurve ccurve(drawnMask.contrast);
     const bool needscale = add && (drawnMask.smoothness > 0.f || drawnMask.feather > 0 || !ccurve.isIdentity());
@@ -518,6 +536,8 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         }
     }
 
+    DUMP("/tmp/after-scale.tif");
+
     if (drawnMask.smoothness > 0.f) {
         float sigma = std::min(width, height) * maxradius * 0.2f * drawnMask.smoothness;
 #ifdef _OPENMP
@@ -526,12 +546,16 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         gaussianBlur(mask, mask, mask_w, mask_h, sigma);
     }
 
+    DUMP("/tmp/after-smoothness.tif");
+
     if (drawnMask.feather > 0) {
         int radius = int(drawnMask.feather / 100.0 * std::min(width, height) * 0.1 + 0.5);
         if (radius > 0) {
-            guidedFilter(guide, mask, mask, radius, 1e-7, multithread);
+            guidedFilter(guide, mask, mask, radius, 1e-5, multithread);
         }
     }
+
+    DUMP("/tmp/after-feather.tif");
 
     if (!ccurve.isIdentity()) {
 #ifdef _OPENMP
@@ -566,6 +590,8 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         tmp.saveTIFF("/tmp/drawnmask.tif", 16);
     }
 #endif
+
+    DUMP("/tmp/at-end.tif");
     
     return true;
 }
