@@ -6547,7 +6547,8 @@ int CLASS parse_tiff_ifd (int base)
 	FORC3 cam_mul[(4-c) % 3] = getint(type);
 	break;
       case 305:  case 11:		/* Software */
-	fgets (software, 64, ifp);
+	fgets(software, 64, ifp);
+        software[63] = 0;
         RT_software = software;
 	if (!strncmp(software,"Adobe",5) ||
 	    !strncmp(software,"dcraw",5) ||
