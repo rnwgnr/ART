@@ -167,7 +167,7 @@ std::vector<GainMap> extract_gain_maps(const std::vector<Exiv2::byte> &buf)
 
 void RawImage::apply_gain_map()
 {
-    if (!(isBayer() && load_raw == &RawImage::lossless_dng_load_raw && RT_OpcodeList2_len > 0)) {
+    if (!(isBayer() && DNGVERSION()/*load_raw == &RawImage::lossless_dng_load_raw*/ && RT_OpcodeList2_len > 0)) {
         return;
     }
     
