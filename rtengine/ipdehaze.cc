@@ -33,7 +33,8 @@
 #include "rt_math.h"
 #include "rt_algo.h"
 #include "rescale.h"
-#include "gauss.h"
+//#include "gauss.h"
+#include "boxblur.h"
 #include <iostream>
 #include <queue>
 
@@ -257,14 +258,18 @@ void subtract_black(Imagefloat *img, int percent, bool multithread)
         rescaleNearest(img->g.ptrs, W, H, static_cast<float **>(gg), ww, hh, multithread);
         rescaleNearest(img->b.ptrs, W, H, static_cast<float **>(bb), ww, hh, multithread);
 
-#ifdef _OPENMP
-#       pragma omp parallel if (multithread)
-#endif
-        {
-            gaussianBlur(rr, rr, ww, hh, std::max(ww, hh) * 0.1);
-            gaussianBlur(gg, gg, ww, hh, std::max(ww, hh) * 0.1);
-            gaussianBlur(bb, bb, ww, hh, std::max(ww, hh) * 0.1);
-        }
+        int radius = std::max(std::max(ww, hh) / 20, 1);
+        boxblur(rr, rr, radius, ww, hh, multithread);
+        boxblur(gg, gg, radius, ww, hh, multithread);
+        boxblur(bb, bb, radius, ww, hh, multithread);
+// #ifdef _OPENMP
+// #       pragma omp parallel if (multithread)
+// #endif
+//         {
+//             gaussianBlur(rr, rr, ww, hh, std::max(ww, hh) * 0.1);
+//             gaussianBlur(gg, gg, ww, hh, std::max(ww, hh) * 0.1);
+//             gaussianBlur(bb, bb, ww, hh, std::max(ww, hh) * 0.1);
+//         }
     
         for (int y = 0; y < hh; ++y) {
             for (int x = 0; x < ww; ++x) {

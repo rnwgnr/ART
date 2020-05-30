@@ -459,11 +459,17 @@ RTWindow::RTWindow():
     {
         info_label_ = Gtk::manage(new Gtk::Label());
         Gtk::HBox *box = Gtk::manage(new Gtk::HBox());
+        info_box_ = box;
         box->set_spacing(4);
+
+        info_label_->set_can_focus(false);
+        info_box_->set_can_focus(false);
 
         box->get_style_context()->add_class("app-notification");
         RTImage *icon = Gtk::manage(new RTImage("warning.png"));
         setExpandAlignProperties(icon, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
+        icon->set_can_focus(false);
+        
         box->pack_start(*icon, false, false, 20);
         box->pack_start(*info_label_, false, true, 10);
         msg_revealer_->add(*box);
@@ -1016,14 +1022,51 @@ void RTWindow::setProgressState(bool inProcessing)
 
 void RTWindow::error(const Glib::ustring& descr)
 {
+    const auto wrap =
+        [](Glib::ustring s) -> Glib::ustring
+        {
+            Glib::ustring ret;
+            const size_t pad = 120;
+            while (s.size() > pad) {
+                if (!ret.empty()) {
+                    ret += "\n";
+                }
+                auto p1 = s.find_first_of(' ', pad);
+                auto p2 = s.find_last_of(' ', pad+1);
+                if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
+                    if (p1 - pad > pad - p2) {
+                        ret += s.substr(0, p2);
+                        s = s.substr(p2+1);
+                    } else {
+                        ret += s.substr(0, p1);
+                        s = s.substr(p1+1);
+                    }
+                } else if (p1 != Glib::ustring::npos) {
+                    ret += s.substr(0, p1);
+                    s = s.substr(p1+1);
+                } else if (p2 != Glib::ustring::npos) {
+                    ret += s.substr(0, p2);
+                    s = s.substr(p2+1);
+                } else {
+                    break;
+                }
+            }
+            if (!ret.empty()) {
+                ret += "\n";
+            }
+            ret += s;
+            return ret;
+        };
+    
+    auto m = escapeHtmlChars(wrap(descr));
     if (reveal_conn_.connected()) {
         reveal_conn_.disconnect();
-        info_msg_ += "\n" + escapeHtmlChars(descr);
+        info_msg_ += "\n" + m;
     } else {
-        info_msg_ = escapeHtmlChars(descr);
+        info_msg_ = m;
     }
-    //prProgBar.set_text(descr);
     info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", info_msg_));
+    info_box_->show();
     msg_revealer_->set_reveal_child(true);
     reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
 }
@@ -1032,6 +1075,14 @@ void RTWindow::error(const Glib::ustring& descr)
 bool RTWindow::hide_info_msg()
 {
     msg_revealer_->set_reveal_child(false);
+    const auto hidebox =
+        [this]() -> bool
+        {
+            info_box_->hide();
+            return false;
+        };
+    Glib::signal_timeout().connect(sigc::slot<bool>(hidebox), msg_revealer_->get_transition_duration());
+    //info_box_->hide();
     info_msg_ = "";
     return false;
 }

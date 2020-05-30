@@ -1557,14 +1557,14 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
     }
 
-    if(prepareDenoise && dirpyrdenoiseExpComp == INFINITY) {
-        LUTu aehist;
-        int aehistcompr;
-        double clip = 0;
-        int brightness, contrast, black, hlcompr, hlcomprthresh;
-        getAutoExpHistogram (aehist, aehistcompr);
-        ImProcFunctions::getAutoExp (aehist, aehistcompr, clip, dirpyrdenoiseExpComp, brightness, contrast, black, hlcompr, hlcomprthresh);
-    }
+    // if(prepareDenoise && dirpyrdenoiseExpComp == INFINITY) {
+    //     LUTu aehist;
+    //     int aehistcompr;
+    //     double clip = 0;
+    //     int brightness, contrast, black, hlcompr, hlcomprthresh;
+    //     getAutoExpHistogram (aehist, aehistcompr);
+    //     ImProcFunctions::getAutoExp (aehist, aehistcompr, clip, dirpyrdenoiseExpComp, brightness, contrast, black, hlcompr, hlcomprthresh);
+    // }
 
     t2.set();
 
