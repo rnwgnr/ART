@@ -302,7 +302,7 @@ CursorShape Gradient::getCursor(const int objectID)
         return CSMove2D;
 
     default:
-        return CSHandOpen;
+        return CSArrow;
     }
 }
 

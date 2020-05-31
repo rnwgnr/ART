@@ -1298,7 +1298,7 @@ void CropWindow::updateCursor(int x, int y, int bstate)
             newType = CSArrow;
         } else if (onArea(CropToolBar, x, y)) {
             newType = CSMove;
-        } else if (iarea->getObject() > -1 && editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
+        } else if (/*iarea->getObject() > -1 &&*/ editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
             int cursorX;
             int cursorY;
             screenCoordToImage (x, y, cursorX, cursorY);
@@ -1360,15 +1360,16 @@ void CropWindow::updateCursor(int x, int y, int bstate)
         } else if (area_updater_) {
             newType = CSCropSelect;
         } else {
-            int objectID = -1;
+            int objectID = -2;
 
             if (editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
+                objectID = -1;
                 Coord cropPos;
                 screenCoordToCropCanvas (iarea->posScreen.x, iarea->posScreen.y, cropPos.x, cropPos.y);
                 objectID = ObjectMOBuffer::getObjectID(cropPos);
             }
 
-            if (objectID > -1) {
+            if (objectID >= -1) {
                 int cursorX;
                 int cursorY;
                 screenCoordToImage (x, y, cursorX, cursorY);
