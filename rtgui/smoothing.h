@@ -58,12 +58,15 @@ private:
     void regionGet(int idx);
     void regionShow(int idx);
     void channelChanged();
+    void modeChanged();
     
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvChannel;
     rtengine::ProcEvent EvRadius;
     rtengine::ProcEvent EvEpsilon;
     rtengine::ProcEvent EvIterations;
+    rtengine::ProcEvent EvMode;
+    rtengine::ProcEvent EvSigma;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -77,18 +80,22 @@ private:
     rtengine::ProcEvent EvContrastThresholdMask;
     rtengine::ProcEvent EvDrawnMask;
 
-    std::vector<rtengine::procparams::GuidedSmoothingParams::Region> data;
+    std::vector<rtengine::procparams::SmoothingParams::Region> data;
 
     friend class SmoothingMasksContentProvider;
     std::unique_ptr<LabMasksContentProvider> labMasksContentProvider;
     LabMasksPanel *labMasks;
-    
+
     MyComboBoxText *channel;
+    MyComboBoxText *mode;
     Adjuster *radius;
     Adjuster *epsilon;
     Adjuster *iterations;
+    Adjuster *sigma;
     Gtk::VBox *box;
+    Gtk::VBox *guided_box;
+    Gtk::VBox *gaussian_box;
 
-    rtengine::procparams::GuidedSmoothingParams initial_params;
+    rtengine::procparams::SmoothingParams initial_params;
 };
 

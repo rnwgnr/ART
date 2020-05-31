@@ -2371,31 +2371,35 @@ bool GrainParams::operator!=(const GrainParams &other) const
 }
 
 
-GuidedSmoothingParams::Region::Region():
+SmoothingParams::Region::Region():
+    mode(Mode::GUIDED),
     channel(Channel::RGB),
     radius(0),
+    sigma(0),
     epsilon(0),
     iterations(1)
 {
 }
 
 
-bool GuidedSmoothingParams::Region::operator==(const Region &other) const
+bool SmoothingParams::Region::operator==(const Region &other) const
 {
-    return channel == other.channel
+    return mode == other.mode
+        && channel == other.channel
         && radius == other.radius
+        && sigma == other.sigma
         && epsilon == other.epsilon
         && iterations == other.iterations;
 }
 
 
-bool GuidedSmoothingParams::Region::operator!=(const Region &other) const
+bool SmoothingParams::Region::operator!=(const Region &other) const
 {
     return !(*this == other);
 }
 
 
-GuidedSmoothingParams::GuidedSmoothingParams():
+SmoothingParams::SmoothingParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
@@ -2404,7 +2408,7 @@ GuidedSmoothingParams::GuidedSmoothingParams():
 }
 
 
-bool GuidedSmoothingParams::operator==(const GuidedSmoothingParams &other) const
+bool SmoothingParams::operator==(const SmoothingParams &other) const
 {
     return enabled == other.enabled
         && regions == other.regions
@@ -2413,7 +2417,7 @@ bool GuidedSmoothingParams::operator==(const GuidedSmoothingParams &other) const
 }
 
 
-bool GuidedSmoothingParams::operator!=(const GuidedSmoothingParams &other) const
+bool SmoothingParams::operator!=(const SmoothingParams &other) const
 {
     return !(*this == other);
 }
@@ -2911,7 +2915,7 @@ void ProcParams::setDefaults()
     softlight = SoftLightParams();
     dehaze = DehazeParams();
     grain = GrainParams();
-    smoothing = GuidedSmoothingParams();
+    smoothing = SmoothingParams();
     colorcorrection = ColorCorrectionParams();
     raw = RAWParams();
     metadata = MetaDataParams();
@@ -3413,17 +3417,19 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 
 // Smoothing
         if (RELEVANT_(smoothing)) {
-            saveToKeyfile("GuidedSmoothing", "Enabled", smoothing.enabled, keyFile);
+            saveToKeyfile("Smoothing", "Enabled", smoothing.enabled, keyFile);
             for (size_t j = 0; j < smoothing.regions.size(); ++j) {
                 std::string n = std::to_string(j+1);
                 auto &r = smoothing.regions[j];
-                putToKeyfile("GuidedSmoothing", Glib::ustring("Channel_") + n, int(r.channel), keyFile);
-                putToKeyfile("GuidedSmoothing", Glib::ustring("Radius_") + n, r.radius, keyFile);
-                putToKeyfile("GuidedSmoothing", Glib::ustring("Epsilon_") + n, r.epsilon, keyFile);
-                putToKeyfile("GuidedSmoothing", Glib::ustring("Iterations_") + n, r.iterations, keyFile);
-                smoothing.labmasks[j].save(keyFile, "GuidedSmoothing", "", Glib::ustring("_") + n);
+                putToKeyfile("Smoothing", Glib::ustring("Mode_") + n, int(r.mode), keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Channel_") + n, int(r.channel), keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Radius_") + n, r.radius, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Sigma_") + n, r.sigma, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Epsilon_") + n, r.epsilon, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Iterations_") + n, r.iterations, keyFile);
+                smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
-            saveToKeyfile("GuidedSmoothing", "ShowMask", smoothing.showMask, keyFile);
+            saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
         }
 
 // ColorCorrection
@@ -4503,37 +4509,47 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "Grain", "Scale", grain.scale);
         }
 
-        if (keyFile.has_group("GuidedSmoothing") && RELEVANT_(smoothing)) {
-            assignFromKeyfile(keyFile, "GuidedSmoothing", "Enabled", smoothing.enabled);
+        const char *smoothing_group = ppVersion < 1016 ? "GuidedSmoothing" : "Smoothing";
+        if (keyFile.has_group(smoothing_group) && RELEVANT_(smoothing)) {
+            assignFromKeyfile(keyFile, smoothing_group, "Enabled", smoothing.enabled);
                 
-            std::vector<GuidedSmoothingParams::Region> ll;
+            std::vector<SmoothingParams::Region> ll;
             std::vector<Mask> lm;
             bool found = false;
             bool done = false;
             for (int i = 1; !done; ++i) {
-                GuidedSmoothingParams::Region cur;
+                SmoothingParams::Region cur;
                 Mask curmask;
                 done = true;
                 std::string n = std::to_string(i);
                 int c;
-                if (assignFromKeyfile(keyFile, "GuidedSmoothing", Glib::ustring("Channel_") + n, c)) {
-                    cur.channel = GuidedSmoothingParams::Region::Channel(c);
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Channel_") + n, c)) {
+                    cur.channel = SmoothingParams::Region::Channel(c);
                     found = true;
                     done = false;
                 }
-                if (assignFromKeyfile(keyFile, "GuidedSmoothing", Glib::ustring("Radius_") + n, cur.radius)) {
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Mode_") + n, c)) {
+                    cur.mode = SmoothingParams::Region::Mode(c);
                     found = true;
                     done = false;
                 }
-                if (assignFromKeyfile(keyFile, "GuidedSmoothing", Glib::ustring("Epsilon_") + n, cur.epsilon)) {
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Radius_") + n, cur.radius)) {
                     found = true;
                     done = false;
                 }
-                if (assignFromKeyfile(keyFile, "GuidedSmoothing", Glib::ustring("Iterations_") + n, cur.iterations)) {
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Sigma_") + n, cur.sigma)) {
                     found = true;
                     done = false;
                 }
-                if (curmask.load(ppVersion, keyFile, "GuidedSmoothing", "", Glib::ustring("_") + n)) {
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Epsilon_") + n, cur.epsilon)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Iterations_") + n, cur.iterations)) {
+                    found = true;
+                    done = false;
+                }
+                if (curmask.load(ppVersion, keyFile, smoothing_group, "", Glib::ustring("_") + n)) {
                     found = true;
                     done = false;
                 }
@@ -4547,7 +4563,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 smoothing.labmasks = std::move(lm);
             }
             assert(smoothing.regions.size() == smoothing.labmasks.size());
-            assignFromKeyfile(keyFile, "GuidedSmoothing", "ShowMask", smoothing.showMask);
+            assignFromKeyfile(keyFile, smoothing_group, "ShowMask", smoothing.showMask);
         }
 
         const char *ccgroup = "ColorCorrection";

@@ -25,6 +25,8 @@
 #include "curves.h"
 #include "labmasks.h"
 #include "sleef.h"
+#include "gauss.h"
+#include "alignedbuffer.h"
 #include <iostream>
 #include <queue>
 
@@ -164,6 +166,57 @@ void find_region(const array2D<float> &mask, int &min_x, int &min_y, int &max_x,
     ++max_y;
 }
 
+
+void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, float *buf, const TMatrix &ws, Channel chan, double sigma, double scale, bool multithread)
+{
+    double s = sigma / scale;
+    const int W = R.width();
+    const int H = R.height();
+
+    const auto blur =
+        [&](array2D<float> &a) -> void
+        {
+#ifdef _OPENMP
+#           pragma omp parallel if (multithread)
+#endif
+            {
+                gaussianBlur(a, a, W, H, s, buf);
+            }
+        };
+
+    if (chan == Channel::LC) {
+        blur(R);
+        blur(G);
+        blur(B);
+    } else {
+        const bool luminance = (chan == Channel::L);
+        array2D<float> iR(W, H, R, 0);
+        array2D<float> iG(W, H, G, 0);
+        array2D<float> iB(W, H, B, 0);
+
+        blur(R);
+        blur(G);
+        blur(B);
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float iY, iu, iv;
+                float oY, ou, ov;
+                Color::rgb2yuv(iR[y][x], iG[y][x], iB[y][x], iY, iu, iv, ws);
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], oY, ou, ov, ws);
+                if (luminance) {
+                    Color::yuv2rgb(oY, iu, iv, R[y][x], G[y][x], B[y][x], ws);
+                } else {
+                    Color::yuv2rgb(iY, ou, ov, R[y][x], G[y][x], B[y][x], ws);
+                }
+            }
+        }
+    }
+}
+
 } // namespace
 
 
@@ -282,10 +335,18 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> G(ww, hh, working.g.ptrs, ARRAY2D_BYREFERENCE);
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
-            const float epsilon = 0.001f * std::pow(2, -r.epsilon);
             Channel ch = Channel(int(r.channel));
-            for (int i = 0; i < r.iterations; ++i) {
-                guided_smoothing<false>(R, G, B, ws, iws, ch, r.radius, epsilon, 100, scale, multiThread);
+            if (r.mode == SmoothingParams::Region::Mode::GAUSSIAN) {
+                // do a gaussian blur here
+                AlignedBuffer<float> buf(ww * hh);
+                for (int i = 0; i < r.iterations; ++i) {
+                    gaussian_smoothing(R, G, B, buf.data, ws, ch, r.sigma, scale, multiThread);
+                }
+            } else {
+                const float epsilon = std::max(0.001f * std::pow(2, -r.epsilon), 1e-6);
+                for (int i = 0; i < r.iterations; ++i) {
+                    guided_smoothing<false>(R, G, B, ws, iws, ch, r.radius, epsilon, 100, scale, multiThread);
+                }
             }
             
 #ifdef _OPENMP

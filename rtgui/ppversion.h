@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1015
+#define PPVERSION 1016
 
 /*
   Log of version changes
+  1016  2020-05-31
+        renamed GuidedSmoothing to Smoothing, added gaussian mode
   1015  2020-05-13
         added AreaMask::per_shape_feather, Shape::feather and Shape:::blur parameters
   1014  2020-05-07

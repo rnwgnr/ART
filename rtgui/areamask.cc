@@ -290,24 +290,22 @@ CursorShape AreaMask::getCursor(const int objectID)
             return CSMoveRotate;
         } else if (objectID == center_id_) {
             return CSMove2D;
-        } else {
-            return CSHandOpen;
         }
+        break;
     case rteMaskShape::Type::POLYGON:
-        if (dragged_element_ != DraggedElement::NONE)
-        {
+        if (dragged_element_ != DraggedElement::NONE) {
             return CSEmpty;
-        }
-        else if (objectID >= 0) {
+        } else if (objectID >= 0) {
             return CSMove2D;
+        } else {
+            return CSCrosshair;
         }
         break;
     default:
         break;
     }
 
-    // should never occure...
-    return CSHandOpen;
+    return CSArrow;
 }
 
 
