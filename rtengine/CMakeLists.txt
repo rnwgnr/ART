@@ -131,7 +131,7 @@ set(RTENGINESOURCEFILES
     ipdehaze.cc
     ipcolorcorrection.cc
     lj92.c
-    ipguidedfilter.cc
+    ipsmoothing.cc
     iplogenc.cc
     labmasks.cc
     ipgrain.cc
