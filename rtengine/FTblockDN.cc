@@ -490,7 +490,7 @@ namespace {
 
 int denoiseNestedLevels = 1;
 
-void RGBtile_denoise(double scale, float * fLblox, int hblproc, float noisevar_Ldetail, float * nbrwt, float * blurbuffer)  //for DCT
+void RGBtile_denoise(double scale, float * fLblox, int hblproc, float *noisevar_Ldetail, float * nbrwt, float * blurbuffer)  //for DCT
 {
     // const int TS = max(int(default_TS / scale), 4);
     // const int offset = max(int(default_offset / scale), 1);
@@ -502,18 +502,18 @@ void RGBtile_denoise(double scale, float * fLblox, int hblproc, float noisevar_L
 
 #ifdef __SSE2__
     __m128  tempv;
-    __m128  noisevar_Ldetailv = _mm_set1_ps(noisevar_Ldetail);
+    //__m128  noisevar_Ldetailv = _mm_set1_ps(noisevar_Ldetail);
     __m128  onev = _mm_set1_ps(1.0f);
 
     for (int n = 0; n < TS * TS; n += 4) { //for DCT
-        tempv  = onev - xexpf(-SQRV(LVF(nbrwt[n])) / noisevar_Ldetailv);
+        tempv  = onev - xexpf(-SQRV(LVF(nbrwt[n])) / LVF(noisevar_Ldetail[blkstart + n]));
         _mm_storeu_ps(&fLblox[blkstart + n], LVFU(fLblox[blkstart + n]) * tempv);
     }//output neighbor averaged result
 
 #else
 
     for (int n = 0; n < TS * TS; ++n) { //for DCT
-        fLblox[blkstart + n] *= (1 - xexpf(-SQR(nbrwt[n]) / noisevar_Ldetail));
+        fLblox[blkstart + n] *= (1 - xexpf(-SQR(nbrwt[n]) / noisevar_Ldetail[blkstart + n]));
     }//output neighbor averaged result
 
 #endif
@@ -1381,13 +1381,45 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
 
     //residual between input and denoised L channel
     array2D<float> Ldetail(width, height, ARRAY2D_CLEAR_DATA);
-    array2D<float> Ldetail2;
-    // if (detail_thresh > 0) {
-    //     Ldetail2(width, height, ARRAY2D_CLEAR_DATA);
-    // }
-    //pixel weight
     array2D<float> totwt(width, height, ARRAY2D_CLEAR_DATA); //weight for combining DCT blocks
 
+    array2D<float> mask;
+    if (detail_thresh > 0) {
+        mask(width, height);
+        float s_scale = std::sqrt(scale);
+        float cthresh = (denoise_aggressive ? 0.1f : 0.3f) * s_scale;
+        float amount = LIM01(float(detail_thresh)/100.f);
+        float thr = 1.f - amount;
+        buildBlendMask(labdn->L, mask, width, height, cthresh, amount, false, 2.f / s_scale);
+        array2D<float> guide(width, height);
+        LUTf ll(65536);
+        for (int i = 0; i < 65536; ++i) {
+            ll[i] = xlin2log(float(i) / 65535.f, 25.f);
+        }
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                guide[i][j] = ll[labdn->L[i][j]];
+            }
+        }
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                mask[i][j] = LIM01(mask[i][j] + thr);
+            }
+        }
+        guidedFilter(guide, mask, mask, 100.f / scale, 0.01f, numthreads > 1);
+#if 0
+        {
+            Imagefloat tmp(width, height);
+            for (int i = 0; i < height; ++i) {
+                for (int j = 0; j < width; ++j) {
+                    tmp.r(i, j) = tmp.g(i, j) = tmp.b(i, j) = mask[i][j] * 65535.f;
+                }
+            }
+            tmp.saveTIFF("/tmp/mask.tif", 16);
+        }
+#endif
+    }   
+    
     if (numtiles == 1) {
         for (int i = 0; i < denoiseNestedLevels * numthreads; ++i) {
             LbloxArray[i]  = reinterpret_cast<float*>(fftwf_malloc(max_numblox_W * TS * TS * sizeof(float)));
@@ -1412,6 +1444,9 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
         float *fLblox = fLbloxArray[subThread];
         float pBuf[width + TS + 2 * blkrad * offset] ALIGNED16;
         float nbrwt[TS * TS] ALIGNED64;
+        AlignedBuffer<float> detail_factor_buf(numblox_W * TS * TS);
+        float *detail_factor = detail_factor_buf.data;
+        
 #ifdef _OPENMP
 #pragma omp for
 #endif
@@ -1453,19 +1488,23 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
 
                         for (j = 0; j < min((-left), TS); ++j) {
                             Lblox[(indx + i)*TS + j] = tilemask_in[i][j] * datarow[left + j]; // luma data
+                            detail_factor[(indx + i)*TS + j] = detail_lo;
                         }
 
                         for (; j < min(TS, width - left); ++j) {
                             Lblox[(indx + i)*TS + j] = tilemask_in[i][j] * datarow[left + j]; // luma data
                             totwt[top + i][left + j] += tilemask_in[i][j] * tilemask_out[i][j];
+                            detail_factor[(indx + i)*TS + j] = detail_thresh > 0 ? compute_detail(params_Ldetail * mask[top+i][left + j]) : detail_hi;
                         }
 
                         for (; j < TS; ++j) {
                             Lblox[(indx + i)*TS + j] = tilemask_in[i][j] * datarow[left + j]; // luma data
+                            detail_factor[(indx + i)*TS + j] = detail_lo;
                         }
                     } else {
                         for (int j = 0; j < TS; ++j) {
                             Lblox[(indx + i)*TS + j] = tilemask_in[i][j] * datarow[left + j]; // luma data
+                            detail_factor[(indx + i)*TS + j] = detail_lo;
                         }
                     }
 
@@ -1475,27 +1514,22 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             //fftwf_print_plan (plan_forward_blox);
-            float *block_out[] = { fLblox, Lblox };
-            float **Lout[] = { static_cast<float **>(Ldetail), static_cast<float **>(Ldetail2) };
-            float detail[] = { detail_hi, detail_lo };
-            for (int k = 0; k < 1/*(detail_thresh > 0 ? 2 : 1)*/; ++k) {
-                int plan_idx = int(numblox_W != max_numblox_W);
-                fftwf_execute_r2r(plan_forward_blox[plan_idx], Lblox, block_out[k]);    // DCT an entire row of tiles
-                //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                // now process the vblk row of blocks for noise reduction
-                for (int hblk = 0; hblk < numblox_W; ++hblk) {
-                    RGBtile_denoise(scale, block_out[k], hblk, detail[k], nbrwt, blurbuffer);
-                }//end of horizontal block loop
+            int plan_idx = int(numblox_W != max_numblox_W);
+            fftwf_execute_r2r(plan_forward_blox[plan_idx], Lblox, fLblox);    // DCT an entire row of tiles
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            // now process the vblk row of blocks for noise reduction
+            for (int hblk = 0; hblk < numblox_W; ++hblk) {
+                RGBtile_denoise(scale, fLblox, hblk, detail_factor, nbrwt, blurbuffer);
+            }//end of horizontal block loop
 
-                //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-                //now perform inverse FT of an entire row of blocks
-                fftwf_execute_r2r(plan_backward_blox[plan_idx], block_out[k], block_out[k]);    //for DCT
-                int topproc = (vblk - blkrad) * offset;
-                //add row of blocks to output image tile
-                RGBoutput_tile_row(scale, block_out[k], Lout[k], tilemask_out, height, width, topproc);
-                //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            }
+            //now perform inverse FT of an entire row of blocks
+            fftwf_execute_r2r(plan_backward_blox[plan_idx], fLblox, fLblox);    //for DCT
+            int topproc = (vblk - blkrad) * offset;
+            //add row of blocks to output image tile
+            RGBoutput_tile_row(scale, fLblox, Ldetail, tilemask_out, height, width, topproc);
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         }//end of vertical block loop
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1503,59 +1537,13 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
     }
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    array2D<float> mask;
-    if (detail_thresh > 0) {
-        mask(width, height);
-        float s_scale = std::sqrt(scale);
-        float cthresh = (denoise_aggressive ? 0.1f : 0.3f) * s_scale;
-        float amount = LIM01(float(detail_thresh)/100.f);
-        float thr = 1.f - amount;
-        buildBlendMask(labdn->L, mask, width, height, cthresh, amount, false, 2.f / s_scale);
-        array2D<float> guide(width, height);
-        // LUTf ll(65536);
-        // for (int i = 0; i < 65536; ++i) {
-        //     ll[i] = xlin2log(float(i) / 65535.f, 25.f);
-        // }
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-                //guide[i][j] = ll[labdn->L[i][j]];
-                guide[i][j] = (labdn->L[i][j] + Ldetail[i][j]/totwt[i][j]) / 65535.f;
-            }
-        }
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-                mask[i][j] = LIM01(mask[i][j] + thr);
-            }
-        }
-        guidedFilter(guide, mask, mask, 100.f / scale, 0.01f, numthreads > 1);
-#if 0
-        {
-            Imagefloat tmp(width, height);
-            for (int i = 0; i < height; ++i) {
-                for (int j = 0; j < width; ++j) {
-                    tmp.r(i, j) = tmp.g(i, j) = tmp.b(i, j) = mask[i][j] * 65535.f;
-                }
-            }
-            tmp.saveTIFF("/tmp/mask.tif", 16);
-        }
-#endif
-    }   
-
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(denoiseNestedLevels) if (denoiseNestedLevels>1)
 #endif
 
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
-            //may want to include masking threshold for large hipass data to preserve edges/detail
-            float d = Ldetail[i][j] / totwt[i][j];
-            if (detail_thresh > 0) {
-                //float d2 = Ldetail2[i][j] / totwt[i][j];
-                //d = intp(mask[i][j], d, d2);
-                d *= mask[i][j];
-            }
-            //labdn->L[i][j] += Ldetail[i][j] / totwt[i][j]; //note that labdn initially stores the denoised hipass data
-            labdn->L[i][j] += d;
+            labdn->L[i][j] += Ldetail[i][j] / totwt[i][j]; //note that labdn initially stores the denoised hipass data
         }
     }
 }

@@ -799,7 +799,7 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
                     float chaut = 0.f, redaut = 0.f, blueaut = 0.f, maxredaut = 0.f, maxblueaut = 0.f, minredaut = 0.f, minblueaut = 0.f, chromina = 0.f, sigma = 0.f, lumema = 0.f, sigma_L = 0.f, redyel = 0.f, skinc = 0.f, nsknc = 0.f;
                     int nb = 0;
                     ImProcData im(params, scale, multiThread);
-                    RGB_denoise_info(im, origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, dnparams, 0.f/*imgsrc->getDirPyrDenoiseExpComp()*/, chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+                    RGB_denoise_info(im, origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, dnparams, std::log(5.f)/std::log(2.f)/*imgsrc->getDirPyrDenoiseExpComp()*/, chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
 
                     //printf("DCROP skip=%d cha=%f red=%f bl=%f redM=%f bluM=%f chrom=%f sigm=%f lum=%f\n",skip, chaut,redaut,blueaut, maxredaut, maxblueaut, chromina, sigma, lumema);
                     Nb[hcr * 3 + wcr] = nb;
