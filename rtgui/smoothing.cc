@@ -77,7 +77,7 @@ public:
 
     bool addPressed() override
     {
-        parent_->data.push_back(GuidedSmoothingParams::Region());
+        parent_->data.push_back(SmoothingParams::Region());
         return true;
     }
 
@@ -95,7 +95,7 @@ public:
 
     bool resetPressed(int idx) override
     {
-        parent_->data[idx] = GuidedSmoothingParams::Region();
+        parent_->data[idx] = SmoothingParams::Region();
         //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
@@ -134,8 +134,8 @@ public:
 
         return Glib::ustring::compose(
             "%1 %2 %4 [%3]", r.radius, r.epsilon, 
-            r.channel == GuidedSmoothingParams::Region::Channel::LUMINANCE ? "L" :
-            (r.channel == GuidedSmoothingParams::Region::Channel::CHROMINANCE ? "C" : "RGB"), r.iterations);
+            r.channel == SmoothingParams::Region::Channel::LUMINANCE ? "L" :
+            (r.channel == SmoothingParams::Region::Channel::CHROMINANCE ? "C" : "RGB"), r.iterations);
     }
 
     void getEditIDs(EditUniqueID &hcurve, EditUniqueID &ccurve, EditUniqueID &lcurve, EditUniqueID &deltaE) override
@@ -164,6 +164,8 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvRadius = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_RADIUS");
     EvEpsilon = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_EPSILON");
     EvIterations = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_ITERATIONS");
+    EvMode = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_MODE");
+    EvSigma = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_SIGMA");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_PARAMETRICMASK");
@@ -192,23 +194,45 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     channel->signal_changed().connect(sigc::mem_fun(*this, &Smoothing::channelChanged));
     hb->pack_start(*channel, Gtk::PACK_EXPAND_WIDGET, 1);
     box->pack_start(*hb, Gtk::PACK_SHRINK, 1);
+
+    mode = Gtk::manage(new MyComboBoxText());
+    mode->append(M("TP_SMOOTHING_MODE_GUIDED"));
+    mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN"));
+    mode->set_active(0);
+    mode->signal_changed().connect(sigc::mem_fun(*this, &Smoothing::modeChanged));
+    hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_SMOOTHING_MODE") + ":")), Gtk::PACK_SHRINK, 1);
+    hb->pack_start(*mode, Gtk::PACK_EXPAND_WIDGET, 1);
+    box->pack_start(*hb, Gtk::PACK_SHRINK, 1);
+
+    guided_box = Gtk::manage(new Gtk::VBox());
+    gaussian_box = Gtk::manage(new Gtk::VBox());
     
     radius = Gtk::manage(new Adjuster(M("TP_SMOOTHING_RADIUS"), 0, 1000, 1, 0));
     radius->setLogScale(100, 0);
     radius->setAdjusterListener(this);
-    box->pack_start(*radius);
+    guided_box->pack_start(*radius);
     
     epsilon = Gtk::manage(new Adjuster(M("TP_SMOOTHING_EPSILON"), -10, 10, 0.1, 0));
     epsilon->setAdjusterListener(this);
-    box->pack_start(*epsilon);
+    guided_box->pack_start(*epsilon);
+
+    sigma = Gtk::manage(new Adjuster(M("TP_SMOOTHING_SIGMA"), 0, 500, 0.01, 0));
+    sigma->setLogScale(100, 0);
+    sigma->setAdjusterListener(this);
+    gaussian_box->pack_start(*sigma);
+    
+    box->pack_start(*guided_box);
+    box->pack_start(*gaussian_box);
 
     iterations = Gtk::manage(new Adjuster(M("TP_SMOOTHING_ITERATIONS"), 1, 10, 1, 1));
     iterations->setAdjusterListener(this);
     box->pack_start(*iterations);
-    
+
     radius->delay = options.adjusterMaxDelay;
     epsilon->delay = options.adjusterMaxDelay;
     iterations->delay = options.adjusterMaxDelay;
+    sigma->delay = options.adjusterMaxDelay;
 
     labMasksContentProvider.reset(new SmoothingMasksContentProvider(this));
     labMasks = Gtk::manage(new LabMasksPanel(labMasksContentProvider.get()));
@@ -226,10 +250,11 @@ void Smoothing::read(const ProcParams *pp)
     data = pp->smoothing.regions;
     auto m = pp->smoothing.labmasks;
     if (data.empty()) {
-        data.emplace_back(rtengine::GuidedSmoothingParams::Region());
+        data.emplace_back(rtengine::SmoothingParams::Region());
         m.emplace_back(rtengine::Mask());
     }
     labMasks->setMasks(m, pp->smoothing.showMask);
+    modeChanged();
 
     enableListener();
 }
@@ -253,6 +278,7 @@ void Smoothing::setDefaults(const ProcParams *defParams)
     radius->setDefault(defParams->smoothing.regions[0].radius);
     epsilon->setDefault(defParams->smoothing.regions[0].epsilon);
     iterations->setDefault(defParams->smoothing.regions[0].iterations);
+    sigma->setDefault(defParams->smoothing.regions[0].sigma);
 
     initial_params = defParams->smoothing;
 }
@@ -269,6 +295,8 @@ void Smoothing::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvEpsilon, a->getTextValue());
         } else if (a == iterations) {
             listener->panelChanged(EvIterations, a->getTextValue());
+        } else if (a == sigma) {
+            listener->panelChanged(EvSigma, a->getTextValue());
         }
     }
 }
@@ -316,10 +344,12 @@ void Smoothing::regionGet(int idx)
     }
     
     auto &r = data[idx];
-    r.channel = GuidedSmoothingParams::Region::Channel(channel->get_active_row_number());
+    r.mode = SmoothingParams::Region::Mode(mode->get_active_row_number());
+    r.channel = SmoothingParams::Region::Channel(channel->get_active_row_number());
     r.radius = radius->getValue();
     r.epsilon = epsilon->getValue();
     r.iterations = iterations->getValue();
+    r.sigma = sigma->getValue();
 }
 
 
@@ -331,10 +361,12 @@ void Smoothing::regionShow(int idx)
     }
 
     auto &r = data[idx];
+    mode->set_active(int(r.mode));
     channel->set_active(int(r.channel));
     radius->setValue(r.radius);
     epsilon->setValue(r.epsilon);
     iterations->setValue(r.iterations);
+    sigma->setValue(r.sigma);
     
     if (disable) {
         enableListener();
@@ -344,8 +376,23 @@ void Smoothing::regionShow(int idx)
 
 void Smoothing::channelChanged()
 {
-    if (listener && getEnabled() ) {
+    if (listener && getEnabled()) {
         listener->panelChanged(EvChannel, channel->get_active_text());
+    }
+}
+
+
+void Smoothing::modeChanged()
+{
+    if (mode->get_active_row_number() == 0) {
+        guided_box->show();
+        gaussian_box->hide();
+    } else {
+        guided_box->hide();
+        gaussian_box->show();
+    }
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvMode, mode->get_active_text());
     }
 }
 

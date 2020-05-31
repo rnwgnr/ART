@@ -1232,15 +1232,21 @@ struct GrainParams {
 };
 
 
-struct GuidedSmoothingParams {
+struct SmoothingParams {
     struct Region {
         enum class Channel {
             LUMINANCE,
             CHROMINANCE,
             RGB
         };
+        enum class Mode {
+            GUIDED,
+            GAUSSIAN
+        };
+        Mode mode;
         Channel channel;
         int radius;
+        double sigma;
         int epsilon;
         int iterations;
 
@@ -1253,10 +1259,10 @@ struct GuidedSmoothingParams {
     std::vector<Mask> labmasks;
     int showMask;
 
-    GuidedSmoothingParams();
+    SmoothingParams();
 
-    bool operator==(const GuidedSmoothingParams &other) const;
-    bool operator!=(const GuidedSmoothingParams &other) const;
+    bool operator==(const SmoothingParams &other) const;
+    bool operator!=(const SmoothingParams &other) const;
 };
 
 
@@ -1539,7 +1545,7 @@ public:
     SoftLightParams         softlight;       ///< softlight parameters
     DehazeParams            dehaze;          ///< dehaze parameters
     GrainParams             grain;
-    GuidedSmoothingParams   smoothing;
+    SmoothingParams         smoothing;
     ColorCorrectionParams   colorcorrection;
     FilmNegativeParams      filmNegative;
     int                     rank;            ///< Custom image quality ranking
