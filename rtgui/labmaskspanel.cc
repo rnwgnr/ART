@@ -903,6 +903,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
 
     areaMaskBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), 0, 500, 0.1, 0));
     add_adjuster(areaMaskBlur, area);
+    areaMaskFeather->setLogScale(10.0, 0.0);
     
     CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_AREA_CONTRAST")));
     cg->setCurveListener(this);
@@ -998,6 +999,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     areaMaskShapeFeather->setLogScale(100.0, 0.0);
     areaMaskShapeBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), 0, 500, 0.1, 0));
     add_adjuster(areaMaskShapeBlur, vb);
+    areaMaskShapeBlur->setLogScale(10.0, 0.0);
 
     areaFrame->add(*vb);
     vb = Gtk::manage(new Gtk::VBox());
