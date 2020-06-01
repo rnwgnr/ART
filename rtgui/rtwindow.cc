@@ -484,6 +484,31 @@ RTWindow::RTWindow():
 
     cacheMgr->setProgressListener(this);
     ProfileStore::getInstance()->setProgressListener(this);
+
+    const auto on_show =
+        [this](GdkEventAny *e) -> bool
+        {
+            static bool first_draw = true;
+            if (first_draw) {
+                first_draw = false;
+
+                if (fpanel) {
+                    fpanel->setAspect();
+                }
+
+                if (simpleEditor) {
+                    epanel->setAspect();
+                }        
+            }
+            return false;
+        };
+    signal_map_event().connect(sigc::slot<bool,GdkEventAny*>(on_show));
+}
+
+
+bool RTWindow::on_draw(const ::Cairo::RefPtr<::Cairo::Context> &cr)
+{
+    return Gtk::Window::on_draw(cr);
 }
 
 
@@ -508,19 +533,19 @@ RTWindow::~RTWindow()
     RTImage::cleanup();
 }
 
-void RTWindow::on_realize ()
+void RTWindow::on_realize()
 {
-    Gtk::Window::on_realize ();
+    Gtk::Window::on_realize();
 
-    if ( fpanel ) {
-        fpanel->setAspect();
-    }
+    // if (fpanel) {
+    //     fpanel->setAspect();
+    // }
 
-    if (simpleEditor) {
-        epanel->setAspect();
-    }
-
-    mainWindowCursorManager.init (get_window());
+    // if (simpleEditor) {
+    //     epanel->setAspect();
+    // }
+    
+    mainWindowCursorManager.init(get_window());
 
     // Display release notes only if new major version.
     bool waitForSplash = false;

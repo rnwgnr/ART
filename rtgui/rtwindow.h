@@ -54,7 +54,8 @@ public:
 
     void showICCProfileCreator ();
     void showPreferences ();
-    void on_realize () override;
+    void on_realize() override;
+    bool on_draw(const ::Cairo::RefPtr<::Cairo::Context> &cr) override;
     void toggle_fullscreen ();
 
     void setProgress(double p) override;
