@@ -1029,6 +1029,12 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         e->set_alignment(Gtk::ALIGN_END);
         e->set_placeholder_text("(" + M("TP_LABMASKS_MASK_UNNAMED") + ")");
         mask_exp = Gtk::manage(new MyExpander(false, hb));
+        const auto on_activate =
+            [this]() -> void
+            {
+                onMaskNameFocusOut(nullptr);
+            };
+        e->signal_activate().connect(sigc::slot<void>(on_activate));
         e->signal_button_release_event().connect(&on_release_event_ignore);
         e->add_events(Gdk::FOCUS_CHANGE_MASK);
         e->signal_focus_out_event().connect(sigc::mem_fun(*this, &LabMasksPanel::onMaskNameFocusOut));

@@ -30,9 +30,9 @@ namespace {
 constexpr int CURVE_POLY  = 0;
 constexpr int CAGE_POLY   = 1;
 constexpr int INSERT_LINE = 2;
-constexpr int SEL_DISC    = 0;
-constexpr int PREV_DISC   = 1;
-constexpr int NEXT_DISC   = 2;
+constexpr int SEL_DISC    = 1;
+constexpr int PREV_DISC   = 2;
+constexpr int NEXT_DISC   = 3;
 
 } // namespace
 
@@ -58,6 +58,7 @@ AreaMask::AreaMask():
     curve(nullptr),
     cage(nullptr),
     sel_knot(nullptr),
+    sel_knot_bg_(nullptr),
     prev_knot(nullptr),
     next_knot(nullptr),
     hovered_line_id_(-1),
@@ -100,6 +101,10 @@ void AreaMask::deleteGeometry()
         curve = nullptr;
         cage = nullptr;
         sel_knot = nullptr;
+        if (sel_knot_bg_) {
+            delete sel_knot_bg_;
+            sel_knot_bg_ = nullptr;
+        }
         prev_knot = nullptr;
         next_knot = nullptr;
     }
@@ -182,11 +187,16 @@ void AreaMask::createPolygonGeometry()
                               //mouseOverGeometry.push_back(circle);
                           };
 
+    mkcircle(sel_knot_bg_);
+    visibleGeometry.pop_back(); // the bg circle is only for mouse wheel
+    
     mkcircle(sel_knot);
     mkcircle(prev_knot);
     mkcircle(next_knot);
 
     sel_knot->state = Geometry::PRELIGHT;  // always prelight, but either visible or invisible
+    sel_knot_bg_->radius = 7;
+    sel_knot_bg_->setHoverable(true);
 
     hovered_line_id_ = -1;
     sel_poly_knot_id_ = -1;
@@ -344,8 +354,8 @@ bool AreaMask::mouseOver(const int modifierKey)
                     // if over a disc, 3 disc to be shown : selected (= hovered) + previous + next
                     sel_poly_knot_id_ = provider->object == discsPos + PREV_DISC ? prev_poly_knot_id_ : next_poly_knot_id_;
                     if (poly_knots_.size() == 1) {
-                            prev_poly_knot_id_ = -1;
-                            next_poly_knot_id_ = -1;
+                        prev_poly_knot_id_ = -1;
+                        next_poly_knot_id_ = -1;
                     }
                     if (poly_knots_.size() == 2) {
                         if (sel_poly_knot_id_ == 0) {
@@ -801,7 +811,7 @@ void AreaMask::setPolylineSize(size_t newSize)
         // needs to add new Lines
         size_t oldSize = segments_MO.size();
         segments_MO.resize(newSize);
-        mouseOverGeometry.resize(newSize + 3);
+        mouseOverGeometry.resize(newSize + 4);
         for (size_t i = oldSize; i < newSize; ++i) {
             segments_MO.at(i) = new Line();
             segments_MO.at(i)->innerLineWidth = 3;
@@ -815,8 +825,9 @@ void AreaMask::setPolylineSize(size_t newSize)
             delete segments_MO.at(i);
         }
         segments_MO.resize(newSize);
-        mouseOverGeometry.resize(newSize + 3);
+        mouseOverGeometry.resize(newSize + 4);
     }
+    mouseOverGeometry.at(mouseOverGeometry.size() - 4) = sel_knot_bg_;
     mouseOverGeometry.at(mouseOverGeometry.size() - 3) = sel_knot;
     mouseOverGeometry.at(mouseOverGeometry.size() - 2) = prev_knot;
     mouseOverGeometry.at(mouseOverGeometry.size() - 1) = next_knot;
@@ -993,6 +1004,8 @@ void AreaMask::updateGeometry(const int fullWidth, const int fullHeight)
                     knot->setVisible(knot_id >= 0 && (dragged_element_ == DraggedElement::NONE || poly_knots_.size() <= 2));
                     knot->setHoverable(knot_id >= 0 && dragged_element_ == DraggedElement::NONE);
                 };
+        updateKnot(sel_poly_knot_id_, sel_knot_bg_);
+        sel_knot_bg_->setVisible(false);
         updateKnot(sel_poly_knot_id_, sel_knot);
         updateKnot(prev_poly_knot_id_, prev_knot);
         updateKnot(next_poly_knot_id_, next_knot);
