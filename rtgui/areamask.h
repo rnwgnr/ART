@@ -79,13 +79,14 @@ protected:
     int center_id_;
 
     // Visible (and MouseOver) geometry for Polygon
-    Line* insertion_line;            // [0]    visible
-    PolyLine* curve;                 // [1]    visible
-    PolyLine* cage;                  // [2]    visible
-    std::vector<Line*> segments_MO;  // [3, n]           hoverable
-    Circle* sel_knot;                // [n+1]  visible / hoverable
-    Circle* prev_knot;               // [n+2]  visible / hoverable
-    Circle* next_knot;               // [n+3]  visible / hoverable
+    Line *insertion_line;            // [0]    visible
+    PolyLine *curve;                 // [1]    visible
+    PolyLine *cage;                  // [2]    visible
+    std::vector<Line *> segments_MO;  // [3, n]           hoverable
+    Circle *sel_knot;                // [n+1]  visible / hoverable
+    Circle *sel_knot_bg_;
+    Circle *prev_knot;               // [n+2]  visible / hoverable
+    Circle *next_knot;               // [n+3]  visible / hoverable
 
     int hovered_line_id_;            // range identical to poly_knots_
     int sel_poly_knot_id_;           // range identical to poly_knots_
