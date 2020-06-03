@@ -1155,6 +1155,9 @@ void RTWindow::MoveFileBrowserToMain()
         fCatalog->enableTabMode (false);
         fCatalog->tbLeftPanel_1_visible (true);
         fCatalog->tbRightPanel_1_visible (true);
+        if (fpanel->isInspectorVisible()) {
+            fCatalog->enableInspector();
+        }
     }
 }
 

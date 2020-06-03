@@ -231,6 +231,12 @@ void FilePanel::on_inspector_ready()
 }
 
 
+bool FilePanel::isInspectorVisible() const
+{
+    return rightNotebook->get_current_page() == 1;
+}
+
+
 void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
 {
     if (page_num == 1) {
