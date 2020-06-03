@@ -1263,7 +1263,7 @@ PREFERENCES_MULTITAB;Multiple Editor Tabs Mode
 PREFERENCES_MULTITABDUALMON;Multiple Editor Tabs In Own Window Mode
 PREFERENCES_NAVIGATIONFRAME;Navigation
 PREFERENCES_OVERLAY_FILENAMES;Overlay filenames on thumbnails in the file browser
-PREFERENCES_OVERLAY_FILENAMES_FILMSTRIP;Overlay filenames on thumbnails in the editor pannel
+PREFERENCES_OVERLAY_FILENAMES_FILMSTRIP;Overlay filenames on thumbnails in the editor panel
 PREFERENCES_OVERWRITEOUTPUTFILE;Overwrite existing output files
 PREFERENCES_PANFACTORLABEL;Pan rate amplification
 PREFERENCES_PARSEDEXT;Parsed Extensions
