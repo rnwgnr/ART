@@ -26,6 +26,7 @@
 #include "cursormanager.h"
 #include "rtimage.h"
 #include "whitebalance.h"
+#include "threadutils.h"
 #include "../rtengine/profilestore.h"
 
 float fontScale = 1.f;
@@ -95,6 +96,7 @@ RTWindow::RTWindow():
     main_overlay_(nullptr),
     msg_revealer_(nullptr),
     info_label_(nullptr),
+    info_msg_num_(0),
     mainNB(nullptr),
     bpanel(nullptr),
     splash(nullptr),
@@ -1047,6 +1049,8 @@ void RTWindow::setProgressState(bool inProcessing)
 
 void RTWindow::error(const Glib::ustring& descr)
 {
+    MyMutex::MyLock lock(info_mutex_);
+    
     const auto wrap =
         [](Glib::ustring s) -> Glib::ustring
         {
@@ -1084,13 +1088,21 @@ void RTWindow::error(const Glib::ustring& descr)
         };
     
     auto m = escapeHtmlChars(wrap(descr));
+    info_msg_.push_back(m);
+    ++info_msg_num_;
+    Glib::ustring msg;
     if (reveal_conn_.connected()) {
         reveal_conn_.disconnect();
-        info_msg_ += "\n" + m;
-    } else {
-        info_msg_ = m;
+        int n = int(info_msg_.size()) - options.max_error_messages;
+        if (options.max_error_messages > 0 && n > 0) {
+            info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
+        }
+        msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), info_msg_num_ - options.max_error_messages) + "\n";
     }
-    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", info_msg_));
+    for (auto &s : info_msg_) {
+        msg += s + "\n";
+    }
+    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
     info_box_->show();
     msg_revealer_->set_reveal_child(true);
     reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
@@ -1107,8 +1119,8 @@ bool RTWindow::hide_info_msg()
             return false;
         };
     Glib::signal_timeout().connect(sigc::slot<bool>(hidebox), msg_revealer_->get_transition_duration());
-    //info_box_->hide();
-    info_msg_ = "";
+    info_msg_.clear();
+    info_msg_num_ = 0;
     return false;
 }
 

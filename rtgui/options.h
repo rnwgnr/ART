@@ -418,6 +418,7 @@ public:
     bool toolpanels_disable;
     
     int error_message_duration; // in milliseconds
+    int max_error_messages;
 
     Options();
 
