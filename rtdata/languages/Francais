@@ -118,7 +118,7 @@ FILEBROWSER_DELETEDIALOG_ALL;Êtes-vous sûr de vouloir effacer tous les <b>%1</
 FILEBROWSER_DELETEDIALOG_SELECTED;Êtes-vous sûr de voulor effacer les <b>%1</b> fichiers sélectionnés ?
 FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Êtes-vous sûr de vouloir effacer les fichiers <b>%1</b> sélectionnés <b>y-compris</b> une version en file de traitement ?
 FILEBROWSER_EMPTYTRASHHINT;Effacer définitivement les fichiers de la corbeille.
-FILEBROWSER_EXTPROGMENU;Ouvrir avec
+FILEBROWSER_EXTPROGMENU;Commandes utilisateur
 FILEBROWSER_FLATFIELD;Champ Uniforme
 FILEBROWSER_MOVETODARKFDIR;Déplacer vers le dossier d'images de Trame Noire
 FILEBROWSER_MOVETOFLATFIELDDIR;Déplacer vers le dossier de Champ Uniforme
@@ -251,7 +251,7 @@ HISTORY_MSG_1;Photo chargée
 HISTORY_MSG_2;Profil ARP chargé
 HISTORY_MSG_3;Profil ARP changé
 HISTORY_MSG_4;Navigation dans l'historique
-HISTORY_MSG_5;L, C &amp; S - Luminosité
+HISTORY_MSG_5;L, C & S - Luminosité
 HISTORY_MSG_6;Courbe Tonale - Contraste
 HISTORY_MSG_7;Exposition - Noir
 HISTORY_MSG_8;Exposition - Compensation
@@ -346,7 +346,7 @@ HISTORY_MSG_96;L*a*b* - Courbe a*
 HISTORY_MSG_97;L*a*b* - Courbe b*
 HISTORY_MSG_98;Méthode de dématriçage
 HISTORY_MSG_99;Filtrage des pixels chauds
-HISTORY_MSG_100;S&amp;V - Saturation
+HISTORY_MSG_100;S & V - Saturation
 HISTORY_MSG_101;Égaliseur couleur - Teinte
 HISTORY_MSG_102;Égaliseur couleur - Saturation
 HISTORY_MSG_103;Égaliseur couleur - Luminosité
@@ -444,8 +444,8 @@ HISTORY_MSG_197;CAM02 - Courbe de couleur
 HISTORY_MSG_198;CAM02 - Courbe de couleur
 HISTORY_MSG_199;CAM02 - Histogrammes de sortie
 HISTORY_MSG_200;CAM02 - Compression Tonale
-HISTORY_MSG_201;Réd. du bruit - Chrom. - R&amp;V
-HISTORY_MSG_202;Réd. du bruit - Chrom. - B&amp;J
+HISTORY_MSG_201;Réd. du bruit - Chrom. - R&V
+HISTORY_MSG_202;Réd. du bruit - Chrom. - B&J
 HISTORY_MSG_203;Réd. du bruit - Espace colorimétrique
 HISTORY_MSG_204;Niveaux d'amélioration LMMSE
 HISTORY_MSG_205;CAM02 - Pixels chauds/défectueux
@@ -457,29 +457,29 @@ HISTORY_MSG_211;Filtre Dégradé
 HISTORY_MSG_212;FV - Force
 HISTORY_MSG_213;Filtre Vignette
 HISTORY_MSG_214;Noir et Blanc
-HISTORY_MSG_215;N&amp;B - MC - Rouge
-HISTORY_MSG_216;N&amp;B - MC - Vert
-HISTORY_MSG_217;N&amp;B - MC - Bleu
-HISTORY_MSG_218;N&amp;B - Gamma - Rouge
-HISTORY_MSG_219;N&amp;B - Gamma - Vert
-HISTORY_MSG_220;N&amp;B - Gamma - Bleu
-HISTORY_MSG_221;N&amp;B - Filtre de couleur
-HISTORY_MSG_222;N&amp;B - Préréglages
-HISTORY_MSG_223;N&amp;B - MC - Orange
-HISTORY_MSG_224;N&amp;B - MC - Jaune
-HISTORY_MSG_225;N&amp;B - MC - Cyan
-HISTORY_MSG_226;N&amp;B - MC - Magenta
-HISTORY_MSG_227;N&amp;B - MC - Violet
-HISTORY_MSG_228;N&amp;B - Égaliseur de Luminance
-HISTORY_MSG_229;N&amp;B - Égaliseur de Luminance
-HISTORY_MSG_230;N&amp;B - Mode
-HISTORY_MSG_231;N&amp;B - Courbe 'Avant'
-HISTORY_MSG_232;N&amp;B - Type de courbe 'Avant'
-HISTORY_MSG_233;N&amp;B - Courbe 'Après'
-HISTORY_MSG_234;N&amp;B - Type de courbe 'Après'
-HISTORY_MSG_235;N&amp;B - Mixeur de Canaux - Auto.
+HISTORY_MSG_215;N&B - MC - Rouge
+HISTORY_MSG_216;N&B - MC - Vert
+HISTORY_MSG_217;N&B - MC - Bleu
+HISTORY_MSG_218;N&B - Gamma - Rouge
+HISTORY_MSG_219;N&B - Gamma - Vert
+HISTORY_MSG_220;N&B - Gamma - Bleu
+HISTORY_MSG_221;N&B - Filtre de couleur
+HISTORY_MSG_222;N&B - Préréglages
+HISTORY_MSG_223;N&B - MC - Orange
+HISTORY_MSG_224;N&B - MC - Jaune
+HISTORY_MSG_225;N&B - MC - Cyan
+HISTORY_MSG_226;N&B - MC - Magenta
+HISTORY_MSG_227;N&B - MC - Violet
+HISTORY_MSG_228;N&B - Égaliseur de Luminance
+HISTORY_MSG_229;N&B - Égaliseur de Luminance
+HISTORY_MSG_230;N&B - Mode
+HISTORY_MSG_231;N&B - Courbe 'Avant'
+HISTORY_MSG_232;N&B - Type de courbe 'Avant'
+HISTORY_MSG_233;N&B - Courbe 'Après'
+HISTORY_MSG_234;N&B - Type de courbe 'Après'
+HISTORY_MSG_235;N&B - Mixeur de Canaux - Auto.
 HISTORY_MSG_236;--inutilisé--
-HISTORY_MSG_237;N&amp;B - Mixeur de Canaux
+HISTORY_MSG_237;N&B - Mixeur de Canaux
 HISTORY_MSG_238;FG - Transition
 HISTORY_MSG_239;FG - Force
 HISTORY_MSG_240;FG - Centre
@@ -493,7 +493,7 @@ HISTORY_MSG_247;L*a*b* - Courbe LT
 HISTORY_MSG_248;L*a*b* - Courbe TT
 HISTORY_MSG_249;CpND - Seuil
 HISTORY_MSG_250;Réd. du Bruit - Amélioré
-HISTORY_MSG_251;N&amp;B - Algorithme
+HISTORY_MSG_251;N&B - Algorithme
 HISTORY_MSG_252;CpND - Cible/protection tons chair
 HISTORY_MSG_253;CpND - Réduction des artéfactes
 HISTORY_MSG_254;CpND - Teinte chair
@@ -720,8 +720,8 @@ HISTORY_MSG_490;CPD - Quantité
 HISTORY_MSG_491;Balances des Blancs
 HISTORY_MSG_492;Courbes RVB
 HISTORY_MSG_493;Ajustements L*a*b*
-HISTORY_MSG_BWMIX_COLORCAST;N&amp;B - Dominante couleur
-HISTORY_MSG_SATURATION_VIBRANCE;S&amp;V - Vibrance
+HISTORY_MSG_BWMIX_COLORCAST;N & B - Dominante couleur
+HISTORY_MSG_SATURATION_VIBRANCE;S & V - Vibrance
 HISTORY_MSG_LOCALCONTRAST_LIST;Contraste local - Régions
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;Contraste local - Masque T
 HISTORY_MSG_LOCALCONTRAST_CHROMATICITYMASK;Contraste local - Masque C
@@ -734,7 +734,7 @@ HISTORY_MSG_CHMIXER_RED_PRIMARY;Mixage des canaux - Primaire rouge
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Mixage des canaux - Primaire vert
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Mixage des canaux - Primaire bleu
 HISTORY_MSG_CLAMPOOG;Ecrêter les couleurs hors gamut
-HISTORY_MSG_COLORCORRECTION_AB;CC - Correction de teinte
+HISTORY_MSG_COLORCORRECTION_AB;CC - Chrominance
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - Masque de zone
 HISTORY_MSG_COLORCORRECTION_MODE;CC - Mode
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - Masque C
@@ -765,6 +765,7 @@ HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;RdB - Seuil des détails
 HISTORY_MSG_DENOISE_LUMINANCE_CURVE;RdB - Courbe de Luminance
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;RdB - Force C du filtre guidé
 HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RdB - Méthode de lissage
+HISTORY_MSG_DEHAZE_BLACKPOINT;Dehaze - Correction du point noir
 HISTORY_MSG_DEHAZE_DEPTH;EB - Profondeur
 HISTORY_MSG_DEHAZE_ENABLED;Élimination de la Brume
 HISTORY_MSG_DEHAZE_LUMINANCE;EB - Luminance seule
@@ -844,9 +845,11 @@ HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Netteté - RLD Echelle
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Netteté - RLD Augmentation du rayon 
 HISTORY_MSG_SH_COLORSPACE;O/HL - Espace colorimétrique
 HISTORY_MSG_SMOOTHING_ENABLED;Lissage 
+HISTORY_MSG_SMOOTHING_MODE;Lissage - mode
 HISTORY_MSG_SMOOTHING_CHANNEL;Lissage - Canal
 HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Lissage - Seuil de contraste du masque
 HISTORY_MSG_SMOOTHING_RADIUS;Lissage - Rayon
+HISTORY_MSG_SMOOTHING_SIGMA;Lissage - Rayon
 HISTORY_MSG_SMOOTHING_EPSILON;Lissage - Détail
 HISTORY_MSG_SMOOTHING_ITERATIONS;Smoothing - itérations
 HISTORY_MSG_SMOOTHING_LIST;Lissage - Régions
@@ -1485,7 +1488,7 @@ TP_COARSETRAF_TOOLTIP_HFLIP;Miroir horizontal.
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotation antihoraire\nRaccourci : <b>[</b> - Mode Onglets Éditeurs Multiples,\n<b>Alt-[</b> - Mode Onglet Éditeur nique.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotation horaire\nRaccourci : <b>]</b> - Mode Onglets Éditeurs Multiples,\n<b>Alt-]</b> - Mode Onglet Éditeur nique.
 TP_COARSETRAF_TOOLTIP_VFLIP;Miroir vertical.
-TP_COLORCORRECTION_ABVALUES;a=%1 b=%2
+TP_COLORCORRECTION_ABVALUES;x=%1 y=%2
 TP_COLORCORRECTION_MODE;Mode
 TP_COLORCORRECTION_MODE_COMBINED;Standard
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Canaux RVB séparés
@@ -1529,6 +1532,7 @@ TP_DARKFRAME_LABEL;Trame Noire
 TP_DEFRINGE_LABEL;Défranger
 TP_DEFRINGE_RADIUS;Rayon
 TP_DEFRINGE_THRESHOLD;Seuil
+TP_DEHAZE_BLACKPOINT;Correction du point noir
 TP_DEHAZE_DEPTH;Profondeur
 TP_DEHAZE_LABEL;Élimination de la Brume
 TP_DEHAZE_MODE;Mode
@@ -1969,12 +1973,16 @@ TP_SHARPENING_THRESHOLD;Seuil
 TP_SHARPENING_USM;Masque flou (USM)
 TP_SMOOTHING_LABEL;Lissage
 TP_SMOOTHING_LIST_TITLE;Pamamétres de lissage
+TP_SMOOTHING_MODE;Mode
+TP_SMOOTHING_MODE_GUIDED;Guidé
+TP_SMOOTHING_MODE_GAUSSIAN;Gaussien
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminance
 TP_SMOOTHING_CHANNEL_C;Chrominance
 TP_SMOOTHING_CHANNEL_RGB;RVB
 TP_SMOOTHING_RADIUS;Rayon
 TP_SMOOTHING_EPSILON;Détail
+TP_SMOOTHING_SIGMA;Rayon
 TP_SMOOTHING_ITERATIONS;Itérations
 TP_SOFTLIGHT_LABEL;Lumière douce
 TP_SOFTLIGHT_STRENGTH;Force

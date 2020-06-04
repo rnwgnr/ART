@@ -84,6 +84,8 @@ private:
     std::unordered_set<std::string> initial_active_keys_;
     std::unordered_set<std::string> cur_active_keys_;
 
+    rtengine::ProgressListener *pl_;
+
     void addTag(const std::string &key, const std::pair<Glib::ustring, Glib::ustring> &label, const Glib::ustring &value, bool editable, bool edited);
     void refreshTags();
     void resetIt(Gtk::TreeModel::iterator iter);
@@ -121,6 +123,7 @@ public:
 
     void notifyListener();
 
+    void setProgressListener(rtengine::ProgressListener *pl);
 };
 
 #endif

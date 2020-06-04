@@ -2801,7 +2801,9 @@ const std::map<Glib::ustring, Glib::ustring> exif_keys = {
     {"Make", "Exif.Image.Make"},
     {"Model", "Exif.Image.Model"},
     {"Lens", "Exif.Photo.LensModel"},
-    {"DateTime", "Exif.Photo.DateTimeOriginal"}
+    {"DateTime", "Exif.Photo.DateTimeOriginal"},
+    {"XResolution", "Exif.Image.XResolution"},
+    {"YResolution", "Exif.Image.YResolution"}
 };
 
 const std::map<Glib::ustring, Glib::ustring> iptc_keys = {
@@ -2842,7 +2844,9 @@ std::vector<std::string> MetaDataParams::basicExifKeys = {
     "Exif.Photo.ISOSpeedRatings",
     "Exif.Photo.ExposureBiasValue",
     "Exif.Photo.Flash",
-    "Exif.Photo.DateTimeOriginal"
+    "Exif.Photo.DateTimeOriginal",
+    "Exif.Image.XResolution",
+    "Exif.Image.YResolution"
 };
 
 

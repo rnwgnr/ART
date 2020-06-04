@@ -1166,6 +1166,7 @@ void Thumbnail::saveRating()
 
 void Thumbnail::loadRating()
 {
+    bool update_rating_xmp = false;
     rating_ = Rating();
     if (cfs.exifValid) {
         if (cfs.getRating() < 0) {
@@ -1181,6 +1182,7 @@ void Thumbnail::loadRating()
             } else {
                 rating_.rank.value = rtengine::LIM(md->getRating(), 0, 5);
             }
+            update_rating_xmp = md->getRating() != 0;
         }
     }
     if (options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS) {
@@ -1202,6 +1204,9 @@ void Thumbnail::loadRating()
                 } else {
                     rating_.rank.value = rtengine::LIM(r, 0, 5);
                 }
+            } else if (update_rating_xmp) {
+                rating_.trash.edited = true;
+                rating_.rank.edited = true;
             }
             pos = xmp.findKey(Exiv2::XmpKey("Xmp.xmp.Label"));
             if (pos != xmp.end()) {
@@ -1214,7 +1219,7 @@ void Thumbnail::loadRating()
             if (cachemgr->getProgressListener()) {
                 cachemgr->getProgressListener()->error(Glib::ustring::compose(M("METADATA_LOAD_ERROR"), getXmpSidecarPath(fname), exc.what()));
             }
-        }        
+        }    
     }
 }
 

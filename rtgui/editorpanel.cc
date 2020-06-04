@@ -471,7 +471,8 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     firstProcessingDone = false;
 
     // construct toolpanelcoordinator
-    tpc = new ToolPanelCoordinator ();
+    tpc = new ToolPanelCoordinator();
+    tpc->setProgressListener(this);
 
     // build GUI
 
@@ -1245,6 +1246,7 @@ void EditorPanel::setProgressState(bool inProcessing)
 
 void EditorPanel::error(const Glib::ustring& descr)
 {
+    parent->error(descr);
 }
 
 void EditorPanel::error(const Glib::ustring& title, const Glib::ustring& descr)
@@ -1509,34 +1511,20 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                 tbTopPanel_1->set_active (!tbTopPanel_1->get_active());    // toggle top panel
             }
 
-            if (ctrl) {
-                hidehp->set_active (!hidehp->get_active());    // toggle History (left panel)
-            }
-
-            if (alt) {
-                tbRightPanel_1->set_active (!tbRightPanel_1->get_active());    // toggle right panel
-            }
-
             return true;
             break;
 
         case GDK_KEY_l:
-            if (!shift && !alt /*&& !ctrl*/) {
-                hidehp->set_active (!hidehp->get_active()); // toggle History (left panel)
-                return true;
-            }
-
-            if (alt && !ctrl) { // toggle right panel
-                tbRightPanel_1->set_active (!tbRightPanel_1->get_active());
-                return true;
-            }
-
-            if (alt && ctrl) { // toggle left and right panels
+            if (alt) { // toggle left and right panels
                 hidehp->set_active (!hidehp->get_active());
                 tbRightPanel_1->set_active (!tbRightPanel_1->get_active());
-                return true;
+            } else if (ctrl) { // toggle right panel
+                tbRightPanel_1->set_active (!tbRightPanel_1->get_active());
+            } else {
+                hidehp->set_active (!hidehp->get_active()); // toggle History (left panel)
             }
-
+            return true;
+            
             break;
 
         case GDK_KEY_m: // Maximize preview panel: hide top AND right AND history panels

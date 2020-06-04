@@ -30,6 +30,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
     message(FATAL_ERROR "Building ART requires using GCC version 4.9 or higher!")
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "10.0")
+    message(STATUS "WARNING: gcc ${CMAKE_CXX_COMPILER_VERSION} is known to miscompile ART when using -ftree-loop-vectorize, forcing the option to be off")    
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-tree-loop-vectorize")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-tree-loop-vectorize")
+endif()
+
 # We might want to build using the old C++ ABI, even when using a new GCC version:
 if(USE_OLD_CXX_ABI)
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)

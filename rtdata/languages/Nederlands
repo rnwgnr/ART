@@ -18,6 +18,7 @@
 #17 2020-01-28 First translation of ART v1.0 by paul.matthijsse/paulmatth, based on existing Dutch translation of RawTherapee 2007-2017, see above for credits
 #18 2020-03-14 update to ART v1.2 by paul.matthijsse
 #19 2020-04-30 update to ART v1.3 by pm
+#20 2020-06-03 update to ART v1.4 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -148,6 +149,7 @@ FILEBROWSER_DELETEDIALOG_SELECTED;Geselecteerde <b>%1</b> bestanden verwijderen?
 FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Geselecteerde <b>%1</b> bestanden <b>inclusief</b> een versie die door de verwerkingsrij is gemaakt verwijderen?
 ###FILEBROWSER_EMPTYTRASH;Leeg prullenbak definitief
 FILEBROWSER_EMPTYTRASHHINT;Alle bestanden in de prullenbak permanent verwijderen
+FILEBROWSER_EXTPROGMENU;Gebruikersopdrachten
 FILEBROWSER_EXTPROGMENU;Open met
 FILEBROWSER_FLATFIELD;Vlakveld
 FILEBROWSER_MOVETODARKFDIR;Verplaats naar map met donkerframes
@@ -189,7 +191,7 @@ FILEBROWSER_POPUPTRASH;Verplaats naar prullenbak
 FILEBROWSER_POPUPUNRANK;Verwijder sterwaardering
 FILEBROWSER_POPUPUNTRASH;Haal terug uit prullenbak
 FILEBROWSER_QUERYBUTTONHINT;Wis zoekopdracht
-FILEBROWSER_QUERYHINT;Zoek op bestandsnamen. Ondersteunt gedeeltelijke bestandsnamen. Scheid zoektermen door komma's, zoals \n1001,1004,1199\n\nSluit zoektermen uit met een 'is niet' ofwel !=, zoals in\n!=1001,1004,1199\n\nSneltoetsen:\n<b>Ctrl+f</b> - focus op zoekveld,\n<b>Enter</b> - zoek,\n<b>Shift+Esc</b> - maak zoekveld leeg, \n<b>Esc</b> - verwijder focus van het zoekveld.
+FILEBROWSER_QUERYHINT;Zoek op bestandsnamen. Ondersteunt gedeeltelijke bestandsnamen. Scheid zoektermen door komma's, zoals \n1001,1004,1199\n\nSluit zoektermen uit met een 'is niet' ofwel !=, zoals in\n!=1001,1004,1199\n\nSneltoetsen:\n<b>Ctrl+f</b> - focus op zoekveld,\n<b>Enter</b> - zoek,\n<b>Esc</b> - maak zoekveld leeg, \n<b>Shift+Esc</b> - verwijder focus van het zoekveld.
 FILEBROWSER_QUERYLABEL; Zoek:
 FILEBROWSER_RANK1_TOOLTIP;Waardering 1 *\nSneltoets: Shift+1
 FILEBROWSER_RANK2_TOOLTIP;Waardering 2 *\nSneltoets: Shift+2
@@ -287,7 +289,7 @@ HISTORY_MSG_1;Foto geladen
 HISTORY_MSG_2;arp-profiel geladen
 HISTORY_MSG_3;arp-profiel aangepast
 HISTORY_MSG_4;Door geschiedenis bladeren
-HISTORY_MSG_5B, C &amp; S - ;Helderheid
+HISTORY_MSG_5;B, C & S - Helderheid
 HISTORY_MSG_6;Tooncurve - contrast
 HISTORY_MSG_7;Belichting - schaduwen
 HISTORY_MSG_8;Belichting - compensatie
@@ -382,7 +384,7 @@ HISTORY_MSG_96;L*a*b* - a*-curve
 HISTORY_MSG_97;L*a*b* - b*-curve
 HISTORY_MSG_98;Demozaïekmethode
 HISTORY_MSG_99;Hetepixelsfilter
-HISTORY_MSG_100;Verz/Lev. - verzadiging
+HISTORY_MSG_100;Verz/Lev. - Verzadiging
 HISTORY_MSG_101;Kleur-equalizer - tint
 HISTORY_MSG_102;Kleur-equalizer - verzadiging
 HISTORY_MSG_103;Kleur-equalizer - lichtheid
@@ -483,8 +485,8 @@ HISTORY_MSG_198;CAM02 - Kleurcurve
 HISTORY_MSG_199;CAM02 - Toon in histogram
 HISTORY_MSG_200;CAM02 - Tonemapping
 
-HISTORY_MSG_201;RO - Chromin. R&Gr
-HISTORY_MSG_202;RO - Chromin. B&Ge
+HISTORY_MSG_201;RO - Chromin. - R&Gr
+HISTORY_MSG_202;RO - Chromin. - B&Ge
 HISTORY_MSG_203;RO - kleurruimte
 HISTORY_MSG_204;LMMSE verbeterstappen
 HISTORY_MSG_205;CAM02 hete/dode pixels
@@ -496,12 +498,12 @@ HISTORY_MSG_211;Grijsverloopfilter
 HISTORY_MSG_212;VF - Kracht
 HISTORY_MSG_213;Vignetteringsfilter
 HISTORY_MSG_214;Zwartwit
-HISTORY_MSG_215;Z&W - KM - rood
-HISTORY_MSG_216;Z&W - KM - groen
-HISTORY_MSG_217;Z&W - KM - blauw
-HISTORY_MSG_218;Z&W - Gamma - rood
-HISTORY_MSG_219;Z&W - Gamma - groen
-HISTORY_MSG_220;Z&W - Gamma - blauw
+HISTORY_MSG_215;Z&W - KM - Rood
+HISTORY_MSG_216;Z&W - KM - Groen
+HISTORY_MSG_217;Z&W - KM - Blauw
+HISTORY_MSG_218;Z&W - Gamma - Rood
+HISTORY_MSG_219;Z&W - Gamma - Groen
+HISTORY_MSG_220;Z&W - Gamma - Blauw
 HISTORY_MSG_221;Z&W - Kleurenfilter
 HISTORY_MSG_222;Z&W - Voorinstellingen
 HISTORY_MSG_223;Z&W - KM - Oranje
@@ -509,8 +511,8 @@ HISTORY_MSG_224;Z&W - KM - Geel
 HISTORY_MSG_225;Z&W - KM - Cyaan
 HISTORY_MSG_226;Z&W - KM - Magenta
 HISTORY_MSG_227;Z&W - KM - Paars
-HISTORY_MSG_228;Z&W - Luminantiemixer
-HISTORY_MSG_229;Z&W - Luminantiemixer
+HISTORY_MSG_228;Z&W - Luminantie-equalizer
+HISTORY_MSG_229;Z&W - Luminantie-equalizer
 HISTORY_MSG_230;Z&W - Modus
 HISTORY_MSG_231;Z&W - 'Voor'-curve
 HISTORY_MSG_232;Z&W - 'Voor'-curvetype
@@ -518,7 +520,7 @@ HISTORY_MSG_233;Z&W - 'Na'-curve
 HISTORY_MSG_234;Z&W - 'Na'-curvetype
 HISTORY_MSG_235;Z&W - CM - Auto
 HISTORY_MSG_236;--ongebruikt--
-HISTORY_MSG_237;Z&W - CM
+HISTORY_MSG_237;Z&W - KM
 HISTORY_MSG_238;GF - Verzachten
 HISTORY_MSG_239;GF - Sterkte
 HISTORY_MSG_240;GF - Centrum
@@ -648,7 +650,7 @@ HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Kanaalmixer - Groene primaat
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Kanaalmixer - Blauwe primaat
 
 HISTORY_MSG_CLAMPOOG;Kleuren afkappen die buiten het gamma vallen
-HISTORY_MSG_COLORCORRECTION_AB;CC - tintcorrectie
+HISTORY_MSG_COLORCORRECTION_AB;CC - chrominantie
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - gebiedsmasker
 HISTORY_MSG_COLORCORRECTION_RGB_CHANNELS;CC - modus
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - gebied C-masker
@@ -670,6 +672,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - kwastmasker
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametrisch masker
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Kleurcorrectie
 HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RV - Verzachtmethode
+HISTORY_MSG_DEHAZE_BLACKPOINT;Nevelvermindering - Correctie zwartpunten
 HISTORY_MSG_DEHAZE_DEPTH;Nevelvermindering - diepte
 HISTORY_MSG_DEHAZE_ENABLED;Nevelvermindering
 HISTORY_MSG_DEHAZE_LUMINANCE;Nevelvermindering - alleen luminantie
@@ -751,9 +754,11 @@ HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Verscherpen - RLV hoekbereik
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Verscherpen - RLV toename hoekstraal
 HISTORY_MSG_SH_COLORSPACE;S/H - Kleurruimte
 HISTORY_MSG_SMOOTHING_ENABLED;Verzachten
+HISTORY_MSG_SMOOTHING_MODE;Verzachten - modus
 HISTORY_MSG_SMOOTHING_CHANNEL;Verzachten - kanaal
 HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Verzachten - masker contrastdrempel
 HISTORY_MSG_SMOOTHING_RADIUS;Verzachten - straal
+HISTORY_MSG_SMOOTHING_SIGMA;Verzachten - straal
 HISTORY_MSG_SMOOTHING_EPSILON;Verzachten - detail
 HISTORY_MSG_SMOOTHING_LIST;Verzachten - gebieden
 HISTORY_MSG_SMOOTHING_HUEMASK;Verzachten - H-masker
@@ -965,6 +970,9 @@ MAIN_TOOLTIP_SHOWHIDERP1;Toon/verberg rechterpaneel\nSneltoets: <b>Ctrl+l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Toon/verberg bovenste paneel\nSneltoets: <b>Shift+l</b>
 MAIN_TOOLTIP_THRESHOLD;Drempel
 MAIN_TOOLTIP_TOGGLE;Schakel tussen <b>Voor</b>/<b>Na</b>-beeld\nSneltoets: <b>Shift+b</b>
+METADATA_LOAD_ERROR;Fout tijdens laden metadata van %1: %2
+METADATA_SAVE_ERROR;Fout tijdens bewaren metadata naar %1: %2
+
 MONITOR_PROFILE_SYSTEM;Systeemstandaard
 
 # Navigator, onder histogram
@@ -1267,11 +1275,18 @@ PREFERENCES_TP_DISABLE;Maak inactieve gereedschappen grijs
 PREFERENCES_TP_VSCROLLBAR;Verberg verticale schuifbalk
 PREFERENCES_TUNNELMETADATA;Kopieer Exif/IPTC/XMP onveranderd naar uitvoerbestand
 PREFERENCES_USEBUNDLEDPROFILES;Gebruik gebundelde profielen
+PREFERENCES_WBPREVIEW_LABEL;Positie witbalans in voorbeeld-pijplijn: 
+PREFERENCES_WBPREVIEW_AFTER;Na demozaïeken (sneller)
+PREFERENCES_WBPREVIEW_BEFORE;Voor demozaïeken (accurater)
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Voor demozaïeken bij <100% zoom, anders na
+
 PREFERENCES_VIEW;Witbalans uitvoerapparaat (monitor, TV, projector, etc.)
 PREFERENCES_WORKFLOW;Lay-out
 PREFERENCES_XMP_SIDECAR_MODE;XMP sidecar-stijl
 PREFERENCES_XMP_SIDECAR_MODE_STD;Standaard (FILENAME.xmp voor FILENAME.ext)
 PREFERENCES_XMP_SIDECAR_MODE_EXT;zoals in Darktable/Digikam (FILENAME.ext.xmp voor FILENAME.ext)
+PROCPARAMS_LOAD_ERROR;Fout tijdens laden parameters van %1: %2
+PROCPARAMS_SAVE_ERROR;Fout tijdens bewaren parameters naar %1: %2
 
 # Profielen
 PROFILEPANEL_COPYPPASTE;Te kopiëren parameters
@@ -1443,7 +1458,7 @@ TP_COARSETRAF_TOOLTIP_ROTRIGHT;Roteer naar rechts.\nSneltoets:\n<b>]</b> in Mult
 TP_COARSETRAF_TOOLTIP_VFLIP;Verticaal spiegelen
 
 # module Color Correction / Kleurcorrectie
-TP_COLORCORRECTION_ABVALUES;a=%1 b=%2
+TP_COLORCORRECTION_ABVALUES;x=%1 y=%2
 TP_COLORCORRECTION_MODE;Modus
 TP_COLORCORRECTION_MODE_COMBINED;Standaard
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Aparte RGB-kanalen
@@ -1483,15 +1498,20 @@ TP_LABMASKS_DELTAE_PICK;Kies
 TP_LABMASKS_INVERTED;Omgekeerd
 TP_LABMASKS_MASK;Masker
 TP_LABMASKS_SHOW;Toon masker
+
+TP_SMOOTHING_MODE;Modus
+TP_SMOOTHING_MODE_GUIDED;Begeleid
+TP_SMOOTHING_MODE_GAUSSIAN;Gaussiaans
 TP_SMOOTHING_CHANNEL;Kanaal
 TP_SMOOTHING_LABEL;Verzachten
-TP_SMOOTHING_LIST_TITLE;Parameters
+TP_SMOOTHING_LIST_TITLE;Verzachtingsparameters
 TP_SMOOTHING_CHANNEL_L;Luminantie
 TP_SMOOTHING_CHANNEL_C;Chrominantie
 TP_SMOOTHING_CHANNEL_RGB;RGB
-TP_SMOOTHING_ITERATIONS;Herhaling
+TP_SMOOTHING_ITERATIONS;Herhalingen
 TP_SMOOTHING_RADIUS;Straal
 TP_SMOOTHING_EPSILON;Detail
+TP_SMOOTHING_SIGMA;Straal
 
 # module Local Contrast
 TP_LOCALCONTRAST_CONTRAST;Residueel contrast
@@ -1528,6 +1548,7 @@ TP_DEFRINGE_RADIUS;Straal
 TP_DEFRINGE_THRESHOLD;Drempel
 
 # module Dehaze
+TP_DEHAZE_BLACKPOINT;Correctie zwartpunten
 TP_DEHAZE_DEPTH;Diepte
 TP_DEHAZE_LABEL;Nevelvermindering
 TP_DEHAZE_MODE;Modus
@@ -1767,7 +1788,9 @@ TP_LABMASKS_INVERTED;Omgekeerd
 TP_LABMASKS_AREA_ROUNDNESS;Rondheid
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Kopieer het huidige masker naar het klembord
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Bewerk het huidige gebiedsmasker door op het voorbeeld te tekenen
-TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Voeg een gebied toe door op het voorbeeld te tekenen
+TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Voeg een rechthoekige vorm toe door op het voorbeeld te tekenen
+TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Voeg een gebied met meerdere hoeken toe door punten op het voorbeeld te plaatsen
+
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Toon huidige vorm op het voorbeeld
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Plak een masker van het klembord
 TP_LABMASKS_AREA_SHAPE;Vorm
@@ -1775,6 +1798,7 @@ TP_LABMASKS_AREA_SHAPE_MODE;Modus
 TP_LABMASKS_AREA_SHAPE_MODE_ADD;Toevoegen
 TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Aftrekken
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Doorsnede
+TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 punten
 TP_LABMASKS_AREA_SHAPES;Gebiedsvormen
 TP_LABMASKS_AREA_WIDTH;Breedte
 TP_LABMASKS_AREA_X;Centrum X

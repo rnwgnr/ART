@@ -620,6 +620,7 @@ void Options::setDefaults()
     toolpanels_disable = false;
 
     error_message_duration = 5000;
+    max_error_messages = 3;
 }
 
 Options* Options::copyFrom(Options* other)
@@ -723,6 +724,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("General", "ErrorMessageDuration")) {
                     error_message_duration = keyFile.get_integer("General", "ErrorMessageDuration");
+                }
+
+                if (keyFile.has_key("General", "MaxErrorMessages")) {
+                    max_error_messages = keyFile.get_integer("General", "MaxErrorMessages");
                 }
             }
 
@@ -1926,6 +1931,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("General", "FlatFieldsPath", rtSettings.flatFieldsPath);
         keyFile.set_boolean("General", "Verbose", rtSettings.verbose);
         keyFile.set_integer("General", "ErrorMessageDuration", error_message_duration);
+        keyFile.set_integer("General", "MaxErrorMessages", max_error_messages);
         keyFile.set_integer("External Editor", "EditorKind", editorToSendTo);
         keyFile.set_string("External Editor", "GimpDir", gimpDir);
         keyFile.set_string("External Editor", "PhotoshopDir", psDir);
