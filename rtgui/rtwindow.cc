@@ -1049,7 +1049,7 @@ void RTWindow::setProgressState(bool inProcessing)
 
 void RTWindow::error(const Glib::ustring& descr)
 {
-    MyMutex::MyLock lock(info_mutex_);
+    GThreadLock lock;
     
     const auto wrap =
         [](Glib::ustring s) -> Glib::ustring

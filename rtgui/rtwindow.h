@@ -101,7 +101,6 @@ private:
     std::vector<Glib::ustring> info_msg_;
     int info_msg_num_;
     sigc::connection reveal_conn_;
-    MyMutex info_mutex_;
     
     Gtk::Notebook* mainNB;
     BatchQueuePanel* bpanel;
