@@ -297,7 +297,7 @@ void Options::setDefaults()
     saveUsePathTemplate = true;
     defProfRaw = DEFPROFILE_RAW;
     defProfImg = DEFPROFILE_IMG;
-    dateFormat = "%y-%m-%d";
+    dateFormat = "%Y-%m-%d";
     adjusterMinDelay = 100;
     adjusterMaxDelay = 200;
     startupDir = STARTUPDIR_LAST;

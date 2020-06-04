@@ -839,6 +839,16 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
             //TODO: ass filters for HDR and PixelShift files
         }
 
+        if (cfs->timeValid) {
+            Glib::Date d(cfs->day, Glib::Date::Month(cfs->month), cfs->year);
+            if (d < dirEFS.dateFrom) {
+                dirEFS.dateFrom = d;
+            }
+            if (d > dirEFS.dateTo) {
+                dirEFS.dateTo = d;
+            }
+        }
+
         dirEFS.filetypes.insert (cfs->filetype);
         dirEFS.cameras.insert (cfs->getCamera());
         dirEFS.lenses.insert (cfs->lens);

@@ -18,13 +18,13 @@
  */
 #include "exiffiltersettings.h"
 
-ExifFilterSettings::ExifFilterSettings ()
+ExifFilterSettings::ExifFilterSettings()
 {
-
-    clear ();
+    clear();
 }
 
-void ExifFilterSettings::clear ()
+
+void ExifFilterSettings::clear()
 {
     fnumberFrom = 100;
     fnumberTo = 0;
@@ -34,10 +34,12 @@ void ExifFilterSettings::clear ()
     isoTo = 0;
     focalFrom = 1e8;
     focalTo = 0;
-    lenses.clear ();
-    cameras.clear ();
-    expcomp.clear ();
-    filetypes.clear ();
+    dateFrom = Glib::Date(31, Glib::Date::DECEMBER, 2100);
+    dateTo = Glib::Date(1, Glib::Date::JANUARY, 1900);
+    lenses.clear();
+    cameras.clear();
+    expcomp.clear();
+    filetypes.clear();
 
     filterFNumber = false;
     filterShutter = false;
@@ -47,4 +49,5 @@ void ExifFilterSettings::clear ()
     filterCamera = false;
     filterLens = false;
     filterFiletype = false;
+    filterDate = false;
 }

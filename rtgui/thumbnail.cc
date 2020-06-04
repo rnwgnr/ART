@@ -700,27 +700,30 @@ void Thumbnail::generateExifDateTimeStrings ()
         exifString = Glib::ustring::compose ("%1 %2EV", exifString, cfs.expcomp);    // append exposure compensation to exifString
     }
 
-    std::string dateFormat = options.dateFormat;
     std::ostringstream ostr;
-    bool spec = false;
+    // std::string dateFormat = options.dateFormat;
+    // bool spec = false;
 
-    for (size_t i = 0; i < dateFormat.size(); i++)
-        if (spec && dateFormat[i] == 'y') {
-            ostr << cfs.year;
-            spec = false;
-        } else if (spec && dateFormat[i] == 'm') {
-            ostr << (int)cfs.month;
-            spec = false;
-        } else if (spec && dateFormat[i] == 'd') {
-            ostr << (int)cfs.day;
-            spec = false;
-        } else if (dateFormat[i] == '%') {
-            spec = true;
-        } else {
-            ostr << (char)dateFormat[i];
-            spec = false;
-        }
+    // for (size_t i = 0; i < dateFormat.size(); i++)
+    //     if (spec && dateFormat[i] == 'y') {
+    //         ostr << cfs.year;
+    //         spec = false;
+    //     } else if (spec && dateFormat[i] == 'm') {
+    //         ostr << (int)cfs.month;
+    //         spec = false;
+    //     } else if (spec && dateFormat[i] == 'd') {
+    //         ostr << (int)cfs.day;
+    //         spec = false;
+    //     } else if (dateFormat[i] == '%') {
+    //         spec = true;
+    //     } else {
+    //         ostr << (char)dateFormat[i];
+    //         spec = false;
+    //     }
 
+    Glib::Date d(cfs.day, Glib::Date::Month(cfs.month), cfs.year);
+    ostr << std::string(d.format_string(options.dateFormat));
+    
     ostr << " " << (int)cfs.hour;
     ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.min;
     ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.sec;

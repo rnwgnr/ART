@@ -25,7 +25,6 @@ using namespace rtengine;
 
 FilterPanel::FilterPanel () : listener (nullptr)
 {
-
     enabled = Gtk::manage (new Gtk::CheckButton (M("EXIFFILTER_METADATAFILTER")));
     pack_start (*enabled, Gtk::PACK_SHRINK, 2);
     pack_start (*Gtk::manage(new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 2);
@@ -86,6 +85,20 @@ FilterPanel::FilterPanel () : listener (nullptr)
     fvb->pack_start (*fhb, Gtk::PACK_SHRINK, 0);
     pack_start (*fvb, Gtk::PACK_SHRINK, 4);
 
+    enaDate = Gtk::manage(new Gtk::CheckButton(M("EXIFFILTER_DATE") + ":"));
+    {
+        Gtk::VBox* fvb = Gtk::manage(new Gtk::VBox ());
+        Gtk::HBox* fhb = Gtk::manage(new Gtk::HBox ());
+        fvb->pack_start(*enaDate, Gtk::PACK_SHRINK, 0);
+        dateFrom = Gtk::manage(new DateEntry());
+        dateTo = Gtk::manage(new DateEntry());
+        fhb->pack_start(*dateFrom, true, true, 2);
+        fhb->pack_start(*Gtk::manage(new Gtk::Label(" - ")), false, false, 4);
+        fhb->pack_start(*dateTo, true, true, 2);
+        fvb->pack_start(*fhb, Gtk::PACK_SHRINK, 0);
+        pack_start(*fvb, Gtk::PACK_SHRINK, 4);
+    }
+    
     enaExpComp = Gtk::manage(new Gtk::CheckButton(M("EXIFFILTER_EXPOSURECOMPENSATION") + ":"));
     Gtk::VBox* evb = Gtk::manage(new Gtk::VBox ());
     evb->pack_start (*enaExpComp, Gtk::PACK_SHRINK, 0);
@@ -142,28 +155,29 @@ FilterPanel::FilterPanel () : listener (nullptr)
     vboxpe->pack_start(*peImg);
     pack_start(*vboxpe, Gtk::PACK_SHRINK, 0);
 
-    conns = 0;
-    sChange[conns++] = fnumberFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = fnumberTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = shutterFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = shutterTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = isoFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = isoTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = focalFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = focalTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = expcomp->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = filetype->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = camera->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = lens->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged));
-    sChange[conns++] = enaFNumber->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaShutter->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaFocalLen->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaISO->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaExpComp->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaCamera->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaLens->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enabled->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
-    sChange[conns++] = enaFiletype->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) );
+    sChange.push_back(fnumberFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(fnumberTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(shutterFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(shutterTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(isoFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(isoTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(focalFrom->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(focalTo->signal_changed().connect (sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(dateFrom->signal_date_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(dateTo->signal_date_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(expcomp->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(filetype->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(camera->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(lens->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterPanel::valueChanged)));
+    sChange.push_back(enaFNumber->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaShutter->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaFocalLen->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaISO->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaExpComp->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaCamera->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaLens->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enabled->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
+    sChange.push_back(enaFiletype->signal_toggled().connect( sigc::mem_fun(*this, &FilterPanel::valueChanged) ));
 
     //set_size_request (0, -1);
 
@@ -172,9 +186,7 @@ FilterPanel::FilterPanel () : listener (nullptr)
 
 void FilterPanel::setFilter (ExifFilterSettings& defefs, bool updateLists)
 {
-
-
-    for (int i = 0; i < conns; i++) {
+    for (size_t i = 0; i < sChange.size(); i++) {
         sChange[i].block (true);
     }
 
@@ -201,6 +213,11 @@ void FilterPanel::setFilter (ExifFilterSettings& defefs, bool updateLists)
     curefs.focalFrom = defefs.focalFrom;
     focalTo->set_text (Glib::ustring::format (defefs.focalTo));
     curefs.focalTo = defefs.focalTo;
+
+    dateFrom->set_date(defefs.dateFrom);
+    dateTo->set_date(defefs.dateTo);
+    curefs.dateFrom = defefs.dateFrom;
+    curefs.dateTo = defefs.dateTo;
 
 //  enaCompExp->set_active (curefs.filterExpComp);
     Glib::RefPtr<Gtk::TreeSelection> eselection = expcomp->get_selection ();
@@ -302,7 +319,7 @@ void FilterPanel::setFilter (ExifFilterSettings& defefs, bool updateLists)
 
     curefs = defefs;
 
-    for (int i = 0; i < conns; i++) {
+    for (size_t i = 0; i < sChange.size(); i++) {
         sChange[i].block (false);
     }
 }
@@ -325,6 +342,8 @@ ExifFilterSettings FilterPanel::getFilter ()
     efs.isoTo       = atoi (isoTo->get_text().c_str());
     efs.shutterFrom = FramesMetaData::shutterFromString (shutterFrom->get_text());
     efs.shutterTo   = FramesMetaData::shutterFromString (shutterTo->get_text());
+    efs.dateFrom = dateFrom->get_date();
+    efs.dateTo = dateTo->get_date();
 
     efs.filterFNumber  = enaFNumber->get_active ();
     efs.filterShutter  = enaShutter->get_active ();
@@ -334,6 +353,7 @@ ExifFilterSettings FilterPanel::getFilter ()
     efs.filterCamera   = enaCamera->get_active ();
     efs.filterLens     = enaLens->get_active ();
     efs.filterFiletype = enaFiletype->get_active ();
+    efs.filterDate = enaDate->get_active();
 
     std::vector<int> sel = camera->get_selected ();
 
@@ -362,10 +382,10 @@ ExifFilterSettings FilterPanel::getFilter ()
     return efs;
 }
 
-// Called within GTK UI thread
-void FilterPanel::valueChanged ()
-{
 
+// Called within GTK UI thread
+void FilterPanel::valueChanged()
+{
     if (listener) {
         listener->exifFilterChanged ();
     }
