@@ -353,6 +353,8 @@ public:
     // DeltaEColorProvider interface
     bool getDeltaELCH(EditUniqueID id, rtengine::Coord pos, float &L, float &C, float &H) override;
 
+    void setProgressListener(rtengine::ProgressListener *pl);
+
 private:
     IdleRegister idle_register;
 };

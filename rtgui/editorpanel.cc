@@ -471,7 +471,8 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     firstProcessingDone = false;
 
     // construct toolpanelcoordinator
-    tpc = new ToolPanelCoordinator ();
+    tpc = new ToolPanelCoordinator();
+    tpc->setProgressListener(this);
 
     // build GUI
 
@@ -1245,6 +1246,7 @@ void EditorPanel::setProgressState(bool inProcessing)
 
 void EditorPanel::error(const Glib::ustring& descr)
 {
+    parent->error(descr);
 }
 
 void EditorPanel::error(const Glib::ustring& title, const Glib::ustring& descr)

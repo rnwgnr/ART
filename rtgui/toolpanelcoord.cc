@@ -1169,3 +1169,9 @@ bool ToolPanelCoordinator::getDeltaELCH(EditUniqueID id, rtengine::Coord pos, fl
 {
     return ipc && ipc->getDeltaELCH(id, pos.x, pos.y, L, C, H);
 }
+
+
+void ToolPanelCoordinator::setProgressListener(rtengine::ProgressListener *pl)
+{
+    metadata->setProgressListener(pl);
+}
