@@ -34,7 +34,8 @@ public:
 
 private:
     void on_button(const GdkEventButton *evt);
-    bool on_buttonpress(const GdkEventButton *evt);
+    bool on_date_selected(const GdkEventButton *evt);
+    void on_enter();
 
     Gtk::Button *button_;
     Gtk::Entry *entry_;

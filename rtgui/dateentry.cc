@@ -21,20 +21,29 @@
 #include "dateentry.h"
 #include "rtimage.h"
 #include "options.h"
+#include <time.h>
 #include <iostream>
+
 
 DateEntry::DateEntry(): Gtk::HBox()
 {
     entry_ = Gtk::manage(new Gtk::Entry());
-    entry_->set_editable(false);
-    entry_->set_can_focus(false);
     entry_->property_width_chars() = 1;
     entry_->property_xalign() = 1;
+    entry_->add_events(Gdk::FOCUS_CHANGE_MASK);
     pack_start(*entry_, 0, 0);
     pack_start(*Gtk::manage(button_ = new Gtk::Button()), 0, 0);
     button_->add(*Gtk::manage(new RTImage("expander-open-small.png")));
     button_->add_events(Gdk::BUTTON_PRESS_MASK);
     button_->signal_button_press_event().connect_notify(sigc::mem_fun(this, &DateEntry::on_button));
+    entry_->signal_activate().connect(sigc::mem_fun(this, &DateEntry::on_enter));
+    const auto on_focus_out =
+        [this](GdkEventFocus *) -> bool
+        {
+            on_enter();
+            return false;
+        };
+    entry_->signal_focus_out_event().connect(sigc::slot<bool, GdkEventFocus *>(on_focus_out));
     dialog_ = nullptr;
     calendar_ = nullptr;
 }
@@ -79,7 +88,7 @@ void DateEntry::on_button(const GdkEventButton *evt)
     calendar_->select_month(int(date_.get_month())-1, date_.get_year());
     calendar_->select_day(date_.get_day());
 
-    dialog_->signal_button_press_event().connect(sigc::mem_fun(this, &DateEntry::on_buttonpress));
+    dialog_->signal_button_press_event().connect(sigc::mem_fun(this, &DateEntry::on_date_selected));
     dialog_->get_action_area()->set_size_request(-1, 0);
 
     dialog_->show_all();
@@ -87,7 +96,7 @@ void DateEntry::on_button(const GdkEventButton *evt)
 }
 
 
-bool DateEntry::on_buttonpress(const GdkEventButton *evt)
+bool DateEntry::on_date_selected(const GdkEventButton *evt)
 {
     calendar_->get_date(date_);
     set_date(date_);
@@ -103,4 +112,24 @@ void DateEntry::set_date(const Glib::Date &date)
 {
     date_ = date;
     entry_->set_text(date_.format_string(options.dateFormat));
+}
+
+
+void DateEntry::on_enter()
+{
+    struct tm t;
+    memset(&t, 0, sizeof(struct tm));
+    std::string val = entry_->get_text();
+    std::string fmt = options.dateFormat;
+    char *end = strptime(val.c_str(), fmt.c_str(), &t);
+    if (!end || *end != 0) {
+        set_date(date_);
+        return;
+    }
+    Glib::Date d(t.tm_mday, Glib::Date::Month(t.tm_mon+1), 1900 + t.tm_year);
+    if (d.valid()) {
+        set_date(d);
+    } else {
+        set_date(date_);
+    }
 }
