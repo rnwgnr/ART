@@ -481,7 +481,7 @@ RTWindow::RTWindow():
         msg_revealer_->property_margin_bottom() = 70;
     }
     main_overlay_->add_overlay(*msg_revealer_);
-    show_all_children();
+    msg_revealer_->show_all();
     msg_revealer_->set_reveal_child(false);
 
     cacheMgr->setProgressListener(this);
