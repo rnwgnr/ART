@@ -640,7 +640,7 @@ float polyFill(float **buffer, int width, int height, const std::vector<CoordD> 
 
         //  Fill the pixels between node pairs.
         for (size_t i = 0; i < nodeX.size(); i += 2) {
-            if (nodeX.at(i) >= xEnd) break;
+            if (nodeX.at(i) > xEnd) break;
             if (nodeX.at(i + 1) > xStart ) {
                 if (nodeX.at(i) < xStart ) {
                     nodeX.at(i) = xStart;
@@ -648,7 +648,7 @@ float polyFill(float **buffer, int width, int height, const std::vector<CoordD> 
                 if (nodeX.at(i + 1) > xEnd) {
                     nodeX.at(i + 1) = xEnd;
                 }
-                for (int x = nodeX.at(i); x < nodeX.at(i + 1); ++x) {
+                for (int x = nodeX.at(i); x <= nodeX.at(i + 1); ++x) {
                     buffer[y][x] = color;
                 }
             }
