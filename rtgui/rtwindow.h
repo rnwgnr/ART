@@ -132,6 +132,8 @@ private:
 #if defined(__APPLE__)
     GtkosxApplication *osxApp;
 #endif
+
+    IdleRegister idle_register;
 };
 
 #endif
