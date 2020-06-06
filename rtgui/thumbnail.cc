@@ -721,13 +721,14 @@ void Thumbnail::generateExifDateTimeStrings ()
     //         spec = false;
     //     }
 
-    Glib::Date d(cfs.day, Glib::Date::Month(cfs.month), cfs.year);
-    ostr << std::string(d.format_string(options.dateFormat));
+    if (g_date_valid_dmy(int(cfs.day), GDateMonth(cfs.month), cfs.year)) {
+        Glib::Date d(cfs.day, Glib::Date::Month(cfs.month), cfs.year);
+        ostr << std::string(d.format_string(options.dateFormat));
     
-    ostr << " " << (int)cfs.hour;
-    ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.min;
-    ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.sec;
-
+        ostr << " " << (int)cfs.hour;
+        ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.min;
+        ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.sec;
+    }
     dateTimeString = ostr.str ();
 }
 

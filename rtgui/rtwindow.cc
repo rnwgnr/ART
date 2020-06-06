@@ -481,7 +481,7 @@ RTWindow::RTWindow():
         msg_revealer_->property_margin_bottom() = 70;
     }
     main_overlay_->add_overlay(*msg_revealer_);
-    show_all_children();
+    msg_revealer_->show_all();
     msg_revealer_->set_reveal_child(false);
 
     cacheMgr->setProgressListener(this);
@@ -494,13 +494,25 @@ RTWindow::RTWindow():
             if (first_draw) {
                 first_draw = false;
 
-                if (fpanel) {
-                    fpanel->setAspect();
-                }
-
-                if (simpleEditor) {
-                    epanel->setAspect();
-                }        
+                // this is a ugly hack to force the right panel to get the
+                // exact size as specified in options.browserToolPanelWidth I
+                // don't know why it's needed, but I couldn't find another
+                // solution...
+                const auto doit =
+                    [this]() -> bool
+                    {
+                        static int count = 5;
+                        if (fpanel) {
+                            fpanel->setAspect();
+                        }
+                        
+                        if (simpleEditor) {
+                            epanel->setAspect();
+                        }
+                        return --count;
+                    };
+                doit();
+                idle_register.add(doit);
             }
             return false;
         };
@@ -516,6 +528,8 @@ bool RTWindow::on_draw(const ::Cairo::RefPtr<::Cairo::Context> &cr)
 
 RTWindow::~RTWindow()
 {
+    idle_register.destroy();
+    
     cacheMgr->setProgressListener(nullptr);
     ProfileStore::getInstance()->setProgressListener(nullptr);
     

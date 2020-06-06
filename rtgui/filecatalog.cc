@@ -839,7 +839,7 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
             //TODO: ass filters for HDR and PixelShift files
         }
 
-        if (cfs->timeValid) {
+        if (g_date_valid_dmy(int(cfs->day), GDateMonth(cfs->month), cfs->year)) {
             Glib::Date d(cfs->day, Glib::Date::Month(cfs->month), cfs->year);
             if (d < dirEFS.dateFrom) {
                 dirEFS.dateFrom = d;
