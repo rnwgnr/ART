@@ -23,6 +23,8 @@
 #include "options.h"
 #include <time.h>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 
 DateEntry::DateEntry(): Gtk::HBox()
@@ -121,15 +123,17 @@ void DateEntry::on_enter()
     memset(&t, 0, sizeof(struct tm));
     std::string val = entry_->get_text();
     std::string fmt = options.dateFormat;
-    char *end = strptime(val.c_str(), fmt.c_str(), &t);
-    if (!end || *end != 0) {
-        set_date(date_);
-        return;
-    }
-    Glib::Date d(t.tm_mday, Glib::Date::Month(t.tm_mon+1), 1900 + t.tm_year);
-    if (d.valid()) {
-        set_date(d);
-    } else {
+    std::istringstream s(val);
+    s.exceptions(std::istream::badbit | std::istream::failbit | std::istream::eofbit);
+    try {
+        s >> std::get_time(&t, fmt.c_str());
+        Glib::Date d(t.tm_mday, Glib::Date::Month(t.tm_mon+1), 1900 + t.tm_year);
+        if (d.valid()) {
+            set_date(d);
+        } else {
+            set_date(date_);
+        }
+    } catch (std::istream::failure &) {
         set_date(date_);
     }
 }
