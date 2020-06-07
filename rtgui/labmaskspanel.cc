@@ -815,7 +815,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaERange = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_RANGE"), 1, 100, 0.1, 1));
     deltaERange->setLogScale(10.f, 3.f, true);
     deltaERange->setAdjusterListener(this);
-    deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), 0, 100, 1, 0));
+    deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), -100, 100, 1, 0));
     deltaEDecay->setLogScale(10.f, 10.f, true);
     deltaEDecay->setAdjusterListener(this);
     vb = Gtk::manage(new Gtk::VBox());

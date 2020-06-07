@@ -47,7 +47,7 @@ namespace {
 DCPProfile::Matrix invert3x3(const DCPProfile::Matrix& a)
 {
     DCPProfile::Matrix res = a;
-    if (!invertMatrix(a, res)) {
+    if (!invertMatrix(a, res) && settings->verbose) {
         std::cerr << "DCP matrix cannot be inverted! Expect weird output." << std::endl;
     }
     return res;
@@ -476,7 +476,9 @@ public:
 
         if (!f) {
 #ifndef NDEBUG
-            std::cerr << "ERROR : no file opened !" << std::endl;
+            if (settings->verbose) {
+                std::cerr << "ERROR : no file opened !" << std::endl;
+            }
 #endif
             return false;
         }
@@ -1135,7 +1137,9 @@ DCPProfile::DCPProfile(const Glib::ustring& filename) :
 
     // Color Matrix (one is always there)
     if (!md.find(COLOR_MATRIX_1)) {
-        std::cerr << "DCP '" << filename << "' is missing 'ColorMatrix1'. Skipped." << std::endl;
+        if (settings->verbose) {
+            std::cerr << "DCP '" << filename << "' is missing 'ColorMatrix1'. Skipped." << std::endl;
+        }
         fclose(file);
         return;
     }

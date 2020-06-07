@@ -651,7 +651,13 @@ public:
         auto &r = refs_[idx];
         const auto W = [](int w) -> double { return w ? 100.0 / w : 1000.0; };
         auto d = cmsCIE2000DeltaE(&r, &c, W(m.weight_L), W(m.weight_C), W(m.weight_H));
-        return getval(m.range, 1.0 + LIM01(m.decay/100.0), d);
+        float decay = std::abs(m.decay);
+        bool invert = m.decay < 0.f;
+        float ret = getval(m.range, 1.0 + LIM01(decay/100.0), d);
+        if (invert) {
+            ret = 1.f - ret;
+        }
+        return ret;
     }
 
 private:
