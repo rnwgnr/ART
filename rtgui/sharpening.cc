@@ -162,54 +162,56 @@ Sharpening::~Sharpening ()
 
 void Sharpening::read(const ProcParams* pp)
 {
-    disableListener ();
+    disableListener();
 
-    setEnabled (pp->sharpening.enabled);
+    setEnabled(pp->sharpening.enabled);
 
-    eonlyConn.block (true);
-    edgesonly->set_active (pp->sharpening.edgesonly);
-    eonlyConn.block (false);
+    eonlyConn.block(true);
+    edgesonly->set_active(pp->sharpening.edgesonly);
+    eonlyConn.block(false);
     lastEdgesOnly = pp->sharpening.edgesonly;
 
-    hcConn.block (true);
-    halocontrol->set_active (pp->sharpening.halocontrol);
-    hcConn.block (false);
+    hcConn.block(true);
+    halocontrol->set_active(pp->sharpening.halocontrol);
+    hcConn.block(false);
     lastHaloControl = pp->sharpening.halocontrol;
 
-    contrast->setValue      (pp->sharpening.contrast);
-    // blur->setValue          (pp->sharpening.blurradius);
-    amount->setValue        (pp->sharpening.amount);
-    radius->setValue        (pp->sharpening.radius);
+    contrast->setValue(pp->sharpening.contrast);
+    // blur->setValue(pp->sharpening.blurradius);
+    amount->setValue(pp->sharpening.amount);
+    radius->setValue(pp->sharpening.radius);
     threshold->setValue<int>(pp->sharpening.threshold);
-    eradius->setValue       (pp->sharpening.edges_radius);
-    etolerance->setValue    (pp->sharpening.edges_tolerance);
-    hcamount->setValue      (pp->sharpening.halocontrol_amount);
+    eradius->setValue(pp->sharpening.edges_radius);
+    etolerance->setValue(pp->sharpening.edges_tolerance);
+    hcamount->setValue(pp->sharpening.halocontrol_amount);
 
-    dradius->setValue       (pp->sharpening.deconvradius);
-    damount->setValue       (pp->sharpening.deconvamount);
+    dradius->setValue(pp->sharpening.deconvradius);
+    damount->setValue(pp->sharpening.deconvamount);
     dradius->setAutoValue(pp->sharpening.deconvAutoRadius);
     deconvCornerBoost->setValue(pp->sharpening.deconvCornerBoost);
     deconvCornerLatitude->setValue(pp->sharpening.deconvCornerLatitude);
 
-    removeIfThere (edgebin, edgebox, false);
+    removeIfThere(edgebin, edgebox, false);
 
-    if (edgesonly->get_active ()) {
-        edgebin->pack_start (*edgebox);
+    if (edgesonly->get_active()) {
+        edgebin->pack_start(*edgebox);
     }
 
-    removeIfThere (hcbin, hcbox, false);
+    removeIfThere(hcbin, hcbox, false);
 
-    if (halocontrol->get_active ()) {
-        hcbin->pack_start (*hcbox);
+    if (halocontrol->get_active()) {
+        hcbin->pack_start(*hcbox);
     }
 
     if (pp->sharpening.method == "usm") {
-        method->set_active (0);
+        method->set_active(0);
     } else if (pp->sharpening.method == "rld") {
-        method->set_active (1);
+        method->set_active(1);
     }
 
-    enableListener ();
+    enabledChanged();
+
+    enableListener();
 }
 
 void Sharpening::write(ProcParams* pp)

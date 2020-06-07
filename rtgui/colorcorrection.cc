@@ -343,6 +343,7 @@ void ColorCorrection::read(const ProcParams *pp)
     labMasks->setMasks(m, pp->colorcorrection.showMask);
 
     modeChanged();
+    enabledChanged();
 
     enableListener();
 }
