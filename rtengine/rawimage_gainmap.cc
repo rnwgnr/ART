@@ -182,8 +182,8 @@ void RawImage::apply_gain_map()
         return;
     }
     for (auto &m : maps) {
-        if (m.bottom != raw_height || m.right != raw_width || m.plane != 0 ||
-            m.planes != 1 || m.map_planes != 1 ||
+        if (m.bottom + 1 < raw_height || m.right + 1 < raw_width ||
+            m.plane != 0 || m.planes != 1 || m.map_planes != 1 ||
             m.row_pitch != 2 || m.col_pitch != 2 ||
             m.map_origin_v != 0 || m.map_origin_h != 0) {
             return; // not something we can handle yet
