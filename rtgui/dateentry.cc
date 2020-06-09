@@ -33,7 +33,7 @@ DateEntry::DateEntry(): Gtk::HBox()
     entry_->property_width_chars() = 1;
     entry_->property_xalign() = 1;
     entry_->add_events(Gdk::FOCUS_CHANGE_MASK);
-    pack_start(*entry_, 0, 0);
+    pack_start(*entry_, Gtk::PACK_EXPAND_WIDGET, 0);
     pack_start(*Gtk::manage(button_ = new Gtk::Button()), 0, 0);
     button_->add(*Gtk::manage(new RTImage("expander-open-small.png")));
     button_->add_events(Gdk::BUTTON_PRESS_MASK);
