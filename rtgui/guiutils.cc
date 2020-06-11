@@ -594,6 +594,7 @@ void MyExpander::init()
     }
 }
 
+
 void MyExpander::cleanup()
 {
     inconsistentImage.reset();
@@ -603,10 +604,12 @@ void MyExpander::cleanup()
     closedImage.reset();
 }
 
+
 MyExpander::MyExpander(bool useEnabled, Gtk::Widget* titleWidget) :
     enabled(false), inconsistent(false), flushEvent(false), expBox(nullptr),
     child(nullptr), headerWidget(nullptr), statusImage(nullptr),
-    label(nullptr), useEnabled(useEnabled)
+    label(nullptr), useEnabled(useEnabled),
+    overlay_(nullptr), overlay_label_(nullptr)    
 {
     set_spacing(0);
     set_name("MyExpander");
@@ -655,10 +658,12 @@ MyExpander::MyExpander(bool useEnabled, Gtk::Widget* titleWidget) :
     titleEvBox->signal_leave_notify_event().connect( sigc::mem_fun(this, & MyExpander::on_enter_leave_title), false);
 }
 
+
 MyExpander::MyExpander(bool useEnabled, Glib::ustring titleLabel) :
     enabled(false), inconsistent(false), flushEvent(false), expBox(nullptr),
     child(nullptr), headerWidget(nullptr),
-    label(nullptr), useEnabled(useEnabled)
+    label(nullptr), useEnabled(useEnabled),
+    overlay_(nullptr), overlay_label_(nullptr)
 {
     set_spacing(0);
     set_name("MyExpander");
@@ -714,6 +719,7 @@ MyExpander::MyExpander(bool useEnabled, Glib::ustring titleLabel) :
     titleEvBox->signal_leave_notify_event().connect( sigc::mem_fun(this, & MyExpander::on_enter_leave_title), false);
 }
 
+
 bool MyExpander::on_enter_leave_title (GdkEventCrossing* event)
 {
     if (is_sensitive()) {
@@ -728,6 +734,7 @@ bool MyExpander::on_enter_leave_title (GdkEventCrossing* event)
 
     return true;
 }
+
 
 bool MyExpander::on_enter_leave_enable (GdkEventCrossing* event)
 {
@@ -847,8 +854,8 @@ void MyExpander::setEnabled(bool isEnabled)
     }
 
     if (useEnabled) {
-        if (options.toolpanels_disable) {
-            expBox->set_sensitive(enabled);
+        if (overlay_label_) {
+            overlay_label_->set_visible(!enabled);
         }
     }        
 }
@@ -899,14 +906,51 @@ bool MyExpander::get_expanded()
     return expBox ? expBox->get_visible() : false;
 }
 
-void MyExpander::add  (Gtk::Container& widget, bool setChild)
+
+namespace {
+
+class DisablerBox: public Gtk::EventBox {
+public:
+    DisablerBox(): Gtk::EventBox()
+    {
+        set_name("ExpanderBox");
+    }
+
+    bool on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
+    {
+        Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
+        cr->set_antialias(Cairo::ANTIALIAS_NONE);
+        Gdk::RGBA c = style->get_color(Gtk::STATE_FLAG_INSENSITIVE);
+        cr->set_source_rgba(c.get_red() / 2, c.get_green() / 2, c.get_blue() / 2, 0.5);
+        cr->paint();
+
+        return true;
+    }
+};
+    
+} // namespace
+
+void MyExpander::add(Gtk::Container& widget, bool setChild)
 {
     if(setChild) {
         child = &widget;
     }
+    overlay_ = Gtk::manage(new Gtk::Overlay());
     expBox = Gtk::manage (new ExpanderBox (child));
-    expBox->add (widget);
-    pack_start(*expBox, Gtk::PACK_SHRINK, 0);
+    expBox->add(widget);
+
+    if (useEnabled && options.toolpanels_disable) {
+        overlay_->add(*expBox);
+        overlay_label_ = Gtk::manage(new DisablerBox());
+        overlay_label_->property_halign() = Gtk::ALIGN_FILL;
+        overlay_label_->property_valign() = Gtk::ALIGN_FILL;
+        overlay_label_->property_margin() = 2;
+        overlay_->add_overlay(*overlay_label_);
+        pack_start(*overlay_, Gtk::PACK_SHRINK, 0);
+    } else {
+        pack_start(*expBox, Gtk::PACK_SHRINK, 0);
+    }
+    
     widget.show();
     expBox->hideBox();
 }
@@ -959,8 +1003,8 @@ bool MyExpander::on_enabled_change(GdkEventButton* event)
             statusImage->set(enabledImage->get_surface());
         }
 
-        if (options.toolpanels_disable) {
-            expBox->set_sensitive(enabled);
+        if (overlay_label_) {
+            overlay_label_->set_visible(!enabled);
         }
         
         message.emit();
