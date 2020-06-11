@@ -217,6 +217,9 @@ protected:
     Gtk::Label* label;          /// Text to display in the header, next to the arrow image ; can be NULL if the "widget" version of the ctor has been used
     bool useEnabled;            /// Set whether to handle an enabled/disabled feature and display the appropriate images
 
+    Gtk::Overlay *overlay_;
+    Gtk::Widget *overlay_label_;
+
 public:
 
     /** @brief Create a custom expander with a simple header made of a label.
