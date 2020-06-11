@@ -479,7 +479,6 @@ Glib::ustring filenameFromUri(int ppVersion, const Glib::ustring &uri)
         gchar *h = nullptr;
         gchar *fn = g_filename_from_uri(uri.c_str(), &h, nullptr);
         if (!fn) {
-            std::cout << "BAD URI: " << uri << std::endl;
             return uri;
         }
         std::string f(fn);
@@ -3412,7 +3411,6 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Color management
         if (RELEVANT_(icm)) {
             if (icm.inputProfile.substr(0, 5) == "file:") {
-                std::cout << "SAVE INPUT PROFILE: " << icm.inputProfile << std::endl;
                 saveToKeyfile("Color Management", "InputProfile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, icm.inputProfile.substr(5))), keyFile);
             } else {
                 saveToKeyfile("Color Management", "InputProfile", icm.inputProfile, keyFile);
@@ -4455,12 +4453,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
         if (keyFile.has_group("Color Management") && RELEVANT_(icm)) {
             if (keyFile.has_key("Color Management", "InputProfile")) {
                 icm.inputProfile = keyFile.get_string("Color Management", "InputProfile");
-                std::cout << "LOAD INPUT PROFILE: " << icm.inputProfile << std::endl;
                 if (icm.inputProfile.substr(0, 5) == "file:") {
-                    std::cout << "HERE: " << ppVersion << std::endl;
                     if (ppVersion >= 1017) {
                         auto f = filenameFromUri(ppVersion, icm.inputProfile);
-                        std::cout << "  filenameFromUri: " << f << std::endl;
                         icm.inputProfile = "file:" + expandRelativePath(fname, "", filenameFromUri(ppVersion, icm.inputProfile));
                     } else {
                         icm.inputProfile = expandRelativePath(fname, "file:", icm.inputProfile);
