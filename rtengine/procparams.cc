@@ -19,6 +19,7 @@
 
 #include <map>
 #include <iterator>
+#include <iostream>
 
 #include <locale.h>
 
@@ -447,6 +448,52 @@ bool saveToKeyfile(
     return false;
 }
 
+
+Glib::ustring filenameToUri(const Glib::ustring &fname)
+{
+    if (fname.empty()) {
+        return fname;
+    }
+    
+    try {
+        auto fn = Glib::filename_from_utf8(fname);
+        if (Glib::path_is_absolute(fname)) {
+            return Glib::filename_to_uri(fn);
+        } else {
+            return Glib::filename_to_uri(Glib::ustring(G_DIR_SEPARATOR_S) + fn, "R");
+        }
+    } catch (Glib::ConvertError &) {
+        return fname;
+    }
+}
+
+Glib::ustring filenameFromUri(int ppVersion, const Glib::ustring &uri)
+{
+    if (ppVersion < 1017 || uri.empty()) {
+        return uri;
+    }
+    
+    try {
+        // Glib::filename_from_uri seems to have troubles on windows (leads to
+        // crashes), so we use the C function directly
+        gchar *h = nullptr;
+        gchar *fn = g_filename_from_uri(uri.c_str(), &h, nullptr);
+        if (!fn) {
+            std::cout << "BAD URI: " << uri << std::endl;
+            return uri;
+        }
+        std::string f(fn);
+        g_free(fn);
+        if (h) {
+            f = f.substr(1);
+            g_free(h);
+        }
+        Glib::ustring ret = Glib::filename_to_utf8(f);
+        return ret;
+    } catch (Glib::ConvertError &e) {
+        return uri;
+    }
+}
 
 } // namespace
 
@@ -3268,7 +3315,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Lens profile
         if (RELEVANT_(lensProf)) {
             saveToKeyfile("LensProfile", "LcMode", lensProf.getMethodString(lensProf.lcMode), keyFile);
-            saveToKeyfile("LensProfile", "LCPFile", relativePathIfInside(fname, fnameAbsolute, lensProf.lcpFile), keyFile);
+            saveToKeyfile("LensProfile", "LCPFile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, lensProf.lcpFile)), keyFile);
             saveToKeyfile("LensProfile", "UseDistortion", lensProf.useDist, keyFile);
             saveToKeyfile("LensProfile", "UseVignette", lensProf.useVign, keyFile);
             saveToKeyfile("LensProfile", "UseCA", lensProf.useCA, keyFile);
@@ -3364,7 +3411,12 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 
 // Color management
         if (RELEVANT_(icm)) {
-            saveToKeyfile("Color Management", "InputProfile", relativePathIfInside(fname, fnameAbsolute, icm.inputProfile), keyFile);
+            if (icm.inputProfile.substr(0, 5) == "file:") {
+                std::cout << "SAVE INPUT PROFILE: " << icm.inputProfile << std::endl;
+                saveToKeyfile("Color Management", "InputProfile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, icm.inputProfile.substr(5))), keyFile);
+            } else {
+                saveToKeyfile("Color Management", "InputProfile", icm.inputProfile, keyFile);
+            }
             saveToKeyfile("Color Management", "ToneCurve", icm.toneCurve, keyFile);
             saveToKeyfile("Color Management", "ApplyLookTable", icm.applyLookTable, keyFile);
             saveToKeyfile("Color Management", "ApplyBaselineExposureOffset", icm.applyBaselineExposureOffset, keyFile);
@@ -3398,7 +3450,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Film simulation
         if (RELEVANT_(filmSimulation)) {
             saveToKeyfile("Film Simulation", "Enabled", filmSimulation.enabled, keyFile);
-            saveToKeyfile("Film Simulation", "ClutFilename", filmSimulation.clutFilename, keyFile);
+            auto filename = filenameToUri(filmSimulation.clutFilename);
+            saveToKeyfile("Film Simulation", "ClutFilename", filename, keyFile);
             saveToKeyfile("Film Simulation", "Strength", filmSimulation.strength, keyFile);
         }
 
@@ -3485,12 +3538,12 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Raw
         if (RELEVANT_(darkframe)) {
             saveToKeyfile("RAW", "DarkFrameEnabled", raw.enable_darkframe, keyFile);
-            saveToKeyfile("RAW", "DarkFrame", relativePathIfInside(fname, fnameAbsolute, raw.dark_frame), keyFile);
+            saveToKeyfile("RAW", "DarkFrame", filenameToUri(relativePathIfInside(fname, fnameAbsolute, raw.dark_frame)), keyFile);
             saveToKeyfile("RAW", "DarkFrameAuto", raw.df_autoselect, keyFile);
         }
         if (RELEVANT_(flatfield)) {
             saveToKeyfile("RAW", "FlatFieldEnabled", raw.enable_flatfield, keyFile);
-            saveToKeyfile("RAW", "FlatFieldFile", relativePathIfInside(fname, fnameAbsolute, raw.ff_file), keyFile);
+            saveToKeyfile("RAW", "FlatFieldFile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, raw.ff_file)), keyFile);
             saveToKeyfile("RAW", "FlatFieldAutoSelect", raw.ff_AutoSelect, keyFile);
             saveToKeyfile("RAW", "FlatFieldBlurRadius", raw.ff_BlurRadius, keyFile);
             saveToKeyfile("RAW", "FlatFieldBlurType", raw.ff_BlurType, keyFile);
@@ -4247,7 +4300,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
 
             if (keyFile.has_key("LensProfile", "LCPFile")) {
-                lensProf.lcpFile = expandRelativePath(fname, "", keyFile.get_string("LensProfile", "LCPFile"));
+                lensProf.lcpFile = expandRelativePath(fname, "", filenameFromUri(ppVersion, keyFile.get_string("LensProfile", "LCPFile")));
 
                 if (ppVersion < 327 && !lensProf.lcpFile.empty()) {
                     lensProf.lcMode = LensProfParams::LcMode::LCP;
@@ -4401,7 +4454,18 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
         if (keyFile.has_group("Color Management") && RELEVANT_(icm)) {
             if (keyFile.has_key("Color Management", "InputProfile")) {
-                icm.inputProfile = expandRelativePath(fname, "file:", keyFile.get_string("Color Management", "InputProfile"));
+                icm.inputProfile = keyFile.get_string("Color Management", "InputProfile");
+                std::cout << "LOAD INPUT PROFILE: " << icm.inputProfile << std::endl;
+                if (icm.inputProfile.substr(0, 5) == "file:") {
+                    std::cout << "HERE: " << ppVersion << std::endl;
+                    if (ppVersion >= 1017) {
+                        auto f = filenameFromUri(ppVersion, icm.inputProfile);
+                        std::cout << "  filenameFromUri: " << f << std::endl;
+                        icm.inputProfile = "file:" + expandRelativePath(fname, "", filenameFromUri(ppVersion, icm.inputProfile));
+                    } else {
+                        icm.inputProfile = expandRelativePath(fname, "file:", icm.inputProfile);
+                    }
+                }
             }
 
             assignFromKeyfile(keyFile, "Color Management", "ToneCurve", icm.toneCurve);
@@ -4484,6 +4548,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
         if (keyFile.has_group("Film Simulation") && RELEVANT_(filmSimulation)) {
             assignFromKeyfile(keyFile, "Film Simulation", "Enabled", filmSimulation.enabled);
             assignFromKeyfile(keyFile, "Film Simulation", "ClutFilename", filmSimulation.clutFilename);
+            filmSimulation.clutFilename = filenameFromUri(ppVersion, filmSimulation.clutFilename);
 
             if (keyFile.has_key("Film Simulation", "Strength")) {
                 if (ppVersion < 321) {
@@ -4690,7 +4755,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (RELEVANT_(darkframe)) {
                 assignFromKeyfile(keyFile, "RAW", "DarkFrameEnabled", raw.enable_darkframe);
                 if (keyFile.has_key("RAW", "DarkFrame")) {
-                    raw.dark_frame = expandRelativePath(fname, "", keyFile.get_string("RAW", "DarkFrame"));
+                    raw.dark_frame = filenameFromUri(ppVersion, expandRelativePath(fname, "", keyFile.get_string("RAW", "DarkFrame")));
                 }
 
                 assignFromKeyfile(keyFile, "RAW", "DarkFrameAuto", raw.df_autoselect);
@@ -4699,7 +4764,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (RELEVANT_(flatfield)) {
                 assignFromKeyfile(keyFile, "RAW", "FlatFieldEnabled", raw.enable_flatfield);
                 if (keyFile.has_key("RAW", "FlatFieldFile")) {
-                    raw.ff_file = expandRelativePath(fname, "", keyFile.get_string("RAW", "FlatFieldFile"));
+                    raw.ff_file = filenameFromUri(ppVersion, expandRelativePath(fname, "", keyFile.get_string("RAW", "FlatFieldFile")));
                 }
 
                 assignFromKeyfile(keyFile, "RAW", "FlatFieldAutoSelect", raw.ff_AutoSelect);

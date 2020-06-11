@@ -153,6 +153,9 @@ void DarkFrame::write( rtengine::procparams::ProcParams* pp)
 {
     pp->raw.enable_darkframe = getEnabled();
     pp->raw.dark_frame = darkFrameFile->get_filename();
+    if (!Glib::file_test(pp->raw.dark_frame, Glib::FILE_TEST_EXISTS)) {
+        pp->raw.dark_frame = "";
+    }
     pp->raw.df_autoselect = dfAuto->get_active();
 }
 

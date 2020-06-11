@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1016
+#define PPVERSION 1017
 
 /*
   Log of version changes
+  1017  2020-06-11
+        store filenames as URIs
   1016  2020-05-31
         renamed GuidedSmoothing to Smoothing, added gaussian mode
   1015  2020-05-13
