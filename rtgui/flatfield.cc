@@ -211,6 +211,9 @@ void FlatField::write( rtengine::procparams::ProcParams* pp)
 {
     pp->raw.enable_flatfield = getEnabled();
     pp->raw.ff_file = flatFieldFile->get_filename();
+    if (!Glib::file_test(pp->raw.ff_file, Glib::FILE_TEST_EXISTS)) {
+        pp->raw.ff_file = "";
+    }    
     pp->raw.ff_AutoSelect = flatFieldAutoSelect->get_active();
     pp->raw.ff_BlurRadius = flatFieldBlurRadius->getIntValue();
     pp->raw.ff_clipControl = flatFieldClipControl->getIntValue();
