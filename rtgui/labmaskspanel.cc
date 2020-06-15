@@ -324,6 +324,7 @@ public:
         feather_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
         tb->pack_start(*feather_);
         feather_->setAdjusterListener(this);
+        feather_->setLogScale(10.0, 0.0);
 
         transparency_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_TRANSPARENCY"), 0, 100, 1, 0));
         tb->pack_start(*transparency_);
@@ -332,6 +333,7 @@ public:
         smoothness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_SMOOTHNESS"), 0, 100, 1, 0));
         tb->pack_start(*smoothness_);
         smoothness_->setAdjusterListener(this);
+        smoothness_->setLogScale(10.0, 0.0);
 
         CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_AREA_CONTRAST")));
         cg->setCurveListener(this);
@@ -899,11 +901,11 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     
     areaMaskFeather = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
     add_adjuster(areaMaskFeather, area);
-    areaMaskFeather->setLogScale(100.0, 0.0);
+    areaMaskFeather->setLogScale(10.0, 0.0);
 
     areaMaskBlur = Gtk::manage(new Adjuster(M("TP_LABMASKS_BLUR"), 0, 500, 0.1, 0));
     add_adjuster(areaMaskBlur, area);
-    areaMaskFeather->setLogScale(10.0, 0.0);
+    areaMaskBlur->setLogScale(10.0, 0.0);
     
     CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_AREA_CONTRAST")));
     cg->setCurveListener(this);
