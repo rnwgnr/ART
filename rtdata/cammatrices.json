@@ -1635,6 +1635,10 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [12554, -5832, -1334, -4264, 13086, 1243, -388, 1225, 5803]
     },
     {
+        "make_model": "HUAWEI ELS-NX9",
+        "dcraw_matrix" : [32404, -15371, -4985,  -9692,  18760,  415, 556, -2040,  10572]
+    },
+    {
         "make_model" : "HUAWEI HONOR 20 PRO REAR MAIN CAMERA",
         "dcraw_matrix" : [14190, -6578, -1365, -2919, 11406, 1707, 172, 1286, 5151]
     },
