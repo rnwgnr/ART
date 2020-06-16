@@ -185,33 +185,6 @@ Glib::ustring expandRelativePath(const Glib::ustring &procparams_fname, const Gl
     return absPath;
 }
 
-Glib::ustring relativePathIfInside(const Glib::ustring &procparams_fname, bool fnameAbsolute, Glib::ustring embedded_fname)
-{
-    if (fnameAbsolute || embedded_fname == "" || !Glib::path_is_absolute(procparams_fname)) {
-        return embedded_fname;
-    }
-
-    Glib::ustring prefix = "";
-
-    if (embedded_fname.length() > 5 && embedded_fname.substr(0, 5) == "file:") {
-        embedded_fname = embedded_fname.substr(5);
-        prefix = "file:";
-    }
-
-    if (!Glib::path_is_absolute(embedded_fname)) {
-        return prefix + embedded_fname;
-    }
-
-    Glib::ustring dir1 = Glib::path_get_dirname(procparams_fname) + G_DIR_SEPARATOR_S;
-    Glib::ustring dir2 = Glib::path_get_dirname(embedded_fname) + G_DIR_SEPARATOR_S;
-
-    if (dir2.substr(0, dir1.length()) != dir1) {
-        // it's in a different directory, ie not inside
-        return prefix + embedded_fname;
-    }
-
-    return prefix + embedded_fname.substr(dir1.length());
-}
 
 void getFromKeyfile(
     const KeyFile& keyfile,
@@ -449,16 +422,36 @@ bool saveToKeyfile(
 }
 
 
-Glib::ustring filenameToUri(const Glib::ustring &fname)
+Glib::ustring filenameToUri(const Glib::ustring &fname, const Glib::ustring &basedir)
 {
     if (fname.empty()) {
         return fname;
     }
+
+    const auto stripif =
+        [](std::string &p, const Glib::ustring &d) -> bool
+        {
+            std::string dd = Glib::filename_from_utf8(d + G_DIR_SEPARATOR_S);
+            if (p.substr(0, dd.length()) == dd) {
+                p = std::string(G_DIR_SEPARATOR_S) + p.substr(dd.length());
+                return true;
+            }
+            return false;
+        };
     
     try {
         auto fn = Glib::filename_from_utf8(fname);
         if (Glib::path_is_absolute(fname)) {
-            return Glib::filename_to_uri(fn);
+            if (stripif(fn, argv0)) {
+                return Glib::filename_to_uri(fn, "S");
+            } else if (stripif(fn, options.rtdir)) {
+                return Glib::filename_to_uri(fn, "U");
+            } else if (Glib::path_get_dirname(fname) == basedir) {
+                fn = Glib::filename_to_utf8(Glib::path_get_basename(fname));
+                return Glib::filename_to_uri(fn, "B");
+            } else {
+                return Glib::filename_to_uri(fn);
+            }
         } else {
             return Glib::filename_to_uri(Glib::ustring(G_DIR_SEPARATOR_S) + fn, "R");
         }
@@ -467,9 +460,10 @@ Glib::ustring filenameToUri(const Glib::ustring &fname)
     }
 }
 
-Glib::ustring filenameFromUri(int ppVersion, const Glib::ustring &uri)
+
+Glib::ustring filenameFromUri(const Glib::ustring &uri, const Glib::ustring &basedir)
 {
-    if (ppVersion < 1017 || uri.empty()) {
+    if (uri.empty()) {
         return uri;
     }
     
@@ -484,8 +478,18 @@ Glib::ustring filenameFromUri(int ppVersion, const Glib::ustring &uri)
         std::string f(fn);
         g_free(fn);
         if (h) {
-            f = f.substr(1);
+            std::string hn(h);
             g_free(h);
+            f = f.substr(1);
+            if (hn == "U") {
+                f = Glib::build_filename(Glib::filename_from_utf8(options.rtdir), f);
+            } else if (hn == "S") {
+                f = Glib::build_filename(Glib::filename_from_utf8(argv0), f);
+            } else if (hn == "B") {
+                f = Glib::build_filename(Glib::filename_from_utf8(basedir), f);
+            } else if (hn != "R") {
+                return uri;
+            }
         }
         Glib::ustring ret = Glib::filename_to_utf8(f);
         return ret;
@@ -2983,7 +2987,7 @@ void ProcParams::setDefaults()
 }
 
 
-int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Glib::ustring& fname2, bool fnameAbsolute, const ParamsEdited *pedited)
+int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Glib::ustring& fname2, const ParamsEdited *pedited)
 {
     if (fname.empty() && fname2.empty()) {
         return 0;
@@ -2993,7 +2997,7 @@ int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Gli
 
     try {
         KeyFile keyFile;
-        int ret = save(pl, keyFile, pedited, fname, fnameAbsolute);
+        int ret = save(pl, keyFile, pedited, fname);
         if (ret != 0) {
             return ret;
         }
@@ -3025,10 +3029,12 @@ int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Gli
 
 int ProcParams::save(ProgressListener *pl, bool save_general,
                      KeyFile &keyFile, const ParamsEdited *pedited,
-                     const Glib::ustring &fname, bool fnameAbsolute) const
+                     const Glib::ustring &fname) const
 {
 #define RELEVANT_(n) (!pedited || pedited->n)
     try {
+        Glib::ustring basedir = Glib::path_get_dirname(fname);
+        
 // Version
         if (save_general) {
             keyFile.set_string("Version", "AppVersion", RTVERSION);
@@ -3314,7 +3320,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Lens profile
         if (RELEVANT_(lensProf)) {
             saveToKeyfile("LensProfile", "LcMode", lensProf.getMethodString(lensProf.lcMode), keyFile);
-            saveToKeyfile("LensProfile", "LCPFile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, lensProf.lcpFile)), keyFile);
+            saveToKeyfile("LensProfile", "LCPFile", filenameToUri(lensProf.lcpFile, basedir), keyFile);
             saveToKeyfile("LensProfile", "UseDistortion", lensProf.useDist, keyFile);
             saveToKeyfile("LensProfile", "UseVignette", lensProf.useVign, keyFile);
             saveToKeyfile("LensProfile", "UseCA", lensProf.useCA, keyFile);
@@ -3411,7 +3417,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Color management
         if (RELEVANT_(icm)) {
             if (icm.inputProfile.substr(0, 5) == "file:") {
-                saveToKeyfile("Color Management", "InputProfile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, icm.inputProfile.substr(5))), keyFile);
+                saveToKeyfile("Color Management", "InputProfile", filenameToUri(icm.inputProfile.substr(5), basedir), keyFile);
             } else {
                 saveToKeyfile("Color Management", "InputProfile", icm.inputProfile, keyFile);
             }
@@ -3448,7 +3454,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Film simulation
         if (RELEVANT_(filmSimulation)) {
             saveToKeyfile("Film Simulation", "Enabled", filmSimulation.enabled, keyFile);
-            auto filename = filenameToUri(filmSimulation.clutFilename);
+            auto filename = filenameToUri(filmSimulation.clutFilename, basedir);
             saveToKeyfile("Film Simulation", "ClutFilename", filename, keyFile);
             saveToKeyfile("Film Simulation", "Strength", filmSimulation.strength, keyFile);
         }
@@ -3536,12 +3542,12 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // Raw
         if (RELEVANT_(darkframe)) {
             saveToKeyfile("RAW", "DarkFrameEnabled", raw.enable_darkframe, keyFile);
-            saveToKeyfile("RAW", "DarkFrame", filenameToUri(relativePathIfInside(fname, fnameAbsolute, raw.dark_frame)), keyFile);
+            saveToKeyfile("RAW", "DarkFrame", filenameToUri(raw.dark_frame, basedir), keyFile);
             saveToKeyfile("RAW", "DarkFrameAuto", raw.df_autoselect, keyFile);
         }
         if (RELEVANT_(flatfield)) {
             saveToKeyfile("RAW", "FlatFieldEnabled", raw.enable_flatfield, keyFile);
-            saveToKeyfile("RAW", "FlatFieldFile", filenameToUri(relativePathIfInside(fname, fnameAbsolute, raw.ff_file)), keyFile);
+            saveToKeyfile("RAW", "FlatFieldFile", filenameToUri(raw.ff_file, basedir), keyFile);
             saveToKeyfile("RAW", "FlatFieldAutoSelect", raw.ff_AutoSelect, keyFile);
             saveToKeyfile("RAW", "FlatFieldBlurRadius", raw.ff_BlurRadius, keyFile);
             saveToKeyfile("RAW", "FlatFieldBlurType", raw.ff_BlurType, keyFile);
@@ -3707,9 +3713,9 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 
 int ProcParams::save(ProgressListener *pl,
                      KeyFile &keyFile, const ParamsEdited *pedited,
-                     const Glib::ustring &fname, bool fnameAbsolute) const
+                     const Glib::ustring &fname) const
 {
-    return save(pl, true, keyFile, pedited, fname, fnameAbsolute);
+    return save(pl, true, keyFile, pedited, fname);
 }
 
 
@@ -3764,6 +3770,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 #define RELEVANT_(n) (!pedited || pedited->n)
     
     try {
+        Glib::ustring basedir = Glib::path_get_dirname(fname);
+        
         if (load_general) {
             ppVersion = PPVERSION;
             appVersion = RTVERSION;
@@ -4298,7 +4306,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
 
             if (keyFile.has_key("LensProfile", "LCPFile")) {
-                lensProf.lcpFile = expandRelativePath(fname, "", filenameFromUri(ppVersion, keyFile.get_string("LensProfile", "LCPFile")));
+                if (ppVersion >= 1017) {
+                    lensProf.lcpFile = filenameFromUri(keyFile.get_string("LensProfile", "LCPFile"), basedir);
+                } else {
+                    lensProf.lcpFile = expandRelativePath(fname, "", keyFile.get_string("LensProfile", "LCPFile"));
+                }
 
                 if (ppVersion < 327 && !lensProf.lcpFile.empty()) {
                     lensProf.lcMode = LensProfParams::LcMode::LCP;
@@ -4455,8 +4467,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 icm.inputProfile = keyFile.get_string("Color Management", "InputProfile");
                 if (icm.inputProfile.substr(0, 5) == "file:") {
                     if (ppVersion >= 1017) {
-                        auto f = filenameFromUri(ppVersion, icm.inputProfile);
-                        icm.inputProfile = "file:" + expandRelativePath(fname, "", filenameFromUri(ppVersion, icm.inputProfile));
+                        icm.inputProfile = "file:" + filenameFromUri(icm.inputProfile, basedir);
                     } else {
                         icm.inputProfile = expandRelativePath(fname, "file:", icm.inputProfile);
                     }
@@ -4543,7 +4554,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
         if (keyFile.has_group("Film Simulation") && RELEVANT_(filmSimulation)) {
             assignFromKeyfile(keyFile, "Film Simulation", "Enabled", filmSimulation.enabled);
             assignFromKeyfile(keyFile, "Film Simulation", "ClutFilename", filmSimulation.clutFilename);
-            filmSimulation.clutFilename = filenameFromUri(ppVersion, filmSimulation.clutFilename);
+            if (ppVersion >= 1017) {
+                filmSimulation.clutFilename = filenameFromUri(filmSimulation.clutFilename, basedir);
+            }
 
             if (keyFile.has_key("Film Simulation", "Strength")) {
                 if (ppVersion < 321) {
@@ -4750,7 +4763,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (RELEVANT_(darkframe)) {
                 assignFromKeyfile(keyFile, "RAW", "DarkFrameEnabled", raw.enable_darkframe);
                 if (keyFile.has_key("RAW", "DarkFrame")) {
-                    raw.dark_frame = filenameFromUri(ppVersion, expandRelativePath(fname, "", keyFile.get_string("RAW", "DarkFrame")));
+                    if (ppVersion >= 1017) {
+                        raw.dark_frame = filenameFromUri(keyFile.get_string("RAW", "DarkFrame"), basedir); 
+                    } else {
+                        raw.dark_frame = expandRelativePath(fname, "", keyFile.get_string("RAW", "DarkFrame"));
+                    }
                 }
 
                 assignFromKeyfile(keyFile, "RAW", "DarkFrameAuto", raw.df_autoselect);
@@ -4759,7 +4776,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (RELEVANT_(flatfield)) {
                 assignFromKeyfile(keyFile, "RAW", "FlatFieldEnabled", raw.enable_flatfield);
                 if (keyFile.has_key("RAW", "FlatFieldFile")) {
-                    raw.ff_file = filenameFromUri(ppVersion, expandRelativePath(fname, "", keyFile.get_string("RAW", "FlatFieldFile")));
+                    if (ppVersion >= 1017) {
+                        raw.ff_file = filenameFromUri(keyFile.get_string("RAW", "FlatFieldFile"), basedir);
+                    } else {
+                        raw.ff_file = expandRelativePath(fname, "", keyFile.get_string("RAW", "FlatFieldFile"));
+                    }
                 }
 
                 assignFromKeyfile(keyFile, "RAW", "FlatFieldAutoSelect", raw.ff_AutoSelect);
@@ -5291,7 +5312,7 @@ int ProcParamsWithSnapshots::load(ProgressListener *pl,
 
 
 int ProcParamsWithSnapshots::save(ProgressListener *pl,
-                                  const Glib::ustring &fname, const Glib::ustring &fname2, bool fnameAbsolute)
+                                  const Glib::ustring &fname, const Glib::ustring &fname2)
 {
     if (fname.empty() && fname2.empty()) {
         return 0;
@@ -5316,14 +5337,14 @@ int ProcParamsWithSnapshots::save(ProgressListener *pl,
             keyfile.set_string("Snapshots", key, snapshots[i].first);
         }
 
-        int ret = master.save(pl, false, keyfile, nullptr, fname, fnameAbsolute);
+        int ret = master.save(pl, false, keyfile, nullptr, fname);
         if (ret != 0) {
             return ret;
         }
 
         for (size_t i = 0; i < snapshots.size(); ++i) {
             keyfile.set_prefix(sn + std::to_string(i+1) + " ");
-            ret = snapshots[i].second.save(pl, false, keyfile, nullptr, fname, fnameAbsolute);
+            ret = snapshots[i].second.save(pl, false, keyfile, nullptr, fname);
             if (ret != 0) {
                 return ret;
             }

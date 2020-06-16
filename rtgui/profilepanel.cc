@@ -376,7 +376,7 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
                     // ppTemp.deleteInstance();
                     ProcParams pparams;
                     toSave->applyTo(pparams);
-                    int retCode = pparams.save(dynamic_cast<rtengine::ProgressListener *>(parent), fname, "", true, &pe);
+                    int retCode = pparams.save(dynamic_cast<rtengine::ProgressListener *>(parent), fname, "", &pe);
 
                     if (retCode) {
                         //writeFailed(dialog, fname);
