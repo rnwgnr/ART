@@ -36,6 +36,7 @@
 #include "rtlensfun.h"
 #include "pdaflinesfilter.h"
 #include "camconst.h"
+#include "../rtgui/multilangmgr.h"
 #define BENCHMARK
 #include "StopWatch.h"
 #ifdef _OPENMP
@@ -915,7 +916,7 @@ DCPProfile *RawImageSource::getDCP(const ColorManagementParams &cmp, DCPProfile:
 
     DCPProfile *dcpProf = nullptr;
     cmsHPROFILE dummy;
-    findInputProfile(cmp.inputProfile, nullptr, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, &dcpProf, dummy);
+    findInputProfile(cmp.inputProfile, nullptr, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, &dcpProf, dummy, nullptr);
 
     if (dcpProf == nullptr) {
         if (settings->verbose) {
@@ -931,7 +932,7 @@ DCPProfile *RawImageSource::getDCP(const ColorManagementParams &cmp, DCPProfile:
 void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb)
 {
     double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
-    colorSpaceConversion (image, cmp, wb, pre_mul, embProfile, camProfile, imatrices.xyz_cam, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName);
+    colorSpaceConversion (image, cmp, wb, pre_mul, embProfile, camProfile, imatrices.xyz_cam, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, plistener);
 }
 
 void RawImageSource::getFullSize (int& w, int& h, int tr)
@@ -2810,7 +2811,7 @@ lab2ProphotoRgbD50(float L, float A, float B, float& r, float& g, float& b)
 }
 
 // Converts raw image including ICC input profile to working space - floating point version
-void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double camMatrix[3][3], const std::string &camName, const Glib::ustring &fileName)
+void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double camMatrix[3][3], const std::string &camName, const Glib::ustring &fileName, ProgressListener *plistener)
 {
 
 //    MyTime t1, t2, t3;
@@ -2818,7 +2819,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
     cmsHPROFILE in;
     DCPProfile *dcpProf;
 
-    if (!findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in)) {
+    if (!findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in, plistener)) {
         return;
     }
 
@@ -3207,7 +3208,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
 
 
 // Determine RAW input and output profiles. Returns TRUE on success
-bool RawImageSource::findInputProfile(Glib::ustring inProfile, cmsHPROFILE embedded, std::string camName, const Glib::ustring &fileName, DCPProfile **dcpProf, cmsHPROFILE& in)
+bool RawImageSource::findInputProfile(Glib::ustring inProfile, cmsHPROFILE embedded, std::string camName, const Glib::ustring &fileName, DCPProfile **dcpProf, cmsHPROFILE& in, ProgressListener *plistener)
 {
     in = nullptr; // cam will be taken on NULL
     *dcpProf = nullptr;
@@ -3242,6 +3243,10 @@ bool RawImageSource::findInputProfile(Glib::ustring inProfile, cmsHPROFILE embed
 
         if (*dcpProf == nullptr) {
             in = ICCStore::getInstance()->getProfile (inProfile);
+        }
+
+        if (!in && !*dcpProf && plistener) {
+            plistener->error(Glib::ustring::compose(M("ERROR_MSG_FILE_READ"), normalName));
         }
     }
 

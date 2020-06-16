@@ -1100,21 +1100,29 @@ void RTWindow::error(const Glib::ustring& descr)
             ret += s;
             return ret;
         };
-    
+
+    if (!unique_info_msg_.insert(descr).second) {
+        return;
+    }
     auto m = escapeHtmlChars(wrap(descr));
     info_msg_.push_back(m);
     ++info_msg_num_;
     Glib::ustring msg;
+    const char *sep = "";
     if (reveal_conn_.connected()) {
         reveal_conn_.disconnect();
         int n = int(info_msg_.size()) - options.max_error_messages;
         if (options.max_error_messages > 0 && n > 0) {
             info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
         }
-        msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), info_msg_num_ - options.max_error_messages) + "\n";
+        n = info_msg_num_ - options.max_error_messages;
+        if (n > 0) {
+            msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
+        }
     }
     for (auto &s : info_msg_) {
-        msg += s + "\n";
+        msg += sep + s;
+        sep = "\n";
     }
     info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
     info_box_->show();
@@ -1134,6 +1142,7 @@ bool RTWindow::hide_info_msg()
         };
     Glib::signal_timeout().connect(sigc::slot<bool>(hidebox), msg_revealer_->get_transition_duration());
     info_msg_.clear();
+    unique_info_msg_.clear();
     info_msg_num_ = 0;
     return false;
 }

@@ -51,6 +51,7 @@ DYNPROFILEEDITOR_PROFILE;Processing Profile
 EDITWINDOW_TITLE;Image Edit
 EDIT_OBJECT_TOOLTIP;Displays a widget on the preview window which lets you adjust this tool.
 EDIT_PIPETTE_TOOLTIP;To add an adjustment point to the curve, hold the Ctrl key while left-clicking the desired spot in the image preview.\nTo adjust the point, hold the Ctrl key while left-clicking the corresponding area in the preview, then let go of Ctrl (unless you desire fine control) and while still holding the left mouse button move the mouse up or down to move that point up or down in the curve.
+ERROR_MSG_FILE_READ;Error reading file: %1
 ERROR_MSG_MAXERRORS;... (%1 previous error(s) not shown)
 ERROR_MSG_METADATA_VALUE;Metadata: error setting %1 to %2
 EXIFFILTER_APERTURE;Aperture

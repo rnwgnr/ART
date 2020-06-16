@@ -22,6 +22,7 @@
 #include "curves.h"
 #include "color.h"
 #include "clutstore.h"
+#include "../rtgui/multilangmgr.h"
 
 namespace rtengine {
 
@@ -51,6 +52,8 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
                 hald_clut(r, g, b, 0, jstart, tW, 1);
             }
         }
+    } else if (plistener) {
+        plistener->error(Glib::ustring::compose(M("ERROR_MSG_FILE_READ"), params->filmSimulation.clutFilename));
     }
 }
 
