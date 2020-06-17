@@ -952,9 +952,7 @@ void Thumbnail::updateCache (bool updatePParams, bool updateCacheImageData)
         pparams.save (
             cachemgr->getProgressListener(),
             options.saveParamsFile  ? fname + paramFileExtension : "",
-            options.saveParamsCache ? getCacheFileName ("profiles", paramFileExtension) : "",
-            true
-        );
+            options.saveParamsCache ? getCacheFileName ("profiles", paramFileExtension) : "");
     }
 
     if (updateCacheImageData) {

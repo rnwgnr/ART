@@ -20,6 +20,8 @@
 
 #include <exiv2/exiv2.hpp>
 #include <vector>
+#include <iostream>
+
 #include "rawimage.h"
 #include "rawimagesource.h"
 #include "array2D.h"
@@ -27,6 +29,8 @@
 
 
 namespace rtengine {
+
+extern const Settings *settings;
 
 namespace {
 
@@ -49,6 +53,27 @@ struct GainMap {
     std::vector<float> map_gain;
 
     GainMap() = default;
+
+    std::string to_str() const
+    {
+        std::ostringstream buf;
+        buf << "[top=" << top
+            << ", left=" << left
+            << ", bottom=" << bottom
+            << ", right=" << right
+            << ", plane=" << plane
+            << ", planes=" << planes
+            << ", row_pitch=" << row_pitch
+            << ", col_pitch=" << col_pitch
+            << ", map_points_v=" << map_points_v
+            << ", map_points_h=" << map_points_h
+            << ", map_spacing_v=" << map_spacing_v
+            << ", map_spacing_h=" << map_spacing_h
+            << ", map_origin_v=" << map_origin_v
+            << ", map_origin_h=" << map_origin_h
+            << ", map_planes=" << map_planes << "]";
+        return buf.str();
+    }
 };
 
 
@@ -179,6 +204,9 @@ void RawImage::apply_gain_map()
 
     auto maps = extract_gain_maps(buf);
     if (maps.size() != 4) {
+        if (settings->verbose) {
+            std::cout << "GAIN MAP: found " << maps.size() << " maps, but 4 expected. Skipping" << std::endl;
+        }
         return;
     }
     for (auto &m : maps) {
@@ -186,6 +214,9 @@ void RawImage::apply_gain_map()
             m.plane != 0 || m.planes != 1 || m.map_planes != 1 ||
             m.row_pitch != 2 || m.col_pitch != 2 ||
             m.map_origin_v != 0 || m.map_origin_h != 0) {
+            if (settings->verbose) {
+                std::cout << "GAIN MAP: unable to handle this map: " << m.to_str() << std::endl;
+            }
             return; // not something we can handle yet
         }
     }
@@ -193,6 +224,10 @@ void RawImage::apply_gain_map()
     float black[4];
     get_colorsCoeff(nullptr, nullptr, black, false);
 
+    if (settings->verbose) {
+        std::cout << "GAIN MAP: applying maps with " << maps[0].map_points_h << "x" << maps[0].map_points_v << " points " << std::endl;
+    }
+    
     // now we can apply each gain map to raw_data
     array2D<float> mvals;
     for (auto &m : maps) {

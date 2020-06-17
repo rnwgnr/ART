@@ -34,8 +34,7 @@
 #include "rtlensfun.h"
 #include "metadata.h"
 
-namespace rtengine
-{
+namespace rtengine {
 
 const Settings* settings;
 
@@ -154,5 +153,6 @@ void Settings::destroy (Settings* s)
 }
 
 
-}
+} // namespace rtengine
+
 

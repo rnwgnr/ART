@@ -26,6 +26,7 @@
 #include "opthelper.h"
 #include "rtlensfun.h"
 #include "perspectivecorrection.h"
+#include "../rtgui/multilangmgr.h"
 
 
 using namespace std;
@@ -563,6 +564,8 @@ void ImProcFunctions::transform(Imagefloat* original, Imagefloat* transformed, i
                                oW, oH, params->coarse, rawRotationDeg
                 )
             );
+        } else if (!params->lensProf.lcpFile.empty() && plistener) {
+            plistener->error(Glib::ustring::compose(M("ERROR_MSG_FILE_READ"), params->lensProf.lcpFile));
         }
     }
 

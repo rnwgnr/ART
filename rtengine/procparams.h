@@ -1581,7 +1581,7 @@ public:
              bool resetOnError=true, const Glib::ustring &fname="");
     int save(ProgressListener *pl,
              KeyFile &keyFile, const ParamsEdited *pedited=nullptr,
-             const Glib::ustring &fname="", bool fnameAbsolute=true) const;
+             const Glib::ustring &fname="") const;
     /**
       * Saves the parameters to possibly two files. This is a performance improvement if a function has to
       * save the same file in two different location, i.e. the cache and the image's directory
@@ -1593,7 +1593,7 @@ public:
       * @return Error code (=0 if all supplied filenames where created correctly)
       */
     int save(ProgressListener *pl,
-             const Glib::ustring& fname, const Glib::ustring& fname2 = Glib::ustring(), bool fnameAbsolute = true, const ParamsEdited *pedited = nullptr);
+             const Glib::ustring &fname, const Glib::ustring &fname2=Glib::ustring(), const ParamsEdited *pedited=nullptr);
 
     /** Creates a new instance of ProcParams.
       * @return a pointer to the new ProcParams instance. */
@@ -1625,7 +1625,7 @@ private:
     int save(ProgressListener *pl,
              bool save_general,
              KeyFile &keyFile, const ParamsEdited *pedited,
-             const Glib::ustring &fname, bool fnameAbsolute) const;
+             const Glib::ustring &fname) const;
 
     friend class ProcParamsWithSnapshots;
 };
@@ -1634,7 +1634,7 @@ private:
 class ProcParamsWithSnapshots {
 public:
     int load(ProgressListener *pl, const Glib::ustring &fname);
-    int save(ProgressListener *pl, const Glib::ustring &fname, const Glib::ustring &fname2=Glib::ustring(), bool fnameAbsolute=true);
+    int save(ProgressListener *pl, const Glib::ustring &fname, const Glib::ustring &fname2=Glib::ustring());
 
     ProcParams master;
     std::vector<std::pair<Glib::ustring, ProcParams>> snapshots;
