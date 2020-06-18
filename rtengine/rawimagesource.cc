@@ -2008,11 +2008,21 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
  */
 void RawImageSource::copyOriginalPixels(const RAWParams &raw, RawImage *src, RawImage *riDark, RawImage *riFlatFile, array2D<float> &rawData )
 {
-    // TODO: Change type of black[] to float to avoid conversions
-    unsigned short black[4] = {
-        (unsigned short)ri->get_cblack(0), (unsigned short)ri->get_cblack(1),
-        (unsigned short)ri->get_cblack(2), (unsigned short)ri->get_cblack(3)
-    };
+    // unsigned short black[4] = {
+    //     (unsigned short)ri->get_cblack(0), (unsigned short)ri->get_cblack(1),
+    //     (unsigned short)ri->get_cblack(2), (unsigned short)ri->get_cblack(3)
+    // };
+    unsigned short black[4];
+    {
+        auto tmpfilters = ri->get_filters();
+        ri->set_filters(ri->prefilters); // we need 4 blacks for bayer processing
+        float fblack[4];
+        ri->get_colorsCoeff(nullptr, nullptr, fblack, false);
+        for (int i = 0; i < 4; ++i) {
+            black[i] = fblack[i];
+        }
+        ri->set_filters(tmpfilters);
+    }
 
     if (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS) {
         if (!rawData) {
