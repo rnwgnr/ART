@@ -150,6 +150,7 @@ History::History (bool bookmarkSupport) :
     show_all_children ();
 }
 
+
 void History::initHistory ()
 {
 
@@ -314,7 +315,6 @@ void History::clearParamChanges ()
 
 void History::addBookmarkWithText (Glib::ustring text)
 {
-
     // lookup the selected item in the history
     Glib::RefPtr<Gtk::TreeSelection> selection = hTreeView->get_selection();
     Gtk::TreeModel::iterator iter = selection->get_selected();
@@ -325,12 +325,15 @@ void History::addBookmarkWithText (Glib::ustring text)
     }
 
     // append new row to bookmarks
-    Gtk::TreeModel::Row newrow = *(bookmarkModel->append());
+    auto newit = bookmarkModel->append();
+    Gtk::TreeModel::Row newrow = *newit;//(bookmarkModel->append());
     newrow[bookmarkColumns.text] = text;
     ProcParams params = row[historyColumns.params];
     newrow[bookmarkColumns.params] = params;
     // ParamsEdited paramsEdited = row[historyColumns.paramsEdited];
     // newrow[bookmarkColumns.paramsEdited] = paramsEdited;
+
+    bTreeView->set_cursor(Gtk::TreeModel::Path(newit), *bTreeView->get_column(0), true);
 }
 
 void History::addBookmarkPressed ()
