@@ -84,7 +84,8 @@ Crop::Crop():
     hDirty(true),
     xDirty(true),
     yDirty(true),
-    lastFixRatio(true)
+    lastFixRatio(true),
+    selecting_(false)
 {
     EvToolReset.set_action(CROP);
 
@@ -125,15 +126,14 @@ Crop::Crop():
     setExpandAlignProperties(h, true, false, Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
     h->set_width_chars(6);
 
-    selectCrop = Gtk::manage (new Gtk::Button (M("TP_CROP_SELECTCROP")));
+    selectCrop = Gtk::manage(new Gtk::Button(M("TP_CROP_SELECTCROP")));
     setExpandAlignProperties(selectCrop, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
     selectCrop->get_style_context()->add_class("independent");
     selectCrop->set_image (*Gtk::manage (new RTImage ("crop-small.png")));
 
-    resetCrop = Gtk::manage (new Gtk::Button (M("TP_CROP_RESETCROP")));
+    resetCrop = Gtk::manage(new Gtk::Button(M("TP_CROP_RESETCROP")));
     setExpandAlignProperties(resetCrop, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
     resetCrop->get_style_context()->add_class("independent");
-    resetCrop->set_image (*Gtk::manage (new RTImage ("undo-small.png")));
 
     methodgrid->attach (*xlab, 0, 0, 1, 1);
     methodgrid->attach (*x, 1, 0, 1, 1);
@@ -516,7 +516,13 @@ bool Crop::inImageArea (int x, int y)
 void Crop::selectPressed ()
 {
     if (clistener) {
-        clistener->cropSelectRequested();
+        if (!selecting_) {
+            setSelecting(true);
+            clistener->cropSelectRequested();
+        } else {
+            setSelecting(false);
+            clistener->cropEnableChanged(false);
+        }
     }
 }
 
@@ -1333,6 +1339,7 @@ void Crop::cropInit (int &x, int &y, int &w, int &h)
     setEnabled(true);
 }
 
+
 void Crop::cropResized (int &x, int &y, int& x2, int& y2)
 {
 
@@ -1450,7 +1457,7 @@ void Crop::cropManipReady(int &x, int &y, int &w, int &h)
         h = nh;
         enableListener();
     }
-    
+
     idle_register.add(
         [this]() -> bool
         {
@@ -1459,6 +1466,14 @@ void Crop::cropManipReady(int &x, int &y, int &w, int &h)
         }
     );
 }
+
+
+void Crop::setSelecting(bool yes)
+{
+    selecting_ = yes;
+    selectCrop->set_label(yes ? M("TP_CROP_DONE") : M("TP_CROP_SELECTCROP"));
+}
+
 
 double Crop::getRatio () const
 {
