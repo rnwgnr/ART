@@ -51,6 +51,7 @@ DYNPROFILEEDITOR_PROFILE;Profil de Traitement
 EDITWINDOW_TITLE;Édition d'image
 EDIT_OBJECT_TOOLTIP;Afficher des éléments dans la fenêtre de prévisualisation qui vous permettront d'ajuster cet outil.
 EDIT_PIPETTE_TOOLTIP;Pour ajouter un point d'ajustement de la courbe, maintenez la touche Ctrl pressée en cliquant sur l'image avec le bouton gauche.\nPour ajuster le point, pressez la touche Ctrl lors du clic-gauche sur la zone correspondante dans l'aperçu, puis relachez Ctrl (sauf si vous désirez un contrôle plus fin) et tout en gardant le bouton gauche appuyé, déplacez le curseur vers le haut ou le bas pour ajuster la position du point.
+ERROR_MSG_FILE_READ;Erreur de lecture du fichier : %1
 ERROR_MSG_MAXERRORS;... (%1 erreur(s) précédente(s) non montrée(s))
 ERROR_MSG_METADATA_VALUE;Metadata: réglage de l'erreur %1 à %2
 EXIFFILTER_APERTURE;Diaphragme
