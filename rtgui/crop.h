@@ -94,6 +94,8 @@ public:
     void setDefaults(const rtengine::procparams::ProcParams *def) override;
     void toolReset(bool to_initial) override;
 
+    void setSelecting(bool yes);
+
 private:
     struct CropRatio {
         Glib::ustring label;
@@ -131,6 +133,7 @@ private:
     int lastRotationDeg;
     sigc::connection xconn, yconn, wconn, hconn, fconn, rconn, oconn, gconn;
     bool wDirty, hDirty, xDirty, yDirty, lastFixRatio;
+    bool selecting_;
 
     IdleRegister idle_register;
 

@@ -1054,6 +1054,7 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
 
     switch (tool) {
         case TMCropSelect:
+            crop->setSelecting(true);
             crop->setExpanded (true);
             toolPanelNotebook->set_current_page (toolPanelNotebook->page_num (*transformPanelSW));
             break;
@@ -1071,6 +1072,10 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
 
         default:
             break;
+    }
+
+    if (tool != TMCropSelect) {
+        crop->setSelecting(false);
     }
 }
 
