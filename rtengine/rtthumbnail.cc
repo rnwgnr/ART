@@ -52,7 +52,7 @@ bool checkRawImageThumb (const rtengine::RawImage& raw_image)
 
 void scale_colors (rtengine::RawImage *ri, float scale_mul[4], float cblack[4], bool multiThread)
 {
-    DCraw::dcrawImage_t image = ri->get_image();
+    rtengine::RawImage::ImageType image = ri->get_image();
     const int height = ri->get_iheight();
     const int width = ri->get_iwidth();
     const int top_margin = ri->get_topmargin();
@@ -396,7 +396,7 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
     RawImage *ri = new RawImage (fname);
     unsigned int tempImageNum = 0;
 
-    int r = ri->loadRaw (1, tempImageNum, 0);
+    int r = ri->loadRaw(true, tempImageNum, false, nullptr, 1.0, false);
 
     if ( r ) {
         delete ri;
@@ -407,7 +407,7 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
     if (ri->getFrameCount() == 7) {
         // special case for Hasselblad H6D-100cMS pixelshift files
         // first frame is not bayer, load second frame
-        int r = ri->loadRaw (1, 1, 0);
+        int r = ri->loadRaw(true, 1, false, nullptr, 1.0, false);
 
         if ( r ) {
             delete ri;
@@ -494,7 +494,7 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
     int tmpw = (width - 2) / hskip;
     int tmph = (height - 2) / vskip;
 
-    DCraw::dcrawImage_t image = ri->get_image();
+    rtengine::RawImage::ImageType image = ri->get_image();
 
     Imagefloat* tmpImg = new Imagefloat (tmpw, tmph);
 

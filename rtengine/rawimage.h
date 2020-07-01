@@ -35,7 +35,7 @@ public:
     explicit RawImage( const Glib::ustring &name );
     ~RawImage();
 
-    int loadRaw (bool loadData, unsigned int imageNum = 0, bool closeFile = true, ProgressListener *plistener = nullptr, double progressRange = 1.0);
+    int loadRaw (bool loadData, unsigned int imageNum = 0, bool closeFile = true, ProgressListener *plistener = nullptr, double progressRange = 1.0, bool apply_corrections=true);
     void get_colorsCoeff( float* pre_mul_, float* scale_mul_, float* cblack_, bool forceAutoWB );
     void set_prefilters()
     {
@@ -44,7 +44,8 @@ public:
             filters &= ~((filters & 0x55555555) << 1);
         }
     }
-    dcrawImage_t get_image()
+    typedef dcrawImage_t ImageType;
+    ImageType get_image()
     {
         return image;
     }
