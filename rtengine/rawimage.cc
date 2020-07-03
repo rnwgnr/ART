@@ -429,7 +429,7 @@ skip_block:
     }
 }
 
-int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, ProgressListener *plistener, double progressRange)
+int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, ProgressListener *plistener, double progressRange, bool apply_corrections)
 {
     ifname = filename.c_str();
     image = nullptr;
@@ -513,7 +513,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         }
 
         // dcraw needs this global variable to hold pixel data
-        image = (dcrawImage_t)calloc (static_cast<unsigned int>(height) * static_cast<unsigned int>(width) * sizeof * image + meta_length, 1);
+        image = (ImageType)calloc (static_cast<unsigned int>(height) * static_cast<unsigned int>(width) * sizeof * image + meta_length, 1);
         meta_data = (char *) (image + static_cast<unsigned int>(height) * static_cast<unsigned int>(width));
 
         if(!image) {
@@ -544,7 +544,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         CameraConst *cc = ccs->get(make, model);
 
         if (raw_image) {
-            apply_gain_map();
+            if (apply_corrections) {
+                apply_gain_map();
+            }
             if (cc && cc->has_rawCrop()) {
                 int lm, tm, w, h;
                 cc->get_rawCrop(lm, tm, w, h);

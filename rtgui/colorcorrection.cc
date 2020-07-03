@@ -559,19 +559,16 @@ void ColorCorrection::regionShow(int idx)
         mode->set_active(0);
     }
     saturation->setValue(r.saturation);
-    if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
-        gridAB->setParams(0, 0, r.a, r.b, r.abscale, false);
-        slope->setValue(r.slope[0]);
-        offset->setValue(r.offset[0]);
-        power->setValue(r.power[0]);
-        pivot->setValue(r.pivot[0]);
-    } else {
-        for (int c = 0; c < 3; ++c) {
-            slope_rgb[c]->setValue(r.slope[c]);
-            offset_rgb[c]->setValue(r.offset[c]);
-            power_rgb[c]->setValue(r.power[c]);
-            pivot_rgb[c]->setValue(r.pivot[c]);
-        }
+    gridAB->setParams(0, 0, r.a, r.b, r.abscale, false);
+    slope->setValue(r.slope[0]);
+    offset->setValue(r.offset[0]);
+    power->setValue(r.power[0]);
+    pivot->setValue(r.pivot[0]);
+    for (int c = 0; c < 3; ++c) {
+        slope_rgb[c]->setValue(r.slope[c]);
+        offset_rgb[c]->setValue(r.offset[c]);
+        power_rgb[c]->setValue(r.power[c]);
+        pivot_rgb[c]->setValue(r.pivot[c]);
     }
     for (int c = 0; c < 3; ++c) {
         huesat[c]->setValue(r.sat[c], r.hue[c]);
