@@ -298,6 +298,8 @@ public:
         }
     }
 
+    std::vector<WBProvider::Preset> getWBPresets() const override;
+
     //DFProvider interface
     rtengine::RawImage* getDF() override;
 

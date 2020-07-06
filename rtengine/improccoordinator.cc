@@ -36,6 +36,8 @@
 
 namespace rtengine {
 
+using rtengine::procparams::WBParams;
+
 namespace {
 
 using rtengine::Coord2D;
@@ -381,7 +383,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                 printf("Applying white balance, color correction & sRBG conversion...\n");
             }
 
-            if (params.wb.method == "Auto") {
+            if (params.wb.method == WBParams::AUTO) {
                 if (lastAwbEqual != params.wb.equal) {
                     double rm, gm, bm;
                     imgsrc->getAutoWBMultipliers(rm, gm, bm);
@@ -402,7 +404,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                 params.wb.green = currWB.getGreen();
             }
     
-            if (params.wb.method == "Auto" && awbListener && params.wb.enabled) {
+            if (params.wb.method == WBParams::AUTO && awbListener && params.wb.enabled) {
                 awbListener->WBChanged(params.wb.temperature, params.wb.green);
             }
     
@@ -606,13 +608,27 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 void ImProcCoordinator::updateWB()
 {
     MyMutex::MyLock initLock(minit);
+
     
     currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
     
-    if (!params.wb.enabled || params.wb.method == "Auto") {
+    if (!params.wb.enabled) {
         currWB = ColorTemp();
-    } else if (params.wb.method == "Camera") {
-        currWB = imgsrc->getWB();
+    } else {
+        switch (params.wb.method) {
+        case WBParams::CAMERA:
+            currWB = imgsrc->getWB();
+            break;
+        case WBParams::CUSTOM_TEMP:
+            currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
+            break;
+        case WBParams::CUSTOM_MULT:
+            currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);            
+            break;
+        case WBParams::AUTO:
+        default:
+            currWB = ColorTemp();
+        }
     }
 }
 
@@ -868,11 +884,11 @@ void ImProcCoordinator::getSpotWB(int x, int y, int rect, double& temp, double& 
         int tr = getCoarseBitMask(params.coarse);
 
         ret = imgsrc->getSpotWB(red, green, blue, tr, params.wb.equal);
-        currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+        currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
         //double rr,gg,bb;
         //currWB.getMultipliers(rr,gg,bb);
 
-    } // end of mutex lockong
+    }
 
     if (ret.getTemp() > 0) {
         temp = ret.getTemp();
@@ -1009,29 +1025,36 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
     imgsrc->preprocess(ppar.raw, ppar.lensProf, ppar.coarse);
     double dummy = 0.0;
     imgsrc->demosaic(ppar.raw, false, dummy);
-    ColorTemp currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+    ColorTemp currWB;
 
-    if (params.wb.method == "Camera") {
-        currWB = imgsrc->getWB();
-    } else if (params.wb.method == "Auto") {
-        if (lastAwbEqual != params.wb.equal) {
-            double rm, gm, bm;
-            imgsrc->getAutoWBMultipliers(rm, gm, bm);
+    if (apply_wb) {
+        switch (params.wb.method) {
+        case WBParams::CAMERA:
+            currWB = imgsrc->getWB();
+            break;
+        case WBParams::AUTO:
+            if (lastAwbEqual != params.wb.equal) {
+                double rm, gm, bm;
+                imgsrc->getAutoWBMultipliers(rm, gm, bm);
 
-            if (rm != -1.) {
-                autoWB.update(rm, gm, bm, params.wb.equal);
-                lastAwbEqual = params.wb.equal;
-            } else {
-                lastAwbEqual = -1.;
-                autoWB.useDefaults(params.wb.equal);
+                if (rm != -1.) {
+                    autoWB.update(rm, gm, bm, params.wb.equal);
+                    lastAwbEqual = params.wb.equal;
+                } else {
+                    lastAwbEqual = -1.;
+                    autoWB.useDefaults(params.wb.equal);
+                }
             }
-        }
 
-        currWB = autoWB;
-    }
-
-    if (!apply_wb) {
-        currWB = ColorTemp(); // = no white balance
+            currWB = autoWB;
+            break;
+        case WBParams::CUSTOM_TEMP:
+            currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
+            break;
+        case WBParams::CUSTOM_MULT:
+            currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);
+            break;
+        }            
     }
 
     imgsrc->getImage(currWB, tr, im, pp, ppar.exposure, ppar.raw);

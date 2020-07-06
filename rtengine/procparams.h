@@ -607,47 +607,24 @@ struct SharpeningParams {
 };
 
 
-/**
-  * Parameters of the white balance adjustments
-  */
-struct WBEntry {
-    enum class Type {
+struct WBParams {
+    bool enabled;
+    enum Type {
         CAMERA,
         AUTO,
-        DAYLIGHT,
-        CLOUDY,
-        SHADE,
-        WATER,
-        TUNGSTEN,
-        FLUORESCENT,
-        LAMP,
-        FLASH,
-        LED,
-        // CUSTOM one must remain the last one!
-        CUSTOM
+        CUSTOM_TEMP,
+        CUSTOM_MULT
     };
-
-    Glib::ustring ppLabel;
-    Type type;
-    Glib::ustring GUILabel;
+    Type method;
     int temperature;
     double green;
     double equal;
-};
-
-struct WBParams {
-    bool enabled;
-    Glib::ustring   method;
-    int             temperature;
-    double          green;
-    double          equal;
+    std::array<double, 3> mult;
 
     WBParams();
 
-    bool operator ==(const WBParams& other) const;
-    bool operator !=(const WBParams& other) const;
-
-    static const std::vector<WBEntry>& getWbEntries();
+    bool operator==(const WBParams &other) const;
+    bool operator!=(const WBParams &other) const;
 };
 
 

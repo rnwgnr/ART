@@ -961,20 +961,23 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     }
 
     // compute WB multipliers
-    ColorTemp currWB = ColorTemp (params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+    ColorTemp currWB;
 
     if (!params.wb.enabled) {
         currWB = ColorTemp();
-    } else if (params.wb.method == "Camera") {
+    } else if (params.wb.method == WBParams::CAMERA) {
         //recall colorMatrix is rgb_cam
         double cam_r = colorMatrix[0][0] * camwbRed + colorMatrix[0][1] * camwbGreen + colorMatrix[0][2] * camwbBlue;
         double cam_g = colorMatrix[1][0] * camwbRed + colorMatrix[1][1] * camwbGreen + colorMatrix[1][2] * camwbBlue;
         double cam_b = colorMatrix[2][0] * camwbRed + colorMatrix[2][1] * camwbGreen + colorMatrix[2][2] * camwbBlue;
         currWB = ColorTemp (cam_r, cam_g, cam_b, params.wb.equal);
-    } else if (params.wb.method == "Auto") {
+    } else if (params.wb.method == WBParams::AUTO) {
         currWB = ColorTemp (autoWBTemp, autoWBGreen, wbEqual, "Custom");
+    } else if (params.wb.method == WBParams::CUSTOM_TEMP) {
+        currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
+    } else if (params.wb.method == WBParams::CUSTOM_MULT) {
+        currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);
     }
-
     double rm, gm, bm;
     if (currWB.getTemp() < 0) {
         rm = redMultiplier;

@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -19,15 +20,24 @@
 #ifndef _WBPROVIDER_
 #define _WBPROVIDER_
 
+#include <array>
+#include <vector>
 
-class WBProvider
-{
-
+class WBProvider {
 public:
     virtual ~WBProvider() {}
     virtual void getAutoWB (double& temp, double& green, double equal) {}
     virtual void getCamWB (double& temp, double& green) {}
     virtual void spotWBRequested (int size) {}
+    
+    struct Preset {
+        Glib::ustring label;
+        std::array<double, 3> mult;
+
+        Preset(const Glib::ustring &l="", const std::array<double, 3> &m={}):
+            label(l), mult(m) {}
+    };
+    virtual std::vector<Preset> getWBPresets() const { return std::vector<Preset>(); }
 };
 
 #endif

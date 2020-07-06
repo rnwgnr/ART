@@ -645,7 +645,7 @@ void ToolPanelCoordinator::initImage (rtengine::StagedImageProcessor* ipc_, bool
         flatfield->setShortcutPath (Glib::path_get_dirname (ipc->getInitialImage()->getFileName()));
 
         icm->setRawMeta (raw, (const rtengine::FramesData*)pMetaData);
-        lensProf->setRawMeta (raw, pMetaData);
+        lensProf->setRawMeta(raw, pMetaData);
         perspective->setRawMeta(raw, pMetaData);
     }
 

@@ -179,11 +179,11 @@ const ProcParams& Thumbnail::getProcParamsU ()
         pp->applyTo(pparams.master);
         //pparams = *(ProfileStore::getInstance()->getDefaultProcParams (getType() == FT_Raw));
 
-        if (pparams.master.wb.method == "Camera") {
+        if (pparams.master.wb.method == WBParams::CAMERA) {
             double ct;
             getCamWB (ct, pparams.master.wb.green);
             pparams.master.wb.temperature = ct;
-        } else if (pparams.master.wb.method == "Auto") {
+        } else if (pparams.master.wb.method == WBParams::AUTO) {
             double ct;
             getAutoWB(ct, pparams.master.wb.green, pparams.master.wb.equal);
             pparams.master.wb.temperature = ct;
