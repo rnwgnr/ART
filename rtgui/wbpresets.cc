@@ -20,7 +20,6 @@
 
 #include "toolpanelcoord.h"
 #include "../rtengine/rawimagesource.h"
-#include "wb_presets.c"
 
 namespace {
 
@@ -36,23 +35,26 @@ inline std::string upcase(const std::string &s)
 } // namespace
 
 
-std::vector<WBProvider::Preset> ToolPanelCoordinator::getWBPresets() const
+std::vector<WBPreset> ToolPanelCoordinator::getWBPresets() const
 {
-    std::vector<WBProvider::Preset> ret;
+    std::vector<WBPreset> ret;
     if (ipc) {
         const rtengine::FramesMetaData *md = ipc->getInitialImage()->getMetaData();
         rtengine::RawImageSource *src = dynamic_cast<rtengine::RawImageSource *>(ipc->getInitialImage());
         if (md && src) {
             std::string make = upcase(md->getMake());
             std::string model = upcase(md->getModel());
+            std::string key = make + " " + model;
 
             auto imatrices = src->getImageMatrices();
-            
-            for (int i = 0; i < wb_preset_count; ++i) {
-                if (make == upcase(wb_preset[i].make) && model == upcase(wb_preset[i].model) && wb_preset[i].tuning == 0 && wb_preset[i].channel[3] == 0) {
-                    double r = src->get_pre_mul(0) / wb_preset[i].channel[0];
-                    double g = src->get_pre_mul(1) / wb_preset[i].channel[1];
-                    double b = src->get_pre_mul(2) / wb_preset[i].channel[2];
+
+            const auto &presets = wb_presets::getPresets();
+            auto it = presets.find(key);
+            if (it != presets.end()) {
+                for (auto &p : it->second) {
+                    double r = src->get_pre_mul(0) / p.mult[0];
+                    double g = src->get_pre_mul(1) / p.mult[1];
+                    double b = src->get_pre_mul(2) / p.mult[2];
 
                     if (imatrices) {
                         double rr = imatrices->rgb_cam[0][0] * r + imatrices->rgb_cam[0][1] * g + imatrices->rgb_cam[0][2] * b;
@@ -63,7 +65,7 @@ std::vector<WBProvider::Preset> ToolPanelCoordinator::getWBPresets() const
                         b = bb;
                     }
                     
-                    ret.push_back(WBProvider::Preset(wb_preset[i].name, {1.0/r, 1.0/g, 1.0/b}));
+                    ret.push_back(WBPreset(p.label, {1.0/r, 1.0/g, 1.0/b}));
                 }
             }
         }

@@ -17,11 +17,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _WBPROVIDER_
-#define _WBPROVIDER_
+#pragma once
 
 #include <array>
 #include <vector>
+#include <map>
+#include <glibmm.h>
+
+struct WBPreset {
+    Glib::ustring label;
+    std::array<double, 3> mult;
+
+    WBPreset(const Glib::ustring &l="", const std::array<double, 3> &m={}):
+        label(l), mult(m) {}
+};
 
 class WBProvider {
 public:
@@ -30,14 +39,14 @@ public:
     virtual void getCamWB (double& temp, double& green) {}
     virtual void spotWBRequested (int size) {}
     
-    struct Preset {
-        Glib::ustring label;
-        std::array<double, 3> mult;
-
-        Preset(const Glib::ustring &l="", const std::array<double, 3> &m={}):
-            label(l), mult(m) {}
-    };
-    virtual std::vector<Preset> getWBPresets() const { return std::vector<Preset>(); }
+    virtual std::vector<WBPreset> getWBPresets() const { return std::vector<WBPreset>(); }
 };
 
-#endif
+namespace wb_presets {
+
+void init(const Glib::ustring &baseDir, const Glib::ustring &userSettingsDir);
+
+const std::map<std::string, std::vector<WBPreset>> &getPresets();
+
+} // namespace wb_presets
+

@@ -108,7 +108,7 @@ private:
     rtengine::procparams::WBParams initial_params;
 
     rtengine::ProcEvent EvWBMult;
-    std::vector<WBProvider::Preset> presets;
+    std::vector<WBPreset> presets;
 };
 
 #endif
