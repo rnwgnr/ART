@@ -40,6 +40,7 @@
 #include "extprog.h"
 #include "../rtengine/dynamicprofile.h"
 #include "printhelp.h"
+#include "wbprovider.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -223,6 +224,7 @@ bool init_rt()
 {
     UserCommandStore::getInstance()->init(Glib::build_filename(options.rtdir, "usercommands"));
     SoundManager::init();
+    wb_presets::init(argv0, options.rtdir);
 
     if ( !options.rtSettings.verbose ) {
         TIFFSetWarningHandler (nullptr);   // avoid annoying message boxes

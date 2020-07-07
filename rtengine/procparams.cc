@@ -1453,10 +1453,11 @@ bool SharpeningParams::operator !=(const SharpeningParams& other) const
 
 WBParams::WBParams() :
     enabled(true),
-    method("Camera"),
+    method(CAMERA),
     temperature(6504),
     green(1.0),
-    equal(1.0)
+    equal(1.0),
+    mult{1.0, 1.0, 1.0}
 {
 }
 
@@ -1467,54 +1468,13 @@ bool WBParams::operator ==(const WBParams& other) const
         && method == other.method
         && temperature == other.temperature
         && green == other.green
-        && equal == other.equal;
+        && equal == other.equal
+        && mult == other.mult;
 }
 
 bool WBParams::operator !=(const WBParams& other) const
 {
     return !(*this == other);
-}
-
-const std::vector<WBEntry>& WBParams::getWbEntries()
-{
-    static const std::vector<WBEntry> wb_entries = {
-        {"Camera",               WBEntry::Type::CAMERA,      M("TP_WBALANCE_CAMERA"),         0, 1.f,   1.f},
-        {"Auto",                 WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTO"),           0, 1.f,   1.f},
-        {"Daylight",             WBEntry::Type::DAYLIGHT,    M("TP_WBALANCE_DAYLIGHT"),    5300, 1.f,   1.f},
-        {"Cloudy",               WBEntry::Type::CLOUDY,      M("TP_WBALANCE_CLOUDY"),      6200, 1.f,   1.f},
-        {"Shade",                WBEntry::Type::SHADE,       M("TP_WBALANCE_SHADE"),       7600, 1.f,   1.f},
-        {"Water 1",              WBEntry::Type::WATER,       M("TP_WBALANCE_WATER1"),     35000, 0.3f,  1.1f},
-        {"Water 2",              WBEntry::Type::WATER,       M("TP_WBALANCE_WATER2"),     48000, 0.63f, 1.38f},
-        {"Tungsten",             WBEntry::Type::TUNGSTEN,    M("TP_WBALANCE_TUNGSTEN"),    2856, 1.f,   1.f},
-        {"Fluo F1",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO1"),       6430, 1.f,   1.f},
-        {"Fluo F2",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO2"),       4230, 1.f,   1.f},
-        {"Fluo F3",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO3"),       3450, 1.f,   1.f},
-        {"Fluo F4",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO4"),       2940, 1.f,   1.f},
-        {"Fluo F5",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO5"),       6350, 1.f,   1.f},
-        {"Fluo F6",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO6"),       4150, 1.f,   1.f},
-        {"Fluo F7",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO7"),       6500, 1.f,   1.f},
-        {"Fluo F8",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO8"),       5020, 1.f,   1.f},
-        {"Fluo F9",              WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO9"),       4330, 1.f,   1.f},
-        {"Fluo F10",             WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO10"),      5300, 1.f,   1.f},
-        {"Fluo F11",             WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO11"),      4000, 1.f,   1.f},
-        {"Fluo F12",             WBEntry::Type::FLUORESCENT, M("TP_WBALANCE_FLUO12"),      3000, 1.f,   1.f},
-        {"HMI Lamp",             WBEntry::Type::LAMP,        M("TP_WBALANCE_HMI"),         4800, 1.f,   1.f},
-        {"GTI Lamp",             WBEntry::Type::LAMP,        M("TP_WBALANCE_GTI"),         5000, 1.f,   1.f},
-        {"JudgeIII Lamp",        WBEntry::Type::LAMP,        M("TP_WBALANCE_JUDGEIII"),    5100, 1.f,   1.f},
-        {"Solux Lamp 3500K",     WBEntry::Type::LAMP,        M("TP_WBALANCE_SOLUX35"),     3480, 1.f,   1.f},
-        {"Solux Lamp 4100K",     WBEntry::Type::LAMP,        M("TP_WBALANCE_SOLUX41"),     3930, 1.f,   1.f},
-        {"Solux Lamp 4700K",     WBEntry::Type::LAMP,        M("TP_WBALANCE_SOLUX47"),     4700, 1.f,   1.f},
-        {"NG Solux Lamp 4700K",  WBEntry::Type::LAMP,        M("TP_WBALANCE_SOLUX47_NG"),  4480, 1.f,   1.f},
-        {"LED LSI Lumelex 2040", WBEntry::Type::LED,         M("TP_WBALANCE_LED_LSI"),     2970, 1.f,   1.f},
-        {"LED CRS SP12 WWMR16",  WBEntry::Type::LED,         M("TP_WBALANCE_LED_CRS"),     3050, 1.f,   1.f},
-        {"Flash 5500K",          WBEntry::Type::FLASH,       M("TP_WBALANCE_FLASH55"),     5500, 1.f,   1.f},
-        {"Flash 6000K",          WBEntry::Type::FLASH,       M("TP_WBALANCE_FLASH60"),     6000, 1.f,   1.f},
-        {"Flash 6500K",          WBEntry::Type::FLASH,       M("TP_WBALANCE_FLASH65"),     6500, 1.f,   1.f},
-        // Should remain the last one
-        {"Custom",               WBEntry::Type::CUSTOM,      M("TP_WBALANCE_CUSTOM"),        0, 1.f,   1.f}
-    };
-
-    return wb_entries;
 }
 
 
@@ -3182,10 +3142,28 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 // WB
         if (RELEVANT_(wb)) {
             saveToKeyfile("White Balance", "Enabled", wb.enabled, keyFile);
-            saveToKeyfile("White Balance", "Setting", wb.method, keyFile);
+            std::string method = "Camera";
+            switch (wb.method) {
+            case WBParams::CAMERA:
+                method = "Camera";
+                break;
+            case WBParams::AUTO:
+                method = "Auto";
+                break;
+            case WBParams::CUSTOM_TEMP:
+                method = "CustomTemp";
+                break;
+            case WBParams::CUSTOM_MULT:
+            default:
+                method = "CustomMult";
+                break;
+            }
+            saveToKeyfile("White Balance", "Setting", method, keyFile);
             saveToKeyfile("White Balance", "Temperature", wb.temperature, keyFile);
             saveToKeyfile("White Balance", "Green", wb.green, keyFile);
             saveToKeyfile("White Balance", "Equal", wb.equal, keyFile);
+            std::vector<double> m(wb.mult.begin(), wb.mult.end());
+            saveToKeyfile("White Balance", "Multipliers", m, keyFile);
         }
 
 
@@ -4058,10 +4036,26 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
         if (keyFile.has_group("White Balance") && RELEVANT_(wb)) {
             assignFromKeyfile(keyFile, "White Balance", "Enabled", wb.enabled);
-            assignFromKeyfile(keyFile, "White Balance", "Setting", wb.method);
+            Glib::ustring method = "CustomTemp";
+            assignFromKeyfile(keyFile, "White Balance", "Setting", method);
             assignFromKeyfile(keyFile, "White Balance", "Temperature", wb.temperature);
             assignFromKeyfile(keyFile, "White Balance", "Green", wb.green);
             assignFromKeyfile(keyFile, "White Balance", "Equal", wb.equal);
+            std::vector<float> m;
+            if (assignFromKeyfile(keyFile, "White Balance", "Multipliers", m) && m.size() == 3) {
+                for (int i = 0; i < 3; ++i) {
+                    wb.mult[i] = m[i];
+                }
+            }
+            if (method == "Camera") {
+                wb.method = WBParams::CAMERA;
+            } else if (method == "Auto") {
+                wb.method = WBParams::AUTO;
+            } else if (method == "CustomMult") {
+                wb.method = WBParams::CUSTOM_MULT;
+            } else {
+                wb.method = WBParams::CUSTOM_TEMP;
+            }
         }
 
         if (keyFile.has_group("Defringing") && RELEVANT_(defringe)) {

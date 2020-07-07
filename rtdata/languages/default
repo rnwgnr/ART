@@ -877,6 +877,7 @@ HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tone equalizer - Regularization
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Tone equalizer - Tonal map
 HISTORY_MSG_TONECURVE_SATCURVE;Tone curve - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tone curve - Perceptual strength
+HISTORY_MSG_WBALANCE_MULT;WB - multipliers
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -2025,9 +2026,10 @@ TP_VIGNETTING_LABEL;Vignetting Correction
 TP_VIGNETTING_RADIUS;Radius
 TP_VIGNETTING_STRENGTH;Strength
 TP_WBALANCE_AUTO;Auto
-TP_WBALANCE_CAMERA;Camera
+TP_WBALANCE_CAMERA;As shot
 TP_WBALANCE_CLOUDY;Cloudy
-TP_WBALANCE_CUSTOM;Custom
+TP_WBALANCE_CUSTOM;Custom temperature
+TP_WBALANCE_CUSTOM_MULT;Custom multipliers
 TP_WBALANCE_DAYLIGHT;Daylight (sunny)
 TP_WBALANCE_EQBLUERED;Blue/Red equalizer
 TP_WBALANCE_EQBLUERED_TOOLTIP;Allows to deviate from the normal behavior of "white balance" by modulating the blue/red balance.\nThis can be useful when shooting conditions:\na) are far from the standard illuminant (e.g. underwater),\nb) are far from conditions where calibrations were performed,\nc) where the matrices or ICC profiles are unsuitable.
@@ -2071,6 +2073,7 @@ TP_WBALANCE_TUNGSTEN;Tungsten
 TP_WBALANCE_WATER1;UnderWater 1
 TP_WBALANCE_WATER2;UnderWater 2
 TP_WBALANCE_WATER_HEADER;UnderWater
+TP_WBALANCE_PRESET;Camera preset
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Open (new) detail window
 ZOOMPANEL_ZOOM100;Zoom to 100%\nShortcut: <b>z</b>

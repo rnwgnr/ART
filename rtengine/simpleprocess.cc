@@ -186,13 +186,24 @@ private:
         imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
 
         // set the color temperature
-        currWB = ColorTemp (params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
-
-        if (!params.wb.enabled || params.wb.method == "Auto") {
-            currWB = ColorTemp();
-        } else if (params.wb.method == "Camera") {
-            currWB = imgsrc->getWB ();
+        currWB = ColorTemp();
+        if (params.wb.enabled) {
+            switch (params.wb.method) {
+            case WBParams::CAMERA:
+                currWB = imgsrc->getWB ();
+                break;
+            case WBParams::CUSTOM_TEMP:
+                currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
+                break;
+            case WBParams::CUSTOM_MULT:
+                currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);
+                break;
+            case WBParams::AUTO:
+            default:
+                currWB = ColorTemp();
+            }
         }
+
         imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, params.filmNegative.enabled ? ColorTemp() : currWB);
 
         if (params.filmNegative.enabled) {
@@ -211,7 +222,7 @@ private:
         double contrastThreshold = imgsrc->getSensorType() == ST_BAYER ? params.raw.bayersensor.dualDemosaicContrast : params.raw.xtranssensor.dualDemosaicContrast;
         imgsrc->demosaic(params.raw, autoContrast, contrastThreshold);
 
-        if (params.wb.method == "Auto") {
+        if (params.wb.method == WBParams::AUTO) {
             double rm, gm, bm;
             imgsrc->getAutoWBMultipliers (rm, gm, bm);
             currWB.update(rm, gm, bm, params.wb.equal);
@@ -232,19 +243,6 @@ private:
         if (pl) {
             pl->setProgress (0.45);
         }
-
-        // // set the color temperature
-        // currWB = ColorTemp (params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
-
-        // if (!params.wb.enabled) {
-        //     currWB = ColorTemp();
-        // } else if (params.wb.method == "Camera") {
-        //     currWB = imgsrc->getWB ();
-        // } else if (params.wb.method == "Auto") {
-        //     double rm, gm, bm;
-        //     imgsrc->getAutoWBMultipliers (rm, gm, bm);
-        //     currWB.update(rm, gm, bm, params.wb.equal);
-        // }
 
         if (params.denoise.enabled) {
             ipf.denoiseComputeParams(imgsrc, currWB, dnstore, params.denoise);
