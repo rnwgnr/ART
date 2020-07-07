@@ -299,7 +299,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
             multBox->pack_start(*mult[i]);
             mult[i]->show();
             mult[i]->setAdjusterListener(this);
-            mult[i]->setLogScale(10, 1, true);
+            mult[i]->setLogScale(100, 1, true);
         }
     }
     multBox->show();
@@ -411,6 +411,7 @@ void WhiteBalance::methodChanged()
     if (preset >= 0) {
         method->set_active(WBParams::CUSTOM_TEMP);
         updateMethodGui();
+        label = M("TP_WBALANCE_PRESET") + ": " + presets[preset].label;
     }
     
     enableListener();
@@ -675,7 +676,7 @@ void WhiteBalance::fillMethods()
         if (!presets.empty()) {
             row = *(refTreeModel->append());
             row[methodColumns.colIcon] = wbPixbufs[0];
-            row[methodColumns.colLabel] = M("TP_WBALANCE_PRESETS");
+            row[methodColumns.colLabel] = M("TP_WBALANCE_PRESET");
             row[methodColumns.colPreset] = -1;
         }
         int i = 0;
