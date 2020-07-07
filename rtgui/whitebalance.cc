@@ -263,13 +263,10 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     green->show ();
     equal->show ();
 
-    /*  Gtk::HBox* boxgreen = Gtk::manage (new Gtk::HBox ());
-    boxgreen->show ();
-
-    boxgreen->pack_start(*igreenL);
-    boxgreen->pack_start(*green);
-    boxgreen->pack_start(*igreenR);*/
-
+    temp->delay = options.adjusterMaxDelay;
+    green->delay = options.adjusterMaxDelay;
+    equal->delay = options.adjusterMaxDelay;
+    
     tempBox = Gtk::manage(new Gtk::VBox());
 
     tempBox->pack_start(*temp);
@@ -300,6 +297,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
             mult[i]->show();
             mult[i]->setAdjusterListener(this);
             mult[i]->setLogScale(100, 1, true);
+            mult[i]->delay = options.adjusterMaxDelay;
         }
     }
     multBox->show();
