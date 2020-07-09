@@ -145,7 +145,7 @@ int main (int argc, char **argv)
     // set paths
     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
         argv0 = DATA_SEARCH_PATH;
-    } else if (DATA_SEARCH_PATH == ".") {
+    } else if (strcmp(DATA_SEARCH_PATH, ".") == 0) {
         argv0 = exePath;
     } else {
         argv0 = Glib::build_filename (exePath, DATA_SEARCH_PATH);
