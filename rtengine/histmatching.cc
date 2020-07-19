@@ -294,10 +294,37 @@ public:
         for (size_t i = 0; i < hist.size(); ++i) {
             ret += std::abs(srchist_[i] - hist[i]);
         }
-        return ret;
+        return ret * (is_scurve(curve) ? 0.1 : 1);
     }
-
+    
 private:
+    bool is_scurve(const std::vector<double> &curve) const
+    {
+        int shoulder = -1;
+        float prev = 0.f;
+        for (size_t i = 1; i < curve.size(); i += 2) {
+            if (shoulder < 0) {
+                if (curve[i] >= curve[i+1] && curve[i] > 0) {
+                    shoulder = 1;
+                } else if (curve[i] > 0) {
+                    return false;
+                }
+            } else if (shoulder == 1) {
+                if (curve[i] < curve[i+1]) {
+                    shoulder = 0;
+                }
+            } else {
+                if (curve[i] >= curve[i+1] && curve[i] < 1) {
+                    return false;
+                } else if (curve[i+1] < prev) {
+                    return false;
+                }
+                prev = curve[i+1];
+            }
+        }
+        return shoulder >= 0;
+    }
+    
     std::array<float, 256> srchist_;
     array2D<float> img_;
 };
@@ -489,6 +516,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         target->resizeImgTo(source->getWidth(), source->getHeight(), TI_Nearest, tmp);
         target.reset(tmp);
     }
+    
     static const std::vector<PixelGetter> getters = {
         &get_luminance,
         &get_r,
