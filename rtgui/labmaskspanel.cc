@@ -593,6 +593,8 @@ private:
     {
         if (mask_ && clipboard.hasDrawnMask()) {
             *mask_ = clipboard.getDrawnMask();
+            undo_stack_.clear();
+            info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
             sig_draw_updated_.emit();
         }
     }
