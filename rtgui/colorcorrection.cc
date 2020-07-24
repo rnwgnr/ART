@@ -138,7 +138,7 @@ public:
                 {
                     return Glib::ustring::compose("{%1,%2,%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("RGB S=%5\ns=%1 o=%2\np=%3 P=%4", lbl(r.slope), lbl(r.offset), lbl(r.power), lbl(r.pivot), r.saturation);
+            return Glib::ustring::compose("RGB S=%5 So=%6\ns=%1 o=%2\np=%3 P=%4", lbl(r.slope), lbl(r.offset), lbl(r.power), lbl(r.pivot), r.inSaturation, r.outSaturation);
         }   break;
         case rtengine::procparams::ColorCorrectionParams::Mode::HSL: {
             const auto lbl =
@@ -146,14 +146,14 @@ public:
                 {
                     return Glib::ustring::compose("{s=%1,o=%2,p=%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("HSL S=%4\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.saturation);
+            return Glib::ustring::compose("HSL S=%4 So=%5\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation);
         }   break;
         default: {
             const auto round_ab = [](float v) -> float
                                   {
                                       return int(v * 1000) / 1000.f;
                                   };
-            return Glib::ustring::compose("x=%1 y=%2 S=%3\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.saturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0]);            
+            return Glib::ustring::compose("x=%1 y=%2 S=%3 So=%8\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation);
         }   break;
         }
     }
@@ -180,7 +180,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     auto EVENT = LUMINANCECURVE | M_LUMACURVE;
     EvEnabled = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_ENABLED");
     EvAB = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_AB");
-    EvSaturation = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_SATURATION");
+    EvInSaturation = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_INSATURATION");
+    EvOutSaturation = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_OUTSATURATION");
     EvLightness = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIGHTNESS");
     EvSlope = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_SLOPE");
     EvOffset = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_OFFSET");
@@ -222,9 +223,17 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     gridAB = Gtk::manage(new LabGrid(EvAB, M("TP_COLORCORRECTION_ABVALUES"), false));
     box_combined->pack_start(*gridAB);
 
-    saturation = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SATURATION"), -100, 100, 1, 0));
-    saturation->setAdjusterListener(this);
-    box/*_combined*/->pack_start(*saturation, Gtk::PACK_EXPAND_WIDGET, 4);
+    Gtk::Frame *satframe = Gtk::manage(new Gtk::Frame(M("TP_COLORCORRECTION_SATURATION")));
+    Gtk::VBox *satbox = Gtk::manage(new Gtk::VBox());
+    inSaturation = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_IN"), -100, 100, 1, 0, nullptr, nullptr, nullptr, nullptr, false, true));
+    inSaturation->setAdjusterListener(this);
+    satbox->pack_start(*inSaturation, Gtk::PACK_EXPAND_WIDGET, 4);
+
+    outSaturation = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_OUT"), -100, 100, 1, 0, nullptr, nullptr, nullptr, nullptr, false, true));
+    outSaturation->setAdjusterListener(this);
+    satbox->pack_start(*outSaturation, Gtk::PACK_EXPAND_WIDGET, 4);
+    satframe->add(*satbox);
+    box->pack_start(*satframe);
 
     slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1));
     slope->setLogScale(10, 1, true);
@@ -304,7 +313,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
 
         
-    saturation->delay = options.adjusterMaxDelay;
+    inSaturation->delay = options.adjusterMaxDelay;
+    outSaturation->delay = options.adjusterMaxDelay;
     slope->delay = options.adjusterMaxDelay;
     offset->delay = options.adjusterMaxDelay;
     power->delay = options.adjusterMaxDelay;
@@ -365,7 +375,8 @@ void ColorCorrection::write(ProcParams *pp)
 
 void ColorCorrection::setDefaults(const ProcParams *defParams)
 {
-    saturation->setDefault(defParams->colorcorrection.regions[0].saturation);
+    inSaturation->setDefault(defParams->colorcorrection.regions[0].inSaturation);
+    outSaturation->setDefault(defParams->colorcorrection.regions[0].outSaturation);
     slope->setDefault(defParams->colorcorrection.regions[0].slope[0]);
     offset->setDefault(defParams->colorcorrection.regions[0].offset[0]);
     power->setDefault(defParams->colorcorrection.regions[0].power[0]);
@@ -385,8 +396,10 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
 {
     rtengine::ProcEvent evt;
     Glib::ustring msg = a->getTextValue();
-    if (a == saturation) {
-        evt = EvSaturation;
+    if (a == inSaturation) {
+        evt = EvInSaturation;
+    } else if (a == outSaturation) {
+        evt = EvOutSaturation;
     } else if (a == slope) {
         evt = EvSlope;
     } else if (a == offset) {
@@ -512,7 +525,8 @@ void ColorCorrection::regionGet(int idx)
     default:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::YUV;
     }
-    r.saturation = saturation->getValue();
+    r.inSaturation = inSaturation->getValue();
+    r.outSaturation = outSaturation->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         double la, lb;
         gridAB->getParams(la, lb, r.a, r.b, r.abscale);
@@ -558,7 +572,8 @@ void ColorCorrection::regionShow(int idx)
     default:
         mode->set_active(0);
     }
-    saturation->setValue(r.saturation);
+    inSaturation->setValue(r.inSaturation);
+    outSaturation->setValue(r.outSaturation);
     gridAB->setParams(0, 0, r.a, r.b, r.abscale, false);
     slope->setValue(r.slope[0]);
     offset->setValue(r.offset[0]);

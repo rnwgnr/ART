@@ -2437,7 +2437,8 @@ ColorCorrectionParams::Region::Region():
     a(0),
     b(0),
     abscale(1),
-    saturation(0),
+    inSaturation(0),
+    outSaturation(0),
     slope{1,1,1},
     offset{0,0,0},
     power{1,1,1},
@@ -2455,7 +2456,8 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
     return a == other.a
         && b == other.b
         && abscale == other.abscale
-        && saturation == other.saturation
+        && inSaturation == other.inSaturation
+        && outSaturation == other.outSaturation
         && slope == other.slope
         && offset == other.offset
         && power == other.power
@@ -3506,7 +3508,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("A_") + n, l.a, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("B_") + n, l.b, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("ABScale_") + n, l.abscale, keyFile);
-                    putToKeyfile("ColorCorrection", Glib::ustring("Saturation_") + n, l.saturation, keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("InSaturation_") + n, l.inSaturation, keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("OutSaturation_") + n, l.outSaturation, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Slope_") + n, l.slope[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Offset_") + n, l.offset[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Power_") + n, l.power[0], keyFile);
@@ -4668,7 +4671,6 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 get("A_", cur.a);
                 get("B_", cur.b);
                 get("ABScale_", cur.abscale);
-                get("Saturation_", cur.saturation);
                 if (ppVersion < 1005) {
                     int c = -1;
                     if (assignFromKeyfile(keyFile, ccgroup, prefix + Glib::ustring("Channel_") + n, c)) {
@@ -4736,6 +4738,20 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         }
                     }
                 }
+                if (ppVersion < 1018) {
+                    double sat = 0;
+                    get("Saturation_", sat);
+                    if (cur.mode == ColorCorrectionParams::Mode::YUV) {
+                        cur.inSaturation = sat;
+                        cur.outSaturation = 0;
+                    } else {
+                        cur.inSaturation = 0;
+                        cur.outSaturation = sat;
+                    }
+                } else {
+                    get("InSaturation_", cur.inSaturation);
+                    get("OutSaturation_", cur.outSaturation);
+                }                
                 if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
                     found = true;
                     done = false;

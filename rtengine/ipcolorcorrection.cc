@@ -91,6 +91,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float abca[n];
     float abcb[n];
     float rs[n];
+    float rsout[n];
     float rslope[n][3];
     float roffset[n][3];
     float rpower[n][3];
@@ -103,14 +104,13 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         if (rgbmode[i]) {
             abca[i] = 0.f;
             abcb[i] = 0.f;
-            //rs[i] = 1.f;
         } else {
             abca[i] = abcoord(r.a);
             abcb[i] = abcoord(r.b);
-            //rs[i] = 1.f + r.saturation / 100.f;
         }
-        rs[i] = 1.f + r.saturation / 100.f;
-        enabled[i] = r.saturation != 0;
+        rs[i] = 1.f + r.inSaturation / 100.f;
+        rsout[i] = 1.f + r.outSaturation / 100.f;
+        enabled[i] = r.inSaturation != 0;
         if (r.mode == ColorCorrectionParams::Mode::HSL) {
             float R, G, B;
             float u, v;
@@ -169,8 +169,13 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 const float *offset = roffset[region];
                 const float *power = rpower[region];
                 const float *pivot = rpivot[region];
+                const float saturation = rs[region];
                 
                 if (rgbmode[region]) {
+                    if (saturation != 1.f) {
+                        u *= saturation;
+                        v *= saturation;
+                    }
                     float rgb[3];
                     Color::yuv2rgb(Y, u, v, rgb[0], rgb[1], rgb[2], ws);
                     for (int i = 0; i < 3; ++i) {
@@ -207,12 +212,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     } else {
                         Y = v;
                     }
+                    if (saturation != 1.f) {
+                        u *= saturation;
+                        v *= saturation;
+                    }
                 }
-            }
-            const float saturation = rs[region];
-            if (saturation != 1.f) {
-                u *= saturation;
-                v *= saturation;
             }
         };
 
@@ -232,8 +236,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 const float *offset = roffset[region];
                 const float *power = rpower[region];
                 const float *pivot = rpivot[region];
+                const float saturation = rs[region];
                 
                 if (rgbmode[region]) {
+                    if (saturation != 1.f) {
+                        vfloat vsaturation = F2V(saturation);
+                        u *= vsaturation;
+                        v *= vsaturation;
+                    }
                     vfloat rgb[3];
                     vfloat v65535 = F2V(65535.f);
                     Color::yuv2rgb(Y, u, v, rgb[0], rgb[1], rgb[2], vws);
@@ -269,21 +279,22 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     Y = YY;
                     u *= f;
                     v *= f;
+                    if (saturation != 1.f) {
+                        vfloat vsaturation = F2V(saturation);
+                        u *= vsaturation;
+                        v *= vsaturation;
+                    }
                 }
-            }
-            const float saturation = rs[region];
-            if (saturation != 1.f) {
-                vfloat vsaturation = F2V(saturation);
-                u *= vsaturation;
-                v *= vsaturation;
             }
         };
 
     vfloat vabcb[n];
     vfloat vabca[n];
+    vfloat vrsout[n];
     for (int i = 0; i < n; ++i) {
         vabcb[i] = F2V(abcb[i]);
         vabca[i] = F2V(abca[i]);
+        vrsout[i] = F2V(rsout[i]);
     }
 
     vfloat zerov = F2V(0.0);
@@ -329,6 +340,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                         vfloat fv = vmaxf(Y_newv, ZEROV);
                         u_newv += fv * vabcb[i];
                         v_newv += fv * vabca[i];
+
+                        if (params->colorcorrection.regions[i].outSaturation) {
+                            u_newv *= vrsout[i];
+                            v_newv *= vrsout[i];
+                        }
                     
                         Yv = vintpf(lblendv, Y_newv, Yv);
                         uv = vintpf(blendv, u_newv, uv);
@@ -363,6 +379,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                         float f = max(Y_new, 0.f);
                         u_new += f * abcb[i];
                         v_new += f * abca[i];
+
+                        if (params->colorcorrection.regions[i].outSaturation) {
+                            u_new *= rsout[i];
+                            v_new *= rsout[i];
+                        }
                     
                         Y = intp(lblend, Y_new, Y);
                         u = intp(blend, u_new, u);

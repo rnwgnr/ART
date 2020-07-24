@@ -1253,7 +1253,8 @@ struct ColorCorrectionParams {
         double a;
         double b;
         double abscale;
-        double saturation;
+        double inSaturation;
+        double outSaturation;
         std::array<double, 3> slope;
         std::array<double, 3> offset;
         std::array<double, 3> power;

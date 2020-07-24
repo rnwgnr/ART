@@ -80,7 +80,8 @@ private:
     
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvAB;
-    rtengine::ProcEvent EvSaturation;
+    rtengine::ProcEvent EvInSaturation;
+    rtengine::ProcEvent EvOutSaturation;
     rtengine::ProcEvent EvLightness;
     rtengine::ProcEvent EvSlope;
     rtengine::ProcEvent EvOffset;
@@ -114,7 +115,8 @@ private:
     Gtk::VBox *box_hsl;
     
     LabGrid *gridAB;
-    Adjuster *saturation;
+    Adjuster *inSaturation;
+    Adjuster *outSaturation;
     Adjuster *slope;
     Adjuster *offset;
     Adjuster *power;
