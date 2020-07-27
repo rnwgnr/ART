@@ -752,7 +752,8 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - Masque flou
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - Offset
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - Pivot
 HISTORY_MSG_COLORCORRECTION_POWER;CC - Puissance
-HISTORY_MSG_COLORCORRECTION_SATURATION;CC - Saturation
+HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - Saturation en entrée
+HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - Saturation en sortie
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - Montrer le masque
 HISTORY_MSG_COLORCORRECTION_SLOPE;CC - Pente
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - Masque ΔE
@@ -877,6 +878,7 @@ HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Égaliseur Tonal - Régularisation
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Égaliseur Tonal - Carte tonale
 HISTORY_MSG_TONECURVE_SATCURVE;Courbe tonale - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Courbe tonale - Force perceptuelle 
+HISTORY_MSG_WBALANCE_MULT;WB - multiplicateurs
 HISTORY_NEWSNAPSHOT;Ajouter
 HISTORY_NEWSNAPSHOT_TOOLTIP;Raccourci : <b>Alt-s</b>
 HISTORY_SNAPSHOT;Instantané
@@ -1493,6 +1495,8 @@ TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotation antihoraire\nRaccourci : <b>[</b> - Mode 
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotation horaire\nRaccourci : <b>]</b> - Mode Onglets Éditeurs Multiples,\n<b>Alt-]</b> - Mode Onglet Éditeur nique.
 TP_COARSETRAF_TOOLTIP_VFLIP;Miroir vertical.
 TP_COLORCORRECTION_ABVALUES;x=%1 y=%2
+TP_COLORCORRECTION_IN;Entrée
+TP_COLORCORRECTION_OUT;Sortie
 TP_COLORCORRECTION_MODE;Mode
 TP_COLORCORRECTION_MODE_COMBINED;Standard
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Canaux RVB séparés
@@ -2025,9 +2029,10 @@ TP_VIGNETTING_LABEL;Correction du Vignetage
 TP_VIGNETTING_RADIUS;Rayon
 TP_VIGNETTING_STRENGTH;Force
 TP_WBALANCE_AUTO;Auto
-TP_WBALANCE_CAMERA;Appareil photo
+TP_WBALANCE_CAMERA;Prise de vue
 TP_WBALANCE_CLOUDY;Nuageux
-TP_WBALANCE_CUSTOM;Personnalisé
+TP_WBALANCE_CUSTOM;Personnalisée 
+TP_WBALANCE_CUSTOM_MULT;Multiplicateur personnalisé 
 TP_WBALANCE_DAYLIGHT;Lumière du jour (ensoleillé)
 TP_WBALANCE_EQBLUERED;Égaliseur Bleu/Rouge
 TP_WBALANCE_EQBLUERED_TOOLTIP;Permet de dévier du comportement normal de la "balance des blancs" en modulant la balance bleu/rouge.\nCeci peut être utile lorsque :\na) les conditions de prise de vue sont loin de l'illuminant standard (ex: sous la mer)\nb) les conditions sont loin de celles dans lesquelles a été réalisé le calibrage\nc) les matrices ou les profils ICC sont incorrects.
@@ -2071,6 +2076,7 @@ TP_WBALANCE_TUNGSTEN;Tungstène
 TP_WBALANCE_WATER1;Sous-marin 1
 TP_WBALANCE_WATER2;Sous-marin 2
 TP_WBALANCE_WATER_HEADER;Sous-marin
+TP_WBALANCE_PRESET;Préréglage appareil photo
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Ouvrir une (nouvelle) vue détaillée
 ZOOMPANEL_ZOOM100;Zoomer à 100%\nRaccourci : <b>z</b>
