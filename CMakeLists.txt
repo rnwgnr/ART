@@ -30,7 +30,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
     message(FATAL_ERROR "Building ART requires using GCC version 4.9 or higher!")
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "10.0")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "10.0" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.2")
     message(STATUS "WARNING: gcc ${CMAKE_CXX_COMPILER_VERSION} is known to miscompile ART when using -ftree-loop-vectorize, forcing the option to be off")    
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-tree-loop-vectorize")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-tree-loop-vectorize")
