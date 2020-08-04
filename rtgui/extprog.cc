@@ -143,6 +143,7 @@ void UserCommand::execute(const std::vector<Thumbnail *> &args) const
     std::vector<Glib::ustring> argv = rtengine::subprocess::split_command_line(command);
     
     for (auto &t : args) {
+        t->updateCache(true, false);
         argv.push_back(t->getFileName());
     }
 
