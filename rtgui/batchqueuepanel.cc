@@ -75,6 +75,7 @@ BatchQueuePanel::BatchQueuePanel (FileCatalog* aFileCatalog) : parent(nullptr)
 
     // Output directory selection
     fdir = Gtk::manage (new Gtk::Frame (M("QUEUE_LOCATION_TITLE")));
+    fdir->set_label_align(0.01, 0.5);
     Gtk::VBox* odvb = Gtk::manage (new Gtk::VBox ());
     Gtk::HBox* hb2 = Gtk::manage (new Gtk::HBox ());
     useTemplate = Gtk::manage (new Gtk::RadioButton (M("QUEUE_LOCATION_TEMPLATE") + ":"));

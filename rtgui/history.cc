@@ -39,6 +39,7 @@ History::History (bool bookmarkSupport) :
     hscrollw->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
     Gtk::Frame* histFrame = Gtk::manage (new Gtk::Frame (M("HISTORY_LABEL")));
+    histFrame->set_label_align(0.025, 0.5);
     histFrame->set_name ("HistoryPanel");
     histFrame->add (*hscrollw);
 
@@ -109,6 +110,7 @@ History::History (bool bookmarkSupport) :
     bscrollw->set_size_request (-1, 45);
 
     Gtk::Frame* bmFrame = Gtk::manage (new Gtk::Frame (M("HISTORY_SNAPSHOTS")));
+    bmFrame->set_label_align(0.025, 0.5);
     bmFrame->set_name("Snapshots");
     Gtk::VBox* bmBox = Gtk::manage (new Gtk::VBox ());
     bmFrame->add (*bmBox);
