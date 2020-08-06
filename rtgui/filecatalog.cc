@@ -2547,4 +2547,6 @@ void FileCatalog::setupSidePanels()
     tbRightPanel_1->set_active(options.browserToolPanelOpened);
     filepanel->showRightBox(options.browserToolPanelOpened);
     filepanel->placespaned->set_visible(options.browserDirPanelOpened);
+    enableInspector();
+    disableInspector();
 }
