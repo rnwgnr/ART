@@ -1186,11 +1186,12 @@ void FileCatalog::developRequested(const std::vector<FileBrowserEntry*>& tbe, bo
     if (listener) {
         std::vector<BatchQueueEntry*> entries;
 
-        // TODO: (HOMBRE) should we still use parallelization here, now that thumbnails are processed asynchronously...?
-        //#pragma omp parallel for ordered
         for (size_t i = 0; i < tbe.size(); i++) {
             FileBrowserEntry* fbe = tbe[i];
             Thumbnail* th = fbe->thumbnail;
+            if (!th->hasProcParams()) {
+                th->createProcParamsForUpdate(false, false, true);
+            }
             rtengine::procparams::ProcParams params = th->getProcParams();
 
             auto pjob = create_processing_job(fbe->filename, th->getType() == FT_Raw, params, fastmode);
@@ -1199,11 +1200,11 @@ void FileCatalog::developRequested(const std::vector<FileBrowserEntry*>& tbe, bo
             int ph = BatchQueue::calcMaxThumbnailHeight();
             th->getThumbnailSize (pw, ph);
 
-            BatchQueueEntry* bqh = new BatchQueueEntry (pjob, params, fbe->filename, pw, ph, th);
+            auto bqh = new BatchQueueEntry(pjob, params, fbe->filename, pw, ph, th);
             entries.push_back(bqh);
         }
 
-        listener->addBatchQueueJobs( entries );
+        listener->addBatchQueueJobs(entries);
     }
 }
 
