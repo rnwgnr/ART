@@ -719,7 +719,11 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
             if (batch_profile_) {
                 batch_profile_->applyTo(processing->params);
             }
-            processing->params.save(this, fname + ".out" + paramFileExtension);
+            if (processing->params.saveEmbedded(this, fname) != 0) {
+                auto sidecar = fname + ".out" + paramFileExtension;
+                error(Glib::ustring::compose(M("PROCPARAMS_EMBEDDED_SAVE_WARNING"), fname, sidecar));
+                processing->params.save(this, sidecar);
+            }
         }
 
         if (processing->thumbnail) {

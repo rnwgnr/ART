@@ -78,6 +78,7 @@ public:
     void set_double_list(const Glib::ustring &grp, const Glib::ustring &key, const Glib::ArrayHandle<double> &list);
 
     bool load_from_file(const Glib::ustring &fn);
+    bool load_from_data(const Glib::ustring &data);
     Glib::ustring to_data();
 
     Glib::ustring get_prefix() const { return prefix_; }
@@ -1573,9 +1574,11 @@ public:
     int save(ProgressListener *pl,
              const Glib::ustring &fname, const Glib::ustring &fname2=Glib::ustring(), const ParamsEdited *pedited=nullptr);
 
+    int saveEmbedded(ProgressListener *pl, const Glib::ustring &fname);
+
     /** Creates a new instance of ProcParams.
       * @return a pointer to the new ProcParams instance. */
-    static ProcParams* create();
+    static ProcParams *create();
 
     /** Destroys an instance of ProcParams.
       * @param pp a pointer to the ProcParams instance to destroy. */

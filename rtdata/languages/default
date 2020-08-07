@@ -1344,6 +1344,7 @@ PREFERENCES_XMP_SIDECAR_MODE_STD;Standard (FILENAME.xmp for FILENAME.ext)
 PREFERENCES_XMP_SIDECAR_MODE_EXT;darktable/digiKam-like (FILENAME.ext.xmp for FILENAME.ext)
 PROCPARAMS_LOAD_ERROR;Error loading parameters from %1: %2
 PROCPARAMS_SAVE_ERROR;Error saving parameters to %1: %2
+PROCPARAMS_EMBEDDED_SAVE_WARNING;Warning: failed to embed processing parameters in %1, saving to sidecar %2 instead
 PROFILEPANEL_COPYPPASTE;Parameters to copy
 PROFILEPANEL_GLOBALPROFILES;Bundled profiles
 PROFILEPANEL_LABEL;Processing Profiles

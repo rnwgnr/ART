@@ -520,6 +520,7 @@ void Exiv2Metadata::init(const Glib::ustring &base_dir)
         exiftool_base_dir = base_dir;
     }
     Exiv2::XmpParser::initialize();
+    Exiv2::XmpProperties::registerNs("us/pixls/ART/", "ART");
 }
 
 

@@ -25,9 +25,14 @@
 
 #include <glib/gstdio.h>
 
+#include <giomm.h>
+#include <sstream>
+#include <fstream>
+
 #include "curves.h"
 #include "procparams.h"
 #include "rtengine.h"
+#include "metadata.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -152,6 +157,12 @@ bool KeyFile::load_from_file(const Glib::ustring &fn)
 {
     filename_ = fn;
     return kf_.load_from_file(fn);
+}
+
+
+bool KeyFile::load_from_data(const Glib::ustring &data)
+{
+    return kf_.load_from_data(data);
 }
 
 
@@ -2989,6 +3000,121 @@ int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Gli
 }
 
 
+namespace {
+
+std::vector<char> compress(const std::string &src)
+{
+    auto s = Gio::MemoryOutputStream::create();
+    auto c = Gio::ZlibCompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW, -1);
+    std::vector<char> res;
+    {
+        auto stream = Gio::ConverterOutputStream::create(s, c);
+        stream->set_close_base_stream(true);
+        gsize n;
+        if (!stream->write_all(src, n)) {
+            return res;
+        }
+    }
+    char *data = static_cast<char *>(s->get_data());
+    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
+        res.push_back(data[i]);
+    }
+    return res;
+}
+
+
+std::string decompress(const std::vector<char> &src)
+{
+    auto s = Gio::MemoryOutputStream::create();
+    auto c = Gio::ZlibDecompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW);
+    std::vector<char> res;
+    {
+        auto stream = Gio::ConverterOutputStream::create(s, c);
+        stream->set_close_base_stream(true);
+        gsize n;
+        if (!stream->write_all(&(src[0]), src.size(), n)) {
+            return "";
+        }
+    }
+    char *data = static_cast<char *>(s->get_data());    
+    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
+        res.push_back(data[i]);
+    }
+    res.push_back(0);
+    return std::string(&(res[0]));
+}
+
+class ConversionError: public std::exception {
+    const char *what() noexcept { return "base64 error"; }
+};
+
+std::string to_xmp(const Glib::ustring &data)
+{
+    auto res = compress(data.raw());
+    std::vector<char> buf(((res.size() + 2) / 3) * 4 + 1);
+    if (Exiv2::base64encode(&(res[0]), res.size(), &(buf[0]), buf.size()) != 1) {
+        throw ConversionError();
+    }
+    buf.push_back(0);
+    return std::string(&(buf[0]));
+}
+
+
+Glib::ustring from_xmp(const std::string &data)
+{
+    std::vector<char> buf(data.size());
+    long n = Exiv2::base64decode(data.c_str(), &(buf[0]), buf.size());
+    if (n < 0) {
+        throw ConversionError();
+    }
+    buf.resize(n);
+    return decompress(buf);
+}
+
+} // namespace
+
+int ProcParams::saveEmbedded(ProgressListener *pl, const Glib::ustring &fname)
+{
+    if (fname.empty()) {
+        return 0;
+    }
+
+    Glib::ustring sPParams;
+
+    try {
+        KeyFile keyFile;
+        int ret = save(pl, keyFile, nullptr, fname);
+        if (ret != 0) {
+            return ret;
+        }
+
+        sPParams = keyFile.to_data();
+    } catch (Glib::KeyFileError &exc) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_SAVE_ERROR"), fname, exc.what()));
+        }
+    }
+
+    if (sPParams.empty()) {
+        return 1;
+    }
+
+    try {
+        Exiv2Metadata md(fname);
+        md.load();
+        md.xmpData()["Xmp.ART.arp"] = to_xmp(sPParams);
+        md.saveToImage(pl, fname);
+        return 0;
+    } catch (std::exception &exc) {
+        if (pl) {
+            pl->error(Glib::ustring::compose(M("PROCPARAMS_SAVE_ERROR"), fname, exc.what()));
+        }
+        return 1;
+    }
+}
+
+
+
 int ProcParams::save(ProgressListener *pl, bool save_general,
                      KeyFile &keyFile, const ParamsEdited *pedited,
                      const Glib::ustring &fname) const
@@ -3713,8 +3839,11 @@ int ProcParams::load(ProgressListener *pl,
     keyFile.setProgressListener(pl);
 
     try {
-        if (!Glib::file_test(fname, Glib::FILE_TEST_EXISTS) ||
-                !keyFile.load_from_file(fname)) {
+        if (!Glib::file_test(fname, Glib::FILE_TEST_EXISTS)) {
+            return 1;
+        }
+
+        if (!keyFile.load_from_file(fname)) {
             // not an error to report
             return 1;
         }
@@ -3722,11 +3851,22 @@ int ProcParams::load(ProgressListener *pl,
         return load(pl, keyFile, pedited, true, fname);
     } catch (const Glib::Error& e) {
         //printf("-->%s\n", e.what().c_str());
-        if (pl) {
-            pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+        try {
+            Exiv2Metadata md(fname);
+            md.load();
+            std::string xd = md.xmpData()["Xmp.ART.arp"].toString();
+            Glib::ustring data = from_xmp(xd);
+            if (!keyFile.load_from_data(data)) {
+                return 1;
+            }
+            return load(pl, keyFile, pedited, true, fname);
+        } catch (std::exception &exc) {
+            if (pl) {
+                pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
+            }
+            setDefaults();
+            return 1;
         }
-        setDefaults();
-        return 1;
     } catch (std::exception &e) {
         if (pl) {
             pl->error(Glib::ustring::compose(M("PROCPARAMS_LOAD_ERROR"), fname, e.what()));
