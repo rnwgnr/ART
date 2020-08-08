@@ -860,8 +860,8 @@ int processLineParams ( int argc, char **argv )
         } else {
             if (copyParamsFile) {
                 Glib::ustring outputProcessingParams = outputFile + paramFileExtension;
-                if (!options.params_out_embed || currentParams.saveEmbedded(outputFile) != 0) {
-                    currentParams.save(nullptr, outputProcessingParams);
+                if (!options.params_out_embed || currentParams.saveEmbedded(pl, outputFile) != 0) {
+                    currentParams.save(pl, outputProcessingParams);
                 }
             }
         }
