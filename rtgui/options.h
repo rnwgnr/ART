@@ -242,6 +242,8 @@ public:
     bool saveParamsFile;
     bool saveParamsCache;
     PPLoadLocation paramsLoadLocation;
+    bool params_out_embed;
+    
     bool procQueueEnabled;
     Glib::ustring gimpDir;
     Glib::ustring psDir;

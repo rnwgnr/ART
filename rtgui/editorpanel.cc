@@ -1820,8 +1820,10 @@ bool EditorPanel::idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImagef
         if (sf.saveParams) {
             // We keep the extension to avoid overwriting the profile when we have
             // the same output filename with different extension
-            if (pparams.saveEmbedded(parent, fname) != 0) { 
-                auto sidecar = fname + ".out" + paramFileExtension;
+            auto sidecar = fname + ".out" + paramFileExtension;
+            if (!options.params_out_embed) {
+                pparams.save(parent, sidecar);
+            } else if (pparams.saveEmbedded(parent, fname) != 0) { 
                 parent->error(Glib::ustring::compose(M("PROCPARAMS_EMBEDDED_SAVE_WARNING"), fname, sidecar));
                 pparams.save(parent, sidecar);
             }

@@ -1294,6 +1294,9 @@ PREFERENCES_PROFILESAVECACHE;Save processing profile to the cache
 PREFERENCES_PROFILESAVEINPUT;Save processing profile next to the input file
 PREFERENCES_PROFILESAVELOCATION;Processing profile saving location
 PREFERENCES_PROFILE_NONE;None
+PREFERENCES_PROFILE_SAVE_OUTPUT;Processing profiles for output images
+PREFERENCES_PROFILE_SAVE_OUTPUT_SIDECAR;Save in a sidecar file (output.ext.arp for output.ext)
+PREFERENCES_PROFILE_SAVE_OUTPUT_EMBEDDED;Embed in the metadata
 PREFERENCES_PRTINTENT;Rendering intent
 PREFERENCES_PRTPROFILE;Color profile
 PREFERENCES_PSPATH;Adobe Photoshop installation directory

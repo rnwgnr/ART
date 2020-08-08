@@ -161,6 +161,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::ComboBoxText* saveParamsPreference;
     Gtk::CheckButton* useBundledProfiles;
     Gtk::ComboBoxText* loadParamsPreference;
+    Gtk::ComboBoxText *saveOutParamsPreference;
     Gtk::ComboBoxText* editorLayout;
     RTWindow* parent;
 

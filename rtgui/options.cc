@@ -371,6 +371,7 @@ void Options::setDefaults()
     saveParamsFile = true;              // was false, but saving the procparams files next to the file make more sense when reorganizing file tree than in a cache
     saveParamsCache = false;            // there's no need to save the procparams files in a cache if saveParamsFile is true
     paramsLoadLocation = PLL_Input;     // was PLL_Cache
+    params_out_embed = false;
     procQueueEnabled = false;
     gimpDir = "";
     psDir = "";
@@ -918,6 +919,10 @@ void Options::readFromFile(Glib::ustring fname)
                     paramsLoadLocation = (PPLoadLocation)keyFile.get_integer("Profiles", "LoadParamsFromLocation");
                 }
 
+                if (keyFile.has_key("Profiles", "EmbedParamsInMetadata")) {
+                    params_out_embed = keyFile.get_boolean("Profiles", "EmbedParamsInMetadata");
+                }
+                
                 if (keyFile.has_key("Profiles", "CustomProfileBuilder")) {
                     CPBPath = keyFile.get_string("Profiles", "CustomProfileBuilder");  // for backward compatibility only
                 }
@@ -2048,6 +2053,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Profiles", "SaveParamsWithFile", saveParamsFile);
         keyFile.set_boolean("Profiles", "SaveParamsToCache", saveParamsCache);
         keyFile.set_integer("Profiles", "LoadParamsFromLocation", paramsLoadLocation);
+        keyFile.set_boolean("Profiles", "EmbedParamsInMetadata", params_out_embed);
         keyFile.set_string("Profiles", "CustomProfileBuilderPath", CPBPath);
         keyFile.set_integer("Profiles", "CustomProfileBuilderKeys", CPBKeys);
 

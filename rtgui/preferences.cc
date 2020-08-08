@@ -192,6 +192,7 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     saveParamsPreference->append (M ("PREFERENCES_PROFILESAVECACHE"));
     saveParamsPreference->append (M ("PREFERENCES_PROFILESAVEBOTH"));
     Gtk::Label *splab = Gtk::manage (new Gtk::Label (M ("PREFERENCES_PROFILESAVELOCATION") + ":"));
+    setExpandAlignProperties(splab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     vbdp->attach (*splab, 0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 2);
     vbdp->attach (*saveParamsPreference, 1, 2, 0, 1, Gtk::EXPAND | Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 2, 2);
     Gtk::Label* lplab = Gtk::manage (new Gtk::Label (M ("PREFERENCES_PROFILELOADPR") + ":"));
@@ -199,7 +200,17 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     loadParamsPreference->append (M ("PREFERENCES_PROFILEPRCACHE"));
     loadParamsPreference->append (M ("PREFERENCES_PROFILEPRFILE"));
     vbdp->attach (*lplab, 0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 2);
+    setExpandAlignProperties(lplab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     vbdp->attach (*loadParamsPreference, 1, 2, 1, 2, Gtk::EXPAND | Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 2, 2);
+
+    lplab = Gtk::manage(new Gtk::Label(M ("PREFERENCES_PROFILE_SAVE_OUTPUT") + ":"));
+    saveOutParamsPreference = Gtk::manage (new Gtk::ComboBoxText());
+    saveOutParamsPreference->append(M("PREFERENCES_PROFILE_SAVE_OUTPUT_SIDECAR"));
+    saveOutParamsPreference->append(M("PREFERENCES_PROFILE_SAVE_OUTPUT_EMBEDDED"));
+    vbdp->attach(*lplab, 0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 2);
+    setExpandAlignProperties(lplab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    vbdp->attach(*saveOutParamsPreference, 1, 2, 2, 3, Gtk::EXPAND | Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 2, 2);
+    
     fdp->add (*vbdp);
     vbImageProcessing->pack_start (*fdp, Gtk::PACK_SHRINK, 4);
 
@@ -1519,6 +1530,7 @@ void Preferences::storePreferences ()
     moptions.saveParamsFile = save_where == 0 || save_where == 2;
     moptions.saveParamsCache = save_where == 1 || save_where == 2;
     moptions.paramsLoadLocation = (PPLoadLocation)loadParamsPreference->get_active_row_number ();
+    moptions.params_out_embed = saveOutParamsPreference->get_active_row_number() == 1;
     moptions.useBundledProfiles = useBundledProfiles->get_active ();
 
     moptions.rtSettings.darkFramesPath = darkFrameDir->get_filename();
@@ -1747,8 +1759,9 @@ void Preferences::fillPreferences ()
 
     saveParamsPreference->set_active (moptions.saveParamsFile ? (moptions.saveParamsCache ? 2 : 0) : 1);
 
-    loadParamsPreference->set_active (moptions.paramsLoadLocation);
-    useBundledProfiles->set_active (moptions.useBundledProfiles);
+    loadParamsPreference->set_active(moptions.paramsLoadLocation);
+    saveOutParamsPreference->set_active(moptions.params_out_embed ? 1 : 0);
+    useBundledProfiles->set_active(moptions.useBundledProfiles);
 
     if (!moptions.tabbedUI) {
         editorLayout->set_active (moptions.mainNBVertical ? 1 : 0);
