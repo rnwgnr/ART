@@ -72,9 +72,9 @@ void Imagefloat::setScanline (int row, unsigned char* buffer, int bps, unsigned 
         uint16_t* sbuffer = (uint16_t*) buffer;
 
         for (int i = 0; i < width; i++) {
-            r(row, i) = 65535.f * DNG_HalfToFloat_f(sbuffer[ix++]);
-            g(row, i) = 65535.f * DNG_HalfToFloat_f(sbuffer[ix++]);
-            b(row, i) = 65535.f * DNG_HalfToFloat_f(sbuffer[ix++]);
+            r(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
+            g(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
+            b(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
         }
 
         break;

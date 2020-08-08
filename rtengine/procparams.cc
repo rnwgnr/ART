@@ -33,6 +33,7 @@
 #include "procparams.h"
 #include "rtengine.h"
 #include "metadata.h"
+#include "halffloat.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -43,6 +44,120 @@
 using namespace std;
 
 namespace rtengine { namespace procparams {
+
+namespace {
+
+std::vector<char> compress(const std::string &src)
+{
+    auto s = Gio::MemoryOutputStream::create();
+    auto c = Gio::ZlibCompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW, -1);
+    std::vector<char> res;
+    {
+        auto stream = Gio::ConverterOutputStream::create(s, c);
+        stream->set_close_base_stream(true);
+        gsize n;
+        if (!stream->write_all(src, n)) {
+            return res;
+        }
+    }
+    char *data = static_cast<char *>(s->get_data());
+    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
+        res.push_back(data[i]);
+    }
+    return res;
+}
+
+
+std::string decompress(const std::vector<char> &src)
+{
+    auto s = Gio::MemoryOutputStream::create();
+    auto c = Gio::ZlibDecompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW);
+    std::vector<char> res;
+    {
+        auto stream = Gio::ConverterOutputStream::create(s, c);
+        stream->set_close_base_stream(true);
+        gsize n;
+        if (!stream->write_all(&(src[0]), src.size(), n)) {
+            return "";
+        }
+    }
+    char *data = static_cast<char *>(s->get_data());    
+    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
+        res.push_back(data[i]);
+    }
+    res.push_back(0);
+    return std::string(&(res[0]));
+}
+
+class ConversionError: public std::exception {
+    const char *what() noexcept { return "base64 error"; }
+};
+
+std::string to_xmp(const Glib::ustring &data)
+{
+    auto res = compress(data.raw());
+    std::vector<char> buf(((res.size() + 2) / 3) * 4 + 1);
+    if (Exiv2::base64encode(&(res[0]), res.size(), &(buf[0]), buf.size()) != 1) {
+        throw ConversionError();
+    }
+    buf.push_back(0);
+    return std::string(&(buf[0]));
+}
+
+
+Glib::ustring from_xmp(const std::string &data)
+{
+    std::vector<char> buf(data.size());
+    long n = Exiv2::base64decode(data.c_str(), &(buf[0]), buf.size());
+    if (n < 0) {
+        throw ConversionError();
+    }
+    buf.resize(n);
+    return decompress(buf);
+}
+
+std::vector<double> unpack_list(const std::string &data)
+{
+    std::vector<double> ret;
+    if (data.empty()) {
+        return ret;
+    }
+    std::vector<char> buf(data.size());
+    long n = Exiv2::base64decode(data.c_str(), &(buf[0]), buf.size());
+    if (n < 0) {
+        throw ConversionError();
+    }
+    buf.resize(n);
+    Exiv2::byte *p = reinterpret_cast<Exiv2::byte *>(&(buf[0]));
+    for (size_t i = 0; i < buf.size(); i += sizeof(uint16_t)) {
+        uint16_t v = Exiv2::getUShort(p + i, Exiv2::littleEndian);
+        float f = DNG_HalfToFloat(v);
+        ret.push_back(f);
+    }
+    return ret;
+}
+
+
+std::string pack_list(const std::vector<double> &data)
+{
+    std::vector<Exiv2::byte> bytes(data.size() * sizeof(uint16_t));
+    auto p = &(bytes[0]);
+    size_t off = 0;
+    for (auto f : data) {
+        uint16_t v = DNG_FloatToHalf(f);
+        long o = Exiv2::us2Data(p + off, v, Exiv2::littleEndian);
+        off += o;
+    }
+    std::vector<char> buf(((bytes.size() + 2) / 3) * 4 + 1);
+    if (Exiv2::base64encode(&(bytes[0]), bytes.size(), &(buf[0]), buf.size()) != 1) {
+        throw ConversionError();
+    }
+    buf.push_back(0);
+    return std::string(&(buf[0]));
+}
+
+} // namespace
+
 
 const short SpotParams::minRadius = 5;
 const short SpotParams::maxRadius = 200;
@@ -1083,11 +1198,20 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                 }
             } else if (str2type(type) == AreaMask::Shape::Type::POLYGON) {
                 AreaMask::Polygon *poly = new AreaMask::Polygon();
-                std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
-                if ((found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Knots" + suffix, v))) {
-                    ret = true;
-                    std::vector<double> vv(v.begin(), v.end());
-                    poly->knots_from_list(vv);
+                if (ppVersion < 1019) {
+                    std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
+                    if ((found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Knots" + suffix, v))) {
+                        ret = true;
+                        std::vector<double> vv(v.begin(), v.end());
+                        poly->knots_from_list(vv);
+                    }
+                } else {
+                    Glib::ustring raw;
+                    if ((found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Knots" + suffix, raw))) {
+                        ret = true;
+                        std::vector<double> vv = unpack_list(raw.raw());
+                        poly->knots_from_list(vv);
+                    }
                 }
                 if (found) {
                     shape.reset(poly);
@@ -1130,11 +1254,20 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskSmoothness" + suffix, drawnMask.smoothness);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskContrast" + suffix, drawnMask.contrast);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskAddMode" + suffix, drawnMask.addmode);
-    std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
-    if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, v)) {
-        ret = true;
-        std::vector<double> vv(v.begin(), v.end());
-        drawnMask.strokes_from_list(vv);
+    if (ppVersion < 1019) {
+        std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
+        if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, v)) {
+            ret = true;
+            std::vector<double> vv(v.begin(), v.end());
+            drawnMask.strokes_from_list(vv);
+        }
+    } else {
+        Glib::ustring raw;
+        if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, raw)) {
+            ret = true;
+            std::vector<double> vv = unpack_list(raw.raw());
+            drawnMask.strokes_from_list(vv);
+        }
     }
     
     return ret;
@@ -1168,7 +1301,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
             auto poly = static_cast<AreaMask::Polygon*>(a.get());
             std::vector<double> v;
             poly->knots_to_list(v);
-            putToKeyfile(group_name, prefix + "AreaMask" + n + "Knots" + suffix, v, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Knots" + suffix, pack_list(v), keyfile);
             break;
         }
         case AreaMask::Shape::Type::RECTANGLE:
@@ -1205,7 +1338,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "DrawnMaskAddMode" + suffix, drawnMask.addmode, keyfile);
     std::vector<double> v;
     drawnMask.strokes_to_list(v);
-    putToKeyfile(group_name, prefix + "DrawnMaskStrokes" + suffix, v, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskStrokes" + suffix, pack_list(v), keyfile);
 }
 
 
@@ -3000,79 +3133,6 @@ int ProcParams::save(ProgressListener *pl, const Glib::ustring& fname, const Gli
 }
 
 
-namespace {
-
-std::vector<char> compress(const std::string &src)
-{
-    auto s = Gio::MemoryOutputStream::create();
-    auto c = Gio::ZlibCompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW, -1);
-    std::vector<char> res;
-    {
-        auto stream = Gio::ConverterOutputStream::create(s, c);
-        stream->set_close_base_stream(true);
-        gsize n;
-        if (!stream->write_all(src, n)) {
-            return res;
-        }
-    }
-    char *data = static_cast<char *>(s->get_data());
-    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
-        res.push_back(data[i]);
-    }
-    return res;
-}
-
-
-std::string decompress(const std::vector<char> &src)
-{
-    auto s = Gio::MemoryOutputStream::create();
-    auto c = Gio::ZlibDecompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW);
-    std::vector<char> res;
-    {
-        auto stream = Gio::ConverterOutputStream::create(s, c);
-        stream->set_close_base_stream(true);
-        gsize n;
-        if (!stream->write_all(&(src[0]), src.size(), n)) {
-            return "";
-        }
-    }
-    char *data = static_cast<char *>(s->get_data());    
-    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
-        res.push_back(data[i]);
-    }
-    res.push_back(0);
-    return std::string(&(res[0]));
-}
-
-class ConversionError: public std::exception {
-    const char *what() noexcept { return "base64 error"; }
-};
-
-std::string to_xmp(const Glib::ustring &data)
-{
-    auto res = compress(data.raw());
-    std::vector<char> buf(((res.size() + 2) / 3) * 4 + 1);
-    if (Exiv2::base64encode(&(res[0]), res.size(), &(buf[0]), buf.size()) != 1) {
-        throw ConversionError();
-    }
-    buf.push_back(0);
-    return std::string(&(buf[0]));
-}
-
-
-Glib::ustring from_xmp(const std::string &data)
-{
-    std::vector<char> buf(data.size());
-    long n = Exiv2::base64decode(data.c_str(), &(buf[0]), buf.size());
-    if (n < 0) {
-        throw ConversionError();
-    }
-    buf.resize(n);
-    return decompress(buf);
-}
-
-} // namespace
-
 int ProcParams::saveEmbedded(ProgressListener *pl, const Glib::ustring &fname)
 {
     if (fname.empty()) {
@@ -3100,7 +3160,7 @@ int ProcParams::saveEmbedded(ProgressListener *pl, const Glib::ustring &fname)
     }
 
     try {
-        Exiv2Metadata md(fname);
+        Exiv2Metadata md(fname, false);
         md.load();
         md.xmpData()["Xmp.ART.arp"] = to_xmp(sPParams);
         md.saveToImage(pl, fname);
@@ -3852,7 +3912,7 @@ int ProcParams::load(ProgressListener *pl,
     } catch (const Glib::Error& e) {
         //printf("-->%s\n", e.what().c_str());
         try {
-            Exiv2Metadata md(fname);
+            Exiv2Metadata md(fname, false);
             md.load();
             std::string xd = md.xmpData()["Xmp.ART.arp"].toString();
             Glib::ustring data = from_xmp(xd);

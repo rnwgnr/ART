@@ -33,7 +33,7 @@
 #include "StopWatch.h"
 #include "halffloat.h"
 
-using rtengine::DNG_HalfToFloat;
+using rtengine::DNG_HalfToFloat_i;
 using rtengine::DNG_FP24ToFloat;
 
 #include <zlib.h>
@@ -1256,7 +1256,7 @@ void CLASS packed_dng_load_raw()
       if (isfloat) {
           uint32_t *dst = reinterpret_cast<uint32_t *>(&float_raw_image[row*raw_width]);
           for (col = 0; col < raw_width; col++) {
-              uint32_t f = DNG_HalfToFloat(pixel[col]);
+              uint32_t f = DNG_HalfToFloat_i(pixel[col]);
               dst[col] = f;
           }
       }
@@ -10752,7 +10752,7 @@ static void expandFloats(Bytef * dst, int tileWidth, int bytesps) {
 #ifndef __F16C__
     uint32_t* const dst32 = reinterpret_cast<uint32_t*>(dst);
     for (int index = tileWidth - 1; index >= 0; --index) {
-        dst32[index] = DNG_HalfToFloat(dst16[index]);
+        dst32[index] = DNG_HalfToFloat_i(dst16[index]);
     }
 #else
     float* const dst32 = reinterpret_cast<float*>(dst);

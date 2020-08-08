@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1018
+#define PPVERSION 1019
 
 /*
   Log of version changes
+  1019  2020-08-08
+        binary encoding of brush mask strokes
   1018  2020-07-24
         color correction: added output saturation
   1017  2020-06-11
