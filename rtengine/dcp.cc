@@ -1612,7 +1612,7 @@ void DCPProfile::step2ApplyTile(float* rc, float* gc, float* bc, int width, int 
     }
 }
 
-DCPProfile::Matrix DCPProfile::findXyztoCamera(const std::array<double, 2>& white_xy, int preferred_illuminant) const
+DCPProfile::Matrix DCPProfile::findXyztoCamera(const std::array<double, 2>& white_xy, int preferred_illuminant, double wbtemp) const
 {
     bool has_col_1 = has_color_matrix_1;
     bool has_col_2 = has_color_matrix_2;
@@ -1633,12 +1633,15 @@ DCPProfile::Matrix DCPProfile::findXyztoCamera(const std::array<double, 2>& whit
           Note: We're using DNG SDK reference code for XY to temperature translation to get the exact same mix as
           the reference code does.
         */
-        const double wbtemp = xyCoordToTemperature(white_xy);
+        //const double wbtemp = xyCoordToTemperature(white_xy);
+        if (wbtemp <= 0) {
+            wbtemp = xyCoordToTemperature(white_xy);
+        }
 
         double mix;
-        if (wbtemp <= temperature_1) {
+        if (wbtemp >= temperature_1) {
             mix = 1.0;
-        } else if (wbtemp >= temperature_2) {
+        } else if (wbtemp <= temperature_2) {
             mix = 0.0;
         } else {
             const double invT = 1.0 / wbtemp;
@@ -1660,7 +1663,7 @@ DCPProfile::Matrix DCPProfile::findXyztoCamera(const std::array<double, 2>& whit
     }
 }
 
-std::array<double, 2> DCPProfile::neutralToXy(const Triple& neutral, int preferred_illuminant) const
+std::array<double, 2> DCPProfile::neutralToXy(const Triple& neutral, int preferred_illuminant, double wbtemp) const
 {
     enum {
         MAX_PASSES = 30
@@ -1669,7 +1672,7 @@ std::array<double, 2> DCPProfile::neutralToXy(const Triple& neutral, int preferr
     std::array<double, 2> last_xy = {0.3457, 0.3585}; // D50
 
     for (unsigned int pass = 0; pass < MAX_PASSES; ++pass) {
-        const Matrix& xyz_to_camera = findXyztoCamera(last_xy, preferred_illuminant);
+        const Matrix& xyz_to_camera = findXyztoCamera(last_xy, preferred_illuminant, wbtemp);
         const Matrix& inv_m = invert3x3(xyz_to_camera);
         const Triple& next_xyz = multiply3x3_v3(inv_m, neutral);
 
@@ -1728,11 +1731,13 @@ DCPProfile::Matrix DCPProfile::makeXyzCam(const ColorTemp& white_balance, const 
         }
     }
 
+    const double wbtemp = white_balance.getTemp();
+    
     /* Calculate what the RGB multipliers corresponds to as a white XY coordinate, based on the
        DCP ColorMatrix or ColorMatrices if dual-illuminant. This is the DNG reference code way to
        do it, which is a bit different from RT's own white balance model at the time of writing.
        When RT's white balance can make use of the DCP color matrices we could use that instead. */
-    const std::array<double, 2> white_xy = neutralToXy(neutral, preferred_illuminant);
+    const std::array<double, 2> white_xy = neutralToXy(neutral, preferred_illuminant, wbtemp);
 
     bool has_fwd_1 = has_forward_matrix_1;
     bool has_fwd_2 = has_forward_matrix_2;
@@ -1765,13 +1770,13 @@ DCPProfile::Matrix DCPProfile::makeXyzCam(const ColorTemp& white_balance, const 
            typically does not affect the result too much, ie it's probably not strictly necessary to
            use the DNG reference code here, but we do it for now. */
         //const double wbtemp = xyCoordToTemperature(white_xy);
-        const double wbtemp = white_balance.getTemp();
+        //const double wbtemp = white_balance.getTemp();
         // std::cout << "WB TEMP ADOBE: " << wbtemp
         //           << " ART: " << white_balance.getTemp() << std::endl;
 
-        if (wbtemp <= temperature_1) {
+        if (wbtemp >= temperature_1) {
             mix = 1.0;
-        } else if (wbtemp >= temperature_2) {
+        } else if (wbtemp <= temperature_2) {
             mix = 0.0;
         } else {
             const double& invT = 1.0 / wbtemp;
