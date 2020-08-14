@@ -498,6 +498,20 @@ CameraConst::update_Crop(CameraConst *other)
     }
 }
 
+
+void CameraConst::update_rawMask(CameraConst *other)
+{
+    if (!other) {
+        return;
+    }
+
+    for (int i = 0; i < 8; ++i) {
+        if (other->has_rawMask(i)) {
+            other->get_rawMask(i, raw_mask[i][0], raw_mask[i][1], raw_mask[i][2], raw_mask[i][3]);
+        }
+    }
+}
+
 bool
 CameraConst::get_Levels(struct camera_const_levels & lvl, int bw, int iso, float fnumber)
 {
@@ -767,6 +781,7 @@ CameraConstantsStore::parse_camera_constants_file(Glib::ustring filename_)
                 // deleting all the existing levels, replaced by the new ones
                 existingcc->update_Levels(cc);
                 existingcc->update_Crop(cc);
+                existingcc->update_rawMask(cc);
                 existingcc->update_pdafPattern(cc->get_pdafPattern());
                 existingcc->update_pdafOffset(cc->get_pdafOffset());
                 if (cc->has_globalGreenEquilibration()) {

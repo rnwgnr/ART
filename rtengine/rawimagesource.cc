@@ -2053,6 +2053,7 @@ void RawImageSource::copyOriginalPixels(const RAWParams &raw, RawImage *src, Raw
         if (riFlatFile && W == riFlatFile->get_width() && H == riFlatFile->get_height()) {
             processFlatField(raw, riFlatFile, black);
         }  // flatfield
+
     } else if (ri->get_colors() == 1) {
         // Monochrome
         if (!rawData) {
@@ -2410,6 +2411,7 @@ void RawImageSource::scaleColors(int winx, int winy, int winw, int winh, const R
         {
             float tmpchmax[3];
             tmpchmax[0] = tmpchmax[1] = tmpchmax[2] = 0.0f;
+            const bool dyn_row_noise = raw.bayersensor.dynamicRowNoiseFilter;
 #ifdef _OPENMP
             #pragma omp for nowait
 #endif
@@ -2419,7 +2421,16 @@ void RawImageSource::scaleColors(int winx, int winy, int winw, int winh, const R
                 for (int col = winx; col < winx + winw; col++) {
                     const int c  = FC(row, col);                        // three colors,  0=R, 1=G,  2=B
                     const int c4 = ( c == 1 && !(row & 1) ) ? 3 : c;    // four  colors,  0=R, 1=G1, 2=B, 3=G2
-                    const float val = max(0.f, rawData[row][col] - cblacksom[c4]) * scale_mul[c4];
+                    //const float val = max(0.f, rawData[row][col] - cblacksom[c4]) * scale_mul[c4];
+                    float val = rawData[row][col];
+                    if (dyn_row_noise) {
+                        // fix dynamic row pattern noise using the approach suggested by user Peter @pixls.us
+                        const float b = ri->get_optical_black(row, col);
+                        if (b > 0.f) {
+                            val -= (b - cblacksom[c]);
+                        }
+                    }
+                    val = max(0.f, val - cblacksom[c4]) * scale_mul[c4];
                     rawData[row][col] = val;
                     tmpchmax[c] = max(tmpchmax[c], val);
                 }

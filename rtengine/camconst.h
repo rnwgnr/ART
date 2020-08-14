@@ -54,6 +54,7 @@ public:
     void update_pdafPattern(const std::vector<int> &other);
     void update_pdafOffset(int other);
     void update_globalGreenEquilibration(bool other);
+    void update_rawMask(CameraConst *other);
 };
 
 class CameraConstantsStore

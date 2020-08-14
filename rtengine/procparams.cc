@@ -2676,6 +2676,7 @@ RAWParams::BayerSensor::BayerSensor() :
     pixelShiftDemosaicMethod(getPSDemosaicMethodString(PSDemosaicMethod::AMAZE)),
     dcb_enhance(true),
     pdafLinesFilter(false),
+    dynamicRowNoiseFilter(false),
     enable_black(false),
     enable_preproc(false)
 {
@@ -2716,6 +2717,7 @@ bool RAWParams::BayerSensor::operator ==(const BayerSensor& other) const
         && pixelShiftDemosaicMethod == other.pixelShiftDemosaicMethod
         && dcb_enhance == other.dcb_enhance
         && pdafLinesFilter == other.pdafLinesFilter
+        && dynamicRowNoiseFilter == other.dynamicRowNoiseFilter
         && enable_black == other.enable_black
         && enable_preproc == other.enable_preproc;
 }
@@ -3778,6 +3780,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         }
         if (RELEVANT_(rawPreprocessing)) {
             saveToKeyfile("RAW Bayer", "PDAFLinesFilter", raw.bayersensor.pdafLinesFilter, keyFile);
+            saveToKeyfile("RAW Bayer", "DynamicRowNoiseFilter", raw.bayersensor.dynamicRowNoiseFilter, keyFile);
         }
         if (RELEVANT_(demosaic)) {
             saveToKeyfile("RAW X-Trans", "Method", raw.xtranssensor.method, keyFile);
@@ -5140,6 +5143,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
             if (RELEVANT_(rawPreprocessing)) {
                 assignFromKeyfile(keyFile, "RAW Bayer", "PDAFLinesFilter", raw.bayersensor.pdafLinesFilter);
+                assignFromKeyfile(keyFile, "RAW Bayer", "DynamicRowNoiseFilter", raw.bayersensor.dynamicRowNoiseFilter);
             }
         }
 

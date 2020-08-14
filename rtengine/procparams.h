@@ -1358,6 +1358,7 @@ struct RAWParams {
         Glib::ustring pixelShiftDemosaicMethod;
         bool dcb_enhance;
         bool pdafLinesFilter;
+        bool dynamicRowNoiseFilter;
 
         // some enable flags
         bool enable_black;

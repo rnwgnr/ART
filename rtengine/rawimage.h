@@ -22,6 +22,7 @@
 #include <ctime>
 #include <cmath>
 #include <iostream>
+#include <array>
 
 #include "dcraw.h"
 #include "imageformat.h"
@@ -67,6 +68,8 @@ protected:
     }
 
     void apply_gain_map(); // in rawimage_gainmap.cc
+
+    std::vector<std::array<int, 4>> raw_optical_black_med_;
 
 public:
 
@@ -315,6 +318,8 @@ public:
 public:
     bool checkThumbOk() const;
     bool thumbNeedsRotation() const;
+
+    float get_optical_black(int row, int col) const;
 };
 
 } // namespace rtengine

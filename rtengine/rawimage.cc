@@ -544,6 +544,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         CameraConst *cc = ccs->get(make, model);
 
         if (raw_image) {
+            unsigned raw_filters = filters;
+            
             if (apply_corrections) {
                 apply_gain_map();
             }
@@ -582,6 +584,36 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (cc && cc->has_rawMask(0)) {
                 for (int i = 0; i < 8 && cc->has_rawMask(i); i++) {
                     cc->get_rawMask(i, mask[i][0], mask[i][1], mask[i][2], mask[i][3]);
+                    if (apply_corrections && i == 0 && !cc->has_rawMask(1) && mask[i][3] < left_margin && mask[i][2] * 1.01 >= height) {
+                        // compute per-row median of black levels, used to fix
+                        // dynamic row pattern noise. Technique suggested (and
+                        // illustrated) by user Peter @pixls.us
+                        // 
+                        // this matches the optical black area in Canon sensors
+                        // 
+                        unsigned tmp_filters = filters;
+                        filters = raw_filters;
+                        
+                        std::array<int, 4> v;
+                        std::array<std::vector<int>, 4> m;
+                        for (int r = top_margin; r < raw_height; ++r) {
+                            for (auto &mv : m) {
+                                mv.clear();
+                            }
+                            for (int j = mask[i][1]; j < mask[i][3]; ++j) {
+                                int c = FC(r, j);
+                                auto b = raw_image[r * raw_width + j];
+                                m[c].push_back(b);
+                            }
+                            for (int c = 0; c < 4; ++c) {
+                                std::sort(m[c].begin(), m[c].end());
+                                v[c] = m[c].empty() ? 0 : m[c][m[c].size()/2];
+                            }
+                            raw_optical_black_med_.emplace_back(std::move(v));
+                        }
+
+                        filters = tmp_filters;
+                    }
                 }
             }
 
@@ -911,6 +943,15 @@ bool RawImage::thumbNeedsRotation() const
 }
 
 
+float RawImage::get_optical_black(int row, int col) const
+{
+    if (raw_optical_black_med_.empty() || size_t(row) >= raw_optical_black_med_.size()) {
+        return 0.f;
+    }
+    int c = FC(row, col);
+    return raw_optical_black_med_[row][c];
+}
+
 } //namespace rtengine
 
 bool
@@ -1221,3 +1262,4 @@ DCraw::dcraw_coeff_overrides(const char make[], const char model[], const int is
 
     return false;
 }
+
