@@ -1638,10 +1638,12 @@ DCPProfile::Matrix DCPProfile::findXyztoCamera(const std::array<double, 2>& whit
             wbtemp = xyCoordToTemperature(white_xy);
         }
 
+        const bool lt = temperature_1 < temperature_2;
+
         double mix;
-        if (wbtemp >= temperature_1) {
+        if (lt ? wbtemp <= temperature_1 : wbtemp >= temperature_1) {
             mix = 1.0;
-        } else if (wbtemp <= temperature_2) {
+        } else if (lt ? wbtemp >= temperature_2 : wbtemp <= temperature_2) {
             mix = 0.0;
         } else {
             const double invT = 1.0 / wbtemp;
@@ -1773,10 +1775,11 @@ DCPProfile::Matrix DCPProfile::makeXyzCam(const ColorTemp& white_balance, const 
         //const double wbtemp = white_balance.getTemp();
         // std::cout << "WB TEMP ADOBE: " << wbtemp
         //           << " ART: " << white_balance.getTemp() << std::endl;
+        const bool lt = temperature_1 < temperature_2;
 
-        if (wbtemp >= temperature_1) {
+        if (lt ? wbtemp <= temperature_1 : wbtemp >= temperature_1) {
             mix = 1.0;
-        } else if (wbtemp <= temperature_2) {
+        } else if (lt ? wbtemp >= temperature_2 : wbtemp <= temperature_2) {
             mix = 0.0;
         } else {
             const double& invT = 1.0 / wbtemp;
