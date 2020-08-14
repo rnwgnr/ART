@@ -796,6 +796,16 @@ SAMSUNG GALAXY S20 ULTRA REAR MAIN CAMERA
 SAMSUNG GALAXY S20+ FRONT CAMERA
 SAMSUNG GALAXY S20+ REAR MAIN CAMERA
 YUNEEC ION L1 PRO
+
+Updated on Fri Aug 14 21:40:54 2020 (with Adobe DNG converter 12.4.0.547):
+  CANON EOS R5
+  CANON EOS R6
+  IPAD8,11 BACK CAMERA
+  IPAD8,9 BACK CAMERA
+  IPHONE12,8 BACK CAMERA
+  LEICA M10-R
+  SKYDIO 2
+  SONY DCZV1B
 */
 {"camera_constants": [
     {
@@ -1025,6 +1035,14 @@ YUNEEC ION L1 PRO
     {
         "make_model" : "CANON EOS R",
         "dcraw_matrix" : [6445, -366, -864, -4436, 12204, 2513, -952, 2496, 6348]
+    },
+    {
+        "make_model" : "CANON EOS R5",
+        "dcraw_matrix" : [9766, -2953, -1254, -4276, 12116, 2433, -437, 1336, 5131]
+    },
+    {
+        "make_model" : "CANON EOS R6",
+        "dcraw_matrix" : [8293, -1611, -1132, -4759, 12710, 2275, -1013, 2415, 5508]
     },
     {
         "make_model" : "CANON EOS RA",
@@ -1563,8 +1581,7 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13158, -5947, -1297, -3615, 12175, 1591, -237, 1469, 5319]
     },
     {
-        "make_model" : ["GOOGLE PIXEL 3 REAR CAMERA",
-                        "GOOGLE PIXEL 3"], // manually aliased
+        "make_model" : ["GOOGLE PIXEL 3 REAR CAMERA", "GOOGLE PIXEL 3"],
         "dcraw_matrix" : [13931, -7010, -1360, -3008, 11519, 1674, -191, 1523, 5598]
     },
     {
@@ -1576,8 +1593,7 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13158, -5947, -1297, -3615, 12175, 1591, -237, 1469, 5319]
     },
     {
-        "make_model" : ["GOOGLE PIXEL 3 XL REAR CAMERA",
-                        "GOOGLE PIXEL 3 XL"], // manually aliased
+        "make_model" : ["GOOGLE PIXEL 3 XL REAR CAMERA", "GOOGLE PIXEL 3 XL"],
         "dcraw_matrix" : [13931, -7010, -1360, -3008, 11519, 1674, -191, 1523, 5598]
     },
     {
@@ -1589,8 +1605,7 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13274, -5957, -1337, -3459, 12159, 1427, -380, 1561, 4870]
     },
     {
-        "make_model" : ["GOOGLE PIXEL 4 REAR WIDE CAMERA",
-                        "GOOGLE PIXEL 4"], // manually aliased
+        "make_model" : ["GOOGLE PIXEL 4 REAR WIDE CAMERA", "GOOGLE PIXEL 4"],
         "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
     },
     {
@@ -1602,8 +1617,7 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13274, -5957, -1337, -3459, 12159, 1427, -380, 1561, 4870]
     },
     {
-        "make_model" : ["GOOGLE PIXEL 4 XL REAR WIDE CAMERA",
-                        "GOOGLE PIXEL 4 XL"], // manually aliased
+        "make_model" : ["GOOGLE PIXEL 4 XL REAR WIDE CAMERA", "GOOGLE PIXEL 4 XL"],
         "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
     },
     {
@@ -1635,8 +1649,8 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [12554, -5832, -1334, -4264, 13086, 1243, -388, 1225, 5803]
     },
     {
-        "make_model": "HUAWEI ELS-NX9",
-        "dcraw_matrix" : [32404, -15371, -4985,  -9692,  18760,  415, 556, -2040,  10572]
+        "make_model" : "HUAWEI ELS-NX9",
+        "dcraw_matrix" : [32404, -15371, -4985, -9692, 18760, 415, 556, -2040, 10572]
     },
     {
         "make_model" : "HUAWEI HONOR 20 PRO REAR MAIN CAMERA",
@@ -1711,6 +1725,10 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [10456, -4600, -1042, -4550, 13207, 1432, -706, 1668, 4697]
     },
     {
+        "make_model" : "IPAD8,11 BACK CAMERA",
+        "dcraw_matrix" : [9368, -3064, -1010, -3724, 12223, 1658, -273, 1570, 4629]
+    },
+    {
         "make_model" : "IPAD8,2 BACK CAMERA",
         "dcraw_matrix" : [10456, -4600, -1042, -4550, 13207, 1432, -706, 1668, 4697]
     },
@@ -1737,6 +1755,10 @@ YUNEEC ION L1 PRO
     {
         "make_model" : "IPAD8,8 BACK CAMERA",
         "dcraw_matrix" : [10456, -4600, -1042, -4550, 13207, 1432, -706, 1668, 4697]
+    },
+    {
+        "make_model" : "IPAD8,9 BACK CAMERA",
+        "dcraw_matrix" : [9368, -3064, -1010, -3724, 12223, 1658, -273, 1570, 4629]
     },
     {
         "make_model" : "IPHONE10,1 BACK CAMERA",
@@ -1825,6 +1847,10 @@ YUNEEC ION L1 PRO
     {
         "make_model" : "IPHONE12,5 BACK TELEPHOTO CAMERA",
         "dcraw_matrix" : [11667, -5188, -1135, -3014, 11506, 1697, 11, 1276, 4869]
+    },
+    {
+        "make_model" : "IPHONE12,8 BACK CAMERA",
+        "dcraw_matrix" : [8572, -3047, -919, -4688, 13393, 1368, -569, 1620, 5173]
     },
     {
         "make_model" : "IPHONE8,1 BACK CAMERA",
@@ -2037,6 +2063,10 @@ YUNEEC ION L1 PRO
     {
         "make_model" : "LEICA M10-P",
         "dcraw_matrix" : [9090, -3342, -740, -4006, 13455, 492, -569, 2266, 6871]
+    },
+    {
+        "make_model" : "LEICA M10-R",
+        "dcraw_matrix" : [5296, -1881, -423, -5483, 13367, 2327, -1226, 2594, 5550]
     },
     {
         "make_model" : "LEICA M8",
@@ -3375,13 +3405,11 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [8035, 434, -961, -6001, 13872, 2320, -1159, 3065, 5434]
     },
     {
-        "make_model" : ["PIXEL 2 XL-GOOGLE-GOOGLE",
-                        "GOOGLE PIXEL 2 XL"], // manually aliased
+        "make_model" : ["PIXEL 2 XL-GOOGLE-GOOGLE", "GOOGLE PIXEL 2 XL"],
         "dcraw_matrix" : [10612, -4169, -1001, -3982, 12675, 1412, -558, 1620, 5205]
     },
     {
-        "make_model" : ["PIXEL 2-GOOGLE-GOOGLE",
-                        "GOOGLE PIXEL 2"], // manually aliased
+        "make_model" : ["PIXEL 2-GOOGLE-GOOGLE", "GOOGLE PIXEL 2"],
         "dcraw_matrix" : [10612, -4169, -1001, -3982, 12675, 1412, -558, 1620, 5205]
     },
     {
@@ -3393,13 +3421,11 @@ YUNEEC ION L1 PRO
         "dcraw_matrix" : [13931, -7010, -1360, -3008, 11519, 1674, -191, 1523, 5598]
     },
     {
-        "make_model" : ["PIXEL XL-GOOGLE-GOOGLE",
-                        "GOOGLE PIXEL XL"], // manually aliased
+        "make_model" : ["PIXEL XL-GOOGLE-GOOGLE", "GOOGLE PIXEL XL"],
         "dcraw_matrix" : [9293, -3484, -871, -2482, 10928, 1776, -256, 1479, 5145]
     },
     {
-        "make_model" : ["PIXEL-GOOGLE-GOOGLE",
-                        "GOOGLE PIXEL"], // manually aliased
+        "make_model" : ["PIXEL-GOOGLE-GOOGLE", "GOOGLE PIXEL"],
         "dcraw_matrix" : [9293, -3484, -871, -2482, 10928, 1776, -256, 1479, 5145]
     },
     {
@@ -3609,6 +3635,14 @@ YUNEEC ION L1 PRO
     {
         "make_model" : "SIGMA FP",
         "dcraw_matrix" : [12431, -5541, -1000, -4387, 12361, 2265, -732, 1526, 5970]
+    },
+    {
+        "make_model" : "SKYDIO 2",
+        "dcraw_matrix" : [11868, -5480, -1159, -2409, 10734, 1926, -263, 1395, 5177]
+    },
+    {
+        "make_model" : "SONY DCZV1B",
+        "dcraw_matrix" : [8280, -2987, -703, -3531, 11645, 2133, -550, 1542, 5312]
     },
     {
         "make_model" : "SONY DSC-HX95",
