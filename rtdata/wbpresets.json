@@ -1,7 +1,7 @@
 // White balance preset values for various cameras
 // generated from src/external/wb_preset.c of Darktable
 // see http://darktable.org for more information
-// last updated on Tue Jul  7 11:15:02 2020
+// last updated on Sun Aug 16 13:48:26 2020
 
 [
   {
@@ -2505,6 +2505,23 @@
       { "name" : "cloudy", "multipliers" : [ 2.21875, 1, 1.35938 ] },
       { "name" : "flash", "multipliers" : [ 2.53516, 1, 1.27344 ] },
       { "name" : "shade", "multipliers" : [ 2.52734, 1, 1.17578 ] }
+    ]
+  },
+  {
+    "make_model" : "NIKON Z 50",
+    "presets" : [
+      { "name" : "direct sunlight", "multipliers" : [ 1.88281, 1, 1.43555 ] },
+      { "name" : "shade", "multipliers" : [ 2.31836, 1, 1.17188 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.01562, 1, 1.30469 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.22656, 1, 2.25781 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 1.21484, 1, 2.02148 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.74219, 1, 2.11719 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.75586, 1, 1.44336 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2, 1, 1.17188 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.43359, 1, 2.42578 ] },
+      { "name" : "high temp. mercury-vapor fluorescent", "multipliers" : [ 2.3457, 1, 1.41992 ] },
+      { "name" : "sodium-vapor fluorescent", "multipliers" : [ 1.16016, 1, 2.58008 ] },
+      { "name" : "flash", "multipliers" : [ 2.11133, 1, 1.25586 ] }
     ]
   },
   {
@@ -5069,6 +5086,25 @@
       { "name" : "4500K", "multipliers" : [ 2.17578, 1, 1.8125 ] },
       { "name" : "6000K", "multipliers" : [ 2.59375, 1, 1.48828 ] },
       { "name" : "8500K", "multipliers" : [ 3.04297, 1, 1.25391 ] }
+    ]
+  },
+  {
+    "make_model" : "SONY ILCE-7RM4",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 2.53906, 1, 1.64062 ] },
+      { "name" : "shade", "multipliers" : [ 3.06641, 1, 1.35156 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.76172, 1, 1.50391 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.52734, 1, 2.96484 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 1.80859, 1, 2.84766 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 2.26953, 1, 2.3125 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 2.44531, 1, 1.71875 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.75781, 1, 1.58984 ] },
+      { "name" : "flash", "multipliers" : [ 2.80078, 1, 1.46484 ] },
+      { "name" : "2500K", "multipliers" : [ 1.32031, 1, 3.58203 ] },
+      { "name" : "3200K", "multipliers" : [ 1.71484, 1, 2.56641 ] },
+      { "name" : "4500K", "multipliers" : [ 2.27734, 1, 1.84766 ] },
+      { "name" : "6000K", "multipliers" : [ 2.73438, 1, 1.51562 ] },
+      { "name" : "8500K", "multipliers" : [ 3.23828, 1, 1.27734 ] }
     ]
   },
   {
