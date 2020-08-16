@@ -1138,14 +1138,16 @@ Camera constants:
         }
     },
 
-    { // Quality C, only raw crop
+    { // Quality C, only raw crop and masked area
         "make_model": [ "Canon EOS M6 Mark II", "Canon EOS 90D" ],
-        "raw_crop": [ 144, 72, 6984, 4660 ]
+        "raw_crop": [ 144, 72, 6984, 4660 ],
+        "masked_areas": [ 76, 40, 4580, 140 ]
     },
 
-    { // Quality C, only raw crop
+    { // Quality C, only raw crop and masked area
         "make_model": [ "Canon EOS R" ],
-        "raw_crop": [ 144, 46, 6744, 4500 ]
+        "raw_crop": [ 144, 46, 6744, 4500 ],
+        "masked_areas": [ 50, 40, 4540, 140 ]
     },
 
 // Canon Powershot
