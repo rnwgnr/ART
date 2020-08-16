@@ -2411,7 +2411,7 @@ void RawImageSource::scaleColors(int winx, int winy, int winw, int winh, const R
         {
             float tmpchmax[3];
             tmpchmax[0] = tmpchmax[1] = tmpchmax[2] = 0.0f;
-            const bool dyn_row_noise = raw.bayersensor.dynamicRowNoiseFilter;
+            const bool dyn_row_noise = raw.bayersensor.enable_preproc && raw.bayersensor.dynamicRowNoiseFilter;
 #ifdef _OPENMP
             #pragma omp for nowait
 #endif
