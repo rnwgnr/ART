@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -87,6 +88,7 @@ public:
 private:
     void on_NB_switch_page(Gtk::Widget* page, guint page_num);
     void on_inspector_ready();
+    void on_position_changed();
 
     PlacesBrowser* placesBrowser;
     RecentBrowser* recentBrowser;
@@ -108,6 +110,7 @@ private:
 
     IdleRegister idle_register;
     int pane_pos_;
+    bool ignore_position_;
 };
 
 #endif

@@ -25,7 +25,8 @@
 
 FilePanel::FilePanel () :
     parent(nullptr), error(0),
-    pane_pos_(-1)
+    pane_pos_(-1),
+    ignore_position_(true)
 {
 
     // Contains everything except for the batch Tool Panel and tabs (Fast Export, Inspect, etc)
@@ -172,6 +173,7 @@ void FilePanel::on_realize ()
 
 void FilePanel::setAspect ()
 {
+    ignore_position_ = true;
     int winW, winH;
     fileCatalog->setupSidePanels();
     parent->get_size(winW, winH);
@@ -188,7 +190,22 @@ void FilePanel::setAspect ()
     // if (!options.browserToolPanelOpened) {
     //     fileCatalog->toggleRightPanel();
     // }
+
+    property_position().signal_changed().connect(sigc::mem_fun(*this, &FilePanel::on_position_changed));
+
+    ignore_position_ = false;
 }
+
+
+void FilePanel::on_position_changed()
+{
+    if (!ignore_position_) {
+        int winW, winH;
+        parent->get_size(winW, winH);
+        options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);        
+    }
+}
+
 
 void FilePanel::init ()
 {
@@ -239,6 +256,8 @@ bool FilePanel::isInspectorVisible() const
 
 void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
 {
+    ignore_position_ = true;
+    
     if (page_num == 1) {
         // switching the inspector "on"
         fileCatalog->enableInspector();
@@ -259,6 +278,8 @@ void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
         set_position(pane_pos_);
         queue_draw();
     }
+
+    ignore_position_ = false;
 }
 
 
@@ -390,7 +411,7 @@ void FilePanel::saveOptions ()
     parent->get_size(winW, winH);
     options.dirBrowserWidth = dirpaned->get_position ();
     options.dirBrowserHeight = placespaned->get_position ();
-    options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
+    //options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
     // options.browserToolPanelHeight = tpcPaned->get_position ();
 
     if (options.startupDir == STARTUPDIR_LAST && fileCatalog->lastSelectedDir () != "") {
