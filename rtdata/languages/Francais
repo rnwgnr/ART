@@ -834,6 +834,7 @@ HISTORY_MSG_PCVIGNETTE_CENTER;VF - Centre
 HISTORY_MSG_PERSPECTIVE_ENABLED;Correction de perspective
 HISTORY_MSG_PERSPECTIVE_LENS;Perspective - Données de l'objectif
 HISTORY_MSG_PIXELSHIFT_DEMOSAIC;PS - Méthode de dématriçage pour les mouvements
+HISTORY_MSG_PREPROCESS_DYNROWNOISEFILTER;Filtre dynamique de bruit en lignes
 HISTORY_MSG_PREPROCESS_LINEDENOISE_DIRECTION;Direction du filtre de bruit en lignes
 HISTORY_MSG_PREPROCESS_PDAFLINESFILTER;Filtre de lignes PDAF
 HISTORY_MSG_PRSHARPEN_CONTRAST;NPR - Seuil de contraste
@@ -1294,6 +1295,9 @@ PREFERENCES_PROFILESAVECACHE;Enregistrer le profil de traitement dans le cache
 PREFERENCES_PROFILESAVEINPUT;Enregistrer le profil de traitement accolé au fichier d'entrée
 PREFERENCES_PROFILESAVELOCATION;Destination de sauvegarde du profil de traitement
 PREFERENCES_PROFILE_NONE;Aucun
+PREFERENCES_PROFILE_SAVE_OUTPUT;Profils de traitement pour pour les images en sortie
+PREFERENCES_PROFILE_SAVE_OUTPUT_SIDECAR;Enregistrer dans un fichier associé (output.ext.arp pour output.ext)
+PREFERENCES_PROFILE_SAVE_OUTPUT_EMBEDDED;Inclure dans les metadata
 PREFERENCES_PRTINTENT;Intention de rendu
 PREFERENCES_PRTPROFILE;Profil colorimétrique
 PREFERENCES_PSPATH;Dossier d'installation d'Adobe Photoshop
@@ -1344,6 +1348,7 @@ PREFERENCES_XMP_SIDECAR_MODE_STD;Standard (NOMDEFICHIER.xmp pour NOMDEFICHIER.ex
 PREFERENCES_XMP_SIDECAR_MODE_EXT;Comme darktable/digiKam (NOMDEFICHIER.ext.xmp pour NOMDEFICHIER.ext)
 PROCPARAMS_LOAD_ERROR;Erreur lors du chargement des paramètres depuis %1: %2
 PROCPARAMS_SAVE_ERROR;Erreur lors de la sauvegarde des paramètres vers %1: %2
+PROCPARAMS_EMBEDDED_SAVE_WARNING;Warning: Echec de l'intégration des paramètres de traitement dans %1, enregistrement dans le fichier associé %2
 PROFILEPANEL_COPYPPASTE;Paramètres à copier
 PROFILEPANEL_GLOBALPROFILES;Profils de traitement fournis
 PROFILEPANEL_LABEL;Profils de traitement
@@ -1832,6 +1837,7 @@ TP_PFCURVE_CURVEEDITOR_CH;Teinte
 TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;Contrôle la force du défrangeage en fonction de la couleur.\nPlus grand = plus de correction, plus petit = moins de correction.
 TP_PREPROCESS_DEADPIXFILT;Filtrer pixels morts
 TP_PREPROCESS_DEADPIXFILT_TOOLTIP;Essaye de supprimer les pixels morts.
+TP_PREPROCESS_DYNROWNOISEFILTER;Filtre dynamique de bruit en lignes
 TP_PREPROCESS_GREENEQUIL;Équilibrage du vert
 TP_PREPROCESS_HOTPIXFILT;Filtrer pixels chauds
 TP_PREPROCESS_HOTPIXFILT_TOOLTIP;Essaie de supprimer les pixels chauds.
