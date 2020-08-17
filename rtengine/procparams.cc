@@ -1879,7 +1879,8 @@ bool LogEncodingParams::operator !=(const LogEncodingParams& other) const
 FattalToneMappingParams::FattalToneMappingParams() :
     enabled(false),
     threshold(30),
-    amount(20)
+    amount(20),
+    satcontrol(false)
 {
 }
 
@@ -1888,7 +1889,8 @@ bool FattalToneMappingParams::operator ==(const FattalToneMappingParams& other) 
     return
         enabled == other.enabled
         && threshold == other.threshold
-        && amount == other.amount;
+        && amount == other.amount
+        && satcontrol == other.satcontrol;
 }
 
 bool FattalToneMappingParams::operator !=(const FattalToneMappingParams& other) const
@@ -3425,6 +3427,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("FattalToneMapping", "Enabled", fattal.enabled, keyFile);
             saveToKeyfile("FattalToneMapping", "Threshold", fattal.threshold, keyFile);
             saveToKeyfile("FattalToneMapping", "Amount", fattal.amount, keyFile);
+            saveToKeyfile("FattalToneMapping", "SaturationControl", fattal.satcontrol, keyFile);
         }
 
 // Log encoding
@@ -4409,6 +4412,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "FattalToneMapping", "Enabled", fattal.enabled);
             assignFromKeyfile(keyFile, "FattalToneMapping", "Threshold", fattal.threshold);
             assignFromKeyfile(keyFile, "FattalToneMapping", "Amount", fattal.amount);
+            assignFromKeyfile(keyFile, "FattalToneMapping", "SaturationControl", fattal.satcontrol);
         }
 
         if (keyFile.has_group("LogEncoding") && RELEVANT_(logenc)) {

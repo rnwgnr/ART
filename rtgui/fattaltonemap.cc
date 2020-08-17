@@ -28,11 +28,13 @@ using namespace rtengine::procparams;
 FattalToneMapping::FattalToneMapping(): FoldableToolPanel(this, "fattal", M("TP_TM_FATTAL_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
-    EvTMFattalAnchor = m->newEvent(HDR, "HISTORY_MSG_TM_FATTAL_ANCHOR");
+    EvSatControl = m->newEvent(HDR, "HISTORY_MSG_TM_FATTAL_SATCONTROL");
     EvToolReset.set_action(HDR);
 
-    amount = Gtk::manage(new Adjuster (M("TP_TM_FATTAL_AMOUNT"), 1., 100., 1., 20.));
-    threshold = Gtk::manage(new Adjuster (M("TP_TM_FATTAL_THRESHOLD"), -100., 300., 1., 30.0));
+    amount = Gtk::manage(new Adjuster(M("TP_TM_FATTAL_AMOUNT"), 1., 100., 1., 20.));
+    threshold = Gtk::manage(new Adjuster(M("TP_TM_FATTAL_THRESHOLD"), -100., 300., 1., 30.0));
+    satcontrol = Gtk::manage(new Gtk::CheckButton(M("TP_TM_FATTAL_SATCONTROL")));
+    satcontrol->signal_toggled().connect(sigc::mem_fun(*this, &FattalToneMapping::satcontrolChanged), true);
 
     amount->setAdjusterListener(this);
     threshold->setAdjusterListener(this);
@@ -44,6 +46,7 @@ FattalToneMapping::FattalToneMapping(): FoldableToolPanel(this, "fattal", M("TP_
 
     pack_start(*amount);
     pack_start(*threshold);
+    pack_start(*satcontrol);
 }
 
 void FattalToneMapping::read(const ProcParams *pp)
@@ -53,6 +56,7 @@ void FattalToneMapping::read(const ProcParams *pp)
     setEnabled(pp->fattal.enabled);
     threshold->setValue(pp->fattal.threshold);
     amount->setValue(pp->fattal.amount);
+    satcontrol->set_active(pp->fattal.satcontrol);
 
     enableListener();
 }
@@ -62,6 +66,7 @@ void FattalToneMapping::write(ProcParams *pp)
     pp->fattal.threshold = threshold->getValue();
     pp->fattal.amount = amount->getValue();
     pp->fattal.enabled = getEnabled();
+    pp->fattal.satcontrol = satcontrol->get_active();
 }
 
 void FattalToneMapping::setDefaults(const ProcParams *defParams)
@@ -97,6 +102,14 @@ void FattalToneMapping::enabledChanged ()
         } else {
             listener->panelChanged (EvTMFattalEnabled, M("GENERAL_DISABLED"));
         }
+    }
+}
+
+
+void FattalToneMapping::satcontrolChanged()
+{
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvSatControl, satcontrol->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
 }
 
