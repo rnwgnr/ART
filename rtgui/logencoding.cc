@@ -49,7 +49,7 @@ LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"),
     sourceGray->addAutoButton();
     targetGray = Gtk::manage(new Adjuster(M("TP_LOGENC_TARGET_GRAY"), 5.0, 80.0, 0.1, 18.0));
     blackEv = Gtk::manage(new Adjuster(M("TP_LOGENC_BLACK_EV"), -16.0, 0.0, 0.1, -5.0));
-    whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 0.0, 32.0, 0.1, 10.0));
+    whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 0.0, 32.0, 0.1, 3.0));
     regularization = Gtk::manage(new Adjuster(M("TP_LOGENC_REGULARIZATION"), 0, 100, 1, 65));
 
     Gtk::Frame *evFrame = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_EV_LEVELS")));
@@ -78,6 +78,9 @@ LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"),
     whiteEv->show();
     blackEv->show();
     targetGray->show();
+
+    sourceGray->setLogScale(10, 18, true);
+    targetGray->setLogScale(10, 18, true);
 
     evBox->pack_start(*autocompute);
     evBox->pack_start(*blackEv);

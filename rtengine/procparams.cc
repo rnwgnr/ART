@@ -1852,7 +1852,7 @@ LogEncodingParams::LogEncodingParams():
     sourceGray(18.0),
     targetGray(18.0),
     blackEv(-5.0),
-    whiteEv(10.0),
+    whiteEv(3.0),
     regularization(65)
 {
 }
