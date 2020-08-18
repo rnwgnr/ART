@@ -872,7 +872,7 @@ HISTORY_MSG_SOFTLIGHT_ENABLED;Lumière douce
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Lumière douce - Force
 HISTORY_MSG_SPOT;Retrait de taches
 HISTORY_MSG_SPOT_ENTRY;Retrait de taches - Modif. de points
-HISTORY_MSG_TM_FATTAL_ANCHOR;CPD - Point d'ancrage
+HISTORY_MSG_TM_FATTAL_SATCONTROL;CPD - Contrôle de saturation
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Égaliseur Tonal
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Égaliseur Tonal - Bandes
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Égaliseur Tonal - Régularisation
@@ -2017,6 +2017,7 @@ TP_SPOT_DETAIL;Protection des détails
 TP_TM_FATTAL_AMOUNT;Quantité
 TP_TM_FATTAL_LABEL;Compression de la Plage Dynamique
 TP_TM_FATTAL_THRESHOLD;Détail
+TP_TM_FATTAL_SATCONTROL;Contrôle de saturation
 TP_TONECURVE_LABEL;Courbes Tonales
 TP_TONECURVE_SATCURVE;Saturation
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Force de la courbe perceptuelle
