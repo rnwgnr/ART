@@ -193,7 +193,7 @@ void FilePanel::setAspect ()
 
     property_position().signal_changed().connect(sigc::mem_fun(*this, &FilePanel::on_position_changed));
 
-    ignore_position_ = false;
+    //ignore_position_ = false;
 }
 
 
@@ -202,8 +202,9 @@ void FilePanel::on_position_changed()
     if (!ignore_position_) {
         int winW, winH;
         parent->get_size(winW, winH);
-        options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);        
+        options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
     }
+    ignore_position_ = true;
 }
 
 
@@ -279,7 +280,7 @@ void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
         queue_draw();
     }
 
-    ignore_position_ = false;
+    //ignore_position_ = false;
 }
 
 
@@ -485,4 +486,15 @@ void FilePanel::updateTPVScrollbar (bool hide)
 void FilePanel::showRightBox(bool yes)
 {
     rightBox->set_visible(yes);
+}
+
+
+bool FilePanel::on_button_press_event(GdkEventButton *event)
+{
+    if (event->window == get_handle_window()->gobj()) {
+        ignore_position_ = false;
+    } else {
+        ignore_position_ = true;
+    }
+    return Gtk::HPaned::on_button_press_event(event);
 }

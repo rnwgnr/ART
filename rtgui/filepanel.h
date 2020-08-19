@@ -85,6 +85,8 @@ public:
 
     bool isInspectorVisible() const;
 
+    bool on_button_press_event(GdkEventButton *event) override;
+
 private:
     void on_NB_switch_page(Gtk::Widget* page, guint page_num);
     void on_inspector_ready();

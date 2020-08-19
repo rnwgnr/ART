@@ -501,7 +501,7 @@ RTWindow::RTWindow():
                 const auto doit =
                     [this]() -> bool
                     {
-                        static int count = 5;
+                        static int count = 10;
                         if (fpanel) {
                             fpanel->setAspect();
                         }
