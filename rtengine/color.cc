@@ -1409,6 +1409,9 @@ void Color::Lab2XYZ(vfloat L, vfloat a, vfloat b, vfloat &x, vfloat &y, vfloat &
 
 inline float Color::computeXYZ2Lab(float f)
 {
+    if (xisnanf(f)) {
+        return f;
+    }
     if (f < 0.f) {
         return 327.68 * ((kappa * f / MAXVALF + 16.0) / 116.0);
     } else if (f > 65535.f) {
@@ -1421,6 +1424,9 @@ inline float Color::computeXYZ2Lab(float f)
 
 inline float Color::computeXYZ2LabY(float f)
 {
+    if (xisnanf(f)) {
+        return f;
+    }
     if (f < 0.f) {
         return 327.68 * (kappa * f / MAXVALF);
     } else if (f > 65535.f) {
