@@ -374,7 +374,7 @@ HISTORY_MSG_120;Green equilibration
 HISTORY_MSG_121;Raw CA Correction - Auto
 HISTORY_MSG_122;Dark-Frame - Auto-selection
 HISTORY_MSG_123;Dark-Frame - File
-HISTORY_MSG_124;White point correction
+HISTORY_MSG_124;Gain/white point correction
 HISTORY_MSG_126;Flat-Field - File
 HISTORY_MSG_127;Flat-Field - Auto-selection
 HISTORY_MSG_128;Flat-Field - Blur radius
@@ -1140,7 +1140,7 @@ PARTIALPASTE_PRSHARPENING;Post-resize sharpening
 PARTIALPASTE_RAWCA;Raw CA correction
 PARTIALPASTE_RAW_DEMOSAIC;Demosaic
 PARTIALPASTE_RAW_BLACK;Black levels
-PARTIALPASTE_RAW_WHITE;White point correction
+PARTIALPASTE_RAW_WHITE;Gain/white point correction
 PARTIALPASTE_RAWGROUP;Raw Settings
 PARTIALPASTE_RAW_PREPROCESSING;Raw preprocessing
 PARTIALPASTE_HOT_DEAD_PIXEL_FILTER;Hot/dead pixel filter
@@ -1626,7 +1626,7 @@ TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Saturation and Value Blending
 TP_EXPOSURE_TCMODE_STANDARD;Standard
 TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Weighted Standard
 TP_EXPOS_BLACKPOINT_LABEL;Raw Black Points
-TP_EXPOS_WHITEPOINT_LABEL;Raw White Points
+TP_EXPOS_WHITEPOINT_LABEL;Raw Gain/White Point
 TP_FILMNEGATIVE_BLUE;Blue ratio
 TP_FILMNEGATIVE_FILMBASE_PICK;Pick film base color
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Pick a spot of unexposed film (eg. the border between frames), to get the actual film base color values, and save them in the processing profile.\nThis makes it easy to get a more consistent color balance when batch-processing multiple pictures from the same roll.\nAlso use this when the converted image is extremely dark, bright, or color-unbalanced.
@@ -1866,7 +1866,7 @@ TP_RAWEXPOS_BLACK_3;Green 2
 TP_RAWEXPOS_BLACK_BLUE;Blue
 TP_RAWEXPOS_BLACK_GREEN;Green
 TP_RAWEXPOS_BLACK_RED;Red
-TP_RAWEXPOS_LINEAR;White-point correction
+TP_RAWEXPOS_LINEAR;Gain/White point correction
 TP_RAWEXPOS_TWOGREEN;Link greens
 TP_RAW_1PASSMEDIUM;1-pass (Markesteijn)
 TP_RAW_2PASS;1-pass+fast
