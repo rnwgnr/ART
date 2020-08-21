@@ -41,7 +41,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     float epsilon = 0.001f;
     float s = pp.strength >= 0 ? pow_F(pp.strength / 2.f, 0.3f) * 2.f : pp.strength;
     float strength = s >= 0 ? 1.f + s : 1.f / (1.f - s);
-    float strength2 = s >= 0 ? 1.f + s / 4.f: 1.f / (1.f - s / 4.f);
+    float strength2 = s >= 0 ? 1.f + s / 4.f: 1.f / (1.f - s / 2.f);
 
     int W = Y.width();
     int H = Y.height();
@@ -60,11 +60,19 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     array2D<float> base(W, H);
 
     const auto scurve =
+        s >= 0 ? 
         [](float x) -> float
         {
+            return 1.f;
             x = std::min(x / 0.05f, 1.f);
             return x < 0.5f ? 2.f * SQR(x) : 1.f - 2.f * SQR(1.f - x);
+        }
+        :
+        [](float x) -> float
+        {
+            return 1.f;
         };
+        
 
 #ifdef __SSE2__
     const vfloat v65535 = F2V(65535.f);
