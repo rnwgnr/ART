@@ -374,7 +374,7 @@ HISTORY_MSG_120;Équilibrage du vert
 HISTORY_MSG_121;A.C. Raw - Auto.
 HISTORY_MSG_122;Trame Noire - Sélection auto.
 HISTORY_MSG_123;Trame Noire - Fichier
-HISTORY_MSG_124;Correction du point blanc
+HISTORY_MSG_124;Gain/Correction du point blanc
 HISTORY_MSG_126;Champ Uniforme - Fichier
 HISTORY_MSG_127;Champ Uniforme - Sélection auto.
 HISTORY_MSG_128;Champ Uniforme - Rayon de floutage
@@ -1140,7 +1140,7 @@ PARTIALPASTE_PRSHARPENING;Netteté post-redimensionnement
 PARTIALPASTE_RAWCA;Correction auto. de l'aberr. chromatique
 PARTIALPASTE_RAW_DEMOSAIC;Dématriçage
 PARTIALPASTE_RAW_BLACK;Niveaux du noir
-PARTIALPASTE_RAW_WHITE;Correction du point blanc
+PARTIALPASTE_RAW_WHITE;Gain/Correction du point blanc
 PARTIALPASTE_RAWGROUP;Réglages raw
 PARTIALPASTE_RAW_PREPROCESSING;Prétraitement raw
 PARTIALPASTE_HOT_DEAD_PIXEL_FILTER;Filtre pixels chauds/morts
@@ -1626,7 +1626,7 @@ TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Mélange Saturation et Valeur
 TP_EXPOSURE_TCMODE_STANDARD;Standard
 TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Standard Pondéré
 TP_EXPOS_BLACKPOINT_LABEL;Points Noir Raw
-TP_EXPOS_WHITEPOINT_LABEL;Points Blanc Raw
+TP_EXPOS_WHITEPOINT_LABEL;Points Blanc/Gain Raw
 TP_FILMNEGATIVE_BLUE;Ratio de bleu
 TP_FILMNEGATIVE_FILMBASE_PICK;Choisissez la couleur de base du film.
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Choisissez un point du film non exposé (eg. la bordure entre les cadres), pour obtenir les valeurs actuelles des couleurs de base du film, et les sauver dans le profile de traitement.\nCeci permet d'obtenir facilement une valeur plus consitente de la balance des couleurs lors du traitement par lot de plusieurs images.\nUtilisez-le également lorsque l'image convertie est extrêmement sombre, lumineuse ou asymétrique.
@@ -1866,7 +1866,7 @@ TP_RAWEXPOS_BLACK_3;Vert 2
 TP_RAWEXPOS_BLACK_BLUE;Bleu
 TP_RAWEXPOS_BLACK_GREEN;Vert
 TP_RAWEXPOS_BLACK_RED;Rouge
-TP_RAWEXPOS_LINEAR;Corr. du Point Blanc
+TP_RAWEXPOS_LINEAR;Gain/Corr. du Point Blanc
 TP_RAWEXPOS_TWOGREEN;Lier les Verts
 TP_RAW_1PASSMEDIUM;1 passe (algo. Markesteijn)
 TP_RAW_2PASS;1 passe + Rapide
