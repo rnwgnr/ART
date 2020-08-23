@@ -19,6 +19,7 @@
 #18 2020-03-14 update to ART v1.2 by paul.matthijsse
 #19 2020-04-30 update to ART v1.3 by pm
 #20 2020-06-03 update to ART v1.4 by pm
+#21 2020-08-21 update to ART v1.5 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -79,6 +80,7 @@ EDIT_PIPETTE_TOOLTIP;Voeg een punt aan de curve toe met Ctrl+klik op de gewenste
 # hoofdscherm rechts, tabje Filter
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Camera
+EXIFFILTER_DATE;Datum
 EXIFFILTER_EXPOSURECOMPENSATION;Belichtingscompensatie (EV)
 EXIFFILTER_FILETYPE;Bestandstype
 EXIFFILTER_FOCALLEN;Brandpuntsafstand
@@ -894,7 +896,7 @@ MAIN_BUTTON_NAVPREV_TOOLTIP;Navigeer naar de vorige afbeelding relatief tov. de 
 MAIN_BUTTON_NAVSYNC_TOOLTIP;Synchroniseer de Bestandsnavigator of de Filmstrook met de Fotobewerker om de miniatuur te tonen van de huidig geopende afbeelding, en verwijder eventuele actieve filters.\nSneltoets: <b>x</b>\n\nAls voorgaand, maar zonder het verwijderen van actieve filters.\nSneltoets: <b>y</b>\n(NB: de miniatuur van de geopende afbeelding zal niet worden getoond indien eruit gefilterd).
 MAIN_BUTTON_PREFERENCES;Voorkeuren
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Plaats huidige foto in verwerkingsrij\nSneltoets: <b>Ctrl+b</b> (<b>Ctrl+Shift+b</b> voor snelle export)
-MAIN_BUTTON_SAVE_TOOLTIP;Bewaar huidige foto (Ctrl+klik voor snelle export)\nSneltoets: <b>Ctrl+s</b> (<b>Ctrl+Shift+s</b> voor snelle export)
+MAIN_BUTTON_SAVE_TOOLTIP;Bewaar huidige foto (<b>Ctrl+klik</b> voor snelle export)\nSneltoets: <b>Ctrl+s</b> (<b>Ctrl+Shift+s</b> voor snelle export)
 MAIN_BUTTON_SENDTOEDITOR;Stuur foto naar externe fotobewerker
 MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Stuur huidige foto naar extern fotobewerkingsprogramma\nSneltoets: <b>Ctrl+e</b>
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Toon/verberg alle zijpanelen\nSneltoets: <b>m</b>
@@ -1459,6 +1461,8 @@ TP_COARSETRAF_TOOLTIP_VFLIP;Verticaal spiegelen
 
 # module Color Correction / Kleurcorrectie
 TP_COLORCORRECTION_ABVALUES;x=%1 y=%2
+TP_COLORCORRECTION_IN;Invoer
+TP_COLORCORRECTION_OUT;Uitvoer
 TP_COLORCORRECTION_MODE;Modus
 TP_COLORCORRECTION_MODE_COMBINED;Standaard
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Aparte RGB-kanalen
@@ -1750,7 +1754,7 @@ TP_ICM_LABEL;Kleurbeheer
 TP_ICM_NOICM;Geen ICM: sRGB-uitvoer
 TP_ICM_NOPROFILE;Geen profiel (doorgeefmodus)
 TP_ICM_OUTPUTPROFILE;Uitvoerprofiel
-TP_ICM_PROFILEINTENT;Grafische weergave
+TP_ICM_PROFILEINTENT;Renderintentie
 TP_ICM_SAVEREFERENCE;Bewaar referentie-afb.
 TP_ICM_SAVEREFERENCE_APPLYWB;Toepassen witbalans
 TP_ICM_SAVEREFERENCE_APPLYWB_TOOLTIP;Gebruik witbalans bij het opslaan van foto's voor het maken van ICC-profielen. Gebruik geen witbalans bij het maken van DCP-profielen.
@@ -1883,12 +1887,14 @@ TP_PERSPECTIVE_VERTICAL;Verticaal
 
 # module RAW - Voorbewerking
 TP_PREPROCESS_DEADPIXFILT;Dodepixels-filter
-TP_PREPROCESS_DEADPIXFILT_TOOLTIP;Onderdrukt dode pixels
+TP_PREPROCESS_DEADPIXFILT_TOOLTIP;Probeert dode pixels te onderdrukken
+TP_PREPROCESS_DYNROWNOISEFILTER;Dynamisch rij-ruisfilter
+TP_PREPROCESS_GREENEQUIL;Groenbalans
 TP_PREPROCESS_HOTPIXFILT;Hetepixels-filter
-TP_PREPROCESS_HOTPIXFILT_TOOLTIP;Onderdrukt hete pixels
+TP_PREPROCESS_HOTPIXFILT_TOOLTIP;Probeert 'hete pixels' te onderdrukken
 TP_PREPROCESS_LABEL;Voorbewerking
 TP_PREPROCESS_LINEDENOISE;Lijnruisfilter
-TP_PREPROCESS_GREENEQUIL;Groenbalancering
+
 TP_PREPROCESS_NO_FOUND;Niet gevonden
 
 TP_PRSHARPENING_LABEL;Verscherp na verkleinen
@@ -2078,7 +2084,7 @@ TP_VIBRANCE_AVOIDCOLORSHIFT;Vermijd kleurverschuiving
 TP_TM_FATTAL_AMOUNT;Hoeveelheid
 TP_TM_FATTAL_LABEL;Compressie dynamisch bereik
 TP_TM_FATTAL_THRESHOLD;Detail
-
+TP_TM_FATTAL_SATCONTROL;Controleer verzadiging 
 TP_TONECURVE_LABEL;Tooncurven
 TP_TONECURVE_SATCURVE;Verzadiging
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Kracht perceptuele curve
@@ -2103,12 +2109,17 @@ TP_VIGNETTING_RADIUS;Straal
 TP_VIGNETTING_STRENGTH;Sterkte
 
 # Witbalans
+TP_WBALANCE_AUTO;Auto
+TP_WBALANCE_CAMERA;Camera
 TP_WBALANCE_CLOUDY;Bewolkt
 TP_WBALANCE_CUSTOM;Handmatig
+TP_WBALANCE_CUSTOM_MULT;Handmatig: RGB-schuiven
 TP_WBALANCE_DAYLIGHT;Daglicht (zonnig)
 TP_WBALANCE_EQBLUERED;Blauw/Rood Balans
 TP_WBALANCE_EQBLUERED_TOOLTIP;Wijzigt het normale gedrag van 'witbalans' door de blauw/rood-balans te verschuiven.\nToepassen wanneer de opname-omstandigheden sterk afwijken van: \na) standaardbelichting (bv. onder water)\nb) de condities waar de kalibraties zijn uitgevoerd\nc) de matrices of ICC-profielen.
+TP_WBALANCE_FLASH55;Leica
 TP_WBALANCE_FLASH60;Standaard, Canon, Pentax, Olympus
+TP_WBALANCE_FLASH65;Nikon, Panasonic, Sony, Minolta
 TP_WBALANCE_FLASH_HEADER;Flits
 TP_WBALANCE_FLUO1;F1 - Daglicht
 TP_WBALANCE_FLUO2;F2 - Koel wit
@@ -2118,20 +2129,35 @@ TP_WBALANCE_FLUO5;F5 - Daglicht
 TP_WBALANCE_FLUO6;F6 - Licht wit
 TP_WBALANCE_FLUO7;F7 - D65 Daglicht simuleren
 TP_WBALANCE_FLUO9;F9 - Koelwit DeLuxe
+TP_WBALANCE_FLUO10;F10 - Philips TL85
+TP_WBALANCE_FLUO11;F11 - Philips TL84
+TP_WBALANCE_FLUO12;F12 - Philips TL83
 TP_WBALANCE_FLUO_HEADER;Fluorescent(TL)
 TP_WBALANCE_GREEN;Groentint
+TP_WBALANCE_GTI;GTI
+TP_WBALANCE_HMI;HMI
+TP_WBALANCE_JUDGEIII;JudgeIII
 TP_WBALANCE_LABEL;Witbalans
+TP_WBALANCE_LAMP_HEADER;Lamp
+TP_WBALANCE_LED_CRS;CRS SP12 WWMR16
+TP_WBALANCE_LED_HEADER;LED
+TP_WBALANCE_LED_LSI;LSI Lumelex 2040
 TP_WBALANCE_METHOD;Methode
 TP_WBALANCE_PICKER;Kies
 TP_WBALANCE_SHADE;Schaduw
 TP_WBALANCE_SIZE;Grootte:
+TP_WBALANCE_SOLUX35;Solux 3500K
+TP_WBALANCE_SOLUX41;Solux 4100K
 TP_WBALANCE_SOLUX47;Solux 4700K (leverancier)
-TP_WBALANCE_SPOTWB;Wijs WB aan
+TP_WBALANCE_SOLUX47_NG;Solux 4700K (Nat. Gallery)
+TP_WBALANCE_SPOTWB;Wijs WB aan door met de pipet op een neutraal gebied 
+in het voorbeeld te klikken
 TP_WBALANCE_TEMPERATURE;Kleurtemperatuur
 TP_WBALANCE_TUNGSTEN;Tungsten (wolfraam)
 TP_WBALANCE_WATER1;Onderwater 1
 TP_WBALANCE_WATER2;Onderwater 2
 TP_WBALANCE_WATER_HEADER;Onderwater
+TP_WBALANCE_PRESET;Camera voorinstelling
 
 ZOOMPANEL_NEWCROPWINDOW;Open (nieuw) detailvenster
 ZOOMPANEL_ZOOM100;Zoom naar 100%\nSneltoets: <b>z</b>
