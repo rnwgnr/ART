@@ -559,6 +559,11 @@ int DCraw::parseCR3(unsigned long long oAtomList,
               relpos_inBox += lTag;
             }
           }
+          
+          if (!szItem) {
+              goto fin;
+          }
+          
           relpos_inDir += szItem;
         }
         order = 0x4d4d;
