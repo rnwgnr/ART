@@ -176,22 +176,19 @@ Image8* ImProcFunctions::lab2rgb(Imagefloat *img, int cx, int cy, int cw, int ch
     Image8* image = new Image8(cw, ch);
     Glib::ustring profile;
 
-    // bool standard_gamma;
+    cmsHPROFILE oprof = nullptr;
 
     if (settings->HistogramWorking && consider_histogram_settings) {
         profile = icm.workingProfile;
-        // standard_gamma = true;
     } else {
         profile = icm.outputProfile;
 
         if (icm.outputProfile.empty() || icm.outputProfile == ColorManagementParams::NoICMString) {
             profile = "sRGB";
         }
-
-        // standard_gamma = false;
+        oprof = ICCStore::getInstance()->getProfile(profile);
     }
 
-    cmsHPROFILE oprof = ICCStore::getInstance()->getProfile(profile);
 
     if (oprof) {
         cmsHPROFILE oprofG = oprof;
