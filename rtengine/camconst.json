@@ -1150,6 +1150,20 @@ Camera constants:
         "masked_areas": [ 50, 40, 4540, 140 ]
     },
 
+    { // Quality C
+        "make_model": "Canon EOS R5",
+        "raw_crop" : [ 124, 92, 8220, 5486 ],
+        "masked_areas" : [ 94, 20, 5578, 122 ],
+        "ranges" : { "white" : 16383 } 
+    },
+
+    { // Quality C
+        "make_model": "Canon EOS R6",
+        "raw_crop": [ 72, 38, 5496, 3670 ],
+        "masked_areas" : [ 40, 10, 5534, 70 ],
+        "ranges" : { "white" : 16383 }
+    },
+    
 // Canon Powershot
     { // Quality C, CHDK DNGs, raw frame correction
         "make_model": "Canon PowerShot A3100 IS",
