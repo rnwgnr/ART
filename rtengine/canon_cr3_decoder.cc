@@ -3020,6 +3020,7 @@ void DCraw::crxLoadRaw()
   }
 
 //  /*imgdata.color.*/maximum = (1 << hdr.nBits) - 1;
+  tiff_bps = hdr.nBits;
 
   uint8_t *hdrBuf = (uint8_t *)malloc(hdr.mdatHdrSize * 2);
 
