@@ -595,6 +595,11 @@ private:
             *mask_ = clipboard.getDrawnMask();
             undo_stack_.clear();
             info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
+            feather_->setValue(mask_->feather);
+            transparency_->setValue(mask_->transparency * 100.0);
+            smoothness_->setValue(mask_->smoothness * 100.0);
+            contrast_->setCurve(mask_->contrast);
+            set_mode(mask_->addmode ? 1 : 0);
             sig_draw_updated_.emit();
         }
     }
