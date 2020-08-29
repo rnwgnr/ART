@@ -798,14 +798,17 @@ SAMSUNG GALAXY S20+ REAR MAIN CAMERA
 YUNEEC ION L1 PRO
 
 Updated on Fri Aug 14 21:40:54 2020 (with Adobe DNG converter 12.4.0.547):
-  CANON EOS R5
-  CANON EOS R6
-  IPAD8,11 BACK CAMERA
-  IPAD8,9 BACK CAMERA
-  IPHONE12,8 BACK CAMERA
-  LEICA M10-R
-  SKYDIO 2
-  SONY DCZV1B
+CANON EOS R5
+CANON EOS R6
+IPAD8,11 BACK CAMERA
+IPAD8,9 BACK CAMERA
+IPHONE12,8 BACK CAMERA
+LEICA M10-R
+SKYDIO 2
+SONY DCZV1B
+
+Updated on Sat Aug 29 16:45:00 2020 (with Adobe DNG converter 12.4.0.555):
+NIKON Z 5
 */
 {"camera_constants": [
     {
@@ -2583,6 +2586,10 @@ Updated on Fri Aug 14 21:40:54 2020 (with Adobe DNG converter 12.4.0.547):
     {
         "make_model" : "NIKON DF",
         "dcraw_matrix" : [8598, -2848, -857, -5618, 13606, 2195, -1002, 1773, 7137]
+    },
+    {
+        "make_model" : "NIKON Z 5",
+        "dcraw_matrix" : [8695, -2558, -648, -5015, 12711, 2575, -1279, 2215, 7514]
     },
     {
         "make_model" : "NIKON Z 50",
