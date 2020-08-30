@@ -1105,7 +1105,8 @@ Camera constants:
     },
 
     { // Quality C, White Levels not properly indicated, aperture scaling..missing factors are guessed
-        "make_model": [ "Canon EOS M5","Canon EOS M6" ],
+        "make_model": [ "Canon EOS M5","Canon EOS M6",
+                        "Canon EOS M50", "Canon EOS Rebel SL3", "Canon EOS 250D" ],
         "dcraw_matrix": [ 8532,-701,-1167,-4095,11879,2508,-797,2424,7010 ], // DNG_V9.8 D65
         "raw_crop": [ 264, 36, 6024, 4020 ], // full size 6288x4056,
         //"raw_crop": [ 272, 44, 6008, 4008 ], // matched to official crop 276,48,6275,4047 - official jpeg 6000X4000
@@ -1150,6 +1151,12 @@ Camera constants:
         "masked_areas": [ 50, 40, 4540, 140 ]
     },
 
+    { // Quality C, only raw crop and masked area
+        "make_model" : "CANON EOS RP",
+        "raw_crop": [ 120, 44, 6264, 4180 ],
+        "masked_areas": [ 44, 4, 4220, 116 ]
+    },
+    
     { // Quality C
         "make_model": "Canon EOS R5",
         "raw_crop" : [ 124, 92, 8220, 5486 ],

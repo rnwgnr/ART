@@ -852,7 +852,8 @@ NIKON Z 5
         "dcraw_matrix" : [14155, -5064, -1382, -6550, 14633, 2039, -1623, 1823, 6561]
     },
     {
-        "make_model" : "CANON EOS 250D",
+        "make_model" : ["CANON EOS 250D",
+                        "CANON EOS REBEL SL3"],
         "dcraw_matrix" : [9079, -1923, -1236, -4677, 12454, 2492, -922, 2319, 5565]
     },
     {
