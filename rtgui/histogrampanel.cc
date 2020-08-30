@@ -869,7 +869,7 @@ void HistogramArea::updateBackBuffer ()
         // make double copies of LUT, one for faster access, another one to scale down the raw histos
         LUTu rhchanged(256), ghchanged(256), bhchanged(256);
         unsigned int lhisttemp[256] ALIGNED16 {0}, chisttemp[256] ALIGNED16 {0}, rhtemp[256] ALIGNED16 {0}, ghtemp[256] ALIGNED16 {0}, bhtemp[256] ALIGNED16 {0};
-        const int scale = (rawMode ? 8 : 1);
+        const int scale = 1;//(rawMode ? 8 : 1);
 
         for(int i = 0; i < 256; i++) {
             if(needLuma) {
