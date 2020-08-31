@@ -1375,13 +1375,13 @@ void DCPProfile::apply(
 
     const TMatrix work_matrix = ICCStore::getInstance()->workingSpaceInverseMatrix(working_space);
 
-    const Matrix xyz_cam = makeXyzCam(white_balance, pre_mul, cam_wb_matrix, preferred_illuminant); // Camera RGB to XYZ D50 matrix
-
     const std::vector<HsbModify> delta_base = makeHueSatMap(white_balance, preferred_illuminant);
 
     if (delta_base.empty()) {
         apply_hue_sat_map = false;
     }
+
+    const Matrix xyz_cam = makeXyzCam(white_balance, pre_mul, cam_wb_matrix, preferred_illuminant, apply_hue_sat_map); // Camera RGB to XYZ D50 matrix
 
     if (!apply_hue_sat_map) {
         // The fast path: No LUT --> Calculate matrix for direct conversion raw -> working space
@@ -1698,7 +1698,7 @@ std::array<double, 2> DCPProfile::neutralToXy(const Triple& neutral, int preferr
     return last_xy;
 }
 
-DCPProfile::Matrix DCPProfile::makeXyzCam(const ColorTemp& white_balance, const Triple& pre_mul, const Matrix& cam_wb_matrix, int preferred_illuminant) const
+DCPProfile::Matrix DCPProfile::makeXyzCam(const ColorTemp& white_balance, const Triple& pre_mul, const Matrix& cam_wb_matrix, int preferred_illuminant, bool use_fwd_matrix) const
 {
     // Code adapted from dng_color_spec::FindXYZtoCamera.
     // Note that we do not support monochrome or colorplanes > 3 (no reductionMatrix support),
@@ -1741,8 +1741,8 @@ DCPProfile::Matrix DCPProfile::makeXyzCam(const ColorTemp& white_balance, const 
        When RT's white balance can make use of the DCP color matrices we could use that instead. */
     const std::array<double, 2> white_xy = neutralToXy(neutral, preferred_illuminant, wbtemp);
 
-    bool has_fwd_1 = has_forward_matrix_1;
-    bool has_fwd_2 = has_forward_matrix_2;
+    bool has_fwd_1 = use_fwd_matrix && has_forward_matrix_1;
+    bool has_fwd_2 = use_fwd_matrix && has_forward_matrix_2;
     bool has_col_1 = has_color_matrix_1;
     bool has_col_2 = has_color_matrix_2;
 
