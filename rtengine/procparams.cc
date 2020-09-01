@@ -49,7 +49,7 @@ namespace {
 
 std::vector<char> compress(const std::string &src)
 {
-    auto s = Gio::MemoryOutputStream::create();
+    auto s = Gio::MemoryOutputStream::create(nullptr, 0, g_realloc, g_free);
     auto c = Gio::ZlibCompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW, -1);
     std::vector<char> res;
     {
@@ -70,7 +70,7 @@ std::vector<char> compress(const std::string &src)
 
 std::string decompress(const std::vector<char> &src)
 {
-    auto s = Gio::MemoryOutputStream::create();
+    auto s = Gio::MemoryOutputStream::create(nullptr, 0, g_realloc, g_free);
     auto c = Gio::ZlibDecompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW);
     std::vector<char> res;
     {
