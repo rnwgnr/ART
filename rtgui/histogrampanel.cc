@@ -1037,6 +1037,7 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
     int peakval[3];
     int peakcount[3];
     int totcount[3];
+    int totsum[3];
     const char *ch[3] = {"#FF0000", "#00FF00", "#0000FF"};
 
     // draw vertical gridlines
@@ -1168,6 +1169,7 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
             peakval[c] = 0;
             peakcount[c] = 0;
             totcount[c] = 0;
+            totsum[c] = 0;
         }
 
         const auto update =
@@ -1188,6 +1190,7 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
                         }
                         ++totcount[c];
                     }
+                    totsum[c] += cnt;
                 }
             };
         
@@ -1200,12 +1203,23 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
 
 
     if (valid) {
+        const auto pct =
+            [](int n, int d) -> Glib::ustring
+            {
+                double p = double(int(double(n)/double(d) * 10000)) / 100.0;
+                if (p == 0 && n > 0) {
+                    return "&lt;0.01%";
+                } else {
+                    return Glib::ustring::compose("%1%%", p);
+                }
+            };
+        
         set_has_tooltip(true);
         Glib::ustring tip = "";
         for (int i = 0; i < 3; ++i) {
             double ev = minval[i] >= 0 ? std::log2(maxval[i] - minval[i]) : 0;
             ev = double(int(ev * 100)) / 100.0;
-            Glib::ustring m = Glib::ustring::compose(M("HISTOGRAM_RAW_STATS_TOOLTIP"), minval[i], mincount[i], maxval[i], maxcount[i], peakval[i], peakcount[i], ev, totcount[i]);
+            Glib::ustring m = Glib::ustring::compose(M("HISTOGRAM_RAW_STATS_TOOLTIP"), minval[i], pct(mincount[i], totsum[i]), maxval[i], pct(maxcount[i], totsum[i]), peakval[i], pct(peakcount[i], totsum[i]), ev, totcount[i]);
             Glib::ustring s = Glib::ustring::compose("<span font_family=\"Arial\" size=\"larger\" foreground=\"%1\">&#9632;</span> %2", ch[i], m);
             if (i > 0) {
                 tip += "\n";
