@@ -170,6 +170,10 @@ private:
     void get_preferred_width_vfunc (int &minimum_width, int &natural_width) const override;
     void get_preferred_height_for_width_vfunc (int width, int &minimum_height, int &natural_height) const override;
     void get_preferred_width_for_height_vfunc (int height, int &minimum_width, int &natural_width) const override;
+
+    void updateRaw(Cairo::RefPtr<Cairo::Context> cr);
+    void updateNonRaw(Cairo::RefPtr<Cairo::Context> cr);
+    void drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr, LUTu &data, unsigned int ub, double scale, int hsize, int vsize);
 };
 
 class HistogramPanel : public Gtk::Grid, public PointerMotionListener, public DrawModeListener

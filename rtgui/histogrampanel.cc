@@ -791,7 +791,6 @@ void HistogramArea::update(
 
 void HistogramArea::updateBackBuffer ()
 {
-
     if (!get_realized ()) {
         return;
     }
@@ -824,27 +823,51 @@ void HistogramArea::updateBackBuffer ()
     ch_ds[0] = 4;
     cr->set_dash (ch_ds, 0);
 
+    if (rawMode) {
+        updateRaw(cr);
+    } else {
+        updateNonRaw(cr);
+    }
+
+    // Draw the frame's border
+    style->render_frame(cr, 0, 0, surface->get_width(), surface->get_height());
+
+    oldwidth = w;
+    oldheight = h;
+
+    setDirty(false);
+}
+
+
+void HistogramArea::updateNonRaw(Cairo::RefPtr<Cairo::Context> cr)
+{
+    set_has_tooltip(false);
+    
+    const Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
+
+    double s = RTScalable::getScale();
+
     // determine the number of h-gridlines based on current h
     int nrOfHGridPartitions = (int)rtengine::min (16.0, pow (2.0, floor ((h - 100) / 250) + 2));
     int nrOfVGridPartitions = 8; // always show 8 stops (lines at 1,3,7,15,31,63,127)
 
     // draw vertical gridlines
-    if (options.histogramDrawMode < 2) {
+    if (options.histogramDrawMode == 0) {
         for (int i = 1; i < nrOfVGridPartitions; i++) {
-            cr->move_to ((pow(2.0,i) - 1) / 255.0 * w + 0.5, 0.);
-            cr->line_to ((pow(2.0,i) - 1) / 255.0 * w + 0.5, h);
-            cr->stroke ();
+            cr->move_to((pow(2.0,i) - 1) / 255.0 * w + 0.5, 0.);
+            cr->line_to((pow(2.0,i) - 1) / 255.0 * w + 0.5, h);
+            cr->stroke();
         }
     } else {
         for (int i = 1; i < nrOfVGridPartitions; i++) {
-            cr->move_to (HistogramScaling::log (255, pow(2.0,i) - 1) / 255.0 * w + 0.5, 0.);
-            cr->line_to (HistogramScaling::log (255, pow(2.0,i) - 1) / 255.0 * w + 0.5, h);
-            cr->stroke ();
+            cr->move_to(HistogramScaling::log(255, pow(2.0,i) - 1) / 255.0 * w + 0.5, 0.);
+            cr->line_to(HistogramScaling::log(255, pow(2.0,i) - 1) / 255.0 * w + 0.5, h);
+            cr->stroke();
         }
     }
 
     // draw horizontal gridlines
-    if (options.histogramDrawMode == 0) {
+    if (options.histogramDrawMode != 2) {
         for (int i = 1; i < nrOfHGridPartitions; i++) {
             cr->move_to (0., i * (double)h / nrOfHGridPartitions + 0.5);
             cr->line_to (w, i * (double)h / nrOfHGridPartitions + 0.5);
@@ -862,14 +885,13 @@ void HistogramArea::updateBackBuffer ()
 
     if (valid) {
         // For RAW mode use the other hists
-        LUTu& rh = rawMode ? rhistRaw : rhist;
-        LUTu& gh = rawMode ? ghistRaw : ghist;
-        LUTu& bh = rawMode ? bhistRaw : bhist;
+        LUTu& rh = rhist;
+        LUTu& gh = ghist;
+        LUTu& bh = bhist;
 
-        // make double copies of LUT, one for faster access, another one to scale down the raw histos
-        LUTu rhchanged(256), ghchanged(256), bhchanged(256);
+        // make copies of LUT for faster access
         unsigned int lhisttemp[256] ALIGNED16 {0}, chisttemp[256] ALIGNED16 {0}, rhtemp[256] ALIGNED16 {0}, ghtemp[256] ALIGNED16 {0}, bhtemp[256] ALIGNED16 {0};
-        const int scale = 1;//(rawMode ? 8 : 1);
+        const int scale = 1;
 
         for(int i = 0; i < 256; i++) {
             if(needLuma) {
@@ -881,15 +903,15 @@ void HistogramArea::updateBackBuffer ()
             }
 
             if(needRed) {
-                rhchanged[i] = rhtemp[i] = rh[i] / scale;
+                rhtemp[i] = rh[i];
             }
 
             if(needGreen) {
-                ghchanged[i] = ghtemp[i] = gh[i] / scale;
+                ghtemp[i] = gh[i];
             }
 
             if(needBlue) {
-                bhchanged[i] = bhtemp[i] = bh[i] / scale;
+                bhtemp[i] = bh[i];
             }
         }
 
@@ -922,8 +944,8 @@ void HistogramArea::updateBackBuffer ()
 
         int realhistheight = histheight;
 
-        if (realhistheight < winh - 2) {
-            realhistheight = winh - 2;
+        if (realhistheight < h - 2) {
+            realhistheight = h - 2;
         }
 
         cr->set_antialias (Cairo::ANTIALIAS_SUBPIXEL);
@@ -936,47 +958,316 @@ void HistogramArea::updateBackBuffer ()
             drawCurve(cr, lhist, realhistheight, w, h);
             cr->set_source_rgba (0.65, 0.65, 0.65, 0.65);
             cr->fill ();
-            drawMarks(cr, lhist, scale/*realhistheight*/, w, ui, oi);
+            drawMarks(cr, lhist, scale, w, ui, oi);
         }
 
         if (needChroma && !rawMode) {
             drawCurve(cr, chist, realhistheight, w, h);
             cr->set_source_rgb (0.9, 0.9, 0.);
             cr->stroke ();
-            drawMarks(cr, chist, scale/*realhistheight*/, w, ui, oi);
+            drawMarks(cr, chist, scale, w, ui, oi);
         }
 
         if (needRed) {
-            drawCurve(cr, rhchanged, realhistheight, w, h);
+            drawCurve(cr, rh, realhistheight, w, h);
             cr->set_source_rgb (1.0, 0.0, 0.0);
             cr->stroke ();
-            drawMarks(cr, rhchanged, scale/*realhistheight*/, w, ui, oi);
+            drawMarks(cr, rh, scale, w, ui, oi);
         }
 
         if (needGreen) {
-            drawCurve(cr, ghchanged, realhistheight, w, h);
+            drawCurve(cr, gh, realhistheight, w, h);
             cr->set_source_rgb (0.0, 1.0, 0.0);
             cr->stroke ();
-            drawMarks(cr, ghchanged, scale/*realhistheight*/, w, ui, oi);
+            drawMarks(cr, gh, scale, w, ui, oi);
         }
 
         if (needBlue) {
-            drawCurve(cr, bhchanged, realhistheight, w, h);
+            drawCurve(cr, bh, realhistheight, w, h);
             cr->set_source_rgb (0.0, 0.0, 1.0);
             cr->stroke ();
-            drawMarks(cr, bhchanged, scale/*realhistheight*/, w, ui, oi);
+            drawMarks(cr, bh, scale, w, ui, oi);
         }
 
     }
-
-    // Draw the frame's border
-    style->render_frame(cr, 0, 0, surface->get_width(), surface->get_height());
-
-    oldwidth = w;
-    oldheight = h;
-
-    setDirty(false);
 }
+
+
+namespace {
+
+void next_raw_idx(bool logscale, unsigned int ub, unsigned int &cur, unsigned int &i)
+{
+    unsigned int j = i;
+    i = cur;
+    unsigned int next = cur;
+    if (logscale) {
+        next = std::max(static_cast<unsigned int>(j * 1.3f), cur + 1u);
+    } else {
+        next = cur + std::max(ub / 512u, 1u);
+    }
+    if (ub - next < next - cur) {
+        next = ub + 1;
+    }
+    if (cur < ub && next > ub) {
+        cur = ub;
+    } else {
+        cur = std::min(next, ub+1);
+    }
+}
+
+} // namespace
+
+
+void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
+{
+    const Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
+    double s = RTScalable::getScale();
+
+    // determine the number of h-gridlines based on current h
+    int nrOfHGridPartitions = (int)rtengine::min (16.0, pow (2.0, floor ((h - 100) / 250) + 2));
+    double sz = 2;
+    if (valid) {
+        sz = rtengine::max(rhistRaw.getUpperBound(), ghistRaw.getUpperBound(), bhistRaw.getUpperBound());
+    }
+
+    int minval[3];
+    int mincount[3];
+    int maxval[3];
+    int maxcount[3];
+    int peakval[3];
+    int peakcount[3];
+    int totcount[3];
+    const char *ch[3] = {"#FF0000", "#00FF00", "#0000FF"};
+
+    // draw vertical gridlines
+    const double logmax = std::log2(sz);
+    const bool logscale = options.histogramDrawMode > 0;
+    
+    for (double i = sz / 2.0; ; i /= 2.0) {
+        double x = i / sz;
+        if (logscale) {
+            x = logmax + std::log2(x);
+            if (x <= 0) {
+                break;
+            }
+            x /= logmax;
+        }
+        x *= w;
+        cr->move_to(x, 0.);
+        cr->line_to(x, h);
+        cr->stroke();
+        if (i <= 1.0) {
+            break;
+        }
+    }
+
+    // draw horizontal gridlines
+    if (options.histogramDrawMode == 2) {
+        for (int i = 1; i < nrOfHGridPartitions; i++) {
+            double y = double(i) / nrOfHGridPartitions;
+            y = rtengine::log2lin(y, 10.0);
+            cr->move_to(0., y * h);
+            cr->line_to(w, y * h);
+            cr->stroke();
+        }
+    } else {
+        for (int i = 1; i < nrOfHGridPartitions; i++) {
+            cr->move_to(0., i * (double)h / nrOfHGridPartitions + 0.5);
+            cr->line_to(w, i * (double)h / nrOfHGridPartitions + 0.5);
+            cr->stroke();
+        }
+    }
+
+    cr->unset_dash();
+
+    if (valid) {
+        // For RAW mode use the other hists
+        LUTu &rh = rhistRaw;
+        LUTu &gh = ghistRaw;
+        LUTu &bh = bhistRaw;
+
+        auto ub = rtengine::max(rh.getUpperBound(), gh.getUpperBound(), bh.getUpperBound());
+
+        const auto bin =
+            [](LUTu &data, int i, int next) -> double
+            {
+                double val = 0.0;
+                for (int j = i; j < next; ++j) {
+                    val += data[j];
+                }
+                val /= (next - i);
+                return val;
+            };
+        
+        //const int delta = std::max(int(ub / std::max(w / 2, 1)), 1);
+        //const float delta = 1.05f;
+        unsigned int next = 1;
+        unsigned int histheight = 0;
+        for (unsigned int i = 0; i <= ub;) {
+            if (i < rh.getSize()) {
+                double val = bin(rh, i, next);
+                if (histheight < val) {
+                    histheight = val;
+                }
+            }
+            if (i < gh.getSize()) {
+                double val = bin(gh, i, next);
+                if (histheight < val) {
+                    histheight = val;
+                }
+            }
+            if (i < bh.getSize()) {
+                double val = bin(bh, i, next);
+                if (histheight < val) {
+                    histheight = val;
+                }
+            }
+
+            next_raw_idx(logscale, ub, next, i);
+        }       
+
+        int realhistheight = histheight;
+
+        if (realhistheight < h - 2) {
+            realhistheight = h - 2;
+        }
+
+        cr->set_antialias (Cairo::ANTIALIAS_SUBPIXEL);
+        cr->set_line_width (1.0 * s);
+        cr->set_operator (Cairo::OPERATOR_OVER);
+
+        int ui = 0, oi = 0;
+
+        if (needRed) {
+            drawRawCurve(cr, rh, ub, realhistheight, w, h);
+            cr->set_source_rgb(1.0, 0.0, 0.0);
+            cr->stroke();
+            drawMarks(cr, rh, 1.0, w, ui, oi);
+        }
+
+        if (needGreen) {
+            drawRawCurve(cr, gh, ub, realhistheight, w, h);
+            cr->set_source_rgb(0.0, 1.0, 0.0);
+            cr->stroke();
+            drawMarks(cr, gh, 1.0, w, ui, oi);
+        }
+
+        if (needBlue) {
+            drawRawCurve(cr, bh, ub, realhistheight, w, h);
+            cr->set_source_rgb(0.0, 0.0, 1.0);
+            cr->stroke();
+            drawMarks(cr, bh, 1.0, w, ui, oi);
+        }
+
+        // update stats
+        for (int c = 0; c < 3; ++c) {
+            minval[c] = -1;
+            mincount[c] = 0;
+            maxval[c] = -1;
+            maxcount[c] = 0;
+            peakval[c] = 0;
+            peakcount[c] = 0;
+            totcount[c] = 0;
+        }
+
+        const auto update =
+            [&](int c, LUTu &data, unsigned int i) -> void
+            {
+                if (i < data.getSize()) {
+                    int cnt = data[i];
+                    if (cnt > 0) {
+                        if (minval[c] < 0) {
+                            minval[c] = i;
+                            mincount[c] = cnt;
+                        }
+                        maxval[c] = i;
+                        maxcount[c] = cnt;
+                        if (peakcount[c] < cnt) {
+                            peakval[c] = i;
+                            peakcount[c] = cnt;
+                        }
+                        ++totcount[c];
+                    }
+                }
+            };
+        
+        for (unsigned int i = 0; i <= ub; ++i) {
+            update(0, rh, i);
+            update(1, gh, i);
+            update(2, bh, i);
+        }
+    }
+
+
+    if (valid) {
+        set_has_tooltip(true);
+        Glib::ustring tip = "";
+        for (int i = 0; i < 3; ++i) {
+            double ev = minval[i] >= 0 ? std::log2(maxval[i] - minval[i]) : 0;
+            ev = double(int(ev * 100)) / 100.0;
+            Glib::ustring m = Glib::ustring::compose(M("HISTOGRAM_RAW_STATS_TOOLTIP"), minval[i], mincount[i], maxval[i], maxcount[i], peakval[i], peakcount[i], ev, totcount[i]);
+            Glib::ustring s = Glib::ustring::compose("<span font_family=\"Arial\" size=\"larger\" foreground=\"%1\">&#9632;</span> %2", ch[i], m);
+            if (i > 0) {
+                tip += "\n";
+            }
+            tip += s;
+        }
+        set_tooltip_markup(tip);
+    } else {
+        set_has_tooltip(false);
+    }
+}
+
+
+void HistogramArea::drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr,
+                                 LUTu &data, unsigned int ub, double scale,
+                                 int hsize, int vsize)
+{
+    double s = RTScalable::getScale();
+
+    cr->set_line_width(s);
+    cr->move_to(0, vsize - 1);
+    scale = scale <= 0.f ? 0.001f : scale; // avoid division by zero and negative values
+
+    unsigned int next = 1;
+    const bool logscale = drawMode > 0;
+    const double logmax = std::log2(ub);
+    const double ybase = std::pow(10, std::max(std::floor(std::log(scale) / std::log(10))-1, 1.0));
+
+    for (unsigned int i = logscale ? 1 : 0; i < data.getSize(); ) {
+        double val = 0.0;
+        for (unsigned int j = i; j < next; ++j) {
+            val += data[j];
+        }
+        val /= (next - i);
+        
+        val = std::min(val / scale, 1.0);
+
+        if (drawMode == 2) { // scale y for log-scale
+            val = rtengine::lin2log(val, ybase);
+        }
+
+        double iscaled = std::min(double(i) / ub, 1.0);
+        if (logscale) { // scale x for log-scale
+            iscaled = logmax + std::log2(iscaled);
+            if (iscaled < 0) {
+                next_raw_idx(logscale, data.getUpperBound(), next, i);
+                continue;
+            }
+            iscaled /= logmax;
+        }
+
+        double posX = iscaled * hsize;
+        double posY = vsize - 2 + val * (4 - vsize);
+
+        cr->line_to(posX, posY);
+
+        next_raw_idx(logscale, data.getUpperBound(), next, i);
+    }
+
+    cr->line_to(hsize - 1, vsize - 1);
+}
+
 
 void HistogramArea::on_realize ()
 {
@@ -998,12 +1289,12 @@ void HistogramArea::drawCurve(Cairo::RefPtr<Cairo::Context> &cr,
     for (int i = 0; i < 256; i++) {
         double val = data[i] * (double)vsize / scale;
 
-        if (drawMode > 0) { // scale y for single and double log-scale
+        if (drawMode == 2) { // scale y for log-scale
             val = HistogramScaling::log ((double)vsize, val);
         }
 
         double iscaled = i;
-        if (drawMode == 2) { // scale x for double log-scale
+        if (drawMode > 0) { // scale x for log-scale
             iscaled = HistogramScaling::log (255.0, (double)i);
         }
 
@@ -1025,7 +1316,7 @@ void HistogramArea::drawMarks(Cairo::RefPtr<Cairo::Context> &cr,
         cr->rectangle(0, (ui++)*s, s, s);
     }
 
-    if(data[255] > scale) {
+    if(data[data.getUpperBound()] > scale) {
         cr->rectangle(hsize - s, (oi++)*s, s, s);
     }
 

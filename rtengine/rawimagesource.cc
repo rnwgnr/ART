@@ -3507,6 +3507,9 @@ void RawImageSource::getAutoExpHistogram (LUTu & histogram, int& histcompr)
     }
 }
 
+//-----------------------------------------------------------------------------
+#if 0
+
 // Histogram MUST be 256 in size; gamma is applied, blackpoint and gain also
 void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw)
 {
@@ -3627,31 +3630,58 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
         } // end of critical region
     } // end of parallel region
 
-    const auto getidx =
-        [&](int c, int i) -> int
-        {
-            float f = mult[c] * std::max(0.f, i - cblacksom[c]);
-            return f > 0.f ? (f < 1.f ? 1 : std::min(int(f), 255)) : 0;
-        };
+    // const auto getidx =
+    //     [&](int c, int i) -> int
+    //     {
+    //         float f = mult[c] * std::max(0.f, i - cblacksom[c]);
+    //         return f > 0.f ? (f < 1.f ? 1 : std::min(int(f), 255)) : 0;
+    //     };
 
-    for(int i = 0; i < histoSize; i++) {
-        int idx = getidx(0, i);
+    // for(int i = 0; i < histoSize; i++) {
+    //     int idx = getidx(0, i);
+    //     histRedRaw[idx] += hist[0][i];
+
+    //     if (ri->get_colors() > 1) {
+    //         idx = getidx(1, i);
+    //         histGreenRaw[idx] += hist[1][i];
+
+    //         if (fourColours) {
+    //             idx = getidx(3, i);
+    //             histGreenRaw[idx] += hist[3][i];
+    //         }
+
+    //         idx = getidx(2, i);
+    //         histBlueRaw[idx] += hist[2][i];
+    //     }
+    // }
+    int step = histoSize / 256;
+    for (int i = 0, idx = 0; i < histoSize; i += step, ++idx) {
         histRedRaw[idx] += hist[0][i];
-
         if (ri->get_colors() > 1) {
-            idx = getidx(1, i);
             histGreenRaw[idx] += hist[1][i];
 
             if (fourColours) {
-                idx = getidx(3, i);
                 histGreenRaw[idx] += hist[3][i];
             }
 
-            idx = getidx(2, i);
             histBlueRaw[idx] += hist[2][i];
         }
     }
+    if (histoSize % 256 != 0) {
+        int i = histoSize-1;
+        int idx = 255;
+        histRedRaw[idx] += hist[0][i];
+        if (ri->get_colors() > 1) {
+            histGreenRaw[idx] += hist[1][i];
 
+            if (fourColours) {
+                histGreenRaw[idx] += hist[3][i];
+            }
+
+            histBlueRaw[idx] += hist[2][i];
+        }
+    }
+    
     if (ri->getSensorType() == ST_BAYER)    // since there are twice as many greens, correct for it
         for (int i = 0; i < 256; i++) {
             histGreenRaw[i] >>= 1;
@@ -3666,6 +3696,169 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     }
 
 }
+
+
+#else // if 0
+
+void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw)
+{
+    size_t histsize[3];
+//    BENCHFUN
+    histRedRaw.clear();
+    histGreenRaw.clear();
+    histBlueRaw.clear();
+
+    const float maxWhite = rtengine::max(c_white[0], c_white[1], c_white[2], c_white[3]);
+
+    if (maxWhite <= 1.f) {
+        histsize[0] = histsize[1] = histsize[2] = 65536;
+    } else {
+        histsize[0] = c_white[0] - cblacksom[0];
+        histsize[1] = std::max(c_white[1] - cblacksom[1], c_white[3] - cblacksom[3]);
+        histsize[2] = c_white[2] - cblacksom[2];
+    }
+    
+    const float scale = maxWhite <= 1.f ? 65535.f : 1.f; // special case for float raw images in [0.0;1.0] range
+
+    const bool fourColours = ri->getSensorType() == ST_BAYER && ((c_white[1] != c_white[3] || cblacksom[1] != cblacksom[3]) || FC(0, 0) == 3 || FC(0, 1) == 3 || FC(1, 0) == 3 || FC(1, 1) == 3);
+
+    histRedRaw(histsize[0]);
+    histGreenRaw(histsize[1]);
+    histBlueRaw(histsize[2]);
+
+    LUTu hist[4];
+    hist[0](histsize[0]);
+    hist[0].clear();
+
+    if (ri->get_colors() > 1) {
+        hist[1](histsize[1]);
+        hist[1].clear();
+        hist[2](histsize[2]);
+        hist[2].clear();
+    }
+
+    if (fourColours) {
+        hist[3](histsize[1]);
+        hist[3].clear();
+    }
+
+    const auto to_idx =
+        [&](float val, int c) -> int
+        {
+            return int(std::max((val - cblacksom[c]) * scale, 0.f));
+        };
+
+#ifdef _OPENMP
+    int numThreads;
+    // reduce the number of threads under certain conditions to avoid overhead of too many critical regions
+    numThreads = sqrt((((H - 2 * border) * (W - 2 * border)) / 262144.f));
+    numThreads = std::min(std::max(numThreads, 1), omp_get_max_threads());
+
+    #pragma omp parallel num_threads(numThreads)
+#endif
+    {
+        // we need one LUT per color and thread, which corresponds to 1 MB per thread
+        LUTu tmphist[4];
+        tmphist[0](histsize[0]);
+        tmphist[0].clear();
+
+        if (ri->get_colors() > 1) {
+            tmphist[1](histsize[1]);
+            tmphist[1].clear();
+            tmphist[2](histsize[2]);
+            tmphist[2].clear();
+
+            if (fourColours) {
+                tmphist[3](histsize[1]);
+                tmphist[3].clear();
+            }
+        }
+
+#ifdef _OPENMP
+        #pragma omp for nowait
+#endif
+
+        for (int i = border; i < H - border; i++) {
+            int start, end;
+            getRowStartEnd (i, start, end);
+
+            if (ri->getSensorType() == ST_BAYER) {
+                int j;
+                int c1 = FC(i, start);
+                c1 = ( fourColours && c1 == 1 && !(i & 1) ) ? 3 : c1;
+                int c2 = FC(i, start + 1);
+                c2 = ( fourColours && c2 == 1 && !(i & 1) ) ? 3 : c2;
+
+                for (j = start; j < end - 1; j += 2) {
+                    tmphist[c1][to_idx(ri->data[i][j], c1)]++;
+                    tmphist[c2][to_idx(ri->data[i][j + 1], c2)]++;
+                }
+
+                if(j < end) { // last pixel of row if width is odd
+                    tmphist[c1][to_idx(ri->data[i][j], c1)]++;
+                }
+            } else if (ri->get_colors() == 1) {
+                for (int j = start; j < end; j++) {
+                    tmphist[0][to_idx(ri->data[i][j], 0)]++;
+                }
+            } else if(ri->getSensorType() == ST_FUJI_XTRANS) {
+                for (int j = start; j < end - 1; j += 2) {
+                    int c = ri->XTRANSFC(i, j);
+                    tmphist[c][to_idx(ri->data[i][j], c)]++;
+                }
+            } else {
+                for (int j = start; j < end; j++) {
+                    for (int c = 0; c < 3; c++) {
+                        tmphist[c][to_idx(ri->data[i][3 * j + c], c)]++;
+                    }
+                }
+            }
+        }
+
+#ifdef _OPENMP
+        #pragma omp critical
+#endif
+        {
+            hist[0] += tmphist[0];
+
+            if (ri->get_colors() > 1) {
+                hist[1] += tmphist[1];
+                hist[2] += tmphist[2];
+
+                if (fourColours) {
+                    hist[3] += tmphist[3];
+                }
+            }
+        } // end of critical region
+    } // end of parallel region
+
+    histRedRaw = hist[0];
+    histGreenRaw = hist[1];
+    histBlueRaw = hist[2];
+    if (fourColours) {
+        histGreenRaw += hist[3];
+    }
+    
+    if (ri->getSensorType() == ST_BAYER) {
+        // since there are twice as many greens, correct for it
+        for (int i = 0; i < 256; i++) {
+            histGreenRaw[i] >>= 1;
+        }
+    } else if(ri->getSensorType() == ST_FUJI_XTRANS) {
+        // since Xtrans has 2.5 as many greens, correct for it
+        for (int i = 0; i < 256; i++) {
+            histGreenRaw[i] = (histGreenRaw[i] * 2) / 5;
+        }
+    } else if(ri->get_colors() == 1) {
+        // monochrome sensor => set all histograms equal
+        histGreenRaw += histRedRaw;
+        histBlueRaw += histRedRaw;
+    }
+}
+
+#endif // if 0
+//-----------------------------------------------------------------------------
+
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
