@@ -995,25 +995,40 @@ void HistogramArea::updateNonRaw(Cairo::RefPtr<Cairo::Context> cr)
 
 namespace {
 
-void next_raw_idx(bool logscale, unsigned int ub, unsigned int &cur, unsigned int &i)
-{
-    unsigned int j = i;
-    i = cur;
-    unsigned int next = cur;
-    if (logscale) {
-        next = std::max(static_cast<unsigned int>(j * 1.3f), cur + 1u);
-    } else {
-        next = cur + std::max(ub / 512u, 1u);
+class RawIdxHelper {
+public:
+    RawIdxHelper(bool logscale, unsigned int ub, unsigned int width):
+        logscale_(logscale),
+        ub_(ub)
+    {
+        incr_ = std::max(ub_ / width, 1u);
     }
-    if (ub - next < next - cur) {
-        next = ub + 1;
+
+    void operator()(unsigned int &cur, unsigned int &i) const
+    {
+        unsigned int j = i;
+        i = cur;
+        unsigned int next = cur;
+        if (logscale_) {
+            next = std::max(static_cast<unsigned int>(j * 1.3f), cur + 1u);
+        } else {
+            next = cur + incr_;
+        }
+        if (ub_ - next < next - cur) {
+            next = ub_ + 1;
+        }
+        if (cur < ub_ && next > ub_) {
+            cur = ub_;
+        } else {
+            cur = std::min(next, ub_+1);
+        }
     }
-    if (cur < ub && next > ub) {
-        cur = ub;
-    } else {
-        cur = std::min(next, ub+1);
-    }
-}
+
+private:
+    bool logscale_;
+    unsigned int ub_;
+    unsigned int incr_;
+};
 
 } // namespace
 
@@ -1102,8 +1117,10 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
         
         //const int delta = std::max(int(ub / std::max(w / 2, 1)), 1);
         //const float delta = 1.05f;
+        RawIdxHelper next_raw_idx(logscale, ub, w);
         unsigned int next = 1;
         unsigned int histheight = 0;
+        
         for (unsigned int i = 0; i <= ub;) {
             if (i < rh.getSize()) {
                 double val = bin(rh, i, next);
@@ -1124,8 +1141,8 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
                 }
             }
 
-            next_raw_idx(logscale, ub, next, i);
-        }       
+            next_raw_idx(next, i);
+        }
 
         int realhistheight = histheight;
 
@@ -1248,6 +1265,8 @@ void HistogramArea::drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr,
     const double logmax = std::log2(ub);
     const double ybase = std::pow(10, std::max(std::floor(std::log(scale) / std::log(10))-1, 1.0));
 
+    RawIdxHelper next_raw_idx(logscale, data.getUpperBound(), hsize);
+
     for (unsigned int i = logscale ? 1 : 0; i < data.getSize(); ) {
         double val = 0.0;
         for (unsigned int j = i; j < next; ++j) {
@@ -1265,7 +1284,7 @@ void HistogramArea::drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr,
         if (logscale) { // scale x for log-scale
             iscaled = logmax + std::log2(iscaled);
             if (iscaled < 0) {
-                next_raw_idx(logscale, data.getUpperBound(), next, i);
+                next_raw_idx(next, i);
                 continue;
             }
             iscaled /= logmax;
@@ -1276,7 +1295,7 @@ void HistogramArea::drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr,
 
         cr->line_to(posX, posY);
 
-        next_raw_idx(logscale, data.getUpperBound(), next, i);
+        next_raw_idx(next, i);
     }
 
     cr->line_to(hsize - 1, vsize - 1);
