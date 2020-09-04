@@ -3703,7 +3703,6 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
 void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw)
 {
     size_t histsize[3];
-//    BENCHFUN
     histRedRaw.clear();
     histGreenRaw.clear();
     histBlueRaw.clear();
@@ -3720,13 +3719,11 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     
     const float scale = maxWhite <= 1.f ? 65535.f : 1.f; // special case for float raw images in [0.0;1.0] range
 
-    const bool fourColours = ri->getSensorType() == ST_BAYER && ((c_white[1] != c_white[3] || cblacksom[1] != cblacksom[3]) || FC(0, 0) == 3 || FC(0, 1) == 3 || FC(1, 0) == 3 || FC(1, 1) == 3);
-
     histRedRaw(histsize[0]);
     histGreenRaw(histsize[1]);
     histBlueRaw(histsize[2]);
 
-    LUTu hist[4];
+    LUTu hist[3];
     hist[0](histsize[0]);
     hist[0].clear();
 
@@ -3735,11 +3732,6 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
         hist[1].clear();
         hist[2](histsize[2]);
         hist[2].clear();
-    }
-
-    if (fourColours) {
-        hist[3](histsize[1]);
-        hist[3].clear();
     }
 
     const auto to_idx =
@@ -3758,7 +3750,7 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
 #endif
     {
         // we need one LUT per color and thread, which corresponds to 1 MB per thread
-        LUTu tmphist[4];
+        LUTu tmphist[3];
         tmphist[0](histsize[0]);
         tmphist[0].clear();
 
@@ -3767,11 +3759,6 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
             tmphist[1].clear();
             tmphist[2](histsize[2]);
             tmphist[2].clear();
-
-            if (fourColours) {
-                tmphist[3](histsize[1]);
-                tmphist[3].clear();
-            }
         }
 
 #ifdef _OPENMP
@@ -3783,26 +3770,17 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
             getRowStartEnd (i, start, end);
 
             if (ri->getSensorType() == ST_BAYER) {
-                int j;
-                int c1 = FC(i, start);
-                c1 = ( fourColours && c1 == 1 && !(i & 1) ) ? 3 : c1;
-                int c2 = FC(i, start + 1);
-                c2 = ( fourColours && c2 == 1 && !(i & 1) ) ? 3 : c2;
-
-                for (j = start; j < end - 1; j += 2) {
-                    tmphist[c1][to_idx(ri->data[i][j], c1)]++;
-                    tmphist[c2][to_idx(ri->data[i][j + 1], c2)]++;
-                }
-
-                if(j < end) { // last pixel of row if width is odd
-                    tmphist[c1][to_idx(ri->data[i][j], c1)]++;
+                for (int j = start; j < end; ++j) {
+                    int c = ri->FC(i, j);
+                    int c4 = (c == 1 && !(i & 1) ) ? 3 : c; // four  colors,  0=R, 1=G1, 2=B, 3=G2
+                    tmphist[c][to_idx(ri->data[i][j], c4)]++;
                 }
             } else if (ri->get_colors() == 1) {
                 for (int j = start; j < end; j++) {
                     tmphist[0][to_idx(ri->data[i][j], 0)]++;
                 }
             } else if(ri->getSensorType() == ST_FUJI_XTRANS) {
-                for (int j = start; j < end - 1; j += 2) {
+                for (int j = start; j < end; ++j) {
                     int c = ri->XTRANSFC(i, j);
                     tmphist[c][to_idx(ri->data[i][j], c)]++;
                 }
@@ -3824,10 +3802,6 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
             if (ri->get_colors() > 1) {
                 hist[1] += tmphist[1];
                 hist[2] += tmphist[2];
-
-                if (fourColours) {
-                    hist[3] += tmphist[3];
-                }
             }
         } // end of critical region
     } // end of parallel region
@@ -3835,21 +3809,8 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     histRedRaw = hist[0];
     histGreenRaw = hist[1];
     histBlueRaw = hist[2];
-    if (fourColours) {
-        histGreenRaw += hist[3];
-    }
-    
-    if (ri->getSensorType() == ST_BAYER) {
-        // since there are twice as many greens, correct for it
-        for (int i = 0; i < 256; i++) {
-            histGreenRaw[i] >>= 1;
-        }
-    } else if(ri->getSensorType() == ST_FUJI_XTRANS) {
-        // since Xtrans has 2.5 as many greens, correct for it
-        for (int i = 0; i < 256; i++) {
-            histGreenRaw[i] = (histGreenRaw[i] * 2) / 5;
-        }
-    } else if(ri->get_colors() == 1) {
+
+    if(ri->get_colors() == 1) {
         // monochrome sensor => set all histograms equal
         histGreenRaw += histRedRaw;
         histBlueRaw += histRedRaw;
