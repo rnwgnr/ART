@@ -1120,8 +1120,9 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
         RawIdxHelper next_raw_idx(logscale, ub, w);
         unsigned int next = 1;
         unsigned int histheight = 0;
-        
-        for (unsigned int i = 0; i <= ub;) {
+
+        const unsigned int off = drawMode == 2 ? 0 : 1;
+        for (unsigned int i = off; i <= ub-off;) {
             if (i < rh.getSize()) {
                 double val = bin(rh, i, next);
                 if (histheight < val) {
@@ -1236,7 +1237,7 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
         for (int i = 0; i < 3; ++i) {
             double ev = minval[i] >= 0 ? std::log2(maxval[i] - minval[i]) : 0;
             ev = double(int(ev * 100)) / 100.0;
-            Glib::ustring m = Glib::ustring::compose(M("HISTOGRAM_RAW_STATS_TOOLTIP"), minval[i], pct(mincount[i], totsum[i]), maxval[i], pct(maxcount[i], totsum[i]), peakval[i], pct(peakcount[i], totsum[i]), ev, totcount[i]);
+            Glib::ustring m = Glib::ustring::compose(M("HISTOGRAM_RAW_STATS_TOOLTIP"), minval[i], pct(mincount[i], totsum[i]), maxval[i], pct(maxcount[i], totsum[i]), peakval[i], pct(peakcount[i], totsum[i]), ev, totcount[i], totsum[i]);
             Glib::ustring s = Glib::ustring::compose("<span font_family=\"Arial\" size=\"larger\" foreground=\"%1\">&#9632;</span> %2", ch[i], m);
             if (i > 0) {
                 tip += "\n";
@@ -1263,7 +1264,8 @@ void HistogramArea::drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr,
     unsigned int next = 1;
     const bool logscale = drawMode > 0;
     const double logmax = std::log2(ub);
-    const double ybase = std::pow(10, std::max(std::floor(std::log(scale) / std::log(10))-1, 1.0));
+    //const double ybase = std::pow(10, std::max(std::floor(std::log(scale) / std::log(10))-1, 1.0));
+    const double ylogmax = std::log10(scale);
 
     RawIdxHelper next_raw_idx(logscale, data.getUpperBound(), hsize);
 
@@ -1276,8 +1278,9 @@ void HistogramArea::drawRawCurve(Cairo::RefPtr<Cairo::Context> &cr,
         
         val = std::min(val / scale, 1.0);
 
-        if (drawMode == 2) { // scale y for log-scale
-            val = rtengine::lin2log(val, ybase);
+        if (drawMode == 2 && val > 0) { // scale y for log-scale
+            //val = rtengine::lin2log(val, ybase);
+            val = std::max((ylogmax + std::log10(val)) / ylogmax, 0.0);
         }
 
         double iscaled = std::min(double(i) / ub, 1.0);
