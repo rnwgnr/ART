@@ -236,7 +236,7 @@ GENERAL_UNCHANGED;(Inchangé)
 GENERAL_WARNING;Attention
 GENERAL_DEPRECATED_TOOLTIP;<b>Obsolète !</b> sera éliminée dans une prochaine version.
 GIMP_PLUGIN_INFO;Bienvenue dans le plugin ART de GIMP !\nUne fois l'édition terminée, fermez simplement la fenêtre principale de ART et l'image sera importée automatiquement dans GIMP.
-HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), sommet: %5 (%6), distance: %7 EV, valeurs: %8
+HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), sommet: %5 (%6)\n    distance: %7 EV, valeurs: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;Montrer/Cacher l'histogramme du bleu.
 HISTOGRAM_TOOLTIP_BAR;Montrer/Cacher la barre indicateur RVB.
 HISTOGRAM_TOOLTIP_CHRO;Montrer/Cacher l'histogramme de Chromaticité.
