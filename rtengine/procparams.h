@@ -1292,21 +1292,24 @@ struct RAWParams {
     struct BayerSensor {
         enum class Method {
             AMAZE,
-            AMAZEVNG4,
             RCD,
-            RCDVNG4,
-            DCB,
-            DCBVNG4,
             LMMSE,
             IGV,
-            AHD,
-            EAHD,
-            HPHD,
+            AMAZEBILINEAR,
+            RCDBILINEAR,
             VNG4,
             FAST,
             MONO,
             PIXELSHIFT,
-            NONE
+            NONE,
+            AMAZEVNG4,
+            RCDVNG4,
+            DCB,
+            DCBBILINEAR,
+            DCBVNG4,
+            AHD,
+            EAHD,
+            HPHD
         };
 
         enum class PSMotionCorrectionMethod {

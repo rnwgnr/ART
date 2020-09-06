@@ -2749,28 +2749,33 @@ const std::vector<const char*>& RAWParams::BayerSensor::getMethodStrings()
 {
     static const std::vector<const char*> method_strings {
         "amaze",
-        "amazevng4",
         "rcd",
-        "rcdvng4",
-        "dcb",
-        "dcbvng4",
         "lmmse",
         "igv",
-        "ahd",
-        "eahd",
-        "hphd",
+        "amazebilinear",
+        "rcdbilinear",
         "vng4",
         "fast",
         "mono",
         "pixelshift",
         "none"
+        // "amazevng4",
+        // "rcdvng4",
+        // "dcb",
+        // "dcbbilinear",
+        // "dcbvng4",
+        // "ahd",
+        // "eahd",
+        // "hphd"
     };
     return method_strings;
 }
 
 Glib::ustring RAWParams::BayerSensor::getMethodString(Method method)
 {
-    return getMethodStrings()[toUnderlying(method)];
+    size_t i = toUnderlying(method);
+    auto &v = getMethodStrings();
+    return i < v.size() ? v[i] : "";
 }
 
 const std::vector<const char*>& RAWParams::BayerSensor::getPSDemosaicMethodStrings()
@@ -3761,8 +3766,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("RAW Bayer", "GreenEqThreshold", raw.bayersensor.greenthresh, keyFile);
         }
         if (RELEVANT_(demosaic)) {
-            saveToKeyfile("RAW Bayer", "DCBIterations", raw.bayersensor.dcb_iterations, keyFile);
-            saveToKeyfile("RAW Bayer", "DCBEnhance", raw.bayersensor.dcb_enhance, keyFile);
+            // saveToKeyfile("RAW Bayer", "DCBIterations", raw.bayersensor.dcb_iterations, keyFile);
+            // saveToKeyfile("RAW Bayer", "DCBEnhance", raw.bayersensor.dcb_enhance, keyFile);
             saveToKeyfile("RAW Bayer", "LMMSEIterations", raw.bayersensor.lmmse_iterations, keyFile);
             saveToKeyfile("RAW Bayer", "DualDemosaicAutoContrast", raw.bayersensor.dualDemosaicAutoContrast, keyFile);
             saveToKeyfile("RAW Bayer", "DualDemosaicContrast", raw.bayersensor.dualDemosaicContrast, keyFile);
@@ -5051,8 +5056,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 if (RELEVANT_(demosaic)) {
                     assignFromKeyfile(keyFile, "RAW", "Method", raw.bayersensor.method);
                     assignFromKeyfile(keyFile, "RAW", "CcSteps", raw.bayersensor.ccSteps);
-                    assignFromKeyfile(keyFile, "RAW", "DCBIterations", raw.bayersensor.dcb_iterations);
-                    assignFromKeyfile(keyFile, "RAW", "DCBEnhance", raw.bayersensor.dcb_enhance);
+                    // assignFromKeyfile(keyFile, "RAW", "DCBIterations", raw.bayersensor.dcb_iterations);
+                    // assignFromKeyfile(keyFile, "RAW", "DCBEnhance", raw.bayersensor.dcb_enhance);
                     assignFromKeyfile(keyFile, "RAW", "LMMSEIterations", raw.bayersensor.lmmse_iterations);
                 }
                 if (RELEVANT_(rawPreprocessing)) {
@@ -5079,6 +5084,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
 
                 assignFromKeyfile(keyFile, "RAW Bayer", "CcSteps", raw.bayersensor.ccSteps);
+                auto &v = raw.bayersensor.getMethodStrings();
+                bool method_ok = std::find(v.begin(), v.end(), raw.bayersensor.method) != v.end();
+                if (!method_ok) {
+                    raw.bayersensor.method = "amaze";
+                }
             }
 
             if (RELEVANT_(rawBlack)) {
@@ -5102,8 +5112,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
 
             if (RELEVANT_(demosaic)) {
-                assignFromKeyfile(keyFile, "RAW Bayer", "DCBIterations", raw.bayersensor.dcb_iterations);
-                assignFromKeyfile(keyFile, "RAW Bayer", "DCBEnhance", raw.bayersensor.dcb_enhance);
+                // assignFromKeyfile(keyFile, "RAW Bayer", "DCBIterations", raw.bayersensor.dcb_iterations);
+                // assignFromKeyfile(keyFile, "RAW Bayer", "DCBEnhance", raw.bayersensor.dcb_enhance);
                 assignFromKeyfile(keyFile, "RAW Bayer", "LMMSEIterations", raw.bayersensor.lmmse_iterations);
                 assignFromKeyfile(keyFile, "RAW Bayer", "DualDemosaicAutoContrast", raw.bayersensor.dualDemosaicAutoContrast);
                 if (ppVersion < 345) {

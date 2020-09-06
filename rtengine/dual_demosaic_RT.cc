@@ -19,39 +19,45 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 ////////////////////////////////////////////////////////////////
 
+#include "color.h"
 #include "jaggedarray.h"
-#include "rtengine.h"
+#include "procparams.h"
 #include "rawimagesource.h"
-#include "rt_math.h"
-//#define BENCHMARK
-#include "StopWatch.h"
 #include "rt_algo.h"
+#include "rt_math.h"
+#include "rtengine.h"
+
+#define BENCHMARK
+#include "StopWatch.h"
 
 using namespace std;
 
 namespace rtengine
 {
 
-void RawImageSource::dual_demosaic_RT(bool isBayer, const RAWParams &raw, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, double &contrast, bool autoContrast)
+void RawImageSource::dual_demosaic_RT(bool isBayer, const procparams::RAWParams &raw, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, double &contrast, bool autoContrast)
 {
     BENCHFUN
 
-    if (contrast == 0.f && !autoContrast) {
+    if (contrast == 0.0 && !autoContrast) {
         // contrast == 0.0 means only first demosaicer will be used
         if(isBayer) {
-            if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4) ) {
+            if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEBILINEAR) ||
+                raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEVNG4)) {
                 amaze_demosaic_RT(0, 0, winw, winh, rawData, red, green, blue);
-            } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCBVNG4) ) {
+            } else if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBBILINEAR) ||
+                       raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBVNG4)) {
                 dcb_demosaic(raw.bayersensor.dcb_iterations, raw.bayersensor.dcb_enhance);
-            } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDVNG4) ) {
+            } else if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDBILINEAR) ||
+                       raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDVNG4)) {
                 rcd_demosaic();
             }
         } else {
-            if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FOUR_PASS) ) {
+            if (raw.xtranssensor.method == procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::FOUR_PASS)) {
                 xtrans_interpolate (3, true);
             } else {
                 xtrans_interpolate (1, false);
@@ -64,18 +70,22 @@ void RawImageSource::dual_demosaic_RT(bool isBayer, const RAWParams &raw, int wi
     array2D<float> L(winw, winh);
 
     if (isBayer) {
-        if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4) || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
+        if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEBILINEAR) ||
+            raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEVNG4) ||
+            raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::PIXELSHIFT)) {
             amaze_demosaic_RT(0, 0, winw, winh, rawData, red, green, blue);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCBVNG4) ) {
+        } else if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBBILINEAR) ||
+                   raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBVNG4)) {
             dcb_demosaic(raw.bayersensor.dcb_iterations, raw.bayersensor.dcb_enhance);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDVNG4) ) {
+        } else if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDBILINEAR) ||
+                   raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDVNG4)) {
             rcd_demosaic();
         }
     } else {
-        if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FOUR_PASS) ) {
-            xtrans_interpolate (3, true);
+        if (raw.xtranssensor.method == procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::FOUR_PASS)) {
+            xtrans_interpolate(3, true);
         } else {
-            xtrans_interpolate (1, false);
+            xtrans_interpolate(1, false);
         }
     }
 
@@ -86,59 +96,47 @@ void RawImageSource::dual_demosaic_RT(bool isBayer, const RAWParams &raw, int wi
                                 };
 
 #ifdef _OPENMP
-    #pragma omp parallel
+    #pragma omp parallel for schedule(dynamic,16)
 #endif
-    {
-#ifdef _OPENMP
-        #pragma omp for
-#endif
-        for(int i = 0; i < winh; ++i) {
-            Color::RGB2L(red[i], green[i], blue[i], L[i], xyz_rgb, winw);
-        }
+    for(int i = 0; i < winh; ++i) {
+        Color::RGB2L(red[i], green[i], blue[i], L[i], xyz_rgb, winw);
     }
-    // calculate contrast based blend factors to use vng4 in regions with low contrast
+
+    // calculate contrast based blend factors to use flat demosaicer in regions with low contrast
     JaggedArray<float> blend(winw, winh);
-    float contrastf = contrast / 100.f;
+    float contrastf = contrast / 100.0;
 
     buildBlendMask(L, blend, winw, winh, contrastf, 1.f, autoContrast);
     contrast = contrastf * 100.f;
 
-    array2D<float>& redTmp = L; // L is not needed anymore => reuse it
-    array2D<float> greenTmp(winw, winh);
-    array2D<float> blueTmp(winw, winh);
-
     if (isBayer) {
-        vng4_demosaic(rawData, redTmp, greenTmp, blueTmp);
+        if (raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEBILINEAR) ||
+            raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDBILINEAR) ||
+            raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBBILINEAR)) {
+            bayer_bilinear_demosaic(blend, rawData, red, green, blue);
+        } else {
+            array2D<float>& redTmp = L; // L is not needed anymore => reuse it
+            array2D<float> greenTmp(winw, winh);
+            array2D<float> blueTmp(winw, winh);
+            vng4_demosaic(rawData, redTmp, greenTmp, blueTmp);
+#ifdef _OPENMP
+            #pragma omp parallel for schedule(dynamic,16)
+#endif
+            for(int i = 0; i < winh; ++i) {
+                // the following is split into 3 loops intentionally to avoid cache conflicts on CPUs with only 4-way cache
+                for(int j = 0; j < winw; ++j) {
+                    red[i][j] = intp(blend[i][j], red[i][j], redTmp[i][j]);
+                }
+                for(int j = 0; j < winw; ++j) {
+                    green[i][j] = intp(blend[i][j], green[i][j], greenTmp[i][j]);
+                }
+                for(int j = 0; j < winw; ++j) {
+                    blue[i][j] = intp(blend[i][j], blue[i][j], blueTmp[i][j]);
+                }
+            }
+        }
     } else {
-        fast_xtrans_interpolate(rawData, redTmp, greenTmp, blueTmp);
+        fast_xtrans_interpolate_blend(blend, rawData, red, green, blue);
     }
-
-
-    // the following is split into 3 loops intentionally to avoid cache conflicts on CPUs with only 4-way cache
-#ifdef _OPENMP
-    #pragma omp parallel for
-#endif
-    for(int i = 0; i < winh; ++i) {
-        for(int j = 0; j < winw; ++j) {
-            red[i][j] = intp(blend[i][j], red[i][j], redTmp[i][j]);
-        }
-    }
-#ifdef _OPENMP
-    #pragma omp parallel for
-#endif
-    for(int i = 0; i < winh; ++i) {
-        for(int j = 0; j < winw; ++j) {
-            green[i][j] = intp(blend[i][j], green[i][j], greenTmp[i][j]);
-        }
-    }
-#ifdef _OPENMP
-    #pragma omp parallel for
-#endif
-    for(int i = 0; i < winh; ++i) {
-        for(int j = 0; j < winw; ++j) {
-            blue[i][j] = intp(blend[i][j], blue[i][j], blueTmp[i][j]);
-        }
-    }
-
 }
 }
