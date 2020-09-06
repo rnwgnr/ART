@@ -1847,13 +1847,13 @@ bool TextureBoostParams::operator !=(const TextureBoostParams& other) const
 
 LogEncodingParams::LogEncodingParams():
     enabled(false),
-    autocompute(true),
-    autogray(true),
+    autocompute(false),
+    autogray(false),
     sourceGray(18.0),
     targetGray(18.0),
     blackEv(-5.0),
     whiteEv(3.0),
-    regularization(65)
+    regularization(60)
 {
 }
 
@@ -2646,7 +2646,7 @@ bool ColorCorrectionParams::operator!=(const ColorCorrectionParams &other) const
 
 
 RAWParams::BayerSensor::BayerSensor() :
-    method(getMethodString(Method::AMAZE)),
+    method(getMethodString(Method::RCD)),
     border(4),
     imageNum(0),
     ccSteps(0),
