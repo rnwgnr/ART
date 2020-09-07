@@ -2646,7 +2646,7 @@ bool ColorCorrectionParams::operator!=(const ColorCorrectionParams &other) const
 
 
 RAWParams::BayerSensor::BayerSensor() :
-    method(getMethodString(Method::RCD)),
+    method(Method::RCD),
     border(4),
     imageNum(0),
     ccSteps(0),
@@ -2796,7 +2796,7 @@ Glib::ustring RAWParams::BayerSensor::getPSDemosaicMethodString(PSDemosaicMethod
 
 
 RAWParams::XTransSensor::XTransSensor() :
-    method(getMethodString(Method::THREE_PASS)),
+    method(Method::THREE_PASS),
     dualDemosaicAutoContrast(true),
     dualDemosaicContrast(20),
     border(7),
@@ -3746,7 +3746,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("RAW", "HotDeadPixelThresh", raw.hotdeadpix_thresh, keyFile);
         }
         if (RELEVANT_(demosaic)) {
-            saveToKeyfile("RAW Bayer", "Method", raw.bayersensor.method, keyFile);
+            saveToKeyfile("RAW Bayer", "Method", RAWParams::BayerSensor::getMethodString(raw.bayersensor.method), keyFile);
             saveToKeyfile("RAW Bayer", "Border", raw.bayersensor.border, keyFile);
             saveToKeyfile("RAW Bayer", "ImageNum", raw.bayersensor.imageNum + 1, keyFile);
             saveToKeyfile("RAW Bayer", "CcSteps", raw.bayersensor.ccSteps, keyFile);
@@ -3791,7 +3791,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("RAW Bayer", "DynamicRowNoiseFilter", raw.bayersensor.dynamicRowNoiseFilter, keyFile);
         }
         if (RELEVANT_(demosaic)) {
-            saveToKeyfile("RAW X-Trans", "Method", raw.xtranssensor.method, keyFile);
+            saveToKeyfile("RAW X-Trans", "Method", RAWParams::XTransSensor::getMethodString(raw.xtranssensor.method), keyFile);
             saveToKeyfile("RAW X-Trans", "DualDemosaicAutoContrast", raw.xtranssensor.dualDemosaicAutoContrast, keyFile);
             saveToKeyfile("RAW X-Trans", "DualDemosaicContrast", raw.xtranssensor.dualDemosaicContrast, keyFile);
             saveToKeyfile("RAW X-Trans", "Border", raw.xtranssensor.border, keyFile);
@@ -5054,7 +5054,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
             if (ppVersion < 320) {
                 if (RELEVANT_(demosaic)) {
-                    assignFromKeyfile(keyFile, "RAW", "Method", raw.bayersensor.method);
+                    //assignFromKeyfile(keyFile, "RAW", "Method", raw.bayersensor.method);
                     assignFromKeyfile(keyFile, "RAW", "CcSteps", raw.bayersensor.ccSteps);
                     // assignFromKeyfile(keyFile, "RAW", "DCBIterations", raw.bayersensor.dcb_iterations);
                     // assignFromKeyfile(keyFile, "RAW", "DCBEnhance", raw.bayersensor.dcb_enhance);
@@ -5076,7 +5076,20 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
         if (keyFile.has_group("RAW Bayer")) {
             if (RELEVANT_(demosaic)) {
-                assignFromKeyfile(keyFile, "RAW Bayer", "Method", raw.bayersensor.method);
+                Glib::ustring method;
+                if (assignFromKeyfile(keyFile, "RAW Bayer", "Method", method)) {
+                    auto &v = raw.bayersensor.getMethodStrings();
+                    auto it = std::find(v.begin(), v.end(), method);
+                    if (it != v.end()) {
+                        raw.bayersensor.method = RAWParams::BayerSensor::Method(it - v.begin());
+                    } else if (method == "amazevng4" || method == "dcbvng4") {
+                        raw.bayersensor.method = RAWParams::BayerSensor::Method::AMAZEBILINEAR;
+                    } else if (method == "rcdvng4") {
+                        raw.bayersensor.method = RAWParams::BayerSensor::Method::RCDBILINEAR;
+                    } else {
+                        raw.bayersensor.method = RAWParams::BayerSensor::Method::AMAZE;
+                    }
+                }
                 assignFromKeyfile(keyFile, "RAW Bayer", "Border", raw.bayersensor.border);
 
                 if (keyFile.has_key("RAW Bayer", "ImageNum")) {
@@ -5084,11 +5097,6 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
 
                 assignFromKeyfile(keyFile, "RAW Bayer", "CcSteps", raw.bayersensor.ccSteps);
-                auto &v = raw.bayersensor.getMethodStrings();
-                bool method_ok = std::find(v.begin(), v.end(), raw.bayersensor.method) != v.end();
-                if (!method_ok) {
-                    raw.bayersensor.method = "amaze";
-                }
             }
 
             if (RELEVANT_(rawBlack)) {
@@ -5163,7 +5171,16 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
         if (keyFile.has_group("RAW X-Trans")) {
             if (RELEVANT_(demosaic)) {
-                assignFromKeyfile(keyFile, "RAW X-Trans", "Method", raw.xtranssensor.method);
+                Glib::ustring method;
+                if (assignFromKeyfile(keyFile, "RAW X-Trans", "Method", method)) {
+                    const auto &v = RAWParams::XTransSensor::getMethodStrings();
+                    auto it = std::find(v.begin(), v.end(), method);
+                    if (it != v.end()) {
+                        raw.xtranssensor.method = RAWParams::XTransSensor::Method(it - v.begin());
+                    } else {
+                        raw.xtranssensor.method = RAWParams::XTransSensor::Method::THREE_PASS;
+                    }
+                }
                 assignFromKeyfile(keyFile, "RAW X-Trans", "DualDemosaicAutoContrast", raw.xtranssensor.dualDemosaicAutoContrast);
                 if (ppVersion < 345) {
                     raw.xtranssensor.dualDemosaicAutoContrast = false;

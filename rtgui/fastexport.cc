@@ -82,8 +82,16 @@ void adjust_fast_params(rtengine::procparams::ProcParams &params)
             params.raw.ff_file = "";
         }
 
-        params.raw.bayersensor.method = options.fastexport_raw_bayer_method;
-        params.raw.xtranssensor.method = options.fastexport_raw_xtrans_method;
+        auto &bm = rtengine::procparams::RAWParams::BayerSensor::getMethodStrings();
+        auto it1 = std::find(bm.begin(), bm.end(), options.fastexport_raw_bayer_method);
+        if (it1 != bm.end()) {
+            params.raw.bayersensor.method = rtengine::procparams::RAWParams::BayerSensor::Method(it1 - bm.begin());
+        }
+        auto &xm = rtengine::procparams::RAWParams::XTransSensor::getMethodStrings();
+        auto it2 = std::find(xm.begin(), xm.end(), options.fastexport_raw_xtrans_method);
+        if (it2 != xm.end()) {
+            params.raw.xtranssensor.method = rtengine::procparams::RAWParams::XTransSensor::Method(it2 - xm.begin());
+        }
         params.icm.inputProfile = options.fastexport_icm_input_profile;
         params.icm.workingProfile = options.fastexport_icm_working_profile;
         params.icm.outputProfile = options.fastexport_icm_output_profile;

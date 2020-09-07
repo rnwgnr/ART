@@ -638,8 +638,8 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
         float new_scale_mul[4];
 
-        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
-                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
+        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::Method::MONO)
+                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::Method::MONO);
 
         for (int i = 0; i < 4; ++i) {
             c_white[i] = (ri->get_white(i) - cblacksom[i]) / raw_expos + cblacksom[i];
@@ -1476,7 +1476,7 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
             return cc && cc->get_globalGreenEquilibration();
         };
     
-    if ( ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (globalGreenEq() && raw.bayersensor.method != RAWParams::BayerSensor::getMethodString( RAWParams::BayerSensor::Method::VNG4))) && raw.bayersensor.enable_preproc) {
+    if ( ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (globalGreenEq() && raw.bayersensor.method != RAWParams::BayerSensor::Method::VNG4)) && raw.bayersensor.enable_preproc) {
         if (settings->verbose) {
             printf("Performing global green equilibration...\n");
         }
@@ -1586,62 +1586,83 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
     double raw_expos = raw.enable_whitepoint ? raw.expos : 1.0;
 
     if (ri->getSensorType() == ST_BAYER) {
-        if ( raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::HPHD) ) {
-            hphd_demosaic ();
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::VNG4) ) {
-            vng4_demosaic (rawData, red, green, blue);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AHD) ) {
-            ahd_demosaic ();
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE) ) {
-            amaze_demosaic_RT (0, 0, W, H, rawData, red, green, blue);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEBILINEAR)
-                   || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4)
-                   || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCBBILINEAR)
-                   || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCBVNG4)
-                   || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDBILINEAR)
-                   || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDVNG4)) {
+        switch (raw.bayersensor.method) {
+        case RAWParams::BayerSensor::Method::HPHD:
+            hphd_demosaic();
+            break;
+        case RAWParams::BayerSensor::Method::VNG4:
+            vng4_demosaic(rawData, red, green, blue);
+            break;
+        case RAWParams::BayerSensor::Method::AHD:
+            ahd_demosaic();
+            break;
+        case RAWParams::BayerSensor::Method::AMAZE:
+            amaze_demosaic_RT(0, 0, W, H, rawData, red, green, blue);
+            break;
+        case RAWParams::BayerSensor::Method::AMAZEBILINEAR:
+        case RAWParams::BayerSensor::Method::AMAZEVNG4:
+        case RAWParams::BayerSensor::Method::DCBBILINEAR:
+        case RAWParams::BayerSensor::Method::DCBVNG4:
+        case RAWParams::BayerSensor::Method::RCDBILINEAR:
+        case RAWParams::BayerSensor::Method::RCDVNG4:
             if (!autoContrast) {
                 double threshold = raw.bayersensor.dualDemosaicContrast;
                 dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, threshold, false);
             } else {
                 dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, contrastThreshold, true);
             }
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT) ) {
+            break;
+        case RAWParams::BayerSensor::Method::PIXELSHIFT:
             pixelshift(0, 0, W, H, raw, currFrame, ri->get_maker(), ri->get_model(), raw_expos);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCB) ) {
+            break;
+        case RAWParams::BayerSensor::Method::DCB:
             dcb_demosaic(raw.bayersensor.dcb_iterations, raw.bayersensor.dcb_enhance);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::EAHD)) {
-            eahd_demosaic ();
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::IGV)) {
+            break;
+        case RAWParams::BayerSensor::Method::EAHD:
+            eahd_demosaic();
+            break;
+        case RAWParams::BayerSensor::Method::IGV:
             igv_interpolate(W, H);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::LMMSE)) {
+            break;
+        case RAWParams::BayerSensor::Method::LMMSE:
             lmmse_interpolate_omp(W, H, rawData, red, green, blue, raw.bayersensor.lmmse_iterations);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::FAST) ) {
+            break;
+        case RAWParams::BayerSensor::Method::FAST:
             fast_demosaic();
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO) ) {
+            break;
+        case RAWParams::BayerSensor::Method::MONO:
             nodemosaic(true);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCD) ) {
-            rcd_demosaic ();
-        } else {
+            break;
+        case RAWParams::BayerSensor::Method::RCD:
+            rcd_demosaic();
+            break;
+        default:
             nodemosaic(false);
         }
     } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
-        if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST) ) {
+        switch (raw.xtranssensor.method) {
+        case RAWParams::XTransSensor::Method::FAST:
             fast_xtrans_interpolate(rawData, red, green, blue);
-        } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::ONE_PASS)) {
+            break;
+        case RAWParams::XTransSensor::Method::ONE_PASS:
             xtrans_interpolate(1, false);
-        } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::THREE_PASS) ) {
+            break;
+        case RAWParams::XTransSensor::Method::THREE_PASS:
             xtrans_interpolate(3, true);
-        } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FOUR_PASS) || raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::TWO_PASS)) {
+            break;
+        case RAWParams::XTransSensor::Method::FOUR_PASS:
+        case RAWParams::XTransSensor::Method::TWO_PASS:
             if (!autoContrast) {
                 double threshold = raw.xtranssensor.dualDemosaicContrast;
                 dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, threshold, false);
             } else {
                 dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, contrastThreshold, true);
             }
-        } else if(raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO) ) {
+            break;
+        case RAWParams::XTransSensor::Method::MONO:
             nodemosaic(true);
-        } else {
+            break;
+        default:
             nodemosaic(false);
         }
     } else if (ri->get_colors() == 1) {
@@ -1657,9 +1678,9 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
 
     if( settings->verbose ) {
         if (getSensorType() == ST_BAYER) {
-            printf("Demosaicing Bayer data: %s - %d usec\n", raw.bayersensor.method.c_str(), t2.etime(t1));
+            std::cout << "Demosaicing Bayer data: " << procparams::RAWParams::BayerSensor::getMethodString(raw.bayersensor.method) << " - " << t2.etime(t1) << " usec\n";
         } else if (getSensorType() == ST_FUJI_XTRANS) {
-            printf("Demosaicing X-Trans data: %s - %d usec\n", raw.xtranssensor.method.c_str(), t2.etime(t1));
+            std::cout << "Demosaicing X-Trans data: " << procparams::RAWParams::XTransSensor::getMethodString(raw.xtranssensor.method) << " - " << t2.etime(t1) << " usec\n";
         }
     }
 }
@@ -2375,7 +2396,7 @@ void RawImageSource::scaleColors(int winx, int winy, int winw, int winh, const R
             black_lev[3] = raw.bayersensor.black3; //G2
         }
 
-        isMono = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO) == raw.bayersensor.method;
+        isMono = RAWParams::BayerSensor::Method::MONO == raw.bayersensor.method;
     } else if (getSensorType() == ST_FUJI_XTRANS) {
 
         if (raw.xtranssensor.enable_black) {
@@ -2385,7 +2406,7 @@ void RawImageSource::scaleColors(int winx, int winy, int winw, int winh, const R
             black_lev[3] = raw.xtranssensor.blackgreen; //G2  (set, only used with a Bayer filter)
         }
 
-        isMono = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO) == raw.xtranssensor.method;
+        isMono = RAWParams::XTransSensor::Method::MONO == raw.xtranssensor.method;
     }
 
     for(int i = 0; i < 4 ; i++) {

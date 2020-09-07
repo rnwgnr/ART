@@ -366,7 +366,7 @@ BENCHFUN
                     lmmse_interpolate_omp(winw, winh, rawData, red, green, blue, bayerParams.lmmse_iterations);
                 } else if (bayerParams.pixelShiftDemosaicMethod == bayerParams.getPSDemosaicMethodString(RAWParams::BayerSensor::PSDemosaicMethod::AMAZEVNG4)) {
                     RAWParams rawParamsTmp = rawParamsIn;
-                    rawParamsTmp.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4);
+                    rawParamsTmp.bayersensor.method = RAWParams::BayerSensor::Method::AMAZEVNG4;
                     dual_demosaic_RT (true, rawParamsTmp, winw, winh, rawData, red, green, blue, bayerParams.dualDemosaicContrast, true);
                 } else {
                     amaze_demosaic_RT(winx, winy, winw, winh, rawData, red, green, blue);

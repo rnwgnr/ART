@@ -1324,7 +1324,7 @@ struct RAWParams {
             LMMSE
         };
 
-        Glib::ustring method;
+        Method method;
         int border;
         int imageNum;
         int ccSteps;
@@ -1396,7 +1396,7 @@ struct RAWParams {
             NONE
         };
 
-        Glib::ustring method;
+        Method method;
         bool dualDemosaicAutoContrast;
         double dualDemosaicContrast;
         int border;

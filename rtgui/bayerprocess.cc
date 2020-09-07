@@ -26,14 +26,14 @@ using namespace rtengine::procparams;
 
 namespace {
 
-bool is_dual_demosaic(const Glib::ustring &method)
+bool is_dual_demosaic(const RAWParams::BayerSensor::Method method)
 {
-    return (method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEVNG4)
-            || method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZEBILINEAR)
-            || method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBVNG4)
-            || method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBBILINEAR)
-            || method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDBILINEAR)
-            || method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::RCDVNG4));
+    return (method == procparams::RAWParams::BayerSensor::Method::AMAZEVNG4
+            || method == procparams::RAWParams::BayerSensor::Method::AMAZEBILINEAR
+            || method == procparams::RAWParams::BayerSensor::Method::DCBVNG4
+            || method == procparams::RAWParams::BayerSensor::Method::DCBBILINEAR
+            || method == procparams::RAWParams::BayerSensor::Method::RCDBILINEAR
+            || method == procparams::RAWParams::BayerSensor::Method::RCDVNG4);
 }
 
 } // namespace
@@ -285,7 +285,7 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp)
     imageNumber->set_active(pp->raw.bayersensor.imageNum);
 
     for (size_t i = 0; i < procparams::RAWParams::BayerSensor::getMethodStrings().size(); ++i) {
-        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodStrings()[i]) {
+        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::Method(i)) {
             method->set_active(i);
             oldMethod = i;
             break;
@@ -327,9 +327,9 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp)
     lastAutoContrast = pp->raw.bayersensor.dualDemosaicAutoContrast;
 
 //    dcbOptions->set_visible(pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCB) || pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCBVNG4));
-    lmmseOptions->set_visible(pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::LMMSE));
+    lmmseOptions->set_visible(pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::Method::LMMSE);
     dualDemosaicOptions->set_visible(is_dual_demosaic(pp->raw.bayersensor.method));
-    if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::PIXELSHIFT)) {
+    if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::Method::PIXELSHIFT) {
         pixelShiftOptions->set_visible(pp->raw.bayersensor.pixelShiftMotionCorrectionMethod == RAWParams::BayerSensor::PSMotionCorrectionMethod::CUSTOM);
         pixelShiftFrame->show();
     } else {
@@ -379,7 +379,7 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp)
 
     int currentRow = method->get_active_row_number();
     if( currentRow >= 0 && method->get_active_text() != M("GENERAL_UNCHANGED")) {
-        pp->raw.bayersensor.method = procparams::RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method(currentRow));
+        pp->raw.bayersensor.method = RAWParams::BayerSensor::Method(currentRow);
     }
 
     currentRow = imageNumber->get_active_row_number();
@@ -465,7 +465,7 @@ void BayerProcess::methodChanged ()
         lmmseOptions->hide();
     }
 
-    dualDemosaicOptions->set_visible(is_dual_demosaic(procparams::RAWParams::BayerSensor::getMethodString(currentMethod)));
+    dualDemosaicOptions->set_visible(is_dual_demosaic(currentMethod));
     
     if (currentMethod == procparams::RAWParams::BayerSensor::Method::PIXELSHIFT) {
         if(pixelShiftMotionMethod->get_active_row_number() == 2) {

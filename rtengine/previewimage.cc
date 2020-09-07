@@ -353,12 +353,12 @@ public:
         }
 
         ProcParams pp;
-        pp.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::FAST);
-        pp.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST);
+        pp.raw.bayersensor.method = RAWParams::BayerSensor::Method::FAST;
+        pp.raw.xtranssensor.method = RAWParams::XTransSensor::Method::FAST;
 
         if (mono) {
-            pp.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO);
-            pp.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO);
+            pp.raw.bayersensor.method = RAWParams::BayerSensor::Method::MONO;
+            pp.raw.xtranssensor.method = RAWParams::XTransSensor::Method::MONO;
         }
 
         double t = 0;
@@ -566,8 +566,8 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
     neutral.icm.inputProfile = "(camera)";
     neutral.icm.workingProfile = options.rtSettings.srgb;
     if (show_clip) {
-        neutral.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO);
-        neutral.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO);
+        neutral.raw.bayersensor.method = RAWParams::BayerSensor::Method::MONO;
+        neutral.raw.xtranssensor.method = RAWParams::XTransSensor::Method::MONO;
     }
 
     ColorTemp wb = show_clip ? ColorTemp() : src.getWB();

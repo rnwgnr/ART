@@ -333,8 +333,8 @@ procparams::PerspectiveParams PerspectiveCorrection::autocompute(ImageSource *sr
     std::unique_ptr<Imagefloat> img(new Imagefloat(w, h));
 
     ProcParams neutral;
-    neutral.raw.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::FAST);
-    neutral.raw.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST);
+    neutral.raw.bayersensor.method = RAWParams::BayerSensor::Method::FAST;
+    neutral.raw.xtranssensor.method = RAWParams::XTransSensor::Method::FAST;
     neutral.icm.outputProfile = ColorManagementParams::NoICMString;    
     src->getImage(src->getWB(), tr, img.get(), pp, neutral.exposure, neutral.raw);
     src->convertColorSpace(img.get(), pparams->icm, src->getWB());

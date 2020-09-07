@@ -135,7 +135,7 @@ private:
 
         tr = getCoarseBitMask (params.coarse);
         if(imgsrc->getSensorType() == ST_BAYER) {
-            if(params.raw.bayersensor.method!= RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
+            if (params.raw.bayersensor.method != RAWParams::BayerSensor::Method::PIXELSHIFT) {
                 imgsrc->setBorder(params.raw.bayersensor.border);
             } else {
                 imgsrc->setBorder(std::max(params.raw.bayersensor.border, 2));
@@ -512,12 +512,12 @@ private:
         pipeline_scale = 1.0 / scale_factor;
         ipf.setScale(pipeline_scale);
 
-        if (params.raw.xtranssensor.method == procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::THREE_PASS)) {
-            params.raw.xtranssensor.method = procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::ONE_PASS);
+        if (params.raw.xtranssensor.method == procparams::RAWParams::XTransSensor::Method::THREE_PASS) {
+            params.raw.xtranssensor.method = procparams::RAWParams::XTransSensor::Method::ONE_PASS;
         }
 
-        if (params.raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::PIXELSHIFT)) {
-            params.raw.bayersensor.method = procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::AMAZE);
+        if (params.raw.bayersensor.method == procparams::RAWParams::BayerSensor::Method::PIXELSHIFT) {
+            params.raw.bayersensor.method = procparams::RAWParams::BayerSensor::Method::AMAZE;
         }
     }
 

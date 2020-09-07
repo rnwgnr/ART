@@ -235,14 +235,14 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         RAWParams rp = params.raw;
         if (!highDetailNeeded) {
             // if below 100% magnification, take a fast path
-            if (rp.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::NONE) && rp.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO)) {
-                rp.bayersensor.method = RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::FAST);
+            if (rp.bayersensor.method != RAWParams::BayerSensor::Method::NONE && rp.bayersensor.method != RAWParams::BayerSensor::Method::MONO) {
+                rp.bayersensor.method = RAWParams::BayerSensor::Method::FAST;
             }
     
             //bayerrp.all_enhance = false;
     
-            if (rp.xtranssensor.method != RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::NONE) && rp.xtranssensor.method != RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO)) {
-                rp.xtranssensor.method = RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST);
+            if (rp.xtranssensor.method != RAWParams::XTransSensor::Method::NONE && rp.xtranssensor.method != RAWParams::XTransSensor::Method::MONO) {
+                rp.xtranssensor.method = RAWParams::XTransSensor::Method::FAST;
             }
     
             rp.bayersensor.ccSteps = 0;
@@ -337,13 +337,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded) || (!hrcolor && imgsrc->isRGBSourceModified())) {
             if (settings->verbose) {
                 if (imgsrc->getSensorType() == ST_BAYER) {
-                    printf("Demosaic Bayer image n.%d using method: %s\n", rp.bayersensor.imageNum + 1, rp.bayersensor.method.c_str());
+                    std::cout << "Demosaic Bayer image n." << rp.bayersensor.imageNum + 1 << " using method: " << RAWParams::BayerSensor::getMethodString(rp.bayersensor.method) << std::endl;
                 } else if (imgsrc->getSensorType() == ST_FUJI_XTRANS) {
-                    printf("Demosaic X-Trans image with using method: %s\n", rp.xtranssensor.method.c_str());
+                    std::cout << "Demosaic X-Trans image with using method: " << RAWParams::XTransSensor::getMethodString(rp.xtranssensor.method) << std::endl;
                 }
             }
             if(imgsrc->getSensorType() == ST_BAYER) {
-                if(params.raw.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
+                if(params.raw.bayersensor.method != RAWParams::BayerSensor::Method::PIXELSHIFT) {
                     imgsrc->setBorder(params.raw.bayersensor.border);
                 } else {
                     imgsrc->setBorder(std::max(params.raw.bayersensor.border, 2));

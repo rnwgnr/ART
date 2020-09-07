@@ -123,7 +123,7 @@ void XTransProcess::read(const rtengine::procparams::ProcParams* pp)
 
     border->setValue(pp->raw.xtranssensor.border);
     for (size_t i = 0; i < RAWParams::XTransSensor::getMethodStrings().size(); ++i)
-        if( pp->raw.xtranssensor.method == RAWParams::XTransSensor::getMethodStrings()[i]) {
+        if( pp->raw.xtranssensor.method == RAWParams::XTransSensor::Method(i)) {
             method->set_active(i);
             oldSelection = i;
             break;
@@ -135,8 +135,8 @@ void XTransProcess::read(const rtengine::procparams::ProcParams* pp)
 
     lastAutoContrast = pp->raw.xtranssensor.dualDemosaicAutoContrast;
 
-    dualDemosaicOptions->set_visible(pp->raw.xtranssensor.method == procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::FOUR_PASS)
-                                     || pp->raw.xtranssensor.method == procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::TWO_PASS));
+    dualDemosaicOptions->set_visible(pp->raw.xtranssensor.method == procparams::RAWParams::XTransSensor::Method::FOUR_PASS
+                                     || pp->raw.xtranssensor.method == procparams::RAWParams::XTransSensor::Method::TWO_PASS);
 
     methodconn.block (false);
 
@@ -153,7 +153,7 @@ void XTransProcess::write( rtengine::procparams::ProcParams* pp)
     int currentRow = method->get_active_row_number();
 
     if (currentRow >= 0 && method->get_active_text() != M("GENERAL_UNCHANGED")) {
-        pp->raw.xtranssensor.method = procparams::RAWParams::XTransSensor::getMethodStrings()[currentRow];
+        pp->raw.xtranssensor.method = procparams::RAWParams::XTransSensor::Method(currentRow);
     }
 }
 
