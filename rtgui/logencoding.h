@@ -52,15 +52,15 @@ protected:
 public:
     LogEncoding();
 
-    void read(const rtengine::procparams::ProcParams *pp);
-    void write(rtengine::procparams::ProcParams *pp);
-    void setDefaults(const rtengine::procparams::ProcParams *defParams);
+    void read(const rtengine::procparams::ProcParams *pp) override;
+    void write(rtengine::procparams::ProcParams *pp) override;
+    void setDefaults(const rtengine::procparams::ProcParams *defParams) override;
 
-    void adjusterChanged(Adjuster* a, double newval);
-    void adjusterAutoToggled(Adjuster* a, bool newval);
-    void enabledChanged();
+    void adjusterChanged(Adjuster* a, double newval) override;
+    void adjusterAutoToggled(Adjuster* a, bool newval) override;
+    void enabledChanged() override;
 
-    void logEncodingChanged(const rtengine::LogEncodingParams &params);
+    void logEncodingChanged(const rtengine::LogEncodingParams &params) override;
     void autocomputeToggled();
 
     void toolReset(bool to_initial) override;

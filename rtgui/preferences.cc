@@ -467,7 +467,7 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance ()->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
 
-    for (const auto profile : profiles) {
+    for (const auto &profile : profiles) {
         if (profile.find("file:") != 0) {
             std::string fileis_RTv4 = profile.substr(0, 4);
 
@@ -536,7 +536,7 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     const std::vector<Glib::ustring> prtprofiles = rtengine::ICCStore::getInstance ()->getProfiles (rtengine::ICCStore::ProfileType::PRINTER);
 
-    for (const auto prtprofile : prtprofiles) {
+    for (const auto &prtprofile : prtprofiles) {
         prtProfile->append (prtprofile);
     }
 

@@ -90,7 +90,7 @@ std::string decompress(const std::vector<char> &src)
 }
 
 class ConversionError: public std::exception {
-    const char *what() noexcept { return "base64 error"; }
+    const char *what() const noexcept { return "base64 error"; }
 };
 
 std::string to_xmp(const Glib::ustring &data)

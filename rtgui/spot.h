@@ -113,7 +113,7 @@ protected:
 
     void reset_adjusters();
     void on_fold(GdkEventButton *event);
-    void on_hide();
+    void on_hide() override;
 
 public:
 

@@ -75,7 +75,7 @@ PlacesBrowser::PlacesBrowser ()
     iviewcol->add_attribute (*labelCR, "text", placesColumns.label);
     treeView->append_column (*iviewcol);
 
-    treeView->set_row_separator_func (sigc::mem_fun(*this, &PlacesBrowser::rowSeparatorFunc));
+    treeView->set_row_separator_func(sigc::mem_fun(*this, &PlacesBrowser::rowSeparatorFunc));
 
     vm = Gio::VolumeMonitor::get();
 

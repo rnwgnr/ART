@@ -177,7 +177,7 @@ void AreaMask::createPolygonGeometry()
                               circle = new Circle();
                               circle->datum = Geometry::IMAGE;
                               circle->radiusInImageSpace = false;
-                              circle->radius = 3.5;
+                              circle->radius = 3;
                               circle->filled = true;
                               circle->setVisible(false);
                               circle->setHoverable(false);

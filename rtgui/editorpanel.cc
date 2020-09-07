@@ -161,8 +161,8 @@ private:
 
         const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
 
-        for (const auto profile : profiles) {
-            profileBox.append (profile);
+        for (const auto &profile : profiles) {
+            profileBox.append(profile);
         }
 
         profileBox.set_tooltip_text (profileBox.get_active_text ());

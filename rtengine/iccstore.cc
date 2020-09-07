@@ -640,7 +640,7 @@ public:
 
         MyMutex::MyLock lock(mutex);
 
-        for (const auto profile : fileProfiles) {
+        for (const auto &profile : fileProfiles) {
             if (
                 (
                     type == ICCStore::ProfileType::MONITOR

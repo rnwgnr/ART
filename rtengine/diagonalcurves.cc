@@ -550,6 +550,9 @@ double DiagonalCurve::getVal (double t) const
         // all other (unknown) kind
         return t;
     }
+
+    assert(false);
+    return 0;
 }
 
 void DiagonalCurve::getVal (const std::vector<double>& t, std::vector<double>& res) const

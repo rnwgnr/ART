@@ -354,7 +354,7 @@ public:
         }
     }
 
-    void adjusterChanged(Adjuster *a, double newval)
+    void adjusterChanged(Adjuster *a, double newval) override
     {
         if (mask_) {
             mask_->feather = feather_->getValue();
@@ -364,7 +364,7 @@ public:
         }
     }
 
-    void curveChanged()
+    void curveChanged() override
     {
         if (mask_) {
             mask_->contrast = contrast_->getCurve();
@@ -372,7 +372,7 @@ public:
         }
     }
 
-    void adjusterAutoToggled(Adjuster *a, bool newval) {}
+    void adjusterAutoToggled(Adjuster *a, bool newval) override {}
 
     // EditSubscriber interface
     CursorShape getCursor(int objectID) override
@@ -1909,7 +1909,7 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
             am.shapes.back().reset(new rtengine::AreaMask::Rectangle(defaultAreaShape));
             for (size_t j = am.shapes.size()-1; j > 0; --j) {
                 if (am.shapes[j-1]->getType() == Shape::Type::RECTANGLE) {
-                    am.shapes.back() = std::move(am.shapes[j-1]->clone());
+                    am.shapes.back() = am.shapes[j-1]->clone();
                     am.shapes.back()->feather = 0;
                     am.shapes.back()->blur = 0;
                     break;
