@@ -341,18 +341,18 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
 
             lastFilename = Glib::path_get_basename (fname);
 
-            const PartialProfile* toSave;
+            const PartialProfile* toSave = custom;
 
-            if (isCustomSelected()) {
-                toSave = custom;
-            } else if (isLastSavedSelected()) {
-                toSave = lastsaved;
-            } else if (isDefaultSelected()) {
-                toSave = defprofile;
-            } else {
-                const ProfileStoreEntry* entry = profiles->getSelectedEntry();
-                toSave = entry ? ProfileStore::getInstance()->getProfile (profiles->getSelectedEntry()) : nullptr;
-            }
+            // if (isCustomSelected()) {
+            //     toSave = custom;
+            // } else if (isLastSavedSelected()) {
+            //     toSave = lastsaved;
+            // } else if (isDefaultSelected()) {
+            //     toSave = defprofile;
+            // } else {
+            //     const ProfileStoreEntry* entry = profiles->getSelectedEntry();
+            //     toSave = entry ? ProfileStore::getInstance()->getProfile (profiles->getSelectedEntry()) : nullptr;
+            // }
 
             if (toSave) {
                 if (event->state & Gdk::CONTROL_MASK) {
@@ -422,18 +422,18 @@ void ProfilePanel::copy_clicked (GdkEventButton* event)
         return;
     }
 
-    const PartialProfile* toSave;
+    const PartialProfile* toSave = custom;
 
-    if (isCustomSelected()) {
-        toSave = custom;
-    } else if (isLastSavedSelected()) {
-        toSave = lastsaved;
-    } else if (isDefaultSelected()) {
-        toSave = defprofile;
-    } else {
-        const ProfileStoreEntry* entry = profiles->getSelectedEntry();
-        toSave = entry ? ProfileStore::getInstance()->getProfile (entry) : nullptr;
-    }
+    // if (isCustomSelected()) {
+    //     toSave = custom;
+    // } else if (isLastSavedSelected()) {
+    //     toSave = lastsaved;
+    // } else if (isDefaultSelected()) {
+    //     toSave = defprofile;
+    // } else {
+    //     const ProfileStoreEntry* entry = profiles->getSelectedEntry();
+    //     toSave = entry ? ProfileStore::getInstance()->getProfile (entry) : nullptr;
+    // }
 
     // toSave has to be a complete procparams
     if (toSave) {
