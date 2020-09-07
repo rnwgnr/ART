@@ -236,7 +236,7 @@ GENERAL_UNCHANGED;(Inchangé)
 GENERAL_WARNING;Attention
 GENERAL_DEPRECATED_TOOLTIP;<b>Obsolète !</b> sera éliminée dans une prochaine version.
 GIMP_PLUGIN_INFO;Bienvenue dans le plugin ART de GIMP !\nUne fois l'édition terminée, fermez simplement la fenêtre principale de ART et l'image sera importée automatiquement dans GIMP.
-HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), sommet: %5 (%6)\n    distance: %7 EV, valeurs: %8, pixels: %9
+HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), pic: %5 (%6)\n    gamme: %7 EV, valeurs: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;Montrer/Cacher l'histogramme du bleu.
 HISTOGRAM_TOOLTIP_BAR;Montrer/Cacher la barre indicateur RVB.
 HISTOGRAM_TOOLTIP_CHRO;Montrer/Cacher l'histogramme de Chromaticité.
@@ -1875,7 +1875,9 @@ TP_RAW_3PASSBEST;3 passes (algo. Markesteijn)
 TP_RAW_4PASS;3 passes + Rapide
 TP_RAW_AHD;AHD
 TP_RAW_AMAZE;AMaZE
+TP_RAW_AMAZEBILINEAR;AMaZE+Bilinéaire
 TP_RAW_AMAZEVNG4;AMaZE + VNG4
+TP_RAW_BILINEAR;Bilinéaire
 TP_RAW_BORDER;Bord
 TP_RAW_DCB;DCB
 TP_RAW_DCBENHANCE;Amélioration du DCB
@@ -1935,11 +1937,14 @@ TP_RAW_PIXELSHIFTSIGMA_TOOLTIP;Le rayon par défaut de 1.0 fonctionne générale
 TP_RAW_PIXELSHIFTSMOOTH;Adoucir les transitions
 TP_RAW_PIXELSHIFTSMOOTH_TOOLTIP;Adoucir les transitions entre les zones avec mouvement et les zones sans.\nRéglez à 0 pour désactiver l'adoucissement des transitions.\nRéglez à 1 pour obtenir soit le résultat du dématriçage AMaZE/LMMSE de la sous-image sélectionnée (si "Utiliser LMMSE..." est sélectionné), ou la médiane des 4 sous-images si "Utiliser la médiane..." est sélectionné.
 TP_RAW_RCD;RCD
+TP_RAW_RCDBILINEAR;RCD+Bilinéaire
 TP_RAW_RCDVNG4;RCD + VNG4
 TP_RAW_SENSOR_BAYER_LABEL;Capteur à matrice Bayer
 TP_RAW_SENSOR_XTRANS_DMETHOD_TOOLTIP;"3 passes" donne les meilleurs résultats (recommendé pour les images à faible ISO).\n"1 passe" est presque identique à "3 passes" pour les images à ISO élevé, et est plus rapide.
 TP_RAW_SENSOR_XTRANS_LABEL;Capteur à matrice X-Trans
 TP_RAW_VNG4;VNG4
+TP_RAW_XTRANS;X-Trans
+TP_RAW_XTRANSFAST;X-Trans Rapide
 TP_RESET_DEFAULT;Réinitialiser à la valeur par défaut
 TP_RESET_SAVED;réinitialiser à la dernière valeur sauvegardée
 TP_RESIZE_ALLOW_UPSCALING;Autoriser l'agrandissement
