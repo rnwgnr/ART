@@ -50,19 +50,38 @@ void apply_contrast(Imagefloat *rgb, const ImProcData &im, int contrast)
     }
 
     LUTf curve(65536);
-    LUTf curve1(65536);
-    LUTf curve2(65536);
-    LUTu dummy;
-    LUTu hist16(65536);
-    ToneCurve customToneCurve1, customToneCurve2;
 
-    ImProcFunctions ipf(im.params, im.multiThread);
-    ipf.firstAnalysis(rgb, *im.params, hist16);
-    CurveFactory::complexCurve(0, 0, 0, 0, 0, 0, contrast,
-                               { DCT_Linear }, { DCT_Linear },
-                               hist16, curve1, curve2, curve, dummy,
-                               customToneCurve1, customToneCurve2,
-                               max(im.scale, 1.0));
+    if (im.params->logenc.enabled) {
+        const double pivot = im.params->logenc.targetGray / 100.0;
+        const auto scurve =
+            [pivot](double x) -> double
+            {
+                return x < pivot ? pivot * SQR(x/pivot) :
+                    1 - (1 - pivot)*SQR((1 - x)/(1 - pivot));
+            };
+
+        const double c = LIM(contrast / 100.0, -1.0, 1.0);
+
+        for (int i = 0; i < 65536; ++i) {
+            double x = i / 65535.0;
+            double y = intp(c, scurve(x), x);
+            curve[i] = y * 65535.f;
+        }        
+    } else {
+        LUTf curve1(65536);
+        LUTf curve2(65536);
+        LUTu dummy;
+        LUTu hist16(65536);
+        ToneCurve customToneCurve1, customToneCurve2;
+
+        ImProcFunctions ipf(im.params, im.multiThread);
+        ipf.firstAnalysis(rgb, *im.params, hist16);
+        CurveFactory::complexCurve(0, 0, 0, 0, 0, 0, contrast,
+                                   { DCT_Linear }, { DCT_Linear },
+                                   hist16, curve1, curve2, curve, dummy,
+                                   customToneCurve1, customToneCurve2,
+                                   max(im.scale, 1.0));
+    }
     
 
 #ifdef _OPENMP
