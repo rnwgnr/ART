@@ -53,6 +53,7 @@ ToneCurve::ToneCurve():
 
     contrast = Gtk::manage (new Adjuster(M("TP_BRIGHTCONTRSAT_CONTRAST"), -100, 100, 1, 0));
     pack_start(*contrast);
+    contrast->setLogScale(4, 0, true);
     contrast->setAdjusterListener(this);
 
     CurveListener::setMulti(true);
