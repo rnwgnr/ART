@@ -2,11 +2,14 @@
 // generated from src/external/wb_preset.c of Darktable
 // see http://darktable.org for more information
 // last updated on Sun Aug 30 11:04:35 2020
-
 // updated on Sun Aug 30 11:36:02 2020:
 // CANON EOS M50
 // CANON EOS REBEL SL3
 // CANON EOS RP
+
+// updated on Sat Sep 12 20:57:15 2020:
+// CANON EOS M6 MARK II
+// CANON EOS R
 
 [
   {
@@ -5468,6 +5471,28 @@
       { "name" : "tungsten", "multipliers" : [ 1.4501953125, 1, 2.4501953125 ] },
       { "name" : "cool white fluorescent", "multipliers" : [ 1.720703125, 1, 2.31640625 ] },
       { "name" : "flash", "multipliers" : [ 2.2802734375, 1, 1.51953125 ] }
+    ]
+  },
+  {
+    "make_model" : "CANON EOS M6 MARK II",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.7177734375, 1, 1.5302734375 ] },
+      { "name" : "shade", "multipliers" : [ 2.0322265625, 1, 1.3056640625 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.8623046875, 1, 1.412109375 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.1640625, 1, 2.306640625 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.4501953125, 1, 2.169921875 ] },
+      { "name" : "flash", "multipliers" : [ 1.9287109375, 1, 1.3984375 ] }
+    ]
+  },
+  {
+    "make_model" : "CANON EOS R",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.99609375, 1, 1.4501953125 ] },
+      { "name" : "shade", "multipliers" : [ 2.2802734375, 1, 1.2529296875 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.1337890625, 1, 1.345703125 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.421875, 1, 2.064453125 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.6923828125, 1, 1.9921875 ] },
+      { "name" : "flash", "multipliers" : [ 2.1376953125, 1, 1.330078125 ] }
     ]
   }
 ]
