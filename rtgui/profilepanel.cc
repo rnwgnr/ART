@@ -342,6 +342,9 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
             lastFilename = Glib::path_get_basename (fname);
 
             const PartialProfile* toSave = custom;
+            if (!toSave && isLastSavedSelected()) {
+                toSave = lastsaved;
+            }
 
             // if (isCustomSelected()) {
             //     toSave = custom;
@@ -423,7 +426,10 @@ void ProfilePanel::copy_clicked (GdkEventButton* event)
     }
 
     const PartialProfile* toSave = custom;
-
+    if (!toSave && isLastSavedSelected()) {
+        toSave = lastsaved;
+    }
+    
     // if (isCustomSelected()) {
     //     toSave = custom;
     // } else if (isLastSavedSelected()) {
