@@ -419,7 +419,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,  // EvWavgreenlow
     DIRPYREQUALIZER,  // EvWavbluelow
     DIRPYREQUALIZER,  // EvWavNeutral
-    RGBCURVE|M_AUTOEXP, // EvDCPApplyLookTable,
+    ALLNORAW, // EvDCPApplyLookTable,
     RGBCURVE|M_AUTOEXP, // EvDCPApplyBaselineExposureOffset,
     ALLNORAW,         // EvDCPApplyHueSatMap
     DIRPYREQUALIZER,  // EvWavenacont

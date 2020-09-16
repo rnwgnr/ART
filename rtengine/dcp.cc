@@ -1369,7 +1369,8 @@ void DCPProfile::apply(
     const ColorTemp& white_balance,
     const Triple& pre_mul,
     const Matrix& cam_wb_matrix,
-    bool apply_hue_sat_map
+    bool apply_hue_sat_map,
+    bool apply_look_table
 ) const
 {
 
@@ -1381,7 +1382,7 @@ void DCPProfile::apply(
         apply_hue_sat_map = false;
     }
 
-    const Matrix xyz_cam = makeXyzCam(white_balance, pre_mul, cam_wb_matrix, preferred_illuminant, apply_hue_sat_map); // Camera RGB to XYZ D50 matrix
+    const Matrix xyz_cam = makeXyzCam(white_balance, pre_mul, cam_wb_matrix, preferred_illuminant, apply_hue_sat_map || apply_look_table); // Camera RGB to XYZ D50 matrix
 
     if (!apply_hue_sat_map) {
         // The fast path: No LUT --> Calculate matrix for direct conversion raw -> working space
