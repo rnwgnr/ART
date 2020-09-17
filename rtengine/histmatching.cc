@@ -240,17 +240,38 @@ void mappingToCurve(const std::vector<int> &mapping, std::vector<double> &curve)
     } else {
         curve.insert(curve.begin(), DCT_Spline);
         DiagonalCurve c(curve);
-        double gap = 0.05;
         double x = 0.0;
         curve = { DCT_CatumullRom };
-        while (x < 1.0) {
-            curve.push_back(x);
-            curve.push_back(c.getVal(x));
-            x += gap;
-            gap *= 1.4;
+        double pivot = -1.0;
+        for (int i = 25; i < 256; ++i) {
+            double xx = double(i) / 255.0;
+            if (c.getVal(xx) > xx) {
+                pivot = xx;
+                break;
+            }
         }
-        curve.push_back(1.0);
-        curve.push_back(c.getVal(1.0));
+        if (pivot > 0) {
+            curve.push_back(0.0);
+            curve.push_back(c.getVal(0.0));
+            curve.push_back(pivot / 2.0);
+            curve.push_back(c.getVal(pivot / 2.0));
+            curve.push_back(pivot);
+            curve.push_back(c.getVal(pivot));
+            curve.push_back(pivot + (1.0 - pivot) / 2.0);
+            curve.push_back(c.getVal(pivot + (1.0 - pivot) / 2.0));
+            curve.push_back(1.0);
+            curve.push_back(c.getVal(1.0));
+        } else {
+            double gap = 0.05;
+            while (x < 1.0) {
+                curve.push_back(x);
+                curve.push_back(c.getVal(x));
+                x += gap;
+                gap *= 1.4;
+            }
+            curve.push_back(1.0);
+            curve.push_back(c.getVal(1.0));
+        }        
     }
 }
 
