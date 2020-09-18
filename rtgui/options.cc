@@ -622,6 +622,21 @@ void Options::setDefaults()
 
     error_message_duration = 5000;
     max_error_messages = 3;
+
+    falseColorsMap = {
+        {2, "#FFFFFF"},
+        {10, "#0000FF"},
+        {20, "#2290FF"},
+        {42, "#4B4B4B"},
+        {48, "#FF11FC"},
+        {52, "#7B7B7B"},
+        {58, "#00FF00"},
+        {78, "#ADADAD"},
+        {84, "#AEAE00"},
+        {94, "#FFFF00"},
+        {100, "#FF7F00"},
+        {108, "#FF0000"}
+    };
 }
 
 Options* Options::copyFrom(Options* other)
@@ -1861,6 +1876,25 @@ void Options::readFromFile(Glib::ustring fname)
                 }
             }
 
+            if (keyFile.has_group("False Colors Map")) {
+                const Glib::ustring g = "False Colors Map";
+                falseColorsMap.clear();
+                for (auto key : keyFile.get_keys(g)) {
+                    if (key.find("IRE_") == 0) {
+                        size_t end = 0;
+                        std::string s = key.substr(4);
+                        int ire = std::stoi(s, &end);
+                        if (end >= s.size()) {
+                            falseColorsMap[ire] = keyFile.get_string(g, key);
+                        }
+                    }
+                }
+                if (falseColorsMap.empty() ||
+                    falseColorsMap.rbegin()->first < 108) {
+                    falseColorsMap[108] = "#000000";
+                }
+            }
+
 // --------------------------------------------------------------------------------------------------------
 
             filterOutParsedExtensions();
@@ -2261,6 +2295,10 @@ void Options::saveToFile(Glib::ustring fname)
         }
 
         keyFile.set_string("Metadata", "ExiftoolPath", rtSettings.exiftool_path);
+
+        for (auto &p : falseColorsMap) {
+            keyFile.set_string("False Colors Map", "IRE_" + std::to_string(p.first), p.second);
+        }
 
         keyData = keyFile.to_data();
 

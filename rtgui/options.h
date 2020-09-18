@@ -422,6 +422,11 @@ public:
     int error_message_duration; // in milliseconds
     int max_error_messages;
 
+    // maps a IRE value to a false color
+    // taken from
+    // https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
+    std::map<int, std::string> falseColorsMap;
+
     Options();
 
     Options *copyFrom(Options *other);

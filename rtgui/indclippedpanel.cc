@@ -21,21 +21,6 @@
 #include "imagearea.h"
 #include "rtimage.h"
 
-std::map<int, const char *> IndicateClippedPanel::falseColorsMap = {
-    {2, "#FFFFFF"},
-    {10, "#0000FF"},
-    {20, "#2290FF"},
-    {42, "#4B4B4B"},
-    {48, "#FF11FC"},
-    {52, "#7B7B7B"},
-    {58, "#00FF00"},
-    {78, "#ADADAD"},
-    {84, "#AEAE00"},
-    {94, "#FFFF00"},
-    {100, "#FF7F00"},
-    {108, "#FF0000"}
-};
-
 
 IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
 {
@@ -77,7 +62,7 @@ IndicateClippedPanel::IndicateClippedPanel (ImageArea* ia) : imageArea(ia)
     Glib::ustring color_key;
     int prev = 0;
     int c = 0;
-    for (auto &p : falseColorsMap) {
+    for (auto &p : options.falseColorsMap) {
         if (c == 3) {
             color_key += "\n";
             c = 0;

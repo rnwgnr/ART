@@ -1754,8 +1754,8 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
         for (int j = 0; j < bWidth; j++) {
             int L = get_L(curr);
             int ire = L_to_IRE(L);
-            auto it = IndicateClippedPanel::falseColorsMap.lower_bound(ire);
-            get_rgb(it->second, curr);
+            auto it = options.falseColorsMap.lower_bound(ire);
+            get_rgb(it->second.c_str(), curr);
             curr += 3;
         }
     }

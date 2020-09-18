@@ -49,11 +49,6 @@ public:
     void toggleSharpMask();
     void toggleFalseColors();
 
-    // maps a IRE value to a false color
-    // taken from
-    // https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
-    static std::map<int, const char *> falseColorsMap;
-
     bool showFocusMask ()
     {
         return previewFocusMask->get_active ();
