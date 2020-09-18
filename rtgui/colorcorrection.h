@@ -23,7 +23,7 @@
 #include "adjuster.h"
 #include "toolpanel.h"
 #include "labmaskspanel.h"
-#include "labgrid.h"
+#include "colorwheel.h"
 #include "colorprovider.h"
 #include "thresholdadjuster.h"
 
@@ -79,7 +79,7 @@ private:
     void syncSlidersToggled();
     
     rtengine::ProcEvent EvEnabled;
-    rtengine::ProcEvent EvAB;
+    rtengine::ProcEvent EvColorWheel;
     rtengine::ProcEvent EvInSaturation;
     rtengine::ProcEvent EvOutSaturation;
     rtengine::ProcEvent EvLightness;
@@ -114,7 +114,7 @@ private:
     Gtk::VBox *box_rgb;
     Gtk::VBox *box_hsl;
     
-    LabGrid *gridAB;
+    ColorWheel *wheel;
     Adjuster *inSaturation;
     Adjuster *outSaturation;
     Adjuster *slope;

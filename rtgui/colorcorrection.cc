@@ -179,7 +179,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     auto m = ProcEventMapper::getInstance();
     auto EVENT = LUMINANCECURVE | M_LUMACURVE;
     EvEnabled = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_ENABLED");
-    EvAB = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_AB");
+    EvColorWheel = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_AB");
     EvInSaturation = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_INSATURATION");
     EvOutSaturation = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_OUTSATURATION");
     EvLightness = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIGHTNESS");
@@ -220,8 +220,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     box_combined = Gtk::manage(new Gtk::VBox());
     box_rgb = Gtk::manage(new Gtk::VBox());
 
-    gridAB = Gtk::manage(new LabGrid(EvAB, M("TP_COLORCORRECTION_ABVALUES"), false));
-    box_combined->pack_start(*gridAB);
+    wheel = Gtk::manage(new ColorWheel(EvColorWheel, M("TP_COLORCORRECTION_ABVALUES")));
+    box_combined->pack_start(*wheel);
 
     Gtk::Frame *satframe = Gtk::manage(new Gtk::Frame(M("TP_COLORCORRECTION_SATURATION")));
     Gtk::VBox *satbox = Gtk::manage(new Gtk::VBox());
@@ -528,8 +528,7 @@ void ColorCorrection::regionGet(int idx)
     r.inSaturation = inSaturation->getValue();
     r.outSaturation = outSaturation->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
-        double la, lb;
-        gridAB->getParams(la, lb, r.a, r.b, r.abscale);
+        wheel->getParams(r.a, r.b, r.abscale);
         for (int c = 0; c < 3; ++c) {
             r.slope[c] = slope->getValue();
             r.offset[c] = offset->getValue();
@@ -574,7 +573,7 @@ void ColorCorrection::regionShow(int idx)
     }
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
-    gridAB->setParams(0, 0, r.a, r.b, r.abscale, false);
+    wheel->setParams(r.a, r.b, r.abscale, false);
     slope->setValue(r.slope[0]);
     offset->setValue(r.offset[0]);
     power->setValue(r.power[0]);
@@ -618,7 +617,7 @@ void ColorCorrection::modeChanged()
 void ColorCorrection::setListener(ToolPanelListener *tpl)
 {
      ToolPanel::setListener(tpl);
-     gridAB->setListener(tpl);
+     wheel->setListener(tpl);
 }
 
 

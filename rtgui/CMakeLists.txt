@@ -149,7 +149,7 @@ set(NONCLISOURCEFILES
     localcontrast.cc
     eventmapper.cc
     metadatapanel.cc
-    labgrid.cc
+    colorwheel.cc
     softlight.cc
     dehaze.cc
     logencoding.cc

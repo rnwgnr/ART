@@ -36,17 +36,18 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "labgrid.h"
+#include "colorwheel.h"
 #include "../rtengine/iccstore.h"
+#include "../rtengine/coord.h"
 
 using rtengine::Color;
 
 
 //-----------------------------------------------------------------------------
-// LabGridArea
+// ColorWheelArea
 //-----------------------------------------------------------------------------
 
-bool LabGridArea::notifyListener()
+bool ColorWheelArea::notifyListener()
 {
     if (listener) {
         const auto round =
@@ -54,49 +55,45 @@ bool LabGridArea::notifyListener()
             {
                 return int(v * 1000) / 1000.f;
             };
-        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(high_a * scale), round(high_b * scale), round(low_a * scale), round(low_b * scale)));
+        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(x_ * scale), round(y_ * scale)));
     }
     return false;
 }
 
 
-LabGridArea::LabGridArea(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low):
+ColorWheelArea::ColorWheelArea(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low):
     Gtk::DrawingArea(),
     evt(evt), evtMsg(msg),
-    litPoint(NONE),
-    low_a(0.f), high_a(0.f), low_b(0.f), high_b(0.f),
-    defaultLow_a(0.f), defaultHigh_a(0.f), defaultLow_b(0.f), defaultHigh_b(0.f),
+    x_(0.f), y_(0.f),
+    default_x_(0.f), default_y_(0.f),
     listener(nullptr),
     edited(false),
-    isDragged(false),
-    low_enabled(enable_low),
-    logscale(0),
+    point_active_(false),
+    is_dragged_(false),
+    lock_angle_(false),
+    lock_radius_(false),
     scale(1),
     defaultScale(1)
 {
     set_can_focus(false); // prevent moving the grid while you're moving a point
     add_events(Gdk::EXPOSURE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
-    set_name("LabGrid");
+    set_name("ColorWheel");
     get_style_context()->add_class("drawingarea");
 }
 
-void LabGridArea::getParams(double &la, double &lb, double &ha, double &hb) const
+void ColorWheelArea::getParams(double &x, double &y) const
 {
-    la = low_a;
-    ha = high_a;
-    lb = low_b;
-    hb = high_b;
+    x = x_;
+    y = y_;
 }
 
 
-void LabGridArea::setParams(double la, double lb, double ha, double hb, bool notify)
+void ColorWheelArea::setParams(double x, double y, bool notify)
 {
     const double lo = -1.0;
     const double hi = 1.0;
-    low_a = rtengine::LIM(la, lo, hi);
-    low_b = rtengine::LIM(lb, lo, hi);
-    high_a = rtengine::LIM(ha, lo, hi);
-    high_b = rtengine::LIM(hb, lo, hi);
+    x_ = rtengine::LIM(x, lo, hi);
+    y_ = rtengine::LIM(y, lo, hi);
     queue_draw();
     if (notify) {
         notifyListener();
@@ -104,7 +101,7 @@ void LabGridArea::setParams(double la, double lb, double ha, double hb, bool not
 }
 
 
-void LabGridArea::setScale(double s, bool notify)
+void ColorWheelArea::setScale(double s, bool notify)
 {
     scale = s;
     queue_draw();
@@ -114,73 +111,58 @@ void LabGridArea::setScale(double s, bool notify)
 }
 
 
-double LabGridArea::getScale() const
+double ColorWheelArea::getScale() const
 {
     return scale;
 }
 
 
-void LabGridArea::setDefault(double la, double lb, double ha, double hb, double s)
+void ColorWheelArea::setDefault(double x, double y, double s)
 {
-    defaultLow_a = la;
-    defaultLow_b = lb;
-    defaultHigh_a = ha;
-    defaultHigh_b = hb;
+    default_x_ = x;
+    default_y_ = y;
     defaultScale = s;
 }
 
 
-void LabGridArea::reset(bool toInitial)
+void ColorWheelArea::reset(bool toInitial)
 {
     if (toInitial) {
         setScale(defaultScale, false);
-        setParams(defaultLow_a, defaultLow_b, defaultHigh_a, defaultHigh_b, true);
+        setParams(default_x_, default_y_, true);
     } else {
         setScale(1.0, false);
-        setParams(0., 0., 0., 0., true);
+        setParams(0., 0., true);
     }
 }
 
 
-void LabGridArea::setEdited(bool yes)
+void ColorWheelArea::setEdited(bool yes)
 {
     edited = yes;
 }
 
 
-bool LabGridArea::getEdited() const
+bool ColorWheelArea::getEdited() const
 {
     return edited;
 }
 
 
-void LabGridArea::setListener(ToolPanelListener *l)
+void ColorWheelArea::setListener(ToolPanelListener *l)
 {
     listener = l;
 }
 
 
-void LabGridArea::setLogScale(int scale)
+void ColorWheelArea::on_style_updated()
 {
-    logscale = scale;
+    setDirty(true);
     queue_draw();
 }
 
 
-int LabGridArea::getLogScale() const
-{
-    return logscale;
-}
-
-
-void LabGridArea::on_style_updated ()
-{
-    setDirty(true);
-    queue_draw ();
-}
-
-
-bool LabGridArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
+bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
 {
     Gtk::Allocation allocation = get_allocation();
     allocation.set_x(0);
@@ -228,67 +210,51 @@ bool LabGridArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         // flip y:
         cr->translate(0, height);
         cr->scale(1., -1.);
-        const int cells = 8;
-        //float step = 12000.f / float(cells/2);
-        float step = 1.f / float(cells/2);
-        double cellW = double(width) / double(cells);
-        double cellH = double(height) / double(cells);
-        double cellYMin = 0.;
-        double cellYMax = std::floor(cellH);
-        const float Y = 0.5f;
         auto ws = rtengine::ICCStore::getInstance()->workingSpaceMatrix("sRGB");
-        for (int j = 0; j < cells; j++) {
-            double cellXMin = 0.;
-            double cellXMax = std::floor(cellW);
-            for (int i = 0; i < cells; i++) {
+        const float h2 = height * 0.5f;
+        const float w2 = width * 0.5f;
+        const float Y = 0.5f;
+        const float radius = std::min(w2, h2);
+        const float factor = Y * scale * 1.4 / radius;
+        for (int j = 0; j < height; ++j) {
+            float jj = j - h2;
+            float u = jj * factor;
+            for (int i = 0; i < width; ++i) {
+                float ii = i - w2;
                 float R, G, B;
-                // float x, y, z;
-                int ii = i - cells/2;
-                int jj = j - cells/2;
-                float v = step * (ii + 0.5);
-                float u = step * (jj + 0.5);
-                Color::yuv2rgb(Y, Y * u * scale, Y * v * scale, R, G, B, ws);
-                // Color::Lab2XYZ(23000.f, a, b, x, y, z);
-                // Color::xyz2srgb(x, y, z, R, G, B);
-                //cr->set_source_rgb(R / 65535.f, G / 65535.f, B / 65535.f);
-                cr->set_source_rgb(R, G, B);
-                cr->rectangle(
-                        cellXMin,
-                        cellYMin,
-                        cellXMax - cellXMin - (i == cells-1 ? 0. : double(s)),
-                        cellYMax - cellYMin - (j == cells-1 ? 0. : double(s))
-                        );
-                cellXMin = cellXMax;
-                cellXMax = std::floor(cellW * double(i+2) + 0.01);
-                cr->fill();
+                if (std::sqrt(rtengine::SQR(ii) + rtengine::SQR(jj)) <= radius){
+                    float v = ii * factor;
+                    Color::yuv2rgb(Y, u, v, R, G, B, ws);
+                    cr->set_source_rgb(R, G, B);
+                    cr->rectangle(i, j, 1, 1);
+                    cr->fill();
+                }
             }
-            cellYMin = cellYMax;
-            cellYMax = std::floor(cellH * double(j+2) + 0.01);
+        }
+
+        // draw the grid
+        {
+            cr->set_antialias(Cairo::ANTIALIAS_DEFAULT);
+            cr->set_line_width(0.5 * double(s));
+            cr->set_source_rgb(0.2, 0.2, 0.2);
+            for (int a = 0; a < 360; a += 30) {
+                cr->move_to(w2, h2);
+                rtengine::CoordD c(rtengine::PolarCoord(radius, a));
+                cr->line_to(w2 + c.x, h2 + c.y);
+                cr->stroke();
+            }
+            for (int i = 1; i < 4; ++i) {
+                cr->arc(w2, h2, radius / 4.0 * i, 0, 2.0 * rtengine::RT_PI);
+                cr->stroke();
+            }
         }
 
         // drawing the connection line
         cr->set_antialias(Cairo::ANTIALIAS_DEFAULT);
-        float loa, hia, lob, hib;
-        if (logscale > 0) {
-            double s = logscale;
-            const auto tr =
-                [=](double v) -> double
-                {
-                    return rtengine::SGN(v) * rtengine::lin2log(std::abs(v), s);
-                };
-            loa = tr(low_a);
-            lob = tr(low_b);
-            hia = tr(high_a);
-            hib = tr(high_b);
-        } else {
-            loa = low_a;
-            hia = high_a;
-            lob = low_b;
-            hib = high_b;
-        }
-        loa = .5f * (width + width * loa);
+        float hia = x_, hib = y_;
+        float loa = width * 0.5f;
+        float lob = height * 0.5f;
         hia = .5f * (width + width * hia);
-        lob = .5f * (height + height * lob);
         hib = .5f * (height + height * hib);
         cr->set_line_width(2. * double(s));
         cr->set_source_rgb(0.6, 0.6, 0.6);
@@ -297,18 +263,8 @@ bool LabGridArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         cr->stroke();
 
         // drawing points
-        if (low_enabled) {
-            cr->set_source_rgb(0.1, 0.1, 0.1);
-            if (litPoint == LOW) {
-                cr->arc(loa, lob, 5 * s, 0, 2. * rtengine::RT_PI);
-            } else {
-                cr->arc(loa, lob, 3 * s, 0, 2. * rtengine::RT_PI);
-            }
-            cr->fill();
-        }
-
         cr->set_source_rgb(0.9, 0.9, 0.9);
-        if (litPoint == HIGH) {
+        if (point_active_) {
             cr->arc(hia, hib, 5 * s, 0, 2. * rtengine::RT_PI);
         } else {
             cr->arc(hia, hib, 3 * s, 0, 2. * rtengine::RT_PI);
@@ -321,26 +277,18 @@ bool LabGridArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
 }
 
 
-bool LabGridArea::on_button_press_event(GdkEventButton *event)
+bool ColorWheelArea::on_button_press_event(GdkEventButton *event)
 {
     if (event->button == 1) {
         if (event->type == GDK_2BUTTON_PRESS) {
-            switch (litPoint) {
-            case NONE:
-                low_a = low_b = high_a = high_b = 0.f;
-                break;
-            case LOW:
-                low_a = low_b = 0.f;
-                break;
-            case HIGH:
-                high_a = high_b = 0.f;
-                break;
-            }
+            x_ = y_ = 0.f;
             edited = true;
             notifyListener();
             queue_draw();
-        } else if (event->type == GDK_BUTTON_PRESS && litPoint != NONE) {
-            isDragged = true;
+        } else if (event->type == GDK_BUTTON_PRESS && point_active_) {
+            is_dragged_ = true;
+            lock_angle_ = event->state & GDK_CONTROL_MASK;
+            lock_radius_ = event->state & GDK_SHIFT_MASK;
         }
         return false;
     }
@@ -348,75 +296,76 @@ bool LabGridArea::on_button_press_event(GdkEventButton *event)
 }
 
 
-bool LabGridArea::on_button_release_event(GdkEventButton *event)
+bool ColorWheelArea::on_button_release_event(GdkEventButton *event)
 {
     if (event->button == 1) {
-        isDragged = false;
+        is_dragged_ = false;
+        lock_angle_ = false;
+        lock_radius_ = false;
         return false;
     }
     return true;
 }
 
 
-bool LabGridArea::on_motion_notify_event(GdkEventMotion *event)
+bool ColorWheelArea::on_motion_notify_event(GdkEventMotion *event)
 {
-    if (isDragged && delayconn.connected()) {
+    if (is_dragged_ && delayconn.connected()) {
         delayconn.disconnect();
     }
 
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     Gtk::Border padding = getPadding(style);  // already scaled
 
-    State oldLitPoint = litPoint;
+    bool old_active = point_active_;
 
-    const auto tr =
-        [&](float v) -> float
-        {
-            if (logscale > 0) {
-                return rtengine::SGN(v) * rtengine::log2lin(std::abs(v), float(logscale));
-            } else {
-                return v;
-            }
-        };
-    
     int s = RTScalable::getScale();
     int width = get_allocated_width() - 2 * inset * s - padding.get_right() - padding.get_left();
     int height = get_allocated_height() - 2 * inset * s - padding.get_top() - padding.get_bottom();
     const float mouse_x = std::min(double(std::max(event->x - inset * s - padding.get_right(), 0.)), double(width));
     const float mouse_y = std::min(double(std::max(get_allocated_height() - 1 - event->y - inset * s - padding.get_bottom(), 0.)), double(height));
-    const float ma = tr((2.0 * mouse_x - width) / (float)width);
-    const float mb = tr((2.0 * mouse_y - height) / (float)height);
-    if (isDragged) {
-        if (litPoint == LOW) {
-            low_a = ma;
-            low_b = mb;
-        } else if (litPoint == HIGH) {
-            high_a = ma;
-            high_b = mb;
+    float ma = (2.0 * mouse_x - width) / float(width);
+    float mb = (2.0 * mouse_y - height) / float(height);
+    
+    rtengine::PolarCoord prev(rtengine::CoordD(x_, y_));
+    
+    rtengine::PolarCoord p(rtengine::CoordD(ma, mb));
+    p.radius = std::min(p.radius, 1.0);
+
+    if (is_dragged_) {
+        if (lock_angle_) {
+            p.angle = prev.angle;
         }
+        if (lock_radius_) {
+            p.radius = prev.radius;
+        }
+    }
+    
+    rtengine::CoordD c(p);
+    ma = c.x;
+    mb = c.y;
+        
+    if (is_dragged_) {
+        x_ = ma;
+        y_ = mb;
         edited = true;
         grab_focus();
         if (options.adjusterMinDelay == 0) {
             notifyListener();
         } else {
-            delayconn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &LabGridArea::notifyListener), options.adjusterMinDelay);
+            delayconn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &ColorWheelArea::notifyListener), options.adjusterMinDelay);
         }
         queue_draw();
     } else {
-        litPoint = NONE;
-        float la = low_a;
-        float lb = low_b;
-        float ha = high_a;
-        float hb = high_b;
+        point_active_ = false;
+        float ha = x_;
+        float hb = y_;
         const float thrs = 0.05f;
-        const float distlo = (la - ma) * (la - ma) + (lb - mb) * (lb - mb);
         const float disthi = (ha - ma) * (ha - ma) + (hb - mb) * (hb - mb);
-        if (low_enabled && distlo < thrs * thrs && distlo < disthi) {
-            litPoint = LOW;
-        } else if (disthi < thrs * thrs && disthi <= distlo) {
-            litPoint = HIGH;
+        if (disthi < thrs * thrs) {
+            point_active_ = true;
         }
-        if ((oldLitPoint == NONE && litPoint != NONE) || (oldLitPoint != NONE && litPoint == NONE)) {
+        if ((!old_active && point_active_) || (old_active && !point_active_)) {
             queue_draw();
         }
     }
@@ -424,13 +373,13 @@ bool LabGridArea::on_motion_notify_event(GdkEventMotion *event)
 }
 
 
-Gtk::SizeRequestMode LabGridArea::get_request_mode_vfunc() const
+Gtk::SizeRequestMode ColorWheelArea::get_request_mode_vfunc() const
 {
     return Gtk::SIZE_REQUEST_HEIGHT_FOR_WIDTH;
 }
 
 
-void LabGridArea::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
+void ColorWheelArea::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     Gtk::Border padding = getPadding(style);  // already scaled
@@ -442,7 +391,7 @@ void LabGridArea::get_preferred_width_vfunc(int &minimum_width, int &natural_wid
 }
 
 
-void LabGridArea::get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
+void ColorWheelArea::get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
 {
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     Gtk::Border padding = getPadding(style);  // already scaled
@@ -451,32 +400,17 @@ void LabGridArea::get_preferred_height_for_width_vfunc(int width, int &minimum_h
 }
 
 
-bool LabGridArea::lowEnabled() const
-{
-    return low_enabled;
-}
-
-
-void LabGridArea::setLowEnabled(bool yes)
-{
-    if (low_enabled != yes) {
-        low_enabled = yes;
-        queue_draw();
-    }
-}
-
-
 //-----------------------------------------------------------------------------
-// LabGrid
+// ColorWheel
 //-----------------------------------------------------------------------------
 
-LabGrid::LabGrid(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low):
-    grid(evt, msg, enable_low)
+ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
+    grid(evt, msg)
 {
     Gtk::Button *reset = Gtk::manage(new Gtk::Button());
     reset->set_tooltip_markup(M("ADJUSTER_RESET_TO_DEFAULT"));
     reset->add(*Gtk::manage(new RTImage("undo-small.png", "redo-small.png")));
-    reset->signal_button_release_event().connect(sigc::mem_fun(*this, &LabGrid::resetPressed));
+    reset->signal_button_release_event().connect(sigc::mem_fun(*this, &ColorWheel::resetPressed));
 
     setExpandAlignProperties(reset, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
     reset->set_relief(Gtk::RELIEF_NONE);
@@ -497,15 +431,13 @@ LabGrid::LabGrid(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_
     pack_start(grid, true, true);
     pack_start(*vb, false, false);
 
-    grid.setLogScale(10);
-
-    scaleconn = scale->signal_value_changed().connect(sigc::mem_fun(*this, &LabGrid::scaleChanged));
+    scaleconn = scale->signal_value_changed().connect(sigc::mem_fun(*this, &ColorWheel::scaleChanged));
     
     show_all_children();
 }
 
 
-bool LabGrid::resetPressed(GdkEventButton *event)
+bool ColorWheel::resetPressed(GdkEventButton *event)
 {
     grid.reset(event->state & GDK_CONTROL_MASK);
     ConnectionBlocker sb(scaleconn);
@@ -513,7 +445,7 @@ bool LabGrid::resetPressed(GdkEventButton *event)
     return false;    
 }
 
-void LabGrid::scaleChanged()
+void ColorWheel::scaleChanged()
 {
     if (timerconn.connected()) {
         timerconn.disconnect();
@@ -522,27 +454,31 @@ void LabGrid::scaleChanged()
 }
 
 
-void LabGrid::getParams(double &la, double &lb, double &ha, double &hb, double &s) const
+void ColorWheel::getParams(double &x, double &y, double &s) const
 {
-    grid.getParams(la, lb, ha, hb);
+    grid.getParams(x, y);
     s = grid.getScale();
-    la *= s;
-    lb *= s;
-    ha *= s;
-    hb *= s;
+    x *= s;
+    y *= s;
 }
 
 
-void LabGrid::setParams(double la, double lb, double ha, double hb, double s, bool notify)
+void ColorWheel::setParams(double x, double y, double s, bool notify)
 {
     ConnectionBlocker sb(scaleconn);
+    double ha1 = x / s;
+    double hb1 = y / s;
+    rtengine::PolarCoord ph(rtengine::CoordD(ha1, hb1));
+    if (ph.radius > 1) {
+        s *= ph.radius;
+    }
     scale->set_value(s);
     grid.setScale(s, false);
-    grid.setParams(la / s, lb / s, ha / s, hb / s, notify);
+    grid.setParams(x / s, y / s, notify);
 }
 
 
-void LabGrid::setDefault(double la, double lb, double ha, double hb, double s)
+void ColorWheel::setDefault(double x, double y, double s)
 {
-    grid.setDefault(la, lb, ha, hb, s);
+    grid.setDefault(x, y, s);
 }

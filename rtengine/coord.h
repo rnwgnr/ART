@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -17,11 +18,9 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __COORD__
-#define __COORD__
+#pragma once
 
-namespace rtengine
-{
+namespace rtengine {
 
 struct Coord;
 struct CoordD;
@@ -113,9 +112,11 @@ struct PolarCoord
     PolarCoord (const double radius, const double angle);
     PolarCoord (const PolarCoord& other) = default;
     explicit PolarCoord (const Coord& other);
+    explicit PolarCoord (const CoordD& other);
 
     PolarCoord& operator= (const PolarCoord& other) = default;
     PolarCoord& operator= (const Coord& other);
+    PolarCoord& operator= (const CoordD& other);
 
     void get (double& radius, double& angle) const;
     void set (const double radius, const double angle);
@@ -347,34 +348,16 @@ inline const CoordD operator* (const double lhs, const CoordD& rhs)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 inline PolarCoord::PolarCoord (const double radius, const double angle) : radius (radius), angle (angle)
 {
 }
 
 inline PolarCoord::PolarCoord (const Coord& other)
+{
+    *this = other;
+}
+
+inline PolarCoord::PolarCoord (const CoordD& other)
 {
     *this = other;
 }
@@ -439,6 +422,4 @@ inline const PolarCoord operator* (const double lhs, const PolarCoord& rhs)
     return PolarCoord (rhs) *= lhs;
 }
 
-}
-
-#endif
+} // namespace rtengine

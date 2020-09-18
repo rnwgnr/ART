@@ -57,6 +57,17 @@ PolarCoord& PolarCoord::operator= (const Coord& other)
     return *this;
 }
 
+PolarCoord& PolarCoord::operator= (const CoordD& other)
+{
+    const double x = other.x;
+    const double y = other.y;
+
+    radius = rtengine::norm2 (x, y);
+    angle = std::atan2 (y, x) * 180.0 / rtengine::RT_PI;
+
+    return *this;
+}
+
 /// @brief Clip the coord to stay in the width x height bounds
 /// @return true if the x or y coordinate has changed
 bool Coord::clip (const int width, const int height)
