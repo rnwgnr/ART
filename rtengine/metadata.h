@@ -54,7 +54,7 @@ public:
     void setExif(const rtengine::procparams::ExifPairs &exif) { exif_ = exif; }
     void setIptc(const rtengine::procparams::IPTCPairs &iptc) { iptc_ = iptc; }
     
-    void saveToImage(ProgressListener *pl, const Glib::ustring &path) const;
+    void saveToImage(ProgressListener *pl, const Glib::ustring &path, bool preserve_all_tags) const;
     void saveToXmp(const Glib::ustring &path) const;
 
     void setExifKeys(const std::vector<std::string> *keys);

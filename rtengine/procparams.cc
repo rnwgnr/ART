@@ -3172,7 +3172,7 @@ int ProcParams::saveEmbedded(ProgressListener *pl, const Glib::ustring &fname)
         Exiv2Metadata md(fname, false);
         md.load();
         md.xmpData()["Xmp.ART.arp"] = to_xmp(sPParams);
-        md.saveToImage(pl, fname);
+        md.saveToImage(pl, fname, true);
         return 0;
     } catch (std::exception &exc) {
         if (pl) {
