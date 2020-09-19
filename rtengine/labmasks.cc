@@ -854,7 +854,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
                         auto &cm = cmask[i];
                         auto &lm = lmask[i];
                         float ll = has_lmask ? intp(ldetail[i], LL[y][x], l) : l;
-                        float blend = LIM01(dE(i, l, a, b) * (hm ? hm->getVal(h) : 1.f) * (cm ? cm->getVal(c) : 1.f) * (lm ? lm->getVal(ll) : 1.f));
+                        float blend = /*LIM01*/(dE(i, l, a, b) * (hm ? hm->getVal(h) : 1.f) * (cm ? cm->getVal(c) : 1.f) * (lm ? lm->getVal(ll) : 1.f));
                         if (Lmask) {
                             (*Lmask)[i][y][x] = blend;
                         }
@@ -868,6 +868,14 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     }
 
     if (has_mask) {
+#ifdef __SSE2__
+        const auto LIM01v =
+            [](vfloat v) -> vfloat
+            {
+                return vminf(vmaxf(v, F2V(0)), F2V(1));
+            };
+#endif
+        
         for (int i = begin_idx; i < end_idx; ++i) {
             float blur = masks[i].parametricMask.enabled ? masks[i].parametricMask.blur : 0.f;
             blur = blur < 0.f ? -1.f/blur : 1.f + blur;
@@ -878,6 +886,30 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             }
             if (Lmask) {
                 rtengine::guidedFilter(guide, (*Lmask)[i], (*Lmask)[i], r2, 0.0001, multithread);
+            }
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                int x = 0;
+#ifdef __SSE2__
+                for (; x < W - 3; x += 4) {
+                    if (abmask) {
+                        STVFU((*abmask)[i][y][x], LIM01v(LVFU((*abmask)[i][y][x])));
+                    }
+                    if (Lmask) {
+                        STVFU((*Lmask)[i][y][x], LIM01v(LVFU((*Lmask)[i][y][x])));
+                    }
+                }
+#endif
+                for (; x < W; ++x) {
+                    if (abmask) {
+                        (*abmask)[i][y][x] = LIM01((*abmask)[i][y][x]);
+                    }
+                    if (Lmask) {
+                        (*Lmask)[i][y][x] = LIM01((*Lmask)[i][y][x]);
+                    }
+                }
             }
         }
     } else {
