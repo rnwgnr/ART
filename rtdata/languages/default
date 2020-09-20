@@ -1784,6 +1784,7 @@ TP_LABMASKS_DRAWNMASK_HARDNESS;Hardness
 TP_LABMASKS_DRAWNMASK_INFO;%1 stroke(s)
 TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Intersect the brush mask with the other masks
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Add the brush mask on top of the other masks
+TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Add the brush mask on top of the other masks, but only within the active area mask
 TP_LABMASKS_PARAMETRIC;Parametric mask
 TP_LENSGEOM_AUTOCROP;Auto-Crop
 TP_LENSGEOM_FILL;Auto-fill

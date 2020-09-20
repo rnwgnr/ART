@@ -374,7 +374,7 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
     const int mask_w = guide.width();
     const int mask_h = guide.height();
 
-    const bool add = drawnMask.addmode;
+    const bool add = drawnMask.mode != DrawnMask::INTERSECT;
 
     mask(mask_w, mask_h);
     float *maskdata = mask;
@@ -939,25 +939,44 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 
     array2D<float> amask;
 
-    for (int i = begin_idx; i < end_idx; ++i) {
-        if (generate_area_mask(offset_x, offset_y, full_width, full_height, guide, masks[i].areaMask, scale, multithread, amask)) {
+    const auto apply_brush =
+        [&](bool add_bounded) -> void
+        {
+            for (int i = begin_idx; i < end_idx; ++i) {
+                if ((masks[i].drawnMask.mode == DrawnMask::ADD_BOUNDED) != add_bounded) {
+                    continue;
+                }
+                if (generate_drawn_mask(offset_x, offset_y, full_width, full_height, masks[i].drawnMask, guide, multithread, amask)) {
+                    const bool add = masks[i].drawnMask.mode != DrawnMask::INTERSECT;
+                    const float alpha = 1.f - LIM01(masks[i].drawnMask.transparency);
 #ifdef _OPENMP
-#           pragma omp parallel for if (multithread)
+#                   pragma omp parallel for if (multithread)
 #endif
-            for (int y = 0; y < H; ++y) {
-                for (int x = 0; x < W; ++x) {
-                    if (abmask) {
-                        (*abmask)[i][y][x] *= amask[y][x];
-                    }
-                    if (Lmask) {
-                        (*Lmask)[i][y][x] *= amask[y][x];
+                    for (int y = 0; y < H; ++y) {
+                        for (int x = 0; x < W; ++x) {
+                            const float f = alpha * amask[y][x];
+                            if (add) {
+                                if (abmask) {
+                                    (*abmask)[i][y][x] = LIM01((*abmask)[i][y][x] + f);
+                                }
+                                if (Lmask) {
+                                    (*Lmask)[i][y][x] = LIM01((*Lmask)[i][y][x] + f);
+                                }
+                            } else {
+                                if (abmask) {
+                                    (*abmask)[i][y][x] *= f;
+                                }
+                                if (Lmask) {
+                                    (*Lmask)[i][y][x] *= f;
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-
+        };
     
+
     float s_scale = std::sqrt(scale);
     for (int i = begin_idx; i < end_idx; ++i) {
         if (masks[i].parametricMask.enabled && masks[i].parametricMask.contrastThreshold != 0) {
@@ -983,35 +1002,56 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
         }
     }
 
+    apply_brush(true);
+    
     for (int i = begin_idx; i < end_idx; ++i) {
-        if (generate_drawn_mask(offset_x, offset_y, full_width, full_height, masks[i].drawnMask, guide, multithread, amask)) {
-            const bool add = masks[i].drawnMask.addmode;
-            const float alpha = 1.f - LIM01(masks[i].drawnMask.transparency);
+        if (generate_area_mask(offset_x, offset_y, full_width, full_height, guide, masks[i].areaMask, scale, multithread, amask)) {
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
-                    const float f = alpha * amask[y][x];
-                    if (add) {
-                        if (abmask) {
-                            (*abmask)[i][y][x] = LIM01((*abmask)[i][y][x] + f);
-                        }
-                        if (Lmask) {
-                            (*Lmask)[i][y][x] = LIM01((*Lmask)[i][y][x] + f);
-                        }
-                    } else {
-                        if (abmask) {
-                            (*abmask)[i][y][x] *= f;
-                        }
-                        if (Lmask) {
-                            (*Lmask)[i][y][x] *= f;
-                        }
+                    if (abmask) {
+                        (*abmask)[i][y][x] *= amask[y][x];
+                    }
+                    if (Lmask) {
+                        (*Lmask)[i][y][x] *= amask[y][x];
                     }
                 }
             }
         }
     }
+
+    apply_brush(false);
+//     for (int i = begin_idx; i < end_idx; ++i) {
+//         if (generate_drawn_mask(offset_x, offset_y, full_width, full_height, masks[i].drawnMask, guide, multithread, amask)) {
+//             const bool add = masks[i].drawnMask.addmode;
+//             const float alpha = 1.f - LIM01(masks[i].drawnMask.transparency);
+// #ifdef _OPENMP
+// #           pragma omp parallel for if (multithread)
+// #endif
+//             for (int y = 0; y < H; ++y) {
+//                 for (int x = 0; x < W; ++x) {
+//                     const float f = alpha * amask[y][x];
+//                     if (add) {
+//                         if (abmask) {
+//                             (*abmask)[i][y][x] = LIM01((*abmask)[i][y][x] + f);
+//                         }
+//                         if (Lmask) {
+//                             (*Lmask)[i][y][x] = LIM01((*Lmask)[i][y][x] + f);
+//                         }
+//                     } else {
+//                         if (abmask) {
+//                             (*abmask)[i][y][x] *= f;
+//                         }
+//                         if (Lmask) {
+//                             (*Lmask)[i][y][x] *= f;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
     
     for (int i = begin_idx; i < end_idx; ++i) {
         if (masks[i].inverted) {

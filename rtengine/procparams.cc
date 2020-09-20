@@ -916,7 +916,7 @@ DrawnMask::DrawnMask():
     smoothness(0),
     contrast{DCT_Linear},
     strokes(),
-    addmode(false)
+    mode(INTERSECT)
 {
 }
 
@@ -929,7 +929,7 @@ bool DrawnMask::operator==(const DrawnMask &other) const
         && smoothness == other.smoothness
         && contrast == other.contrast
         && strokes == other.strokes
-        && addmode == other.addmode;
+        && mode == other.mode;
 }
 
 
@@ -1253,7 +1253,19 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskTransparency" + suffix, drawnMask.transparency);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskSmoothness" + suffix, drawnMask.smoothness);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskContrast" + suffix, drawnMask.contrast);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskAddMode" + suffix, drawnMask.addmode);
+    if (ppVersion < 1019) {
+        bool addmode = false;
+        if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskAddMode" + suffix, addmode)) {
+            ret = true;
+            drawnMask.mode = addmode ? DrawnMask::ADD : DrawnMask::INTERSECT;
+        }
+    } else {
+        int mode = 0;
+        if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskMode" + suffix, mode)) {
+            ret = true;
+            drawnMask.mode = DrawnMask::Mode(LIM(mode, 0, 2));
+        }
+    }
     if (ppVersion < 1019) {
         std::vector<float> v; // important: use vector<float> to avoid calling rtengine::sanitizeCurve -- need to think of a better way
         if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, v)) {
@@ -1335,7 +1347,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "DrawnMaskTransparency" + suffix, drawnMask.transparency, keyfile);
     putToKeyfile(group_name, prefix + "DrawnMaskSmoothness" + suffix, drawnMask.smoothness, keyfile);
     putToKeyfile(group_name, prefix + "DrawnMaskContrast" + suffix, drawnMask.contrast, keyfile);
-    putToKeyfile(group_name, prefix + "DrawnMaskAddMode" + suffix, drawnMask.addmode, keyfile);
+    putToKeyfile(group_name, prefix + "DrawnMaskMode" + suffix, int(drawnMask.mode), keyfile);
     std::vector<double> v;
     drawnMask.strokes_to_list(v);
     putToKeyfile(group_name, prefix + "DrawnMaskStrokes" + suffix, pack_list(v), keyfile);

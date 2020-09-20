@@ -256,15 +256,17 @@ public:
         info_ = Gtk::manage(new Gtk::Label(M("TP_LABMASKS_DRAWNMASK_INFO")));
         hb->pack_start(*info_, Gtk::PACK_EXPAND_WIDGET, 4);
         
-        const char *img[2] = {
+        const char *img[3] = {
             "area-shape-intersect.png",
-            "area-shape-add.png"
+            "area-shape-add.png",
+            "drawn-mask-add-bounded.png"
         };
-        const char *tips[2] = {
+        const char *tips[3] = {
             "TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP",
-            "TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP"
+            "TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP",
+            "TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP"
         };
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 3; ++i) {
             mode_[i] = Gtk::manage(new Gtk::ToggleButton());
             mode_[i]->add(*Gtk::manage(new RTImage(img[i])));
             modeconn_[i] = mode_[i]->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &DrawnMaskPanel::on_mode_changed), i));
@@ -317,6 +319,7 @@ public:
         grid->attach(*toggle_, 0, 3, 1, 1);
         grid->attach(*mode_[0], 0, 4, 1, 1);
         grid->attach(*mode_[1], 0, 5, 1, 1);
+        grid->attach(*mode_[2], 0, 6, 1, 1);
         hb->pack_start(*grid, Gtk::PACK_SHRINK, 2);
         
         tb->pack_start(*hb);
@@ -466,7 +469,7 @@ public:
                 transparency_->setValue(mask->transparency * 100.0);
                 smoothness_->setValue(mask->smoothness * 100.0);
                 contrast_->setCurve(mask->contrast);
-                set_mode(mask->addmode ? 1 : 0);
+                set_mode(int(mask->mode));
             }
             mask_ = mask;
         }
@@ -562,7 +565,7 @@ private:
 
     void set_mode(int i)
     {
-        for (int j = 0; j < 2; ++j) {
+        for (int j = 0; j < 3; ++j) {
             ConnectionBlocker blocker(modeconn_[j]);
             mode_[j]->set_active(i == j);
         }
@@ -577,7 +580,7 @@ private:
         }
         set_mode(i);
         if (mask_) {
-            mask_->addmode = mode_[1]->get_active();
+            mask_->mode = mode_[0]->get_active() ? rtengine::procparams::DrawnMask::INTERSECT : (mode_[1]->get_active() ? rtengine::procparams::DrawnMask::ADD : rtengine::procparams::DrawnMask::ADD_BOUNDED);
             sig_draw_updated_.emit();
         }
     }
@@ -599,7 +602,7 @@ private:
             transparency_->setValue(mask_->transparency * 100.0);
             smoothness_->setValue(mask_->smoothness * 100.0);
             contrast_->setCurve(mask_->contrast);
-            set_mode(mask_->addmode ? 1 : 0);
+            set_mode(int(mask_->mode));
             sig_draw_updated_.emit();
         }
     }
@@ -617,8 +620,8 @@ private:
     Adjuster *hardness_;
     Gtk::CheckButton *erase_;
     DiagonalCurveEditor *contrast_;
-    Gtk::ToggleButton *mode_[2];
-    sigc::connection modeconn_[2];
+    Gtk::ToggleButton *mode_[3];
+    sigc::connection modeconn_[3];
 
     SigDrawUpdated sig_draw_updated_;
     bool prev_erase_;
