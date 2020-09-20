@@ -824,6 +824,9 @@ void Crop::refreshSize ()
  */
 void Crop::setDimensions (int mw, int mh)
 {
+    if (maxw == mw && maxh == mh) {
+        return;
+    }
 
     maxw = mw;
     maxh = mh;
