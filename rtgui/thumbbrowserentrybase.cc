@@ -571,7 +571,7 @@ void ThumbBrowserEntryBase::drawFrame (Cairo::RefPtr<Cairo::Context> cc, const G
 
     int radius = 4;
 
-    if (selected || framed) {
+    if (selected || framed || options.show_thumbnails_frame) {
         cc->move_to (radius, 0);
         cc->arc (exp_width - 1 - radius, radius, radius, -rtengine::RT_PI / 2, 0);
         cc->arc (exp_width - 1 - radius, exp_height - 1 - radius, radius, 0, rtengine::RT_PI / 2);
@@ -581,6 +581,9 @@ void ThumbBrowserEntryBase::drawFrame (Cairo::RefPtr<Cairo::Context> cc, const G
 
         if (selected) {
             cc->set_source_rgb (bg.get_red(), bg.get_green(), bg.get_blue());
+            cc->fill_preserve ();
+        } else if (options.show_thumbnails_frame) {
+            cc->set_source_rgba (bg.get_red(), bg.get_green(), bg.get_blue(), 0.3);
             cc->fill_preserve ();
         }
 

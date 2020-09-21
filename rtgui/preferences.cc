@@ -994,6 +994,7 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     Gtk::HBox* hbro0 = Gtk::manage ( new Gtk::HBox () );
     overlayedFileNames = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_OVERLAY_FILENAMES")) );
     filmStripOverlayedFileNames = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_OVERLAY_FILENAMES_FILMSTRIP")) );
+    thumbFrames = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMB_FRAMES")));
     sameThumbSize = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_FSTRIP_SAME_THUMB_HEIGHT")) );
     sameThumbSize->set_tooltip_text (M ("PREFERENCES_FSTRIP_SAME_THUMB_HEIGHT_HINT"));
     ckbInternalThumbIfUntouched = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_INTERNALTHUMBIFUNTOUCHED")));
@@ -1012,6 +1013,7 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     vbro->pack_start (*hbro1, Gtk::PACK_SHRINK, 0);
     vbro->pack_start (*overlayedFileNames, Gtk::PACK_SHRINK, 0);
     vbro->pack_start (*filmStripOverlayedFileNames, Gtk::PACK_SHRINK, 0);
+    vbro->pack_start(*thumbFrames, Gtk::PACK_SHRINK, 0);
     vbro->pack_start (*sameThumbSize, Gtk::PACK_SHRINK, 0);
     vbro->pack_start (*ckbInternalThumbIfUntouched, Gtk::PACK_SHRINK, 0);
 
@@ -1525,6 +1527,7 @@ void Preferences::storePreferences ()
     moptions.filmStripOverlayedFileNames = filmStripOverlayedFileNames->get_active();
     moptions.sameThumbSize = sameThumbSize->get_active();
     moptions.internalThumbIfUntouched = ckbInternalThumbIfUntouched->get_active ();
+    moptions.show_thumbnails_frame = thumbFrames->get_active();
 
     auto save_where = saveParamsPreference->get_active_row_number();
     moptions.saveParamsFile = save_where == 0 || save_where == 2;
@@ -1756,6 +1759,7 @@ void Preferences::fillPreferences ()
     filmStripOverlayedFileNames->set_active (moptions.filmStripOverlayedFileNames);
     sameThumbSize->set_active (moptions.sameThumbSize);
     ckbInternalThumbIfUntouched->set_active (moptions.internalThumbIfUntouched);
+    thumbFrames->set_active(moptions.show_thumbnails_frame);
 
     saveParamsPreference->set_active (moptions.saveParamsFile ? (moptions.saveParamsCache ? 2 : 0) : 1);
 

@@ -326,6 +326,7 @@ void Options::setDefaults()
     lastScale = 5;
     panAccelFactor = 5;
     rememberZoomAndPan = true;
+    show_thumbnails_frame = false;
     fbShowDateTime = true;
     fbShowBasicExif = true;
     fbShowExpComp = false;
@@ -1438,6 +1439,10 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("GUI", "ToolPanelsDisable")) {
                     toolpanels_disable = keyFile.get_boolean("GUI", "ToolPanelsDisable");
                 }
+
+                if (keyFile.has_key("GUI", "ShowThumbnailsFrame")) {
+                    show_thumbnails_frame = keyFile.get_boolean("GUI", "ShowThumbnailsFrame");
+                }                
             }
 
             if (keyFile.has_group("Crop Settings")) {
@@ -2163,6 +2168,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean ("GUI", "HistogramWorking", rtSettings.HistogramWorking);
         keyFile.set_integer ("GUI", "CurveBBoxPosition", curvebboxpos);
         keyFile.set_boolean("GUI", "ToolPanelsDisable", toolpanels_disable);
+        keyFile.set_boolean("GUI", "ShowThumbnailsFrame", show_thumbnails_frame);
 
         //Glib::ArrayHandle<int> crvopen = crvOpen;
         //keyFile.set_integer_list ("GUI", "CurvePanelsExpanded", crvopen);
