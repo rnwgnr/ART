@@ -1858,6 +1858,8 @@ void LabMasksPanel::onAreaShapeSelectionChanged()
             break;
         }
         s->mode = Shape::Mode(getAreaShapeMode());
+        s->feather = areaMaskShapeFeather->getValue();
+        s->blur = areaMaskShapeBlur->getValue();
 
         auto sel = areaMaskShapes->get_selected();
         unsigned int newidx = sel.empty() ? area_shape_index_ : sel[0];
