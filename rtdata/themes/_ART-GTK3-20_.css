@@ -107,6 +107,14 @@ dialog frame > border {
     padding: 0px;
 }
 
+
+#FileCatalog {
+    background-color: rgb(50, 50, 50);
+}
+
 #FileCatalog:hover {
-    background-color: rgba(86, 86, 86, 0.3);
+    background-color: rgb(60,60,60);
+}
+#FileCatalog:selected {
+    background-color: rgb(92,92,92);
 }

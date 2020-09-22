@@ -32,7 +32,7 @@
 @define-color highlighted-text-color rgb(200,200,200);  /*** Highlighted text color * Default: rgb(200,200,200) ***/
 
 @define-color bg-image rgb(58,58,58);                   /*** Image area & File Browser background * Default: rgb(58,58,58) ***/
-@define-color bg-image2 rgba(58,58,58,0.3);              
+@define-color bg-image2 rgb(70,70,70);              
 
 @define-color accent-color2 rgb(33,82,150);             /*** Scale, Progressbar, Scrollbar, Tabs * Default: rgb(33,82,145) ***/
 @define-color accent-color4 rgb(98,98,98);              /*** Slider knob * Default: rgb(98,98,98) ***/
