@@ -611,11 +611,13 @@ float polyFill(float **buffer, int width, int height, const std::vector<CoordD> 
         }
     }
 
+    float ret = rtengine::min<int>(xEnd - xStart, yEnd - yStart);
+
     xStart = rtengine::LIM<int>(xStart, 0., width - 1);
     xEnd = rtengine::LIM<int>(xEnd, xStart, width - 1);
     yStart = rtengine::LIM<int>(yStart, 0., height - 1);
     yEnd = rtengine::LIM<int>(yEnd, yStart, height - 1);
-
+    
     std::vector<int> nodeX;
 
     //  Loop through the rows of the image.
@@ -655,7 +657,7 @@ float polyFill(float **buffer, int width, int height, const std::vector<CoordD> 
         }
     }
 
-    return float(rtengine::min<int>(xEnd - xStart, yEnd - yStart));
+    return ret;//float(rtengine::min<int>(xEnd - xStart, yEnd - yStart));
 }
 
 } // namespace rtengine
