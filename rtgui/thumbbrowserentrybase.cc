@@ -215,6 +215,7 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
     Gdk::RGBA texts = parent->getSelectedTextColor();
     Gdk::RGBA bgn = parent->getNormalBgColor();
     Gdk::RGBA bgs = parent->getSelectedBgColor();
+    Gdk::RGBA bgp = parent->getPrelightBgColor();
 
     // clear area, draw frames and background
     style->render_background(cc, 0., 0., exp_width, exp_height);
@@ -229,7 +230,7 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
 
     cc->set_antialias(Cairo::ANTIALIAS_SUBPIXEL);
 
-    drawFrame (cc, bgs, bgn);
+    drawFrame(cc, selected ? bgs : bgp, bgn);
 
     // calculate height of button set
     int bsHeight = 0;
@@ -566,7 +567,7 @@ void ThumbBrowserEntryBase::resize (int h)
     drawable = true;
 }
 
-void ThumbBrowserEntryBase::drawFrame (Cairo::RefPtr<Cairo::Context> cc, const Gdk::RGBA& bg, const Gdk::RGBA& fg)
+void ThumbBrowserEntryBase::drawFrame(Cairo::RefPtr<Cairo::Context> cc, const Gdk::RGBA& bg, const Gdk::RGBA& fg)
 {
 
     int radius = 4;
@@ -579,12 +580,12 @@ void ThumbBrowserEntryBase::drawFrame (Cairo::RefPtr<Cairo::Context> cc, const G
         cc->arc (radius, radius, radius, rtengine::RT_PI, -rtengine::RT_PI / 2);
         cc->close_path ();
 
-        if (selected) {
-            cc->set_source_rgb (bg.get_red(), bg.get_green(), bg.get_blue());
+        if (selected || options.show_thumbnails_frame) {
+            cc->set_source_rgba(bg.get_red(), bg.get_green(), bg.get_blue(), bg.get_alpha());
             cc->fill_preserve ();
-        } else if (options.show_thumbnails_frame) {
-            cc->set_source_rgba (bg.get_red(), bg.get_green(), bg.get_blue(), 0.3);
-            cc->fill_preserve ();
+        // } else if (options.show_thumbnails_frame) {
+        //     cc->set_source_rgba (bg.get_red(), bg.get_green(), bg.get_blue(), 0.3);
+        //     cc->fill_preserve ();
         }
 
         cc->set_source_rgb (bg.get_red() * 2 / 3, bg.get_green() * 2 / 3, bg.get_blue() * 2 / 3);

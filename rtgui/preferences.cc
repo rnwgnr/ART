@@ -1326,6 +1326,10 @@ void Preferences::parseThemeDir (Glib::ustring dirname)
                 }
             }
 
+            if (keepIt && sname[0] == '_') { // filter out file names starting with _ (these are implementation files...)
+                keepIt = false;
+            }
+
             if (keepIt) {
                 themeFNames.push_back (ThemeFilename (matchInfo.fetch (1), sname.substr (0, sname.size() - 4)));
             }

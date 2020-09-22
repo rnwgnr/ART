@@ -27,6 +27,7 @@
 @define-color highlighted-text-color rgb(210,210,210);  /*** Highlighted text color * Default: rgb(210,210,210) ***/
 
 @define-color bg-image rgb(75,75,75);                   /*** Image area & File Browser background * Default: rgb(70,70,70) ***/
+@define-color bg-image2 rgba(75,75,75,0.3);             /*** Thumbnail background * Default: rgb(70,70,70,0.3) ***/
 
 @define-color accent-color2 rgb(35,99,166);             /*** Scale, Progressbar, Scrollbar, Tabs * Default: rgb(35,99,166) ***/
 @define-color accent-color4 rgb(115,115,115);           /*** Slider knob * Default: rgb(115,115,115) ***/
@@ -1044,6 +1045,9 @@ window.csd:not(.fullscreen) #MainNotebook > header.top {
 #FileCatalog:selected {
     background-color: @accent-color3;
     color: @text-hl-color3;
+}
+#FileCatalog:hover {
+    background-color: @bg-image2;
 }
 
 /*?win*/
@@ -2118,3 +2122,4 @@ headerbar button.titlebutton.close:active{
     box-shadow: inset 0 0.083333333333333333em rgba(242, 242, 242, 0.4);
 }
 /*** end ***************************************************************************************/
+

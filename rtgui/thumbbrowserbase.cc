@@ -745,6 +745,7 @@ void ThumbBrowserBase::Internal::on_style_updated()
     texts = style->get_color(Gtk::STATE_FLAG_SELECTED);
     bgn = style->get_background_color(Gtk::STATE_FLAG_NORMAL);
     bgs = style->get_background_color(Gtk::STATE_FLAG_SELECTED);
+    bgp = style->get_background_color(Gtk::STATE_FLAG_PRELIGHT);
 }
 
 void ThumbBrowserBase::Internal::on_realize()

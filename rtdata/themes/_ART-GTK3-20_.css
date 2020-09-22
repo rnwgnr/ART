@@ -106,3 +106,7 @@ dialog frame > border {
 #MetaPanelNotebook treeview {
     padding: 0px;
 }
+
+#FileCatalog:hover {
+    background-color: rgba(86, 86, 86, 0.3);
+}
