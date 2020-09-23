@@ -17,6 +17,7 @@ Other contributors (profiles, ideas, mockups, testing, forum activity, translati
   Sebastien Guyader
   Paul Matthijsse
   Serge Moreau
+  Barry Thomas
 
 RawTherapee
 ===========
