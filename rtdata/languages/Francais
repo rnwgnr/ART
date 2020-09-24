@@ -1329,6 +1329,7 @@ PREFERENCES_TAB_GENERAL;Général
 PREFERENCES_TAB_IMPROC;Traitement de l'image
 PREFERENCES_TAB_PERFORMANCE;Performance
 PREFERENCES_TAB_SOUND;Sons
+PREFERENCES_THUMB_FRAMES;Toujours tracer un cadre autour des vignettes
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Prévisualisation de l'image JPEG incluse
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Image à montrer
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW;Rendu raw rapide
@@ -1784,6 +1785,7 @@ TP_LABMASKS_DRAWNMASK_HARDNESS;Dureté
 TP_LABMASKS_DRAWNMASK_INFO;%1 trait(s)
 TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Intersection du masque au pinceau avec les autres masques
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Ajouter le masque au pinceau au dessus des autres masques
+TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Ajouter le masque au pinceau au dessus des autres masques, mais seulement à l'intérieur de la zone active du masque
 TP_LABMASKS_PARAMETRIC;Masque paramétrique
 TP_LENSGEOM_AUTOCROP;Rognage auto
 TP_LENSGEOM_FILL;Remplir automatiquement
