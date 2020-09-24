@@ -420,7 +420,7 @@ ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
 
     Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
     vb->pack_start(*reset, false, false, 4);
-    scale = Gtk::manage(new Gtk::VScale(0.5, 2.5, 0.01));
+    scale = Gtk::manage(new Gtk::VScale(0.2, 2.5, 0.01));
     scale->set_inverted(true);
     scale->set_value(1.0);
     scale->set_draw_value(false);
