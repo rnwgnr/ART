@@ -572,26 +572,19 @@ void ThumbBrowserEntryBase::drawFrame(Cairo::RefPtr<Cairo::Context> cc, const Gd
 
     int radius = 4;
 
-    if (selected || framed || options.show_thumbnails_frame) {
-        cc->move_to (radius, 0);
-        cc->arc (exp_width - 1 - radius, radius, radius, -rtengine::RT_PI / 2, 0);
-        cc->arc (exp_width - 1 - radius, exp_height - 1 - radius, radius, 0, rtengine::RT_PI / 2);
-        cc->arc (radius, exp_height - 1 - radius, radius, rtengine::RT_PI / 2, rtengine::RT_PI);
-        cc->arc (radius, radius, radius, rtengine::RT_PI, -rtengine::RT_PI / 2);
-        cc->close_path ();
+    cc->move_to (radius, 0);
+    cc->arc (exp_width - 1 - radius, radius, radius, -rtengine::RT_PI / 2, 0);
+    cc->arc (exp_width - 1 - radius, exp_height - 1 - radius, radius, 0, rtengine::RT_PI / 2);
+    cc->arc (radius, exp_height - 1 - radius, radius, rtengine::RT_PI / 2, rtengine::RT_PI);
+    cc->arc (radius, radius, radius, rtengine::RT_PI, -rtengine::RT_PI / 2);
+    cc->close_path ();
 
-        if (selected || options.show_thumbnails_frame) {
-            cc->set_source_rgba(bg.get_red(), bg.get_green(), bg.get_blue(), bg.get_alpha());
-            cc->fill_preserve ();
-        // } else if (options.show_thumbnails_frame) {
-        //     cc->set_source_rgba (bg.get_red(), bg.get_green(), bg.get_blue(), 0.3);
-        //     cc->fill_preserve ();
-        }
+    cc->set_source_rgba(bg.get_red(), bg.get_green(), bg.get_blue(), bg.get_alpha());
+    cc->fill_preserve ();
 
-        cc->set_source_rgb (bg.get_red() * 2 / 3, bg.get_green() * 2 / 3, bg.get_blue() * 2 / 3);
-        cc->set_line_width (1.0);
-        cc->stroke ();
-    }
+    cc->set_source_rgb (bg.get_red() * 2 / 3, bg.get_green() * 2 / 3, bg.get_blue() * 2 / 3);
+    cc->set_line_width (1.0);
+    cc->stroke ();
 
     if (framed) {
         cc->move_to (+2 + 0.5 + radius, +2 + 0.5);
