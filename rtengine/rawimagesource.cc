@@ -1743,6 +1743,14 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
     int BS = raw.ff_BlurRadius;
     BS += BS & 1;
 
+    float ffblack[4];
+    {
+        auto tmpfilters = riFlatFile->get_filters();
+        riFlatFile->set_filters(riFlatFile->prefilters); // we need 4 blacks for bayer processing
+        riFlatFile->get_colorsCoeff(nullptr, nullptr, ffblack, false);
+        riFlatFile->set_filters(tmpfilters);
+    }    
+
     //function call to cfabloxblur
     if (raw.ff_BlurType == RAWParams::getFlatFieldBlurTypeString(RAWParams::FlatFieldBlurType::V)) {
         cfaboxblur(riFlatFile, cfablur, 2 * BS, 0);
@@ -1765,7 +1773,7 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
                 int col = 2 * (W >> 2) + n;
                 int c  = ri->get_colors() != 1 ? FC(row, col) : 0;
                 int c4 = ri->get_colors() != 1 ? (( c == 1 && !(row & 1) ) ? 3 : c) : 0;
-                refcolor[m][n] = max(0.0f, cfablur[row * W + col] - black[c4]);
+                refcolor[m][n] = max(0.0f, cfablur[row * W + col] - ffblack[c4]);
             }
 
         float limitFactor = 1.f;
@@ -1787,7 +1795,7 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
 
                         for (int row = 0; row < H - m; row += 2) {
                             for (int col = 0; col < W - n; col += 2) {
-                                float tempval = (rawData[row + m][col + n] - black[c4]) * ( refcolor[m][n] / max(1e-5f, cfablur[(row + m) * W + col + n] - black[c4]) );
+                                float tempval = (rawData[row + m][col + n] - black[c4]) * ( refcolor[m][n] / max(1e-5f, cfablur[(row + m) * W + col + n] - ffblack[c4]) );
 
                                 if(tempval > maxvalthr) {
                                     maxvalthr = tempval;
@@ -1841,12 +1849,18 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
         constexpr float minValue = 1.f; // if the pixel value in the flat field is less or equal this value, no correction will be applied.
 
 #ifdef __SSE2__
-        vfloat refcolorv[2] = {_mm_set_ps(refcolor[0][1], refcolor[0][0], refcolor[0][1], refcolor[0][0]),
-                               _mm_set_ps(refcolor[1][1], refcolor[1][0], refcolor[1][1], refcolor[1][0])
-                              };
-        vfloat blackv[2] = {_mm_set_ps(black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
-                            _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
-                           };
+        vfloat refcolorv[2] = {
+            _mm_set_ps(refcolor[0][1], refcolor[0][0], refcolor[0][1], refcolor[0][0]),
+            _mm_set_ps(refcolor[1][1], refcolor[1][0], refcolor[1][1], refcolor[1][0])
+        };
+        vfloat blackv[2] = {
+            _mm_set_ps(black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
+            _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
+        };
+        vfloat ffblackv[2] = {
+            _mm_set_ps(ffblack[c4[0][1]], ffblack[c4[0][0]], ffblack[c4[0][1]], ffblack[c4[0][0]]),
+            _mm_set_ps(ffblack[c4[1][1]], ffblack[c4[1][0]], ffblack[c4[1][1]], ffblack[c4[1][0]])
+        };
 
         vfloat onev = F2V(1.f);
         vfloat minValuev = F2V(minValue);
@@ -1859,10 +1873,11 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
             int col = 0;
 #ifdef __SSE2__
             vfloat rowBlackv = blackv[row & 1];
+            vfloat ffrowBlackv = ffblackv[row & 1];
             vfloat rowRefcolorv = refcolorv[row & 1];
 
             for (; col < W - 3; col += 4) {
-                vfloat blurv = LVFU(cfablur[(row) * W + col]) - rowBlackv;
+                vfloat blurv = LVFU(cfablur[(row) * W + col]) - ffrowBlackv;
                 vfloat vignettecorrv = rowRefcolorv / blurv;
                 vignettecorrv = vself(vmaskf_le(blurv, minValuev), onev, vignettecorrv);
                 vfloat valv = LVFU(rawData[row][col]);
@@ -1873,7 +1888,7 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
 #endif
 
             for (; col < W; col ++) {
-                float blur = cfablur[(row) * W + col] - black[c4[row & 1][col & 1]];
+                float blur = cfablur[(row) * W + col] - ffblack[c4[row & 1][col & 1]];
                 float vignettecorr = blur <= minValue ? 1.f : refcolor[row & 1][col & 1] / blur;
                 rawData[row][col] = (rawData[row][col] - black[c4[row & 1][col & 1]]) * vignettecorr + black[c4[row & 1][col & 1]];
             }
