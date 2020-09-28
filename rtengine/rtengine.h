@@ -35,6 +35,8 @@
 #include "settings.h"
 #include "LUT.h"
 #include "tweakoperator.h"
+#include "gainmap.h"
+
 /**
  * @file
  * This file contains the main functionality of the RawTherapee engine.
@@ -131,6 +133,7 @@ public:
 
     virtual Glib::ustring getFileName() const = 0;
     virtual int getRating() const = 0;
+    virtual std::vector<GainMap> getGainMaps() const = 0;
 };
 
 /** This listener interface is used to indicate the progress of time consuming operations */

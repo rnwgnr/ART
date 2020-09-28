@@ -26,6 +26,7 @@
 
 #include "dcraw.h"
 #include "imageformat.h"
+#include "gainmap.h"
 
 namespace rtengine {
 
@@ -67,11 +68,10 @@ protected:
         return is_foveon;
     }
 
-    void apply_gain_map(); // in rawimage_gainmap.cc
-
     std::vector<std::array<int, 4>> raw_optical_black_med_;
 
 public:
+    bool has_gain_map(std::vector<Exiv2::byte> *out_buf) const;
 
     static void initCameraConstants(Glib::ustring baseDir);
     std::string get_filename() const

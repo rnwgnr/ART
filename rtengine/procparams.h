@@ -1440,6 +1440,7 @@ struct RAWParams {
     Glib::ustring ff_BlurType;
     bool ff_AutoClipControl;
     int ff_clipControl;
+    bool ff_embedded;
 
     bool ca_autocorrect;
     bool ca_avoidcolourshift;

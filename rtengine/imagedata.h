@@ -28,6 +28,7 @@
 #include "procparams.h"
 #include "rtengine.h"
 #include "metadata.h"
+#include "gainmap.h"
 
 namespace rtengine
 {
@@ -52,6 +53,7 @@ private:
     bool isPixelShift;
     bool isHDR;
     int rating_;
+    std::vector<GainMap> gain_maps_;
     
 public:
     FramesData (const Glib::ustring& fname);
@@ -79,8 +81,14 @@ public:
     std::string getOrientation() const override;
     Glib::ustring getFileName() const override;
     int getRating() const override;
+    std::vector<GainMap> getGainMaps() const override { return gain_maps_; }
 
     void fillBasicTags(Exiv2::ExifData &exif) const;
+
+    void setGainMaps(const std::vector<GainMap> &m)
+    {
+        gain_maps_ = m;
+    }
 };
 
 

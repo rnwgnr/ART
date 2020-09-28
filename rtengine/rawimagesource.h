@@ -303,6 +303,8 @@ protected:
     bool getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const FilmNegativeParams& currentParams, std::array<float, 3>& newExps) override;
     bool getImageSpotValues(Coord2D spot, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& rawValues) override;
 
+    void apply_gain_map(unsigned short black[4], std::vector<GainMap> maps);
+
 public:
     float get_pre_mul(int c) const { return ri ? ri->get_pre_mul(c) : 1.f; }
 };

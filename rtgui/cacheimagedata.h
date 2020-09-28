@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -16,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _CACHEIMAGEDATA_
-#define _CACHEIMAGEDATA_
+#pragma once
 
 #include <glibmm.h>
 #include "options.h"
@@ -108,5 +108,6 @@ public:
     std::string getImageType() const override { return isPixelShift ? "PS" : isHDR ? "HDR" : "STD"; }
     rtengine::IIOSampleFormat getSampleFormat() const override { return sampleFormat; }
     int getRating() const override { return rating; }
+    std::vector<rtengine::GainMap> getGainMaps() const override
+    { return std::vector<rtengine::GainMap>(); }
 };
-#endif

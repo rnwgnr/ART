@@ -18,27 +18,36 @@
  *  along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rawimage.h"
-#include "gainmap.h"
+#pragma once
+
+#include <exiv2/exiv2.hpp>
+#include <vector>
 
 namespace rtengine {
 
-bool RawImage::has_gain_map(std::vector<Exiv2::byte> *out_buf) const
-{
-    if (!(isBayer() && DNGVERSION() && RT_OpcodeList2_len > 0)) {
-        return false;
-    }
-    
-    std::vector<Exiv2::byte> buf(RT_OpcodeList2_len);
-    fseek(ifp, RT_OpcodeList2_start, SEEK_SET);
-    if (fread(&buf[0], 1, RT_OpcodeList2_len, ifp) != RT_OpcodeList2_len) {
-        return false;
-    }
+struct GainMap {
+    uint32_t top;
+    uint32_t left;
+    uint32_t bottom;
+    uint32_t right;
+    uint32_t plane;
+    uint32_t planes;
+    uint32_t row_pitch;
+    uint32_t col_pitch;
+    uint32_t map_points_v;
+    uint32_t map_points_h;
+    double map_spacing_v;
+    double map_spacing_h;
+    double map_origin_v;
+    double map_origin_h;
+    uint32_t map_planes;
+    std::vector<float> map_gain;
 
-    if (out_buf) {
-        out_buf->swap(buf);
-    }
-    return true;
-}
+    GainMap() = default;
+
+    std::string to_str() const;
+    static std::vector<GainMap> read(const std::vector<Exiv2::byte> &buf);
+};
+
 
 } // namespace rtengine

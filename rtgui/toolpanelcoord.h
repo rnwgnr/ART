@@ -306,6 +306,7 @@ public:
     //FFProvider interface
     rtengine::RawImage* getFF() override;
     Glib::ustring GetCurrentImageFilePath() override;
+    bool hasEmbeddedFF() override;
 
     // FilmNegProvider interface
     bool getFilmNegativeExponents(rtengine::Coord spotA, rtengine::Coord spotB, std::array<float, 3>& newExps) override;

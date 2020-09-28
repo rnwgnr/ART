@@ -1003,6 +1003,15 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
     if (errCode) {
         return errCode;
     }
+
+    std::vector<GainMap> gain_maps;
+    {
+        std::vector<Exiv2::byte> gainmap_buf;
+        if (ri->has_gain_map(&gainmap_buf)) {
+            gain_maps = GainMap::read(gainmap_buf);
+        }
+    }
+    
     numFrames = firstFrameOnly ? (numFrames < 7 ? 1 : ri->getFrameCount()) : ri->getFrameCount();
 
     errCode = 0;
@@ -1205,6 +1214,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
     // Load complete Exif information
     idata = new FramesData (fname);
     idata->setDCRawFrameCount (numFrames);
+    idata->setGainMaps(gain_maps);
 
     green(W, H);
     red(W, H);
@@ -1304,6 +1314,9 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
             }
         } else {
             rif = ffm.searchFlatField( idata->getMake(), idata->getModel(), idata->getLens(), idata->getFocalLen(), idata->getFNumber(), idata->getDateTimeAsTS());
+        }
+        if (raw.ff_embedded && !idata->getGainMaps().empty()) {
+            rif = nullptr;
         }
     }
 
@@ -2126,6 +2139,10 @@ void RawImageSource::copyOriginalPixels(const RAWParams &raw, RawImage *src, Raw
                 }
             }
         }
+    }
+
+    if (raw.enable_flatfield && raw.ff_embedded) {
+        apply_gain_map(black, idata->getGainMaps());
     }
 }
 

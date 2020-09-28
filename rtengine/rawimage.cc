@@ -546,9 +546,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         if (raw_image) {
             unsigned raw_filters = filters;
             
-            if (apply_corrections) {
-                apply_gain_map();
-            }
+            // if (apply_corrections) {
+            //     apply_gain_map();
+            // }
             if (cc && cc->has_rawCrop()) {
                 int lm, tm, w, h;
                 cc->get_rawCrop(lm, tm, w, h);

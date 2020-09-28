@@ -864,6 +864,21 @@ Glib::ustring ToolPanelCoordinator::GetCurrentImageFilePath()
     return ipc->getInitialImage()->getFileName();
 }
 
+
+bool ToolPanelCoordinator::hasEmbeddedFF()
+{
+    if (ipc) {
+        const rtengine::FramesMetaData *imd = ipc->getInitialImage()->getMetaData();
+
+        if (imd) {
+            auto gm = imd->getGainMaps();
+            return !gm.empty();
+        }
+    }
+    return false;
+}
+
+
 void ToolPanelCoordinator::straightenRequested ()
 {
 

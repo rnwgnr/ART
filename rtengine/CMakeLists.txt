@@ -156,6 +156,7 @@ set(RTENGINESOURCEFILES
     rawimage_gainmap.cc
     subprocess.cc
     bayer_bilinear_demosaic.cc
+    gainmap.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)

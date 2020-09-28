@@ -2865,6 +2865,7 @@ RAWParams::RAWParams() :
     ff_BlurType(getFlatFieldBlurTypeString(FlatFieldBlurType::AREA)),
     ff_AutoClipControl(false),
     ff_clipControl(0),
+    ff_embedded(false),
     ca_autocorrect(false),
     ca_avoidcolourshift(true),
     caautoiterations(2),
@@ -2895,6 +2896,7 @@ bool RAWParams::operator ==(const RAWParams& other) const
         && ff_BlurType == other.ff_BlurType
         && ff_AutoClipControl == other.ff_AutoClipControl
         && ff_clipControl == other.ff_clipControl
+        && ff_embedded == other.ff_embedded
         && ca_autocorrect == other.ca_autocorrect
         && ca_avoidcolourshift == other.ca_avoidcolourshift
         && caautoiterations == other.caautoiterations
@@ -3742,6 +3744,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("RAW", "FlatFieldBlurType", raw.ff_BlurType, keyFile);
             saveToKeyfile("RAW", "FlatFieldAutoClipControl", raw.ff_AutoClipControl, keyFile);
             saveToKeyfile("RAW", "FlatFieldClipControl", raw.ff_clipControl, keyFile);
+            saveToKeyfile("RAW", "FlatFieldUseEmbedded", raw.ff_embedded, keyFile);
         }
         if (RELEVANT_(rawCA)) {
             saveToKeyfile("RAW", "CAEnabled", raw.enable_ca, keyFile);
@@ -5029,6 +5032,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 } else {
                     assignFromKeyfile(keyFile, "RAW", "FlatFieldClipControl", raw.ff_clipControl);
                 }
+                assignFromKeyfile(keyFile, "RAW", "FlatFieldUseEmbedded", raw.ff_embedded);
             }
 
             if (RELEVANT_(rawCA)) {

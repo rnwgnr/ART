@@ -796,6 +796,7 @@ HISTORY_MSG_EXPOSURE_BLACK;Exposure - Black point
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Negative
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base color
 HISTORY_MSG_FILMNEGATIVE_VALUES;Film negative values
+HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field embedded
 HISTORY_MSG_GRAIN_ENABLED;Film Grain
 HISTORY_MSG_GRAIN_ISO;Film Grain - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Film Grain - Strength
@@ -1650,6 +1651,7 @@ TP_FLATFIELD_BT_VERTHORIZ;Vertical + Horizontal
 TP_FLATFIELD_BT_VERTICAL;Vertical
 TP_FLATFIELD_CLIPCONTROL;Clip control
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;Clip control avoids clipped highlights caused by applying the flat field. If there are already clipped highlights before applying the flat field, clip control can lead to color cast.
+TP_FLATFIELD_EMBEDDED;Embedded in metadata
 TP_FLATFIELD_LABEL;Flat-Field
 TP_GENERAL_11SCALE_TOOLTIP;The effects of this tool are only visible or only accurate at a preview scale of 1:1.
 TP_GENERAL_RESET_DEFAULT;Reset to default
