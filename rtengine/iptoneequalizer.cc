@@ -151,8 +151,9 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
         epsilon = base_epsilon;
         rtengine::guidedFilter(Y2, Y, Y, radius, epsilon, multithread);
 
-        if (pp.regularization > 1) {
-            rtengine::guidedFilter(Y2, Y, Y, radius * (pp.regularization - 1), epsilon / 100, multithread);
+        int reg = 6 - std::min(pp.regularization, 5);
+        if (reg > 1) {
+            rtengine::guidedFilter(Y2, Y, Y, radius * (reg - 1), epsilon / 100, multithread);
         }
     }
     

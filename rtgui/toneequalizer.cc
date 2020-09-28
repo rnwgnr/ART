@@ -46,7 +46,7 @@ ToneEqualizer::ToneEqualizer(): FoldableToolPanel(this, "toneequalizer", M("TP_T
         bands[i]->showIcons(false);
     }
     pack_start(*Gtk::manage(new Gtk::HSeparator()));
-    regularization = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_DETAIL"), -5, 5, 1, 0));
+    regularization = Gtk::manage(new Adjuster(M("TP_TONE_EQUALIZER_DETAIL"), -5, 5, 1, 5));
     regularization->setAdjusterListener(this);
     pack_start(*regularization);
     show_colormap = Gtk::manage(new Gtk::CheckButton(M("TP_TONE_EQUALIZER_SHOW_COLOR_MAP")));
