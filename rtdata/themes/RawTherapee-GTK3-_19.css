@@ -523,3 +523,7 @@ GtkToggleButton.button.text-button:checked {
 GtkToggleButton.button.text-button:hover:checked {
     background-image: linear-gradient(to bottom, rgba(48,48,48,.3), rgba(0,0,0,.3));
 }
+
+#FileCatalog:hover {
+    background-color: rgb(60,60,60);
+}
