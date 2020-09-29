@@ -273,6 +273,10 @@ void LocalContrast::enabledChanged ()
             listener->panelChanged(EvLocalContrastEnabled, M("GENERAL_DISABLED"));
         }
     }
+
+    if (!getEnabled()) {
+        labMasks->switchOffEditMode();
+    }
 }
 
 

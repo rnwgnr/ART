@@ -313,6 +313,10 @@ void Smoothing::enabledChanged ()
             listener->panelChanged(EvEnabled, M("GENERAL_DISABLED"));
         }
     }
+
+    if (!getEnabled()) {
+        labMasks->switchOffEditMode();
+    }
 }
 
 

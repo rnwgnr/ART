@@ -484,6 +484,10 @@ void ColorCorrection::enabledChanged ()
         box_rgb->set_sensitive(getEnabled());
         box_hsl->set_sensitive(getEnabled());
     }
+
+    if (!getEnabled()) {
+        labMasks->switchOffEditMode();
+    }
 }
 
 

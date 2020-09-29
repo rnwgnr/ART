@@ -1600,6 +1600,9 @@ bool LabMasksPanel::onKnotRoundnessUpdated()
 
 void LabMasksPanel::switchOffEditMode()
 {
+    static_cast<DeltaEArea *>(deltaEColor)->switchOffEditMode();
+    static_cast<DrawnMaskPanel *>(drawnMask)->switchOffEditMode();
+    
     areaMaskToggle->set_active(false);
     AreaMask::switchOffEditMode();
 }
@@ -2441,3 +2444,4 @@ void LabMasksPanel::onMaskExpanded(GdkEventButton *evt, MyExpander *exp)
         }
     }
 }
+

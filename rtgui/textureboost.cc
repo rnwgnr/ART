@@ -265,6 +265,10 @@ void TextureBoost::enabledChanged ()
             listener->panelChanged (EvEPDEnabled, M("GENERAL_DISABLED"));
         }
     }
+
+    if (!getEnabled()) {
+        labMasks->switchOffEditMode();
+    }
 }
 
 

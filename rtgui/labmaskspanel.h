@@ -137,7 +137,7 @@ public:
     void adjusterChanged(ThresholdAdjuster *a, int newBottom, int newTop) override {}
     void adjusterChanged(ThresholdAdjuster *a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight) override {}
     void adjusterChanged2(ThresholdAdjuster *a, int newBottomL, int newTopL, int newBottomR, int newTopR) override {}
-    
+
 private:
     void on_map() override;
     void onMaskFold(GdkEventButton *evt);
