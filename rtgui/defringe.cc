@@ -26,7 +26,7 @@ using namespace rtengine::procparams;
 
 Defringe::Defringe () : FoldableToolPanel(this, "defringe", M("TP_DEFRINGE_LABEL"), true, true, true)
 {
-    EvToolReset.set_action(DEFRINGE);
+    EvToolReset.set_action(DETAIL);
 
     std::vector<GradientMilestone> bottomMilestones;
     float R, G, B;

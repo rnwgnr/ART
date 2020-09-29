@@ -233,7 +233,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC,         // EvDemosaicLMMSEIter
     LUMINANCECURVE,   // EvCATbadpix
     LUMINANCECURVE,   // EvCATAutoadap
-    DEFRINGE,         // EvPFCurve
+    DETAIL,           // EvPFCurve
     WHITEBALANCE,     // EvWBequal
     WHITEBALANCE,     // EvWBequalbo
     LUMINANCECURVE,   // EvGradientDegree
