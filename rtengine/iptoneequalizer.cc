@@ -124,14 +124,14 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
         }
     }
 
-    int detail = LIM(pp.regularization + 5, 0, 5);
+    const int detail = pp.regularization > 0 ? 5 : 0;//LIM(pp.regularization + 5, 0, 5);
     int radius = float(detail) / scale + 0.5f;
     float epsilon = 0.01f + 0.002f * max(detail - 3, 0);
     if (radius > 0) {
         rtengine::guidedFilterLog(10.f, Y, radius, epsilon, multithread);
     }
 
-    if (pp.regularization > 0) {
+    if (pp.regularization > 1) {
         array2D<float> Y2(W, H);
         constexpr float base_epsilon = 0.004f;
         constexpr float base_posterization = 5.f;
@@ -151,7 +151,7 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
         epsilon = base_epsilon;
         rtengine::guidedFilter(Y2, Y, Y, radius, epsilon, multithread);
 
-        int reg = 6 - std::min(pp.regularization, 5);
+        int reg = 5 - std::min(pp.regularization, 4);
         if (reg > 1) {
             rtengine::guidedFilter(Y2, Y, Y, radius * (reg - 1), epsilon / 100, multithread);
         }

@@ -1914,7 +1914,7 @@ bool FattalToneMappingParams::operator !=(const FattalToneMappingParams& other) 
 ToneEqualizerParams::ToneEqualizerParams():
     enabled(false),
     bands{0,0,0,0,0},
-    regularization(5),
+    regularization(4),
     show_colormap(false)
 {
 }
@@ -4468,7 +4468,12 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else if (ppVersion >= 1002) {
                 if (assignFromKeyfile(keyFile, "ToneEqualizer", "Regularization", toneEqualizer.regularization)) {
                     if (toneEqualizer.regularization > 0) {
-                        toneEqualizer.regularization = 6 - std::min(toneEqualizer.regularization, 5);
+                        //toneEqualizer.regularization = 6 - std::min(toneEqualizer.regularization, 5);
+                        toneEqualizer.regularization = 4;
+                    } else if (toneEqualizer.regularization == -5) {
+                        toneEqualizer.regularization = 0;
+                    } else {
+                        toneEqualizer.regularization = 1;
                     }
                 }
             } else {
