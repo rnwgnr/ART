@@ -485,7 +485,7 @@ void ColorCorrection::enabledChanged ()
         box_hsl->set_sensitive(getEnabled());
     }
 
-    if (!getEnabled()) {
+    if (listener && !getEnabled()) {
         labMasks->switchOffEditMode();
     }
 }

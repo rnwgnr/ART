@@ -266,7 +266,7 @@ void TextureBoost::enabledChanged ()
         }
     }
 
-    if (!getEnabled()) {
+    if (listener && !getEnabled()) {
         labMasks->switchOffEditMode();
     }
 }
