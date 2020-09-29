@@ -76,10 +76,22 @@ std::string decompress(const std::vector<char> &src)
     {
         auto stream = Gio::ConverterOutputStream::create(s, c);
         stream->set_close_base_stream(true);
-        gsize n;
-        if (!stream->write_all(&(src[0]), src.size(), n)) {
-            return "";
+        constexpr gsize chunk = 512;
+        size_t i = 0;
+        while (i < src.size()) {
+            gsize count = std::min(src.size() - i, chunk);
+            auto n = stream->write(&(src[i]), count);
+            if (n < 0) {
+                return "";
+            } else if (n == 0) {
+                break;
+            }
+            i += n;
         }
+        // gsize n;
+        // if (!stream->write_all(&(src[0]), src.size(), n)) {
+        //     return "";
+        // }
     }
     char *data = static_cast<char *>(s->get_data());    
     for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
