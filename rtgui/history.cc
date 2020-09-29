@@ -59,7 +59,7 @@ History::History (bool bookmarkSupport) :
     valuecrt->property_ellipsize() = Pango::ELLIPSIZE_END;
     Gtk::TreeView::Column *hviewcol = Gtk::manage (new Gtk::TreeView::Column (""));
     hviewcol->pack_start (*changecrt, true);
-    hviewcol->add_attribute (changecrt->property_markup (), historyColumns.text);
+    hviewcol->add_attribute (changecrt->property_text()/*markup ()*/, historyColumns.text);
     hviewcol->set_expand(true);
     hviewcol->set_resizable (true);
     hviewcol->set_fixed_width(35);
@@ -68,7 +68,7 @@ History::History (bool bookmarkSupport) :
 
     Gtk::TreeView::Column *hviewcol2 = Gtk::manage (new Gtk::TreeView::Column (""));
     hviewcol2->pack_start (*valuecrt, true);
-    hviewcol2->add_attribute (valuecrt->property_markup (), historyColumns.value);
+    hviewcol2->add_attribute (valuecrt->property_text()/*markup ()*/, historyColumns.value);
     hviewcol2->set_expand(true);
     hviewcol2->set_resizable(true);
     hviewcol2->set_fixed_width(35);
@@ -264,8 +264,8 @@ void History::procParamsChanged(
     // if there is no last item or its chev!=ev, create a new one
     if (size == 0 || !row || row[historyColumns.chev] != ev || ev == EvProfileChanged) {
         Gtk::TreeModel::Row newrow = *(historyModel->append());
-        newrow[historyColumns.text] = escapeHtmlChars(text);
-        newrow[historyColumns.value] = g_markup_escape_text(descr.c_str(), -1);
+        newrow[historyColumns.text] = text;//escapeHtmlChars(text);
+        newrow[historyColumns.value] = descr;//g_markup_escape_text(descr.c_str(), -1);
         newrow[historyColumns.chev] = ev;
         newrow[historyColumns.params] = *params;
         //newrow[historyColumns.paramsEdited] = paramsEdited ? *paramsEdited : defParamsEdited;
