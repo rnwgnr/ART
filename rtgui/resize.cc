@@ -725,7 +725,7 @@ void Resize::updateInfoLabels()
         size_info_1->set_text(Glib::ustring::compose("%1 px x %2 px", std::round(iw), std::round(ih)));
         size_info_2->set_text(Glib::ustring::compose("%1 in x %2 in", Glib::ustring::format(std::setprecision(3), w->get_value() / IN_TO_CM), Glib::ustring::format(std::setprecision(3), h->get_value() / IN_TO_CM)));
         break;
-    case ResizeParams::IN:
+    case ResizeParams::INCHES:
         iw = w->get_value() * ppi->get_value();
         ih = h->get_value() * ppi->get_value();
         size_info_1->set_text(Glib::ustring::compose("%1 px x %2 px", std::round(iw), std::round(ih)));
@@ -746,7 +746,7 @@ double Resize::from_px(int p, ResizeParams::Unit u)
     switch (u) {
     case ResizeParams::CM:
         return double(p) / ppi->get_value() * IN_TO_CM;
-    case ResizeParams::IN:
+    case ResizeParams::INCHES:
         return double(p) / ppi->get_value();
     default:
         return p;
@@ -765,7 +765,7 @@ int Resize::to_px(double p, ResizeParams::Unit u)
     switch (u) {
     case ResizeParams::CM:
         return std::round(ppi->get_value() * (p / IN_TO_CM));
-    case ResizeParams::IN:
+    case ResizeParams::INCHES:
         return std::round(ppi->get_value() * p);
     default:
         return p;

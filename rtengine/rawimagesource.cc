@@ -1006,7 +1006,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
 
     std::vector<GainMap> gain_maps;
     {
-        std::vector<Exiv2::byte> gainmap_buf;
+        std::vector<uint8_t> gainmap_buf;
         if (ri->has_gain_map(&gainmap_buf)) {
             gain_maps = GainMap::read(gainmap_buf);
         }

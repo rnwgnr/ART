@@ -1059,7 +1059,7 @@ struct ResizeParams {
     enum Unit {
         PX,
         CM,
-        IN
+        INCHES
     };
     Unit unit;
 

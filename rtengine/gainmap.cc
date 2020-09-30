@@ -20,6 +20,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <exiv2/exiv2.hpp>
 
 #include "gainmap.h"
 #include "rawimage.h"
@@ -39,7 +40,7 @@ struct OutOfBounds: public std::exception {
 };
 
 
-GainMap read_gain_map(const Exiv2::byte *data, size_t limit, size_t idx)
+GainMap read_gain_map(const uint8_t *data, size_t limit, size_t idx)
 {
     GainMap ret;
 
@@ -101,7 +102,7 @@ GainMap read_gain_map(const Exiv2::byte *data, size_t limit, size_t idx)
 }
 
 
-bool check_gain_map(const Exiv2::byte *data, size_t limit,
+bool check_gain_map(const uint8_t *data, size_t limit,
                     size_t &idx, size_t &size)
 {
     if (idx + 16 > limit) {
@@ -117,13 +118,13 @@ bool check_gain_map(const Exiv2::byte *data, size_t limit,
 }
 
 
-std::vector<GainMap> extract_gain_maps(const std::vector<Exiv2::byte> &buf)
+std::vector<GainMap> extract_gain_maps(const std::vector<uint8_t> &buf)
 {
     std::vector<GainMap> ret;
     if (buf.size() < 4) {
         return ret;
     }
-    const Exiv2::byte *data = &buf[0];
+    const uint8_t *data = &buf[0];
     try {
         uint32_t num_entries = Exiv2::getULong(data, Exiv2::bigEndian);
         size_t idx = 4;
@@ -147,7 +148,7 @@ std::vector<GainMap> extract_gain_maps(const std::vector<Exiv2::byte> &buf)
 } // namespace
 
 
-std::vector<GainMap> GainMap::read(const std::vector<Exiv2::byte> &buf)
+std::vector<GainMap> GainMap::read(const std::vector<uint8_t> &buf)
 {
     return extract_gain_maps(buf);
 }

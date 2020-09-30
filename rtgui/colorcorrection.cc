@@ -251,6 +251,9 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     pivot->setLogScale(100, 0.18, true);
     box_combined->pack_start(*pivot);
 
+    sync_rgb_sliders = Gtk::manage(new Gtk::CheckButton(M("TP_COLORCORRECTION_SYNC_SLIDERS")));
+    box_rgb->pack_start(*sync_rgb_sliders, Gtk::PACK_SHRINK, 4);
+    
     for (int c = 0; c < 3; ++c) {
         const char *chan = (c == 0 ? "R" : (c == 1 ? "G" : "B"));
         const char *img = (c == 0 ? "red" : (c == 1 ? "green" : "blue"));
@@ -283,9 +286,6 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         f->add(*vb);
         box_rgb->pack_start(*f);
     }
-
-    sync_rgb_sliders = Gtk::manage(new Gtk::CheckButton(M("TP_COLORCORRECTION_SYNC_SLIDERS")));
-    box_rgb->pack_start(*sync_rgb_sliders, Gtk::PACK_SHRINK, 4);
 
     box_hsl = Gtk::manage(new Gtk::VBox());
     for (int c = 0; c < 3; ++c) {

@@ -2394,7 +2394,7 @@ int ResizeParams::get_width() const
     switch (unit) {
     case PX: return width;
     case CM: return std::round(ppi * (width / 2.54)); 
-    case IN: return std::round(ppi * width);
+    case INCHES: return std::round(ppi * width);
     default:
         assert(false);
         return width;
@@ -2407,7 +2407,7 @@ int ResizeParams::get_height() const
     switch (unit) {
     case PX: return height;
     case CM: return std::round(ppi * (height / 2.54));
-    case IN: return std::round(ppi * height);
+    case INCHES: return std::round(ppi * height);
     default:
         assert(false);
         return height;
@@ -3593,7 +3593,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             const char *u = "px";
             switch (resize.unit) {
             case ResizeParams::CM: u = "cm"; break;
-            case ResizeParams::IN: u = "in"; break;
+            case ResizeParams::INCHES: u = "in"; break;
             default: u = "px"; break;
             }
             saveToKeyfile("Resize", "Unit", Glib::ustring(u), keyFile);
@@ -4646,7 +4646,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 if (u == "cm") {
                     resize.unit = ResizeParams::CM;
                 } else if (u == "in") {
-                    resize.unit = ResizeParams::IN;
+                    resize.unit = ResizeParams::INCHES;
                 } else {
                     resize.unit = ResizeParams::PX;
                 }

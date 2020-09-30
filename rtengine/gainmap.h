@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <exiv2/exiv2.hpp>
+#include <stdint.h>
 #include <vector>
 
 namespace rtengine {
@@ -46,7 +46,7 @@ struct GainMap {
     GainMap() = default;
 
     std::string to_str() const;
-    static std::vector<GainMap> read(const std::vector<Exiv2::byte> &buf);
+    static std::vector<GainMap> read(const std::vector<uint8_t> &buf);
 };
 
 
