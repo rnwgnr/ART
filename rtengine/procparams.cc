@@ -2045,13 +2045,15 @@ bool RotateParams::operator !=(const RotateParams& other) const
 
 DistortionParams::DistortionParams() :
     enabled(false),
-    amount(0.0)
+    amount(0.0),
+    autocompute(false)
 {
 }
 
 bool DistortionParams::operator ==(const DistortionParams& other) const
 {
-    return enabled == other.enabled && amount == other.amount;
+    return enabled == other.enabled && amount == other.amount
+        && autocompute == other.autocompute;
 }
 
 bool DistortionParams::operator !=(const DistortionParams& other) const
@@ -3517,6 +3519,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(distortion)) {
             saveToKeyfile("Distortion", "Enabled", distortion.enabled, keyFile);
             saveToKeyfile("Distortion", "Amount", distortion.amount, keyFile);
+            saveToKeyfile("Distortion", "Auto", distortion.autocompute, keyFile);
         }
 
 // Lens profile
@@ -4545,6 +4548,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
         if (keyFile.has_group("Distortion") && RELEVANT_(distortion)) {
             assignFromKeyfile(keyFile, "Distortion", "Enabled", distortion.enabled);
             assignFromKeyfile(keyFile, "Distortion", "Amount", distortion.amount);
+            assignFromKeyfile(keyFile, "Distortion", "Auto", distortion.autocompute);
         }
 
         if (keyFile.has_group("LensProfile") && RELEVANT_(lensProf)) {

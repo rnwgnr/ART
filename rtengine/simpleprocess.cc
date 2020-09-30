@@ -310,6 +310,10 @@ private:
 
         // perform transform (excepted resizing)
         if (ipf.needsTransform()) {
+            if (params.distortion.enabled && params.distortion.autocompute) {
+                params.distortion.amount = ImProcFunctions::getAutoDistor(imgsrc->getFileName(), 400);
+            }
+            
             Imagefloat *trImg = nullptr;
             if (ipf.needsLuminanceOnly()) {
                 trImg = img;

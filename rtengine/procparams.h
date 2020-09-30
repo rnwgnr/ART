@@ -864,7 +864,8 @@ struct RotateParams {
   */
 struct DistortionParams {
     bool enabled;
-    double  amount;
+    double amount;
+    bool autocompute;
 
     DistortionParams();
 

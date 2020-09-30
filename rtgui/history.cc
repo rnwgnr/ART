@@ -231,15 +231,19 @@ void History::procParamsChanged(
         return;
     }
 
+    // construct formatted list content
+    Glib::ustring text = M(ProcEventMapper::getInstance()->getHistoryMsg(ev));
+    
+    if (text.empty() && descr.empty()) {
+        return;
+    }
+
     selchangehist.block (true);
     selchangebm.block (true);
 
     if (ev == EvPhotoLoaded) {
         initHistory ();
     }
-
-    // construct formatted list content
-    Glib::ustring text = M(ProcEventMapper::getInstance()->getHistoryMsg(ev));
 
     Glib::RefPtr<Gtk::TreeSelection> selection = hTreeView->get_selection();
     Gtk::TreeModel::iterator iter = selection->get_selected();
@@ -262,7 +266,7 @@ void History::procParamsChanged(
     }
 
     // if there is no last item or its chev!=ev, create a new one
-    if (size == 0 || !row || row[historyColumns.chev] != ev || ev == EvProfileChanged) {
+    if (size == 0 || !row || row[historyColumns.chev] != ev  || ev == EvProfileChanged) {
         Gtk::TreeModel::Row newrow = *(historyModel->append());
         newrow[historyColumns.text] = text;//escapeHtmlChars(text);
         newrow[historyColumns.value] = descr;//g_markup_escape_text(descr.c_str(), -1);
