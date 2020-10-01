@@ -205,8 +205,8 @@ void TextureBoost::read(const ProcParams *pp)
     data = pp->textureBoost.regions;
     auto m = pp->textureBoost.labmasks;
     if (data.empty()) {
-        data.emplace_back(rtengine::TextureBoostParams::Region());
-        m.emplace_back(rtengine::Mask());
+        data.emplace_back(rtengine::procparams::TextureBoostParams::Region());
+        m.emplace_back(rtengine::procparams::Mask());
     }
     labMasks->setMasks(m, pp->textureBoost.showMask);
 

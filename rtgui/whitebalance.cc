@@ -19,6 +19,7 @@
 #include "whitebalance.h"
 #include "../rtengine/refreshmap.h"
 #include "eventmapper.h"
+#include "../rtengine/colortemp.h"
 
 #include <iomanip>
 

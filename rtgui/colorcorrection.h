@@ -132,6 +132,6 @@ private:
     Adjuster *lfactor[3];
     ThresholdAdjuster *huesat[3];
 
-    rtengine::ColorCorrectionParams initial_params;
+    rtengine::procparams::ColorCorrectionParams initial_params;
 };
 

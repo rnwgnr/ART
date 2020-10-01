@@ -757,7 +757,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     maskEditorGroup = Gtk::manage(new CurveEditorGroup(options.lastColorToningCurvesDir, "", 0.7));
     maskEditorGroup->setCurveListener(this);
 
-    rtengine::Mask default_params;
+    rtengine::procparams::Mask default_params;
 
     EditUniqueID eh, ec, el, ede;
     cp_->getEditIDs(eh, ec, el, ede);
@@ -1142,7 +1142,7 @@ void LabMasksPanel::maskGet(int idx)
         switch (a->getType()) {
             case Shape::Type::POLYGON:
             {
-                auto poly = static_cast<rtengine::AreaMask::Polygon*>(a.get());
+                auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.get());
                 poly->knots = getPolygon();
                 poly->mode = Shape::Mode(getAreaShapeMode());
             }
@@ -1150,7 +1150,7 @@ void LabMasksPanel::maskGet(int idx)
             case Shape::Type::RECTANGLE:
             default:
             {
-                auto rect = static_cast<rtengine::AreaMask::Rectangle*>(a.get());
+                auto rect = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.get());
                 rect->x = areaMaskX->getValue();
                 rect->y = areaMaskY->getValue();
                 rect->width = areaMaskWidth->getValue();
@@ -1189,7 +1189,6 @@ void LabMasksPanel::onAddPressed()
     listEdited = true;
     selected_ = masks_.size();
     masks_.push_back(rtengine::procparams::Mask());
-//    masks_.back().areaMask.shapes = {std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
     populateList();
     area_shape_index_ = 0;
     maskShow(selected_);
@@ -1385,7 +1384,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         if (area_shape_index_ < r.areaMask.shapes.size()) {
             auto &a = r.areaMask.shapes[area_shape_index_];
             if (a->getType() == Shape::Type::RECTANGLE) {
-                auto rect = static_cast<rtengine::AreaMask::Rectangle*>(a.get());
+                auto rect = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.get());
                 areaMaskX->setValue(rect->x);
                 areaMaskY->setValue(rect->y);
                 areaMaskWidth->setValue(rect->width);
@@ -1395,7 +1394,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
                 setAdjustersVisibility(true);
             }
             else if (a->getType() == Shape::Type::POLYGON) {
-                auto poly = static_cast<rtengine::AreaMask::Polygon*>(a.get());
+                auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.get());
                 setPolygon(poly->knots);
                 setAdjustersVisibility(false);
             }
@@ -1841,7 +1840,7 @@ void LabMasksPanel::onAreaShapeSelectionChanged()
         switch (s->getType()) {
         case Shape::Type::RECTANGLE:
         {
-            auto rect = static_cast<rtengine::AreaMask::Rectangle*>(s.get());
+            auto rect = static_cast<rtengine::procparams::AreaMask::Rectangle*>(s.get());
             updateRectangleAreaMask(false);
             rect->x = center_x_;
             rect->y = center_y_;
@@ -1853,7 +1852,7 @@ void LabMasksPanel::onAreaShapeSelectionChanged()
         }
         case Shape::Type::POLYGON:
         {
-            auto poly = static_cast<rtengine::AreaMask::Polygon*>(s.get());
+            auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(s.get());
             poly->knots = getPolygon();
         }
             break;
@@ -1886,7 +1885,7 @@ void LabMasksPanel::onAreaShapeResetPressed()
             areaMaskToggle->set_active(false);
         }
         listEdited = true;
-        masks_[selected_].areaMask.shapes.clear();// = {};//std::shared_ptr<rtengine::AreaMask::Rectangle>(new rtengine::AreaMask::Rectangle(defaultAreaShape))};
+        masks_[selected_].areaMask.shapes.clear();
         area_shape_index_ = 0;
         center_x_ = defaultAreaShape.x;
         center_y_ = defaultAreaShape.y;
@@ -1914,7 +1913,7 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
         auto &am = masks_[selected_].areaMask;
         am.shapes.emplace_back();
         if (type == Shape::Type::RECTANGLE) {
-            am.shapes.back().reset(new rtengine::AreaMask::Rectangle(defaultAreaShape));
+            am.shapes.back().reset(new rtengine::procparams::AreaMask::Rectangle(defaultAreaShape));
             for (size_t j = am.shapes.size()-1; j > 0; --j) {
                 if (am.shapes[j-1]->getType() == Shape::Type::RECTANGLE) {
                     am.shapes.back() = am.shapes[j-1]->clone();
@@ -1924,7 +1923,7 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
                 }
             }
         } else if (type == Shape::Type::POLYGON) {
-            am.shapes.back().reset(new rtengine::AreaMask::Polygon());
+            am.shapes.back().reset(new rtengine::procparams::AreaMask::Polygon());
         }
         populateShapeList(selected_, -1);
         areaShapeSelect(am.shapes.size()-1, true);
@@ -2070,12 +2069,12 @@ void LabMasksPanel::populateShapeList(int idx, int sel)
         Glib::ustring label;
         switch (a->getType()){
         case Shape::Type::POLYGON: {
-            auto poly = static_cast<rtengine::AreaMask::Polygon*>(a.get());
+            auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.get());
             label = Glib::ustring::compose(M("TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY") + "%2", poly->knots.size(), m(poly->mode));
         } break;
         case Shape::Type::RECTANGLE:
         default: {
-            auto rect = static_cast<rtengine::AreaMask::Rectangle*>(a.get());
+            auto rect = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.get());
             label = Glib::ustring::compose("%1 %2 %3 %4 %5 %6 %7", rd(rect->x), rd(rect->y), rd(rect->width), rd(rect->height), rd(rect->angle), rd(rect->roundness), m(rect->mode));
         } break;
         }
@@ -2112,7 +2111,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
             switch (a.shapes[area_shape_index_]->getType()) {
             case Shape::Type::POLYGON:
             {
-                auto s = static_cast<rtengine::AreaMask::Polygon*>(a.shapes[area_shape_index_].get());
+                auto s = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.shapes[area_shape_index_].get());
                 setAdjustersVisibility(false);
                 setPolygon(s->knots);
                 break;
@@ -2120,7 +2119,7 @@ void LabMasksPanel::onAreaMaskPastePressed()
             case Shape::Type::RECTANGLE:
             default:
             {
-                auto s = static_cast<rtengine::AreaMask::Rectangle*>(a.shapes[area_shape_index_].get());
+                auto s = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.shapes[area_shape_index_].get());
                 setAdjustersVisibility(true);
                 center_x_ = s->x;
                 center_y_ = s->y;
@@ -2160,7 +2159,7 @@ void LabMasksPanel::areaShapeSelect(int sel, bool update_list)
         switch (ns->getType()) {
         case Shape::Type::POLYGON:
         {
-            auto s = static_cast<rtengine::AreaMask::Polygon*>(ns.get());
+            auto s = static_cast<rtengine::procparams::AreaMask::Polygon*>(ns.get());
             setPolygon(s->knots);
             setAdjustersVisibility(false);
             setGeometryType(Shape::Type::POLYGON);
@@ -2169,7 +2168,7 @@ void LabMasksPanel::areaShapeSelect(int sel, bool update_list)
         case Shape::Type::RECTANGLE:
         default:
         {
-            auto s = static_cast<rtengine::AreaMask::Rectangle*>(ns.get());
+            auto s = static_cast<rtengine::procparams::AreaMask::Rectangle*>(ns.get());
             setAdjustersVisibility(true);
             center_x_ = s->x;
             center_y_ = s->y;

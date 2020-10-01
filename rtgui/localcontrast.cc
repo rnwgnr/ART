@@ -222,8 +222,8 @@ void LocalContrast::read(const ProcParams *pp)
 
     auto m = pp->localContrast.labmasks;
     if (regionData.empty()) {
-        regionData.emplace_back(rtengine::LocalContrastParams::Region());
-        m.emplace_back(rtengine::Mask());
+        regionData.emplace_back(rtengine::procparams::LocalContrastParams::Region());
+        m.emplace_back(rtengine::procparams::Mask());
     }
     labMasks->setMasks(m, pp->localContrast.showMask);
 

@@ -21,10 +21,12 @@
 
 #include <gtkmm.h>
 #include "edit.h"
+#include "../rtengine/procparams.h"
 
-using rteMaskShape = rtengine::AreaMask::Shape;
-using rteMaskRect = rtengine::AreaMask::Rectangle;
-using rteMaskPoly = rtengine::AreaMask::Polygon;
+
+using rteMaskShape = rtengine::procparams::AreaMask::Shape;
+using rteMaskRect = rtengine::procparams::AreaMask::Rectangle;
+using rteMaskPoly = rtengine::procparams::AreaMask::Polygon;
 
 class AreaMask: public EditSubscriber {
 public:

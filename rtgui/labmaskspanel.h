@@ -295,7 +295,7 @@ private:
     Adjuster *areaMaskRoundness;
     std::vector<Adjuster *> areaMaskAdjusters;
     std::vector<bool> listenerDisabled;
-    rtengine::AreaMask::Rectangle defaultAreaShape;
+    rtengine::procparams::AreaMask::Rectangle defaultAreaShape;
     bool listEdited;
     AreaDrawListener *adl_;
     sigc::connection scrollDelayConn;

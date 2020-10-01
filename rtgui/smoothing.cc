@@ -250,8 +250,8 @@ void Smoothing::read(const ProcParams *pp)
     data = pp->smoothing.regions;
     auto m = pp->smoothing.labmasks;
     if (data.empty()) {
-        data.emplace_back(rtengine::SmoothingParams::Region());
-        m.emplace_back(rtengine::Mask());
+        data.emplace_back(rtengine::procparams::SmoothingParams::Region());
+        m.emplace_back(rtengine::procparams::Mask());
     }
     labMasks->setMasks(m, pp->smoothing.showMask);
     modeChanged();

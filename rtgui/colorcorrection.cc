@@ -77,7 +77,7 @@ public:
 
     bool addPressed() override
     {
-        parent_->data.push_back(rtengine::ColorCorrectionParams::Region());
+        parent_->data.push_back(rtengine::procparams::ColorCorrectionParams::Region());
         return true;
     }
 
@@ -347,8 +347,8 @@ void ColorCorrection::read(const ProcParams *pp)
     data = pp->colorcorrection.regions;
     auto m = pp->colorcorrection.labmasks;
     if (data.empty()) {
-        data.emplace_back(rtengine::ColorCorrectionParams::Region());
-        m.emplace_back(rtengine::Mask());
+        data.emplace_back(rtengine::procparams::ColorCorrectionParams::Region());
+        m.emplace_back(rtengine::procparams::Mask());
     }
     labMasks->setMasks(m, pp->colorcorrection.showMask);
 

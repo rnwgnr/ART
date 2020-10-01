@@ -197,7 +197,7 @@ void LogEncoding::autocomputeToggled()
 }
 
 
-void LogEncoding::logEncodingChanged(const rtengine::LogEncodingParams &params)
+void LogEncoding::logEncodingChanged(const LogEncodingParams &params)
 {
     GThreadLock lock;
     

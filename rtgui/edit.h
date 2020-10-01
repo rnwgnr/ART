@@ -19,7 +19,7 @@
  */
 #pragma once
 #include <gtkmm.h>
-#include "../rtengine/imagefloat.h"
+//#include "../rtengine/imagefloat.h"
 #include "editid.h"
 #include "cursormanager.h"
 #include "../rtengine/rt_math.h"

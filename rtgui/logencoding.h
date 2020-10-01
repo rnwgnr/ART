@@ -60,7 +60,7 @@ public:
     void adjusterAutoToggled(Adjuster* a, bool newval) override;
     void enabledChanged() override;
 
-    void logEncodingChanged(const rtengine::LogEncodingParams &params) override;
+    void logEncodingChanged(const rtengine::procparams::LogEncodingParams &params) override;
     void autocomputeToggled();
 
     void toolReset(bool to_initial) override;
