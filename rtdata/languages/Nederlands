@@ -20,6 +20,7 @@
 #19 2020-04-30 update to ART v1.3 by pm
 #20 2020-06-03 update to ART v1.4 by pm
 #21 2020-08-21 update to ART v1.5 by pm
+#22 2020-10-02 update to ART v1.5.4 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -680,6 +681,7 @@ HISTORY_MSG_DEHAZE_ENABLED;Nevelvermindering
 HISTORY_MSG_DEHAZE_LUMINANCE;Nevelvermindering - alleen luminantie
 HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Nevelvermindering - Toon dieptemap
 HISTORY_MSG_DEHAZE_STRENGTH;Nevelvermindering - Sterkte
+HISTORY_MSG_DISTORTION_AUTO;Autom. vertekeningscorrectie
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Dual-demozaïek - auto-drempel
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dual-demozaïek - Contrastdrempel
 HISTORY_MSG_EPD_DETAIL_THRESHOLD;TV - detailschaal
@@ -699,6 +701,7 @@ HISTORY_MSG_EXPOSURE_BLACK;Belichting - Zwartpunt
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatief
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Basiskleur film
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
+HISTORY_MSG_FLATFIELD_EMBEDDED;Vlakveld ingebed
 HISTORY_MSG_GRAIN_ENABLED;Filmkorrel
 HISTORY_MSG_GRAIN_ISO;Filmkorrel - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Filmkorrel - Kracht
@@ -1678,6 +1681,7 @@ TP_FLATFIELD_BT_VERTHORIZ;Verticaal + horizontaal
 TP_FLATFIELD_BT_VERTICAL;Verticaal
 TP_FLATFIELD_CLIPCONTROL;Afkapcontrole
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;Afkapcontrole vermijdt uitgevreten hoge lichten veroorzaakt door het toepassen van het vlakveld. Als er al uitgevreten hoge lichten waren voor het toepassen van het vlakveld dan kan de afkapcontrole een kleurzweem veroorzaken.
+TP_FLATFIELD_EMBEDDED;Ingebed in metadata
 TP_FLATFIELD_LABEL;Vlakveld
 
 TP_GENERAL_11SCALE_TOOLTIP;De werking is alleen zichtbaar op schaal 1:1 van het voorbeeld
@@ -1813,7 +1817,7 @@ TP_LABMASKS_HUE;H
 TP_LABMASKS_LIGHTNESS;L
 TP_LABMASKS_LIGHTNESS_DETAIL;L-masker detailbescherming
 TP_LABMASKS_MASK;Masker
-TP_LABMASKS_MASK_UNNAMED;Nog_geen_naam
+TP_LABMASKS_MASK_UNNAMED;naamloos
 TP_LABMASKS_SHOW;Toon masker
 TP_LABMASKS_CONTRASTTHRESHOLDMASK;Contrastdrempelmasker
 TP_LABMASKS_DELTAE;ΔE masker
@@ -1829,7 +1833,7 @@ TP_LABMASKS_DRAWNMASK;Penseelmasker
 TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Schakelt het tekenen met de kwast in of uit.\nHoud de <b>Shift</b>-toets ingedrukt om tijdelijk naar de Gum-modus om te schakelen.\nGebruik <b>Ctrl+muiswiel</b> om de kwastgrootte te veranderen,\n<b>Ctrl+Shift+muiswiel</b> om de hardheid te wijzigen,\nen <b>Ctrl+klik</b> om een nieuwe 'penseelgroep' te starten zonder de perameters te veranderen\n(zodat meerdere kwaststreken in hetzelfde gebied elkaar versterken).
 
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Penseelinstellingen
-TP_LABMASKS_DRAWNMASK_RESET_TIP;Wis alles penseelstreken
+TP_LABMASKS_DRAWNMASK_RESET_TIP;Wis alle penseelstreken
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Verwijder laatste groep penseelstreken
 TP_LABMASKS_DRAWNMASK_RADIUS;Straal
 TP_LABMASKS_DRAWNMASK_TRANSPARENCY;Transparantie
@@ -1839,6 +1843,7 @@ TP_LABMASKS_DRAWNMASK_HARDNESS;Hardheid
 TP_LABMASKS_DRAWNMASK_INFO;%1 penseelstreken
 TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Doorsnij penseelmasker met de andere maskers
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Plaats penseelmasker bovenop de andere maskers
+TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Plaats het penseelmasker boven de andere maskers, maar alleen binnen het actieve gebiedsmasker
 TP_LABMASKS_PARAMETRIC;Parametrisch masker
 
 
