@@ -777,6 +777,7 @@ HISTORY_MSG_DEHAZE_ENABLED;Élimination de la Brume
 HISTORY_MSG_DEHAZE_LUMINANCE;EB - Luminance seule
 HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;EB - Montrer carte de profondeur
 HISTORY_MSG_DEHAZE_STRENGTH;EB - Force
+HISTORY_MSG_DISTORTION_AUTO;Auto Distortion Correction
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Double dématriçage - Seuil auto.
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Double dématriçage - Seuil de contraste
 HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - échelle détails
@@ -796,6 +797,7 @@ HISTORY_MSG_EXPOSURE_BLACK;Exposition - Point noir
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Négatif
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base couleur
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valeurs du Film Négatif
+HISTORY_MSG_FLATFIELD_EMBEDDED;Champ uniforme intégré
 HISTORY_MSG_GRAIN_ENABLED;Grain d'émulsion
 HISTORY_MSG_GRAIN_ISO;Grain d'émulsion - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Grain d'émulsion - Force
@@ -1650,6 +1652,7 @@ TP_FLATFIELD_BT_VERTHORIZ;Vertical + Horizontal
 TP_FLATFIELD_BT_VERTICAL;Vertical
 TP_FLATFIELD_CLIPCONTROL;Contrôle de l'écrêtage
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;"Contrôle de l'écrêtage" évite l'écrêtage des Hautes Lumière dû à l'application du Champ Uniforme. S'il y a déjà des Hautes Lumières brûlées avant l'application du Champ Uniforme, "Contrôle de l'écrêtage" peut conduire à une dérive couleur.
+TP_FLATFIELD_EMBEDDED;Intégré dans les métadonnées
 TP_FLATFIELD_LABEL;Champ Uniforme
 TP_GENERAL_11SCALE_TOOLTIP;Les effets de cet outil ne sont visibles ou fiables qu'à une échelle d'aperçu de 1:1.
 TP_GENERAL_RESET_DEFAULT;Réinitialiser les paramètres par défaut
