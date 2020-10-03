@@ -38,6 +38,19 @@ extern const Settings *settings;
 } // namespace rtengine
 
 
+namespace {
+
+std::string validateUtf8(const std::string &str, const std::string &on_error="???")
+{
+    if (Glib::ustring(str).validate()) {
+        return str;
+    }
+
+    return on_error;
+}
+
+} // namespace
+
 
 FramesMetaData* FramesMetaData::fromFile (const Glib::ustring& fname)
 {
@@ -127,11 +140,11 @@ FramesData::FramesData(const Glib::ustring &fname):
         /* List of tag names taken from exiv2's printSummary() in actions.cpp */
 
         if (find_tag(Exiv2::make)) {
-            make = pos->print(&exif);
+            make = validateUtf8(pos->print(&exif));
         }
         
         if (find_tag(Exiv2::model)) {
-            model = pos->print(&exif);
+            model = validateUtf8(pos->print(&exif));
         }
 
         if (make.size() > 0) {
@@ -266,11 +279,11 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         std::string datetime_taken;
         if (find_exif_tag("Exif.Image.DateTimeOriginal")) {
-            datetime_taken = pos->print(&exif);
+            datetime_taken = validateUtf8(pos->print(&exif));
         } else if (find_exif_tag("Exif.Photo.DateTimeOriginal")) {
-            datetime_taken = pos->print(&exif);
+            datetime_taken = validateUtf8(pos->print(&exif));
         } else if (find_exif_tag("Exif.Photo.DateTimeDigitized")) {
-            datetime_taken = pos->print(&exif);
+            datetime_taken = validateUtf8(pos->print(&exif));
         }
         if (sscanf(datetime_taken.c_str(), "%d:%d:%d %d:%d:%d", &time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, &time.tm_min, &time.tm_sec) == 6) {
             time.tm_year -= 1900;

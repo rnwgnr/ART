@@ -302,7 +302,11 @@ void ExifPanel::refreshTags()
                 try {
                     if (!tag.tagLabel().empty() && //tag.typeId() != Exiv2::undefined &&
                         (tag.typeId() == Exiv2::asciiString || tag.size() < 256)) {
-                        return escapeHtmlChars(tag.print(&exif));
+                        auto ret = escapeHtmlChars(tag.print(&exif));
+                        if (!ret.validate()) {
+                            return "<i>(" + M("EXIFPANEL_VALUE_NOT_SHOWN") + ")</i>";
+                        }
+                        return ret;
                     }
                 } catch (std::exception &) {}
                 return "<i>(" + M("EXIFPANEL_VALUE_NOT_SHOWN") + ")</i>";
@@ -337,6 +341,9 @@ void ExifPanel::refreshTags()
             if (pos != exif.end() && pos->size()) {
                 edited = changeList.find(pos->key()) != changeList.end();
                 value = escapeHtmlChars(pos->print(&exif));
+                if (!value.validate()) {
+                    value = "???";
+                }
             }
             addTag(p.first, lbl, value, true, edited);
         }
@@ -713,7 +720,7 @@ void ExifPanel::onEditExifTagValue(const Glib::ustring &path, const Glib::ustrin
     std::string key = row[exifColumns.key];
     auto value = val;
 
-    bool good = true;
+    bool good = value.validate();
     try {
         Exiv2::ExifData data;
         auto &datum = data[key];
