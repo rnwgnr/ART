@@ -384,6 +384,8 @@ int main (int argc, char **argv)
     Gio::init ();
 
 #ifdef WIN32
+    CoInitialize(0);
+    
     if (GetFileType (GetStdHandle (STD_OUTPUT_HANDLE)) == 0x0003) {
         // started from msys2 console => do not buffer stdout
         setbuf(stdout, NULL);
@@ -597,6 +599,8 @@ int main (int argc, char **argv)
         FlushConsoleInputBuffer (GetStdHandle (STD_INPUT_HANDLE));
         getch();
     }
+
+    CoUninitialize();
 
 #endif
 
