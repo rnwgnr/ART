@@ -867,6 +867,9 @@ void MyExpander::setEnabled(bool isEnabled)
         if (headerWidget) {
             headerWidget->set_opacity(enabled ? 1 : MyExpander_disabled_opacity);
         }
+        if (label) {
+            label->set_opacity(enabled ? 1 : MyExpander_disabled_opacity);
+        }
     }        
 }
 
@@ -1019,6 +1022,9 @@ bool MyExpander::on_enabled_change(GdkEventButton* event)
 
         if (headerWidget) {
             headerWidget->set_opacity(enabled ? 1.0 : MyExpander_disabled_opacity);
+        }
+        if (label) {
+            label->set_opacity(enabled ? 1.0 : MyExpander_disabled_opacity);
         }
         
         message.emit();
