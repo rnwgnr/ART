@@ -728,8 +728,8 @@ double ImProcFunctions::getAutoDistor  (const Glib::ustring &fname, int thumb_si
             calcDistortion (thumbGray, rawGray, width, h_thumb, 4, dist_amount);
         }
 
-        delete thumbGray;
-        delete rawGray;
+        delete[] thumbGray;
+        delete[] rawGray;
         delete thumb;
         delete raw;
         return dist_amount;
