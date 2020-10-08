@@ -90,22 +90,30 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
         };
 #endif
 
+    float minval = RT_INFINITY;
+
 #ifdef _OPENMP
-#   pragma omp parallel for if (multithread)
+#   pragma omp parallel for reduction(min:minval) if (multithread)
 #endif
     for (int y = 0; y < H; ++y) {
         int x = 0;
 #ifdef __SSE2__
         for (; x < W-3; x += 4) {
-            vfloat v = LVFU((*src)[y][x]);
-            STVFU((*src)[y][x], v / v65535);
+            vfloat v = LVFU((*src)[y][x]) / v65535;
+            STVFU((*src)[y][x], v);
+            minval = min(minval, v[0], v[1], v[2], v[3]);
         }
 #endif
         for (; x < W; ++x) {
             float v = (*src)[y][x] / 65535.f;
             (*src)[y][x] = v;
+            minval = min(minval, v);
         }
     }
+
+#ifdef __SSE2__
+    vfloat vminval = F2V(minval);
+#endif
 
     for (int i = 0; i < pp.iterations; ++i) {
         guidedFilter((*src), (*src), mid, radius, epsilon, multithread);
@@ -125,7 +133,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 vfloat d2 = (vm - vb) * vstrength2;
                 vfloat vblend;
                 vscurve((*src)[y] + x, vblend);
-                STVFU((*src)[y][x], intp(vblend, vmaxf(vb + d + d2, ZEROV), vy));
+                STVFU((*src)[y][x], intp(vblend, vmaxf(vb + d + d2, vminval), vy));
             }
 #endif
             for (; x < W; ++x) {
@@ -135,7 +143,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 float d2 = mid[y][x] - base[y][x];
                 d2 *= strength2;
                 float blend = scurve(v);
-                (*src)[y][x] = intp(blend, std::max(base[y][x] + d + d2, 0.f), v);
+                (*src)[y][x] = intp(blend, std::max(base[y][x] + d + d2, minval), v);
             }
         }
     }
