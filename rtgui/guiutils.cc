@@ -37,6 +37,13 @@ Glib::RefPtr<RTImage> MyExpander::disabledImage;
 Glib::RefPtr<RTImage> MyExpander::openedImage;
 Glib::RefPtr<RTImage> MyExpander::closedImage;
 
+namespace {
+
+constexpr double MyExpander_disabled_opacity = 0.35;
+
+} // namespace
+
+
 IdleRegister::~IdleRegister()
 {
     destroy();
@@ -857,6 +864,9 @@ void MyExpander::setEnabled(bool isEnabled)
         if (overlay_label_) {
             overlay_label_->set_visible(!enabled);
         }
+        if (headerWidget) {
+            headerWidget->set_opacity(enabled ? 1 : MyExpander_disabled_opacity);
+        }
     }        
 }
 
@@ -1005,6 +1015,10 @@ bool MyExpander::on_enabled_change(GdkEventButton* event)
 
         if (overlay_label_) {
             overlay_label_->set_visible(!enabled);
+        }
+
+        if (headerWidget) {
+            headerWidget->set_opacity(enabled ? 1.0 : MyExpander_disabled_opacity);
         }
         
         message.emit();
