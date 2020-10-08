@@ -527,3 +527,8 @@ GtkToggleButton.button.text-button:hover:checked {
 #FileCatalog:hover {
     background-color: rgb(60,60,60);
 }
+
+/******************************************************************************
+ * ART tweaks
+ ******************************************************************************/
+@import "_ART-GTK3-_19.css";
