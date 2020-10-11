@@ -24,3 +24,7 @@
     background-image: none;
     background-clip: content-box;
 }
+
+popover {
+    background-color: rgb(72,72,72);
+}
