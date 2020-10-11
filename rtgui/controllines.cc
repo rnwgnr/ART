@@ -30,7 +30,7 @@ using namespace rtengine;
 
 ControlLineManager::ControlLineManager():
     EditSubscriber(ET_OBJECTS),
-    canvas_area(new Rectangle()),
+    canvas_area(new EditRectangle()),
     cursor(CSArrow),
     draw_mode(false),
     drawing_line(false),

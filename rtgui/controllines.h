@@ -22,13 +22,9 @@
 #include <memory>
 
 #include "edit.h"
+typedef Rectangle EditRectangle; // workaround to compilation errors with exiv2 0.27.3 on windows
 #include "../rtengine/perspectivecorrection.h"
 
-class Circle;
-class Line;
-class OPIcon;
-class Rectangle;
-class RTSurface;
 
 struct ControlLine {
     static constexpr int OBJ_COUNT = 4;
@@ -46,7 +42,7 @@ class ControlLineManager: public EditSubscriber {
 
 protected:
     /** Hidden object for capturing mouse events. */
-    std::unique_ptr<Rectangle> canvas_area;
+    std::unique_ptr<EditRectangle> canvas_area;
     rtengine::Coord drag_delta;
     std::vector<std::unique_ptr<ControlLine>> control_lines;
     CursorShape cursor;

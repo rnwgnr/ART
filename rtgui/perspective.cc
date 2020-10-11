@@ -16,6 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "controllines.h"
 #include "perspective.h"
 #include "rtimage.h"
 #include "eventmapper.h"
@@ -74,6 +75,29 @@ std::vector<rtengine::ControlLine> valuesToControlLines(const std::vector<int> &
 
     return lines;
 }
+
+
+class LinesCallbacks: public ControlLineManager::Callbacks {
+protected:
+    PerspCorrection *tool;
+
+public:
+    explicit LinesCallbacks(PerspCorrection *tool): tool(tool) {}
+
+    void lineChanged() override
+    {
+        if (tool) {
+            tool->lineChanged();
+        }
+    }
+    
+    void switchOffEditMode() override
+    {
+        if (tool) {
+            tool->switchOffEditMode();
+        }
+    }
+};
 
 } // namespace
 
@@ -440,24 +464,4 @@ void PerspCorrection::linesEditButtonPressed()
 void PerspCorrection::linesEraseButtonPressed()
 {
     lines->removeAll();
-}
-
-
-LinesCallbacks::LinesCallbacks(PerspCorrection *tool):
-    tool(tool)
-{
-}
-
-void LinesCallbacks::lineChanged()
-{
-    if (tool) {
-        tool->lineChanged();
-    }
-}
-
-void LinesCallbacks::switchOffEditMode()
-{
-    if (tool) {
-        tool->switchOffEditMode();
-    }
 }

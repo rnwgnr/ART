@@ -21,9 +21,10 @@
 
 #include <gtkmm.h>
 #include "adjuster.h"
-#include "controllines.h"
 #include "toolpanel.h"
 #include "lensgeomlistener.h"
+
+class ControlLineManager;
 
 class PerspCorrection: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel {
 public:
@@ -77,15 +78,4 @@ private:
     const rtengine::FramesMetaData *metadata;
 
     rtengine::procparams::PerspectiveParams initial_params;
-};
-
-
-class LinesCallbacks: public ControlLineManager::Callbacks {
-protected:
-    PerspCorrection *tool;
-
-public:
-    explicit LinesCallbacks(PerspCorrection *tool);
-    void lineChanged() override;
-    void switchOffEditMode() override;
 };
