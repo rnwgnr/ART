@@ -17,11 +17,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _PERSPECTIVE_PANEL_H_
-#define _PERSPECTIVE_PANEL_H_
+#pragma once
 
 #include <gtkmm.h>
 #include "adjuster.h"
+#include "controllines.h"
 #include "toolpanel.h"
 #include "lensgeomlistener.h"
 
@@ -43,11 +43,19 @@ public:
 
     void toolReset(bool to_initial) override;
 
+    void setEditProvider(EditDataProvider *provider) override;
+    void switchOffEditMode();
+    void lineChanged();
+    
 private:
     void do_set_metadata(const rtengine::FramesMetaData *meta);
+    void applyControlLines();
+    void linesApplyButtonPressed();
+    void linesEditButtonPressed();
+    void linesEraseButtonPressed();
     
-    Adjuster* horiz;
-    Adjuster* vert;
+    Adjuster *horiz;
+    Adjuster *vert;
     Adjuster *angle;
     Adjuster *shear;
     Adjuster *flength;
@@ -57,10 +65,27 @@ private:
     Gtk::Button *auto_vert;
     Gtk::Button *auto_both;
     LensGeomListener *lgl;
+
+    std::unique_ptr<ControlLineManager> lines;
+    Gtk::Button *lines_button_apply;
+    Gtk::ToggleButton *lines_button_edit;
+    Gtk::Button *lines_button_erase;
+    
     rtengine::ProcEvent EvPerspCorrLens;
+    rtengine::ProcEvent EvPerspRender;
+    rtengine::ProcEvent EvPerspControlLines;
     const rtengine::FramesMetaData *metadata;
 
     rtengine::procparams::PerspectiveParams initial_params;
 };
 
-#endif
+
+class LinesCallbacks: public ControlLineManager::Callbacks {
+protected:
+    PerspCorrection *tool;
+
+public:
+    explicit LinesCallbacks(PerspCorrection *tool);
+    void lineChanged() override;
+    void switchOffEditMode() override;
+};

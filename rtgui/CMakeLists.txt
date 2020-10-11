@@ -166,6 +166,7 @@ set(NONCLISOURCEFILES
     dateentry.cc
     wbpresets.cc
     wbprovider.cc
+    controllines.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")

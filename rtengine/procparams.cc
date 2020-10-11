@@ -2140,7 +2140,8 @@ PerspectiveParams::PerspectiveParams() :
     shear(0.0),
     flength(0),
     cropfactor(1),
-    aspect(1)
+    aspect(1),
+    control_lines()
 {
 }
 
@@ -2154,7 +2155,8 @@ bool PerspectiveParams::operator ==(const PerspectiveParams& other) const
         && shear == other.shear
         && flength == other.flength
         && cropfactor == other.cropfactor
-        && aspect == other.aspect;
+        && aspect == other.aspect
+        && control_lines == other.control_lines;
 }
 
 bool PerspectiveParams::operator !=(const PerspectiveParams& other) const
@@ -3544,6 +3546,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Perspective", "FocalLength", perspective.flength, keyFile);
             saveToKeyfile("Perspective", "CropFactor", perspective.cropfactor, keyFile);
             saveToKeyfile("Perspective", "Aspect", perspective.aspect, keyFile);
+            saveToKeyfile("Perspective", "ControlLines", perspective.control_lines, keyFile);
         }
 
 // Gradient
@@ -4593,7 +4596,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "Perspective", "Shear", perspective.shear);
             assignFromKeyfile(keyFile, "Perspective", "FocalLength", perspective.flength);
             assignFromKeyfile(keyFile, "Perspective", "CropFactor", perspective.cropfactor);
-            assignFromKeyfile(keyFile, "Perspective", "Aspect", perspective.aspect);
+            assignFromKeyfile(keyFile, "Perspective", "Aspect", perspective.aspect); 
+            if (keyFile.has_key("Perspective", "ControlLines")) {
+                perspective.control_lines = keyFile.get_integer_list("Perspective", "ControlLines");
+            }
         }
 
         if (keyFile.has_group("Gradient") && RELEVANT_(gradient)) {

@@ -316,7 +316,8 @@ public:
     void straightenRequested () override;
     void autoCropRequested () override;
     double autoDistorRequested () override;
-    void autoPerspectiveRequested(bool horiz, bool vert, double &angle, double &horizontal, double &vertical, double &shear) override;
+    void autoPerspectiveRequested(bool horiz, bool vert, double &angle, double &horizontal, double &vertical, double &shear, const std::vector<rtengine::ControlLine> *lines=nullptr) override;
+    void updateTransformPreviewRequested (rtengine::ProcEvent event, bool render_perspective) override;
 
     // spotwblistener interface
     void spotWBRequested (int size) override;

@@ -898,6 +898,18 @@ double ToolPanelCoordinator::autoDistorRequested ()
     return rtengine::ImProcFunctions::getAutoDistor (ipc->getInitialImage()->getFileName(), 400);
 }
 
+
+void ToolPanelCoordinator::updateTransformPreviewRequested(rtengine::ProcEvent event, bool render_perspective)
+{
+    if (!ipc) {
+        return;
+    }
+
+    ipc->beginUpdateParams()->perspective.enabled = render_perspective;
+    ipc->endUpdateParams(event);
+}
+
+
 void ToolPanelCoordinator::spotWBRequested (int size)
 {
 
@@ -1116,7 +1128,7 @@ void ToolPanelCoordinator::setEditProvider (EditDataProvider *provider)
     }
 }
 
-void ToolPanelCoordinator::autoPerspectiveRequested(bool horiz, bool vert, double &angle, double &horizontal, double &vertical, double &shear)
+void ToolPanelCoordinator::autoPerspectiveRequested(bool horiz, bool vert, double &angle, double &horizontal, double &vertical, double &shear, const std::vector<rtengine::ControlLine> *lines)
 {
     angle = 0;
     horizontal = 0;
@@ -1144,7 +1156,7 @@ void ToolPanelCoordinator::autoPerspectiveRequested(bool horiz, bool vert, doubl
         dir = rtengine::PerspectiveCorrection::VERTICAL;
     }
 
-    auto res = rtengine::PerspectiveCorrection::autocompute(src, dir, &params, src->getMetaData());
+    auto res = rtengine::PerspectiveCorrection::autocompute(src, dir, &params, src->getMetaData(), lines);
     angle = res.angle;
     horizontal = res.horizontal;
     vertical = res.vertical;

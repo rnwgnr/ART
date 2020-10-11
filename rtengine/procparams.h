@@ -910,13 +910,14 @@ struct LensProfParams {
   */
 struct PerspectiveParams {
     bool enabled;
-    double  horizontal;
-    double  vertical;
+    double horizontal;
+    double vertical;
     double angle;
     double shear;
     double flength;
     double cropfactor;
     double aspect;
+    std::vector<int> control_lines;
 
     PerspectiveParams();
 
