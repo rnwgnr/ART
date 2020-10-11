@@ -8,11 +8,21 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 PCVignette::PCVignette():
-    FoldableToolPanel(this, "pcvignette", M("TP_PCVIGNETTE_LABEL"), false, true, true)
+    FoldableToolPanel(this, "pcvignette", M("TP_PCVIGNETTE_LABEL"), false, true, true),
+    EditSubscriber(ET_OBJECTS),
+    lastObject(-1)    
 {
     auto m = ProcEventMapper::getInstance();
     EvCenter = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_PCVIGNETTE_CENTER");
     EvToolReset.set_action(LUMINANCECURVE);
+
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    edit = Gtk::manage (new Gtk::ToggleButton());
+    edit->get_style_context()->add_class("independent");
+    edit->add (*Gtk::manage (new RTImage ("crosshair-adjust.png")));
+    edit->set_tooltip_text(M("EDIT_OBJECT_TOOLTIP"));
+    editConn = edit->signal_toggled().connect( sigc::mem_fun(*this, &PCVignette::editToggled) );
+    hb->pack_start(*edit, Gtk::PACK_SHRINK, 0);
 
     strength = Gtk::manage (new Adjuster (M("TP_PCVIGNETTE_STRENGTH"), -6, 6, 0.01, 0));
     strength->set_tooltip_text (M("TP_PCVIGNETTE_STRENGTH_TOOLTIP"));
@@ -31,14 +41,46 @@ PCVignette::PCVignette():
     centerY = Gtk::manage(new Adjuster(M("TP_PCVIGNETTE_CENTER_Y"), -100, 100, 1, 0));
     centerY->setAdjusterListener(this);
 
+    pack_start(*hb, Gtk::PACK_SHRINK, 0);
     pack_start(*strength);
     pack_start(*feather);
     pack_start(*roundness);
     pack_start(*centerX);
     pack_start(*centerY);
 
+    // Instantiating the Editing geometry; positions will be initialized later
+    Circle *centerCircle = new Circle();
+    centerCircle->datum = Geometry::IMAGE;
+    centerCircle->radiusInImageSpace = false;
+    centerCircle->radius = 15;
+    centerCircle->filled = true;
+
+    EditSubscriber::visibleGeometry.push_back(centerCircle);
+
+    // MouseOver geometry
+    centerCircle = new Circle();
+    centerCircle->datum = Geometry::IMAGE;
+    centerCircle->radiusInImageSpace = false;
+    centerCircle->radius = 15;
+    centerCircle->filled = true;
+
+    EditSubscriber::mouseOverGeometry.push_back(centerCircle);
+
     show_all();
 }
+
+
+PCVignette::~PCVignette()
+{
+    for (std::vector<Geometry*>::const_iterator i = visibleGeometry.begin(); i != visibleGeometry.end(); ++i) {
+        delete *i;
+    }
+
+    for (std::vector<Geometry*>::const_iterator i = mouseOverGeometry.begin(); i != mouseOverGeometry.end(); ++i) {
+        delete *i;
+    }
+}
+
 
 void PCVignette::read (const ProcParams* pp)
 {
@@ -51,6 +93,8 @@ void PCVignette::read (const ProcParams* pp)
     centerX->setValue(pp->pcvignette.centerX);
     centerY->setValue(pp->pcvignette.centerY);
 
+    updateGeometry(pp->pcvignette.centerX, pp->pcvignette.centerY);
+    
     enableListener ();
 }
 
@@ -77,6 +121,8 @@ void PCVignette::setDefaults(const ProcParams* defParams)
 
 void PCVignette::adjusterChanged(Adjuster* a, double newval)
 {
+    updateGeometry(int(centerX->getValue()), int(centerY->getValue()));
+
     if (listener && getEnabled()) {
         if (a == strength) {
             listener->panelChanged (EvPCVignetteStrength, strength->getTextValue());
@@ -126,4 +172,165 @@ void PCVignette::toolReset(bool to_initial)
     }
     pp.pcvignette.enabled = getEnabled();
     read(&pp);
+}
+
+
+void PCVignette::updateGeometry(const int centerX, const int centerY)
+{
+    EditDataProvider* dataProvider = getEditProvider();
+
+    if (!dataProvider) {
+        return;
+    }
+
+    int imW=0;
+    int imH=0;
+    dataProvider->getImageSize(imW, imH);
+    if (!imW || !imH) {
+        return;
+    }
+
+    rtengine::Coord origin (imW / 2 + centerX * imW / 200, imH / 2 + centerY * imH / 200);
+
+    const auto updateCircle = [&](Geometry* geometry)
+    {
+        const auto circle = static_cast<Circle*>(geometry);
+        circle->center = origin;
+    };
+
+    // update circle's position
+    updateCircle(visibleGeometry[0]);
+    updateCircle(mouseOverGeometry[0]);
+}
+
+
+void PCVignette::setEditProvider(EditDataProvider *provider)
+{
+    EditSubscriber::setEditProvider(provider);
+}
+
+void PCVignette::editToggled()
+{
+    if (edit->get_active()) {
+        subscribe();
+    } else {
+        unsubscribe();
+    }
+}
+
+CursorShape PCVignette::getCursor(const int objectID)
+{
+    switch (objectID) {
+    case 0:
+        return CSMove2D;
+
+    default:
+        return CSArrow;
+    }
+}
+
+bool PCVignette::mouseOver(const int modifierKey)
+{
+    EditDataProvider *editProvider = getEditProvider();
+
+    if (editProvider && editProvider->object != lastObject) {
+        if (lastObject > -1) {
+            EditSubscriber::visibleGeometry.at(lastObject)->state = Geometry::NORMAL;
+        }
+
+        if (editProvider->object > -1) {
+            EditSubscriber::visibleGeometry.at(editProvider->object)->state = Geometry::PRELIGHT;
+        }
+
+        lastObject = editProvider->object;
+        return true;
+    }
+
+    return false;
+}
+
+bool PCVignette::button1Pressed(const int modifierKey)
+{
+    if (lastObject < 0) {
+        return false;
+    }
+
+    EditDataProvider *provider = getEditProvider();
+
+    if (!(modifierKey & GDK_CONTROL_MASK)) {
+        // button press is valid (no modifier key)
+        PolarCoord pCoord;
+        int imW, imH;
+        provider->getImageSize(imW, imH);
+        double halfSizeW = imW / 2.;
+        double halfSizeH = imH / 2.;
+        draggedCenter.set(int(halfSizeW + halfSizeW * (centerX->getValue() / 100.)), int(halfSizeH + halfSizeH * (centerY->getValue() / 100.)));
+
+        EditSubscriber::action = ES_ACTION_DRAGGING;
+        return false;
+    } else { // should theoretically always be true
+        // this will let this class ignore further drag events
+        EditSubscriber::visibleGeometry.at(lastObject)->state = Geometry::NORMAL;
+        lastObject = -1;
+        return true;
+    }
+
+    return false;
+}
+
+
+bool PCVignette::button1Released()
+{
+    EditSubscriber::action = ES_ACTION_NONE;
+    return true;
+}
+
+
+bool PCVignette::drag1(const int modifierKey)
+{
+    // compute the polar coordinate of the mouse position
+    EditDataProvider *provider = getEditProvider();
+    int imW, imH;
+    provider->getImageSize(imW, imH);
+    double halfSizeW = imW / 2.;
+    double halfSizeH = imH / 2.;
+
+    if (lastObject == 0) {
+        // Dragging the circle to change the center
+        rtengine::Coord currPos;
+        draggedCenter += provider->deltaPrevImage;
+        currPos = draggedCenter;
+        currPos.clip(imW, imH);
+        int newCenterX = int((double(currPos.x) - halfSizeW) / halfSizeW * 100.);
+        int newCenterY = int((double(currPos.y) - halfSizeH) / halfSizeH * 100.);
+
+        if (newCenterX != centerX->getIntValue() || newCenterY != centerY->getIntValue()) {
+            centerX->setValue(newCenterX);
+            centerY->setValue(newCenterY);
+            updateGeometry(newCenterX, newCenterY);
+
+            if (listener) {
+                listener->panelChanged(EvCenter, Glib::ustring::compose("X=%1\nY=%2", centerX->getTextValue(), centerY->getTextValue()));
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void PCVignette::switchOffEditMode ()
+{
+    if (edit->get_active()) {
+        // switching off the toggle button
+        bool wasBlocked = editConn.block(true);
+        edit->set_active(false);
+
+        if (!wasBlocked) {
+            editConn.block(false);
+        }
+    }
+
+    EditSubscriber::switchOffEditMode();  // disconnect
 }

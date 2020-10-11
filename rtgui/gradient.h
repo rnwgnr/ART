@@ -2,8 +2,7 @@
  *  
  *  This file is part of RawTherapee.
  */
-#ifndef _GRADIENT_H_
-#define _GRADIENT_H_
+#pragma once
 
 #include <gtkmm.h>
 #include "adjuster.h"
@@ -62,4 +61,3 @@ public:
     void toolReset(bool to_initial) override;
 };
 
-#endif
