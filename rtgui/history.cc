@@ -562,12 +562,11 @@ void History::enableSnapshots(bool yes)
 
 bool History::onPressEvent(GdkEventButton *event)
 {
-    {
+    shapshot_update_ = event->button == 3;
+    if (shapshot_update_) {
         ConnectionBlocker block_sel(selchangebm);
         bTreeView->get_selection()->unselect_all();
     }
-    
-    shapshot_update_ = event->button == 3;
 
     return false;
 }
