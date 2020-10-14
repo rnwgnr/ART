@@ -20,7 +20,7 @@
 /*RT*/#define NO_JASPER
 /*RT*/#define LOCALTIME
 /*RT*/#define DJGPP
-/*RT*/#include "jpeg.h"
+/*RT*/#include "rtjpeg.h"
 /*RT*/#include "lj92.h"
 /*RT*/#ifdef _OPENMP
 /*RT*/#include <omp.h>
@@ -2954,13 +2954,16 @@ fill_input_buffer (j_decompress_ptr cinfo)
 void CLASS kodak_jpeg_load_raw()
 {
   struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
+  //struct jpeg_error_mgr jerr;
+  rt_jpeg_error_mgr jerr;
   JSAMPARRAY buf;
   JSAMPLE (*pixel)[3];
   int row, col;
 
-  cinfo.err = jpeg_std_error (&jerr);
+  //cinfo.err = jpeg_std_error (&jerr);
+  cinfo.err = rt_jpeg_std_error(&jerr, ifname, nullptr);
   jpeg_create_decompress (&cinfo);
+  try {
   jpeg_stdio_src (&cinfo, ifp);
   cinfo.src->fill_input_buffer = fill_input_buffer;
   jpeg_read_header (&cinfo, TRUE);
@@ -2989,6 +2992,10 @@ void CLASS kodak_jpeg_load_raw()
   jpeg_finish_decompress (&cinfo);
   jpeg_destroy_decompress (&cinfo);
   maximum = 0xff << 1;
+  } catch (rt_jpeg_error &) {
+      jpeg_destroy_decompress(&cinfo);
+      longjmp(failure, 1);
+  }
 }
 
 void CLASS gamma_curve (double pwr, double ts, int mode, int imax);
@@ -2997,7 +3004,8 @@ void CLASS gamma_curve (double pwr, double ts, int mode, int imax);
 void CLASS lossy_dng_load_raw()
 {
   struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
+  //struct jpeg_error_mgr jerr;
+  rt_jpeg_error_mgr jerr;
   JSAMPARRAY buf;
   JSAMPLE (*pixel)[3];
   unsigned sorder=order, ntags, opcode, deg, i, j, c;
@@ -3030,14 +3038,17 @@ void CLASS lossy_dng_load_raw()
     gamma_curve (1/2.4, 12.92310, 1, 255);
     FORC3 memcpy (cur[c], curve, sizeof cur[0]);
   }
-  cinfo.err = jpeg_std_error (&jerr);
+  //cinfo.err = jpeg_std_error (&jerr);
+  cinfo.err = rt_jpeg_std_error(&jerr, ifname, nullptr);
   jpeg_create_decompress (&cinfo);
+  try {
   while (trow < raw_height) {
     fseek (ifp, save+=4, SEEK_SET);
     if (tile_length < INT_MAX)
       fseek (ifp, get4(), SEEK_SET);
     /*RT jpeg_stdio_src (&cinfo, ifp); */
-    /*RT*/jpeg_memory_src(&cinfo, fdata(ftell(ifp), ifp), ifp->size - ftell(ifp));
+    ///*RT*/rt_jpeg_memory_src(&cinfo, fdata(ftell(ifp), ifp), ifp->size - ftell(ifp));
+    jpeg_mem_src(&cinfo, fdata(ftell(ifp), ifp), ifp->size - ftell(ifp));
     jpeg_read_header (&cinfo, TRUE);
     jpeg_start_decompress (&cinfo);
     buf = (*cinfo.mem->alloc_sarray)
@@ -3055,6 +3066,10 @@ void CLASS lossy_dng_load_raw()
       trow += tile_length + (tcol = 0);
   }
   jpeg_destroy_decompress (&cinfo);
+  } catch (rt_jpeg_error &) {
+      jpeg_destroy_decompress(&cinfo);
+      longjmp(failure, 1);
+  }
   maximum = 0xffff;
 }
 /*RT #endif */

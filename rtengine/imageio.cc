@@ -43,7 +43,7 @@
 #include "imagedata.h"
 #include "settings.h"
 
-#include "jpeg.h"
+#include "rtjpeg.h"
 
 using namespace std;
 using namespace rtengine;
@@ -373,88 +373,96 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
 {
     jpeg_decompress_struct cinfo;
     jpeg_create_decompress(&cinfo);
-    jpeg_memory_src (&cinfo, (const JOCTET*)buffer, bufsize);
+    //rt_jpeg_memory_src (&cinfo, (const JOCTET*)buffer, bufsize);
+    jpeg_mem_src(&cinfo, reinterpret_cast<const unsigned char *>(buffer), bufsize);
 
     /* We use our private extension JPEG error handler.
        Note that this struct must live as long as the main JPEG parameter
        struct, to avoid dangling-pointer problems.
     */
-    my_error_mgr jerr;
+    //my_error_mgr jerr;
+    rt_jpeg_error_mgr jerr;
     /* We set up the normal JPEG error routines, then override error_exit. */
-    cinfo.err = jpeg_std_error(&jerr.pub);
-    jerr.pub.error_exit = my_error_exit;
+    //cinfo.err = jpeg_std_error(&jerr.pub);
+    //jerr.pub.error_exit = my_error_exit;
+    cinfo.err = rt_jpeg_std_error(&jerr, "<MEMORY>", pl);
 
-    /* Establish the setjmp return context for my_error_exit to use. */
-#if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
+//     /* Establish the setjmp return context for my_error_exit to use. */
+// #if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
 
-    if (__builtin_setjmp(jerr.setjmp_buffer)) {
-#else
+//     if (__builtin_setjmp(jerr.setjmp_buffer)) {
+// #else
 
-    if (setjmp(jerr.setjmp_buffer)) {
-#endif
-        /* If we get here, the JPEG code has signaled an error.
-           We need to clean up the JPEG object and return.
-        */
+//     if (setjmp(jerr.setjmp_buffer)) {
+// #endif
+//         /* If we get here, the JPEG code has signaled an error.
+//            We need to clean up the JPEG object and return.
+//         */
+//         jpeg_destroy_decompress(&cinfo);
+//         return IMIO_READERROR;
+//     }
+
+    try {
+        if (pl) {
+            pl->setProgressStr ("PROGRESSBAR_LOADJPEG");
+            pl->setProgress (0.0);
+
+        }
+
+        setup_read_icc_profile (&cinfo);
+
+        jpeg_read_header(&cinfo, TRUE);
+
+        deleteLoadedProfileData();
+        loadedProfileDataJpg = true;
+        bool hasprofile = read_icc_profile (&cinfo, (JOCTET**)&loadedProfileData, (unsigned int*)&loadedProfileLength);
+
+        if (hasprofile) {
+            embProfile = cmsOpenProfileFromMem (loadedProfileData, loadedProfileLength);
+        } else {
+            embProfile = nullptr;
+        }
+
+        jpeg_start_decompress(&cinfo);
+
+        unsigned int width = cinfo.output_width;
+        unsigned int height = cinfo.output_height;
+
+        allocate (width, height);
+
+        std::vector<unsigned char> vrow(width * 3);
+        unsigned char *row = &(vrow[0]); //new unsigned char[width * 3];
+
+        while (cinfo.output_scanline < height) {
+            if (jpeg_read_scanlines(&cinfo, &row, 1) < 1) {
+                jpeg_finish_decompress(&cinfo);
+                jpeg_destroy_decompress(&cinfo);
+                //delete [] row;
+                return IMIO_READERROR;
+            }
+
+            setScanline (cinfo.output_scanline - 1, row, 8, cinfo.num_components);
+
+            if (pl && !(cinfo.output_scanline % 100)) {
+                pl->setProgress ((double)(cinfo.output_scanline) / cinfo.output_height);
+            }
+        }
+
+        //delete [] row;
+
+        jpeg_finish_decompress(&cinfo);
+        jpeg_destroy_decompress(&cinfo);
+
+        if (pl) {
+            pl->setProgressStr ("PROGRESSBAR_READY");
+            pl->setProgress (1.0);
+        }
+
+        return IMIO_SUCCESS;
+    } catch (rt_jpeg_error &) {
         jpeg_destroy_decompress(&cinfo);
         return IMIO_READERROR;
     }
-
-
-    if (pl) {
-        pl->setProgressStr ("PROGRESSBAR_LOADJPEG");
-        pl->setProgress (0.0);
-
-    }
-
-    setup_read_icc_profile (&cinfo);
-
-    jpeg_read_header(&cinfo, TRUE);
-
-    deleteLoadedProfileData();
-    loadedProfileDataJpg = true;
-    bool hasprofile = read_icc_profile (&cinfo, (JOCTET**)&loadedProfileData, (unsigned int*)&loadedProfileLength);
-
-    if (hasprofile) {
-        embProfile = cmsOpenProfileFromMem (loadedProfileData, loadedProfileLength);
-    } else {
-        embProfile = nullptr;
-    }
-
-    jpeg_start_decompress(&cinfo);
-
-    unsigned int width = cinfo.output_width;
-    unsigned int height = cinfo.output_height;
-
-    allocate (width, height);
-
-    unsigned char *row = new unsigned char[width * 3];
-
-    while (cinfo.output_scanline < height) {
-        if (jpeg_read_scanlines(&cinfo, &row, 1) < 1) {
-            jpeg_finish_decompress(&cinfo);
-            jpeg_destroy_decompress(&cinfo);
-            delete [] row;
-            return IMIO_READERROR;
-        }
-
-        setScanline (cinfo.output_scanline - 1, row, 8, cinfo.num_components);
-
-        if (pl && !(cinfo.output_scanline % 100)) {
-            pl->setProgress ((double)(cinfo.output_scanline) / cinfo.output_height);
-        }
-    }
-
-    delete [] row;
-
-    jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-
-    if (pl) {
-        pl->setProgressStr ("PROGRESSBAR_READY");
-        pl->setProgress (1.0);
-    }
-
-    return IMIO_SUCCESS;
 }
 
 int ImageIO::loadJPEG (const Glib::ustring &fname)
@@ -466,13 +474,14 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
     }
 
     jpeg_decompress_struct cinfo;
-    jpeg_error_mgr jerr;
-    cinfo.err = my_jpeg_std_error(&jerr);
+    rt_jpeg_error_mgr jerr;
+    cinfo.err = rt_jpeg_std_error(&jerr, fname.c_str(), pl);
     jpeg_create_decompress(&cinfo);
 
-    my_jpeg_stdio_src (&cinfo, file);
+    jpeg_stdio_src(&cinfo, file);
 
-    if ( setjmp((reinterpret_cast<rt_jpeg_error_mgr*>(cinfo.src))->error_jmp_buf) == 0 ) {
+//    if ( setjmp((reinterpret_cast<rt_jpeg_error_mgr*>(cinfo.src))->error_jmp_buf) == 0 ) {
+    try { 
         if (pl) {
             pl->setProgressStr ("PROGRESSBAR_LOADJPEG");
             pl->setProgress (0.0);
@@ -486,6 +495,9 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
         //if JPEG is CMYK, then abort reading
         if (cinfo.jpeg_color_space == JCS_CMYK || cinfo.jpeg_color_space == JCS_YCCK) {
             jpeg_destroy_decompress(&cinfo);
+            if (pl) {
+                pl->error(M("JPEG_UNSUPPORTED_COLORSPACE_ERROR"));
+            }
             return IMIO_READERROR;
         }
 
@@ -508,13 +520,14 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
 
         allocate (width, height);
 
-        unsigned char *row = new unsigned char[width * 3];
+        std::vector<unsigned char> vrow(width *3);
+        unsigned char *row = &(vrow[0]);//new unsigned char[width * 3];
 
         while (cinfo.output_scanline < height) {
             if (jpeg_read_scanlines(&cinfo, &row, 1) < 1) {
                 jpeg_finish_decompress(&cinfo);
                 jpeg_destroy_decompress(&cinfo);
-                delete [] row;
+                //delete [] row;
                 return IMIO_READERROR;
             }
 
@@ -525,7 +538,7 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
             }
         }
 
-        delete [] row;
+        //delete [] row;
 
         jpeg_finish_decompress(&cinfo);
         jpeg_destroy_decompress(&cinfo);
@@ -537,7 +550,7 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
         }
 
         return IMIO_SUCCESS;
-    } else {
+    } catch (rt_jpeg_error &) {//else {
         jpeg_destroy_decompress(&cinfo);
         return IMIO_READERROR;
     }
@@ -1002,127 +1015,135 @@ int ImageIO::saveJPEG (const Glib::ustring &fname, int quality, int subSamp) con
        Note that this struct must live as long as the main JPEG parameter
        struct, to avoid dangling-pointer problems.
     */
-    my_error_mgr jerr;
+    //my_error_mgr jerr;
     /* We set up the normal JPEG error routines, then override error_exit. */
-    cinfo.err = jpeg_std_error(&jerr.pub);
-    jerr.pub.error_exit = my_error_exit;
+    //cinfo.err = jpeg_std_error(&jerr.pub);
+    //jerr.pub.error_exit = my_error_exit;
+    rt_jpeg_error_mgr jerr;
+    cinfo.err = rt_jpeg_std_error(&jerr, fname.c_str(), pl);
 
-    /* Establish the setjmp return context for my_error_exit to use. */
-#if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
+//     /* Establish the setjmp return context for my_error_exit to use. */
+// #if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
 
-    if (__builtin_setjmp(jerr.setjmp_buffer)) {
-#else
+//     if (__builtin_setjmp(jerr.setjmp_buffer)) {
+// #else
 
-    if (setjmp(jerr.setjmp_buffer)) {
-#endif
-        /* If we get here, the JPEG code has signaled an error.
-           We need to clean up the JPEG object, close the file, remove the already saved part of the file and return.
-        */
-        jpeg_destroy_compress(&cinfo);
-        fclose(file);
-        g_remove (fname.c_str());
-        return IMIO_CANNOTWRITEFILE;
-    }
+//     if (setjmp(jerr.setjmp_buffer)) {
+// #endif
+//         /* If we get here, the JPEG code has signaled an error.
+//            We need to clean up the JPEG object, close the file, remove the already saved part of the file and return.
+//         */
+//         jpeg_destroy_compress(&cinfo);
+//         fclose(file);
+//         g_remove (fname.c_str());
+//         return IMIO_CANNOTWRITEFILE;
+//     }
 
     jpeg_create_compress (&cinfo);
 
+    try {
+        if (pl) {
+            pl->setProgressStr ("PROGRESSBAR_SAVEJPEG");
+            pl->setProgress (0.0);
+        }
 
+        jpeg_stdio_dest (&cinfo, file);
 
-    if (pl) {
-        pl->setProgressStr ("PROGRESSBAR_SAVEJPEG");
-        pl->setProgress (0.0);
-    }
+        int width = getWidth ();
+        int height = getHeight ();
 
-    jpeg_stdio_dest (&cinfo, file);
+        cinfo.image_width  = width;
+        cinfo.image_height = height;
+        cinfo.in_color_space = JCS_RGB;
+        cinfo.input_components = 3;
+        jpeg_set_defaults (&cinfo);
+        cinfo.write_JFIF_header = FALSE;
 
-    int width = getWidth ();
-    int height = getHeight ();
+        // compute optimal Huffman coding tables for the image. Bit slower to generate, but size of result image is a bit less (default was FALSE)
+        cinfo.optimize_coding = TRUE;
 
-    cinfo.image_width  = width;
-    cinfo.image_height = height;
-    cinfo.in_color_space = JCS_RGB;
-    cinfo.input_components = 3;
-    jpeg_set_defaults (&cinfo);
-    cinfo.write_JFIF_header = FALSE;
+        // Since math coprocessors are common these days, FLOAT should be a bit more accurate AND fast (default is ISLOW)
+        // (machine dependency is not really an issue, since we all run on x86 and having exactly the same file is not a requirement)
+        cinfo.dct_method = JDCT_FLOAT;
 
-    // compute optimal Huffman coding tables for the image. Bit slower to generate, but size of result image is a bit less (default was FALSE)
-    cinfo.optimize_coding = TRUE;
+        if (quality >= 0 && quality <= 100) {
+            jpeg_set_quality (&cinfo, quality, true);
+        }
 
-    // Since math coprocessors are common these days, FLOAT should be a bit more accurate AND fast (default is ISLOW)
-    // (machine dependency is not really an issue, since we all run on x86 and having exactly the same file is not a requirement)
-    cinfo.dct_method = JDCT_FLOAT;
+        cinfo.comp_info[1].h_samp_factor = cinfo.comp_info[1].v_samp_factor = 1;
+        cinfo.comp_info[2].h_samp_factor = cinfo.comp_info[2].v_samp_factor = 1;
 
-    if (quality >= 0 && quality <= 100) {
-        jpeg_set_quality (&cinfo, quality, true);
-    }
+        if (subSamp == 1) {
+            // Best compression, default of the JPEG library:  2x2, 1x1, 1x1 (4:2:0)
+            cinfo.comp_info[0].h_samp_factor = cinfo.comp_info[0].v_samp_factor = 2;
+        } else if (subSamp == 2) {
+            // Widely used normal ratio 2x1, 1x1, 1x1 (4:2:2)
+            cinfo.comp_info[0].h_samp_factor = 2;
+            cinfo.comp_info[0].v_samp_factor = 1;
+        } else if (subSamp == 3) {
+            // Best quality 1x1 1x1 1x1 (4:4:4)
+            cinfo.comp_info[0].h_samp_factor = cinfo.comp_info[0].v_samp_factor = 1;
+        }
 
-    cinfo.comp_info[1].h_samp_factor = cinfo.comp_info[1].v_samp_factor = 1;
-    cinfo.comp_info[2].h_samp_factor = cinfo.comp_info[2].v_samp_factor = 1;
+        jpeg_start_compress(&cinfo, TRUE);
 
-    if (subSamp == 1) {
-        // Best compression, default of the JPEG library:  2x2, 1x1, 1x1 (4:2:0)
-        cinfo.comp_info[0].h_samp_factor = cinfo.comp_info[0].v_samp_factor = 2;
-    } else if (subSamp == 2) {
-        // Widely used normal ratio 2x1, 1x1, 1x1 (4:2:2)
-        cinfo.comp_info[0].h_samp_factor = 2;
-        cinfo.comp_info[0].v_samp_factor = 1;
-    } else if (subSamp == 3) {
-        // Best quality 1x1 1x1 1x1 (4:4:4)
-        cinfo.comp_info[0].h_samp_factor = cinfo.comp_info[0].v_samp_factor = 1;
-    }
+        // write icc profile to the output
+        if (profileData) {
+            write_icc_profile (&cinfo, (JOCTET*)profileData, profileLength);
+        }
 
-    jpeg_start_compress(&cinfo, TRUE);
+        // write image data
+        int rowlen = width * 3;
+        std::vector<unsigned char> vrow(rowlen);
+        unsigned char *row = &(vrow[0]);//new unsigned char [rowlen];
 
-    // write icc profile to the output
-    if (profileData) {
-        write_icc_profile (&cinfo, (JOCTET*)profileData, profileLength);
-    }
+//         /* To avoid memory leaks we establish a new setjmp return context for my_error_exit to use. */
+// #if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
 
-    // write image data
-    int rowlen = width * 3;
-    unsigned char *row = new unsigned char [rowlen];
+//         if (__builtin_setjmp(jerr.setjmp_buffer)) {
+// #else
 
-    /* To avoid memory leaks we establish a new setjmp return context for my_error_exit to use. */
-#if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
+//             if (setjmp(jerr.setjmp_buffer)) {
+// #endif
+//                 /* If we get here, the JPEG code has signaled an error.
+//                    We need to clean up the JPEG object, close the file, remove the already saved part of the file and return.
+//                 */
+//                 //delete [] row;
+//                 jpeg_destroy_compress(&cinfo);
+//                 fclose(file);
+//                 g_remove (fname.c_str());
+//                 return IMIO_CANNOTWRITEFILE;
+//             }
 
-    if (__builtin_setjmp(jerr.setjmp_buffer)) {
-#else
+        while (cinfo.next_scanline < cinfo.image_height) {
 
-    if (setjmp(jerr.setjmp_buffer)) {
-#endif
-        /* If we get here, the JPEG code has signaled an error.
-           We need to clean up the JPEG object, close the file, remove the already saved part of the file and return.
-        */
-        delete [] row;
+            getScanline (cinfo.next_scanline, row, 8);
+
+            if (jpeg_write_scanlines (&cinfo, &row, 1) < 1) {
+                jpeg_destroy_compress (&cinfo);
+                //delete [] row;
+                fclose (file);
+                g_remove (fname.c_str());
+                return IMIO_CANNOTWRITEFILE;
+            }
+
+            if (pl && !(cinfo.next_scanline % 100)) {
+                pl->setProgress ((double)(cinfo.next_scanline) / cinfo.image_height);
+            }
+        }
+
+        jpeg_finish_compress (&cinfo);
+        jpeg_destroy_compress (&cinfo);
+
+        //delete [] row;
+
+        fclose (file);
+    } catch (rt_jpeg_error &e) {
         jpeg_destroy_compress(&cinfo);
         fclose(file);
-        g_remove (fname.c_str());
+        g_remove(fname.c_str());
         return IMIO_CANNOTWRITEFILE;
     }
-
-    while (cinfo.next_scanline < cinfo.image_height) {
-
-        getScanline (cinfo.next_scanline, row, 8);
-
-        if (jpeg_write_scanlines (&cinfo, &row, 1) < 1) {
-            jpeg_destroy_compress (&cinfo);
-            delete [] row;
-            fclose (file);
-            g_remove (fname.c_str());
-            return IMIO_CANNOTWRITEFILE;
-        }
-
-        if (pl && !(cinfo.next_scanline % 100)) {
-            pl->setProgress ((double)(cinfo.next_scanline) / cinfo.image_height);
-        }
-    }
-
-    jpeg_finish_compress (&cinfo);
-    jpeg_destroy_compress (&cinfo);
-
-    delete [] row;
-
-    fclose (file);
 
     if (!saveMetadata(fname)) {
         g_remove(fname.c_str());

@@ -33,7 +33,7 @@
 #include "stdimagesource.h"
 #include <glib/gstdio.h>
 #include "rawimage.h"
-#include "jpeg.h"
+#include "rtjpeg.h"
 #include "../rtgui/ppversion.h"
 #include "improccoordinator.h"
 #include "settings.h"
