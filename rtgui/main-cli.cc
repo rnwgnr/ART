@@ -581,7 +581,7 @@ int processLineParams ( int argc, char **argv )
 
                                     if (sideProcParams && skipIfNoSidecar) {
                                         // look for the sidecar proc params
-                                        if (!Glib::file_test (fileName + paramFileExtension, Glib::FILE_TEST_EXISTS)) {
+                                        if (!Glib::file_test(options.getParamFile(fileName), Glib::FILE_TEST_EXISTS)) {
                                             std::cout << "\"" << fileName << "\"  has no side-car file. Image skipped." << std::endl;
                                             continue;
                                         }
@@ -798,7 +798,7 @@ int processLineParams ( int argc, char **argv )
         do {
             if (sideProcParams && i == sideCarFilePos) {
                 // using the sidecar file
-                Glib::ustring sideProcessingParams = inputFile + paramFileExtension;
+                Glib::ustring sideProcessingParams = options.getParamFile(inputFile);
 
                 // the "load" method don't reset the procparams values anymore, so values found in the procparam file override the one of currentParams
                 if (!Glib::file_test(sideProcessingParams, Glib::FILE_TEST_EXISTS) || currentParams.load(nullptr, sideProcessingParams)) {

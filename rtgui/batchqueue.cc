@@ -906,7 +906,7 @@ Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileNam
                     char rank;
                     rtengine::procparams::ProcParams pparams;
 
-                    if( pparams.load(nullptr, origFileName + paramFileExtension) == 0 ) {
+                    if( pparams.load(nullptr, options.getParamFile(origFileName)) == 0 ) {
                         if (!pparams.inTrash) {
                             rank = pparams.rank + '0';
                         } else {

@@ -163,6 +163,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::ComboBoxText* loadParamsPreference;
     Gtk::ComboBoxText *saveOutParamsPreference;
     Gtk::ComboBoxText* editorLayout;
+    Gtk::ComboBoxText *paramsSidecarStripExtension;
     RTWindow* parent;
 
     Gtk::CheckButton* ckbSndEnable;

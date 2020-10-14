@@ -1280,6 +1280,9 @@ PREFERENCES_OVERLAY_FILENAMES;Overlay filenames on thumbnails in the file browse
 PREFERENCES_OVERLAY_FILENAMES_FILMSTRIP;Overlay filenames on thumbnails in the editor panel
 PREFERENCES_OVERWRITEOUTPUTFILE;Overwrite existing output files
 PREFERENCES_PANFACTORLABEL;Pan rate amplification
+PREFERENCES_PARAMS_SIDECAR_STYLE;Processing profile sidecar style
+PREFERENCES_PARAMS_SIDECAR_FULL;Append .arp to filename (FILENAME.ext.arp for FILENAME.ext)
+PREFERENCES_PARAMS_SIDECAR_STRIP_EXT;Replace extension with .arp (FILENAME.arp for FILENAME.ext)
 PREFERENCES_PARSEDEXT;Parsed Extensions
 PREFERENCES_PARSEDEXTADD;Add extension
 PREFERENCES_PARSEDEXTADDHINT;Add entered extension to the list.

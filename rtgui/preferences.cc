@@ -211,6 +211,14 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     setExpandAlignProperties(lplab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     vbdp->attach(*saveOutParamsPreference, 1, 2, 2, 3, Gtk::EXPAND | Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 2, 2);
     
+    lplab = Gtk::manage(new Gtk::Label(M ("PREFERENCES_PARAMS_SIDECAR_STYLE") + ":"));
+    paramsSidecarStripExtension = Gtk::manage (new Gtk::ComboBoxText());
+    paramsSidecarStripExtension->append(M("PREFERENCES_PARAMS_SIDECAR_FULL"));
+    paramsSidecarStripExtension->append(M("PREFERENCES_PARAMS_SIDECAR_STRIP_EXT"));
+    vbdp->attach(*lplab, 0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 2);
+    setExpandAlignProperties(lplab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    vbdp->attach(*paramsSidecarStripExtension, 1, 2, 3, 4, Gtk::EXPAND | Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 2, 2);
+
     fdp->add (*vbdp);
     vbImageProcessing->pack_start (*fdp, Gtk::PACK_SHRINK, 4);
 
@@ -1535,6 +1543,7 @@ void Preferences::storePreferences ()
     moptions.saveParamsCache = save_where == 1 || save_where == 2;
     moptions.paramsLoadLocation = (PPLoadLocation)loadParamsPreference->get_active_row_number ();
     moptions.params_out_embed = saveOutParamsPreference->get_active_row_number() == 1;
+    moptions.params_sidecar_strip_extension = paramsSidecarStripExtension->get_active_row_number() == 1;
     moptions.useBundledProfiles = useBundledProfiles->get_active ();
 
     moptions.rtSettings.darkFramesPath = darkFrameDir->get_filename();
@@ -1765,6 +1774,7 @@ void Preferences::fillPreferences ()
 
     loadParamsPreference->set_active(moptions.paramsLoadLocation);
     saveOutParamsPreference->set_active(moptions.params_out_embed ? 1 : 0);
+    paramsSidecarStripExtension->set_active(moptions.params_sidecar_strip_extension ? 1 : 0);
     useBundledProfiles->set_active(moptions.useBundledProfiles);
 
     if (!moptions.tabbedUI) {

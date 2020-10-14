@@ -372,6 +372,7 @@ void Options::setDefaults()
     saveParamsCache = false;            // there's no need to save the procparams files in a cache if saveParamsFile is true
     paramsLoadLocation = PLL_Input;     // was PLL_Cache
     params_out_embed = false;
+    params_sidecar_strip_extension = false;
     procQueueEnabled = false;
     gimpDir = "";
     psDir = "";
@@ -936,6 +937,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("Profiles", "EmbedParamsInMetadata")) {
                     params_out_embed = keyFile.get_boolean("Profiles", "EmbedParamsInMetadata");
+                }
+
+                if (keyFile.has_key("Profiles", "ParamsSidecarStripExtension")) {
+                    params_sidecar_strip_extension = keyFile.get_boolean("Profiles", "ParamsSidecarStripExtension");
                 }
                 
                 if (keyFile.has_key("Profiles", "CustomProfileBuilder")) {
@@ -2088,6 +2093,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Profiles", "SaveParamsToCache", saveParamsCache);
         keyFile.set_integer("Profiles", "LoadParamsFromLocation", paramsLoadLocation);
         keyFile.set_boolean("Profiles", "EmbedParamsInMetadata", params_out_embed);
+        keyFile.set_boolean("Profiles", "ParamsSidecarStripExtension", params_sidecar_strip_extension);
         keyFile.set_string("Profiles", "CustomProfileBuilderPath", CPBPath);
         keyFile.set_integer("Profiles", "CustomProfileBuilderKeys", CPBKeys);
 
@@ -2628,4 +2634,14 @@ Glib::ustring Options::getICCProfileCopyright()
     Glib::Date now;
     now.set_time_current();
     return Glib::ustring::compose("Copyright RawTherapee %1, CC0", now.get_year());
+}
+
+
+Glib::ustring Options::getParamFile(const Glib::ustring &fname)
+{
+    if (params_sidecar_strip_extension) {
+        return removeExtension(fname) + paramFileExtension;
+    } else {
+        return fname + paramFileExtension;
+    }
 }

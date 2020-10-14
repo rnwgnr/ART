@@ -1030,8 +1030,9 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
             // delete from file system
             ::g_remove (fname.c_str ());
             // delete paramfile if found
-            ::g_remove ((fname + paramFileExtension).c_str ());
-            ::g_remove ((removeExtension(fname) + paramFileExtension).c_str ());
+            // ::g_remove ((fname + paramFileExtension).c_str ());
+            // ::g_remove ((removeExtension(fname) + paramFileExtension).c_str ());
+            ::g_remove(options.getParamFile(fname).c_str());
             // delete .thm file
             ::g_remove ((removeExtension(fname) + ".thm").c_str ());
             ::g_remove ((removeExtension(fname) + ".THM").c_str ());
@@ -1100,7 +1101,7 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
 
             // construct  destination File Paths
             Glib::ustring dest_fPath = Glib::build_filename (options.lastCopyMovePath, fname);
-            Glib::ustring dest_fPath_param = dest_fPath + paramFileExtension;
+            Glib::ustring dest_fPath_param = options.getParamFile(dest_fPath);
 
             if (moveRequested && (src_Dir == options.lastCopyMovePath)) {
                 continue;
@@ -1133,17 +1134,17 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
 
 
                     // attempt to copy/move paramFile only if it exist next to the src
-                    Glib::RefPtr<Gio::File> scr_param = Gio::File::create_for_path (  src_fPath + paramFileExtension );
+                    Glib::RefPtr<Gio::File> scr_param = Gio::File::create_for_path (options.getParamFile(src_fPath));
 
-                    if (Glib::file_test( src_fPath + paramFileExtension, Glib::FILE_TEST_EXISTS)) {
+                    if (Glib::file_test(options.getParamFile(src_fPath), Glib::FILE_TEST_EXISTS)) {
                         Glib::RefPtr<Gio::File> dest_param = Gio::File::create_for_path ( dest_fPath_param);
 
                         // copy/move paramFile to destination
                         if (moveRequested) {
-                            if (Glib::file_test( dest_fPath + paramFileExtension, Glib::FILE_TEST_EXISTS)) {
+                            if (Glib::file_test(options.getParamFile(dest_fPath), Glib::FILE_TEST_EXISTS)) {
                                 // profile already got copied to destination from cache after cacheMgr->renameEntry
                                 // delete source profile as cleanup
-                                ::g_remove ((src_fPath + paramFileExtension).c_str ());
+                                ::g_remove (options.getParamFile(src_fPath).c_str ());
                             } else {
                                 scr_param->move(dest_param);
                             }
@@ -1169,7 +1170,7 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
                     Glib::ustring dest_fname = Glib::ustring::compose("%1%2%3%4%5", fname_noExt, "_", i_copyindex, ".", fname_Ext);
                     // re-construct  destination File Paths
                     dest_fPath = Glib::build_filename (options.lastCopyMovePath, dest_fname);
-                    dest_fPath_param = dest_fPath + paramFileExtension;
+                    dest_fPath_param = options.getParamFile(dest_fPath);
                     i_copyindex++;
                 }
             }//while
@@ -1249,7 +1250,7 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry*>& tbe)
 
                     if (::g_rename (ofname.c_str (), nfname.c_str ()) == 0) {
                         cacheMgr->renameEntry (ofname, tbe[i]->thumbnail->getMD5(), nfname);
-                        ::g_remove((ofname + paramFileExtension).c_str ());
+                        ::g_remove(options.getParamFile(ofname).c_str());
                         auto xmp = Thumbnail::getXmpSidecarPath(ofname);
                         if (!xmp.empty()) {
                             ::g_remove(xmp.c_str());

@@ -282,7 +282,7 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
 
     const Glib::ustring outFName =
         (options.paramsLoadLocation == PLL_Input && options.saveParamsFile) ?
-        fname + paramFileExtension :
+        options.getParamFile(fname) :
         getCacheFileName("profiles", paramFileExtension);
 
     if (!run_cpb) {
@@ -358,20 +358,20 @@ void Thumbnail::loadProcParams(bool load_rating)
 
     if (options.paramsLoadLocation == PLL_Input) {
         // try to load it from params file next to the image file
-        int ppres = pparams.load (cachemgr->getProgressListener(), fname + paramFileExtension);
+        int ppres = pparams.load(cachemgr->getProgressListener(), options.getParamFile(fname));
         pparamsValid = !ppres && pparams.master.ppVersion >= 220;
 
         // if no success, try to load the cached version of the procparams
         if (!pparamsValid) {
-            pparamsValid = !pparams.load (cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
+            pparamsValid = !pparams.load(cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
         }
     } else {
         // try to load it from cache
-        pparamsValid = !pparams.load (cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
+        pparamsValid = !pparams.load(cachemgr->getProgressListener(), getCacheFileName ("profiles", paramFileExtension));
 
         // if no success, try to load it from params file next to the image file
         if (!pparamsValid) {
-            int ppres = pparams.load (cachemgr->getProgressListener(), fname + paramFileExtension);
+            int ppres = pparams.load(cachemgr->getProgressListener(), options.getParamFile(fname));
             pparamsValid = !ppres && pparams.master.ppVersion >= 220;
         }
     }
@@ -423,10 +423,11 @@ void Thumbnail::clearProcParams (int whoClearedIt)
             g_remove (fname_.c_str ());
 
             // remove param file located next to the file
-            fname_ = fname + paramFileExtension;
-            g_remove (fname_.c_str ());
+            // fname_ = fname + paramFileExtension;
+            // g_remove (fname_.c_str ());
 
-            fname_ = removeExtension(fname) + paramFileExtension;
+            // fname_ = removeExtension(fname) + paramFileExtension;
+            fname_ = options.getParamFile(fname);
             g_remove (fname_.c_str ());
 
             if (cfs.format == FT_Raw && options.internalThumbIfUntouched && cfs.thumbImgType != CacheImageData::QUICK_THUMBNAIL) {
@@ -951,7 +952,7 @@ void Thumbnail::updateCache (bool updatePParams, bool updateCacheImageData)
     if (updatePParams && pparamsValid) {
         pparams.save (
             cachemgr->getProgressListener(),
-            options.saveParamsFile  ? fname + paramFileExtension : "",
+            options.saveParamsFile  ? options.getParamFile(fname) : "",
             options.saveParamsCache ? getCacheFileName ("profiles", paramFileExtension) : "");
     }
 

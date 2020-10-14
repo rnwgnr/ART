@@ -243,6 +243,7 @@ public:
     bool saveParamsCache;
     PPLoadLocation paramsLoadLocation;
     bool params_out_embed;
+    bool params_sidecar_strip_extension;
     
     bool procQueueEnabled;
     Glib::ustring gimpDir;
@@ -455,6 +456,8 @@ public:
     void setDefProfImgMissing(bool value);
     void setBundledDefProfImgMissing(bool value);
     static Glib::ustring getICCProfileCopyright();
+
+    Glib::ustring getParamFile(const Glib::ustring &fname);
 };
 
 extern Options options;
