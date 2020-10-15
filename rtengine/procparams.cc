@@ -34,6 +34,7 @@
 #include "rtengine.h"
 #include "metadata.h"
 #include "halffloat.h"
+#include "base64.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -47,11 +48,11 @@ namespace rtengine { namespace procparams {
 
 namespace {
 
-std::vector<char> compress(const std::string &src)
+std::vector<uint8_t> compress(const std::string &src)
 {
     auto s = Gio::MemoryOutputStream::create(nullptr, 0, g_realloc, g_free);
     auto c = Gio::ZlibCompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW, -1);
-    std::vector<char> res;
+    std::vector<uint8_t> res;
     {
         auto stream = Gio::ConverterOutputStream::create(s, c);
         stream->set_close_base_stream(true);
@@ -68,7 +69,7 @@ std::vector<char> compress(const std::string &src)
 }
 
 
-std::string decompress(const std::vector<char> &src)
+std::string decompress(const std::vector<uint8_t> &src)
 {
     auto s = Gio::MemoryOutputStream::create(nullptr, 0, g_realloc, g_free);
     auto c = Gio::ZlibDecompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW);
@@ -108,24 +109,18 @@ class ConversionError: public std::exception {
 std::string to_xmp(const Glib::ustring &data)
 {
     auto res = compress(data.raw());
-    std::vector<char> buf(((res.size() + 2) / 3) * 4 + 1);
-    if (Exiv2::base64encode(&(res[0]), res.size(), &(buf[0]), buf.size()) != 1) {
-        throw ConversionError();
-    }
-    buf.push_back(0);
-    return std::string(&(buf[0]));
+    return base64encode(res);
 }
 
 
 Glib::ustring from_xmp(const std::string &data)
 {
-    std::vector<char> buf(data.size());
-    long n = Exiv2::base64decode(data.c_str(), &(buf[0]), buf.size());
-    if (n < 0) {
+    try {
+        auto buf = base64decode(data);
+        return decompress(buf);
+    } catch (std::exception &e) {
         throw ConversionError();
     }
-    buf.resize(n);
-    return decompress(buf);
 }
 
 std::vector<double> unpack_list(const std::string &data)
@@ -134,12 +129,12 @@ std::vector<double> unpack_list(const std::string &data)
     if (data.empty()) {
         return ret;
     }
-    std::vector<char> buf(data.size());
-    long n = Exiv2::base64decode(data.c_str(), &(buf[0]), buf.size());
-    if (n < 0) {
+    std::vector<uint8_t> buf;
+    try {
+        buf = base64decode(data);
+    } catch (std::exception &exc) {
         throw ConversionError();
     }
-    buf.resize(n);
     Exiv2::byte *p = reinterpret_cast<Exiv2::byte *>(&(buf[0]));
     for (size_t i = 0; i < buf.size(); i += sizeof(uint16_t)) {
         uint16_t v = Exiv2::getUShort(p + i, Exiv2::littleEndian);
@@ -152,7 +147,7 @@ std::vector<double> unpack_list(const std::string &data)
 
 std::string pack_list(const std::vector<double> &data)
 {
-    std::vector<Exiv2::byte> bytes(data.size() * sizeof(uint16_t));
+    std::vector<uint8_t> bytes(data.size() * sizeof(uint16_t));
     auto p = &(bytes[0]);
     size_t off = 0;
     for (auto f : data) {
@@ -160,12 +155,7 @@ std::string pack_list(const std::vector<double> &data)
         long o = Exiv2::us2Data(p + off, v, Exiv2::littleEndian);
         off += o;
     }
-    std::vector<char> buf(((bytes.size() + 2) / 3) * 4 + 1);
-    if (Exiv2::base64encode(&(bytes[0]), bytes.size(), &(buf[0]), buf.size()) != 1) {
-        throw ConversionError();
-    }
-    buf.push_back(0);
-    return std::string(&(buf[0]));
+    return base64encode(bytes);
 }
 
 } // namespace
@@ -1221,7 +1211,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                     Glib::ustring raw;
                     if ((found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Knots" + suffix, raw))) {
                         ret = true;
-                        std::vector<double> vv = unpack_list(raw.raw());
+                        std::vector<double> vv = unpack_list(raw);//.raw());
                         poly->knots_from_list(vv);
                     }
                 }
@@ -1289,7 +1279,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
         Glib::ustring raw;
         if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, raw)) {
             ret = true;
-            std::vector<double> vv = unpack_list(raw.raw());
+            std::vector<double> vv = unpack_list(raw);//.raw());
             drawnMask.strokes_from_list(vv);
         }
     }
