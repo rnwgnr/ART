@@ -321,6 +321,14 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
         guidedFilter(guide, global_mask, global_mask, radius, 1e-7, multithread);
     }
 
+    // blur the shape's mask
+    if (areaMask.blur > 0.) {
+#ifdef _OPENMP
+#       pragma omp parallel if (multithread)
+#endif
+        gaussianBlur(global_mask, global_mask, global_mask.width(), global_mask.height(), areaMask.blur / scale);
+    }
+
     // Apply contrast
     if (!contrast_curve.isIdentity()) {
         const auto contrast =
@@ -341,8 +349,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 assert(global_mask[y][x] == global_mask[y][x]);
             }
         }
-    }
-    else {
+    } else {
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
@@ -352,14 +359,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 assert(global_mask[y][x] == global_mask[y][x]);
             }
         }
-    }
-
-    // blur the shape's mask
-    if (areaMask.blur > 0.) {
-#ifdef _OPENMP
-#       pragma omp parallel if (multithread)
-#endif
-        gaussianBlur(global_mask, global_mask, global_mask.width(), global_mask.height(), areaMask.blur / scale);
     }
 
     return true;
