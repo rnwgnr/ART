@@ -216,6 +216,8 @@ GENERAL_CANCEL;Annuler
 GENERAL_CHANGED;Changé
 GENERAL_CLOSE;Fermer
 GENERAL_CURRENT;Actuel
+GENERAL_DELETE_ALL;Tout supprimer
+GENERAL_EDIT;Editer
 GENERAL_DISABLE;Désactiver
 GENERAL_DISABLED;Désactivé
 GENERAL_ENABLE;Activer
@@ -835,6 +837,7 @@ HISTORY_MSG_METADATA_MODE;Mode de copie des métadonnées
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontraste - Seuil de contraste
 HISTORY_MSG_PCVIGNETTE_CENTER;VF - Centre
 HISTORY_MSG_PERSPECTIVE_ENABLED;Correction de perspective
+HISTORY_MSG_PERSPECTIVE_CTRL_LINE;Perspective - Lignes de contrôle
 HISTORY_MSG_PERSPECTIVE_LENS;Perspective - Données de l'objectif
 HISTORY_MSG_PIXELSHIFT_DEMOSAIC;PS - Méthode de dématriçage pour les mouvements
 HISTORY_MSG_PREPROCESS_DYNROWNOISEFILTER;Filtre dynamique de bruit en lignes
@@ -887,6 +890,7 @@ HISTORY_NEWSNAPSHOT;Ajouter
 HISTORY_NEWSNAPSHOT_TOOLTIP;Raccourci : <b>Alt-s</b>
 HISTORY_SNAPSHOT;Instantané
 HISTORY_SNAPSHOTS;Instantanés
+HISTORY_SNAPSHOT_CONFIRM_UPDATE;Ecraser l'Instantané actuel ?
 ICCPROFCREATOR_COPYRIGHT;Copyright :
 ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Réinitialise au copyright par défaut, attribué à "ART, CC0"
 ICCPROFCREATOR_CUSTOM;Personnalisé
@@ -1832,6 +1836,8 @@ TP_PERSPECTIVE_AUTO;Correction auto.
 TP_PERSPECTIVE_AUTO_BOTH_TOOLTIP;Horizontale et verticale
 TP_PERSPECTIVE_AUTO_HORIZONTAL_TOOLTIP;Horizontale
 TP_PERSPECTIVE_AUTO_VERTICAL_TOOLTIP;Verticale
+TP_PERSPECTIVE_CONTROL_LINES;Lignes de contrôle
+TP_PERSPECTIVE_CONTROL_LINES_TOOLTIP;<b>Ctrl</b>+<b>drag</b>: Tracer une nouvelle ligne\n<b>Right-click</b>: Effacer la ligne
 TP_PERSPECTIVE_CROPFACTOR;Facteur de rognage
 TP_PERSPECTIVE_FLENGTH;Distance focale
 TP_PERSPECTIVE_HORIZONTAL;Horizontale
