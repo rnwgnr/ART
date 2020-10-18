@@ -419,6 +419,7 @@ public:
     bool batch_queue_use_profile;
 
     bool toolpanels_disable;
+    bool adjuster_force_linear;
     
     int error_message_duration; // in milliseconds
     int max_error_messages;

@@ -620,6 +620,7 @@ void Options::setDefaults()
     batch_queue_profile_path = "";
 
     toolpanels_disable = false;
+    adjuster_force_linear = false;
 
     error_message_duration = 5000;
     max_error_messages = 3;
@@ -1443,6 +1444,10 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("GUI", "ToolPanelsDisable")) {
                     toolpanels_disable = keyFile.get_boolean("GUI", "ToolPanelsDisable");
                 }
+
+                if (keyFile.has_key("GUI", "AdjusterForceLinear")) {
+                    adjuster_force_linear = keyFile.get_boolean("GUI", "AdjusterForceLinear");
+                }
             }
 
             if (keyFile.has_group("Crop Settings")) {
@@ -2169,6 +2174,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean ("GUI", "HistogramWorking", rtSettings.HistogramWorking);
         keyFile.set_integer ("GUI", "CurveBBoxPosition", curvebboxpos);
         keyFile.set_boolean("GUI", "ToolPanelsDisable", toolpanels_disable);
+        keyFile.set_boolean("GUI", "AdjusterForceLinear", adjuster_force_linear);
 
         //Glib::ArrayHandle<int> crvopen = crvOpen;
         //keyFile.set_integer_list ("GUI", "CurvePanelsExpanded", crvopen);

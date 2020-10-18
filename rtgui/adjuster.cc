@@ -690,17 +690,19 @@ inline void Adjuster::setSliderValue(double val)
 
 void Adjuster::setLogScale(double base, double pivot, bool anchorMiddle)
 {
-    spinChange.block (true);
-    sliderChange.block (true);
+    if (!options.adjuster_force_linear) {
+        spinChange.block(true);
+        sliderChange.block(true);
 
-    double cur = getSliderValue();
-    logBase = base;
-    logPivot = pivot;
-    logAnchorMiddle = anchorMiddle;
-    setSliderValue(cur);
+        double cur = getSliderValue();
+        logBase = base;
+        logPivot = pivot;
+        logAnchorMiddle = anchorMiddle;
+        setSliderValue(cur);
     
-    sliderChange.block (false);
-    spinChange.block (false);
+        sliderChange.block(false);
+        spinChange.block(false);
+    }
 }
 
 

@@ -639,14 +639,22 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     workflowGrid->attach_next_to (*ckbFileBrowserToolbarSingleRow, *ckbHistogramPositionLeft, Gtk::POS_BOTTOM, 1, 1);
     workflowGrid->attach_next_to (*ckbShowFilmStripToolBar, *curveBBoxPosC, Gtk::POS_BOTTOM, 2, 1);
 
+    adjuster_force_linear = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_ADJUSTER_FORCE_LINEAR") + " (" + M("PREFERENCES_APPLNEXTSTARTUP") + ")"));
+    setExpandAlignProperties(adjuster_force_linear, false, false, Gtk::ALIGN_START, Gtk::ALIGN_START);
+    workflowGrid->attach_next_to(*adjuster_force_linear, *ckbShowFilmStripToolBar, Gtk::POS_BOTTOM, 1, 1);
+
     Gtk::Label* hb4label = Gtk::manage ( new Gtk::Label (M ("PREFERENCES_TP_LABEL")) );
     setExpandAlignProperties (hb4label, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
     ckbHideTPVScrollbar = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_TP_VSCROLLBAR")) );
     setExpandAlignProperties (ckbHideTPVScrollbar, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
     workflowGrid->attach_next_to (*hb4label, *ckbFileBrowserToolbarSingleRow, Gtk::POS_BOTTOM, 1, 1);
-    workflowGrid->attach_next_to (*ckbHideTPVScrollbar, *hb4label, Gtk::POS_RIGHT, 1, 1);
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*ckbHideTPVScrollbar);
+    // workflowGrid->attach_next_to (*ckbHideTPVScrollbar, *hb4label, Gtk::POS_RIGHT, 1, 1);
     ckbTpDisable = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_TP_DISABLE") + " (" + M("PREFERENCES_APPLNEXTSTARTUP") + ")"));
-    workflowGrid->attach_next_to(*ckbTpDisable, *ckbHideTPVScrollbar, Gtk::POS_RIGHT, 1, 1);
+    // workflowGrid->attach_next_to(*ckbTpDisable, *ckbHideTPVScrollbar, Gtk::POS_RIGHT, 1, 1);
+    hb->pack_start(*ckbTpDisable);
+    workflowGrid->attach_next_to(*hb, *hb4label, Gtk::POS_RIGHT, 1, 1);
     
     ckbAutoSaveTpOpen = Gtk::manage (new Gtk::CheckButton (M ("PREFERENCES_AUTOSAVE_TP_OPEN")));
     workflowGrid->attach_next_to (*ckbAutoSaveTpOpen, *hb4label, Gtk::POS_BOTTOM, 1, 1);
@@ -1562,6 +1570,7 @@ void Preferences::storePreferences ()
     moptions.showFilmStripToolBar = ckbShowFilmStripToolBar->get_active();
     moptions.hideTPVScrollbar = ckbHideTPVScrollbar->get_active();
     moptions.overwriteOutputFile = chOverwriteOutputFile->get_active ();
+    moptions.adjuster_force_linear = adjuster_force_linear->get_active();
 
     moptions.autoSaveTpOpen = ckbAutoSaveTpOpen->get_active();
 
@@ -1788,6 +1797,7 @@ void Preferences::fillPreferences ()
     ckbFileBrowserToolbarSingleRow->set_active (moptions.FileBrowserToolbarSingleRow);
     ckbShowFilmStripToolBar->set_active (moptions.showFilmStripToolBar);
     ckbHideTPVScrollbar->set_active (moptions.hideTPVScrollbar);
+    adjuster_force_linear->set_active(moptions.adjuster_force_linear);
 
     ckbAutoSaveTpOpen->set_active (moptions.autoSaveTpOpen);
 

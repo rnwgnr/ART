@@ -180,6 +180,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::CheckButton* ckbFileBrowserToolbarSingleRow;
     Gtk::CheckButton* ckbShowFilmStripToolBar;
     Gtk::CheckButton* ckbHideTPVScrollbar;
+    Gtk::CheckButton *adjuster_force_linear;
 
     Gtk::CheckButton* ckbAutoSaveTpOpen;
     Gtk::Button* btnSaveTpOpenNow;
