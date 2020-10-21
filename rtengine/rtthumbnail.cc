@@ -235,6 +235,9 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
         tpp->scale = (double)img->getWidth() / w;
     }
 
+    h = std::max(h, 1);
+    w = std::max(w, 1);
+
     // bilinear interpolation
     if (tpp->thumbImg) {
         delete tpp->thumbImg;
@@ -1019,6 +1022,8 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
         rwidth = int (size_t (thumbImg->getWidth()) * size_t (rheight) / size_t (thumbImg->getHeight()));
     }
 
+    rwidth = std::max(rwidth, 1);
+    rheight = std::max(rheight, 1);
 
     Imagefloat* baseImg = resizeTo<Imagefloat> (rwidth, rheight, interp, thumbImg);
     processFilmNegative(params, baseImg, rwidth, rheight);
