@@ -353,7 +353,7 @@ HISTORY_MSG_96;L*a*b* - a* curve
 HISTORY_MSG_97;L*a*b* - b* curve
 HISTORY_MSG_98;Demosaicing method
 HISTORY_MSG_99;Hot pixel filter
-HISTORY_MSG_100;S & V - Saturation
+HISTORY_MSG_100;S/V - Saturation
 HISTORY_MSG_101;Color equalizer - Hue
 HISTORY_MSG_102;Color equalizer - Saturation
 HISTORY_MSG_103;Color equalizer - Lightness
@@ -728,7 +728,7 @@ HISTORY_MSG_491;White Balance
 HISTORY_MSG_492;RGB Curves
 HISTORY_MSG_493;L*a*b* Adjustments
 HISTORY_MSG_BWMIX_COLORCAST;B & W - Tint
-HISTORY_MSG_SATURATION_VIBRANCE;S & V - Vibrance
+HISTORY_MSG_SATURATION_VIBRANCE;S/V - Vibrance
 HISTORY_MSG_LOCALCONTRAST_LIST;Local contrast - regions
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;Local contrast - H mask
 HISTORY_MSG_LOCALCONTRAST_CHROMATICITYMASK;Local contrast - C mask
@@ -746,7 +746,7 @@ HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - region area mask
 HISTORY_MSG_COLORCORRECTION_MODE;CC - mode
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - region C mask
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - contrast threshold mask
-HISTORY_MSG_COLORCORRECTION_ENABLED;Color Correction
+HISTORY_MSG_COLORCORRECTION_ENABLED;Color/Tone Correction
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - region H mask
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - lightness
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - region L mask
@@ -1089,14 +1089,14 @@ OPTIONS_DEFRAW_MISSING;The default profile for <b>raw photos</b> could not be fo
 PARTIALPASTE_ADVANCEDGROUP;Advanced Settings
 PARTIALPASTE_EFFECTSGROUP;Special Effects Settings
 PARTIALPASTE_EXPOSUREGROUP;Exposure Settings
-PARTIALPASTE_SATURATION;Saturation & vibrance
+PARTIALPASTE_SATURATION;Saturation/vibrance
 PARTIALPASTE_TONECURVE;Tone curves
 PARTIALPASTE_CACORRECTION;Chromatic aberration correction
 PARTIALPASTE_CHANNELMIXER;Channel mixer
 PARTIALPASTE_CHANNELMIXERBW;Black-and-white
 PARTIALPASTE_COARSETRANS;Coarse rotation/flipping
 PARTIALPASTE_COLORAPP;CIECAM02
-PARTIALPASTE_COLORCORRECTION;Color correction
+PARTIALPASTE_COLORCORRECTION;Color/tone correction
 PARTIALPASTE_COLORGROUP;Color Related Settings
 PARTIALPASTE_COLORTONING;Color toning
 PARTIALPASTE_COMMONTRANSFORMPARAMS;Auto-fill
@@ -1450,7 +1450,7 @@ TOOLBAR_TOOLTIP_CROP;<b>Crop</b> selection.\nShortcut: <b>c</b>\nMove the crop u
 TOOLBAR_TOOLTIP_HAND;Hand tool.\nShortcut: <b>h</b>
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Straighten</b> / <b>fine rotation</b>.\nShortcut: <b>s</b>\n\nIndicate the vertical or horizontal by drawing a guide line over the image preview. Angle of rotation will be shown next to the guide line. Center of rotation is the geometrical center of the image.
 TOOLBAR_TOOLTIP_WB;Spot white balance.\nShortcut: <b>w</b>
-TP_SATURATION_LABEL;Saturation & Vibrance
+TP_SATURATION_LABEL;Saturation/Vibrance
 TP_BRIGHTCONTRSAT_CONTRAST;Contrast
 TP_SATURATION_SATURATION;Saturation
 TP_SATURATION_VIBRANCE;Vibrance
@@ -1520,7 +1520,7 @@ TP_COLORCORRECTION_MODE_HSL;HSL factors
 TP_COLORCORRECTION_CHANNEL_B;Blue
 TP_COLORCORRECTION_CHANNEL_G;Green
 TP_COLORCORRECTION_CHANNEL_R;Red
-TP_COLORCORRECTION_LABEL;Color Correction
+TP_COLORCORRECTION_LABEL;Color/Tone Correction
 TP_COLORCORRECTION_LIST_TITLE;Correction
 TP_COLORCORRECTION_OFFSET;Shadows/Lift
 TP_COLORCORRECTION_PIVOT;Pivot
@@ -2024,7 +2024,7 @@ TP_SOFTLIGHT_STRENGTH;Strength
 TP_SPOT_COUNTLABEL;%1 point(s)
 TP_SPOT_ENTRYCHANGED;Point changed
 TP_SPOT_HINT;Click on this button to be able to operate on the preview area.\n\nTo edit a spot, hover the white mark locating an edited aera, making the editing geometry appear.\n\nTo add a spot, press Ctrl and left mouse button, drag the circle (Ctrl key can be released) to a source location, then release the mouse button.\n\nTo move the source or destination spot, hover its center then drag it.\n\nThe inner circle (maximum effect area) and the "feather" circle can be resized by hovering them (the circle becomes orange) and dragging it (the circle becomes red).\n\nWhen the changes are done, right click outside any spot to end the Spot editing mode, or click on this button again.
-TP_SPOT_LABEL;Spot removal
+TP_SPOT_LABEL;Spot Removal
 TP_SPOT_CUR_SPOT_LABEL;Current Spot
 TP_SPOT_SOURCE_X;Source X
 TP_SPOT_SOURCE_Y;Source Y
