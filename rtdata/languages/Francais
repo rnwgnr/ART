@@ -752,14 +752,14 @@ HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - Luminosité
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - Masque L
 HISTORY_MSG_COLORCORRECTION_LIST;CC - Régions
 HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - Masque flou
-HISTORY_MSG_COLORCORRECTION_OFFSET;CC - Offset
+HISTORY_MSG_COLORCORRECTION_OFFSET;CC - Ombres/Déboucher
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - Pivot
-HISTORY_MSG_COLORCORRECTION_POWER;CC - Puissance
+HISTORY_MSG_COLORCORRECTION_POWER;CC - Tons moyens/Gamma
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - Saturation en entrée
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - Saturation en sortie
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - Montrer le masque
-HISTORY_MSG_COLORCORRECTION_SLOPE;CC - Pente
-HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - Masque ΔE
+HISTORY_MSG_COLORCORRECTION_SLOPE;CC - Haute lumières /Gain
+HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - Masque similarités de couleurs
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - Masque au pinceau
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - Masque paramétrique
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correction de Couleur
@@ -792,7 +792,7 @@ HISTORY_MSG_EPD_MASKBLUR;TM - Masque flou
 HISTORY_MSG_EPD_SHOWMASK;TM - Montrer le masque
 HISTORY_MSG_EPD_AREAMASK;TM - Zone du masque
 HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - seuil de contraste du masque
-HISTORY_MSG_EPD_DELTAEMASK;TB - masque ΔE
+HISTORY_MSG_EPD_DELTAEMASK;TB - masque similarité de couleurs
 HISTORY_MSG_EPD_DRAWNMASK;TB - masque au pinceau
 HISTORY_MSG_EPD_PARAMETRICMASK;TB - masque paramétrique
 HISTORY_MSG_EXPOSURE_BLACK;Exposition - Point noir
@@ -822,7 +822,7 @@ HISTORY_MSG_LOCALCONTRAST_ENABLED;Contraste Local
 HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Contraste Local - Lumières
 HISTORY_MSG_LOCALCONTRAST_MODE;Contraste Local - Méthode
 HISTORY_MSG_LOCALCONTRAST_RADIUS;Contraste Local - Rayon
-HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contraste Local - Masque ΔE
+HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contraste Local - Masque similarité de couleurs
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Contraste Local - Masque au pinceau
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Contraste Local - Masque paramétrique
 HISTORY_MSG_LOGENC_AUTO;Log - Automatique
@@ -871,7 +871,7 @@ HISTORY_MSG_SMOOTHING_LIGHTNESSMASK;Lissage - Masque L
 HISTORY_MSG_SMOOTHING_MASKBLUR;Lissage - Masque flou
 HISTORY_MSG_SMOOTHING_SHOWMASK;Lissage - Montrer le masque
 HISTORY_MSG_SMOOTHING_AREAMASK;Lissage - Masque de zone
-HISTORY_MSG_SMOOTHING_DELTAEMASK;Lissage - Masque ΔE
+HISTORY_MSG_SMOOTHING_DELTAEMASK;Lissage - Masque similarité de couleurs
 HISTORY_MSG_SMOOTHING_DRAWNMASK;Lissage - Masque au pinceau
 HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Lissage - Masque paramétrique
 HISTORY_MSG_SOFTLIGHT_ENABLED;Lumière douce
@@ -1064,7 +1064,7 @@ MAIN_TOOLTIP_PREVIEWR;Affichage du <b>canal Rouge</b>\nRaccourci : <b>r</b>
 MAIN_TOOLTIP_PREVIEWSHARPMASK;Prévisualiser le <b>masque de contraste de netteté</b>.\nRaccourci : <b>p</b>\n\nNe fonctionne que si l'outil Netteté est activé et pour un zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Informations rapides sur l'image\nRaccourci : <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Montrer/Cacher le panneau gauche\nRaccourci : <b>l</b>
-MAIN_TOOLTIP_SHOWHIDERP1;Afficher/Cacher le panneau droit\nRaccourci : <b>Alt-l</b>
+MAIN_TOOLTIP_SHOWHIDERP1;Afficher/Cacher le panneau droit\nRaccourci : <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Afficher/Cacher le panneau supérieur\nRaccourci : <b>Shift-L</b>
 MAIN_TOOLTIP_THRESHOLD;Seuil
 MAIN_TOOLTIP_TOGGLE;Comparer Avant/Après\nRaccourci : <b>Shift-b</b>
@@ -1171,6 +1171,7 @@ PARTIALPASTE_VIBRANCE;Vibrance
 PARTIALPASTE_VIGNETTING;Correction du Vignetage
 PARTIALPASTE_WHITEBALANCE;Balance des Blancs
 PREFERENCES_ADD;Ajouter
+PREFERENCES_ADJUSTER_FORCE_LINEAR;Forcer l'échelle linéaire pour les curseurs d'ajustement
 PREFERENCES_APPEARANCE;Apparence
 PREFERENCES_APPEARANCE_COLORPICKERFONT;Police des ancres de vérification couleur
 PREFERENCES_APPEARANCE_CROPMASKCOLOR;Couleur du masque de rognage
@@ -1280,6 +1281,9 @@ PREFERENCES_OVERLAY_FILENAMES;Superposer les noms de fichier sur les vignettes d
 PREFERENCES_OVERLAY_FILENAMES_FILMSTRIP;Superposer les noms de fichier sur les vignettes dans le panneau d'édition
 PREFERENCES_OVERWRITEOUTPUTFILE;Écraser le fichier s'il existe déjà
 PREFERENCES_PANFACTORLABEL;Facteur d'amplification du défilement
+PREFERENCES_PARAMS_SIDECAR_STYLE;Traitement des styles des fichiers associés
+PREFERENCES_PARAMS_SIDECAR_FULL;Ajouter .arp au nom de fichier (NOMDEFICHIER.ext.arp for NOMDEFICHIER.ext)
+PREFERENCES_PARAMS_SIDECAR_STRIP_EXT;Remplacer l'extension par .arp (NOMDEFICHIER.arp for NOMDEFICHIER.ext)
 PREFERENCES_PARSEDEXT;Extensions considérées
 PREFERENCES_PARSEDEXTADD;Ajouter une extension
 PREFERENCES_PARSEDEXTADDHINT;Ajouter l'extension indiquée à la liste
@@ -1518,11 +1522,11 @@ TP_COLORCORRECTION_CHANNEL_G;Vert
 TP_COLORCORRECTION_CHANNEL_R;Rouge
 TP_COLORCORRECTION_LABEL;Correction des Couleurs
 TP_COLORCORRECTION_LIST_TITLE;Correction
-TP_COLORCORRECTION_OFFSET;Décalage (Ombres/Déboucher)
+TP_COLORCORRECTION_OFFSET;Ombres/Déboucher
 TP_COLORCORRECTION_PIVOT;Pivot
-TP_COLORCORRECTION_POWER;Puissance (Tons moyens/Gamma)
+TP_COLORCORRECTION_POWER;Tons moyens/Gamma
 TP_COLORCORRECTION_SATURATION;Saturation
-TP_COLORCORRECTION_SLOPE;Pente (Hautes lumières/Gain)
+TP_COLORCORRECTION_SLOPE;Hautes lumières/Gain
 TP_COLORCORRECTION_SYNC_SLIDERS;Lier les curseurs correspondants
 TP_COLORCORRECTION_L;Luminosité
 TP_COLORCORRECTION_H;Teinte
@@ -1769,7 +1773,7 @@ TP_LABMASKS_MASK;Masques
 TP_LABMASKS_MASK_UNNAMED;Sans nom
 TP_LABMASKS_SHOW;Montrer masque
 TP_LABMASKS_CONTRASTTHRESHOLDMASK;Seuil du contraste
-TP_LABMASKS_DELTAE;Masque ΔE
+TP_LABMASKS_DELTAE;Masque similarité de couleurs
 TP_LABMASKS_DELTAE_L;L
 TP_LABMASKS_DELTAE_C;C
 TP_LABMASKS_DELTAE_H;H (T)
