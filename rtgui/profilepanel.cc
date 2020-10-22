@@ -716,7 +716,7 @@ void ProfilePanel::procParamsChanged(
 )
 {
     // to prevent recursion, filter out the events caused by the profilepanel
-    if (ev == EvProfileChanged || ev == EvPhotoLoaded) {
+    if ((!isCustomSelected() && ev == EvProfileChanged) || ev == EvPhotoLoaded) {
         return;
     }
 
