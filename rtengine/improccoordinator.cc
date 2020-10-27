@@ -608,9 +608,8 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 void ImProcCoordinator::updateWB()
 {
     MyMutex::MyLock initLock(minit);
-
     
-    currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+    currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
     
     if (!params.wb.enabled) {
         currWB = ColorTemp();
