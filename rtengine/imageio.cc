@@ -347,26 +347,26 @@ int ImageIO::loadPNG  (const Glib::ustring &fname)
     return IMIO_SUCCESS;
 }
 
-typedef struct  {
-    struct jpeg_error_mgr pub;  /* "public" fields */
-    jmp_buf setjmp_buffer;  /* for return to caller */
-} my_error_mgr;
+// typedef struct  {
+//     struct jpeg_error_mgr pub;  /* "public" fields */
+//     jmp_buf setjmp_buffer;  /* for return to caller */
+// } my_error_mgr;
 
-void my_error_exit (j_common_ptr cinfo)
-{
-    /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
-    my_error_mgr *myerr = (my_error_mgr*) cinfo->err;
-    /* Always display the message. */
-    /* We could postpone this until after returning, if we chose. */
-    (*cinfo->err->output_message) (cinfo);
+// void my_error_exit (j_common_ptr cinfo)
+// {
+//     /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
+//     my_error_mgr *myerr = (my_error_mgr*) cinfo->err;
+//     /* Always display the message. */
+//     /* We could postpone this until after returning, if we chose. */
+//     (*cinfo->err->output_message) (cinfo);
 
-    /* Return control to the setjmp point */
-#if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
-    __builtin_longjmp(myerr->setjmp_buffer, 1);
-#else
-    longjmp(myerr->setjmp_buffer, 1);
-#endif
-}
+//     /* Return control to the setjmp point */
+// #if defined( WIN32 ) && defined( __x86_64__ ) && !defined(__clang__)
+//     __builtin_longjmp(myerr->setjmp_buffer, 1);
+// #else
+//     longjmp(myerr->setjmp_buffer, 1);
+// #endif
+// }
 
 
 int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
@@ -374,7 +374,7 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
     jpeg_decompress_struct cinfo;
     jpeg_create_decompress(&cinfo);
     //rt_jpeg_memory_src (&cinfo, (const JOCTET*)buffer, bufsize);
-    jpeg_mem_src(&cinfo, reinterpret_cast<const unsigned char *>(buffer), bufsize);
+    jpeg_mem_src(&cinfo, const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer)), bufsize);
 
     /* We use our private extension JPEG error handler.
        Note that this struct must live as long as the main JPEG parameter
