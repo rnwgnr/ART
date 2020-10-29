@@ -89,6 +89,11 @@ InspectorArea::InspectorArea():
 {
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     set_name("Inspector");
+    add_events(Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+    signal_button_press_event().connect(sigc::mem_fun(*this, &InspectorArea::onMousePress), false);
+    signal_button_release_event().connect(sigc::mem_fun(*this, &InspectorArea::onMouseRelease), false);
+    signal_motion_notify_event().connect(sigc::mem_fun(*this, &InspectorArea::onMouseMove), false);
+    prev_point_.set(-1, -1);
 }
 
 
@@ -231,7 +236,7 @@ void InspectorArea::mouseMove (rtengine::Coord2D pos, int transform)
 }
 
 
-void InspectorArea::switchImage(const Glib::ustring &fullPath)
+void InspectorArea::switchImage(const Glib::ustring &fullPath, bool recenter)
 {
     if (!active) {
         return;
@@ -243,14 +248,14 @@ void InspectorArea::switchImage(const Glib::ustring &fullPath)
 
     next_image_path = fullPath;
     if (!options.inspectorDelay) {
-        doSwitchImage();
+        doSwitchImage(recenter);
     } else {
-        delayconn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &InspectorArea::doSwitchImage), options.inspectorDelay);
+        delayconn = Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(*this, &InspectorArea::doSwitchImage), recenter), options.inspectorDelay);
     }
 }
 
 
-bool InspectorArea::doSwitchImage()
+bool InspectorArea::doSwitchImage(bool recenter)
 {
     Glib::ustring fullPath = next_image_path;
     
@@ -268,7 +273,6 @@ bool InspectorArea::doSwitchImage()
 
     if (fullPath.empty()) {
         currImage = nullptr;
-//        queue_draw();
     } else {
         bool found = false;
 
@@ -313,6 +317,10 @@ bool InspectorArea::doSwitchImage()
                 currImage = nullptr;
             }
         }
+    }
+
+    if (currImage && recenter) {
+        center.set(currImage->imgBuffer.getWidth()/2, currImage->imgBuffer.getHeight()/2);
     }
 
     queue_draw();
@@ -436,6 +444,42 @@ void InspectorArea::infoEnabled(bool yes)
 }
 
 
+bool InspectorArea::onMouseMove(GdkEventMotion *evt)
+{
+    if (active && currImage && prev_point_.x >= 0) {
+        double w = currImage->imgBuffer.getWidth();
+        double h = currImage->imgBuffer.getHeight();
+        if (w > 0 && h > 0) {
+            constexpr double gain = 4.0;
+            double dx = center.x - (evt->x - prev_point_.x) * gain;
+            double dy = center.y - (evt->y - prev_point_.y) * gain;
+            sig_moved_.emit(rtengine::Coord2D(dx/w, dy/h));
+        }
+        prev_point_.set(evt->x, evt->y);
+    }
+    return false;
+}
+
+bool InspectorArea::onMousePress(GdkEventButton *evt)
+{
+    if (active && evt->button == 1) {
+        prev_point_.set(evt->x, evt->y);
+        CursorManager::setWidgetCursor(get_window(), CSHandClosed);
+    } else {
+        prev_point_.set(-1, -1);
+        CursorManager::setWidgetCursor(get_window(), CSArrow);
+    }
+    return false;
+}
+
+bool InspectorArea::onMouseRelease(GdkEventButton *evt)
+{
+    prev_point_.set(-1, -1);
+    CursorManager::setWidgetCursor(get_window(), CSArrow);
+    return false;
+}
+
+
 //-----------------------------------------------------------------------------
 // Inspector
 //-----------------------------------------------------------------------------
@@ -458,9 +502,11 @@ Inspector::Inspector(FileCatalog *filecatalog):
         ins_[i].set_can_focus(true);
         ins_[i].add_events(Gdk::BUTTON_PRESS_MASK);
         ins_[i].signal_button_press_event().connect_notify(sigc::bind(sigc::mem_fun(*this, &Inspector::onGrabFocus), i));
-        ins_[i].signal_size_allocate().connect(sigc::mem_fun(*this, &Inspector::onInspectorResized));
+//        ins_[i].signal_size_allocate().connect(sigc::mem_fun(*this, &Inspector::onInspectorResized));
         ins_[i].signal_active().connect(sigc::bind(sigc::mem_fun(*this, &Inspector::setActive), true));
+        ins_[i].signal_moved().connect(sigc::mem_fun(*this, &Inspector::onMoved));
     }
+    signal_size_allocate().connect(sigc::mem_fun(*this, &Inspector::onInspectorResized));    
 }
 
 
@@ -470,7 +516,13 @@ void Inspector::mouseMove(rtengine::Coord2D pos, int transform)
         ins_[i].mouseMove(pos, transform);
     }
 }
-    
+
+
+void Inspector::onMoved(rtengine::Coord2D pos)
+{
+    mouseMove(pos, 0);
+}
+   
 
 void Inspector::flushBuffers()
 {
@@ -705,7 +757,7 @@ void Inspector::zoom_toggled(Gtk::ToggleButton *b)
 
         for (size_t i = 0; i < num_active_; ++i) {
             ins_[i].flushBuffers();
-            ins_[i].switchImage(cur_image_[i]);
+            ins_[i].switchImage(cur_image_[i], true);
         }
     }
 }
@@ -867,9 +919,20 @@ bool Inspector::handleShortcutKey(GdkEventKey *event)
 void Inspector::onInspectorResized(Gtk::Allocation &a)
 {
     if (zoomfit_->get_active()) {
-        for (size_t i = 0; i < num_active_; ++i) {
-            ins_[i].flushBuffers();
-            ins_[i].switchImage(cur_image_[i]);
+        if (delayconn_.connected()) {
+            delayconn_.disconnect();
         }
-    }        
+
+        const auto doit =
+            [this]() -> bool
+            {
+                for (size_t i = 0; i < num_active_; ++i) {
+                    ins_[i].flushBuffers();
+                    ins_[i].switchImage(cur_image_[i]);
+                }
+                return false;
+            };
+        
+        delayconn_ = Glib::signal_timeout().connect(sigc::slot<bool>(doit), options.adjusterMaxDelay);
+    }
 }

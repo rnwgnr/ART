@@ -40,7 +40,7 @@ public:
     /** @brief A new image is being flown over
      * @param fullPath Full path of the image that is being hovered inspect, or an empty string if out of any image.
      */
-    void switchImage (const Glib::ustring &fullPath);
+    void switchImage(const Glib::ustring &fullPath, bool recenter=false);
 
     /** @brief Set the new coarse rotation transformation
      * @param transform A semi-bitfield coarse transformation using #defines from iimage.h
@@ -75,13 +75,18 @@ public:
 
     sigc::signal<void> signal_ready() { return sig_ready_; }
     sigc::signal<void> signal_active() { return sig_active_; }
+    sigc::signal<void, rtengine::Coord2D> signal_moved() { return sig_moved_; }
 
     void setHighlight(bool yes) { highlight_ = yes; }
 
 private:
     bool on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr) override;
+    bool onMouseMove(GdkEventMotion *evt);
+    bool onMousePress(GdkEventButton *evt);
+    bool onMouseRelease(GdkEventButton *evt);
+	
     void deleteBuffers();
-    bool doSwitchImage();
+    bool doSwitchImage(bool recenter);
 
     rtengine::Coord center;
     std::vector<InspectorBuffer*> images;
@@ -99,6 +104,8 @@ private:
 
     sigc::signal<void> sig_ready_;
     sigc::signal<void> sig_active_;
+    sigc::signal<void, rtengine::Coord2D> sig_moved_;
+    rtengine::Coord prev_point_;
 };
 
 
@@ -138,12 +145,14 @@ private:
     void onGrabFocus(GdkEventButton *evt, size_t i);
     void onInspectorResized(Gtk::Allocation &a);
     void split_toggled();
+    void onMoved(rtengine::Coord2D pos);
 
     FileCatalog *filecatalog_;
 
     Gtk::HBox ibox_;
     std::array<Glib::ustring, 2> cur_image_;
     std::array<InspectorArea, 2> ins_;
+    std::array<Gtk::Allocation, 2> ins_sz_;
     size_t active_;
     size_t num_active_;
 
@@ -166,4 +175,5 @@ private:
     sigc::connection rawclipconn_;
     sigc::connection zoomfitconn_;
     sigc::connection zoom11conn_;
+    sigc::connection delayconn_;
 };

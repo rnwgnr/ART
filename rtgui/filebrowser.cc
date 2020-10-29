@@ -1933,7 +1933,7 @@ void FileBrowser::notifySelectionListener ()
 
         tbl->selectionChanged (thm);
 
-        if (inspector && thm.size() == 1 && options.thumbnail_inspector_zoom_fit) {
+        if (inspector && thm.size() == 1) {// && options.thumbnail_inspector_zoom_fit) {
             inspector->switchImage(thm[0]->getFileName());
         }
     }
