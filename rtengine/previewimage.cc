@@ -617,18 +617,20 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
     LUTi gamma(65536);
     const bool apply_curve = settings->thumbnail_inspector_raw_curve != Settings::ThumbnailInspectorRawCurve::LINEAR && !show_clip;
     if (apply_curve) {
-        static const std::vector<double> shadowcurve = {
-            DCT_CatumullRom,
-            0, 0,
-            0.1, 0.4,
-            0.70, 0.75,
-            1, 1
-        };
-        DiagonalCurve curve(settings->thumbnail_inspector_raw_curve == Settings::ThumbnailInspectorRawCurve::FILM ? curves::filmcurve_def : shadowcurve);
-        for (int i = 0; i < 65536; ++i) {
-            float x = Color::gamma_srgbclipped(i) / 65535.f;
-            float y = curve.getVal(x) * 255.f;
-            gamma[i] = y;
+        if (settings->thumbnail_inspector_raw_curve == Settings::ThumbnailInspectorRawCurve::FILM) {
+            DiagonalCurve curve(curves::filmcurve_def);
+            for (int i = 0; i < 65536; ++i) {
+                float x = Color::gamma_srgbclipped(i) / 65535.f;
+                float y = curve.getVal(x) * 255.f;
+                gamma[i] = y;
+            }
+        } else {
+            constexpr float base = 500.f;
+            for (int i = 0; i < 65536; ++i) {
+                float x = float(i)/65535.f;
+                float y = xlin2log(x, base);
+                gamma[i] = y * 255.f;
+            }
         }
     } else {
         for (int i = 0; i < 65536; ++i) {

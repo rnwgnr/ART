@@ -53,18 +53,28 @@ void apply_contrast(Imagefloat *rgb, const ImProcData &im, int contrast)
 
     if (im.params->logenc.enabled) {
         const double pivot = im.params->logenc.targetGray / 100.0;
-        const auto scurve =
-            [pivot](double x) -> double
-            {
-                return x < pivot ? pivot * SQR(x/pivot) :
-                    1 - (1 - pivot)*SQR((1 - x)/(1 - pivot));
-            };
+        const double b = contrast > 0 ? (1 + contrast * 0.25) : -1.0 / (1 + contrast * 0.25);
+        const double a = std::log((std::exp(std::log(b) * pivot) - 1) / (b - 1)) / std::log(pivot);
 
-        const double c = LIM(contrast / 100.0, -1.0, 1.0);
+        // const auto scurve =
+        //     [pivot](double x) -> double
+        //     {
+        //         return x < pivot ? pivot * SQR(x/pivot) :
+        //             1 - (1 - pivot)*SQR((1 - x)/(1 - pivot));
+        //     };
+
+        // const double c = LIM(contrast / 100.0, -1.0, 1.0);
+
+        const auto scurve =
+            [a,b](double x) -> double
+            {
+                return lin2log(std::pow(x, a), b);
+            };
 
         for (int i = 0; i < 65536; ++i) {
             double x = i / 65535.0;
-            double y = intp(c, scurve(x), x);
+            //double y = intp(c, scurve(x), x);
+            double y = scurve(x);
             curve[i] = y * 65535.f;
         }        
     } else {
