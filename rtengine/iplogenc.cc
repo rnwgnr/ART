@@ -255,23 +255,45 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
     // neutral.exposure.clampOOG = false;
     imgsrc->getImage(imgsrc->getWB(), tr, &img, pp, neutral.exposure, neutral.raw);
     imgsrc->convertColorSpace(&img, params->icm, imgsrc->getWB());
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
 
     float vmin = RT_INFINITY;
     float vmax = -RT_INFINITY;
 
     constexpr float noise = 1e-5;
+    const int w = img.getWidth();
+    const int h = img.getHeight();
 
-    for (int y = 0, h = fh / SCALE; y < h; ++y) {
-        for (int x = 0, w = fw / SCALE; x < w; ++x) {
+    array2D<float> Y(w, h);
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
             float r = img.r(y, x), g = img.g(y, x), b = img.b(y, x);
-            float m = max(0.f, r, g, b) / 65535.f;
-            if (m > noise) {
-                float l = min(r, g, b) / 65535.f;
-                vmin = min(vmin, l > noise ? l : m);
-                vmax = max(vmax, m);
+            Y[y][x] = Color::rgbLuminance(r, g, b, ws) / 65535.f;
+        }
+    }
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            float l = Y[y][x];
+            if (l > noise) {
+                vmin = min(vmin, l);
+                vmax = max(vmax, l);
             }
         }
     }
+//    vmin /= 1.5f;
+    vmax *= 1.5f;
+
+    // for (int y = 0, h = fh / SCALE; y < h; ++y) {
+    //     for (int x = 0, w = fw / SCALE; x < w; ++x) {
+    //         float r = img.r(y, x), g = img.g(y, x), b = img.b(y, x);
+    //         float m = max(0.f, r, g, b) / 65535.f;
+    //         if (m > noise) {
+    //             float l = min(r, g, b) / 65535.f;
+    //             vmin = min(vmin, l > noise ? l : m);
+    //             vmax = max(vmax, m);
+    //         }
+    //     }
+    // }
 
     if (vmax > vmin) {
         const float log2 = xlogf(2.f);
@@ -289,15 +311,24 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
             if (settings->verbose) {
                 std::cout << "         gray boundaries: " << gmin << ", " << gmax << std::endl;
             }
-            for (int y = 0, h = fh / SCALE; y < h; ++y) {
-                for (int x = 0, w = fw / SCALE; x < w; ++x) {
-                    float l = img.g(y, x) / 65535.f;
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    float l = Y[y][x];
                     if (l >= gmin && l <= gmax) {
                         tot += l;
                         ++n;
                     }
                 }
             }
+            // for (int y = 0, h = fh / SCALE; y < h; ++y) {
+            //     for (int x = 0, w = fw / SCALE; x < w; ++x) {
+            //         float l = img.g(y, x) / 65535.f;
+            //         if (l >= gmin && l <= gmax) {
+            //             tot += l;
+            //             ++n;
+            //         }
+            //     }
+            // }
             if (n > 0) {
                 lparams.sourceGray = tot / n * 100.f;
                 if (settings->verbose) {
