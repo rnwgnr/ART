@@ -142,6 +142,15 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
         }
     }
 
+    if (!tpp) {
+        // try a custom loader
+        tpp = rtengine::Thumbnail::loadFromImage(fname, tw, th, -1, pparams.master.wb.equal);
+        if (tpp) {
+            cfs.format = FT_Tiff;
+            infoFromImage(fname);
+        }
+    }
+
     if (tpp) {
         tpp->getAutoWBMultipliers(cfs.redAWBMul, cfs.greenAWBMul, cfs.blueAWBMul);
         if (save_in_cache) {

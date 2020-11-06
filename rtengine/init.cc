@@ -33,6 +33,7 @@
 #include "../rtgui/threadutils.h"
 #include "rtlensfun.h"
 #include "metadata.h"
+#include "imgiomanager.h"
 
 namespace rtengine {
 
@@ -104,6 +105,7 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     Exiv2Metadata::init(baseDir);
 
     DynamicProfileRules::init(baseDir);
+    ImageIOManager::getInstance()->init(Glib::build_filename(userSettingsDir, "imageio"));
     
     delete lcmsMutex;
     lcmsMutex = new MyMutex;

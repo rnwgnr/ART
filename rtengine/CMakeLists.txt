@@ -157,6 +157,7 @@ set(RTENGINESOURCEFILES
     bayer_bilinear_demosaic.cc
     gainmap.cc
     base64.cc
+    imgiomanager.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)

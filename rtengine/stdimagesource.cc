@@ -22,6 +22,7 @@
 #include "imageio.h"
 #include "curves.h"
 #include "color.h"
+#include "imgiomanager.h"
 #include "../rtgui/multilangmgr.h"
 
 #undef THREAD_PRIORITY_NORMAL
@@ -118,17 +119,17 @@ void StdImageSource::getSampleFormat (const Glib::ustring &fname, IIOSampleForma
  * and RT's image data type (Image8, Image16 and Imagefloat), then it will
  * load the image into it
  */
-int StdImageSource::load (const Glib::ustring &fname)
+int StdImageSource::load(const Glib::ustring &fname, int maxw_hint, int maxh_hint)
 {
-
     fileName = fname;
 
     // First let's find out the input image's type
 
     IIOSampleFormat sFormat;
     IIOSampleArrangement sArrangement;
-    getSampleFormat(fname, sFormat, sArrangement);
+    getSampleFormat(fileName, sFormat, sArrangement);
 
+    bool loaded = false;
     // Then create the appropriate object
 
     switch (sFormat) {
@@ -152,26 +153,33 @@ int StdImageSource::load (const Glib::ustring &fname)
     }
 
     default:
-        return IMIO_FILETYPENOTSUPPORTED;
+        if (!ImageIOManager::getInstance()->load(fname, plistener, img, maxw_hint, maxh_hint)) {
+            return IMIO_FILETYPENOTSUPPORTED;
+        } else {
+            loaded = true;
+            maxw_hint = maxh_hint = 0;
+        }
     }
 
-    img->setSampleFormat(sFormat);
-    img->setSampleArrangement(sArrangement);
+    if (!loaded) {
+        img->setSampleFormat(sFormat);
+        img->setSampleArrangement(sArrangement);
 
-    if (plistener) {
-        plistener->setProgressStr ("PROGRESSBAR_LOADING");
-        plistener->setProgress (0.0);
-        img->setProgressListener (plistener);
-    }
+        if (plistener) {
+            plistener->setProgressStr ("PROGRESSBAR_LOADING");
+            plistener->setProgress (0.0);
+            img->setProgressListener (plistener);
+        }
 
-    // And load the image!
+        // And load the image!
 
-    int error = img->load (fname);
+        int error = img->load(fname, maxw_hint, maxh_hint);
 
-    if (error) {
-        delete img;
-        img = nullptr;
-        return error;
+        if (error) {
+            delete img;
+            img = nullptr;
+            return error;
+        }
     }
 
     if (embProfile) {
@@ -182,7 +190,7 @@ int StdImageSource::load (const Glib::ustring &fname)
         embProfile = ProfileContent(img->getEmbeddedProfile()).toProfile();
     }
 
-    idata = new FramesData (fname);
+    idata = new FramesData(fname);
 
     if (idata->hasExif()) {
         int deg = 0;
@@ -205,10 +213,15 @@ int StdImageSource::load (const Glib::ustring &fname)
         plistener->setProgress (1.0);
     }
 
-    wb = ColorTemp (1.0, 1.0, 1.0, 1.0);
     //this is probably a mistake if embedded profile is not D65
+    wb = ColorTemp (1.0, 1.0, 1.0, 1.0);
 
     return 0;
+}
+
+int StdImageSource::load(const Glib::ustring &fname)
+{
+    return load(fname, 0, 0);
 }
 
 void StdImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ExposureParams &hrp, const RAWParams &raw)

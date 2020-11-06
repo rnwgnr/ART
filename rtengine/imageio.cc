@@ -187,7 +187,8 @@ int ImageIO::getPNGSampleFormat (const Glib::ustring &fname, IIOSampleFormat &sF
     }
 }
 
-int ImageIO::loadPNG  (const Glib::ustring &fname)
+
+int ImageIO::loadPNG(const Glib::ustring &fname)
 {
 
     FILE *file = g_fopen (fname.c_str (), "rb");
@@ -369,7 +370,7 @@ int ImageIO::loadPNG  (const Glib::ustring &fname)
 // }
 
 
-int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
+int ImageIO::loadJPEGFromMemory(const char* buffer, int bufsize)
 {
     jpeg_decompress_struct cinfo;
     jpeg_create_decompress(&cinfo);
@@ -465,7 +466,8 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
     }
 }
 
-int ImageIO::loadJPEG (const Glib::ustring &fname)
+
+int ImageIO::loadJPEG(const Glib::ustring &fname, int maxw_hint, int maxh_hint)
 {
     FILE *file = g_fopen(fname.c_str (), "rb");
 
@@ -502,6 +504,19 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
         }
 
         cinfo.out_color_space = JCS_RGB;
+        if (maxw_hint > 0 && maxh_hint > 0) {
+            int w = cinfo.image_width;
+            int h = cinfo.image_height;
+            int d1 = w / maxw_hint;
+            int d2 = h / maxh_hint;
+            int d = std::min(d1, d2);
+            if (d > 1) {
+                cinfo.scale_num = 1;
+                int l = std::min(d, 8);
+                for (d = 1; (d << 1) <= l; d = d << 1) {}
+                cinfo.scale_denom = d;
+            }
+        }
 
         deleteLoadedProfileData();
         loadedProfileDataJpg = true;
@@ -518,7 +533,7 @@ int ImageIO::loadJPEG (const Glib::ustring &fname)
         unsigned int width = cinfo.output_width;
         unsigned int height = cinfo.output_height;
 
-        allocate (width, height);
+        allocate(width, height);
 
         std::vector<unsigned char> vrow(width *3);
         unsigned char *row = &(vrow[0]);//new unsigned char[width * 3];
@@ -709,7 +724,8 @@ void tiff_Unmap(thandle_t, tdata_t, toff_t)
 
 } // namespace
 
-int ImageIO::loadTIFF (const Glib::ustring &fname)
+
+int ImageIO::loadTIFF(const Glib::ustring &fname)
 {
 
     static MyMutex thumbMutex;
@@ -784,18 +800,21 @@ int ImageIO::loadTIFF (const Glib::ustring &fname)
         else
             printf("   No LinearResponseLimit value!\n");
 
-        uint16 tiffMinValue, tiffMaxValue;
-        if (TIFFGetField(in, TIFFTAG_SMINSAMPLEVALUE, &tiffMinValue)) {
-            printf("   MinValue: %d\n", tiffMinValue);
-        }
-        else
-            printf("   No minimum value!\n");
-        if (TIFFGetField(in, TIFFTAG_SMAXSAMPLEVALUE, &tiffMaxValue)) {
-            printf("   MaxValue: %d\n\n", tiffMaxValue);
-        }
-        else
-            printf("   No maximum value!\n\n");
-        printf("   Those values are not taken into account, the image data are normalized to a [0;1] range\n\n");
+        // agriggio 2020-11-06: this causes a segfault when compiled with -O3 and PROC_TARGET_NUMBER=2
+        // on gcc 7.5.0, Ubuntu 18.04. Need to understand why...
+        // 
+        // uint16 tiffMinValue, tiffMaxValue;
+        // if (TIFFGetField(in, TIFFTAG_SMINSAMPLEVALUE, &tiffMinValue)) {
+        //     printf("   MinValue: %d\n", tiffMinValue);
+        // }
+        // else
+        //     printf("   No minimum value!\n");
+        // if (TIFFGetField(in, TIFFTAG_SMAXSAMPLEVALUE, &tiffMaxValue)) {
+        //     printf("   MaxValue: %d\n\n", tiffMaxValue);
+        // }
+        // else
+        //     printf("   No maximum value!\n\n");
+        // printf("   Those values are not taken into account, the image data are normalized to a [0;1] range\n\n");
     }
 
     char* profdata;
@@ -823,7 +842,7 @@ int ImageIO::loadTIFF (const Glib::ustring &fname)
 
         if (samplesperpixel > 3) {
             for (int i = 0; i < width; i++) {
-                memcpy (linebuffer + i * 3 * bitspersample / 8, linebuffer + i * samplesperpixel * bitspersample / 8, 3 * bitspersample / 8);
+                memmove(linebuffer + i * 3 * bitspersample / 8, linebuffer + i * samplesperpixel * bitspersample / 8, 3 * bitspersample / 8);
             }
         }
         else if (samplesperpixel == 1) {
@@ -854,6 +873,7 @@ int ImageIO::loadTIFF (const Glib::ustring &fname)
 
     return IMIO_SUCCESS;
 }
+
 
 int ImageIO::loadPPMFromMemory(const char* buffer, int width, int height, bool swap, int bps)
 {
@@ -1318,21 +1338,23 @@ void png_flush(png_structp png_ptr)
     }
 }
 
-int ImageIO::load (const Glib::ustring &fname)
+
+int ImageIO::load(const Glib::ustring &fname, int maxw_hint, int maxh_hint)
 {
 
     if (hasPngExtension(fname)) {
-        return loadPNG (fname);
+        return loadPNG(fname);
     } else if (hasJpegExtension(fname)) {
-        return loadJPEG (fname);
+        return loadJPEG(fname, maxw_hint, maxh_hint);
     } else if (hasTiffExtension(fname)) {
-        return loadTIFF (fname);
+        return loadTIFF(fname);
     } else {
         return IMIO_FILETYPENOTSUPPORTED;
     }
 }
 
-int ImageIO::save (const Glib::ustring &fname) const
+
+int ImageIO::save(const Glib::ustring &fname) const
 {
     if (hasPngExtension(fname)) {
         return savePNG (fname);

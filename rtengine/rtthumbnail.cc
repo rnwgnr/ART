@@ -186,7 +186,7 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
 
     StdImageSource imgSrc;
 
-    if (imgSrc.load (fname)) {
+    if (imgSrc.load(fname, std::max(w, 0), std::max(h, 0))) {
         return nullptr;
     }
 
