@@ -62,7 +62,6 @@ void ImageIOManager::init(const Glib::ustring &dirname)
     loaders_.clear();
 
     if (!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
-        exit(1);
         return;
     }
 
