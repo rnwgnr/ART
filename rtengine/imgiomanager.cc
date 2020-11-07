@@ -25,6 +25,7 @@
 #include "imagefloat.h"
 #include <iostream>
 #include <glib/gstdio.h>
+#include <unistd.h>
 
 namespace rtengine {
 
