@@ -157,6 +157,17 @@ public:
         R0_1,
         _COUNT
     };
+
+    enum class ScopeType {
+        NONE = -1,
+        HISTOGRAM,
+        HISTOGRAM_RAW,
+        PARADE,
+        VECTORSCOPE_HC,
+        VECTORSCOPE_HS,
+        WAVEFORM
+    };
+    
     SaveFormat saveFormat;
     SaveFormat saveFormatBatch;
     Glib::ustring savePathTemplate;
@@ -300,11 +311,15 @@ public:
     bool histogramBlue;
     bool histogramLuma;
     bool histogramChroma;
-    bool histogramRAW;
+    //bool histogramRAW;
     bool histogramBar;
     int histogramHeight;
     int histogramDrawMode;
     double histogram_scaling_factor;
+    ScopeType histogramScopeType;
+    bool histogramShowOptionButtons;
+    float histogramTraceBrightness;
+
     bool FileBrowserToolbarSingleRow;
     bool hideTPVScrollbar;
     int whiteBalanceSpotSize;

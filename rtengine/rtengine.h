@@ -36,6 +36,7 @@
 #include "LUT.h"
 #include "tweakoperator.h"
 #include "gainmap.h"
+#include "array2D.h"
 
 /**
  * @file
@@ -256,9 +257,10 @@ public:
     virtual void sizeChanged(int w, int h, int ow, int oh) = 0;
 };
 
+class HistogramObservable;
+
 /** This listener is used when the histogram of the final image has changed. */
-class HistogramListener
-{
+class HistogramListener {
 public:
     virtual ~HistogramListener() = default;
     /** This member function is called when the histogram of the final image has changed.
@@ -281,8 +283,42 @@ public:
         const LUTu& histGreenRaw,
         const LUTu& histBlueRaw,
         const LUTu& histChroma,
-        const LUTu& histLRETI
+        const LUTu& histLRETI,
+        int vectorscopeScale,
+        const array2D<int>& vectorscopeHC,
+        const array2D<int>& vectorscopeHS,
+        int waveformScale,
+        const array2D<int>& waveformRed,
+        const array2D<int>& waveformGreen,
+        const array2D<int>& waveformBlue,
+        const array2D<int>& waveformLuma
     ) = 0;
+    /** Tells which observable is notifying the listener. */
+    virtual void setObservable(HistogramObservable* observable) = 0;
+    /** Returns if the listener wants the histogram to be updated. */
+    virtual bool updateHistogram() const = 0;
+    /** Returns if the listener wants the raw histogram to be updated. */
+    virtual bool updateHistogramRaw() const = 0;
+    /** Returns if the listener wants the H-C vectorscope to be updated. */
+    virtual bool updateVectorscopeHC() const = 0;
+    /** Returns if the listener wants the H-S vectorscope to be updated. */
+    virtual bool updateVectorscopeHS() const = 0;
+    /** Returns if the listener wants the waveform to be updated. */
+    virtual bool updateWaveform() const  = 0;
+};
+
+class HistogramObservable {
+public:
+    /** Tells the observable to update the histogram data. */
+    virtual void requestUpdateHistogram() = 0;
+    /** Tells the observable to update the raw histogram data. */
+    virtual void requestUpdateHistogramRaw() = 0;
+    /** Tells the observable to update the H-C vectorscope data. */
+    virtual void requestUpdateVectorscopeHC() = 0;
+    /** Tells the observable to update the H-S vectorscope data. */
+    virtual void requestUpdateVectorscopeHS() = 0;
+    /** Tells the observable to update the waveform data. */
+    virtual void requestUpdateWaveform() = 0;
 };
 
 /** This listener is used when the auto exposure has been recomputed (e.g. when the clipping ratio changed). */

@@ -18,8 +18,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _EDITORPANEL_
-#define _EDITORPANEL_
+#pragma once
 
 #include <gtkmm.h>
 #include "imageareapanel.h"
@@ -53,7 +52,8 @@ class EditorPanel final :
     public rtengine::ProgressListener,
     public ThumbnailListener,
     public HistoryBeforeAfterListener,
-    public rtengine::HistogramListener
+    public rtengine::HistogramListener,
+    public HistogramPanelListener
 {
 public:
     explicit EditorPanel (FilePanel* filePanel = nullptr);
@@ -123,8 +123,25 @@ public:
         const LUTu& histGreenRaw,
         const LUTu& histBlueRaw,
         const LUTu& histChroma,
-        const LUTu& histLRETI
+        const LUTu& histLRETI,
+        int vectorscopeScale,
+        const array2D<int>& vectorscopeHC,
+        const array2D<int>& vectorscopeHS,
+        int waveformScale,
+        const array2D<int>& waveformRed,
+        const array2D<int>& waveformGreen,
+        const array2D<int>& waveformBlue,
+        const array2D<int>& waveformLuma
     ) override;
+    void setObservable(rtengine::HistogramObservable* observable) override;
+    bool updateHistogram(void) const override;
+    bool updateHistogramRaw(void) const override;
+    bool updateVectorscopeHC(void) const override;
+    bool updateVectorscopeHS(void) const override;
+    bool updateWaveform(void) const override;
+
+    // HistogramPanelListener
+    void scopeTypeChanged(Options::ScopeType new_type) override;
 
     // event handlers
     void info_toggled ();
@@ -261,7 +278,8 @@ private:
     bool isProcessing;
 
     IdleRegister idle_register;
-};
 
-#endif
+    rtengine::HistogramObservable* histogram_observable;
+    Options::ScopeType histogram_scope_type;
+};
 

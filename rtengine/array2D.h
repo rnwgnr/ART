@@ -189,6 +189,13 @@ public:
         }
     }
 
+    void fill(const T val)
+    {
+        for (size_t i = 0, n = width() * height(); i < n; ++i) {
+            data[i] = val;
+        }
+    }
+
     void free()
     {
         if ((owner) && (data)) {

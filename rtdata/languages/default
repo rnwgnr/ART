@@ -242,6 +242,7 @@ HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range
 HISTOGRAM_TOOLTIP_B;Show/Hide blue histogram.
 HISTOGRAM_TOOLTIP_BAR;Show/Hide RGB indicator bar.
 HISTOGRAM_TOOLTIP_CHRO;Show/Hide chromaticity histogram.
+HISTOGRAM_TOOLTIP_CROSSHAIR;Show/Hide indicator crosshair.
 HISTOGRAM_TOOLTIP_G;Show/Hide green histogram.
 HISTOGRAM_TOOLTIP_L;Show/Hide CIELab luminance histogram.
 HISTOGRAM_TOOLTIP_MODE;Toggle between linear, log-linear and log-log scaling of the histogram.\n(Current mode: %1)
@@ -250,6 +251,14 @@ HISTOGRAM_TOOLTIP_MODE_LOG_X;log-linear
 HISTOGRAM_TOOLTIP_MODE_LOG_XY;log-log
 HISTOGRAM_TOOLTIP_R;Show/Hide red histogram.
 HISTOGRAM_TOOLTIP_RAW;Show/Hide raw histogram.
+HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Toggle visibility of the scope option buttons.
+HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Adjust scope brightness.
+HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;Histogram
+HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Raw Histogram
+HISTOGRAM_TOOLTIP_TYPE_PARADE;RGB Parade
+HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;Waveform
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;Hue-Chroma Vectorscope
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;Hue-Saturation Vectorscope
 HISTORY_CHANGED;Changed
 HISTORY_CUSTOMCURVE;Custom curve
 HISTORY_FROMCLIPBOARD;From clipboard

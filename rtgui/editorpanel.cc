@@ -35,6 +35,7 @@
 #include "fastexport.h"
 
 using namespace rtengine::procparams;
+using ScopeType = Options::ScopeType;
 
 namespace
 {
@@ -459,7 +460,8 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
       iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), previewHandler (nullptr), beforePreviewHandler (nullptr),
       beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), beforeLabel (nullptr), afterLabel (nullptr),
       beforeHeaderBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), parentWindow (nullptr), openThm (nullptr),
-      selectedFrame(0), isrc (nullptr), ipc (nullptr), beforeIpc (nullptr), err (0), isProcessing (false)
+      selectedFrame(0), isrc (nullptr), ipc (nullptr), beforeIpc (nullptr), err (0), isProcessing (false),
+      histogram_observable(nullptr), histogram_scope_type(ScopeType::NONE)      
 {
 
     epih = new EditorPanelIdleHelper;
@@ -2311,15 +2313,95 @@ void EditorPanel::histogramChanged(
     const LUTu& histGreenRaw,
     const LUTu& histBlueRaw,
     const LUTu& histChroma,
-    const LUTu& histLRETI
+    const LUTu& histLRETI,
+    int vectorscopeScale,
+    const array2D<int>& vectorscopeHC,
+    const array2D<int>& vectorscopeHS,
+    int waveformScale,
+    const array2D<int>& waveformRed,
+    const array2D<int>& waveformGreen,
+    const array2D<int>& waveformBlue,
+    const array2D<int>& waveformLuma
 )
 {
     if (histogramPanel) {
-        histogramPanel->histogramChanged(histRed, histGreen, histBlue, histLuma, histChroma, histRedRaw, histGreenRaw, histBlueRaw);
+        histogramPanel->histogramChanged(histRed, histGreen, histBlue, histLuma, histChroma, histRedRaw, histGreenRaw, histBlueRaw, vectorscopeScale, vectorscopeHC, vectorscopeHS, waveformScale, waveformRed, waveformGreen, waveformBlue, waveformLuma);
     }
 
     tpc->updateCurveBackgroundHistogram(histToneCurve, histLCurve, histCCurve, histLCAM, histCCAM, histRed, histGreen, histBlue, histLuma, histLRETI);
 }
+
+void EditorPanel::setObservable(rtengine::HistogramObservable* observable)
+{
+    histogram_observable = observable;
+}
+
+bool EditorPanel::updateHistogram() const
+{
+    return histogram_scope_type == ScopeType::HISTOGRAM
+        || histogram_scope_type == ScopeType::NONE;
+}
+
+bool EditorPanel::updateHistogramRaw() const
+{
+    return histogram_scope_type == ScopeType::HISTOGRAM_RAW
+        || histogram_scope_type == ScopeType::NONE;
+}
+
+bool EditorPanel::updateVectorscopeHC() const
+{
+    return
+        histogram_scope_type == ScopeType::VECTORSCOPE_HC
+        || histogram_scope_type == ScopeType::NONE;
+}
+
+bool EditorPanel::updateVectorscopeHS() const
+{
+    return
+        histogram_scope_type == ScopeType::VECTORSCOPE_HS
+        || histogram_scope_type == ScopeType::NONE;
+}
+
+bool EditorPanel::updateWaveform() const
+{
+    return histogram_scope_type == ScopeType::WAVEFORM
+        || histogram_scope_type == ScopeType::PARADE
+        || histogram_scope_type == ScopeType::NONE;
+}
+
+
+void EditorPanel::scopeTypeChanged(ScopeType new_type)
+{
+    histogram_scope_type = new_type;
+
+    if (!histogram_observable) {
+        return;
+    }
+
+    // Make sure the new scope is updated since we only actively update the
+    // current scope.
+    switch (new_type) {
+        case ScopeType::HISTOGRAM:
+            histogram_observable->requestUpdateHistogram();
+            break;
+        case ScopeType::HISTOGRAM_RAW:
+            histogram_observable->requestUpdateHistogramRaw();
+            break;
+        case ScopeType::VECTORSCOPE_HC:
+            histogram_observable->requestUpdateVectorscopeHC();
+            break;
+        case ScopeType::VECTORSCOPE_HS:
+            histogram_observable->requestUpdateVectorscopeHS();
+            break;
+        case ScopeType::PARADE:
+        case ScopeType::WAVEFORM:
+            histogram_observable->requestUpdateWaveform();
+            break;
+        case ScopeType::NONE:
+            break;
+    }
+}
+
 
 bool EditorPanel::CheckSidePanelsVisibility()
 {
@@ -2435,6 +2517,10 @@ void EditorPanel::updateHistogramPosition (int oldPosition, int newPosition)
             vboxright->set_position(options.histogramHeight);
             histogramPanel->reorder (Gtk::POS_RIGHT);
             break;
+    }
+ 
+    if (histogramPanel) {
+        histogramPanel->setPanelListener(this);
     }
 
     iareapanel->imageArea->setPointerMotionHListener (histogramPanel);

@@ -413,11 +413,14 @@ void Options::setDefaults()
     histogramBlue = true;
     histogramLuma = false;
     histogramChroma = false;
-    histogramRAW = false;
+    //histogramRAW = false;
     histogramBar = true;
     histogramHeight = 200;
     histogramDrawMode = 0;
     histogram_scaling_factor = 10.0;
+    histogramScopeType = ScopeType::HISTOGRAM;
+    histogramShowOptionButtons = false;
+    histogramTraceBrightness = 1;
     curvebboxpos = 1;
     prevdemo = PD_Sidecar;
     rgbDenoiseThreadLimit = 0;
@@ -1394,7 +1397,10 @@ void Options::readFromFile(Glib::ustring fname)
                 }
 
                 if (keyFile.has_key("GUI", "HistogramRAW")) {
-                    histogramRAW = keyFile.get_boolean("GUI", "HistogramRAW");
+                    //histogramRAW = keyFile.get_boolean("GUI", "HistogramRAW");
+                    if (keyFile.get_boolean("GUI", "HistogramRAW")) {
+                        histogramScopeType = ScopeType::HISTOGRAM_RAW;
+                    }
                 }
 
                 if (keyFile.has_key("GUI", "HistogramBar")) {
@@ -1419,6 +1425,18 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("GUI", "NavigatorLCHUnit")) {
                     navLCHUnit = (NavigatorUnit)keyFile.get_integer("GUI", "NavigatorLCHUnit");
+                }
+
+                if (keyFile.has_key("GUI", "HistogramScopeType")) {
+                    histogramScopeType = static_cast<ScopeType>(keyFile.get_integer("GUI", "HistogramScopeType"));
+                }
+
+                if (keyFile.has_key("GUI", "HistogramShowOptionButtons")) {
+                    histogramShowOptionButtons = keyFile.get_boolean("GUI", "HistogramShowOptionButtons");
+                }
+
+                if (keyFile.has_key("GUI", "HistogramTraceBrightness")) {
+                    histogramTraceBrightness = keyFile.get_double("GUI", "HistogramTraceBrightness");
                 }
 
                 if (keyFile.has_key("GUI", "ShowFilmStripToolBar")) {
@@ -2161,11 +2179,14 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean ("GUI", "HistogramBlue", histogramBlue);
         keyFile.set_boolean ("GUI", "HistogramLuma", histogramLuma);
         keyFile.set_boolean ("GUI", "HistogramChroma", histogramChroma);
-        keyFile.set_boolean ("GUI", "HistogramRAW", histogramRAW);
+        //keyFile.set_boolean ("GUI", "HistogramRAW", histogramRAW);
         keyFile.set_boolean ("GUI", "HistogramBar", histogramBar);
         keyFile.set_integer ("GUI", "HistogramHeight", histogramHeight);
         keyFile.set_integer ("GUI", "HistogramDrawMode", histogramDrawMode);
         keyFile.set_double("GUI", "HistogramScalingFactor", histogram_scaling_factor);
+        keyFile.set_integer("GUI", "HistogramScopeType", rtengine::toUnderlying(histogramScopeType));
+        keyFile.set_boolean("GUI", "HistogramShowOptionButtons", histogramShowOptionButtons);
+        keyFile.set_double("GUI", "HistogramTraceBrightness", histogramTraceBrightness);
         keyFile.set_integer ("GUI", "NavigatorRGBUnit", (int)navRGBUnit);
         keyFile.set_integer ("GUI", "NavigatorLCHUnit", (int)navLCHUnit);
         keyFile.set_boolean ("GUI", "ShowFilmStripToolBar", showFilmStripToolBar);
