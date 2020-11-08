@@ -146,7 +146,7 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
         // try a custom loader
         tpp = rtengine::Thumbnail::loadFromImage(fname, tw, th, -1, pparams.master.wb.equal);
         if (tpp) {
-            cfs.format = FT_Tiff;
+            cfs.format = FT_Custom;
             infoFromImage(fname);
         }
     }

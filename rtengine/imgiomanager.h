@@ -25,6 +25,7 @@
 #include "imageio.h"
 #include <glibmm/ustring.h>
 #include <unordered_map>
+#include <map>
 
 namespace rtengine {
 
@@ -34,10 +35,14 @@ public:
 
     void init(const Glib::ustring &dir);
     bool load(const Glib::ustring &fileName, ProgressListener *plistener, ImageIO *&img, int maxw_hint, int maxh_hint);
+    bool save(IImagefloat *img, const std::string &ext, const Glib::ustring &fileName, ProgressListener *plistener);
+    std::vector<std::pair<std::string, Glib::ustring>> getSaveFormats() const;
 
 private:
-    // map extension -> loader app
     std::unordered_map<std::string, Glib::ustring> loaders_;
+    std::unordered_map<std::string, Glib::ustring> savers_;
+    std::map<std::string, Glib::ustring> savelbls_;
+    
     Glib::ustring dir_;
 };
 

@@ -111,6 +111,23 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                 if (settings->verbose) {
                     std::cout << "Found loader for extension \"" << ext << "\": " << S(cmd) << std::endl;
                 }
+
+                if (kf.has_key(group, "WriteCommand")) {
+                    cmd = kf.get_string(group, "WriteCommand");
+                    savers_[ext] = cmd;
+                    Glib::ustring lbl;
+                    if (kf.has_key(group, "Label")) {
+                        lbl = kf.get_string(group, "Label");
+                    } else {
+                        lbl = Glib::ustring(ext).uppercase();
+                    }
+
+                    savelbls_[ext] = lbl;
+                    
+                    if (settings->verbose) {
+                        std::cout << "Found saver for extension \"" << ext << "\": " << S(cmd) << std::endl;
+                    }
+                }
             } catch (Glib::Exception &exc) {
                 std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what())
                           << std::endl;
@@ -207,6 +224,81 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
         g_remove(outname.c_str());
     }
+    return ret;
+}
+
+
+bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::ustring &fileName, ProgressListener *plistener)
+{
+    auto it = savers_.find(ext);
+    if (it == savers_.end()) {
+        return false;
+    }
+    if (plistener) {
+        plistener->setProgressStr("PROGRESSBAR_SAVING");
+        plistener->setProgress(0.0);
+    }
+
+    std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-save-%1-XXXXXX", Glib::path_get_basename(fileName)));
+    int fd = Glib::mkstemp(templ);
+    if (fd < 0) {
+        return false;
+    }
+    Glib::ustring tmpname = Glib::filename_to_utf8(templ) + ".tif";
+
+    bool ok = true;
+    
+    if (img->saveAsTIFF(tmpname, 32, true, true) != 0) {
+        ok = false;
+    }
+
+    if (plistener) {
+        plistener->setProgress(0.5);
+    }
+        
+    if (ok) {
+        std::vector<Glib::ustring> argv = subprocess::split_command_line(it->second);
+        argv.push_back(tmpname);
+        argv.push_back(fileName);
+        std::string out, err;
+        if (settings->verbose) {
+            std::cout << "saving " << fileName << " with " << it->second << std::endl;
+        }
+        try {
+            subprocess::exec_sync(dir_, argv, true, &out, &err);
+        } catch (subprocess::error &err) {
+            if (settings->verbose) {
+                std::cout << "  exec error: " << err.what() << std::endl;
+            }
+            ok = false;
+        }
+        if (settings->verbose) {
+            if (!out.empty()) {
+                std::cout << "  stdout: " << out << std::flush;
+            }
+            if (!err.empty()) {
+                std::cout << "  stderr: " << err << std::flush;
+            }
+        }
+    }
+    
+    if (plistener) {
+        plistener->setProgress(1.0);
+    }
+
+    close(fd);
+    g_remove(templ.c_str());
+    if (Glib::file_test(tmpname, Glib::FILE_TEST_EXISTS)) {
+        g_remove(tmpname.c_str());
+    }
+
+    return ok;
+}
+
+
+std::vector<std::pair<std::string, Glib::ustring>> ImageIOManager::getSaveFormats() const
+{
+    std::vector<std::pair<std::string, Glib::ustring>> ret(savelbls_.begin(), savelbls_.end());
     return ret;
 }
 

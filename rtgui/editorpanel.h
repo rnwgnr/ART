@@ -188,11 +188,11 @@ private:
     void close ();
 
     BatchQueueEntry *createBatchQueueEntry(bool fast_export=false);
-    bool                idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
-    bool                idle_saveImage (ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
-    bool                idle_sendToGimp ( ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname);
-    bool                idle_sentToGimp (ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring filename);
-    void                histogramProfile_toggled ();
+    bool idle_imageSaved(ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
+    bool idle_saveImage(ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
+    bool idle_sendToGimp( ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname);
+    bool idle_sentToGimp(ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring filename);
+    void histogramProfile_toggled();
 
     void do_save_image(bool fast_export);
     void do_queue_image(bool fast_export);

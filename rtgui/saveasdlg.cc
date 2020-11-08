@@ -25,11 +25,11 @@
 #include "rtimage.h"
 
 #include "../rtengine/utils.h"
+#include "../rtengine/imgiomanager.h"
 
 extern Options options;
 
-namespace
-{
+namespace {
 
 Glib::ustring getCurrentFilename(const Gtk::FileChooserWidget* fchooser)
 {
@@ -44,7 +44,8 @@ Glib::ustring getCurrentFilename(const Gtk::FileChooserWidget* fchooser)
     return res;
 }
 
-}
+} // namespace
+
 
 SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent)
     : Gtk::Dialog (M("GENERAL_SAVE"), *parent)
@@ -55,7 +56,7 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     fchooser->set_current_folder (initialDir);
     fchooser->signal_file_activated().connect(sigc::mem_fun(*this, &SaveAsDialog::okPressed));
 
-    filter_jpg = Gtk::FileFilter::create();
+    auto filter_jpg = Gtk::FileFilter::create();
     filter_jpg->set_name(M("SAVEDLG_JPGFILTER"));
     filter_jpg->add_pattern("*.jpg");
     filter_jpg->add_pattern("*.JPG");
@@ -64,31 +65,43 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     filter_jpg->add_pattern("*.jpe");
     filter_jpg->add_pattern("*.JPE");
 
-    filter_tif = Gtk::FileFilter::create();
+    auto filter_tif = Gtk::FileFilter::create();
     filter_tif->set_name(M("SAVEDLG_JPGFILTER"));
     filter_tif->add_pattern("*.tif");
     filter_tif->add_pattern("*.TIF");
     filter_tif->add_pattern("*.tiff");
     filter_tif->add_pattern("*.TIFF");
 
-    filter_png = Gtk::FileFilter::create();
+    auto filter_png = Gtk::FileFilter::create();
     filter_png->set_name(M("SAVEDLG_JPGFILTER"));
     filter_png->add_pattern("*.png");
     filter_png->add_pattern("*.PNG");
 
-    formatChanged (options.saveFormat.format);
+    filters_["jpg"] = filter_jpg;
+    filters_["tif"] = filter_tif;
+    filters_["png"] = filter_png;
+
+    for (auto &p : rtengine::ImageIOManager::getInstance()->getSaveFormats()) {
+        auto f = Gtk::FileFilter::create();
+        f->set_name(p.second);
+        Glib::ustring e = p.first;
+        f->add_pattern(Glib::ustring("*.") + e);
+        f->add_pattern(Glib::ustring("*.") + e.uppercase());
+    }
+    
+    formatChanged(options.saveFormat.format);
 
 // Output Options
 // ~~~~~~~~~~~~~~
-    formatOpts = Gtk::manage( new SaveFormatPanel () );
+    formatOpts = Gtk::manage(new SaveFormatPanel());
     setExpandAlignProperties(formatOpts, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_START);
-    formatOpts->setListener (this);
+    formatOpts->setListener(this);
 
 // queue/immediate
 // ~~~~~~~~~~~~~~~
-    saveMethod[0]  = Gtk::manage( new Gtk::RadioButton (M("SAVEDLG_SAVEIMMEDIATELY")) );
-    saveMethod[1]  = Gtk::manage( new Gtk::RadioButton (M("SAVEDLG_PUTTOQUEUEHEAD")) );
-    saveMethod[2]  = Gtk::manage( new Gtk::RadioButton (M("SAVEDLG_PUTTOQUEUETAIL")) );
+    saveMethod[0] = Gtk::manage(new Gtk::RadioButton(M("SAVEDLG_SAVEIMMEDIATELY")));
+    saveMethod[1] = Gtk::manage(new Gtk::RadioButton(M("SAVEDLG_PUTTOQUEUEHEAD")));
+    saveMethod[2] = Gtk::manage(new Gtk::RadioButton(M("SAVEDLG_PUTTOQUEUETAIL")));
 
     Gtk::RadioButton::Group g = saveMethod[0]->get_group();
     saveMethod[1]->set_group (g);
@@ -118,8 +131,8 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
 
 // buttons
 // ~~~~~~~
-    Gtk::Button* ok     = Gtk::manage( new Gtk::Button (M("GENERAL_OK")) );
-    Gtk::Button* cancel = Gtk::manage( new Gtk::Button (M("GENERAL_CANCEL")) );
+    Gtk::Button* ok = Gtk::manage(new Gtk::Button(M("GENERAL_OK")));
+    Gtk::Button* cancel = Gtk::manage(new Gtk::Button(M("GENERAL_CANCEL")));
 
     ok->set_tooltip_markup (M("TP_SAVEDIALOG_OK_TIP"));
 
@@ -178,7 +191,6 @@ void SaveAsDialog::forceFmtOptsSwitched ()
 
 bool SaveAsDialog::getForceFormatOpts ()
 {
-
     return forceFormatOpts->get_active();
 }
 
@@ -190,7 +202,6 @@ bool SaveAsDialog::getAutoSuffix ()
 
 bool SaveAsDialog::getImmediately ()
 {
-
     return simpleEditor ? true : saveMethod[0]->get_active ();
 }
 
@@ -222,21 +233,36 @@ int SaveAsDialog::getSaveMethodNum ()
 
 Glib::ustring SaveAsDialog::getFileName ()
 {
-
     return fname;
 }
 
 Glib::ustring SaveAsDialog::getDirectory ()
 {
-
     return fchooser->get_current_folder ();
 }
 
 SaveFormat SaveAsDialog::getFormat ()
 {
-
     return formatOpts->getFormat ();
 }
+
+
+namespace {
+
+bool has_good_extension(const Glib::ustring &fmt, const Glib::ustring &fname)
+{
+    if (fmt == "jpg") {
+        return rtengine::hasJpegExtension(fname);
+    } else if (fmt == "tif") {
+        return rtengine::hasTiffExtension(fname);
+    } else if (fmt == "png") {
+        return rtengine::hasPngExtension(fname);
+    } else {
+        return rtengine::getFileExtension(fname).lowercase() == fmt;
+    }
+}    
+
+} // namespace
 
 void SaveAsDialog::okPressed ()
 {
@@ -260,20 +286,7 @@ void SaveAsDialog::okPressed ()
     if (getExtension(fname).empty()) {
         // Extension is either empty or unfamiliar
         fname += '.' + formatOpts->getFormat().format;
-    } else if (
-        (
-            formatOpts->getFormat().format == "jpg"
-            && !rtengine::hasJpegExtension(fname)
-        )
-        || (
-            formatOpts->getFormat().format == "tif"
-            && !rtengine::hasTiffExtension(fname)
-        )
-        || (
-            formatOpts->getFormat().format == "png"
-            && !rtengine::hasPngExtension(fname)
-        )
-    ) {
+    } else if (!has_good_extension(formatOpts->getFormat().format, fname)) {
         // Create dialog to warn user that the filename may have two extensions on the end
         Gtk::MessageDialog msgd(
             *this,
@@ -299,7 +312,7 @@ void SaveAsDialog::okPressed ()
         }
     }
 
-    response (Gtk::RESPONSE_OK);
+    response(Gtk::RESPONSE_OK);
 }
 
 void SaveAsDialog::cancelPressed ()
@@ -320,7 +333,7 @@ void SaveAsDialog::formatChanged(const Glib::ustring& format)
         };
 
     if (format == "jpg") {
-        fchooser->set_filter (filter_jpg);
+        fchooser->set_filter(filters_["jpg"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
             {
@@ -328,7 +341,7 @@ void SaveAsDialog::formatChanged(const Glib::ustring& format)
             }
         );
     } else if (format == "png") {
-        fchooser->set_filter (filter_png);
+        fchooser->set_filter (filters_["png"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
             {
@@ -336,13 +349,24 @@ void SaveAsDialog::formatChanged(const Glib::ustring& format)
             }
         );
     } else if (format == "tif") {
-        fchooser->set_filter (filter_tif);
+        fchooser->set_filter(filters_["tif"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
             {
                 return rtengine::hasTiffExtension(filename);
             }
         );
+    } else {
+        auto it = filters_.find(format);
+        if (it != filters_.end()) {
+            fchooser->set_filter(it->second);
+        }
+        sanitize_suffix(
+            [=](const Glib::ustring &filename)
+            {
+                return rtengine::getFileExtension(filename).lowercase() == format;
+            }
+        ); 
     }
 }
 

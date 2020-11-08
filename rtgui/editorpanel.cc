@@ -33,6 +33,7 @@
 #include "procparamchangers.h"
 #include "placesbrowser.h"
 #include "fastexport.h"
+#include "../rtengine/imgiomanager.h"
 
 using namespace rtengine::procparams;
 using ScopeType = Options::ScopeType;
@@ -1776,24 +1777,31 @@ bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImagefloat*> *pc,
     rtengine::IImagefloat* img = pc->returnValue();
     delete pc;
 
-    if ( img ) {
+    if (img) {
         setProgressStr (M ("GENERAL_SAVE"));
         setProgress (0.9f);
 
         ProgressConnector<int> *ld = new ProgressConnector<int>();
         img->setSaveProgressListener (parent->getProgressListener());
 
-        if (sf.format == "tif")
+        if (sf.format == "tif") {
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsTIFF), fname, sf.tiffBits, sf.tiffFloat, sf.tiffUncompressed),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
-        else if (sf.format == "png")
+        } else if (sf.format == "png") {
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsPNG), fname, sf.pngBits),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
-        else if (sf.format == "jpg")
+        } else if (sf.format == "jpg") {
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsJPEG), fname, sf.jpegQuality, sf.jpegSubSamp),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
-        else {
-            delete ld;
+        } else {
+            //delete ld;
+            const auto do_save =
+                [=]() -> int
+                {
+                    return rtengine::ImageIOManager::getInstance()->save(img, sf.format, fname, this) ? 0 : 1;
+                };
+            ld->startFunc(sigc::slot0<int>(do_save),
+                          sigc::bind(sigc::mem_fun(*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
         }
     } else {
         Glib::ustring msg_ = Glib::ustring ("<b>") + fname + ": Error during image processing\n</b>";
@@ -2033,7 +2041,7 @@ bool EditorPanel::saveImmediately (const Glib::ustring &filename, const SaveForm
     } else if (sf.format == "jpg") {
         err = img->saveAsJPEG (filename, sf.jpegQuality, sf.jpegSubSamp);
     } else {
-        err = 1;
+        err = rtengine::ImageIOManager::getInstance()->save(img, sf.format, filename, this) ? 0 : 1;
     }
 
     img->free();

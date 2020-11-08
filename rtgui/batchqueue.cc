@@ -35,6 +35,7 @@
 #include "guiutils.h"
 #include "rtimage.h"
 #include <sys/time.h>
+#include "../rtengine/imgiomanager.h"
 
 using namespace std;
 using namespace rtengine;
@@ -704,6 +705,8 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
             err = img->saveAsPNG (fname, saveFormat.pngBits);
         } else if (saveFormat.format == "jpg") {
             err = img->saveAsJPEG (fname, saveFormat.jpegQuality, saveFormat.jpegSubSamp);
+        } else {
+            err = rtengine::ImageIOManager::getInstance()->save(img, saveFormat.format, fname, this) ? 0 : 1;
         }
 
         img->free ();
