@@ -242,6 +242,7 @@ HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), pic: %5 (%6)\n    gamme:
 HISTOGRAM_TOOLTIP_B;Montrer/Cacher l'histogramme du bleu.
 HISTOGRAM_TOOLTIP_BAR;Montrer/Cacher la barre indicateur RVB.
 HISTOGRAM_TOOLTIP_CHRO;Montrer/Cacher l'histogramme de Chromaticité.
+HISTOGRAM_TOOLTIP_CROSSHAIR;Montrer/Cacher l'indicateur en croix.
 HISTOGRAM_TOOLTIP_G;Montrer/Cacher l'histogramme du vert.
 HISTOGRAM_TOOLTIP_L;Montrer/Cacher l'histogramme de luminance CIELab.
 HISTOGRAM_TOOLTIP_MODE;Basculer entre échelles linéaire, linéaire-log et log-log de l'histogramme.\n(Mode actuel : %1)
@@ -250,6 +251,14 @@ HISTOGRAM_TOOLTIP_MODE_LOG_X;Log-linéaire
 HISTOGRAM_TOOLTIP_MODE_LOG_XY;log-log
 HISTOGRAM_TOOLTIP_R;Montrer/Cacher l'histogramme du rouge.
 HISTOGRAM_TOOLTIP_RAW;Montrer/Cacher l'histogramme des données raw.
+HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Bascule la visibilité des boutons d'option de l'histogramme.
+HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Ajuster la luminosité de l'histogramme.
+HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;Histogramme
+HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Histogramme raw
+HISTOGRAM_TOOLTIP_TYPE_PARADE;Affichage juxtaposé RVB
+HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;Forme d'onde;
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;Teinte-Chromaticité vue vectorielle
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;Teinte-Saturation vue vectorielle
 HISTORY_CHANGED;Changé
 HISTORY_CUSTOMCURVE;Courbe personnelle
 HISTORY_FROMCLIPBOARD;Depuis le presse-papier
@@ -1393,6 +1402,7 @@ PROGRESSBAR_READY;Prêt
 PROGRESSBAR_SAVEJPEG;Enregistrement du fichier JPEG...
 PROGRESSBAR_SAVEPNG;Enregistrement du fichier PNG...
 PROGRESSBAR_SAVETIFF;Enregistrement du fichier TIFF...
+PROGRESSBAR_SAVING;Enregistrement de l'image...
 PROGRESSBAR_SNAPSHOT_ADDED;Instantané ajouté
 PROGRESSDLG_PROFILECHANGEDINBROWSER;Profil de traitement modifié dans le navigateur
 QINFO_FRAMECOUNT;%2 trames
