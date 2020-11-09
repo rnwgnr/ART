@@ -259,17 +259,17 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     
     switch (sFormat) {
     case IIOSF_UNSIGNED_CHAR:
-        fimg = new Image8;
+        fimg = new Image8();
         break;
     case IIOSF_UNSIGNED_SHORT:
-        fimg = new Image16;
+        fimg = new Image16();
         break;
     case IIOSF_LOGLUV24:
     case IIOSF_LOGLUV32:
     case IIOSF_FLOAT16:
     case IIOSF_FLOAT24:
     case IIOSF_FLOAT32:
-        img = new Imagefloat;
+        fimg = new Imagefloat();
         break;
     default:
         ret = false;
@@ -285,7 +285,8 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
             ret = false;
         } else {
             img = fimg;
-        }} else {
+        }
+    } else {
         if (fimg) {
             delete fimg;
         }
