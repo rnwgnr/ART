@@ -23,6 +23,8 @@
 #include "utils.h"
 #include "settings.h"
 #include "imagefloat.h"
+#include "image8.h"
+#include "image16.h"
 #include <iostream>
 #include <glib/gstdio.h>
 #include <unistd.h>
@@ -92,6 +94,8 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                     continue;
                 }
 
+                Format fmt = FMT_TIFF_FLOAT;
+
                 Glib::ustring cmd;
                 if (kf.has_key(group, "ReadCommand")) {
                     cmd = kf.get_string(group, "ReadCommand");
@@ -128,6 +132,22 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                         std::cout << "Found saver for extension \"" << ext << "\": " << S(cmd) << std::endl;
                     }
                 }
+
+                if (kf.has_key(group, "Format")) {
+                    auto f = kf.get_string(group, "Format").lowercase();
+                    if (f == "jpg") {
+                        fmt = FMT_JPG;
+                    } else if (f == "png") {
+                        fmt = FMT_PNG;
+                    } else if (f == "png16") {
+                        fmt = FMT_PNG16;
+                    } else if (f == "tiff") {
+                        fmt = FMT_TIFF;
+                    } else if (f == "float") {
+                        fmt = FMT_TIFF_FLOAT;
+                    }
+                }
+                fmts_[ext] = fmt;
             } catch (Glib::Exception &exc) {
                 std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what())
                           << std::endl;
@@ -140,6 +160,16 @@ void ImageIOManager::init(const Glib::ustring &dirname)
     if (settings->verbose) {
         std::cout << "Loaded " << loaders_.size() << " custom loaders"
                   << std::endl;
+    }
+}
+
+
+Glib::ustring ImageIOManager::get_ext(Format f)
+{
+    switch (f) {
+    case FMT_JPG: return ".jpg";
+    case FMT_PNG: case FMT_PNG16: return ".png";
+    default: return ".tif";
     }
 }
 
@@ -161,20 +191,21 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     if (fd < 0) {
         return false;
     }
-    Glib::ustring outname = Glib::filename_to_utf8(templ) + ".tif";
+    auto fmt = fmts_[ext];
+    Glib::ustring outname = Glib::filename_to_utf8(templ) + get_ext(fmt);
     // int exit_status = -1;
     std::vector<Glib::ustring> argv = subprocess::split_command_line(it->second);
     argv.push_back(fileName);
     argv.push_back(outname);
     argv.push_back(std::to_string(maxw_hint));
     argv.push_back(std::to_string(maxh_hint));
-    std::string out, err;
+    std::string sout, serr;
     bool ok = true;
     if (settings->verbose) {
         std::cout << "loading " << fileName << " with " << it->second << std::endl;
     }
     try {
-        subprocess::exec_sync(dir_, argv, true, &out, &err);
+        subprocess::exec_sync(dir_, argv, true, &sout, &serr);
     } catch (subprocess::error &err) {
         if (settings->verbose) {
             std::cout << "  exec error: " << err.what() << std::endl;
@@ -184,11 +215,11 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     close(fd);
     g_remove(templ.c_str());
     if (settings->verbose) {
-        if (!out.empty()) {
-            std::cout << "  stdout: " << out << std::flush;
+        if (!sout.empty()) {
+            std::cout << "  stdout: " << sout << std::flush;
         }
-        if (!err.empty()) {
-            std::cout << "  stderr: " << err << std::flush;
+        if (!serr.empty()) {
+            std::cout << "  stderr: " << serr << std::flush;
         }
     }
     if (!ok) {
@@ -200,25 +231,64 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
 
     IIOSampleFormat sFormat;
     IIOSampleArrangement sArrangement;
-    if (ImageIO::getTIFFSampleFormat(outname, sFormat, sArrangement) != IMIO_SUCCESS) {
+    bool err = false;
+
+    switch (fmt) {
+    case FMT_JPG:
+        sFormat = IIOSF_UNSIGNED_CHAR;
+        sArrangement = IIOSA_CHUNKY;
+        break;
+    case FMT_PNG:
+    case FMT_PNG16:
+        err = ImageIO::getPNGSampleFormat(outname, sFormat, sArrangement) != IMIO_SUCCESS;
+        break;
+    default:
+        err = ImageIO::getTIFFSampleFormat(outname, sFormat, sArrangement) != IMIO_SUCCESS;
+        break;
+    }
+        
+    if (err) {
         if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
             g_remove(outname.c_str());
         }
         return false;
     }
-    
-    Imagefloat *fimg = new Imagefloat();
-    fimg->setProgressListener(plistener);
-    fimg->setSampleFormat(sFormat);
-    fimg->setSampleArrangement(sArrangement);
 
     bool ret = true;
+    ImageIO *fimg = nullptr;
     
-    if (fimg->load(outname)) {
-        delete fimg;
+    switch (sFormat) {
+    case IIOSF_UNSIGNED_CHAR:
+        fimg = new Image8;
+        break;
+    case IIOSF_UNSIGNED_SHORT:
+        fimg = new Image16;
+        break;
+    case IIOSF_LOGLUV24:
+    case IIOSF_LOGLUV32:
+    case IIOSF_FLOAT16:
+    case IIOSF_FLOAT24:
+    case IIOSF_FLOAT32:
+        img = new Imagefloat;
+        break;
+    default:
         ret = false;
-    } else {
-        img = fimg;
+    }
+
+    if (ret) {
+        fimg->setProgressListener(plistener);
+        fimg->setSampleFormat(sFormat);
+        fimg->setSampleArrangement(sArrangement);
+
+        if (fimg->load(outname)) {
+            delete fimg;
+            ret = false;
+        } else {
+            img = fimg;
+        }} else {
+        if (fimg) {
+            delete fimg;
+        }
     }
 
     if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
@@ -244,12 +314,27 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
     if (fd < 0) {
         return false;
     }
-    Glib::ustring tmpname = Glib::filename_to_utf8(templ) + ".tif";
+    auto fmt = fmts_[ext];
+    Glib::ustring tmpname = Glib::filename_to_utf8(templ) + get_ext(fmt);
 
-    bool ok = true;
-    
-    if (img->saveAsTIFF(tmpname, 32, true, true) != 0) {
-        ok = false;
+    bool ok = false;
+
+    switch (fmt) {
+    case FMT_JPG:
+        ok = (img->saveAsJPEG(tmpname) == 0);
+        break;
+    case FMT_PNG:
+        ok = (img->saveAsPNG(tmpname, 8) == 0);
+        break;
+    case FMT_PNG16:
+        ok = (img->saveAsPNG(tmpname, 16) == 0);
+        break;
+    case FMT_TIFF:
+        ok = (img->saveAsTIFF(tmpname, 16, false, true) == 0);
+        break;
+    default:
+        ok = (img->saveAsTIFF(tmpname, 32, true, true) == 0);
+        break;
     }
 
     if (plistener) {
@@ -260,12 +345,12 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
         std::vector<Glib::ustring> argv = subprocess::split_command_line(it->second);
         argv.push_back(tmpname);
         argv.push_back(fileName);
-        std::string out, err;
+        std::string sout, serr;
         if (settings->verbose) {
             std::cout << "saving " << fileName << " with " << it->second << std::endl;
         }
         try {
-            subprocess::exec_sync(dir_, argv, true, &out, &err);
+            subprocess::exec_sync(dir_, argv, true, &sout, &serr);
         } catch (subprocess::error &err) {
             if (settings->verbose) {
                 std::cout << "  exec error: " << err.what() << std::endl;
@@ -273,11 +358,11 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
             ok = false;
         }
         if (settings->verbose) {
-            if (!out.empty()) {
-                std::cout << "  stdout: " << out << std::flush;
+            if (!sout.empty()) {
+                std::cout << "  stdout: " << sout << std::flush;
             }
-            if (!err.empty()) {
-                std::cout << "  stderr: " << err << std::flush;
+            if (!serr.empty()) {
+                std::cout << "  stderr: " << serr << std::flush;
             }
         }
     }

@@ -39,8 +39,19 @@ public:
     std::vector<std::pair<std::string, Glib::ustring>> getSaveFormats() const;
 
 private:
+    enum Format {
+        FMT_JPG,
+        FMT_PNG,
+        FMT_PNG16,
+        FMT_TIFF,
+        FMT_TIFF_FLOAT
+    };
+
+    static Glib::ustring get_ext(Format f);
+    
     std::unordered_map<std::string, Glib::ustring> loaders_;
     std::unordered_map<std::string, Glib::ustring> savers_;
+    std::unordered_map<std::string, Format> fmts_;
     std::map<std::string, Glib::ustring> savelbls_;
     
     Glib::ustring dir_;
