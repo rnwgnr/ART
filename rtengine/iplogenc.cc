@@ -90,6 +90,23 @@ float find_gray(float source_gray, float target_gray)
 }
 
 
+// taken from darktable
+inline float power_norm(float r, float g, float b)
+{
+    r = std::abs(r);
+    g = std::abs(g);
+    b = std::abs(b);
+
+    float r2 = SQR(r);
+    float g2 = SQR(g);
+    float b2 = SQR(b);
+    float d = r2 + g2 + b2;
+    float n = r*r2 + g*g2 + b*b2;
+
+    return n / std::max(d, 1e-12f);
+}
+
+
 // basic log encoding taken from ACESutil.Lin_to_Log2, from
 // https://github.com/ampas/aces-dev
 // (as seen on pixls.us)
@@ -106,7 +123,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
     const float log2 = xlogf(2.f);
     const float b = params->logenc.targetGray > 1 && params->logenc.targetGray < 100 && dynamic_range > 0 ? find_gray(std::abs(params->logenc.blackEv) / dynamic_range, params->logenc.targetGray / 100.f) : 0.f;
     const float linbase = max(b, 0.f);
-    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
+    //TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
 
     const auto apply =
         [=](float x, bool scale=true) -> float
@@ -131,31 +148,8 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
     const auto norm =
         [&](float r, float g, float b) -> float
         {
-            return Color::rgbLuminance(r, g, b, ws);
-
-            // other possible alternatives (so far, luminance seems to work
-            // fine though). See also
-            // https://discuss.pixls.us/t/finding-a-norm-to-preserve-ratios-across-non-linear-operations
-            //
-            // MAX
-            //return max(r, g, b);
-            //
-            // Euclidean
-            //return std::sqrt(SQR(r) + SQR(g) + SQR(b));
-            
-            // weighted yellow power norm from https://youtu.be/Z0DS7cnAYPk
-            // float rr = 1.22f * r / 65535.f;
-            // float gg = 1.20f * g / 65535.f;
-            // float bb = 0.58f * b / 65535.f;
-            // float rr4 = SQR(rr) * SQR(rr);
-            // float gg4 = SQR(gg) * SQR(gg);
-            // float bb4 = SQR(bb) * SQR(bb);
-            // float den = (rr4 + gg4 + bb4);
-            // if (den > 0.f) {
-            //     return 0.8374319f * ((rr4 * rr + gg4 * gg + bb4 * bb) / den) * 65535.f;
-            // } else {
-            //     return 0.f;
-            // }
+            return power_norm(r, g, b);
+            //return Color::rgbLuminance(r, g, b, ws);
         };
 
     const int W = rgb->getWidth(), H = rgb->getHeight();
