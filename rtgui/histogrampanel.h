@@ -187,7 +187,7 @@ protected:
     double movingPosition;
     bool needPointer;
     
-    double padding = 5.0;
+    double padding = 0.0;
 
     HistogramAreaIdleHelper* haih;
 
@@ -196,8 +196,10 @@ protected:
 
     SignalBrightnessChanged signal_brightness_changed;
 
+    bool is_main_;
+    
 public:
-    explicit HistogramArea(DrawModeListener *fml = nullptr);
+    explicit HistogramArea(DrawModeListener *fml=nullptr, bool is_main=true);
     ~HistogramArea() override;
 
     void updateBackBuffer ();

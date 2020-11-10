@@ -25,7 +25,8 @@
 #include "rawimagesource.h"
 #include "stdimagesource.h"
 #include "iccstore.h"
-#define BENCHMARK
+#include "imgiomanager.h"
+//#define BENCHMARK
 #include "StopWatch.h"
 
 
@@ -41,7 +42,7 @@ PreviewImage::PreviewImage(const Glib::ustring &fname, const Glib::ustring &ext,
 {
     auto lext = ext.lowercase();
 
-    if (lext == "jpg" || lext == "jpeg" || lext == "png" || lext == "tif" || lext == "tiff") {
+    if (lext == "jpg" || lext == "jpeg" || lext == "png" || lext == "tif" || lext == "tiff" || ImageIOManager::getInstance()->canLoad(lext)) {
         img_.reset(load_img(fname, width, height));
     } else if (settings->thumbnail_inspector_mode == Settings::ThumbnailInspectorMode::RAW) {
         img_.reset(load_raw(fname, width, height));
@@ -128,7 +129,7 @@ Cairo::RefPtr<Cairo::ImageSurface> PreviewImage::getImage()
 Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
 {
     StdImageSource imgSrc;
-    if (imgSrc.load(fname)) {
+    if (imgSrc.load(fname, std::max(w, 0), std::max(h, 0))) {
         return nullptr;
     }
 

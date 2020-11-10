@@ -1050,7 +1050,7 @@ void HistogramRGBAreaVert::get_preferred_width_for_height_vfunc (int height, int
 //
 //
 // HistogramArea
-HistogramArea::HistogramArea (DrawModeListener *fml) :
+HistogramArea::HistogramArea(DrawModeListener *fml, bool is_main):
     vectorscope_scale(0),
     vect_hc(0, 0), vect_hs(0, 0),
     vect_hc_buffer_dirty(true), vect_hs_buffer_dirty(true),
@@ -1067,7 +1067,8 @@ HistogramArea::HistogramArea (DrawModeListener *fml) :
     isPressed(false), movingPosition(0.0),
     needPointer(options.histogramBar),
     pointer_red(-1), pointer_green(-1), pointer_blue(-1),
-    pointer_a(0), pointer_b(0)
+    pointer_a(0), pointer_b(0),
+    is_main_(is_main)
 {
 
     rhist(256);
@@ -1132,14 +1133,25 @@ void HistogramArea::updateOptions (bool r, bool g, bool b, bool l, bool c, int m
 {
     wave_buffer_dirty = wave_buffer_dirty || needRed != r || needGreen != g || needBlue != b;
 
-    options.histogramRed      = needRed    = r;
-    options.histogramGreen    = needGreen  = g;
-    options.histogramBlue     = needBlue   = b;
-    options.histogramLuma     = needLuma   = l;
-    options.histogramChroma   = needChroma = c;
-    options.histogramDrawMode = drawMode   = mode;
-    options.histogramScopeType = scopeType = type;
-    options.histogramBar = needPointer = pointer;
+    needRed = r;
+    needGreen = g;
+    needBlue = b;
+    needLuma = l;
+    needChroma = c;
+    drawMode = mode;
+    scopeType = type;
+    needPointer = pointer;
+
+    if (is_main_) {
+        options.histogramRed = needRed;
+        options.histogramGreen = needGreen;
+        options.histogramBlue = needBlue;
+        options.histogramLuma = needLuma;
+        options.histogramChroma = needChroma;
+        options.histogramDrawMode = drawMode;
+        options.histogramScopeType = scopeType;
+        options.histogramBar = needPointer;
+    }
 }
 
 bool HistogramArea::updatePending(void)
@@ -1298,8 +1310,8 @@ void HistogramArea::updateNonRaw(Cairo::RefPtr<Cairo::Context> cr)
     int nrOfVGridPartitions = 8; // always show 8 stops (lines at 1,3,7,15,31,63,127)
 
     // draw vertical gridlines
-    if (options.histogramScopeType == ScopeType::HISTOGRAM) {
-        if (options.histogramDrawMode == 0) {
+    if (scopeType == ScopeType::HISTOGRAM) {
+        if (drawMode == 0) {
             for (int i = 1; i < nrOfVGridPartitions; i++) {
                 cr->move_to((pow(2.0,i) - 1) / 255.0 * w + 0.5, 0.);
                 cr->line_to((pow(2.0,i) - 1) / 255.0 * w + 0.5, h);
@@ -1315,16 +1327,16 @@ void HistogramArea::updateNonRaw(Cairo::RefPtr<Cairo::Context> cr)
     }
 
     // draw horizontal gridlines
-    if (options.histogramScopeType == ScopeType::PARADE || options.histogramScopeType == ScopeType::WAVEFORM) {
+    if (scopeType == ScopeType::PARADE || scopeType == ScopeType::WAVEFORM) {
         for (int i = 0; i <= nrOfVGridPartitions; i++) {
             const double ypos = h - padding - (pow(2.0,i) - 1) * (h - 2 * padding - 1) / 255.0;
             cr->move_to(0, ypos);
             cr->line_to(w, ypos);
             cr->stroke();
         }
-    } else if (options.histogramScopeType == ScopeType::VECTORSCOPE_HC || options.histogramScopeType == ScopeType::VECTORSCOPE_HS) {
+    } else if (scopeType == ScopeType::VECTORSCOPE_HC || scopeType == ScopeType::VECTORSCOPE_HS) {
         // Vectorscope has no gridlines.
-    } else if (options.histogramDrawMode != 2) {
+    } else if (drawMode != 2) {
         for (int i = 1; i < nrOfHGridPartitions; i++) {
             cr->move_to (0., i * (double)h / nrOfHGridPartitions + 0.5);
             cr->line_to (w, i * (double)h / nrOfHGridPartitions + 0.5);
@@ -1538,7 +1550,7 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
 
     // draw vertical gridlines
     const double logmax = std::log2(sz);
-    const bool logscale = options.histogramDrawMode > 0;
+    const bool logscale = drawMode > 0;
     
     for (double i = sz / 2.0; ; i /= 2.0) {
         double x = i / sz;
@@ -1559,7 +1571,7 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
     }
 
     // draw horizontal gridlines
-    if (options.histogramDrawMode == 2) {
+    if (drawMode == 2) {
         for (int i = 1; i < nrOfHGridPartitions; i++) {
             double y = double(i) / nrOfHGridPartitions;
             y = rtengine::log2lin(y, 10.0);
@@ -2225,11 +2237,14 @@ bool HistogramArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
 
 bool HistogramArea::on_button_press_event (GdkEventButton* event)
 {
+    if (!is_main_) {
+        return true;
+    }
+    
     isPressed = true;
     movingPosition = event->x;
 
-    if (
-        event->type == GDK_2BUTTON_PRESS && event->button == 1
+    if (event->type == GDK_2BUTTON_PRESS && event->button == 1
         && (scopeType == ScopeType::HISTOGRAM || scopeType == ScopeType::HISTOGRAM_RAW)
     ) {
 
@@ -2249,12 +2264,20 @@ bool HistogramArea::on_button_press_event (GdkEventButton* event)
 
 bool HistogramArea::on_button_release_event (GdkEventButton* event)
 {
+    if (!is_main_) {
+        return true;
+    }
+    
     isPressed = false;
     return true;
 }
 
 bool HistogramArea::on_motion_notify_event (GdkEventMotion* event)
 {
+    if (!is_main_) {
+        return true;
+    }
+    
     if (
         drawMode == 0
         && (scopeType == ScopeType::HISTOGRAM || scopeType == ScopeType::HISTOGRAM_RAW)

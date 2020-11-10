@@ -38,6 +38,11 @@ public:
     bool save(IImagefloat *img, const std::string &ext, const Glib::ustring &fileName, ProgressListener *plistener);
     std::vector<std::pair<std::string, Glib::ustring>> getSaveFormats() const;
 
+    bool canLoad(const std::string &ext) const
+    {
+        return loaders_.find(ext) != loaders_.end();
+    }
+
 private:
     enum Format {
         FMT_JPG,
