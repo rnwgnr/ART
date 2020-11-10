@@ -38,33 +38,15 @@ extern const Settings *settings;
 using namespace rtengine;
 using namespace procparams;
 
-PreviewImage::PreviewImage(const Glib::ustring &fname, const Glib::ustring &ext, int width, int height, bool enable_cms)
+PreviewImage::PreviewImage(const Glib::ustring &fname, const Glib::ustring &ext, int width, int height, bool enable_cms, bool compute_histogram):
+    fname_(fname),
+    ext_(ext),
+    width_(width),
+    height_(height),
+    enable_cms_(enable_cms),
+    compute_histogram_(compute_histogram),
+    loaded_(false)
 {
-    auto lext = ext.lowercase();
-
-    if (lext == "jpg" || lext == "jpeg" || lext == "png" || lext == "tif" || lext == "tiff" || ImageIOManager::getInstance()->canLoad(lext)) {
-        img_.reset(load_img(fname, width, height));
-    } else if (settings->thumbnail_inspector_mode == Settings::ThumbnailInspectorMode::RAW) {
-        img_.reset(load_raw(fname, width, height));
-        if (settings->thumbnail_inspector_raw_curve == Settings::ThumbnailInspectorRawCurve::RAW_CLIPPING) {
-            enable_cms = false;
-        }
-    } else {
-        img_.reset(load_raw_preview(fname, width, height));
-    }
-
-    if (img_) {
-        try {
-            previewImage = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24, img_->getWidth(), img_->getHeight());
-            previewImage->flush();
-            render(enable_cms);
-        } catch (std::exception &exc) {
-            if (settings->verbose) {
-                std::cout << "ERROR in creating PreviewImage: " << exc.what() << std::endl;
-            }
-            previewImage.clear();
-        }
-    }    
 }
 
 
@@ -120,8 +102,43 @@ void PreviewImage::render(bool enable_cms)
 }
 
 
+void PreviewImage::load()
+{
+    loaded_ = true;
+
+    auto lext = ext_.lowercase();
+
+    if (lext == "jpg" || lext == "jpeg" || lext == "png" || lext == "tif" || lext == "tiff" || ImageIOManager::getInstance()->canLoad(lext)) {
+        img_.reset(load_img(fname_, width_, height_));
+    } else if (settings->thumbnail_inspector_mode == Settings::ThumbnailInspectorMode::RAW) {
+        img_.reset(load_raw(fname_, width_, height_));
+        if (settings->thumbnail_inspector_raw_curve == Settings::ThumbnailInspectorRawCurve::RAW_CLIPPING) {
+            enable_cms_ = false;
+        }
+    } else {
+        img_.reset(load_raw_preview(fname_, width_, height_));
+    }
+
+    if (img_) {
+        try {
+            previewImage = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24, img_->getWidth(), img_->getHeight());
+            previewImage->flush();
+            render(enable_cms_);
+        } catch (std::exception &exc) {
+            if (settings->verbose) {
+                std::cout << "ERROR in creating PreviewImage: " << exc.what() << std::endl;
+            }
+            previewImage.clear();
+        }
+    }    
+}
+
+
 Cairo::RefPtr<Cairo::ImageSurface> PreviewImage::getImage()
 {
+    if (!loaded_) {
+        load();
+    }
     return previewImage;
 }
 
@@ -163,8 +180,41 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
         delete ret;
         ret = nullptr;
     }
-    
+
+    if (ret && compute_histogram_) {
+        get_histogram(ret);
+    }        
+
     return ret;
+}
+
+
+void PreviewImage::get_histogram(Image8 *img)
+{
+    for (int i = 0; i < 3; ++i) {
+        hist_[i](256);
+    }
+
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+#ifdef _OPENMP
+#   pragma omp parallel for
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            hist_[0][img->r(y, x)]++;
+            hist_[1][img->g(y, x)]++;
+            hist_[2][img->b(y, x)]++;
+        }
+    }
+}
+
+
+void PreviewImage::getHistogram(LUTu &r, LUTu &g, LUTu &b)
+{
+    r = hist_[0];
+    g = hist_[1];
+    b = hist_[2];
 }
 
 
@@ -230,6 +280,25 @@ Image8 *PreviewImage::load_raw_preview(const Glib::ustring &fname, int w, int h)
 
     if (ri.get_rotateDegree() > 0 && ri.thumbNeedsRotation()) {
         img->rotate(ri.get_rotateDegree());
+    }
+
+    if (compute_histogram_) {
+        for (int i = 0; i < 3; ++i) {
+            hist_[i](256);
+            for (int j = 0; j < 256; ++j) {
+                hist_[i][j] = 0;
+            }
+        }
+
+        const int W = img->getWidth();
+        const int H = img->getHeight();
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                hist_[0][img->r(y, x)]++;
+                hist_[1][img->g(y, x)]++;
+                hist_[2][img->b(y, x)]++;
+            }
+        }
     }
 
     return img;
@@ -577,6 +646,10 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
     //src.rescale();
     src.fast_demosaic(show_clip);
 
+    if (compute_histogram_) {
+        src.getRAWHistogram(hist_[0], hist_[1], hist_[2]);
+    }
+    
     bool marked = show_clip && src.mark_clipped();
 
     int fw, fh;

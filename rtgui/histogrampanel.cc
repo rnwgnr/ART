@@ -1246,15 +1246,19 @@ void HistogramArea::update(
     );
 }
 
-void HistogramArea::updateBackBuffer ()
+void HistogramArea::updateBackBuffer(int custom_w, int custom_h)
 {
-    if (!get_realized ()) {
-        return;
-    }
+    int winw = custom_w;
+    int winh = custom_h;
+    if (winw < 0) {
+        if (!get_realized ()) {
+            return;
+        }
 
-    Glib::RefPtr<Gdk::Window> window = get_window();
-    int winx, winy, winw, winh;
-    window->get_geometry(winx, winy, winw, winh);
+        Glib::RefPtr<Gdk::Window> window = get_window();
+        int winx, winy;
+        window->get_geometry(winx, winy, winw, winh);
+    }
 
     // This will create or update the size of the BackBuffer::surface
     setDrawRectangle(Cairo::FORMAT_ARGB32, 0, 0, winw, winh, true);
@@ -1268,6 +1272,7 @@ void HistogramArea::updateBackBuffer ()
     cr->set_source_rgba (0., 0., 0., 0.);
     cr->set_operator (Cairo::OPERATOR_CLEAR);
     cr->paint ();
+
     cr->set_operator (Cairo::OPERATOR_SOURCE);
 
     // Prepare drawing gridlines first

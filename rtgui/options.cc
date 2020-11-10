@@ -604,6 +604,7 @@ void Options::setDefaults()
     thumbnail_inspector_zoom_fit = false;
     thumbnail_inspector_show_info = false;
     thumbnail_inspector_enable_cms = false;
+    thumbnail_inspector_show_histogram = false;
 
     thumbnail_rating_mode = Options::ThumbnailRatingMode::XMP;
 #if defined WIN32 || defined __APPLE__
@@ -1157,6 +1158,10 @@ void Options::readFromFile(Glib::ustring fname)
                     thumbnail_inspector_show_info = keyFile.get_boolean("Inspector", "ShowInfo");
                 }
 
+                if (keyFile.has_key("Inspector", "ShowHistogram")) {
+                    thumbnail_inspector_show_histogram = keyFile.get_boolean("Inspector", "ShowHistogram");
+                }
+                
                 if (keyFile.has_key("Inspector", "EnableCMS")) {
                     thumbnail_inspector_enable_cms = keyFile.get_boolean("Inspector", "EnableCMS");
                 }
@@ -2074,6 +2079,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("Inspector", "RawCurve", int(rtSettings.thumbnail_inspector_raw_curve));
         keyFile.set_boolean("Inspector", "ZoomFit", thumbnail_inspector_zoom_fit);
         keyFile.set_boolean("Inspector", "ShowInfo", thumbnail_inspector_show_info);
+        keyFile.set_boolean("Inspector", "ShowHistogram", thumbnail_inspector_show_histogram);
         keyFile.set_boolean("Inspector", "EnableCMS", thumbnail_inspector_enable_cms);
         keyFile.set_integer("Inspector", "BrowserWidth", browser_width_for_inspector);
 

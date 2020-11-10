@@ -202,7 +202,7 @@ public:
     explicit HistogramArea(DrawModeListener *fml=nullptr, bool is_main=true);
     ~HistogramArea() override;
 
-    void updateBackBuffer ();
+    void updateBackBuffer(int custom_w=-1, int custom_h=-1);
     /// Update pointer values. Returns true if widget needs redrawing.
     bool updatePointer(int r, int g, int b, const Glib::ustring &profile = "", const Glib::ustring &profileW = "");
     void update(

@@ -43,14 +43,13 @@ class InspectorBuffer {
 public:
     BackBuffer imgBuffer;
     Glib::ustring imgPath;
-    int currTransform;  // coarse rotation from RT, not from shot orientation
-    bool fromRaw;
+    std::array<LUTu, 3> histogram;
 
     explicit InspectorBuffer(const Glib::ustring &imgagePath, int width=-1, int height=-1);
     //~InspectorBuffer();
 };
 
-InspectorBuffer::InspectorBuffer(const Glib::ustring &imagePath, int width, int height) : currTransform(0), fromRaw(false)
+InspectorBuffer::InspectorBuffer(const Glib::ustring &imagePath, int width, int height)
 {
     if (!imagePath.empty() && Glib::file_test(imagePath, Glib::FILE_TEST_EXISTS) && !Glib::file_test(imagePath, Glib::FILE_TEST_IS_DIR)) {
         imgPath = imagePath;
@@ -63,12 +62,12 @@ InspectorBuffer::InspectorBuffer(const Glib::ustring &imagePath, int width, int 
             return;
         }
 
-        rtengine::PreviewImage pi(imagePath, ext, width, height, options.thumbnail_inspector_enable_cms);
+        rtengine::PreviewImage pi(imagePath, ext, width, height, options.thumbnail_inspector_enable_cms, options.thumbnail_inspector_show_histogram);
         Cairo::RefPtr<Cairo::ImageSurface> imageSurface = pi.getImage();
+        pi.getHistogram(histogram[0], histogram[1], histogram[2]);
 
         if (imageSurface) {
             imgBuffer.setSurface(imageSurface);
-            fromRaw = true;
         } else {
             imgPath.clear();
         }
@@ -85,7 +84,8 @@ InspectorArea::InspectorArea():
     active(false),
     first_active_(true),
     highlight_(false),
-    info_text_("")
+    info_text_(""),
+    hist_bb_(nullptr, false)
 {
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     set_name("Inspector");
@@ -94,6 +94,9 @@ InspectorArea::InspectorArea():
     signal_button_release_event().connect(sigc::mem_fun(*this, &InspectorArea::onMouseRelease), false);
     signal_motion_notify_event().connect(sigc::mem_fun(*this, &InspectorArea::onMouseMove), false);
     prev_point_.set(-1, -1);
+
+    hist_bb_.hide();
+    hist_bb_.updateOptions(true, true, true, false, false, 1, Options::ScopeType::HISTOGRAM_RAW, false);
 }
 
 
@@ -197,6 +200,19 @@ bool InspectorArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
 
         if (options.thumbnail_inspector_show_info && info_text_ != "") {
             info_bb_.copySurface(cr);
+        }
+
+        if (options.thumbnail_inspector_show_histogram) {
+            auto s = RTScalable::getScale();
+            double border = 4 * s;
+            Gdk::Rectangle rect(border + 8 * s, availableSize.y - hist_bb_.getHeight() - 8 * s - border, hist_bb_.getWidth(), hist_bb_.getHeight());
+
+            //cr->set_operator(Cairo::OPERATOR_OVER);
+            cr->set_source_rgba(0., 0., 0., 0.75);
+            cr->rectangle(rect.get_x() - border, rect.get_y() - border, rect.get_width() + border*2, rect.get_height() + border*2);
+            cr->fill();
+            
+            hist_bb_.copySurface(cr, &rect);
         }
     } else {
         Gdk::RGBA c;
@@ -323,6 +339,10 @@ bool InspectorArea::doSwitchImage(bool recenter)
         center.set(currImage->imgBuffer.getWidth()/2, currImage->imgBuffer.getHeight()/2);
     }
 
+    if (currImage && options.thumbnail_inspector_show_histogram) {
+        updateHistogram();
+    }
+
     queue_draw();
 
     return true;
@@ -441,6 +461,32 @@ void InspectorArea::infoEnabled(bool yes)
         options.thumbnail_inspector_show_info = yes;
         queue_draw();
     }
+}
+
+
+void InspectorArea::updateHistogram()
+{
+    Glib::RefPtr<Gdk::Window> win = get_window();
+    if (!win || !currImage) {
+        return;
+    }
+    
+    LUTu dummy_lut(1);
+    array2D<int> dummy_arr;
+    hist_bb_.update(dummy_lut, dummy_lut, dummy_lut,
+                    dummy_lut, dummy_lut,
+                    currImage->histogram[0],
+                    currImage->histogram[1],
+                    currImage->histogram[2],
+                    1,
+                    dummy_arr, dummy_arr,
+                    1,
+                    dummy_arr, dummy_arr, dummy_arr, dummy_arr);
+
+    int hist_w = RTScalable::getScale() * 300;
+    int hist_h = RTScalable::getScale() * 200;
+    
+    hist_bb_.updateBackBuffer(hist_w, hist_h);
 }
 
 
@@ -599,6 +645,7 @@ Gtk::HBox *Inspector::get_toolbar()
     tb->pack_start(*Gtk::manage(new Gtk::VSeparator()), Gtk::PACK_SHRINK, 4);
        
     info_ = add_tool("info.png", "INSPECTOR_INFO");
+    histogram_ = add_tool("histogram.png", "INSPECTOR_HISTOGRAM");
     tb->pack_start(*Gtk::manage(new Gtk::VSeparator()), Gtk::PACK_SHRINK, 4);
 
     jpg_ = add_tool("wb-camera.png", "INSPECTOR_PREVIEW");
@@ -622,6 +669,10 @@ Gtk::HBox *Inspector::get_toolbar()
     
     info_->set_active(options.thumbnail_inspector_show_info);
     info_->signal_toggled().connect(sigc::mem_fun(*this, &Inspector::info_toggled));
+
+    histogram_->set_active(options.thumbnail_inspector_show_histogram);
+    histogram_->signal_toggled().connect(sigc::mem_fun(*this, &Inspector::histogram_toggled));
+    
     bool use_jpg = options.rtSettings.thumbnail_inspector_mode == rtengine::Settings::ThumbnailInspectorMode::JPEG;
     jpg_->set_active(use_jpg);
     rawlinear_->set_active(!use_jpg && options.rtSettings.thumbnail_inspector_raw_curve == rtengine::Settings::ThumbnailInspectorRawCurve::LINEAR);
@@ -784,6 +835,12 @@ void Inspector::toggleUseCms()
     cms_->set_active(!cms_->get_active());
 }
 
+
+void Inspector::toggleShowHistogram()
+{
+    histogram_->set_active(!histogram_->get_active());
+}
+
 enum class DisplayMode {
     JPG,
     RAW_LINEAR,
@@ -857,6 +914,16 @@ void Inspector::split_toggled()
 }
 
 
+void Inspector::histogram_toggled()
+{
+    options.thumbnail_inspector_show_histogram = histogram_->get_active();
+    for (size_t i = 0; i < num_active_; ++i) {
+        ins_[i].flushBuffers();
+        ins_[i].switchImage(cur_image_[i]);
+    }
+}
+
+
 bool Inspector::handleShortcutKey(GdkEventKey *event)
 {
     bool ctrl  = event->state & GDK_CONTROL_MASK;
@@ -872,7 +939,10 @@ bool Inspector::handleShortcutKey(GdkEventKey *event)
         switch (event->keyval) {
         case GDK_KEY_i:
             toggleShowInfo(); 
-           return true;
+            return true;
+        case GDK_KEY_h:
+            toggleShowHistogram();
+            return true;
         case GDK_KEY_c:
             toggleUseCms();
             return true;

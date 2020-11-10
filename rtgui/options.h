@@ -429,6 +429,7 @@ public:
     bool thumbnail_inspector_show_info;
     bool thumbnail_inspector_enable_cms;
     int browser_width_for_inspector;
+    bool thumbnail_inspector_show_histogram;
 
     Glib::ustring batch_queue_profile_path;
     bool batch_queue_use_profile;

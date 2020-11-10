@@ -22,6 +22,7 @@
 #include <gtkmm.h>
 #include "guiutils.h"
 #include "../rtengine/coord.h"
+#include "histogrampanel.h"
 
 class InspectorBuffer;
 class FileCatalog;
@@ -87,6 +88,7 @@ private:
 	
     void deleteBuffers();
     bool doSwitchImage(bool recenter);
+    void updateHistogram();
 
     rtengine::Coord center;
     std::vector<InspectorBuffer*> images;
@@ -106,6 +108,8 @@ private:
     sigc::signal<void> sig_active_;
     sigc::signal<void, rtengine::Coord2D> sig_moved_;
     rtengine::Coord prev_point_;
+
+    HistogramArea hist_bb_;
 };
 
 
@@ -122,6 +126,7 @@ public:
 
     void toggleShowInfo();
     void toggleUseCms();
+    void toggleShowHistogram();
     enum class DisplayMode {
         JPG,
         RAW_LINEAR,
@@ -145,6 +150,7 @@ private:
     void onGrabFocus(GdkEventButton *evt, size_t i);
     void onInspectorResized(Gtk::Allocation &a);
     void split_toggled();
+    void histogram_toggled();
     void onMoved(rtengine::Coord2D pos);
 
     FileCatalog *filecatalog_;
@@ -159,6 +165,7 @@ private:
     Gtk::HBox *toolbar_;
     Gtk::ToggleButton *split_;
     Gtk::ToggleButton *info_;
+    Gtk::ToggleButton *histogram_;
     Gtk::ToggleButton *jpg_;
     Gtk::ToggleButton *rawlinear_;
     Gtk::ToggleButton *rawfilm_;
