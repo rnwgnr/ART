@@ -905,6 +905,15 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
             STEP_(blackAndWhite);
             STEP_(filmGrain);
         }
+        if (pipeline == Pipeline::PREVIEW && params->prsharpening.enabled) {
+            double s = scale;
+            int fw = full_width * s, fh = full_height * s;
+            int imw, imh;
+            double s2 = resizeScale(params, fw, fh, imw, imh);
+            scale = s * s2;
+            STEP_s_(prsharpening);
+            scale = s;
+        }
         break;
     }
     return stop;

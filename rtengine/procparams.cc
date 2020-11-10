@@ -3597,19 +3597,19 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
 
 // Post resize sharpening
         if (RELEVANT_(prsharpening)) {
-            saveToKeyfile("PostResizeSharpening", "Enabled", prsharpening.enabled, keyFile);
-            saveToKeyfile("PostResizeSharpening", "Contrast", prsharpening.contrast, keyFile);
-            saveToKeyfile("PostResizeSharpening", "Method", prsharpening.method, keyFile);
-            saveToKeyfile("PostResizeSharpening", "Radius", prsharpening.radius, keyFile);
-            saveToKeyfile("PostResizeSharpening", "Amount", prsharpening.amount, keyFile);
-            saveToKeyfile("PostResizeSharpening", "Threshold", prsharpening.threshold.toVector(), keyFile);
-            saveToKeyfile("PostResizeSharpening", "OnlyEdges", prsharpening.edgesonly, keyFile);
-            saveToKeyfile("PostResizeSharpening", "EdgedetectionRadius", prsharpening.edges_radius, keyFile);
-            saveToKeyfile("PostResizeSharpening", "EdgeTolerance", prsharpening.edges_tolerance, keyFile);
-            saveToKeyfile("PostResizeSharpening", "HalocontrolEnabled", prsharpening.halocontrol, keyFile);
-            saveToKeyfile("PostResizeSharpening", "HalocontrolAmount", prsharpening.halocontrol_amount, keyFile);
-            saveToKeyfile("PostResizeSharpening", "DeconvRadius", prsharpening.deconvradius, keyFile);
-            saveToKeyfile("PostResizeSharpening", "DeconvAmount", prsharpening.deconvamount, keyFile);
+            saveToKeyfile("OutputSharpening", "Enabled", prsharpening.enabled, keyFile);
+            saveToKeyfile("OutputSharpening", "Contrast", prsharpening.contrast, keyFile);
+            saveToKeyfile("OutputSharpening", "Method", prsharpening.method, keyFile);
+            saveToKeyfile("OutputSharpening", "Radius", prsharpening.radius, keyFile);
+            saveToKeyfile("OutputSharpening", "Amount", prsharpening.amount, keyFile);
+            saveToKeyfile("OutputSharpening", "Threshold", prsharpening.threshold.toVector(), keyFile);
+            saveToKeyfile("OutputSharpening", "OnlyEdges", prsharpening.edgesonly, keyFile);
+            saveToKeyfile("OutputSharpening", "EdgedetectionRadius", prsharpening.edges_radius, keyFile);
+            saveToKeyfile("OutputSharpening", "EdgeTolerance", prsharpening.edges_tolerance, keyFile);
+            saveToKeyfile("OutputSharpening", "HalocontrolEnabled", prsharpening.halocontrol, keyFile);
+            saveToKeyfile("OutputSharpening", "HalocontrolAmount", prsharpening.halocontrol_amount, keyFile);
+            saveToKeyfile("OutputSharpening", "DeconvRadius", prsharpening.deconvradius, keyFile);
+            saveToKeyfile("OutputSharpening", "DeconvAmount", prsharpening.deconvamount, keyFile);
         }
 
 // Color management
@@ -4680,18 +4680,19 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } while (1);
         }
 
-        if (keyFile.has_group("PostResizeSharpening") && RELEVANT_(prsharpening)) {
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "Enabled", prsharpening.enabled);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "Contrast", prsharpening.contrast);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "Radius", prsharpening.radius);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "Amount", prsharpening.amount);
+        const char *psgrp = ppVersion < 1021 ? "PostResizeSharpening" : "OutputSharpening";
+        if (keyFile.has_group(psgrp) && RELEVANT_(prsharpening)) {
+            assignFromKeyfile(keyFile, psgrp, "Enabled", prsharpening.enabled);
+            assignFromKeyfile(keyFile, psgrp, "Contrast", prsharpening.contrast);
+            assignFromKeyfile(keyFile, psgrp, "Radius", prsharpening.radius);
+            assignFromKeyfile(keyFile, psgrp, "Amount", prsharpening.amount);
 
-            if (keyFile.has_key("PostResizeSharpening", "Threshold")) {
+            if (keyFile.has_key(psgrp, "Threshold")) {
                 if (ppVersion < 302) {
-                    int thresh = min(keyFile.get_integer("PostResizeSharpening", "Threshold"), 2000);
+                    int thresh = min(keyFile.get_integer(psgrp, "Threshold"), 2000);
                     prsharpening.threshold.setValues(thresh, thresh, 2000, 2000);  // TODO: 2000 is the maximum value and is taken of rtgui/sharpening.cc ; should be changed by the tool modularization
                 } else {
-                    const std::vector<int> thresh = keyFile.get_integer_list("PostResizeSharpening", "Threshold");
+                    const std::vector<int> thresh = keyFile.get_integer_list(psgrp, "Threshold");
 
                     if (thresh.size() >= 4) {
                         prsharpening.threshold.setValues(thresh[0], thresh[1], min(thresh[2], 2000), min(thresh[3], 2000));
@@ -4699,14 +4700,17 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
 
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "OnlyEdges", prsharpening.edgesonly);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "EdgedetectionRadius", prsharpening.edges_radius);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "EdgeTolerance", prsharpening.edges_tolerance);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "HalocontrolEnabled", prsharpening.halocontrol);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "HalocontrolAmount", prsharpening.halocontrol_amount);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "Method", prsharpening.method);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "DeconvRadius", prsharpening.deconvradius);
-            assignFromKeyfile(keyFile, "PostResizeSharpening", "DeconvAmount", prsharpening.deconvamount);
+            assignFromKeyfile(keyFile, psgrp, "OnlyEdges", prsharpening.edgesonly);
+            assignFromKeyfile(keyFile, psgrp, "EdgedetectionRadius", prsharpening.edges_radius);
+            assignFromKeyfile(keyFile, psgrp, "EdgeTolerance", prsharpening.edges_tolerance);
+            assignFromKeyfile(keyFile, psgrp, "HalocontrolEnabled", prsharpening.halocontrol);
+            assignFromKeyfile(keyFile, psgrp, "HalocontrolAmount", prsharpening.halocontrol_amount);
+            assignFromKeyfile(keyFile, psgrp, "Method", prsharpening.method);
+            assignFromKeyfile(keyFile, psgrp, "DeconvRadius", prsharpening.deconvradius);
+            assignFromKeyfile(keyFile, psgrp, "DeconvAmount", prsharpening.deconvamount);
+            if (ppVersion < 1021 && !resize.enabled) {
+                prsharpening.enabled = false;
+            }
         }
 
         if (keyFile.has_group("Color Management") && RELEVANT_(icm)) {

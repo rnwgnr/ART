@@ -390,10 +390,10 @@ private:
                     img = resized;
                 }
             }
-            if (params.prsharpening.enabled) {
-                ipf.setScale(1);
-                ipf.prsharpening(img);
-            }
+        }
+        if (params.prsharpening.enabled) {
+            ipf.setScale(1);
+            ipf.prsharpening(img);
         }
 
         Imagefloat *readyImg = ipf.lab2rgbOut(img, 0, 0, img->getWidth(), img->getHeight(), params.icm);

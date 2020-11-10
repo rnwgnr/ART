@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1020
+#define PPVERSION 1021
 
 /*
   Log of version changes
+  1021  2020-11-10
+        output sharpening always applied if enabled
   1020  2020-09-28
         streamlined tone equaliser regularization 
   1019  2020-08-08

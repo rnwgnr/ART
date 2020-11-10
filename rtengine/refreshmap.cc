@@ -397,20 +397,20 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,  // EvWavopacity
     DIRPYREQUALIZER,  // EvWavBAmet
     DIRPYREQUALIZER,  // EvWavopacityWL
-    RESIZE,           // EvPrShrEnabled
-    RESIZE,           // EvPrShrRadius
-    RESIZE,           // EvPrShrAmount
-    RESIZE,           // EvPrShrThresh
-    RESIZE,           // EvPrShrEdgeOnly
-    RESIZE,           // EvPrShrEdgeRadius=375,
-    RESIZE,           // EvPrShrEdgeTolerance=376,
-    RESIZE,           // EvPrShrHaloControl=377,
-    RESIZE,           // EvPrShrHaloAmount=378,
-    RESIZE,           // EvPrShrMethod=379,
-    RESIZE,           // EvPrShrDRadius=380,
-    RESIZE,           // EvPrShrDAmount=381,
-    RESIZE,           // EvPrShrDDamping=382,
-    RESIZE,           // EvPrShrDIterations=383,
+    M_LUMINANCE,           // EvPrShrEnabled
+    M_LUMINANCE,           // EvPrShrRadius
+    M_LUMINANCE,           // EvPrShrAmount
+    M_LUMINANCE,           // EvPrShrThresh
+    M_LUMINANCE,           // EvPrShrEdgeOnly
+    M_LUMINANCE,           // EvPrShrEdgeRadius=375,
+    M_LUMINANCE,           // EvPrShrEdgeTolerance=376,
+    M_LUMINANCE,           // EvPrShrHaloControl=377,
+    M_LUMINANCE,           // EvPrShrHaloAmount=378,
+    M_LUMINANCE,           // EvPrShrMethod=379,
+    M_LUMINANCE,           // EvPrShrDRadius=380,
+    M_LUMINANCE,           // EvPrShrDAmount=381,
+    M_LUMINANCE,           // EvPrShrDDamping=382,
+    M_LUMINANCE,           // EvPrShrDIterations=383,
     DIRPYREQUALIZER,  // EvWavcbenab
     DIRPYREQUALIZER,  // EvWavgreenhigh
     DIRPYREQUALIZER,  // EvWavbluehigh

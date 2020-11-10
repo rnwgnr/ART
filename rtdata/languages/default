@@ -629,20 +629,20 @@ HISTORY_MSG_367;W - Final - 'After' contrast curve
 HISTORY_MSG_368;W - Final - Contrast balance
 HISTORY_MSG_369;W - Final - Balance method
 HISTORY_MSG_370;W - Final - Local contrast curve
-HISTORY_MSG_371;Post-Resize Sharpening
-HISTORY_MSG_372;PRS USM - Radius
-HISTORY_MSG_373;PRS USM - Amount
-HISTORY_MSG_374;PRS USM - Threshold
-HISTORY_MSG_375;PRS USM - Sharpen only edges
-HISTORY_MSG_376;PRS USM - Edge detection radius
-HISTORY_MSG_377;PRS USM - Edge tolerance
-HISTORY_MSG_378;PRS USM - Halo control
-HISTORY_MSG_379;PRS USM - Halo control amount
-HISTORY_MSG_380;PRS - Method
-HISTORY_MSG_381;PRS RLD - Radius
-HISTORY_MSG_382;PRS RLD - Amount
-HISTORY_MSG_383;PRS RLD - Damping
-HISTORY_MSG_384;PRS RLD - Iterations
+HISTORY_MSG_371;Output Sharpening
+HISTORY_MSG_372;Out Sharpen USM - Radius
+HISTORY_MSG_373;Out Sharpen USM - Amount
+HISTORY_MSG_374;Out Sharpen USM - Threshold
+HISTORY_MSG_375;Out Sharpen USM - Sharpen only edges
+HISTORY_MSG_376;Out Sharpen USM - Edge detection radius
+HISTORY_MSG_377;Out Sharpen USM - Edge tolerance
+HISTORY_MSG_378;Out Sharpen USM - Halo control
+HISTORY_MSG_379;Out Sharpen USM - Halo control amount
+HISTORY_MSG_380;Out Sharpen - Method
+HISTORY_MSG_381;Out Sharpen RLD - Radius
+HISTORY_MSG_382;Out Sharpen RLD - Amount
+HISTORY_MSG_383;Out Sharpen RLD - Damping
+HISTORY_MSG_384;Out Sharpen RLD - Iterations
 HISTORY_MSG_385;W - Residual - Color Balance
 HISTORY_MSG_386;W - Residual - CB green high
 HISTORY_MSG_387;W - Residual - CB blue high
@@ -1152,7 +1152,7 @@ PARTIALPASTE_PREPROCESS_GREENEQUIL;Green equilibration
 PARTIALPASTE_PREPROCESS_HOTPIXFILT;Hot pixel filter
 PARTIALPASTE_PREPROCESS_LINEDENOISE;Line noise filter
 PARTIALPASTE_PREPROCESS_PDAFLINESFILTER;PDAF lines filter
-PARTIALPASTE_PRSHARPENING;Post-resize sharpening
+PARTIALPASTE_PRSHARPENING;Output sharpening
 PARTIALPASTE_RAWCA;Raw CA correction
 PARTIALPASTE_RAW_DEMOSAIC;Demosaic
 PARTIALPASTE_RAW_BLACK;Black levels
@@ -1875,8 +1875,8 @@ TP_PREPROCESS_LINEDENOISE_DIRECTION_PDAF_LINES;Horizontal only on PDAF rows
 TP_PREPROCESS_LINEDENOISE_DIRECTION_VERTICAL;Vertical
 TP_PREPROCESS_NO_FOUND;None found
 TP_PREPROCESS_PDAFLINESFILTER;PDAF lines filter
-TP_PRSHARPENING_LABEL;Post-Resize Sharpening
-TP_PRSHARPENING_TOOLTIP;Sharpens the image after resizing. Only works when the "Lanczos" resizing method is used. It is impossible to preview the effects of this tool. See RawPedia for usage instructions.
+TP_PRSHARPENING_LABEL;Output Sharpening
+TP_PRSHARPENING_TOOLTIP;Sharpens the image after resizing.
 TP_RAWCACORR_AUTO;Auto-correction
 TP_RAWCACORR_AUTOIT;Iterations
 TP_RAWCACORR_AUTOIT_TOOLTIP;This setting is available if "Auto-correction" is checked.\nAuto-correction is conservative, meaning that it often does not correct all chromatic aberration.\nTo correct the remaining chromatic aberration, you can use up to five iterations of automatic chromatic aberration correction.\nEach iteration will reduce the remaining chromatic aberration from the last iteration at the cost of additional processing time.
