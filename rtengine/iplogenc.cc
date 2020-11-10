@@ -107,6 +107,12 @@ inline float power_norm(float r, float g, float b)
 }
 
 
+inline float norm(float r, float g, float b, TMatrix ws)
+{
+    return (power_norm(r, g, b) + Color::rgbLuminance(r, g, b, ws)) / 2.f;
+}
+
+
 // basic log encoding taken from ACESutil.Lin_to_Log2, from
 // https://github.com/ampas/aces-dev
 // (as seen on pixls.us)
@@ -123,7 +129,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
     const float log2 = xlogf(2.f);
     const float b = params->logenc.targetGray > 1 && params->logenc.targetGray < 100 && dynamic_range > 0 ? find_gray(std::abs(params->logenc.blackEv) / dynamic_range, params->logenc.targetGray / 100.f) : 0.f;
     const float linbase = max(b, 0.f);
-    //TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
 
     const auto apply =
         [=](float x, bool scale=true) -> float
@@ -145,13 +151,6 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             }
         };
 
-    const auto norm =
-        [&](float r, float g, float b) -> float
-        {
-            return power_norm(r, g, b);
-            //return Color::rgbLuminance(r, g, b, ws);
-        };
-
     const int W = rgb->getWidth(), H = rgb->getHeight();
     
     if (params->logenc.regularization == 0) {
@@ -163,7 +162,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
                 float r = rgb->r(y, x);
                 float g = rgb->g(y, x);
                 float b = rgb->b(y, x);
-                float m = norm(r, g, b);
+                float m = norm(r, g, b, ws);
                 if (m > noise) {
                     float mm = apply(m);
                     float f = mm / m;
@@ -192,7 +191,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
 #endif
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
-                    Y2[y][x] = norm(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x)) / 65535.f;
+                    Y2[y][x] = norm(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), ws) / 65535.f;
                     float l = xlogf(std::max(Y2[y][x], 1e-9f));
                     float ll = round(l * base_posterization) / base_posterization;
                     Y[y][x] = xexpf(ll);
@@ -215,10 +214,9 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
                 float &b = rgb->b(y, x);
                 float t = Y[y][x];
                 float t2;
-                if (t > noise && (t2 = norm(r, g, b)) > noise) {
+                if (t > noise && (t2 = norm(r, g, b, ws)) > noise) {
                     float c = apply(t, false);
                     float f = c / t;
-                    //float t2 = norm(r, g, b);
                     float f2 = apply(t2) / t2;
                     f = intp(blend, f, f2);
                     assert(std::isfinite(f));
@@ -262,7 +260,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             float r = img.r(y, x), g = img.g(y, x), b = img.b(y, x);
-            Y[y][x] = Color::rgbLuminance(r, g, b, ws) / 65535.f;
+            Y[y][x] = norm(r, g, b, ws) / 65535.f;
         }
     }
     for (int y = 0; y < h; ++y) {
