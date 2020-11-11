@@ -41,7 +41,7 @@ constexpr int TARGET_DISC = 1;
 
 
 Spot::Spot() :
-    FoldableToolPanel(this, "spot", M ("TP_SPOT_LABEL"), true, true, true),
+    FoldableToolPanel(this, "spot", M ("TP_SPOT_LABEL"), false, true, true),
     EditSubscriber(ET_OBJECTS),
     draggedSide(DraggedSide::NONE),
     lastObject(-1),

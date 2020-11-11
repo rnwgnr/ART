@@ -25,7 +25,7 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-ImpulseDenoise::ImpulseDenoise () : FoldableToolPanel(this, "impulsedenoise", M("TP_IMPULSEDENOISE_LABEL"), true, true, true)
+ImpulseDenoise::ImpulseDenoise () : FoldableToolPanel(this, "impulsedenoise", M("TP_IMPULSEDENOISE_LABEL"), false, true, true)
 {
     EvToolReset.set_action(DETAIL);
     

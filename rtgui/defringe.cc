@@ -24,7 +24,7 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-Defringe::Defringe () : FoldableToolPanel(this, "defringe", M("TP_DEFRINGE_LABEL"), true, true, true)
+Defringe::Defringe () : FoldableToolPanel(this, "defringe", M("TP_DEFRINGE_LABEL"), false, true, true)
 {
     EvToolReset.set_action(DETAIL);
 

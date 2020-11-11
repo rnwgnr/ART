@@ -24,7 +24,7 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-BayerPreProcess::BayerPreProcess() : FoldableToolPanel(this, "bayerpreprocess", M("TP_PREPROCESS_LABEL"), true, true, true)
+BayerPreProcess::BayerPreProcess() : FoldableToolPanel(this, "bayerpreprocess", M("TP_PREPROCESS_LABEL"), false, true, true)
 {
     EvToolEnabled.set_action(DARKFRAME);
     EvToolReset.set_action(DARKFRAME);
