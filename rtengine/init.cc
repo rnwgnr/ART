@@ -102,7 +102,7 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
 }
 
     Color::init ();
-    Exiv2Metadata::init(baseDir);
+    Exiv2Metadata::init(baseDir, userSettingsDir);
 
     DynamicProfileRules::init(baseDir);
     ImageIOManager::getInstance()->init(Glib::build_filename(userSettingsDir, "imageio"));

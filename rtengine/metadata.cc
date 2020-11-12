@@ -172,6 +172,76 @@ std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const 
     return ret;
 }
 
+Glib::ustring exiftool_config_dir;
+
+const char *exiftool_xmp_config = 
+ "%Image::ExifTool::UserDefined = (\n" \
+ "   'Image::ExifTool::XMP::Main' => {\n" \
+ "       ART => {\n" \
+ "           SubDirectory => {\n" \
+ "               TagTable => 'Image::ExifTool::UserDefined::ART',\n" \
+ "           },\n" \
+ "       },\n" \
+ "   },\n" \
+ ");\n" \
+ "%Image::ExifTool::UserDefined::ART = (\n" \
+ "   GROUPS        => { 0 => 'XMP', 1 => 'XMP-ART', 2 => 'Image' },\n" \
+ "   NAMESPACE     => { 'ART' => 'http://us.pixls.art/ART/1.0/' },\n" \
+ "   WRITABLE      => 'string',\n" \
+ "   arp => { Groups => { 2 => 'Other' } },\n" \
+ ");\n";
+
+
+bool exiftool_embed_procparams(const Glib::ustring &fname, const std::string &data)
+{
+    Glib::ustring cfg = Glib::build_filename(exiftool_config_dir, "ART-exiftool.config");
+    if (!Glib::file_test(cfg, Glib::FILE_TEST_EXISTS)) {
+        FILE *f = g_fopen(cfg.c_str(), "w");
+        if (!f) {
+            return false;
+        }
+        bool err = (fputs(exiftool_xmp_config, f) == EOF);
+        fclose(f);
+        if (err) {
+            return false;
+        }
+    }
+
+    Glib::ustring exiftool = settings->exiftool_path;
+    if (exiftool == exiftool_default) {
+        Glib::ustring e = Glib::build_filename(exiftool_base_dir, exiftool);
+        if (Glib::file_test(e, Glib::FILE_TEST_EXISTS)) {
+            exiftool = e;
+        }
+    }
+
+    std::vector<Glib::ustring> argv = {
+        exiftool,
+        "-config",
+        cfg,
+        "-overwrite_original",
+        "-Arp=" + data,
+        fname
+    };
+    if (settings->verbose) {
+        std::cout << "embedding params for " << fname << " with exiftool"
+                  << std::endl;
+    }
+    std::string out, err;
+    bool ok = true;
+    try {
+        subprocess::exec_sync("", argv, true, &out, &err);
+    } catch (subprocess::error &exc) {
+        if (settings->verbose) {
+            std::cout << "  exec error: " << exc.what() << std::endl;
+            std::cout << "  stdout: " << out << std::endl;
+            std::cout << "  stderr: " << err << std::endl;
+        }
+        ok = false;
+    }
+    return ok;
+}
+
 } // namespace
 
 
@@ -512,7 +582,7 @@ Exiv2::XmpData Exiv2Metadata::getXmpSidecar(const Glib::ustring &path)
 }
 
 
-void Exiv2Metadata::init(const Glib::ustring &base_dir)
+void Exiv2Metadata::init(const Glib::ustring &base_dir, const Glib::ustring &user_dir)
 {
     cache_.reset(new ImageCache(IMAGE_CACHE_SIZE));
     const gchar *exiftool_base_dir_env = g_getenv("ART_EXIFTOOL_BASE_DIR");
@@ -523,12 +593,27 @@ void Exiv2Metadata::init(const Glib::ustring &base_dir)
     }
     Exiv2::XmpParser::initialize();
     Exiv2::XmpProperties::registerNs("us/pixls/ART/", "ART");
+    exiftool_config_dir = user_dir;
 }
 
 
 void Exiv2Metadata::cleanup()
 {
     Exiv2::XmpParser::terminate();
+}
+
+
+void Exiv2Metadata::embedProcParamsData(const Glib::ustring &fname, const std::string &data)
+{
+    try {
+        auto img = open_exiv2(fname, false);
+        img->xmpData()["Xmp.ART.arp"] = data;
+        img->writeMetadata();
+    } catch (std::exception &exc) {
+        if (!exiftool_embed_procparams(fname, data)) {
+            throw exc;
+        }
+    }
 }
 
 } // namespace rtengine

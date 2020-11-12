@@ -62,8 +62,10 @@ public:
     static Glib::ustring xmpSidecarPath(const Glib::ustring &path);
     static Exiv2::XmpData getXmpSidecar(const Glib::ustring &path);
 
-    static void init(const Glib::ustring &base_dir);
+    static void init(const Glib::ustring &base_dir, const Glib::ustring &user_dir);
     static void cleanup();
+
+    static void embedProcParamsData(const Glib::ustring &fname, const std::string &data);
    
 private:
     void do_merge_xmp(Exiv2::Image *dst) const;
