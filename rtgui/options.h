@@ -445,6 +445,19 @@ public:
     // https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
     std::map<int, std::string> falseColorsMap;
 
+    struct RenameOptions {
+        Glib::ustring pattern;
+        Glib::ustring sidecars;
+        int name_norm;
+        int ext_norm;
+        bool allow_whitespace;
+        int on_existing;
+        int progressive_number;
+
+        RenameOptions();
+    };
+    RenameOptions renaming;
+
     Options();
 
     Options *copyFrom(Options *other);
@@ -475,6 +488,7 @@ public:
     static Glib::ustring getICCProfileCopyright();
 
     Glib::ustring getParamFile(const Glib::ustring &fname);
+    Glib::ustring getXmpSidecarFile(const Glib::ustring &fname);
 };
 
 extern Options options;

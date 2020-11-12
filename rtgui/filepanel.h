@@ -87,6 +87,8 @@ public:
 
     bool on_button_press_event(GdkEventButton *event) override;
 
+    RTWindow *getParent() { return parent; }
+
 private:
     void on_NB_switch_page(Gtk::Widget* page, guint page_num);
     void on_inspector_ready();

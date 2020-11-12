@@ -32,7 +32,6 @@
 #include "cachemanager.h"
 #include "multilangmgr.h"
 #include "filepanel.h"
-#include "renamedlg.h"
 #include "thumbimageupdater.h"
 #include "batchqueue.h"
 #include "placesbrowser.h"
@@ -1207,67 +1206,6 @@ void FileCatalog::developRequested(const std::vector<FileBrowserEntry*>& tbe, bo
 
         listener->addBatchQueueJobs(entries);
     }
-}
-
-void FileCatalog::renameRequested(const std::vector<FileBrowserEntry*>& tbe)
-{
-    RenameDialog* renameDlg = new RenameDialog ((Gtk::Window*)get_toplevel());
-
-    for (size_t i = 0; i < tbe.size(); i++) {
-        renameDlg->initName (Glib::path_get_basename (tbe[i]->filename), tbe[i]->thumbnail->getCacheImageData());
-
-        Glib::ustring ofname = tbe[i]->filename;
-        Glib::ustring dirName = Glib::path_get_dirname (tbe[i]->filename);
-        Glib::ustring baseName = Glib::path_get_basename (tbe[i]->filename);
-
-        bool success = false;
-
-        do {
-            if (renameDlg->run () == Gtk::RESPONSE_OK) {
-                Glib::ustring nBaseName = renameDlg->getNewName ();
-
-                // if path has directory components, exit
-                if (Glib::path_get_dirname (nBaseName) != ".") {
-                    continue;
-                }
-
-                // if no extension is given, concatenate the extension of the original file
-                Glib::ustring ext = getExtension (nBaseName);
-
-                if (ext.empty()) {
-                    nBaseName += "." + getExtension (baseName);
-                }
-
-                Glib::ustring nfname = Glib::build_filename (dirName, nBaseName);
-
-                /* check if filename already exists*/
-                if (Glib::file_test (nfname, Glib::FILE_TEST_EXISTS)) {
-                    Glib::ustring msg_ = Glib::ustring("<b>") + nfname + ": " + M("MAIN_MSG_ALREADYEXISTS") + "</b>";
-                    Gtk::MessageDialog msgd (msg_, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
-                    msgd.run ();
-                } else {
-                    success = true;
-
-                    if (::g_rename (ofname.c_str (), nfname.c_str ()) == 0) {
-                        cacheMgr->renameEntry (ofname, tbe[i]->thumbnail->getMD5(), nfname);
-                        ::g_remove(options.getParamFile(ofname).c_str());
-                        auto xmp = Thumbnail::getXmpSidecarPath(ofname);
-                        if (!xmp.empty()) {
-                            ::g_remove(xmp.c_str());
-                        }
-
-                        reparseDirectory ();
-                    }
-                }
-            } else {
-                success = true;
-            }
-        } while (!success);
-
-        renameDlg->hide ();
-    }
-
-    delete renameDlg;
 }
 
 void FileCatalog::selectionChanged(const std::vector<Thumbnail*>& tbe)

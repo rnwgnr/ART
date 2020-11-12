@@ -25,6 +25,7 @@
 #include "addsetids.h"
 #include "guiutils.h"
 #include "version.h"
+#include "../rtengine/metadata.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -49,6 +50,19 @@ Glib::ustring Options::cacheBaseDir;
 Options options;
 Glib::ustring versionString = RTVERSION;
 Glib::ustring paramFileExtension = ".arp";
+
+
+Options::RenameOptions::RenameOptions()
+{
+    pattern = "%f.%e";
+    sidecars = "";
+    name_norm = 0;
+    ext_norm = 0;
+    allow_whitespace = false;
+    on_existing = 0;
+    progressive_number = 1;
+}
+
 
 Options::Options()
 {
@@ -643,6 +657,8 @@ void Options::setDefaults()
         {100, "#FF7F00"},
         {108, "#FF0000"}
     };
+
+    renaming = RenameOptions();
 }
 
 Options* Options::copyFrom(Options* other)
@@ -1928,6 +1944,31 @@ void Options::readFromFile(Glib::ustring fname)
                 }
             }
 
+            if (keyFile.has_group("Renaming")) {
+                const char *g = "Renaming";
+                if (keyFile.has_key(g, "Pattern")) {
+                    renaming.pattern = keyFile.get_string(g, "Pattern");
+                }
+                if (keyFile.has_key(g, "Sidecars")) {
+                    renaming.sidecars = keyFile.get_string(g, "Sidecars");
+                }
+                if (keyFile.has_key(g, "NameNormalization")) {
+                    renaming.name_norm = keyFile.get_integer(g, "NameNormalization");
+                }
+                if (keyFile.has_key(g, "ExtNormalization")) {
+                    renaming.ext_norm = keyFile.get_integer(g, "ExtNormalization");
+                }
+                if (keyFile.has_key(g, "AllowWhitespace")) {
+                    renaming.allow_whitespace = keyFile.get_boolean(g, "AllowWhitespace");
+                }
+                if (keyFile.has_key(g, "OnExisting")) {
+                    renaming.on_existing = keyFile.get_integer(g, "OnExisting");
+                }
+                if (keyFile.has_key(g, "ProgressiveNumber")) {
+                    renaming.progressive_number = keyFile.get_integer(g, "ProgressiveNumber");
+                }
+            }
+
 // --------------------------------------------------------------------------------------------------------
 
             filterOutParsedExtensions();
@@ -2339,6 +2380,14 @@ void Options::saveToFile(Glib::ustring fname)
             keyFile.set_string("False Colors Map", "IRE_" + std::to_string(p.first), p.second);
         }
 
+        keyFile.set_string("Renaming", "Pattern", renaming.pattern);
+        keyFile.set_string("Renaming", "Sidecars", renaming.sidecars);
+        keyFile.set_integer("Renaming", "NameNormalization", renaming.name_norm);
+        keyFile.set_integer("Renaming", "ExtNormalization", renaming.ext_norm);
+        keyFile.set_boolean("Renaming", "AllowWhitespace", renaming.allow_whitespace);
+        keyFile.set_integer("Renaming", "OnExisting", renaming.on_existing);
+        keyFile.set_integer("Renaming", "ProgressiveNumber", renaming.progressive_number);
+
         keyData = keyFile.to_data();
 
     } catch (Glib::KeyFileError &e) {
@@ -2677,4 +2726,10 @@ Glib::ustring Options::getParamFile(const Glib::ustring &fname)
     } else {
         return fname + paramFileExtension;
     }
+}
+
+
+Glib::ustring Options::getXmpSidecarFile(const Glib::ustring &fname)
+{
+    return rtengine::Exiv2Metadata::xmpSidecarPath(fname);
 }

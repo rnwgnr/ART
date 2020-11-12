@@ -111,7 +111,6 @@ set(NONCLISOURCEFILES
     rawcacorrection.cc
     rawexposure.cc
     recentbrowser.cc
-    renamedlg.cc
     resize.cc
     rgbcurves.cc
     rotate.cc
@@ -167,6 +166,7 @@ set(NONCLISOURCEFILES
     wbpresets.cc
     wbprovider.cc
     controllines.cc
+    filecatalog_rename.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
