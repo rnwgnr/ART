@@ -380,14 +380,14 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
 }
 
 
-Glib::ustring trim(const Glib::ustring &s)
+Glib::ustring trim(const Glib::ustring &s, bool start=true, bool end=true)
 {
     size_t i = 0;
     size_t n = s.length();
-    while (isspace(s[i])) {
+    while (start && isspace(s[i])) {
         ++i;
     }
-    while (n > 0 && isspace(s[n-1])) {
+    while (end && n > 0 && isspace(s[n-1])) {
         --n;
     }
     return s.substr(i, n-i);
@@ -578,7 +578,8 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
         {
             bool err = false;
             Glib::ustring errmsg = "";
-            if (!parse_pattern(pattern.get_text(), out)) {
+            Glib::ustring patternstr = pattern.get_text();
+            if (!parse_pattern(patternstr, out)) {
                 errmsg = M("RENAME_DIALOG_INVALID_PATTERN");
                 err = true;
             } else if (!parse_sidecars(sidecars.get_text(), out)) {
@@ -601,7 +602,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
             out.on_existing = Params::OnExistingAction(on_existing.get_active_row_number());
             out.progressive_number = progressive_number.get_value_as_int();
 
-            options.renaming.pattern = pattern.get_text();
+            options.renaming.pattern = patternstr;
             options.renaming.sidecars = sidecars.get_text();
             options.renaming.name_norm = name_norm.get_active_row_number();
             options.renaming.ext_norm = ext_norm.get_active_row_number();
@@ -620,7 +621,17 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
                 if (!sel.empty()) {
                     auto entry = args[sel[0]];
                     Glib::ustring newname = get_new_name(out, entry);
-                    info.set_markup("<span size=\"large\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": " + newname + "</b></span>");
+                    Glib::ustring show;
+                    for (auto c : newname) {
+                        if (isspace(c)) {
+                            show += "<span foreground=\"#E59836\">";
+                            show.push_back(gunichar(9141));
+                            show += "</span>";
+                        } else {
+                            show.push_back(c);
+                        }
+                    }
+                    info.set_markup("<span size=\"large\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": " + show + "</b></span>");
                 }
             }
         };
