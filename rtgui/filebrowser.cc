@@ -1114,10 +1114,10 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
     } else if ((event->keyval == GDK_KEY_V || event->keyval == GDK_KEY_v) && ctrl && shift) {
         partPasteProfile ();
         return true;
-    } else if (event->keyval == GDK_KEY_Delete && !shift) {
+    } else if (event->keyval == GDK_KEY_Delete && !shift && !ctrl) {
         menuItemActivated (trash);
         return true;
-    } else if (event->keyval == GDK_KEY_Delete && shift) {
+    } else if (event->keyval == GDK_KEY_Delete && shift && !ctrl) {
         menuItemActivated (untrash);
         return true;
     } else if ((event->keyval == GDK_KEY_B || event->keyval == GDK_KEY_b) && ctrl && !shift) {

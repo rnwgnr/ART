@@ -2359,6 +2359,12 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
             modifierKey = 0; // HOMBRE: yet another hack.... otherwise the shortcut won't work
             categoryButtonToggled(bTrash, false);
             return true;
+
+        case GDK_KEY_Delete:
+            if (shift && bTrash->get_active()) {
+                emptyTrash();
+                return true;
+            }
         }
     }
 
