@@ -28,6 +28,8 @@
 #include "rtwindow.h"
 #include <time.h>
 #include <ctype.h>
+#include <sstream>
+#include <iomanip>
 
 
 namespace {
@@ -79,65 +81,6 @@ public:
 };
 
 
-class FixedPattern: public Pattern {
-public:
-    FixedPattern(const Glib::ustring &s): s_(s) {}
-    
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
-    {
-        return s_;
-    }
-
-private:
-    Glib::ustring s_;
-};
-
-
-class MakePattern: public Pattern {
-public:
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
-    {
-        return fd->getMake();
-    }
-};
-
-
-class ModelPattern: public Pattern {
-public:
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
-    {
-        return fd->getModel();
-    }
-};
-
-
-class CameraPattern: public Pattern {
-public:
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
-    {
-        return fd->getMake() + " " + fd->getModel();
-    }
-};
-
-
-class DatePattern: public Pattern {
-public:
-    DatePattern(char c): c_(c) {}
-    
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
-    {
-        char buf[256];
-        char fmt[3] = { '%', c_, 0 };
-        auto t = fd->getDateTime();
-        strftime(buf, 255, fmt, &t);
-        return buf;
-    }
-
-private:
-    char c_;
-};
-
-
 class ProgressivePattern: public Pattern {
 public:
     ProgressivePattern(int &idx, size_t pad): idx_(idx), pad_(pad) {}
@@ -158,22 +101,23 @@ private:
 };
 
 
-class FileNamePattern: public Pattern {
+template <class F>
+class FramesDataPattern: public Pattern {
 public:
+    FramesDataPattern(F func): func_(func) {}
     Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
     {
-        return removeExtension(Glib::path_get_basename(fd->getFileName()));
+        return make_valid(func_(fd));
     }
+private:
+    F func_;
 };
 
-
-class FileExtPattern: public Pattern {
-public:
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
-    {
-        return getExtension(fd->getFileName());
-    }
-};
+template <class F>
+std::unique_ptr<Pattern> make_pattern(F func)
+{
+    return std::unique_ptr<Pattern>(new FramesDataPattern<F>(func));
+}
 
 
 class TagPattern: public Pattern {
@@ -231,9 +175,17 @@ struct Params {
     OnExistingAction on_existing;
     int progressive_number;
 
-    Params() {}
+    Params() = default;
 };
 
+
+template <class T>
+std::string tostr(T n, int digits)
+{
+    std::ostringstream buf;
+    buf << std::setprecision(digits) << n;
+    return buf.str();
+}
 
 /*
  * pattern syntax:
@@ -250,12 +202,19 @@ struct Params {
  * %C : CameraPattern
  * %M : MakePattern
  * %N : ModelPattern
+ * %r : FramesDataPattern<rating>
+ * %I : FramesDataPattern<ISO>
+ * %F : FramesDataPattern<FNumber>
+ * %L : FramesDataPattern<Lens>
+ * %l : FramesDataPattern<FocalLength>
+ * %E : FramesDataPattern<ExpComp>
  * %n[0-9] : ProgressivePattern
  * %T[tag] : TagPattern
  * %% : % character
  */ 
 bool parse_pattern(const Glib::ustring &s, Params &out)
 {
+    typedef const FramesMetaData *FD;
     out.pattern.clear();
     size_t prev = 0;
     size_t n = s.length();
@@ -263,16 +222,28 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
         auto c = s[i];
         if (c == '%') {
             if (prev != i) {
-                out.pattern.emplace_back(new FixedPattern(s.substr(prev, i-prev)));
+                auto f = s.substr(prev, i-prev);
+                out.pattern.push_back(
+                    make_pattern([f](FD fd) { return f; }));
             }
             if (i+1 < n) {
                 i += 2;
-                switch (s[i-1]) {
+                c = s[i-1];
+                switch (c) {
                 case 'f':
-                    out.pattern.emplace_back(new FileNamePattern());
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return removeExtension(
+                                    Glib::path_get_basename(fd->getFileName()));
+                            }));
                     break;
                 case 'e':
-                    out.pattern.emplace_back(new FileExtPattern());
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return getExtension(fd->getFileName());
+                            }));
                     break;
                 case 'm':
                 case 'd':
@@ -282,23 +253,46 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                 case 'A':
                 case 'b':
                 case 'B':
-                    out.pattern.emplace_back(new DatePattern(s[i-1]));
+                    out.pattern.push_back(
+                        make_pattern(
+                            [c](FD fd) {
+                                char buf[256];
+                                char fmt[3] = { '%', char(c), 0 };
+                                auto t = fd->getDateTime();
+                                strftime(buf, 255, fmt, &t);
+                                return std::string(buf);
+                            }));
                     break;
                 case 'C':
-                    out.pattern.emplace_back(new CameraPattern());
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return fd->getMake() + " " + fd->getModel();
+                            }));
                     break;
                 case 'M':
-                    out.pattern.emplace_back(new MakePattern());
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return fd->getMake();
+                            }));
                     break;
                 case 'N':
-                    out.pattern.emplace_back(new ModelPattern());
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return fd->getModel();
+                            }));
                     break;
-                case 'n':
+                case 'n': 
                     if (i < n && isdigit(s[i])) {
-                        out.pattern.emplace_back(new ProgressivePattern(out.progressive_number, int(s[i]) - int('0')));
+                        out.pattern.emplace_back(
+                            new ProgressivePattern(out.progressive_number,
+                                                   int(s[i]) - int('0')));
                         ++i;
                     } else {
-                        out.pattern.emplace_back(new ProgressivePattern(out.progressive_number, 0));
+                        out.pattern.emplace_back(
+                            new ProgressivePattern(out.progressive_number, 0));
                     }
                     break;
                 case 'T':
@@ -308,7 +302,8 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                             ++j;
                         }
                         if (j < n) {
-                            out.pattern.emplace_back(new TagPattern(s.substr(i+1, j-i-1)));
+                            out.pattern.emplace_back(
+                                new TagPattern(s.substr(i+1, j-i-1)));
                             i = j+1;
                         } else {
                             return false;
@@ -317,8 +312,51 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                         return false;
                     }
                     break;
+                case 'r':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return tostr(fd->getRating(), 0);
+                            }));
+                    break;
+                case 'I':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return tostr(fd->getISOSpeed(), 0);
+                            }));
+                    break;
+                case 'F':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return tostr(fd->getFNumber(), 1);
+                            }));
+                    break;
+                case 'L':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return fd->getLens();
+                            }));
+                    break;
+                case 'l':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return tostr(fd->getFocalLen(), 1);
+                            }));
+                    break;
+                case 'E':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return tostr(fd->getExpComp(), 2);
+                            }));
+                    break;
                 case '%':
-                    out.pattern.emplace_back(new FixedPattern("%"));
+                    out.pattern.push_back(
+                        make_pattern([](FD fd) { return "%"; }));
                     break;
                 default:
                     return false;
@@ -335,7 +373,8 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
         }
     }
     if (prev < n) {
-        out.pattern.emplace_back(new FixedPattern(s.substr(prev)));
+        auto f = s.substr(prev);
+        out.pattern.push_back(make_pattern([f](FD fd) { return f; }));
     }
     return !out.pattern.empty();
 }
@@ -454,7 +493,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     Gtk::Label lbl7(M("RENAME_DIALOG_ALLOW_WHITESPACE"));
     Gtk::CheckButton allow_whitespace("");
     hb2.pack_start(lbl7, Gtk::PACK_SHRINK, pad);
-    hb2.pack_start(allow_whitespace, Gtk::PACK_EXPAND_WIDGET, pad);
+    hb2.pack_start(allow_whitespace, Gtk::PACK_SHRINK, pad);
     mainvb.pack_start(hb2, Gtk::PACK_SHRINK, pad);
 
     Gtk::HBox hb3;
@@ -505,7 +544,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     mainvb.pack_start(hb5, Gtk::PACK_SHRINK, pad);
     
     Gtk::ListViewText filelist(1);
-    filelist.set_column_title(0, M("RENAME_DIALOG_FILENAMES"));
+    filelist.set_column_title(0, M("RENAME_DIALOG_FILENAMES") + " (" + std::to_string(args.size()) + ")");
     filelist.set_activate_on_single_click(true);
     for (auto &e : args) {
         filelist.append(Glib::path_get_basename(e->thumbnail->getFileName()));
@@ -521,7 +560,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
 
     Gtk::HBox hb8;
     Gtk::Label info;
-    info.set_markup("<span size=\"larger\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": </b></span>");
+    info.set_markup("<span size=\"large\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": </b></span>");
     hb8.pack_start(info, Gtk::PACK_SHRINK, 2*pad);
     Gtk::Label empty;
     hb8.pack_start(empty, Gtk::PACK_EXPAND_WIDGET);
@@ -547,7 +586,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
                 err = true;
             }
 
-            info.set_markup("<span size=\"larger\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": <span foreground=\"#ff0000\">" + errmsg + "</span></b></span>");
+            info.set_markup("<span size=\"large\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": <span foreground=\"#ff0000\">" + errmsg + "</span></b></span>");
             
             if (err) {
                 okbtn->set_sensitive(false);
@@ -581,7 +620,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
                 if (!sel.empty()) {
                     auto entry = args[sel[0]];
                     Glib::ustring newname = get_new_name(out, entry);
-                    info.set_markup("<span size=\"larger\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": " + newname + "</b></span>");
+                    info.set_markup("<span size=\"large\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": " + newname + "</b></span>");
                 }
             }
         };
