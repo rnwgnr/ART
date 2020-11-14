@@ -66,7 +66,8 @@ public:
 
     void setInfoText(const Glib::ustring &txt);
     void infoEnabled(bool yes);
-    void setZoomFit(bool yes);
+//    void setZoomFit(bool yes);
+    void setFocusMask(bool yes);
 
     Gtk::SizeRequestMode get_request_mode_vfunc () const override;
     void get_preferred_height_vfunc (int& minimum_height, int& natural_height) const override;
@@ -97,6 +98,7 @@ private:
     bool active;
     bool first_active_;
     bool highlight_;
+    bool has_focus_mask_;
 
     sigc::connection delayconn;
     Glib::ustring next_image_path;
@@ -151,6 +153,7 @@ private:
     void onInspectorResized(Gtk::Allocation &a);
     void split_toggled();
     void histogram_toggled();
+    void focus_mask_toggled();
     void onMoved(rtengine::Coord2D pos);
 
     FileCatalog *filecatalog_;
@@ -166,6 +169,7 @@ private:
     Gtk::ToggleButton *split_;
     Gtk::ToggleButton *info_;
     Gtk::ToggleButton *histogram_;
+    Gtk::ToggleButton *focusmask_;
     Gtk::ToggleButton *jpg_;
     Gtk::ToggleButton *rawlinear_;
     Gtk::ToggleButton *rawfilm_;
@@ -174,6 +178,9 @@ private:
     Gtk::ToggleButton *zoomfit_;
     Gtk::ToggleButton *zoom11_;
     Gtk::ToggleButton *cms_;
+
+    RTImage focusmask_on_;
+    RTImage focusmask_off_;
 
     sigc::connection jpgconn_;
     sigc::connection rawlinearconn_;

@@ -167,6 +167,7 @@ set(NONCLISOURCEFILES
     wbprovider.cc
     controllines.cc
     filecatalog_rename.cc
+    focusmask.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")

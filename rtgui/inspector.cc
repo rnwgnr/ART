@@ -29,6 +29,7 @@
 #include "filecatalog.h"
 #include "../rtengine/previewimage.h"
 #include "../rtengine/imagedata.h"
+#include "focusmask.h"
 
 extern Options options;
 
@@ -84,6 +85,7 @@ InspectorArea::InspectorArea():
     active(false),
     first_active_(true),
     highlight_(false),
+    has_focus_mask_(false),
     info_text_(""),
     hist_bb_(nullptr, false)
 {
@@ -104,6 +106,16 @@ InspectorArea::~InspectorArea()
 {
     deleteBuffers();
 }
+
+
+namespace {
+
+void show_focus_mask(Cairo::RefPtr<Cairo::ImageSurface> surface)
+{
+    addFocusMask(surface->get_data(), surface->get_data(), surface->get_width(), surface->get_height(), surface->get_stride(), surface->get_stride(), 1, 1);
+}
+
+} // namespace
 
 
 bool InspectorArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
@@ -166,7 +178,9 @@ bool InspectorArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
         //printf("center: %d, %d   (img: %d, %d)  (availableSize: %d, %d)  (topLeft: %d, %d)\n", center.x, center.y, imW, imH, availableSize.x, availableSize.y, topLeft.x, topLeft.y);
 
         // define the destination area
-        currImage->imgBuffer.setDrawRectangle(win, dest.x, dest.y, rtengine::min<int>(availableSize.x - dest.x, imW), rtengine::min<int>(availableSize.y - dest.y, imH), false);
+        auto dw = rtengine::min<int>(availableSize.x - dest.x, imW);
+        auto dh = rtengine::min<int>(availableSize.y - dest.y, imH);
+        currImage->imgBuffer.setDrawRectangle(win, dest.x, dest.y, dw, dh, false);
         currImage->imgBuffer.setSrcOffset(topLeft.x, topLeft.y);
 
         if (!currImage->imgBuffer.surfaceCreated()) {
@@ -177,19 +191,20 @@ bool InspectorArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
 
         Gdk::RGBA c;
         Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
-
-        // draw the background
         style->render_background(cr, 0, 0, get_width(), get_height());
 
-        // /* --- old method */
-        // c = style->get_background_color (Gtk::STATE_FLAG_PRELIGHT);
-        // cr->set_source_rgb (c.get_red(), c.get_green(), c.get_blue());
-        // cr->set_line_width (5);
-        // cr->rectangle (0, 0, availableSize.x, availableSize.y);
-        // cr->fill ();
-        // /* */
-
-        currImage->imgBuffer.copySurface(win);
+        if (has_focus_mask_) {
+            int sw = std::min(win->get_width(), imW);
+            int sh = std::min(win->get_height(), imH);
+            BackBuffer surf(sw, sh);//win->get_width(), win->get_height());
+            currImage->imgBuffer.setDestPosition(0, 0);
+            currImage->imgBuffer.copySurface(&surf);
+            show_focus_mask(surf.getSurface());
+            surf.setDestPosition(dest.x, dest.y);
+            surf.copySurface(win);
+        } else {
+            currImage->imgBuffer.copySurface(win);
+        }
 
         // draw the frame
         c = highlight_ ? style->get_color(Gtk::STATE_FLAG_SELECTED) : style->get_background_color(Gtk::STATE_FLAG_NORMAL);
@@ -464,6 +479,15 @@ void InspectorArea::infoEnabled(bool yes)
 }
 
 
+void InspectorArea::setFocusMask(bool yes)
+{
+    if (has_focus_mask_ != yes) {
+        has_focus_mask_ = yes;
+        queue_draw();
+    }
+}
+
+
 void InspectorArea::updateHistogram()
 {
     Glib::RefPtr<Gdk::Window> win = get_window();
@@ -531,7 +555,9 @@ bool InspectorArea::onMouseRelease(GdkEventButton *evt)
 //-----------------------------------------------------------------------------
 
 Inspector::Inspector(FileCatalog *filecatalog):
-    filecatalog_(filecatalog)
+    filecatalog_(filecatalog),
+    focusmask_on_("focusscreen-on.png"),
+    focusmask_off_("focusscreen-off.png")
 {
     ibox_.pack_start(ins_[0], Gtk::PACK_EXPAND_WIDGET, 3);
     ibox_.pack_start(ins_[1], Gtk::PACK_EXPAND_WIDGET, 3);
@@ -632,7 +658,7 @@ Gtk::HBox *Inspector::get_toolbar()
         [&](const char *icon, const char *tip=nullptr) -> Gtk::ToggleButton *
         {
             Gtk::ToggleButton *ret = Gtk::manage(new Gtk::ToggleButton());
-            ret->add(*Gtk::manage(new RTImage(icon)));
+            ret->set_image(*Gtk::manage(new RTImage(icon)));
             ret->set_relief(Gtk::RELIEF_NONE);
             if (tip) {
                 ret->set_tooltip_markup(M(tip));
@@ -646,6 +672,7 @@ Gtk::HBox *Inspector::get_toolbar()
        
     info_ = add_tool("info.png", "INSPECTOR_INFO");
     histogram_ = add_tool("histogram.png", "INSPECTOR_HISTOGRAM");
+    focusmask_ = add_tool("focusscreen-off.png", "INSPECTOR_FOCUS_MASK");
     tb->pack_start(*Gtk::manage(new Gtk::VSeparator()), Gtk::PACK_SHRINK, 4);
 
     jpg_ = add_tool("wb-camera.png", "INSPECTOR_PREVIEW");
@@ -672,6 +699,8 @@ Gtk::HBox *Inspector::get_toolbar()
 
     histogram_->set_active(options.thumbnail_inspector_show_histogram);
     histogram_->signal_toggled().connect(sigc::mem_fun(*this, &Inspector::histogram_toggled));
+
+    focusmask_->signal_toggled().connect(sigc::mem_fun(*this, &Inspector::focus_mask_toggled));
     
     bool use_jpg = options.rtSettings.thumbnail_inspector_mode == rtengine::Settings::ThumbnailInspectorMode::JPEG;
     jpg_->set_active(use_jpg);
@@ -881,6 +910,12 @@ void Inspector::setZoomFit(bool yes)
 }
 
 
+// void Inspector::setFocusMask(bool yes)
+// {
+//     focusmask_->set_active(yes);
+// }
+
+
 void Inspector::onGrabFocus(GdkEventButton *evt, size_t i)
 {
     if (evt->button == 1) {
@@ -920,6 +955,19 @@ void Inspector::histogram_toggled()
     for (size_t i = 0; i < num_active_; ++i) {
         ins_[i].flushBuffers();
         ins_[i].switchImage(cur_image_[i]);
+    }
+}
+
+
+void Inspector::focus_mask_toggled()
+{
+    if (focusmask_->get_active()) {
+        focusmask_->set_image(focusmask_on_);
+    } else {
+        focusmask_->set_image(focusmask_off_);
+    }
+    for (size_t i = 0; i < num_active_; ++i) {
+        ins_[i].setFocusMask(focusmask_->get_active());
     }
 }
 
@@ -981,6 +1029,10 @@ bool Inspector::handleShortcutKey(GdkEventKey *event)
             break;
         }
     }
+    if (!ctrl && shift && !alt && !altgr && event->keyval == GDK_KEY_F) {
+        focusmask_->set_active(!focusmask_->get_active());
+        return true;
+    }    
 
     return false;
 }
