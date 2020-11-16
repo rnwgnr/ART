@@ -183,7 +183,7 @@ template <class T>
 std::string tostr(T n, int digits)
 {
     std::ostringstream buf;
-    buf << std::setprecision(digits) << n;
+    buf << std::setprecision(digits) << std::fixed << n;
     return buf.str();
 }
 
@@ -344,7 +344,7 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                     out.pattern.push_back(
                         make_pattern(
                             [](FD fd) {
-                                return tostr(fd->getFocalLen(), 1);
+                                return tostr(fd->getFocalLen(), 0);
                             }));
                     break;
                 case 'E':
