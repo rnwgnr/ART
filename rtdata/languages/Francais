@@ -170,7 +170,7 @@ FILEBROWSER_RANK2_TOOLTIP;Assigner le rang 2 *\nRaccourci : <b>Shift-2</b>
 FILEBROWSER_RANK3_TOOLTIP;Assigner le rang 3 *\nRaccourci : <b>Shift-3</b>
 FILEBROWSER_RANK4_TOOLTIP;Assigner le rang 4 *\nRaccourci : <b>Shift-4</b>
 FILEBROWSER_RANK5_TOOLTIP;Assigner le rang 5 *\nRaccourci : <b>Shift-5</b>
-FILEBROWSER_RENAMEDLGLABEL;Renommer le fichier
+FILEBROWSER_RENAMEDLGLABEL;Renommer le(s) fichier(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Réinitialiser au profil par défaut
 FILEBROWSER_SELECTDARKFRAME;Choisir une image de Trame Noire...
 FILEBROWSER_SELECTFLATFIELD;Sélectionner une image de Champ Uniforme...
@@ -629,20 +629,20 @@ HISTORY_MSG_367;O - Final - Courbe de contraste 'après'
 HISTORY_MSG_368;O - Final - Balance du contraste
 HISTORY_MSG_369;O - Final - Méthode de balance du contraste
 HISTORY_MSG_370;O - Final - Courbe de contraste local
-HISTORY_MSG_371;Netteté Post-Redimensionnement
-HISTORY_MSG_372;NPR USM - Rayon
-HISTORY_MSG_373;NPR USM - Quantité
-HISTORY_MSG_374;NPR USM - Seuil
-HISTORY_MSG_375;NPR USM - Améliorer seulement les bords
-HISTORY_MSG_376;NPR USM - Rayon de détection des bords
-HISTORY_MSG_377;NPR USM - Tolérance de détection des bords
-HISTORY_MSG_378;NPR USM - Contrôle du halo
-HISTORY_MSG_379;NPR USM - Contrôle du halo - Quantité
-HISTORY_MSG_380;NPR - Méthode
-HISTORY_MSG_381;NPR RLD - Rayon
-HISTORY_MSG_382;NPR RLD - Quantité
-HISTORY_MSG_383;NPR RLD - Amortissement
-HISTORY_MSG_384;NPR RLD - Itérations
+HISTORY_MSG_371;Netteté en sortie
+HISTORY_MSG_372;S - Netteté USM - Rayon
+HISTORY_MSG_373;S - Netteté USM - Quantité
+HISTORY_MSG_374;S - Netteté USM - Seuil
+HISTORY_MSG_375;S - Netteté USM - Améliorer seulement les bords
+HISTORY_MSG_376;S - Netteté USM - Rayon de détection des bords
+HISTORY_MSG_377;S - Netteté USM - Tolérance de détection des bords
+HISTORY_MSG_378;S - Netteté USM - Contrôle du halo
+HISTORY_MSG_379;S - Netteté USM - Contrôle du halo quantité
+HISTORY_MSG_380;S - Netteté Méthode
+HISTORY_MSG_381;S - Netteté RLD - Rayon
+HISTORY_MSG_382;S - Netteté RLD - Quantité
+HISTORY_MSG_383;S - Netteté RLD - Amortissement
+HISTORY_MSG_384;S - Netteté RLD - Itérations
 HISTORY_MSG_385;O - Résiduelle - Balance couleur
 HISTORY_MSG_386;O - Résiduelle - BC vert haut
 HISTORY_MSG_387;O - Résiduelle - BC bleu heut
@@ -942,6 +942,7 @@ ICCPROFCREATOR_SAVEDIALOG_TITLE;Enregistrer le profil ICC sous...
 ICCPROFCREATOR_SLOPE;Pente
 ICCPROFCREATOR_TRC_PRESET;Courbe de réponse tonale :
 INSPECTOR_ENABLE_CMS;Activer gestion de la colorimétrie
+INSPECTOR_HISTOGRAM;Histogram.\nRaccourci: <b>h</b>.
 INSPECTOR_INFO;Info rapide \nRaccourci : <b>i</b>.
 INSPECTOR_PREVIEW;Prévisualisation de l'image intégrée.\nRaccourci : <b>j</b>.
 INSPECTOR_RAW_LINEAR;Rendu raw rapide avec courbe tonale linéaire.\nRaccourci : <b>r</b>.
@@ -1152,7 +1153,7 @@ PARTIALPASTE_PREPROCESS_GREENEQUIL;Équilibrage du vert
 PARTIALPASTE_PREPROCESS_HOTPIXFILT;Filtrage des pixels chauds
 PARTIALPASTE_PREPROCESS_LINEDENOISE;Filtre de bruit en lignes
 PARTIALPASTE_PREPROCESS_PDAFLINESFILTER;Filtrage des lignes PDAF
-PARTIALPASTE_PRSHARPENING;Netteté post-redimensionnement
+PARTIALPASTE_PRSHARPENING;Netteté en sortie
 PARTIALPASTE_RAWCA;Correction auto. de l'aberr. chromatique
 PARTIALPASTE_RAW_DEMOSAIC;Dématriçage
 PARTIALPASTE_RAW_BLACK;Niveaux du noir
@@ -1420,6 +1421,25 @@ QUEUE_LOCATION_TEMPLATE;Utiliser le modèle
 QUEUE_LOCATION_TEMPLATE_TOOLTIP;Indiquez la destination du fichier de sortie en fonction de la localisation, du classement, du statut d'affacement ou de la position dans la file de traitement de l'image source. Utilisant par exemple le nom chemin suivant :\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nla signification des chaînes de formatage est la suivante :\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> sera remplacé par le classement de l'image. Si l'image n'a pas de classement, '<i>0</i>' est utilisé. Si l'image est dans la corbeille, '<i>x</i>' est utilisé.\n\n<b>%s1</b>, ..., <b>%s9</b> sera remplacé par la position initiale de l'image dans la file de traitement au moment où celle-ci est lancée. Le numéro indique le décalage, par exemple <b>%s3</b> résulte en '<i>001</i>'.\n\nSi vous voulez enregistrer l'image de sortie au côté de l'image source, écrivez :\n<b>%p1/%f</b>\n\nSi vous voulez enregistrer l'image de sortie dans un dossier nommé '<i>converted</i>' situé au sein du dossier contenant l'image source, écrivez :\n<b>%p1/converted/%f</b>\n\nSi vous voulez enregistrer l'image de sortie dans un dossier nommé \n'<i>/home/tom/photos/converted/2010-10-31</i>', écrivez :\n<b>%p2/converted/%d1/%f</b>.
 QUEUE_LOCATION_TITLE;Emplacement de sortie
 QUEUE_STARTSTOP_TOOLTIP;Démarre ou arrête le traitement des images dans la file.\n\nRaccourci : <b>Ctrl</b>+<b>s</b>
+RENAME_DIALOG_PATTERN;Modèle de nom de fichier
+RENAME_DIALOG_PATTERN_TIP;Specifier les noms de sortie des fichiers en se basant sur le nom et les métadonnées du fichier original.\n\nSignification des chaines de formatage:\n<b>%f</b>: Nom de fichier sans extensions\n<b>%e</b>: Extension du fichier\n<b>%C</b>: Nom de l'appareil (marque et modèle)\n<b>%M</b>: Marque de l'appareil\n<b>%N</b>: Modèle de l'appareil\n<b>%Y</b>: Date de la photo (4 chiffres)\n<b>%y</b>: Date de la photo, année (2 chiffres)\n<b>%m</b>: Date de la photo, mois  (numéro)\n<b>%b</b>: Date de la photo, mois (abréviation)\n<b>%B</b>: Date de la photo, mois (nom complet)\n<b>%d</b>: Date de la photo, jour (numéro)\n<b>%a</b>: Date de la photo, jour (abréviation)\n<b>%A</b>: Date de la photo, jour (nom complet)\n<b>%n1</b> to <b>%n9</b>: Numérotation avec le chiffre spécifiant le nombre de zéros additionnels (e.g. <b>%n2</b> résulte en <i>01</i>)\n<b>%I</b>: Vitesse ISO\n<b>%L</b>: Nom de l'objectif\n<b>%F</b>: Ouverture (Nombre F)\n<b>%l</b>: Longueur focale\n<b>%E</b>: Compensation d'exposition\n<b>%r</b>: Note de la photo\n<b>%T[<i>tagname</i>]</b>: contenu de la balise métadonnées <i>tagname</i> (caractères non valide remplacé par'_')\n<b>%%</b>: caractère'%'.
+RENAME_DIALOG_ALLOW_WHITESPACE;Autoriser les espaces dans les noms de sortie.
+RENAME_DIALOG_NAME_NORMALIZATION;Mode des noms de fichiers
+RENAME_DIALOG_NORM_OFF;Aucun
+RENAME_DIALOG_NORM_UPPERCASE;Majuscule
+RENAME_DIALOG_NORM_LOWERCASE;Minuscule
+RENAME_DIALOG_EXT_NORMALIZATION;Mode des extensions de fichiers
+RENAME_DIALOG_ON_EXISTING;Action quand le fichier de destination existe
+RENAME_DIALOG_SKIP;Sauter
+RENAME_DIALOG_RENAME;Créer un nouveau nom
+RENAME_DIALOG_PROGRESSIVE;Numérotation
+RENAME_DIALOG_SIDECARS;Fichiers associés supplémentaires
+RENAME_DIALOG_SIDECARS_TIP;Liste des extensions des fichiers associés additionnels à renommer séparés par un caractére ';'. Si une extension commence par un '+', elle est ajoutée au nom original au lieu de remplacer son extension.\nPar exemple, si le fichier d'entrée est <i>fichier.raw</i>, spécifier <i>ext1;+ext2</i> se traduit par des fichiers associés <i>fichier.ext1</i> et <i>fichier.raw.ext2</i>.
+RENAME_DIALOG_FILENAMES;Fichiers à renommer
+RENAME_DIALOG_PREVIEW;Prévisualisation
+RENAME_DIALOG_INVALID_PATTERN;Modèle non valide
+RENAME_DIALOG_INVALID_SIDECARS;Liste des fichiers associés non valide
+RENAME_DIALOG_ERROR;Echec en renommant %1 à %2
 SAMPLEFORMAT_0;Format de données inconnu
 SAMPLEFORMAT_1;8 bits non signé
 SAMPLEFORMAT_2;16 bits non signé
@@ -1875,8 +1895,8 @@ TP_PREPROCESS_LINEDENOISE_DIRECTION_PDAF_LINES;Horizontale seulement sur les lig
 TP_PREPROCESS_LINEDENOISE_DIRECTION_VERTICAL;Verticale
 TP_PREPROCESS_NO_FOUND;Aucun trouvé
 TP_PREPROCESS_PDAFLINESFILTER;Filtre de lignes PDAF
-TP_PRSHARPENING_LABEL;Netteté post-redimensionnement
-TP_PRSHARPENING_TOOLTIP;Augmente la netteté de l'image après le redimensionnement. Ne fonctionne que si la méthode de redimensionnement "Lanczos" est utilisée. Il est impossible de prévisualiser les effets de cet outil. Cf. RawPedia pour les instructions d'utilisation.
+TP_PRSHARPENING_LABEL;Netteté en sortie
+TP_PRSHARPENING_TOOLTIP;Augmente la netteté de l'image après le redimensionnement.
 TP_RAWCACORR_AUTO;Correction automatique
 TP_RAWCACORR_AUTOIT;Itérations
 TP_RAWCACORR_AUTOIT_TOOLTIP;Ce réglage est disponible si "Correction automatique" est activé.\nLa Correction automatique est conservative, signifiant qu'elle ne corrige souvent pas toute l'aberration chromatique.\nPour corriger l'aberration restante, vous pouvez uttiliser jusqu'à cinq itérations de de la correction automatique de l'aberration chromatique.\nChaque itération réduira l'aberration restante de l'itération précédente avec pour coût un temps de traitement plus long.
