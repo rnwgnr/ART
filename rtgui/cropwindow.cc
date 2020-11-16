@@ -576,21 +576,31 @@ void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
     } else if (button == 2) {
         if (iarea->getToolMode () == TMHand) {
             EditSubscriber *editSubscriber = iarea->getCurrSubscriber();
+            bool done = false;
             if (editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
                 needRedraw = editSubscriber->button2Pressed(bstate);
 
                 if (editSubscriber->isDragging()) {
                     state = SEditDrag2;
+                    done = true;
                 } else if (editSubscriber->isPicking()) {
                     state = SEditPick2;
                     pickedObject = iarea->object;
                     pickModifierKey = bstate & 255;
+                    done = true;
                 }
 
                 press_x = x;
                 press_y = y;
                 action_x = 0;
                 action_y = 0;
+            }
+            if (!done && onArea(CropImage, x, y)) {
+                state = SCropImgMove;
+                press_x = x;
+                press_y = y;
+                action_x = 0;
+                action_y = 0;                
             }
         }
     } else if (button == 3) {
