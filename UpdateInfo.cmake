@@ -1,7 +1,7 @@
 # cmakefile executed within a makefile target
 
 # If we find ReleaseInfo.cmake we use the info from there and don't need Git to be installed
-find_file(REL_INFO_FILE ReleaseInfo.cmake PATHS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" NO_DEFAULT_PATH)
+find_file(REL_INFO_FILE ReleaseInfo.cmake PATHS "${PROJECT_SOURCE_DIR}" NO_DEFAULT_PATH)
 if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
     if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         # this is a git repo
@@ -107,7 +107,7 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
             OUTPUT_STRIP_TRAILING_WHITESPACE
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
     else()
-        message(FATAL_ERROR "not inside a repository!")
+        message(WARNING "not inside a repository -- info will be bogus!")
     endif()
 
     # If user checked-out something which is not a branch, use the description as branch name.
@@ -121,7 +121,7 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
     if(GIT_COMMITS_SINCE_TAG STREQUAL "")
         set(GIT_NUMERIC_VERSION_BS "0.0.0")
     else()
-        string(REGEX REPLACE "-.*" "" GIT_NUMERIC_VERSION_BS ${GIT_DESCRIBE})
+        string(REGEX REPLACE "-.*" "" GIT_NUMERIC_VERSION_BS "${GIT_DESCRIBE}")
         set(GIT_NUMERIC_VERSION_BS "${GIT_NUMERIC_VERSION_BS}.${GIT_COMMITS_SINCE_TAG}")
     endif()
 
@@ -146,6 +146,16 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
         message(STATUS "CACHE_NAME_SUFFIX is \"${CACHE_NAME_SUFFIX}\"")
     endif()
 
+    file(WRITE
+        "${CMAKE_BINARY_DIR}/ReleaseInfo.cmake"
+        "set(GIT_DESCRIBE \"${GIT_DESCRIBE}\")
+set(GIT_BRANCH \"${GIT_BRANCH}\")
+set(GIT_COMMIT \"${GIT_COMMIT}\")
+set(GIT_COMMIT_DATE \"${GIT_COMMIT_DATE}\")
+set(GIT_COMMITS_SINCE_TAG \"${GIT_COMMITS_SINCE_TAG}\")
+set(GIT_COMMITS_SINCE_BRANCH \"${GIT_COMMITS_SINCE_BRANCH}\")
+set(GIT_NUMERIC_VERSION_BS \"${GIT_NUMERIC_VERSION_BS}\")
+")
 else()
     include(${REL_INFO_FILE})
 endif()
