@@ -65,7 +65,11 @@ Glib::ustring make_valid(const Glib::ustring &s)
     Glib::ustring ret;
     for (auto c : s) {
         if (!is_valid_char(c)) {
-            ret.push_back('_');
+            if (c == '/') {
+                ret.push_back(gunichar(gunichar(0x2215))); // unicode "division slash" ∕
+            } else {
+                ret.push_back('_');
+            }
         } else {
             ret.push_back(c);
         }
@@ -208,6 +212,7 @@ std::string tostr(T n, int digits)
  * %L : FramesDataPattern<Lens>
  * %l : FramesDataPattern<FocalLength>
  * %E : FramesDataPattern<ExpComp>
+ * %s : FramesDataPattern<ShutterSpeed>
  * %n[0-9] : ProgressivePattern
  * %T[tag] : TagPattern
  * %% : % character
@@ -330,7 +335,7 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                     out.pattern.push_back(
                         make_pattern(
                             [](FD fd) {
-                                return tostr(fd->getFNumber(), 1);
+                                return fd->apertureToString(fd->getFNumber());
                             }));
                     break;
                 case 'L':
@@ -351,7 +356,14 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                     out.pattern.push_back(
                         make_pattern(
                             [](FD fd) {
-                                return tostr(fd->getExpComp(), 2);
+                                return fd->expcompToString(fd->getExpComp(), false);
+                            }));
+                    break;
+                case 's':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                return fd->shutterToString(fd->getShutterSpeed());
                             }));
                     break;
                 case '%':
