@@ -1,7 +1,7 @@
 # cmakefile executed within a makefile target
 
 # If we find ReleaseInfo.cmake we use the info from there and don't need Git to be installed
-find_file(REL_INFO_FILE ReleaseInfo.cmake PATHS "${PROJECT_SOURCE_DIR}" NO_DEFAULT_PATH)
+find_file(REL_INFO_FILE ReleaseInfo.cmake PATHS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" NO_DEFAULT_PATH)
 if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
     if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
         # this is a git repo
@@ -147,7 +147,7 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
     endif()
 
     file(WRITE
-        "${CMAKE_BINARY_DIR}/ReleaseInfo.cmake"
+        "${CMAKE_BINARY_DIR}/ReleaseInfo.cmake.in"
         "set(GIT_DESCRIBE \"${GIT_DESCRIBE}\")
 set(GIT_BRANCH \"${GIT_BRANCH}\")
 set(GIT_COMMIT \"${GIT_COMMIT}\")
