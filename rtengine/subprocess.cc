@@ -30,6 +30,9 @@
 #  include <windows.h>
 #  include <io.h>
 #  include <fcntl.h>
+#else
+#  include <sys/types.h>
+#  include <sys/wait.h>
 #endif
 
 #include "subprocess.h"
