@@ -65,87 +65,87 @@ void WhiteBalance::cleanup ()
     }
 }
 
-static double wbSlider2Temp(double sval)
-{
+// static double wbSlider2Temp(double sval)
+// {
 
-    // slider range: 0 - 10000
-    double temp;
+//     // slider range: 0 - 10000
+//     double temp;
 
-    if (sval <= 5000) {
-        // linear below center-temp
-        temp = MINTEMP + (sval / 5000.0) * (CENTERTEMP - MINTEMP);
-    } else {
-        const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
-        double x = (sval - 5000) / 5000; // x 0..1
-        double y = x * slope + (1.0 - slope) * pow(x, 4.0);
-        //double y = pow(x, 4.0);
-        temp = CENTERTEMP + y * (MAXTEMP - CENTERTEMP);
-    }
+//     if (sval <= 5000) {
+//         // linear below center-temp
+//         temp = MINTEMP + (sval / 5000.0) * (CENTERTEMP - MINTEMP);
+//     } else {
+//         const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
+//         double x = (sval - 5000) / 5000; // x 0..1
+//         double y = x * slope + (1.0 - slope) * pow(x, 4.0);
+//         //double y = pow(x, 4.0);
+//         temp = CENTERTEMP + y * (MAXTEMP - CENTERTEMP);
+//     }
 
-    if (temp < MINTEMP) {
-        temp = MINTEMP;
-    }
+//     if (temp < MINTEMP) {
+//         temp = MINTEMP;
+//     }
 
-    if (temp > MAXTEMP) {
-        temp = MAXTEMP;
-    }
+//     if (temp > MAXTEMP) {
+//         temp = MAXTEMP;
+//     }
 
-    return temp;
-}
+//     return temp;
+// }
 
-static double wbTemp2Slider(double temp)
-{
+// static double wbTemp2Slider(double temp)
+// {
 
-    double sval;
+//     double sval;
 
-    if (temp <= CENTERTEMP) {
-        sval = ((temp - MINTEMP) / (CENTERTEMP - MINTEMP)) * 5000.0;
-    } else {
-        const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
-        const double y = (temp - CENTERTEMP) / (MAXTEMP - CENTERTEMP);
-        double x = pow(y, 0.25); // rough guess of x, will be a little lower
-        double k = 0.1;
-        bool add = true;
+//     if (temp <= CENTERTEMP) {
+//         sval = ((temp - MINTEMP) / (CENTERTEMP - MINTEMP)) * 5000.0;
+//     } else {
+//         const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
+//         const double y = (temp - CENTERTEMP) / (MAXTEMP - CENTERTEMP);
+//         double x = pow(y, 0.25); // rough guess of x, will be a little lower
+//         double k = 0.1;
+//         bool add = true;
 
-        // the y=f(x) function is a mess to invert, therefore we have this trial-refinement loop instead.
-        // from tests, worst case is about 20 iterations, ie no problem
-        for (;;) {
-            double y1 = x * slope + (1.0 - slope) * pow(x, 4.0);
+//         // the y=f(x) function is a mess to invert, therefore we have this trial-refinement loop instead.
+//         // from tests, worst case is about 20 iterations, ie no problem
+//         for (;;) {
+//             double y1 = x * slope + (1.0 - slope) * pow(x, 4.0);
 
-            if (5000 * fabs(y1 - y) < 0.1) {
-                break;
-            }
+//             if (5000 * fabs(y1 - y) < 0.1) {
+//                 break;
+//             }
 
-            if (y1 < y) {
-                if (!add) {
-                    k /= 2;
-                }
+//             if (y1 < y) {
+//                 if (!add) {
+//                     k /= 2;
+//                 }
 
-                x += k;
-                add = true;
-            } else {
-                if (add) {
-                    k /= 2;
-                }
+//                 x += k;
+//                 add = true;
+//             } else {
+//                 if (add) {
+//                     k /= 2;
+//                 }
 
-                x -= k;
-                add = false;
-            }
-        }
+//                 x -= k;
+//                 add = false;
+//             }
+//         }
 
-        sval = 5000.0 + x * 5000.0;
-    }
+//         sval = 5000.0 + x * 5000.0;
+//     }
 
-    if (sval < 0) {
-        sval = 0;
-    }
+//     if (sval < 0) {
+//         sval = 0;
+//     }
 
-    if (sval > 10000) {
-        sval = 10000;
-    }
+//     if (sval > 10000) {
+//         sval = 10000;
+//     }
 
-    return sval;
-}
+//     return sval;
+// }
 
 WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true, true), wbp(nullptr), wblistener(nullptr)
 {
@@ -252,7 +252,8 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     Gtk::Image* iblueredL = Gtk::manage (new RTImage ("circle-blue-small.png"));
     Gtk::Image* iblueredR = Gtk::manage (new RTImage ("circle-red-small.png"));
 
-    temp = Gtk::manage (new Adjuster (M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR, &wbSlider2Temp, &wbTemp2Slider));
+    temp = Gtk::manage (new Adjuster (M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR));//, &wbSlider2Temp, &wbTemp2Slider));
+    temp->setLogScale(2, 5500, true);
     green = Gtk::manage (new Adjuster (M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
     green->setLogScale(100, 1, true);
     equal = Gtk::manage (new Adjuster (M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR));
