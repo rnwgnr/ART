@@ -320,14 +320,19 @@ void SaveAsDialog::cancelPressed ()
     response (Gtk::RESPONSE_CANCEL);
 }
 
+
 void SaveAsDialog::formatChanged(const Glib::ustring& format)
 {
-    const auto sanitize_suffix =
-        [this, format](const std::function<bool (const Glib::ustring&)>& has_suffix)
-        {
-            const Glib::ustring name = getCurrentFilename(fchooser);
+    fixExtension(getCurrentFilename(fchooser), format);
+}
 
-            if (!has_suffix(name)) {
+
+void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& format)
+{
+    const auto sanitize_suffix =
+        [this, name, format](const std::function<bool (const Glib::ustring&)>& has_suffix)
+        {
+            if (!name.empty() && !has_suffix(name)) {
                 fchooser->set_current_name(removeExtension(Glib::path_get_basename(name)) + '.' + format);
             }
         };
@@ -373,7 +378,8 @@ void SaveAsDialog::formatChanged(const Glib::ustring& format)
 void SaveAsDialog::setInitialFileName (const Glib::ustring& fname)
 {
     this->fname = fname;
-    fchooser->set_current_name(fname);
+    //fchooser->set_current_name(fname);
+    fixExtension(fname, formatOpts->getFormat().format);
 }
 
 void SaveAsDialog::setImagePath (const Glib::ustring& imagePath)

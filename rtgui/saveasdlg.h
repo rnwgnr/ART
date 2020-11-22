@@ -41,6 +41,7 @@ protected:
     void forceFmtOptsSwitched();
     void saveImmediatlyClicked();
     void putToQueueClicked();
+    void fixExtension(const Glib::ustring &name, const Glib::ustring &format);
 
 public:
     SaveAsDialog(const Glib::ustring &initialDir, Gtk::Window *parent);
