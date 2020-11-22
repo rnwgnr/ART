@@ -253,7 +253,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     Gtk::Image* iblueredR = Gtk::manage (new RTImage ("circle-red-small.png"));
 
     temp = Gtk::manage (new Adjuster (M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR));//, &wbSlider2Temp, &wbTemp2Slider));
-    temp->setLogScale(2, 5500, true);
+    temp->setLogScale(100, MINTEMP, false);
     green = Gtk::manage (new Adjuster (M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
     green->setLogScale(100, 1, true);
     equal = Gtk::manage (new Adjuster (M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR));
