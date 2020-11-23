@@ -36,6 +36,10 @@ using ScopeType = Options::ScopeType;
 
 namespace {
 
+constexpr float rgb_R[3] = { 1.f, 0.f, 0.f };
+constexpr float rgb_G[3] = { 0.f, 1.f, 0.f };
+constexpr float rgb_B[3] = { 0.f, 0.25f, 1.f };
+
 void set_arr(array2D<int> &dst, const array2D<int> &src)
 {
     dst(src.width(), src.height(), static_cast<int *>(const_cast<array2D<int>&>(src)));
@@ -832,19 +836,19 @@ void HistogramRGBArea::updateBackBuffer (int r, int g, int b, const Glib::ustrin
         if ( r != -1 && g != -1 && b != -1 ) {
             if (needRed) {
                 // Red
-                cc->set_source_rgb(1.0, 0.0, 0.0);
+                cc->set_source_rgb(rgb_R[0], rgb_R[1], rgb_R[2]);
                 drawBar(cc, r, 255.0, winw, winh, s);
             }
 
             if (needGreen) {
                 // Green
-                cc->set_source_rgb(0.0, 1.0, 0.0);
+                cc->set_source_rgb(rgb_G[0], rgb_G[1], rgb_G[2]);
                 drawBar(cc, g, 255.0, winw, winh, s);
             }
 
             if (needBlue) {
                 // Blue
-                cc->set_source_rgb(0.0, 0.0, 1.0);
+                cc->set_source_rgb(rgb_B[0], rgb_B[1], rgb_B[2]);
                 drawBar(cc, b, 255.0, winw, winh, s);
             }
 
@@ -1445,21 +1449,21 @@ void HistogramArea::updateNonRaw(Cairo::RefPtr<Cairo::Context> cr)
 
         if (needRed) {
             drawCurve(cr, rh, realhistheight, w, h);
-            cr->set_source_rgb (1.0, 0.0, 0.0);
+            cr->set_source_rgb(rgb_R[0], rgb_R[1], rgb_R[2]);
             cr->stroke ();
             drawMarks(cr, rh, scale, w, ui, oi);
         }
 
         if (needGreen) {
             drawCurve(cr, gh, realhistheight, w, h);
-            cr->set_source_rgb (0.0, 1.0, 0.0);
+            cr->set_source_rgb(rgb_G[0], rgb_G[1], rgb_G[2]);
             cr->stroke ();
             drawMarks(cr, gh, scale, w, ui, oi);
         }
 
         if (needBlue) {
             drawCurve(cr, bh, realhistheight, w, h);
-            cr->set_source_rgb (0.0, 0.0, 1.0);
+            cr->set_source_rgb(rgb_B[0], rgb_B[1], rgb_B[2]);
             cr->stroke ();
             drawMarks(cr, bh, scale, w, ui, oi);
         }
@@ -1657,21 +1661,21 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
 
         if (needRed) {
             drawRawCurve(cr, rh, ub, realhistheight, w, h);
-            cr->set_source_rgb(1.0, 0.0, 0.0);
+            cr->set_source_rgb(rgb_R[0], rgb_R[1], rgb_R[2]);
             cr->stroke();
             drawMarks(cr, rh, 1.0, w, ui, oi);
         }
 
         if (needGreen) {
             drawRawCurve(cr, gh, ub, realhistheight, w, h);
-            cr->set_source_rgb(0.0, 1.0, 0.0);
+            cr->set_source_rgb(rgb_G[0], rgb_G[1], rgb_G[2]);
             cr->stroke();
             drawMarks(cr, gh, 1.0, w, ui, oi);
         }
 
         if (needBlue) {
             drawRawCurve(cr, bh, ub, realhistheight, w, h);
-            cr->set_source_rgb(0.0, 0.0, 1.0);
+            cr->set_source_rgb(rgb_B[0], rgb_B[1], rgb_B[2]);
             cr->stroke();
             drawMarks(cr, bh, 1.0, w, ui, oi);
         }
@@ -1913,7 +1917,7 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             for (int col = 0; col < wave_width; col++) {
                 const unsigned char b = std::min<float>(scale * b_row[col], 0xff);
                 if (b != 0) {
-                    const unsigned char green = 0;//b / 2; // Make blue easier to see.
+                    const unsigned char green = b * rgb_B[1]; // Make blue easier to see.
                     buffer_b_row[col] = b | (green << 8) | (b << 24);
                 }
             }
@@ -2172,8 +2176,8 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
             std::uint32_t* const buffer_row = reinterpret_cast<uint32_t*>(wave_buffer.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
                 const unsigned char r = needRed ? std::min<float>(scale * r_row[col], 0xff) : 0;
-                const unsigned char g = needGreen ? std::min<float>(scale * g_row[col], 0xff) : 0;
                 const unsigned char b = needBlue ? std::min<float>(scale * b_row[col], 0xff) : 0;
+                const unsigned char g = needGreen ? rtengine::LIM(std::min<float>(scale * g_row[col], 0xff) + float(needBlue ? b * rgb_B[1] : 0), 0.f, float(0xff)) : 0;
                 const unsigned char value = rtengine::max(r, g, b);
                 if (value != 0) {
                     // Ensures correct order regardless of endianness.
