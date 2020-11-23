@@ -26,8 +26,61 @@
 #include "../rtengine/dcrop.h"
 #include "../rtengine/refreshmap.h"
 #include "../rtengine/rt_math.h"
+#include "../rtengine/improcfun.h"
 
 using namespace rtengine;
+
+namespace {
+
+
+Glib::RefPtr<Gdk::Pixbuf> resize_lanczos(Glib::RefPtr<Gdk::Pixbuf> src, int dw, int dh, float scale)
+{
+    const int sW = src->get_width();
+    const int sH = src->get_height();
+    
+    Imagefloat tmps(sW, sH);
+    tmps.assignMode(Imagefloat::Mode::LAB);
+    auto s_data = src->get_pixels();
+    auto s_stride = src->get_rowstride();
+        
+#ifdef _OPENMP
+#   pragma omp parallel for
+#endif
+    for (int y = 0; y < sH; ++y) {
+        auto s_row = s_data + (y * s_stride);
+        for (int x = 0; x < sW; ++x) {
+            tmps.r(y, x) = s_row[x * 3];
+            tmps.g(y, x) = s_row[x * 3 + 1];
+            tmps.b(y, x) = s_row[x * 3 + 2];
+        }
+    }
+
+    Imagefloat tmpd(dw, dh);
+
+    ImProcFunctions ipf(nullptr);
+    ipf.Lanczos(&tmps, &tmpd, scale);
+
+    auto dst = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, dw, dh);
+    auto d_data = dst->get_pixels();
+    auto d_stride = dst->get_rowstride();
+    
+#ifdef _OPENMP
+#   pragma omp parallel for
+#endif
+    for (int y = 0; y < dh; ++y) {
+        auto d_row = d_data + (y * d_stride);
+        for (int x = 0; x < dw; ++x) {
+            d_row[x * 3] = LIM(int(tmpd.r(y, x)), 0, 255); 
+            d_row[x * 3 + 1] = LIM(int(tmpd.g(y, x)), 0, 255);
+            d_row[x * 3 + 2] = LIM(int(tmpd.b(y, x)), 0, 255);
+        }
+    }
+
+    return dst;
+}
+
+} // namespace
+
 
 CropHandler::CropHandler() :
     zoom(100),
@@ -371,8 +424,12 @@ void CropHandler::setDetailedCrop(
                                 }
 
                                 Glib::RefPtr<Gdk::Pixbuf> tmpPixbuf = Gdk::Pixbuf::create_from_data (cropimg.data(), Gdk::COLORSPACE_RGB, false, 8, cropimg_width, cropimg_height, 3 * cropimg_width);
-                                cropPixbuf = Gdk::Pixbuf::create (Gdk::COLORSPACE_RGB, false, 8, imw, imh);
-                                tmpPixbuf->scale (cropPixbuf, 0, 0, imw, imh, 0, 0, czoom, czoom, Gdk::INTERP_TILES);
+                                if (czoom < 1.f) {
+                                    cropPixbuf = resize_lanczos(tmpPixbuf, imw, imh, czoom);
+                                } else {
+                                    cropPixbuf = Gdk::Pixbuf::create (Gdk::COLORSPACE_RGB, false, 8, imw, imh);
+                                    tmpPixbuf->scale (cropPixbuf, 0, 0, imw, imh, 0, 0, czoom, czoom, Gdk::INTERP_TILES);
+                                }
                                 tmpPixbuf.clear ();
 
                                 Glib::RefPtr<Gdk::Pixbuf> tmpPixbuftrue = Gdk::Pixbuf::create_from_data (cropimgtrue.data(), Gdk::COLORSPACE_RGB, false, 8, cropimg_width, cropimg_height, 3 * cropimg_width);
