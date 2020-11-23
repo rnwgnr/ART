@@ -26,13 +26,6 @@
 #include "rtimage.h"
 #include "options.h"
 
-#define MINTEMP 1500   //1200
-#define MAXTEMP 60000  //12000
-#define CENTERTEMP 4750
-#define MINGREEN 0.02
-#define MAXGREEN 10.0
-#define MINEQUAL 0.8
-#define MAXEQUAL 1.5
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -40,6 +33,8 @@ using namespace rtengine::procparams;
 std::vector<Glib::RefPtr<Gdk::Pixbuf>> WhiteBalance::wbPixbufs;
 
 namespace {
+
+constexpr double CENTERTEMP = 4750;
 
 const std::vector<std::string> labels = {
     "TP_WBALANCE_CAMERA",
@@ -65,87 +60,99 @@ void WhiteBalance::cleanup ()
     }
 }
 
-// static double wbSlider2Temp(double sval)
-// {
 
-//     // slider range: 0 - 10000
-//     double temp;
+namespace {
 
-//     if (sval <= 5000) {
-//         // linear below center-temp
-//         temp = MINTEMP + (sval / 5000.0) * (CENTERTEMP - MINTEMP);
-//     } else {
-//         const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
-//         double x = (sval - 5000) / 5000; // x 0..1
-//         double y = x * slope + (1.0 - slope) * pow(x, 4.0);
-//         //double y = pow(x, 4.0);
-//         temp = CENTERTEMP + y * (MAXTEMP - CENTERTEMP);
-//     }
+constexpr double wbgamma = 3.0;
 
-//     if (temp < MINTEMP) {
-//         temp = MINTEMP;
-//     }
+double wbSlider2Temp(double sval)
+{
+    double r = (MAXTEMP - MINTEMP);
+    double v = (sval - MINTEMP) / r;
+    return rtengine::LIM(MINTEMP + std::pow(v, wbgamma) * r, MINTEMP, MAXTEMP);
 
-//     if (temp > MAXTEMP) {
-//         temp = MAXTEMP;
-//     }
+    // if (sval <= 5000) {
+    //     // linear below center-temp
+    //     temp = MINTEMP + (sval / 5000.0) * (CENTERTEMP - MINTEMP);
+    // } else {
+    //     const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
+    //     double x = (sval - 5000) / 5000; // x 0..1
+    //     double y = x * slope + (1.0 - slope) * pow(x, 4.0);
+    //     //double y = pow(x, 4.0);
+    //     temp = CENTERTEMP + y * (MAXTEMP - CENTERTEMP);
+    // }
 
-//     return temp;
-// }
+    // if (temp < MINTEMP) {
+    //     temp = MINTEMP;
+    // }
 
-// static double wbTemp2Slider(double temp)
-// {
+    // if (temp > MAXTEMP) {
+    //     temp = MAXTEMP;
+    // }
 
-//     double sval;
+    // return temp;
+}
 
-//     if (temp <= CENTERTEMP) {
-//         sval = ((temp - MINTEMP) / (CENTERTEMP - MINTEMP)) * 5000.0;
-//     } else {
-//         const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
-//         const double y = (temp - CENTERTEMP) / (MAXTEMP - CENTERTEMP);
-//         double x = pow(y, 0.25); // rough guess of x, will be a little lower
-//         double k = 0.1;
-//         bool add = true;
 
-//         // the y=f(x) function is a mess to invert, therefore we have this trial-refinement loop instead.
-//         // from tests, worst case is about 20 iterations, ie no problem
-//         for (;;) {
-//             double y1 = x * slope + (1.0 - slope) * pow(x, 4.0);
+double wbTemp2Slider(double temp)
+{
+    double r = (MAXTEMP - MINTEMP);
+    double v = (temp - MINTEMP) / r;
+    return rtengine::LIM(MINTEMP + std::pow(v, 1.0/wbgamma) * r, MINTEMP, MAXTEMP);
+    
+    // double sval;
 
-//             if (5000 * fabs(y1 - y) < 0.1) {
-//                 break;
-//             }
+    // if (temp <= CENTERTEMP) {
+    //     sval = ((temp - MINTEMP) / (CENTERTEMP - MINTEMP)) * 5000.0;
+    // } else {
+    //     const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
+    //     const double y = (temp - CENTERTEMP) / (MAXTEMP - CENTERTEMP);
+    //     double x = pow(y, 0.25); // rough guess of x, will be a little lower
+    //     double k = 0.1;
+    //     bool add = true;
 
-//             if (y1 < y) {
-//                 if (!add) {
-//                     k /= 2;
-//                 }
+    //     // the y=f(x) function is a mess to invert, therefore we have this trial-refinement loop instead.
+    //     // from tests, worst case is about 20 iterations, ie no problem
+    //     for (;;) {
+    //         double y1 = x * slope + (1.0 - slope) * pow(x, 4.0);
 
-//                 x += k;
-//                 add = true;
-//             } else {
-//                 if (add) {
-//                     k /= 2;
-//                 }
+    //         if (5000 * fabs(y1 - y) < 0.1) {
+    //             break;
+    //         }
 
-//                 x -= k;
-//                 add = false;
-//             }
-//         }
+    //         if (y1 < y) {
+    //             if (!add) {
+    //                 k /= 2;
+    //             }
 
-//         sval = 5000.0 + x * 5000.0;
-//     }
+    //             x += k;
+    //             add = true;
+    //         } else {
+    //             if (add) {
+    //                 k /= 2;
+    //             }
 
-//     if (sval < 0) {
-//         sval = 0;
-//     }
+    //             x -= k;
+    //             add = false;
+    //         }
+    //     }
 
-//     if (sval > 10000) {
-//         sval = 10000;
-//     }
+    //     sval = 5000.0 + x * 5000.0;
+    // }
 
-//     return sval;
-// }
+    // if (sval < 0) {
+    //     sval = 0;
+    // }
+
+    // if (sval > 10000) {
+    //     sval = 10000;
+    // }
+
+    // return sval;
+}
+
+} // namespace
+
 
 WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true, true), wbp(nullptr), wblistener(nullptr)
 {
@@ -252,8 +259,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     Gtk::Image* iblueredL = Gtk::manage (new RTImage ("circle-blue-small.png"));
     Gtk::Image* iblueredR = Gtk::manage (new RTImage ("circle-red-small.png"));
 
-    temp = Gtk::manage (new Adjuster (M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR));//, &wbSlider2Temp, &wbTemp2Slider));
-    temp->setLogScale(100, MINTEMP, false);
+    temp = Gtk::manage (new Adjuster (M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR, &wbSlider2Temp, &wbTemp2Slider));
     green = Gtk::manage (new Adjuster (M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
     green->setLogScale(100, 1, true);
     equal = Gtk::manage (new Adjuster (M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR));
