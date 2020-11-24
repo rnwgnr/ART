@@ -86,7 +86,7 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
     }
 
     for (size_t i = 0; i < n; ++i) {
-        auto mdi = args[i]->getMetaData();
+        auto mdi = args[i]->getCacheImageData();//args[i]->getMetaData();
         if (i > 0) {
             if (match_camera && (md->getMake() != mdi->getMake() ||
                                  md->getModel() != mdi->getModel())) {
