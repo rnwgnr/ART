@@ -125,6 +125,49 @@ int findMatch(int val, const std::vector<int> &cdf, int j)
 }
 
 
+void ensure_not_clipping(std::vector<double> &curve)
+{
+    DiagonalCurve c(curve);
+    double pivot = curve[5];
+    double start = pivot / 2;
+    while (start >= 0.01) {
+        double mid = start / 2;
+        double y = c.getVal(mid);
+        if (y <= 0) {
+            curve[4] += (curve[3] - curve[4]) / 2;
+            if (settings->verbose) {
+                std::cout << "histogram matching: bumping up (" << curve[3]
+                          << ", " << c.getVal(curve[3]) << ") to " << curve[4]
+                          << " to avoid negative clipping at " << mid
+                          << std::endl;
+            }
+            ensure_not_clipping(curve);
+            return;
+        } else {
+            start = mid;
+        }
+    }
+    start = pivot + (1.0 - pivot) / 2.0;
+    while (start <= 0.9) {
+        double mid = start + (1 - start) / 2;
+        double y = c.getVal(mid);
+        if (y >= 1) {
+            curve[8] += (curve[7] - curve[8]) * 0.1;
+            if (settings->verbose) {
+                std::cout << "histogram matching: bumping down (" << curve[7]
+                          << ", " << c.getVal(curve[7]) << ") to " << curve[8]
+                          << " to avoid positive clipping at " << mid
+                          << std::endl;
+            }
+            ensure_not_clipping(curve);
+            return;
+        } else {
+            start = mid;
+        }
+    }
+}
+
+
 void mappingToCurve(const std::vector<int> &mapping, std::vector<double> &curve)
 {
     curve.clear();
@@ -261,6 +304,7 @@ void mappingToCurve(const std::vector<int> &mapping, std::vector<double> &curve)
             curve.push_back(c.getVal(pivot + (1.0 - pivot) / 2.0));
             curve.push_back(1.0);
             curve.push_back(c.getVal(1.0));
+            ensure_not_clipping(curve);
         } else {
             double gap = 0.05;
             while (x < 1.0) {
