@@ -37,6 +37,54 @@ namespace {
 using rtengine::FramesMetaData;
 using rtengine::Exiv2Metadata;
 
+
+class FastMetadata: public FramesMetaData {
+public:
+    FastMetadata(const Glib::ustring &fname, const CacheImageData *cd):
+        fname_(fname), cd_(cd) {}
+
+    Glib::ustring getFileName() const override { return fname_; }
+    tm getDateTime() const override
+    {
+        tm res;
+        res.tm_sec = cd_->sec;
+        res.tm_min = cd_->min;
+        res.tm_hour = cd_->hour;
+        res.tm_year = cd_->year - 1900;
+        res.tm_mday = cd_->day;
+        res.tm_mon = cd_->month - 1;
+        res.tm_isdst = -1;
+        time_t t = mktime(&res);
+        return *localtime(&t);
+    }
+
+    unsigned int getFrameCount () const override { return cd_->getFrameCount(); }
+    bool hasExif() const override  { return cd_->hasExif(); }
+    time_t getDateTimeAsTS() const override { return cd_->getDateTimeAsTS(); }
+    int getISOSpeed() const override { return cd_->getISOSpeed(); }
+    double getFNumber() const override { return cd_->getFNumber(); }
+    double getFocalLen() const override { return cd_->getFocalLen(); }
+    double getFocalLen35mm() const override { return cd_->getFocalLen35mm(); }
+    float getFocusDist() const override { return cd_->getFocusDist(); }
+    double getShutterSpeed() const override { return cd_->getShutterSpeed(); }
+    double getExpComp() const override { return cd_->getExpComp(); }
+    std::string getMake() const override { return cd_->getMake(); }
+    std::string getModel() const override { return cd_->getModel(); }
+    std::string getLens() const override { return cd_->getLens(); }
+    std::string getOrientation() const override { return cd_->getOrientation(); }
+    bool getPixelShift () const override { return cd_->getPixelShift(); }
+    bool getHDR() const override { return cd_->getHDR(); }
+    std::string getImageType() const override { return cd_->getImageType(); }
+    rtengine::IIOSampleFormat getSampleFormat() const override { return cd_->getSampleFormat(); }
+    int getRating() const override { return cd_->getRating(); }
+    std::vector<rtengine::GainMap> getGainMaps() const override { return cd_->getGainMaps(); }
+    
+private:
+    Glib::ustring fname_;
+    const CacheImageData *cd_;
+};
+
+
 bool is_valid_char(gunichar c)
 {
 #ifdef __WIN32__
@@ -81,7 +129,7 @@ Glib::ustring make_valid(const Glib::ustring &s)
 class Pattern {
 public:
     virtual ~Pattern() {}
-    virtual Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) = 0;
+    virtual Glib::ustring operator()(const FramesMetaData *fd) = 0;
 };
 
 
@@ -89,7 +137,7 @@ class ProgressivePattern: public Pattern {
 public:
     ProgressivePattern(int &idx, size_t pad): idx_(idx), pad_(pad) {}
     
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
+    Glib::ustring operator()(const FramesMetaData *fd) override
     {
         auto s = std::to_string(idx_++);
         if (s.length() < pad_) {
@@ -109,7 +157,7 @@ template <class F>
 class FramesDataPattern: public Pattern {
 public:
     FramesDataPattern(F func): func_(func) {}
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
+    Glib::ustring operator()(const FramesMetaData *fd) override
     {
         return make_valid(func_(fd));
     }
@@ -128,23 +176,24 @@ class TagPattern: public Pattern {
 public:
     TagPattern(const std::string &tag): tag_(tag) {}
     
-    Glib::ustring operator()(const FramesMetaData *fd, const Exiv2Metadata *md) override
+    Glib::ustring operator()(const FramesMetaData *fd) override
     {
         try {
-            md->load();
+            Exiv2Metadata md(fd->getFileName());
+            md.load();
             if (strncmp(tag_.c_str(), "Exif.", 5) == 0) {
-                auto it = md->exifData().findKey(Exiv2::ExifKey(tag_));
-                if (it != md->exifData().end()) {
+                auto it = md.exifData().findKey(Exiv2::ExifKey(tag_));
+                if (it != md.exifData().end()) {
                     return make_valid(it->toString());
                 }
             } else if (strncmp(tag_.c_str(), "Iptc.", 5) == 0) {
-                auto it = md->iptcData().findKey(Exiv2::IptcKey(tag_));
-                if (it != md->iptcData().end()) {
+                auto it = md.iptcData().findKey(Exiv2::IptcKey(tag_));
+                if (it != md.iptcData().end()) {
                     return make_valid(it->toString());
                 }
             } else if (strncmp(tag_.c_str(), "Xmp.", 4) == 0) {
-                auto it = md->xmpData().findKey(Exiv2::XmpKey(tag_));
-                if (it != md->xmpData().end()) {
+                auto it = md.xmpData().findKey(Exiv2::XmpKey(tag_));
+                if (it != md.xmpData().end()) {
                     return make_valid(it->toString());
                 }
             }
@@ -433,12 +482,11 @@ bool parse_sidecars(const Glib::ustring &s, Params &out)
 
 Glib::ustring get_new_name(Params &params, FileBrowserEntry *entry)
 {
-    std::unique_ptr<FramesMetaData> fd(FramesMetaData::fromFile(entry->thumbnail->getFileName()));
-    Exiv2Metadata md(entry->thumbnail->getFileName());
+    std::unique_ptr<FramesMetaData> fd(new FastMetadata(entry->thumbnail->getFileName(), entry->thumbnail->getCacheImageData()));//FramesMetaData::fromFile(entry->thumbnail->getFileName()));
 
     Glib::ustring name;
     for (auto &p : params.pattern) {
-        name += (*p)(fd.get(), &md);
+        name += (*p)(fd.get());
     }
     Glib::ustring ext = getExtension(name);
     if (!ext.empty()) {
