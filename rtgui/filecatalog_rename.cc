@@ -493,7 +493,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     Gtk::HBox hb;
     Gtk::HBox mainhb;
     Gtk::VBox mainvb;
-    double s = 1;
+    double s = RTScalable::getScale();
     int pad = 4 * s;
     
     hb.pack_start(lbl, Gtk::PACK_SHRINK, pad);
@@ -565,8 +565,11 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
         Gtk::TreePath pth;
         pth.push_back(0);
         filelist.get_selection()->select(pth);
-    }        
-    mainhb.pack_start(filelist, Gtk::PACK_EXPAND_WIDGET, pad);
+    }
+    Gtk::ScrolledWindow sw;
+    sw.add(filelist);
+    sw.set_size_request(200 * s, -1);
+    mainhb.pack_start(sw, Gtk::PACK_SHRINK, pad);
     mainhb.pack_start(mainvb, Gtk::PACK_EXPAND_WIDGET);
     vb.pack_start(mainhb, Gtk::PACK_SHRINK);
 
