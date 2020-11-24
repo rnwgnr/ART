@@ -434,10 +434,12 @@ void CropHandler::setDetailedCrop(
                                 cropPixbuf = Gdk::Pixbuf::create_from_data (cropimg.data(), Gdk::COLORSPACE_RGB, false, 8, cropimg_width, cropimg_height, 3 * cropimg_width);
                                 if (czoom < 1.f) {
                                     cropPixbuf = resize_lanczos(cropPixbuf, imw, imh, czoom);
+                                } else if (czoom > 1.f) {
+                                    cropPixbuf = resize_fast(cropPixbuf, imw, imh, czoom);
                                 }
 
                                 cropPixbuftrue = Gdk::Pixbuf::create_from_data (cropimgtrue.data(), Gdk::COLORSPACE_RGB, false, 8, cropimg_width, cropimg_height, 3 * cropimg_width);
-                                if (czoom < 1.f) {
+                                if (czoom != 1.f) {
                                     cropPixbuftrue = resize_fast(cropPixbuftrue, imw, imh, czoom);
                                 }
                             }
