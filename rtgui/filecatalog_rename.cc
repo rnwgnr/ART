@@ -46,42 +46,62 @@ public:
     Glib::ustring getFileName() const override { return fname_; }
     tm getDateTime() const override
     {
-        tm res;
-        res.tm_sec = cd_->sec;
-        res.tm_min = cd_->min;
-        res.tm_hour = cd_->hour;
-        res.tm_year = cd_->year - 1900;
-        res.tm_mday = cd_->day;
-        res.tm_mon = cd_->month - 1;
-        res.tm_isdst = -1;
-        time_t t = mktime(&res);
-        return *localtime(&t);
+        if (fd_) {
+            return fd_->getDateTime();
+        } else if (cd_->timeValid) {
+            tm res;
+            res.tm_sec = cd_->sec;
+            res.tm_min = cd_->min;
+            res.tm_hour = cd_->hour;
+            res.tm_year = cd_->year - 1900;
+            res.tm_mday = cd_->day;
+            res.tm_mon = cd_->month - 1;
+            res.tm_isdst = -1;
+            time_t t = mktime(&res);
+            return *localtime(&t);
+        } else {
+            fd_.reset(FramesMetaData::fromFile(fname_));
+            return fd_->getDateTime();
+        }
     }
 
-    unsigned int getFrameCount () const override { return cd_->getFrameCount(); }
-    bool hasExif() const override  { return cd_->hasExif(); }
-    time_t getDateTimeAsTS() const override { return cd_->getDateTimeAsTS(); }
-    int getISOSpeed() const override { return cd_->getISOSpeed(); }
-    double getFNumber() const override { return cd_->getFNumber(); }
-    double getFocalLen() const override { return cd_->getFocalLen(); }
-    double getFocalLen35mm() const override { return cd_->getFocalLen35mm(); }
-    float getFocusDist() const override { return cd_->getFocusDist(); }
-    double getShutterSpeed() const override { return cd_->getShutterSpeed(); }
-    double getExpComp() const override { return cd_->getExpComp(); }
-    std::string getMake() const override { return cd_->getMake(); }
-    std::string getModel() const override { return cd_->getModel(); }
-    std::string getLens() const override { return cd_->getLens(); }
-    std::string getOrientation() const override { return cd_->getOrientation(); }
-    bool getPixelShift () const override { return cd_->getPixelShift(); }
-    bool getHDR() const override { return cd_->getHDR(); }
-    std::string getImageType() const override { return cd_->getImageType(); }
-    rtengine::IIOSampleFormat getSampleFormat() const override { return cd_->getSampleFormat(); }
-    int getRating() const override { return cd_->getRating(); }
-    std::vector<rtengine::GainMap> getGainMaps() const override { return cd_->getGainMaps(); }
+    unsigned int getFrameCount () const override { return f()->getFrameCount(); }
+    bool hasExif() const override  { return f()->hasExif(); }
+    time_t getDateTimeAsTS() const override { return f()->getDateTimeAsTS(); }
+    int getISOSpeed() const override { return f()->getISOSpeed(); }
+    double getFNumber() const override { return f()->getFNumber(); }
+    double getFocalLen() const override { return f()->getFocalLen(); }
+    double getFocalLen35mm() const override { return f()->getFocalLen35mm(); }
+    float getFocusDist() const override { return f()->getFocusDist(); }
+    double getShutterSpeed() const override { return f()->getShutterSpeed(); }
+    double getExpComp() const override { return f()->getExpComp(); }
+    std::string getMake() const override { return f()->getMake(); }
+    std::string getModel() const override { return f()->getModel(); }
+    std::string getLens() const override { return f()->getLens(); }
+    std::string getOrientation() const override { return f()->getOrientation(); }
+    bool getPixelShift () const override { return f()->getPixelShift(); }
+    bool getHDR() const override { return f()->getHDR(); }
+    std::string getImageType() const override { return f()->getImageType(); }
+    rtengine::IIOSampleFormat getSampleFormat() const override { return f()->getSampleFormat(); }
+    int getRating() const override { return f()->getRating(); }
+    std::vector<rtengine::GainMap> getGainMaps() const override { return f()->getGainMaps(); }
     
 private:
+    const FramesMetaData *f() const
+    {
+        if (fd_) {
+            return fd_.get();
+        } else if (!cd_->exifValid) {
+            fd_.reset(FramesMetaData::fromFile(fname_));
+            return fd_.get();
+        } else {
+            return cd_;
+        }
+    }
+    
     Glib::ustring fname_;
     const CacheImageData *cd_;
+    mutable std::unique_ptr<FramesMetaData> fd_;
 };
 
 
