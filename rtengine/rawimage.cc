@@ -546,12 +546,18 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         if (raw_image) {
             unsigned raw_filters = filters;
             
-            // if (apply_corrections) {
-            //     apply_gain_map();
-            // }
             if (cc && cc->has_rawCrop()) {
                 int lm, tm, w, h;
                 cc->get_rawCrop(lm, tm, w, h);
+
+                // protect against DNG files that are already cropped
+                if (int(raw_width) <= w+lm) {
+                    lm = max(int(raw_width) - w, 0);
+                }
+                if (int(raw_height) <= h+tm) {
+                    tm = max(int(raw_height) - h, 0);
+                }
+                
                 if(isXtrans()) {
                     shiftXtransMatrix(6 - ((top_margin - tm)%6), 6 - ((left_margin - lm)%6));
                 } else {
@@ -581,7 +587,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 }
             }
 
-            if (cc && cc->has_rawMask(0)) {
+            if (cc && cc->has_rawMask(0) && !dng_version) {
                 for (int i = 0; i < 8 && cc->has_rawMask(i); i++) {
                     cc->get_rawMask(i, mask[i][0], mask[i][1], mask[i][2], mask[i][3]);
                     if (apply_corrections && i == 0 && !cc->has_rawMask(1) && mask[i][3] < left_margin && mask[i][2] * 1.01 >= height) {
