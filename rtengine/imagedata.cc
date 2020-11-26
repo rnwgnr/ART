@@ -20,6 +20,8 @@
 #include <strings.h>
 #include <glib/gstdio.h>
 #include <tiff.h>
+#include <regex>
+#include <sstream>
 
 #include "imagedata.h"
 #include "imagesource.h"
@@ -284,6 +286,8 @@ FramesData::FramesData(const Glib::ustring &fname):
             datetime_taken = validateUtf8(pos->print(&exif));
         } else if (find_exif_tag("Exif.Photo.DateTimeDigitized")) {
             datetime_taken = validateUtf8(pos->print(&exif));
+        } else if (find_exif_tag("Exif.Image.DateTime")) {
+            datetime_taken = validateUtf8(pos->print(&exif));
         }
         if (sscanf(datetime_taken.c_str(), "%d:%d:%d %d:%d:%d", &time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, &time.tm_min, &time.tm_sec) == 6) {
             time.tm_year -= 1900;
@@ -307,6 +311,42 @@ FramesData::FramesData(const Glib::ustring &fname):
             }
         }
 
+        // try getting some metadata from ImageDescription
+        if (!make.compare(0, 5, "KODAK") && !getISOSpeed() && !getFNumber() && !getFocalLen() && !getShutterSpeed() &&
+            find_exif_tag("Exif.Image.ImageDescription")) {
+            std::string s = pos->toString();
+            std::string line;
+            std::smatch m;
+            const auto d =
+                [&m]() -> double {
+                    std::string s = m[1];
+                    return atof(s.c_str());
+                };
+            while (true) {
+                auto p = s.find('\r');
+                if (p == std::string::npos) {
+                    break;
+                }
+                auto line = s.substr(0, p);
+                s = s.substr(p+1);
+
+                if (std::regex_match(line, m, std::regex("ISO: +([0-9]+) *"))) {
+                    iso_speed = d();
+                } else if (std::regex_match(line, m, std::regex("Aperture: +F([0-9.]+) *"))) {
+                    aperture = d();
+                } else if (std::regex_match(line, m, std::regex("Shutter: +([0-9.]+) *"))) {
+                    shutter = d();
+                    if (shutter) {
+                        shutter = 1.0/shutter;
+                    }
+                } else if (std::regex_match(line, m, std::regex("Lens \\(mm\\): +([0-9.]+) *"))) {
+                    focal_len = d();
+                } else if (std::regex_match(line, m, std::regex("Exp Comp: +([0-9.]+) *"))) {
+                    expcomp = d();
+                }
+            }
+        }
+        
         // -----------------------
         // Special file type detection (HDR, PixelShift)
         // ------------------------
