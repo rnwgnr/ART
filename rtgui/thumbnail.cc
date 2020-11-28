@@ -109,13 +109,6 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
         if (tpp) {
             cfs.format = FT_Png;
         }
-    } else if (ext.lowercase() == "tif" || ext.lowercase() == "tiff") {
-        infoFromImage (fname);
-        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
-
-        if (tpp) {
-            cfs.format = FT_Tiff;
-        }
     } else {
         // RAW works like this:
         //  1. if we are here it's because we aren't in the cache so load the JPG
@@ -142,6 +135,15 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
         }
     }
 
+    if (!tpp && (ext.lowercase() == "tif" || ext.lowercase() == "tiff")) {
+        infoFromImage (fname);
+        tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
+
+        if (tpp) {
+            cfs.format = FT_Tiff;
+        }
+    }
+    
     if (!tpp) {
         // try a custom loader
         tpp = rtengine::Thumbnail::loadFromImage(fname, tw, th, -1, pparams.master.wb.equal);

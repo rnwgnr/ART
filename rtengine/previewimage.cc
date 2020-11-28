@@ -108,7 +108,7 @@ void PreviewImage::load()
 
     auto lext = ext_.lowercase();
 
-    if (lext == "jpg" || lext == "jpeg" || lext == "png" || lext == "tif" || lext == "tiff" || ImageIOManager::getInstance()->canLoad(lext)) {
+    if (lext == "jpg" || lext == "jpeg" || lext == "png" /*|| lext == "tif" || lext == "tiff" || ImageIOManager::getInstance()->canLoad(lext)*/) {
         img_.reset(load_img(fname_, width_, height_));
     } else if (settings->thumbnail_inspector_mode == Settings::ThumbnailInspectorMode::RAW) {
         img_.reset(load_raw(fname_, width_, height_));
@@ -118,7 +118,10 @@ void PreviewImage::load()
     } else {
         img_.reset(load_raw_preview(fname_, width_, height_));
     }
-
+    if (!img_ && (lext == "tif" || lext == "tiff" || ImageIOManager::getInstance()->canLoad(lext))) {
+        img_.reset(load_img(fname_, width_, height_));
+    }
+    
     if (img_) {
         try {
             previewImage = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24, img_->getWidth(), img_->getHeight());
