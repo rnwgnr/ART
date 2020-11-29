@@ -434,11 +434,14 @@ std::map<std::string, std::string> getAliases(const Glib::ustring& profile_dir)
                 const cJSON* const alias = cJSON_GetArrayItem(camera, index);
                 if (cJSON_IsString(alias)) {
                     res[alias->valuestring] = camera->string;
+                    if (settings->verbose) {
+                        std::cout << "dcp - alias: " << alias->valuestring << " -> " << camera->string << std::endl;
+                    }
                 }
             }
         }
     }
-
+        
     return res;
 }
 

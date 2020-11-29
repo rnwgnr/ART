@@ -2601,11 +2601,11 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [11640, -4829, -1079, -5107, 13006, 2325, -972, 1711, 7380]
     },
     {
-        "make_model" : "NIKON Z 6",
+        "make_model" : ["NIKON Z 6", "NIKON Z 6_2"],
         "dcraw_matrix" : [8210, -2534, -683, -5355, 13338, 2212, -1143, 1928, 6464]
     },
     {
-        "make_model" : "NIKON Z 7",
+        "make_model" : ["NIKON Z 7", "NIKON Z 7_2"],
         "dcraw_matrix" : [10405, -3755, -1270, -5461, 13787, 1792, -1040, 2015, 6785]
     },
     {
