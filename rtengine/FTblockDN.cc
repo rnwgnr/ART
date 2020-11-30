@@ -1360,6 +1360,50 @@ void WaveletDenoiseAll_info(int levwav, wavelet_decomposition &WaveletCoeffs_a,
 }
 
 
+namespace {
+
+void laplacian(const array2D<float> &src, array2D<float> &dst, float threshold, float ceiling, float factor, bool multiThread)
+{
+    const int W = src.width();
+    const int H = src.height();
+
+    const auto X =
+        [W](int x) -> int
+        {
+            return x < 0 ? x+2 : (x >= W ? x-2 : x);
+        };
+
+    const auto Y =
+        [H](int y) -> int
+        {
+            return y < 0 ? y+2 : (y >= H ? y-2 : y);
+        };
+
+    const auto get =
+        [&src](int y, int x) -> float
+        {
+            return std::max(src[y][x], 0.f);
+        };
+
+    dst(W, H);
+    const float f = factor / ceiling;
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (multiThread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        int n = Y(y-1), s = Y(y+1);
+        for (int x = 0; x < W; ++x) {
+            int w = X(x-1), e = X(x+1);
+            float v = -8.f * get(y, x) + get(n, x) + get(s, x) + get(y, w) + get(y, e) + get(n, w) + get(n, e) + get(s, w) + get(s, e);
+            dst[y][x] = LIM(std::abs(v) - threshold, 0.f, ceiling) * f;
+        }
+    }
+}
+
+} // namespace
+
+
 void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin, int numtiles, int numthreads, int denoiseNestedLevels, float **LbloxArray, float **fLbloxArray, size_t blox_array_size, float params_Ldetail, int detail_thresh, array2D<float> &tilemask_in, array2D<float> &tilemask_out, fftwf_plan *plan_forward_blox, fftwf_plan *plan_backward_blox, int max_numblox_W, double scale, bool denoise_aggressive)
 {
     const auto compute_detail =
@@ -1386,27 +1430,32 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
     array2D<float> mask;
     if (detail_thresh > 0) {
         mask(width, height);
-        float s_scale = std::sqrt(scale);
-        float cthresh = (denoise_aggressive ? 0.1f : 0.3f) * s_scale;
+        // float s_scale = std::sqrt(scale);
+        // float cthresh = (denoise_aggressive ? 0.1f : 0.3f) * s_scale;
         float amount = LIM01(float(detail_thresh)/100.f);
         float thr = 1.f - amount;
-        buildBlendMask(labdn->L, mask, width, height, cthresh, amount, false, 2.f / s_scale);
-        array2D<float> guide(width, height);
-        LUTf ll(65536);
-        for (int i = 0; i < 65536; ++i) {
-            ll[i] = xlin2log(float(i) / 65535.f, 25.f);
-        }
+        //buildBlendMask(labdn->L, mask, width, height, cthresh, amount, false, 2.f / s_scale);
+        array2D<float> LL(width, height, labdn->L, ARRAY2D_BYREFERENCE);
+        laplacian(LL, mask, 25.f, 10000.f, amount, false);//numthreads > 1);
+        // array2D<float> guide(width, height);
+        // LUTf ll(65536);
+        // for (int i = 0; i < 65536; ++i) {
+        //     ll[i] = pow_F(float(i)/65535.f, 3.f); //xlin2log(float(i) / 65535.f, 25.f);
+        // }
+        // for (int i = 0; i < height; ++i) {
+        //     for (int j = 0; j < width; ++j) {
+        //         guide[i][j] = ll[labdn->L[i][j]];
+        //     }
+        // }
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
-                guide[i][j] = ll[labdn->L[i][j]];
+                mask[i][j] = LIM01(mask[i][j] + thr);//ll[LIM01(mask[i][j] + thr) * 65535.f];
             }
         }
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-                mask[i][j] = LIM01(mask[i][j] + thr);
-            }
+        // guidedFilter(guide, mask, mask, 100.f / scale, 0.01f, numthreads > 1);
+        for (int i = 0; i < 3; ++i) {
+            boxblur(mask, mask, 10 / scale, width, height, false);// / scale);
         }
-        guidedFilter(guide, mask, mask, 100.f / scale, 0.01f, numthreads > 1);
 #if 0
         {
             Imagefloat tmp(width, height);
