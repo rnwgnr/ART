@@ -170,6 +170,35 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
     sliderChange = slider->signal_value_changed().connect( sigc::mem_fun(*this, &Adjuster::sliderChanged) );
     spinChange = spin->signal_value_changed().connect ( sigc::mem_fun(*this, &Adjuster::spinChanged), true);
     reset->signal_button_release_event().connect_notify( sigc::mem_fun(*this, &Adjuster::resetPressed) );
+    const auto keypress =
+        [this](GdkEventKey *evt) -> bool
+        {
+            bool ctrl = evt->state & GDK_CONTROL_MASK;
+            bool shift = evt->state & GDK_SHIFT_MASK;
+            bool alt = evt->state & GDK_MOD1_MASK;
+            double step, page;
+            spin->get_increments(step, page);
+
+            if (!ctrl && !shift && !alt) {
+                switch (evt->keyval) {
+                case GDK_KEY_Up:
+                    spin->set_value(spin->get_value() + step);
+                    return true;
+                case GDK_KEY_Down:
+                    spin->set_value(spin->get_value() - step);
+                    return true;
+                case GDK_KEY_Page_Up:
+                    spin->set_value(spin->get_value() + page);
+                    return true;
+                case GDK_KEY_Page_Down:
+                    spin->set_value(spin->get_value() - page);
+                    return true;
+                }
+            }
+            return false;
+        };
+    slider->add_events(Gdk::KEY_PRESS_MASK);
+    slider->signal_key_press_event().connect(sigc::slot<bool, GdkEventKey *>(keypress), false);
 
     show_all ();
 }
