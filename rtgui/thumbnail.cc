@@ -42,7 +42,8 @@ using namespace rtengine::procparams;
 Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf)
     : fname(fname), cfs(*cf), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr),
       pparamsValid(false), needsReProcessing(true), imageLoading(false), lastImg(nullptr),
-      lastW(0), lastH(0), lastScale(0), initial_(false)
+      lastW(0), lastH(0), lastScale(0), initial_(false),
+      orig_w_(-1), orig_h_(-1)
 {
     loadProcParams(false);
 
@@ -637,8 +638,18 @@ void Thumbnail::getFinalSize (const rtengine::procparams::ProcParams& pparams, i
 
 void Thumbnail::getOriginalSize (int& w, int& h)
 {
-    w = tw;
-    h = th;
+    if (orig_w_ < 0) {
+        try {
+            rtengine::Exiv2Metadata meta(fname);
+            meta.load();
+            meta.getDimensions(orig_w_, orig_h_);
+        } catch (std::exception &exc) {
+            orig_w_ = tw;
+            orig_h_ = th;
+        }
+    }
+    w = orig_w_;
+    h = orig_h_;
 }
 
 rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::ProcParams& pparams, int h, double& scale)

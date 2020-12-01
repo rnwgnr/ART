@@ -560,6 +560,17 @@ void Exiv2Metadata::setExifKeys(const std::vector<std::string> *keys)
 }
 
 
+void Exiv2Metadata::getDimensions(int &w, int &h) const
+{
+    if (image_) {
+        w = image_->pixelWidth();
+        h = image_->pixelHeight();
+    } else {
+        w = h = -1;
+    }
+}
+
+
 Glib::ustring Exiv2Metadata::xmpSidecarPath(const Glib::ustring &path)
 {
     Glib::ustring fn = path;

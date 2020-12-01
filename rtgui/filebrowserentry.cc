@@ -42,7 +42,7 @@ Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::hdr;
 Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::ps;
 
 FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
-    : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
+    : ThumbBrowserEntryBase (fname), /*wasInside(false),*/ press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
 {
     refresh_status_ = RefreshStatus::READY;
     thumbnail = thm;
@@ -173,13 +173,19 @@ std::vector<Glib::RefPtr<Gdk::Pixbuf>> FileBrowserEntry::getSpecificityIconsOnIm
 void FileBrowserEntry::customBackBufferUpdate (Cairo::RefPtr<Cairo::Context> c)
 {
     if(scale != 1.0 && cropParams.enabled) { // somewhere in pipeline customBackBufferUpdate is called when scale == 1.0, which is nonsense for a thumb
+        int w, h;
+        thumbnail->getOriginalSize(w, h);
+        double cur_scale = scale;
+        if (h > 0) {
+            cur_scale = double(preh) / double(h);
+        }
         if (state == SCropSelecting || state == SResizeH1 || state == SResizeH2 || state == SResizeW1 || state == SResizeW2 || state == SResizeTL || state == SResizeTR || state == SResizeBL || state == SResizeBR || state == SCropMove) {
-            drawCrop (c, prex, prey, prew, preh, 0, 0, scale, cropParams, true, false);
+            drawCrop (c, prex, prey, prew, preh, 0, 0, cur_scale, cropParams, true, false);
         } else {
             rtengine::procparams::CropParams cparams = thumbnail->getProcParams().crop;
             cparams.guide = "Frame";
             if (cparams.enabled && !thumbnail->isQuick()) { // Quick thumb have arbitrary sizes, so don't apply the crop
-                drawCrop (c, prex, prey, prew, preh, 0, 0, scale, cparams, true, false);
+                drawCrop (c, prex, prey, prew, preh, 0, 0, cur_scale, cparams, true, false);
             }
         }
     }
@@ -430,88 +436,88 @@ bool FileBrowserEntry::releaseNotify (int button, int type, int bstate, int x, i
     return b;
 }
 
-bool FileBrowserEntry::onArea (CursorArea a, int x, int y)
-{
+// bool FileBrowserEntry::onArea (CursorArea a, int x, int y)
+// {
 
-    if (!drawable || preview.empty()) {
-        return false;
-    }
+//     if (!drawable || preview.empty()) {
+//         return false;
+//     }
 
-    int x1 = (x - prex) / scale;
-    int y1 = (y - prey) / scale;
-    int cropResizeBorder = CROPRESIZEBORDER / scale;
+//     int x1 = (x - prex) / scale;
+//     int y1 = (y - prey) / scale;
+//     int cropResizeBorder = CROPRESIZEBORDER / scale;
 
-    switch (a) {
-    case CropImage:
-        return x >= prex && x < prex + prew && y >= prey && y < prey + preh;
+//     switch (a) {
+//     case CropImage:
+//         return x >= prex && x < prex + prew && y >= prey && y < prey + preh;
 
-    case CropTopLeft:
-        return cropParams.enabled &&
-               y1 >= cropParams.y - cropResizeBorder &&
-               y1 <= cropParams.y + cropResizeBorder &&
-               x1 >= cropParams.x - cropResizeBorder &&
-               x1 <= cropParams.x + cropResizeBorder;
+//     case CropTopLeft:
+//         return cropParams.enabled &&
+//                y1 >= cropParams.y - cropResizeBorder &&
+//                y1 <= cropParams.y + cropResizeBorder &&
+//                x1 >= cropParams.x - cropResizeBorder &&
+//                x1 <= cropParams.x + cropResizeBorder;
 
-    case CropTopRight:
-        return cropParams.enabled &&
-               y1 >= cropParams.y - cropResizeBorder &&
-               y1 <= cropParams.y + cropResizeBorder &&
-               x1 >= cropParams.x + cropParams.w - 1 - cropResizeBorder &&
-               x1 <= cropParams.x + cropParams.w - 1 + cropResizeBorder;
+//     case CropTopRight:
+//         return cropParams.enabled &&
+//                y1 >= cropParams.y - cropResizeBorder &&
+//                y1 <= cropParams.y + cropResizeBorder &&
+//                x1 >= cropParams.x + cropParams.w - 1 - cropResizeBorder &&
+//                x1 <= cropParams.x + cropParams.w - 1 + cropResizeBorder;
 
-    case CropBottomLeft:
-        return cropParams.enabled &&
-               y1 >= cropParams.y + cropParams.h - 1 - cropResizeBorder &&
-               y1 <= cropParams.y + cropParams.h - 1 + cropResizeBorder &&
-               x1 >= cropParams.x - cropResizeBorder &&
-               x1 <= cropParams.x + cropResizeBorder;
+//     case CropBottomLeft:
+//         return cropParams.enabled &&
+//                y1 >= cropParams.y + cropParams.h - 1 - cropResizeBorder &&
+//                y1 <= cropParams.y + cropParams.h - 1 + cropResizeBorder &&
+//                x1 >= cropParams.x - cropResizeBorder &&
+//                x1 <= cropParams.x + cropResizeBorder;
 
-    case CropBottomRight:
-        return cropParams.enabled &&
-               y1 >= cropParams.y + cropParams.h - 1 - cropResizeBorder &&
-               y1 <= cropParams.y + cropParams.h - 1 + cropResizeBorder &&
-               x1 >= cropParams.x + cropParams.w - 1 - cropResizeBorder &&
-               x1 <= cropParams.x + cropParams.w - 1 + cropResizeBorder;
+//     case CropBottomRight:
+//         return cropParams.enabled &&
+//                y1 >= cropParams.y + cropParams.h - 1 - cropResizeBorder &&
+//                y1 <= cropParams.y + cropParams.h - 1 + cropResizeBorder &&
+//                x1 >= cropParams.x + cropParams.w - 1 - cropResizeBorder &&
+//                x1 <= cropParams.x + cropParams.w - 1 + cropResizeBorder;
 
-    case CropTop:
-        return cropParams.enabled &&
-               x1 > cropParams.x + cropResizeBorder &&
-               x1 < cropParams.x + cropParams.w - 1 - cropResizeBorder &&
-               y1 > cropParams.y - cropResizeBorder &&
-               y1 < cropParams.y + cropResizeBorder;
+//     case CropTop:
+//         return cropParams.enabled &&
+//                x1 > cropParams.x + cropResizeBorder &&
+//                x1 < cropParams.x + cropParams.w - 1 - cropResizeBorder &&
+//                y1 > cropParams.y - cropResizeBorder &&
+//                y1 < cropParams.y + cropResizeBorder;
 
-    case CropBottom:
-        return cropParams.enabled &&
-               x1 > cropParams.x + cropResizeBorder &&
-               x1 < cropParams.x + cropParams.w - 1 - cropResizeBorder &&
-               y1 > cropParams.y + cropParams.h - 1 - cropResizeBorder &&
-               y1 < cropParams.y + cropParams.h - 1 + cropResizeBorder;
+//     case CropBottom:
+//         return cropParams.enabled &&
+//                x1 > cropParams.x + cropResizeBorder &&
+//                x1 < cropParams.x + cropParams.w - 1 - cropResizeBorder &&
+//                y1 > cropParams.y + cropParams.h - 1 - cropResizeBorder &&
+//                y1 < cropParams.y + cropParams.h - 1 + cropResizeBorder;
 
-    case CropLeft:
-        return cropParams.enabled &&
-               y1 > cropParams.y + cropResizeBorder &&
-               y1 < cropParams.y + cropParams.h - 1 - cropResizeBorder &&
-               x1 > cropParams.x - cropResizeBorder &&
-               x1 < cropParams.x + cropResizeBorder;
+//     case CropLeft:
+//         return cropParams.enabled &&
+//                y1 > cropParams.y + cropResizeBorder &&
+//                y1 < cropParams.y + cropParams.h - 1 - cropResizeBorder &&
+//                x1 > cropParams.x - cropResizeBorder &&
+//                x1 < cropParams.x + cropResizeBorder;
 
-    case CropRight:
-        return cropParams.enabled &&
-               y1 > cropParams.y + cropResizeBorder &&
-               y1 < cropParams.y + cropParams.h - 1 - cropResizeBorder &&
-               x1 > cropParams.x + cropParams.w - 1 - cropResizeBorder &&
-               x1 < cropParams.x + cropParams.w - 1 + cropResizeBorder;
+//     case CropRight:
+//         return cropParams.enabled &&
+//                y1 > cropParams.y + cropResizeBorder &&
+//                y1 < cropParams.y + cropParams.h - 1 - cropResizeBorder &&
+//                x1 > cropParams.x + cropParams.w - 1 - cropResizeBorder &&
+//                x1 < cropParams.x + cropParams.w - 1 + cropResizeBorder;
 
-    case CropInside:
-        return cropParams.enabled &&
-               y1 > cropParams.y &&
-               y1 < cropParams.y + cropParams.h - 1 &&
-               x1 > cropParams.x &&
-               x1 < cropParams.x + cropParams.w - 1;
-    default: /* do nothing */ ;
-    }
+//     case CropInside:
+//         return cropParams.enabled &&
+//                y1 > cropParams.y &&
+//                y1 < cropParams.y + cropParams.h - 1 &&
+//                x1 > cropParams.x &&
+//                x1 < cropParams.x + cropParams.w - 1;
+//     default: /* do nothing */ ;
+//     }
 
-    return false;
-}
+//     return false;
+// }
 
 
 void FileBrowserEntry::update_refresh_status()
@@ -632,4 +638,5 @@ void FileBrowserEntry::drawStraightenGuide (Cairo::RefPtr<Cairo::Context> cr)
         cr->fill ();
     }
 }
+
 

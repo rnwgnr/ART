@@ -64,6 +64,8 @@ class Thumbnail: public PParamsSnapshotListener {
     Glib::ustring dateTimeString;
 
     bool initial_;
+    int orig_w_;
+    int orig_h_;
 
     // rating info
     struct Rating {
