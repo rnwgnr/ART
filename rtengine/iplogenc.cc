@@ -244,7 +244,6 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
     Imagefloat img(int(fw / SCALE + 0.5), int(fh / SCALE + 0.5));
     ProcParams neutral;
     neutral.exposure.enabled = true;
-    // neutral.exposure.clampOOG = false;
     imgsrc->getImage(imgsrc->getWB(), tr, &img, pp, neutral.exposure, neutral.raw);
     imgsrc->convertColorSpace(&img, params->icm, imgsrc->getWB());
     TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
@@ -272,20 +271,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
             }
         }
     }
-//    vmin /= 1.5f;
     vmax *= 1.5f;
-
-    // for (int y = 0, h = fh / SCALE; y < h; ++y) {
-    //     for (int x = 0, w = fw / SCALE; x < w; ++x) {
-    //         float r = img.r(y, x), g = img.g(y, x), b = img.b(y, x);
-    //         float m = max(0.f, r, g, b) / 65535.f;
-    //         if (m > noise) {
-    //             float l = min(r, g, b) / 65535.f;
-    //             vmin = min(vmin, l > noise ? l : m);
-    //             vmax = max(vmax, m);
-    //         }
-    //     }
-    // }
 
     if (vmax > vmin) {
         const float log2 = xlogf(2.f);
@@ -312,15 +298,6 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                     }
                 }
             }
-            // for (int y = 0, h = fh / SCALE; y < h; ++y) {
-            //     for (int x = 0, w = fw / SCALE; x < w; ++x) {
-            //         float l = img.g(y, x) / 65535.f;
-            //         if (l >= gmin && l <= gmax) {
-            //             tot += l;
-            //             ++n;
-            //         }
-            //     }
-            // }
             if (n > 0) {
                 lparams.sourceGray = tot / n * 100.f;
                 if (settings->verbose) {
@@ -331,10 +308,13 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                 lparams.sourceGray = LogEncodingParams().sourceGray;
             }
         }
+
+        constexpr double MIN_WHITE = 2.f;
+        constexpr double MAX_BLACK = -3.5f;
         
         float gray = float(lparams.sourceGray) / 100.f;
-        lparams.whiteEv = xlogf(vmax / gray) / log2;
-        lparams.blackEv = lparams.whiteEv - dynamic_range;
+        lparams.whiteEv = std::max(double(xlogf(vmax / gray) / log2), MIN_WHITE);
+        lparams.blackEv = std::min(lparams.whiteEv - dynamic_range, MAX_BLACK);
     }
 }
 
