@@ -1642,8 +1642,8 @@ BENCHFUN
     float** ccalc = nullptr;
     float* ccalcBuffer = nullptr;
 
-    bool ponder = false;
-    float ponderCC = 1.f;
+    const bool ponder = false;
+    const float ponderCC = 1.f;
 
     // init luma noisevarL
     const float noiseluma = static_cast<float>(dnparams.luminance);
@@ -1803,24 +1803,24 @@ BENCHFUN
             overlap = 96;
         }
 
-        int numTries = 0;
+        // int numTries = 0;
 
-        if (ponder) {
-            printf("Tiled denoise processing caused by Automatic Multizone mode\n");
-        }
+        // if (ponder) {
+        //     printf("Tiled denoise processing caused by Automatic Multizone mode\n");
+        // }
 
         bool memoryAllocationFailed = false;
 
-        do {
-            ++numTries;
+        // do {
+            // ++numTries;
 
-            if (numTries == 2) {
-                printf("1st denoise pass failed due to insufficient memory, starting 2nd (tiled) pass now...\n");
-            }
+            // if (numTries == 2) {
+            //     printf("1st denoise pass failed due to insufficient memory, starting 2nd (tiled) pass now...\n");
+            // }
 
             int numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip;
 
-            Tile_calc(tilesize, overlap, (options.rgbDenoiseThreadLimit == 0 && !ponder) ? (numTries == 1 ? 0 : 2) : 2, imwidth, imheight, numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip);
+            Tile_calc(tilesize, overlap, 0/*(options.rgbDenoiseThreadLimit == 0 && !ponder) ? (numTries == 1 ? 0 : 2) : 2*/, imwidth, imheight, numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip);
             memoryAllocationFailed = false;
             const int numtiles = numtiles_W * numtiles_H;
 
@@ -2586,7 +2586,7 @@ BENCHFUN
                 fftwf_destroy_plan(plan_forward_blox[1]);
                 fftwf_destroy_plan(plan_backward_blox[1]);
             }
-        } while (memoryAllocationFailed && numTries < 2 && (options.rgbDenoiseThreadLimit == 0) && !ponder);
+        // } while (memoryAllocationFailed && numTries < 2 && (options.rgbDenoiseThreadLimit == 0) && !ponder);
 
         if (memoryAllocationFailed) {
             printf("tiled denoise failed due to isufficient memory. Output is not denoised!\n");
