@@ -1288,7 +1288,7 @@ Camera constants:
 
     { // Quality C
         "make_model": "FUJIFILM GFX 100",
-        "raw_crop": [ 0, 2, 11664, 8734 ]
+        "raw_crop": [ 0, 2, -96, -1 ] // [ 0, 2, 11664, 8734 ]
     },
 
     { // Quality B

@@ -7159,12 +7159,21 @@ void CLASS apply_tiff()
 			tiff_ifd[raw].bytes*7 > raw_width*raw_height)
 		     load_raw = &CLASS olympus_load_raw;
                    // ------- RT -------
-                   if (!strncmp(make,"SONY",4) &&
+                   bool sony_arq = !strncmp(make,"SONY",4) &&
                        (!strncmp(model,"ILCE-7RM3",9) ||
-                        !strncmp(model,"ILCE-7RM4",9)) &&
+                        !strncmp(model,"ILCE-7RM4",9));
+                   bool fuji_arq = !strncmp(make, "FUJIFILM", 8) &&
+                       !strncmp(model, "GFX 100", 7);
+                   if ((sony_arq || fuji_arq) &&
+                       // !strncmp(make,"SONY",4) &&
+                       // (!strncmp(model,"ILCE-7RM3",9) ||
+                       //  !strncmp(model,"ILCE-7RM4",9)) &&
                        tiff_samples == 4 &&
                        tiff_ifd[raw].bytes == raw_width*raw_height*tiff_samples*2) {
                        load_raw = &CLASS sony_arq_load_raw;
+                       if (fuji_arq) {
+                           maximum = 0xffff;
+                       }
                        colors = 3;
                        is_raw = 4;
                        filters = 0x94949494;
@@ -9518,7 +9527,7 @@ void CLASS identify()
       "Nikon", "Nokia", "Olympus", "Ricoh", "Pentax", "Phase One",
       "Samsung", "Sigma", "Sinar", "Sony", "YI" };
   char head[32], *cp;
-  int hlen, flen, fsize, zero_fsize=1, i, c;
+  ssize_t hlen, flen, fsize, zero_fsize=1, i, c;
   struct jhead jh;
 
   tiff_flip = flip = filters = UINT_MAX;	/* unknown */
