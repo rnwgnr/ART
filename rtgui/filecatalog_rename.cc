@@ -85,6 +85,7 @@ public:
     rtengine::IIOSampleFormat getSampleFormat() const override { return f()->getSampleFormat(); }
     int getRating() const override { return f()->getRating(); }
     std::vector<rtengine::GainMap> getGainMaps() const override { return f()->getGainMaps(); }
+    void getDimensions(int &w, int &h) const override { f()->getDimensions(w, h); }
     
 private:
     const FramesMetaData *f() const

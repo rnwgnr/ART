@@ -613,7 +613,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
 {
     MyMutex::MyLock lock(getImageMutex);
 
-    tran = defTransform (tran);
+    tran = defTransform(ri, tran);
 
     // compute channel multipliers
     double r, g, b;
@@ -937,9 +937,42 @@ void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementP
 
 void RawImageSource::getFullSize (int& w, int& h, int tr)
 {
+    computeFullSize(ri, tr, w, h);
 
-    tr = defTransform (tr);
+    // tr = defTransform(ri, tr);
 
+    // if (fuji) {
+    //     w = ri->get_FujiWidth() * 2 + 1;
+    //     h = (H - ri->get_FujiWidth()) * 2 + 1;
+    // } else if (d1x) {
+    //     w = W;
+    //     h = 2 * H;
+    // } else {
+    //     w = W;
+    //     h = H;
+    // }
+
+    // if ((tr & TR_ROT) == TR_R90 || (tr & TR_ROT) == TR_R270) {
+    //     int tmp = w;
+    //     w = h;
+    //     h = tmp;
+    // }
+
+    // w -= 2 * border;
+    // h -= 2 * border;
+}
+
+
+void RawImageSource::computeFullSize(const RawImage *ri, int tr, int &w, int &h)
+{
+    tr = defTransform(ri, tr);
+
+    const int W = ri->get_width();
+    const int H = ri->get_height();
+    const bool fuji = ri->get_FujiWidth() != 0;
+    const bool d1x = !ri->get_model().compare("D1X");
+    const int border = (ri->getSensorType() == ST_BAYER ? 4 : (ri->getSensorType() == ST_FUJI_XTRANS ? 7 : 0));
+    
     if (fuji) {
         w = ri->get_FujiWidth() * 2 + 1;
         h = (H - ri->get_FujiWidth()) * 2 + 1;
@@ -1215,6 +1248,11 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
     idata = new FramesData (fname);
     idata->setDCRawFrameCount (numFrames);
     idata->setGainMaps(gain_maps);
+    {
+        int ww, hh;
+        getFullSize(ww, hh);
+        idata->setDimensions(ww, hh);
+    }
 
     green(W, H);
     red(W, H);
@@ -2595,7 +2633,7 @@ void RawImageSource::scaleColors(int winx, int winy, int winw, int winh, const R
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-int RawImageSource::defTransform (int tran)
+int RawImageSource::defTransform(const RawImage *ri, int tran)
 {
 
     int deg = ri->get_rotateDegree();
@@ -4329,7 +4367,7 @@ ColorTemp RawImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
 void RawImageSource::transformPosition (int x, int y, int tran, int& ttx, int& tty)
 {
 
-    tran = defTransform (tran);
+    tran = defTransform(ri, tran);
 
     x += border;
     y += border;

@@ -54,6 +54,8 @@ private:
     bool isHDR;
     int rating_;
     std::vector<GainMap> gain_maps_;
+    int w_;
+    int h_;
     
 public:
     FramesData (const Glib::ustring& fname);
@@ -82,6 +84,7 @@ public:
     Glib::ustring getFileName() const override;
     int getRating() const override;
     std::vector<GainMap> getGainMaps() const override { return gain_maps_; }
+    void getDimensions(int &w, int &h) const override;
 
     void fillBasicTags(Exiv2::ExifData &exif) const;
 
@@ -89,6 +92,8 @@ public:
     {
         gain_maps_ = m;
     }
+
+    void setDimensions(int w, int h);
 };
 
 

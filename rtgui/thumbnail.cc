@@ -42,8 +42,7 @@ using namespace rtengine::procparams;
 Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf)
     : fname(fname), cfs(*cf), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr),
       pparamsValid(false), needsReProcessing(true), imageLoading(false), lastImg(nullptr),
-      lastW(0), lastH(0), lastScale(0), initial_(false),
-      orig_w_(-1), orig_h_(-1)
+      lastW(0), lastH(0), lastScale(0), initial_(false)
 {
     loadProcParams(false);
 
@@ -133,6 +132,10 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
             cfs.format = FT_Raw;
             cfs.thumbImgType = quick ? CacheImageData::QUICK_THUMBNAIL : CacheImageData::FULL_THUMBNAIL;
             infoFromImage (fname);
+            if (!quick) {
+                cfs.width = tpp->full_width;
+                cfs.height = tpp->full_height;
+            }
         }
     }
 
@@ -638,18 +641,15 @@ void Thumbnail::getFinalSize (const rtengine::procparams::ProcParams& pparams, i
 
 void Thumbnail::getOriginalSize (int& w, int& h)
 {
-    if (orig_w_ < 0) {
+    if (cfs.width < 0) {
         try {
             rtengine::Exiv2Metadata meta(fname);
             meta.load();
-            meta.getDimensions(orig_w_, orig_h_);
-        } catch (std::exception &exc) {
-            orig_w_ = tw;
-            orig_h_ = th;
-        }
+            meta.getDimensions(cfs.width, cfs.height);
+        } catch (std::exception &) {}
     }
-    w = orig_w_;
-    h = orig_h_;
+    w = cfs.width;
+    h = cfs.height;
 }
 
 rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::ProcParams& pparams, int h, double& scale)
@@ -844,6 +844,8 @@ int Thumbnail::infoFromImage (const Glib::ustring& fname)
     } else {
         cfs.filetype = "";
     }
+
+    idata->getDimensions(cfs.width, cfs.height);
 
     delete idata;
     return deg;

@@ -77,6 +77,9 @@ public:
         QUICK_THUMBNAIL = 1  // was the thumbnail generated from embedded jpeg
     };
 
+    int width;
+    int height;
+
     CacheImageData ();
 
     int load (const Glib::ustring& fname);
@@ -110,4 +113,9 @@ public:
     int getRating() const override { return rating; }
     std::vector<rtengine::GainMap> getGainMaps() const override
     { return std::vector<rtengine::GainMap>(); }
+    void getDimensions(int &w, int &h) const override
+    {
+        w = width;
+        h = height;
+    }
 };

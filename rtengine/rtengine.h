@@ -58,9 +58,7 @@ class ImageSource;
   * This class provides functions to obtain exif and IPTC metadata information
   * from any of the sub-frame of an image file
   */
-class FramesMetaData
-{
-
+class FramesMetaData {
 public:
     /** @return Returns the number of frame contained in the file based on Metadata */
     virtual unsigned int getFrameCount() const = 0;
@@ -135,6 +133,7 @@ public:
     virtual Glib::ustring getFileName() const = 0;
     virtual int getRating() const = 0;
     virtual std::vector<GainMap> getGainMaps() const = 0;
+    virtual void getDimensions(int &w, int &h) const = 0;
 };
 
 /** This listener interface is used to indicate the progress of time consuming operations */

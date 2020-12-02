@@ -30,7 +30,8 @@ CacheImageData::CacheImageData ()
       isPixelShift (false), sensortype(rtengine::ST_NONE), sampleFormat(rtengine::IIOSF_UNKNOWN),
       rating(0),
       redAWBMul(-1.0), greenAWBMul(-1.0), blueAWBMul(-1.0),
-      rotate(0), thumbImgType(0)
+      rotate(0), thumbImgType(0),
+      width(-1), height(-1)
 {
 }
 
@@ -174,6 +175,12 @@ int CacheImageData::load (const Glib::ustring& fname)
                 if (keyFile.has_key ("FileInfo", "SampleFormat")) {
                     sampleFormat = (rtengine::IIO_Sample_Format)keyFile.get_integer ("FileInfo", "SampleFormat");
                 }
+                if (keyFile.has_key("FileInfo", "Width")) {
+                    width = keyFile.get_integer("FileInfo", "Width");
+                }
+                if (keyFile.has_key("FileInfo", "Height")) {
+                    height = keyFile.get_integer("FileInfo", "Height");
+                }
             }
 
             if (format == FT_Raw && keyFile.has_group ("ExtraRawInfo")) {
@@ -264,6 +271,8 @@ int CacheImageData::save (const Glib::ustring& fname)
     keyFile.set_string  ("FileInfo", "Filetype", filetype);
     keyFile.set_integer ("FileInfo", "FrameCount", frameCount);
     keyFile.set_integer ("FileInfo", "SampleFormat", sampleFormat);
+    keyFile.set_integer("FileInfo", "Width", width);
+    keyFile.set_integer("FileInfo", "Height", height);
 
     if (format == FT_Raw) {
         keyFile.set_integer ("ExtraRawInfo", "ThumbImageType", thumbImgType);

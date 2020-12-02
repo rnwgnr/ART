@@ -772,6 +772,16 @@ Glib::ustring Inspector::get_info_text(size_t i)
                                               infoString,
                                               escapeHtmlChars(Glib::path_get_dirname(cur_image_[i])) + G_DIR_SEPARATOR_S,
                                               escapeHtmlChars(Glib::path_get_basename(cur_image_[i])));
+
+        int ww = -1, hh = -1;
+        meta.getDimensions(ww, hh);
+        if (ww > 0 && hh > 0) {
+            //megapixels
+            infoString = Glib::ustring::compose ("%1\n<span size=\"small\">%2 MP (%3x%4)</span>",
+                                                 infoString,
+                                                 Glib::ustring::format (std::setw (4), std::fixed, std::setprecision (1), (float)ww * hh / 1000000),
+                                                 ww, hh);
+        }
     } else {
         infoString = M("QINFO_NOEXIF");
     }

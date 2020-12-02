@@ -563,8 +563,20 @@ void Exiv2Metadata::setExifKeys(const std::vector<std::string> *keys)
 void Exiv2Metadata::getDimensions(int &w, int &h) const
 {
     if (image_) {
-        w = image_->pixelWidth();
-        h = image_->pixelHeight();
+        if (dynamic_cast<const Exiv2::XmpSidecar *>(image_.get())) {
+            auto &exif = image_->exifData();
+            auto itw = exif.findKey(Exiv2::ExifKey("Exif.Image.ImageWidth"));
+            auto ith = exif.findKey(Exiv2::ExifKey("Exif.Image.ImageLength"));
+            if (itw != exif.end() && ith != exif.end()) {
+                w = itw->toLong();
+                h = ith->toLong();
+            } else {
+                w = h = -1;
+            }
+        } else {
+            w = image_->pixelWidth();
+            h = image_->pixelHeight();
+        }
     } else {
         w = h = -1;
     }

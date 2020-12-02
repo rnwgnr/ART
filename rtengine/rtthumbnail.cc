@@ -843,6 +843,9 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
         }
 
     tpp->init();
+
+    RawImageSource::computeFullSize(ri, TR_NONE, tpp->full_width, tpp->full_height);
+    
     delete ri;
     return tpp;
 }
@@ -900,7 +903,9 @@ Thumbnail::Thumbnail () :
     colorMatrix{},
     scaleGain(1.0),
     sensorType(ST_NONE),
-    isRaw(false)
+    isRaw(false),
+    full_width(-1),
+    full_height(-1)
 {
 }
 

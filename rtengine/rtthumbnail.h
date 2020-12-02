@@ -74,6 +74,8 @@ class Thumbnail {
 public:
 
     bool isRaw;
+    int full_width;
+    int full_height;
 
     ~Thumbnail ();
     Thumbnail ();
@@ -86,7 +88,7 @@ public:
     void     getDimensions  (int& w, int& h, double& scaleFac);
 
     static Thumbnail *loadQuickFromRaw(const Glib::ustring& fname, eSensorType &sensorType, int &w, int &h, int fixwh, bool rotate, bool forHistogramMatching = false);
-    static Thumbnail *loadFromRaw(const Glib::ustring& fname, eSensorType &sensorType, int &w, int &h, int fixwh, double wbEq, bool rotate, bool forHistogramMatching = false);
+    static Thumbnail *loadFromRaw(const Glib::ustring& fname, eSensorType &sensorType, int &w, int &h, int fixwh, double wbEq, bool rotate, bool forHistogramMatching=false);
     static Thumbnail *loadFromImage(const Glib::ustring& fname, int &w, int &h, int fixwh, double wbEq);
 
     void getCamWB     (double& temp, double& green);

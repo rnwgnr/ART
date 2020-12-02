@@ -79,7 +79,9 @@ FramesData::FramesData(const Glib::ustring &fname):
     sampleFormat(IIOSF_UNKNOWN),
     isPixelShift(false),
     isHDR(false),
-    rating_(0)
+    rating_(0),
+    w_(-1),
+    h_(-1)
 {
     memset(&time, 0, sizeof(time));
     timeStamp = 0;
@@ -346,6 +348,8 @@ FramesData::FramesData(const Glib::ustring &fname):
                 }
             }
         }
+
+        meta.getDimensions(w_, h_);
         
         // -----------------------
         // Special file type detection (HDR, PixelShift)
@@ -746,4 +750,18 @@ void FramesData::fillBasicTags(Exiv2::ExifData &exif) const
     auto t = getDateTime();
     strftime(buf, 256, "%Y:%m:%d %H:%M:%S", &t);
     set_exif(exif, "Exif.Photo.DateTimeOriginal", buf);
+}
+
+
+void FramesData::getDimensions(int &w, int &h) const
+{
+    w = w_;
+    h = h_;
+}
+
+
+void FramesData::setDimensions(int w, int h)
+{
+    w_ = w;
+    h_ = h;
 }

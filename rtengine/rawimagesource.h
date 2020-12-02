@@ -42,7 +42,7 @@ private:
     static LUTf invGrad;  // for fast_demosaic
     static LUTf initInvGrad ();
     static void colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double cam[3][3], const std::string &camName, const Glib::ustring &fileName, ProgressListener *plistener);
-    int  defTransform        (int tran);
+    static int defTransform(const RawImage *ri, int tran);
 
 protected:
     MyMutex getImageMutex;  // locks getImage
@@ -220,6 +220,8 @@ public:
         virtual float operator()(int row) const { return 1.f; }
     };
     
+    static void computeFullSize(const RawImage *ri, int tr, int &w, int &h);
+
 protected:
     typedef unsigned short ushort;
     void processFalseColorCorrection (Imagefloat* i, const int steps);
