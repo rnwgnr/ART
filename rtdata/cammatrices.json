@@ -2893,7 +2893,7 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [9803, -4185, -992, -4066, 12578, 1628, -838, 1824, 5288]
     },
     {
-        "make_model" : "PANASONIC DC-FZ80",
+        "make_model" : ["PANASONIC DC-FZ80", "PANASONIC DC-FZ82", "PANASONIC DMC-FZ85"],
         "dcraw_matrix" : [11532, -4324, -1066, -2375, 10847, 1749, -564, 1699, 4351]
     },
     {
@@ -2905,11 +2905,11 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [9657, -3963, -748, -3361, 11378, 2258, -568, 1414, 5158]
     },
     {
-        "make_model" : "PANASONIC DC-GF10",
+        "make_model" : ["PANASONIC DC-GF10", "PANASONIC DC-GX880"],
         "dcraw_matrix" : [7610, -2780, -576, -4614, 12195, 2733, -1375, 2393, 6490]
     },
     {
-        "make_model" : "PANASONIC DC-GF9",
+        "make_model" : ["PANASONIC DC-GF9", "PANASONIC DC-GX800"],
         "dcraw_matrix" : [7610, -2780, -576, -4614, 12195, 2733, -1375, 2393, 6490]
     },
     {
@@ -3049,7 +3049,7 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [7610, -2780, -576, -4614, 12195, 2733, -1375, 2393, 6490]
     },
     {
-        "make_model" : "PANASONIC DMC-G8",
+        "make_model" : ["PANASONIC DMC-G8", "PANASONIC DMC-G80", "PANASONIC DMC-G81", "PANASONIC DMC-G85"],
         "dcraw_matrix" : [7610, -2780, -576, -4614, 12195, 2733, -1375, 2393, 6490]
     },
     {
@@ -3117,7 +3117,7 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [7564, -2263, -606, -3148, 11238, 2177, -540, 1435, 4853]
     },
     {
-        "make_model" : "PANASONIC DMC-GX85",
+        "make_model" : ["PANASONIC DMC-GX85", "PANASONIC DMC-GX80", "PANASONIC DMC-GX7MK2"],
         "dcraw_matrix" : [7771, -3020, -629, -4029, 11950, 2345, -821, 1976, 6119]
     },
     {
@@ -3161,23 +3161,23 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [10148, -3743, -990, -2837, 11366, 1659, -701, 1893, 4899]
     },
     {
-        "make_model" : "PANASONIC DMC-LX9",
+        "make_model" : ["PANASONIC DMC-LX9", "PANASONIC DMC-LX15", "PANASONIC DMC-LX10"],
         "dcraw_matrix" : [7790, -2736, -755, -3452, 11870, 1769, -628, 1647, 4898]
     },
     {
-        "make_model" : "PANASONIC DMC-ZS100",
+        "make_model" : ["PANASONIC DMC-ZS100", "PANASONIC DMC-TZ100", "PANASONIC DMC-ZS110", "PANASONIC DMC-TZ101", "PANASONIC DMC-TZ110"],
         "dcraw_matrix" : [7790, -2736, -755, -3452, 11870, 1769, -628, 1647, 4898]
     },
     {
-        "make_model" : "PANASONIC DMC-ZS40",
+        "make_model" : ["PANASONIC DMC-ZS40", "PANASONIC DMC-TZ60", "PANASONIC DMC-TZ61"],
         "dcraw_matrix" : [8607, -2822, -808, -3755, 11930, 2049, -820, 2060, 5224]
     },
     {
-        "make_model" : "PANASONIC DMC-ZS50",
+        "make_model" : ["PANASONIC DMC-ZS50", "PANASONIC DMC-TZ70", "PANASONIC DMC-TZ71"],
         "dcraw_matrix" : [8802, -3135, -789, -3151, 11468, 1904, -550, 1744, 4810]
     },
     {
-        "make_model" : "PANASONIC DMC-ZS60",
+        "make_model" : ["PANASONIC DMC-ZS60", "PANASONIC DMC-TZ81", "PANASONIC DMC-TZ80", "PANASONIC DMC-TZ85"],
         "dcraw_matrix" : [8550, -2908, -842, -3195, 11529, 1881, -337, 1603, 4631]
     },
     {

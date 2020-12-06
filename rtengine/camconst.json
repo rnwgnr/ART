@@ -1933,7 +1933,7 @@ Camera constants:
     },
 
     { // Quality C, only color matrix
-        "make_model" : "Panasonic DC-GF10",
+        "make_model" : ["Panasonic DC-GF10", "PANASONIC DC-GX880"],
         "dcraw_matrix": [ 7610, -2780, -576, -4614, 12195, 2733, -1375, 2393, 6490 ], // ColorMatrix2 from Adobe DNG Converter 11.3
         "raw_crop": [ 0, 0, 4600, 0 ], // SensorWidth=4816 SensorHeight=3464. Width=4600 to match DNG.
         "ranges": {
