@@ -221,7 +221,7 @@ CameraConst::parseEntry(void *cJSON_, const char *make_model)
     const auto get_masked_areas =
         [cc](int w, int h, cJSON *ji) -> bool
         {
-            std::array<std::array<int, 4>, 8> rm;
+            std::array<std::array<int, 4>, 8> rm = {};
         
             if (ji->type != cJSON_Array) {
                 //fprintf(stderr, "\"masked_areas\" must be an array\n");
@@ -527,8 +527,15 @@ bool CameraConst::has_rawMask(int raw_width, int raw_height, int idx)
         return false;
     }
 
-    return raw_mask.find(std::make_pair(raw_width, raw_height)) != raw_mask.end() || raw_mask.find(std::make_pair(0, 0)) != raw_mask.end();
-    //return (raw_mask[idx][0] | raw_mask[idx][1] | raw_mask[idx][2] | raw_mask[idx][3]) != 0;
+    auto it = raw_mask.find(std::make_pair(raw_width, raw_height));
+    if (it == raw_mask.end()) {
+        it = raw_mask.find(std::make_pair(0, 0));
+    }
+    if (it != raw_mask.end()) {
+        return (it->second[idx][0] | it->second[idx][1] | it->second[idx][2] | it->second[idx][3]) != 0;
+    } else {
+        return false;
+    }
 }
 
 
