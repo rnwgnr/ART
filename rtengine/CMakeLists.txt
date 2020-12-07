@@ -151,7 +151,6 @@ set(RTENGINESOURCEFILES
     filmnegativeproc.cc
     filmnegativethumb.cc
     canon_cr3_decoder.cc
-    pyramids.cc
     rawimage_gainmap.cc
     subprocess.cc
     bayer_bilinear_demosaic.cc

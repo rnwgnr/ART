@@ -36,7 +36,6 @@
 #include "color.h"
 #include "calc_distort.h"
 #include "rt_math.h"
-#include "EdgePreservingDecomposition.h"
 #include "improccoordinator.h"
 #include "clutstore.h"
 #include "StopWatch.h"
