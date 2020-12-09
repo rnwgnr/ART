@@ -63,17 +63,17 @@ HSLEqualizer::HSLEqualizer():
     curveEditorG->setCurveListener(this);
 
     hshape = static_cast<FlatCurveEditor *>(curveEditorG->addCurve(CT_Flat, M("TP_HSVEQUALIZER_HUE")));
-    hshape->setEditID(EUID_HSV_H, BT_SINGLEPLANE_FLOAT);
+    hshape->setEditID(EUID_HSL_H, BT_SINGLEPLANE_FLOAT);
     hshape->setBottomBarBgGradient(bottomMilestones);
     hshape->setCurveColorProvider(this, 1);
 
     sshape = static_cast<FlatCurveEditor *>(curveEditorG->addCurve(CT_Flat, M("TP_HSVEQUALIZER_SAT")));
-    sshape->setEditID(EUID_HSV_S, BT_SINGLEPLANE_FLOAT);
+    sshape->setEditID(EUID_HSL_S, BT_SINGLEPLANE_FLOAT);
     sshape->setBottomBarBgGradient(bottomMilestones);
     sshape->setCurveColorProvider(this, 2);
 
     lshape = static_cast<FlatCurveEditor *>(curveEditorG->addCurve(CT_Flat, M("TP_HSVEQUALIZER_VAL")));
-    lshape->setEditID(EUID_HSV_V, BT_SINGLEPLANE_FLOAT);
+    lshape->setEditID(EUID_HSL_V, BT_SINGLEPLANE_FLOAT);
     lshape->setBottomBarBgGradient(bottomMilestones);
     lshape->setCurveColorProvider(this, 3);
 

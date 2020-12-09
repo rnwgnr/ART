@@ -221,6 +221,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     box_rgb = Gtk::manage(new Gtk::VBox());
 
     wheel = Gtk::manage(new ColorWheel(EvColorWheel, M("TP_COLORCORRECTION_ABVALUES")));
+    wheel->setEditID(EUID_ColorCorrection_Wheel, BT_IMAGEFLOAT);
     box_combined->pack_start(*wheel);
 
     Gtk::Frame *satframe = Gtk::manage(new Gtk::Frame(M("TP_COLORCORRECTION_SATURATION")));
@@ -494,6 +495,7 @@ void ColorCorrection::enabledChanged ()
 void ColorCorrection::setEditProvider(EditDataProvider *provider)
 {
     labMasks->setEditProvider(provider);
+    wheel->setEditProvider(provider);
 }
 
 
@@ -577,6 +579,9 @@ void ColorCorrection::regionShow(int idx)
     }
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
+    if (wheel->isCurrentSubscriber()) {
+        wheel->unsubscribe();
+    }
     wheel->setParams(r.a, r.b, r.abscale, false);
     slope->setValue(r.slope[0]);
     offset->setValue(r.offset[0]);

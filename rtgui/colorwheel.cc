@@ -39,6 +39,7 @@
 #include "colorwheel.h"
 #include "../rtengine/iccstore.h"
 #include "../rtengine/coord.h"
+#include <iostream>
 
 using rtengine::Color;
 
@@ -405,7 +406,9 @@ void ColorWheelArea::get_preferred_height_for_width_vfunc(int width, int &minimu
 //-----------------------------------------------------------------------------
 
 ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
-    grid(evt, msg)
+    EditSubscriber(ET_PIPETTE),
+    grid(evt, msg),
+    savedparams_{}
 {
     Gtk::Button *reset = Gtk::manage(new Gtk::Button());
     reset->set_tooltip_markup(M("ADJUSTER_RESET_TO_DEFAULT"));
@@ -418,8 +421,17 @@ ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
     reset->set_can_focus(false);
     reset->set_size_request(-1, 20);
 
+    edit_ = Gtk::manage(new Gtk::ToggleButton());
+    edit_->add(*Gtk::manage(new RTImage("color-picker-small.png")));
+    setExpandAlignProperties(edit_, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
+    edit_->set_relief(Gtk::RELIEF_NONE);
+    edit_->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
+    edit_->set_can_focus(false);
+    edit_->set_size_request(-1, 20);
+
     Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
     vb->pack_start(*reset, false, false, 4);
+    vb->pack_start(*edit_, false, false, 4);
     scale = Gtk::manage(new Gtk::VScale(0.2, 2.5, 0.01));
     scale->set_inverted(true);
     scale->set_value(1.0);
@@ -432,6 +444,18 @@ ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
     pack_start(*vb, false, false);
 
     scaleconn = scale->signal_value_changed().connect(sigc::mem_fun(*this, &ColorWheel::scaleChanged));
+
+    const auto toggle_subscription =
+        [this]()
+        {
+            if (edit_->get_active()) {
+                this->subscribe();
+                grid.setScale(scale->get_value(), true);
+            } else {
+                this->switchOffEditMode();
+            }
+        };
+    editconn_ = edit_->signal_toggled().connect(sigc::slot<void>(toggle_subscription));
     
     show_all_children();
 }
@@ -442,7 +466,7 @@ bool ColorWheel::resetPressed(GdkEventButton *event)
     grid.reset(event->state & GDK_CONTROL_MASK);
     ConnectionBlocker sb(scaleconn);
     scale->set_value(grid.getScale());
-    return false;    
+    return false;
 }
 
 void ColorWheel::scaleChanged()
@@ -481,4 +505,70 @@ void ColorWheel::setParams(double x, double y, double s, bool notify)
 void ColorWheel::setDefault(double x, double y, double s)
 {
     grid.setDefault(x, y, s);
+}
+
+
+// EditSubscriber interface
+CursorShape ColorWheel::getCursor(const int objectID)
+{
+    return CSHandOpen;
+}
+
+
+namespace {
+
+double find_scale(double x, double y)
+{
+    double s = 0.2;
+    double v = std::max(std::abs(x), std::abs(y));
+    while (v / s > 0.5 && s < 2.5) {
+        s += 0.1;
+    }
+    return s;
+}
+
+} // namespace
+
+
+bool ColorWheel::mouseOver(const int modifierKey)
+{
+    auto p = getEditProvider();
+    if (p && p->object) {
+        double x = p->pipetteVal[0];
+        double y = p->pipetteVal[2];
+        double s = find_scale(x, y);
+        setParams(x, y, s, false);
+    }
+    return true;
+}
+
+
+bool ColorWheel::button1Pressed(const int modifierKey)
+{
+    auto p = getEditProvider();
+    if (p && p->object) {
+        double x = p->pipetteVal[0];
+        double y = p->pipetteVal[2];
+        double s = find_scale(x, y);
+        setParams(x, y, s, true);
+        getParams(savedparams_[0], savedparams_[1], savedparams_[2]);
+        switchOffEditMode();
+    }
+    return true;
+}
+
+
+void ColorWheel::subscribe()
+{
+    getParams(savedparams_[0], savedparams_[1], savedparams_[2]);
+    EditSubscriber::subscribe();
+}
+
+
+void ColorWheel::unsubscribe()
+{
+    ConnectionBlocker b(editconn_);
+    edit_->set_active(false);
+    EditSubscriber::unsubscribe();
+    setParams(savedparams_[0], savedparams_[1], savedparams_[2], true);
 }

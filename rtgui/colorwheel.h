@@ -41,6 +41,7 @@
 #include <gtkmm.h>
 #include "toolpanel.h"
 #include "eventmapper.h"
+#include "edit.h"
 
 
 class ColorWheelArea: public Gtk::DrawingArea, public BackBuffer {
@@ -98,7 +99,7 @@ private:
 };
 
 
-class ColorWheel: public Gtk::HBox {
+class ColorWheel: public Gtk::HBox, public EditSubscriber {
 public:
     ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg);
 
@@ -110,13 +111,22 @@ public:
     void reset(bool toInitial) { grid.reset(toInitial); }
     void setListener(ToolPanelListener *l) { grid.setListener(l); }
 
+    CursorShape getCursor(const int objectID) override;
+    bool mouseOver(const int modifierKey) override;
+    bool button1Pressed(const int modifierKey) override;
+    void subscribe() override;
+    void unsubscribe() override;
+
 private:
     bool resetPressed(GdkEventButton *event);
     void scaleChanged();
 
     ColorWheelArea grid;
     Gtk::VScale *scale;
+    Gtk::ToggleButton *edit_;
     sigc::connection scaleconn;
     sigc::connection timerconn;
+    sigc::connection editconn_;
+    std::array<double, 3> savedparams_;
 };
 

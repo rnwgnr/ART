@@ -37,8 +37,12 @@ namespace rtengine {
 bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 {
     PlanarWhateverData<float> *editWhatever = nullptr;
+    Imagefloat *imgbuf = nullptr;
     EditUniqueID eid = pipetteBuffer ? pipetteBuffer->getEditID() : EUID_None;
 
+    const int H = rgb->getHeight();
+    const int W = rgb->getWidth();
+        
     if ((eid == EUID_LabMasks_H1 || eid == EUID_LabMasks_C1 || eid == EUID_LabMasks_L1) && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_SINGLEPLANE_FLOAT) {
         editWhatever = pipetteBuffer->getSinglePlaneBuffer();
     }
@@ -48,10 +52,26 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             deltaE.ok = true;
         }
     }
+
+    if (eid == EUID_ColorCorrection_Wheel && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_IMAGEFLOAT) {
+        imgbuf = pipetteBuffer->getImgFloatBuffer();
+    }
     
     if (!params->colorcorrection.enabled) {
         if (editWhatever) {
             editWhatever->fill(0.f);
+        }
+        if (imgbuf) {
+#ifdef _OPENMP
+#           pragma omp parallel for if (multiThread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    imgbuf->g(y, x) = 0.f;
+                    imgbuf->r(y, x) = 0.f;
+                    imgbuf->b(y, x) = 0.f;
+                }
+            }
         }
         return false;
     }
@@ -61,6 +81,32 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         fillPipetteLabMasks(rgb, editWhatever, id, multiThread);
     }
     
+    const auto abcoord =
+        [](float x) -> float
+        {
+            return SGN(x) * xlog2lin(std::abs(x), 4.f);
+        };
+
+    if (imgbuf) {
+        rgb->setMode(Imagefloat::Mode::YUV, multiThread);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                imgbuf->g(y, x) = 0.f;
+                float f = std::max(rgb->g(y, x), 0.f);
+                float u = 0.f, v = 0.f;
+                if (f > 1e-5f) {
+                    u = rgb->b(y, x) / f;
+                    v = rgb->r(y, x) / f;
+                }
+                imgbuf->r(y, x) = SGN(v) * xlin2log(std::abs(v), 4.f);
+                imgbuf->b(y, x) = SGN(u) * xlin2log(std::abs(u), 4.f);
+            }
+        }
+    }
+
     int n = params->colorcorrection.regions.size();
     int show_mask_idx = params->colorcorrection.showMask;
     if (show_mask_idx >= n || (cur_pipeline != Pipeline::PREVIEW && cur_pipeline != Pipeline::OUTPUT)) {
@@ -74,12 +120,6 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         return true; // show mask is active, nothing more to do
     }
     
-    const auto abcoord =
-        [](float x) -> float
-        {
-            return SGN(x) * xlog2lin(std::abs(x), 4.f);
-        };
-
     TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
     float ws[3][3];
     for (int i = 0; i < 3; ++i) {
@@ -299,9 +339,6 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
     vfloat zerov = F2V(0.0);
 #endif
-
-    const int H = rgb->getHeight();
-    const int W = rgb->getWidth();
 
     rgb->setMode(Imagefloat::Mode::YUV, multiThread);
 

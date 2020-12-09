@@ -30,7 +30,7 @@ void ImProcFunctions::hslEqualizer(Imagefloat *img)
 {
     PlanarWhateverData<float> *editWhatever = nullptr;
     EditUniqueID eid = pipetteBuffer ? pipetteBuffer->getEditID() : EUID_None;
-    if ((eid == EUID_HSV_H || eid == EUID_HSV_S || eid == EUID_HSV_V) && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_SINGLEPLANE_FLOAT) {
+    if ((eid == EUID_HSL_H || eid == EUID_HSL_S || eid == EUID_HSL_V) && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_SINGLEPLANE_FLOAT) {
         editWhatever = pipetteBuffer->getSinglePlaneBuffer();
     }
     
