@@ -814,6 +814,39 @@ NIKON Z 5
 Updated on Wed Nov 18 16:16:59 2020 (with Adobe DNG converter 13.0.0.610):
 SONY ILCE-7C
 SONY ILCE-7SM3
+
+Updated on Wed Dec  9 15:20:18 2020 (with Adobe DNG converter 13.1):
+CANON EOS M50 MARK II
+GOOGLE PIXEL 5 FRONT CAMERA
+GOOGLE PIXEL 5 REAR MAIN CAMERA
+GOOGLE PIXEL 5 REAR ULTRA WIDE CAMERA
+IPAD13,1 BACK CAMERA
+IPHONE13,1 BACK CAMERA
+IPHONE13,2 BACK CAMERA
+IPHONE13,3 BACK CAMERA
+IPHONE13,3 BACK TELEPHOTO CAMERA
+IPHONE13,3 BACK ULTRA WIDE CAMERA
+IPHONE13,3 FRONT CAMERA
+IPHONE13,4 BACK CAMERA
+IPHONE13,4 BACK TELEPHOTO CAMERA
+IPHONE13,4 BACK ULTRA WIDE CAMERA
+IPHONE13,4 FRONT CAMERA
+LG V60 THINQ FRONT CAMERA
+LG V60 THINQ REAR MAIN CAMERA
+LG VELVET FRONT CAMERA
+LG VELVET REAR MAIN CAMERA
+LG VELVET REAR WIDE CAMERA
+LG WING FRONT CAMERA
+LG WING REAR MAIN CAMERA
+LG WING REAR WIDE CAMERA
+NIKON Z 6 2
+NIKON Z 7 2
+ONEPLUS 8 FRONT CAMERA
+ONEPLUS 8 PRO FRONT CAMERA
+ONEPLUS 8 PRO REAR MAIN CAMERA
+ONEPLUS 8 REAR MAIN CAMERA
+SAMSUNG GALAXY NOTE 20 REAR MAIN CAMERA
+SAMSUNG GALAXY NOTE 20 ULTRA REAR MAIN CAMERA
 */
 {"camera_constants": [
     {
@@ -1031,6 +1064,10 @@ SONY ILCE-7SM3
     {
         "make_model" : "CANON EOS M50",
         "dcraw_matrix" : [8532, -701, -1167, -4094, 11879, 2508, -796, 2424, 7010]
+    },
+    {
+        "make_model" : "CANON EOS M50 MARK II",
+        "dcraw_matrix" : [10463, -2173, -1437, -4856, 12635, 2482, -1216, 2915, 7237]
     },
     {
         "make_model" : "CANON EOS M6",
@@ -1629,6 +1666,18 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
     },
     {
+        "make_model" : "GOOGLE PIXEL 5 FRONT CAMERA",
+        "dcraw_matrix" : [11792, -5080, -1209, -2945, 11484, 1644, -23, 1398, 5238]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 5 REAR MAIN CAMERA",
+        "dcraw_matrix" : [10290, -4415, -947, -3350, 11782, 1754, -320, 1666, 5210]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 5 REAR ULTRA WIDE CAMERA",
+        "dcraw_matrix" : [12830, -5866, -1132, -2862, 11341, 1719, -57, 1222, 5014]
+    },
+    {
         "make_model" : "GOPRO HERO7 BLACK",
         "dcraw_matrix" : [11033, -4339, -1176, -2180, 10845, 1524, -467, 1613, 4469]
     },
@@ -1703,6 +1752,10 @@ SONY ILCE-7SM3
     {
         "make_model" : "HUAWEI P9 LITE",
         "dcraw_matrix" : [12855, -5708, -1288, -4076, 12578, 1639, -533, 1953, 6136]
+    },
+    {
+        "make_model" : "IPAD13,1 BACK CAMERA",
+        "dcraw_matrix" : [9368, -3064, -1010, -3724, 12223, 1658, -273, 1570, 4629]
     },
     {
         "make_model" : "IPAD6,3 BACK CAMERA",
@@ -1859,6 +1912,46 @@ SONY ILCE-7SM3
     {
         "make_model" : "IPHONE12,8 BACK CAMERA",
         "dcraw_matrix" : [8572, -3047, -919, -4688, 13393, 1368, -569, 1620, 5173]
+    },
+    {
+        "make_model" : "IPHONE13,1 BACK CAMERA",
+        "dcraw_matrix" : [10788, -4608, -1151, -3392, 11974, 1572, -238, 1329, 4683]
+    },
+    {
+        "make_model" : "IPHONE13,2 BACK CAMERA",
+        "dcraw_matrix" : [10788, -4608, -1151, -3392, 11974, 1572, -238, 1329, 4683]
+    },
+    {
+        "make_model" : "IPHONE13,3 BACK CAMERA",
+        "dcraw_matrix" : [10788, -4608, -1151, -3392, 11974, 1572, -238, 1329, 4683]
+    },
+    {
+        "make_model" : "IPHONE13,3 BACK TELEPHOTO CAMERA",
+        "dcraw_matrix" : [9857, -3795, -1017, -3494, 11842, 1850, -324, 1545, 4787]
+    },
+    {
+        "make_model" : "IPHONE13,3 BACK ULTRA WIDE CAMERA",
+        "dcraw_matrix" : [9857, -3795, -1017, -3494, 11842, 1850, -324, 1545, 4787]
+    },
+    {
+        "make_model" : "IPHONE13,3 FRONT CAMERA",
+        "dcraw_matrix" : [9857, -3795, -1017, -3494, 11842, 1850, -324, 1545, 4787]
+    },
+    {
+        "make_model" : "IPHONE13,4 BACK CAMERA",
+        "dcraw_matrix" : [10788, -4608, -1151, -3392, 11974, 1572, -238, 1329, 4683]
+    },
+    {
+        "make_model" : "IPHONE13,4 BACK TELEPHOTO CAMERA",
+        "dcraw_matrix" : [10069, -3837, -1057, -3585, 12109, 1633, -292, 1515, 4627]
+    },
+    {
+        "make_model" : "IPHONE13,4 BACK ULTRA WIDE CAMERA",
+        "dcraw_matrix" : [9857, -3795, -1017, -3494, 11842, 1850, -324, 1545, 4787]
+    },
+    {
+        "make_model" : "IPHONE13,4 FRONT CAMERA",
+        "dcraw_matrix" : [9857, -3795, -1017, -3494, 11842, 1850, -324, 1545, 4787]
     },
     {
         "make_model" : "IPHONE8,1 BACK CAMERA",
@@ -2223,6 +2316,38 @@ SONY ILCE-7SM3
     {
         "make_model" : "LG V50S THINQ REAR WIDE CAMERA",
         "dcraw_matrix" : [11697, -4562, -1169, -3096, 12158, 1004, -497, 2172, 4730]
+    },
+    {
+        "make_model" : "LG V60 THINQ FRONT CAMERA",
+        "dcraw_matrix" : [12876, -5757, -1180, -4014, 13087, 950, -274, 1961, 5098]
+    },
+    {
+        "make_model" : "LG V60 THINQ REAR MAIN CAMERA",
+        "dcraw_matrix" : [13949, -6139, -1126, -2676, 11201, 1671, 489, 1188, 5162]
+    },
+    {
+        "make_model" : "LG VELVET FRONT CAMERA",
+        "dcraw_matrix" : [13117, -5376, -1444, -3852, 12813, 1092, -104, 1207, 4339]
+    },
+    {
+        "make_model" : "LG VELVET REAR MAIN CAMERA",
+        "dcraw_matrix" : [14625, -6327, -1227, -2630, 11242, 1568, 524, 1206, 4605]
+    },
+    {
+        "make_model" : "LG VELVET REAR WIDE CAMERA",
+        "dcraw_matrix" : [10109, -3706, -1523, -4848, 15039, -358, 82, 1206, 4569]
+    },
+    {
+        "make_model" : "LG WING FRONT CAMERA",
+        "dcraw_matrix" : [13886, -6220, -1341, -2262, 11198, 1190, 724, 756, 4556]
+    },
+    {
+        "make_model" : "LG WING REAR MAIN CAMERA",
+        "dcraw_matrix" : [12776, -5610, -1064, -2947, 11469, 1664, 534, 1077, 5479]
+    },
+    {
+        "make_model" : "LG WING REAR WIDE CAMERA",
+        "dcraw_matrix" : [13273, -5652, -1743, -4807, 15347, -862, -2, 1095, 4759]
     },
     {
         "make_model" : "M8 DIGITAL CAMERA",
@@ -2601,12 +2726,20 @@ SONY ILCE-7SM3
         "dcraw_matrix" : [11640, -4829, -1079, -5107, 13006, 2325, -972, 1711, 7380]
     },
     {
-        "make_model" : ["NIKON Z 6", "NIKON Z 6_2"],
+        "make_model" : "NIKON Z 6",
         "dcraw_matrix" : [8210, -2534, -683, -5355, 13338, 2212, -1143, 1928, 6464]
     },
     {
-        "make_model" : ["NIKON Z 7", "NIKON Z 7_2"],
+        "make_model" : ["NIKON Z 6 2", "NIKON Z 6_2"],
+        "dcraw_matrix" : [9943, -3269, -839, -5323, 13269, 2259, -1198, 2083, 7557]
+    },
+    {
+        "make_model" : "NIKON Z 7",
         "dcraw_matrix" : [10405, -3755, -1270, -5461, 13787, 1792, -1040, 2015, 6785]
+    },
+    {
+        "make_model" : ["NIKON Z 7 2", "NIKON Z 7_2"],
+        "dcraw_matrix" : [13705, -6004, -1400, -5464, 13568, 2062, -940, 1706, 7618]
     },
     {
         "make_model" : "OLYMPUS AIR A01",
@@ -2887,6 +3020,22 @@ SONY ILCE-7SM3
     {
         "make_model" : "ONEPLUS 7T REAR MAIN CAMERA",
         "dcraw_matrix" : [14211, -6460, -1514, -2239, 11090, 1296, 417, 930, 4839]
+    },
+    {
+        "make_model" : "ONEPLUS 8 FRONT CAMERA",
+        "dcraw_matrix" : [10736, -4389, -1215, -3983, 12479, 1651, -558, 1715, 5154]
+    },
+    {
+        "make_model" : "ONEPLUS 8 PRO FRONT CAMERA",
+        "dcraw_matrix" : [9986, -3790, -1135, -3867, 12404, 1607, -610, 1770, 4982]
+    },
+    {
+        "make_model" : "ONEPLUS 8 PRO REAR MAIN CAMERA",
+        "dcraw_matrix" : [12295, -5557, -1167, -2365, 10951, 1612, -68, 1574, 5195]
+    },
+    {
+        "make_model" : "ONEPLUS 8 REAR MAIN CAMERA",
+        "dcraw_matrix" : [13149, -5557, -1226, -3164, 11514, 1863, -180, 1477, 4698]
     },
     {
         "make_model" : "PANASONIC DC-FZ1000M2",
@@ -3491,6 +3640,14 @@ SONY ILCE-7SM3
     {
         "make_model" : "SAMSUNG EX2F",
         "dcraw_matrix" : [10648, -3897, -1055, -2022, 10572, 1668, -492, 1611, 4742]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY NOTE 20 REAR MAIN CAMERA",
+        "dcraw_matrix" : [12300, -5795, -1224, -3685, 12623, 1128, -359, 2058, 5335]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY NOTE 20 ULTRA REAR MAIN CAMERA",
+        "dcraw_matrix" : [16108, -7804, -1287, -1514, 10539, 1116, 864, 864, 4609]
     },
     {
         "make_model" : "SAMSUNG GALAXY NOTE 9",
