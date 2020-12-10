@@ -951,6 +951,18 @@ void ToolPanelCoordinator::cropEnableChanged(bool enabled)
 //     }
 // }
 
+void ToolPanelCoordinator::controlLineEditModeChanged(bool active)
+{
+    if (!ipc) {
+        return;
+    }
+
+    if (active) {
+        toolBar->setTool(TMPerspective);
+    }
+}
+
+
 void ToolPanelCoordinator::saveInputICCReference(const Glib::ustring& fname, bool apply_wb)
 {
     if (ipc) {
@@ -1097,6 +1109,12 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
             toolPanelNotebook->set_current_page (toolPanelNotebook->page_num (*transformPanelSW));
             break;
 
+        case TMPerspective:
+            perspective->setControlLineEditMode(true);
+            perspective->setExpanded(true);
+            lensgeom->setExpanded(true);
+            toolPanelNotebook->set_current_page(toolPanelNotebook->page_num(*transformPanelSW));
+            break;
         default:
             break;
     }
@@ -1105,6 +1123,15 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
         crop->setSelecting(false);
     }
 }
+
+
+void ToolPanelCoordinator::toolDeselected(ToolMode tool)
+{
+    if (tool == TMPerspective) {
+        perspective->requestApplyControlLines();
+    }
+}
+
 
 void ToolPanelCoordinator::editModeSwitchedOff ()
 {

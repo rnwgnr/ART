@@ -113,6 +113,7 @@ PerspCorrection::PerspCorrection() : FoldableToolPanel(this, "perspective", M("T
     EvPerspRender = m->newAnonEvent(TRANSFORM);
     
     lgl = nullptr;
+    panel_listener = nullptr;
     metadata = nullptr;
 
     Gtk::Image *ipersHL = Gtk::manage(new RTImage("perspective-horizontal-left-small.png"));
@@ -449,6 +450,9 @@ void PerspCorrection::linesEditButtonPressed()
         lines_button_apply->set_sensitive(true);
         lines_button_erase->set_sensitive(true);
         //setCamBasedEventsActive(false);
+        if (panel_listener) {
+            panel_listener->controlLineEditModeChanged(true);
+        }
     } else { // Leave edit mode.
         //setCamBasedEventsActive(true);
         lines_button_apply->set_sensitive(false);
@@ -458,10 +462,27 @@ void PerspCorrection::linesEditButtonPressed()
         }
         lines->setDrawMode(false);
         lines->setActive(false);
+        if (panel_listener) {
+            panel_listener->controlLineEditModeChanged(false);
+        }
     }
 }
 
 void PerspCorrection::linesEraseButtonPressed()
 {
     lines->removeAll();
+}
+
+
+void PerspCorrection::requestApplyControlLines()
+{
+    if (lines_button_apply->is_sensitive()) {
+        linesApplyButtonPressed();
+    }
+}
+
+
+void PerspCorrection::setControlLineEditMode(bool active)
+{
+    lines_button_edit->set_active(active);
 }

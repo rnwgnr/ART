@@ -26,6 +26,13 @@
 
 class ControlLineManager;
 
+class PerspCorrectionPanelListener {
+public:
+    virtual ~PerspCorrectionPanelListener() = default;
+    virtual void controlLineEditModeChanged(bool active) = 0;
+};
+
+
 class PerspCorrection: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel {
 public:
     PerspCorrection();
@@ -38,6 +45,10 @@ public:
     void trimValues(rtengine::procparams::ProcParams* pp) override;
 
     void setLensGeomListener (LensGeomListener* l) { lgl = l; }
+    void setPerspCorrectionPanelListener(PerspCorrectionPanelListener* l)
+    {
+        panel_listener = l;
+    }
     void autoPressed(Gtk::Button *which);
 
     void setRawMeta(bool raw, const rtengine::FramesMetaData *meta);
@@ -47,6 +58,9 @@ public:
     void setEditProvider(EditDataProvider *provider) override;
     void switchOffEditMode();
     void lineChanged();
+
+    void setControlLineEditMode(bool active);
+    void requestApplyControlLines();
     
 private:
     void do_set_metadata(const rtengine::FramesMetaData *meta);
@@ -66,6 +80,7 @@ private:
     Gtk::Button *auto_vert;
     Gtk::Button *auto_both;
     LensGeomListener *lgl;
+    PerspCorrectionPanelListener *panel_listener;
 
     std::unique_ptr<ControlLineManager> lines;
     Gtk::Button *lines_button_apply;
