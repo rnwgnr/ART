@@ -45,8 +45,17 @@ PreviewImage::PreviewImage(const Glib::ustring &fname, const Glib::ustring &ext,
     height_(height),
     enable_cms_(enable_cms),
     compute_histogram_(compute_histogram),
-    loaded_(false)
+    loaded_(false),
+    imgprof_(nullptr)
 {
+}
+
+
+PreviewImage::~PreviewImage()
+{
+    if (imgprof_) {
+        cmsCloseProfile(imgprof_);
+    }
 }
 
 
@@ -56,7 +65,7 @@ void PreviewImage::render(bool enable_cms)
         cmsHTRANSFORM xform = nullptr;
         if (enable_cms) {
             cmsHPROFILE mprof = ICCStore::getInstance()->getProfile(ICCStore::getInstance()->getDefaultMonitorProfileName());
-            cmsHPROFILE iprof = ICCStore::getInstance()->getsRGBProfile();
+            cmsHPROFILE iprof = imgprof_ ? imgprof_ : ICCStore::getInstance()->getsRGBProfile();
             if (mprof) {
                 xform = cmsCreateTransform(iprof, TYPE_RGB_8, mprof, TYPE_RGB_8, settings->monitorIntent, cmsFLAGS_NOCACHE | (settings->monitorBPC ? cmsFLAGS_BLACKPOINTCOMPENSATION : 0));
             }
@@ -182,6 +191,15 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
     } else {
         delete ret;
         ret = nullptr;
+    }
+
+    if (ret && img->getEmbeddedProfile()) {
+        int length = 0;
+        unsigned char *data = nullptr;
+        img->getEmbeddedProfileData(length, data);
+        if (data) {
+            imgprof_ = cmsOpenProfileFromMem(data, length);
+        }
     }
 
     if (ret && compute_histogram_) {
