@@ -67,7 +67,9 @@ void PreviewImage::render(bool enable_cms)
             cmsHPROFILE mprof = ICCStore::getInstance()->getProfile(ICCStore::getInstance()->getDefaultMonitorProfileName());
             cmsHPROFILE iprof = imgprof_ ? imgprof_ : ICCStore::getInstance()->getsRGBProfile();
             if (mprof) {
+                lcmsMutex->lock();
                 xform = cmsCreateTransform(iprof, TYPE_RGB_8, mprof, TYPE_RGB_8, settings->monitorIntent, cmsFLAGS_NOCACHE | (settings->monitorBPC ? cmsFLAGS_BLACKPOINTCOMPENSATION : 0));
+                lcmsMutex->unlock();
             }
         }
         const unsigned char *data = img_->data;
@@ -180,6 +182,8 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
         }
     }
 
+    bool has_profile = img->getEmbeddedProfile();
+
     Image8 *ret = new Image8(w, h);
 
     if (img->getType() == sImage8) {
@@ -187,13 +191,29 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
     } else if (img->getType() == sImage16) {
         static_cast<Image16 *>(img)->resizeImgTo(w, h, TI_Bilinear, ret);
     } else if (img->getType() == sImagefloat) {
-        static_cast<Imagefloat *>(img)->resizeImgTo(w, h, TI_Bilinear, ret);
+        // do the CMS conversion here
+        Imagefloat *f = static_cast<Imagefloat *>(img);
+        if (has_profile) {
+            lcmsMutex->lock();
+            cmsHTRANSFORM xform = cmsCreateTransform(
+                img->getEmbeddedProfile(),
+                TYPE_RGB_FLT,
+                ICCStore::getInstance()->getsRGBProfile(), TYPE_RGB_FLT,
+                INTENT_RELATIVE_COLORIMETRIC,
+                cmsFLAGS_NOOPTIMIZE|cmsFLAGS_NOCACHE);
+            lcmsMutex->unlock();
+            f->normalizeFloatTo1();
+            f->ExecCMSTransform(xform);
+            f->normalizeFloatTo65535();
+        }
+        has_profile = false;
+        f->resizeImgTo(w, h, TI_Bilinear, ret);
     } else {
         delete ret;
         ret = nullptr;
     }
 
-    if (ret && img->getEmbeddedProfile()) {
+    if (ret && has_profile) {
         int length = 0;
         unsigned char *data = nullptr;
         img->getEmbeddedProfileData(length, data);
