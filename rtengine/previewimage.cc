@@ -205,6 +205,7 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
             f->normalizeFloatTo1();
             f->ExecCMSTransform(xform);
             f->normalizeFloatTo65535();
+            cmsDeleteTransform(xform);
         }
         has_profile = false;
         f->resizeImgTo(w, h, TI_Bilinear, ret);
