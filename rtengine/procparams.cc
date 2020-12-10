@@ -161,7 +161,7 @@ std::string pack_list(const std::vector<double> &data)
 } // namespace
 
 
-const short SpotParams::minRadius = 5;
+const short SpotParams::minRadius = 2;
 const short SpotParams::maxRadius = 200;
 
 //-----------------------------------------------------------------------------
