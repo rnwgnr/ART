@@ -106,8 +106,12 @@ private:
 };
 
 
-bool is_valid_char(gunichar c)
+bool is_valid_char(gunichar c, bool allow_sep)
 {
+    if (G_IS_DIR_SEPARATOR(c)) {
+        return allow_sep;
+    }
+    
 #ifdef __WIN32__
     switch (c) {
     case '<':
@@ -129,11 +133,11 @@ bool is_valid_char(gunichar c)
 }
 
 
-Glib::ustring make_valid(const Glib::ustring &s)
+Glib::ustring make_valid(const Glib::ustring &s, bool allow_sep=false)
 {
     Glib::ustring ret;
     for (auto c : s) {
-        if (!is_valid_char(c)) {
+        if (!is_valid_char(c, allow_sep)) {
             if (c == '/') {
                 ret.push_back(gunichar(gunichar(0x2215))); // unicode "division slash" ∕
             } else {
@@ -151,6 +155,18 @@ class Pattern {
 public:
     virtual ~Pattern() {}
     virtual Glib::ustring operator()(const FramesMetaData *fd) = 0;
+};
+
+
+class FixedPattern: public Pattern {
+public:
+    FixedPattern(const Glib::ustring &s): s_(make_valid(s, true)) {}
+    Glib::ustring operator()(const FramesMetaData *fd) override
+    {
+        return s_;
+    }
+private:
+    Glib::ustring s_;
 };
 
 
@@ -232,6 +248,7 @@ private:
 
 
 struct Params {
+    std::string basedir;
     std::vector<std::unique_ptr<Pattern>> pattern;
     std::vector<Glib::ustring> sidecars;
     enum class Normalization {
@@ -298,8 +315,7 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
         if (c == '%') {
             if (prev != i) {
                 auto f = s.substr(prev, i-prev);
-                out.pattern.push_back(
-                    make_pattern([f](FD fd) { return f; }));
+                out.pattern.emplace_back(new FixedPattern(f));
             }
             if (i+1 < n) {
                 i += 2;
@@ -448,7 +464,7 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                 return false;
             }
         } else {
-            if (!is_valid_char(c)) {
+            if (!is_valid_char(c, true)) {
                 return false;
             }
             ++i;
@@ -456,9 +472,17 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
     }
     if (prev < n) {
         auto f = s.substr(prev);
-        out.pattern.push_back(make_pattern([f](FD fd) { return f; }));
+        out.pattern.emplace_back(new FixedPattern(f));
     }
-    return !out.pattern.empty();
+    if (out.pattern.empty()) {
+        return false;
+    } else if (dynamic_cast<FixedPattern *>(out.pattern[0].get())) {
+        auto s = (*out.pattern[0])(nullptr);
+        if (g_path_is_absolute(s.c_str())) {
+            return false;
+        }
+    }
+    return true;
 }
 
 
@@ -503,7 +527,7 @@ bool parse_sidecars(const Glib::ustring &s, Params &out)
 
 Glib::ustring get_new_name(Params &params, FileBrowserEntry *entry)
 {
-    std::unique_ptr<FramesMetaData> fd(new FastMetadata(entry->thumbnail->getFileName(), entry->thumbnail->getCacheImageData()));//FramesMetaData::fromFile(entry->thumbnail->getFileName()));
+    std::unique_ptr<FramesMetaData> fd(new FastMetadata(entry->thumbnail->getFileName(), entry->thumbnail->getCacheImageData()));
 
     Glib::ustring name;
     for (auto &p : params.pattern) {
@@ -548,6 +572,10 @@ Glib::ustring get_new_name(Params &params, FileBrowserEntry *entry)
         }
         ret.push_back(c);
     }
+
+    if (!params.basedir.empty() && params.basedir != ".") {
+        ret = Glib::build_filename(params.basedir, ret);
+    }
     
     return ret;
 }
@@ -557,6 +585,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
 {
     Gtk::Dialog dialog(M("FILEBROWSER_RENAMEDLGLABEL"), parent);
     Gtk::Label lbl(M("RENAME_DIALOG_PATTERN"));
+    MyFileChooserButton basedir(M("RENAME_DIALOG_BASEDIR"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
     Gtk::Entry pattern;
     Gtk::VBox vb;
     Gtk::HBox hb;
@@ -564,6 +593,12 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     Gtk::VBox mainvb;
     double s = RTScalable::getScale();
     int pad = 4 * s;
+
+    Gtk::Label lbld(M("RENAME_DIALOG_BASEDIR"));
+    Gtk::HBox hbd;
+    hbd.pack_start(lbld, Gtk::PACK_SHRINK, pad);
+    hbd.pack_start(basedir, Gtk::PACK_EXPAND_WIDGET, pad);
+    mainvb.pack_start(hbd, Gtk::PACK_SHRINK, pad);
     
     hb.pack_start(lbl, Gtk::PACK_SHRINK, pad);
     hb.pack_start(pattern, Gtk::PACK_EXPAND_WIDGET, pad);
@@ -670,6 +705,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
                 errmsg = M("RENAME_DIALOG_INVALID_SIDECARS");
                 err = true;
             }
+            out.basedir = basedir.get_filename();
 
             info.set_markup("<span size=\"large\"><b>" + M("RENAME_DIALOG_PREVIEW") + ": <span foreground=\"#ff0000\">" + errmsg + "</span></b></span>");
             
@@ -711,6 +747,10 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
                             show += "<span foreground=\"#E59836\">";
                             show.push_back(gunichar(9141));
                             show += "</span>";
+                        } else if (G_IS_DIR_SEPARATOR(c)) {
+                            show += "<span foreground=\"#E59836\">";
+                            show.push_back(c);
+                            show += "</span>";                               
                         } else {
                             show.push_back(c);
                         }
@@ -726,6 +766,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
             on_pattern_change();
         };
 
+    basedir.set_filename(".");
     pattern.set_text(options.renaming.pattern);
     sidecars.set_text(options.renaming.sidecars);
     name_norm.set_active(options.renaming.name_norm);
@@ -733,7 +774,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     on_existing.set_active(options.renaming.on_existing);
     allow_whitespace.set_active(options.renaming.allow_whitespace);
     progressive_number.set_value(options.renaming.progressive_number);
-    
+
     pattern.signal_changed().connect(sigc::slot<void>(on_pattern_change));
     name_norm.signal_changed().connect(sigc::slot<void>(on_pattern_change));
     ext_norm.signal_changed().connect(sigc::slot<void>(on_pattern_change));
@@ -741,6 +782,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     allow_whitespace.signal_toggled().connect(sigc::slot<void>(on_pattern_change));
     progressive_number.signal_value_changed().connect(sigc::slot<void>(on_pattern_change));
     filelist.signal_row_activated().connect(sigc::slot<void, const Gtk::TreeModel::Path &, Gtk::TreeViewColumn *>(on_file_select));
+    basedir.signal_file_set().connect(sigc::slot<void>(on_pattern_change));
 
     on_pattern_change();
 
@@ -757,7 +799,7 @@ void get_targets(Params &params, FileBrowserEntry *entry,
     auto dir = Glib::path_get_dirname(fn);
     auto name = Glib::path_get_basename(fn);
     auto newname = get_new_name(params, entry);
-    auto newpath = Glib::build_filename(dir, newname);
+    auto newpath = g_path_is_absolute(newname.c_str()) ? newname : Glib::ustring(Glib::build_filename(dir, newname));
     if (Glib::file_test(newpath, Glib::FILE_TEST_EXISTS)) {
         if (params.on_existing == Params::OnExistingAction::RENAME) {
             auto bn = removeExtension(newname);
@@ -818,7 +860,9 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
             get_targets(params, e, torename);
             bool first = true;
             for (auto &p : torename) {
-                if (::g_rename(p.first.c_str(), p.second.c_str()) == 0) {
+                auto destdir = Glib::path_get_dirname(p.second);
+                if (::g_mkdir_with_parents(destdir.c_str(), 0755) == 0 &&
+                    ::g_rename(p.first.c_str(), p.second.c_str()) == 0) {
                     if (first) {
                         cacheMgr->renameEntry(p.first, e->thumbnail->getMD5(), p.second);
                     }
