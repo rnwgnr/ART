@@ -355,7 +355,8 @@ public:
         RawImageSource(),
         bbox_W_(bw),
         bbox_H_(bh),
-        demosaiced_(false)
+        demosaiced_(false),
+        scaled_(false)
     {
     }
 
@@ -455,11 +456,11 @@ public:
     {
         BENCHFUNMICRO
             
-        bool scaled = rescale(mono);
+        scaled_ = rescale(mono);
         
         if (demosaiced_) {
             return;
-        } else if (!mono && scaled && ri->isBayer()) {
+        } else if (!mono && scaled_ && ri->isBayer()) {
             bayer_bilinear_demosaic(rawData, red, green, blue);
             return;
         }
@@ -477,9 +478,21 @@ public:
         RawImageSource::demosaic(pp.raw, false, t);
     }
 
+    void getFullSize(int &w, int &h, int tr=TR_NONE) override
+    {
+        if (scaled_) {
+            w = W;
+            h = H;
+        } else {
+            RawImageSource::getFullSize(w, h, tr);
+        }
+    }
+
 private:
     bool rescale(bool mono)
     {
+        return false;
+        
         if (bbox_W_ < 0 || bbox_H_ < 0) {
             return false;
         }
@@ -659,6 +672,7 @@ private:
     int bbox_W_;
     int bbox_H_;
     bool demosaiced_;
+    bool scaled_;
 };
 
 } // namespace
