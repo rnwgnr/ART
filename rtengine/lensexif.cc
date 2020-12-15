@@ -138,17 +138,19 @@ float interpolate(const std::vector<float> &xi, const std::vector<float> &yi, fl
 
 ExifLensCorrection::ExifLensCorrection(const FramesMetaData *meta, int width, int height, const CoarseTransformParams &coarse, int rawRotationDeg):
     data_(),
-    width_(width),
-    height_(height),
     swap_xy_(false)
 {
     if (rawRotationDeg >= 0) {
         int rot = (coarse.rotate + rawRotationDeg) % 360;
         swap_xy_ = (rot == 90 || rot == 270);
         if (swap_xy_) {
-            std::swap(width_, height_);
+            std::swap(width, height);
         }
     }
+
+    w2_ = width * 0.5f;
+    h2_ = height * 0.5f;
+    r_ = 1 / std::sqrt(SQR(w2_) + SQR(h2_));
 
     auto make = meta->getMake();
     if (make != "SONY" && make != "FUJIFILM") {
@@ -263,16 +265,13 @@ void ExifLensCorrection::correctDistortion(double &x, double &y, int cx, int cy,
         if (swap_xy_) {
             std::swap(xx, yy);
         }
-        const float w2 = width_ * 0.5f;
-        const float h2 = height_ * 0.5f;
-        const float r = 1 / std::sqrt(SQR(w2) + SQR(h2));
 
-        float ccx = xx - w2;
-        float ccy = yy - h2;
-        float dr = interpolate(knots_, dist_, r * std::sqrt(SQR(ccx) + SQR(ccy)));
+        float ccx = xx - w2_;
+        float ccy = yy - h2_;
+        float dr = interpolate(knots_, dist_, r_ * std::sqrt(SQR(ccx) + SQR(ccy)));
 
-        x = dr * ccx + w2;
-        y = dr * ccy + h2;
+        x = dr * ccx + w2_;
+        y = dr * ccy + h2_;
         if (swap_xy_) {
             std::swap(x, y);
         }
@@ -299,16 +298,13 @@ void ExifLensCorrection::correctCA(double &x, double &y, int cx, int cy, int cha
         if (swap_xy_) {
             std::swap(xx, yy);
         }
-        const float w2 = width_ * 0.5f;
-        const float h2 = height_ * 0.5f;
-        const float r = 1 / std::sqrt(SQR(w2) + SQR(h2));
 
-        float ccx = xx - w2;
-        float ccy = yy - h2;
-        float dr = interpolate(knots_, ca_[channel], r * std::sqrt(SQR(ccx) + SQR(ccy)));
+        float ccx = xx - w2_;
+        float ccy = yy - h2_;
+        float dr = interpolate(knots_, ca_[channel], r_ * std::sqrt(SQR(ccx) + SQR(ccy)));
 
-        x = dr * ccx + w2;
-        y = dr * ccy + h2;
+        x = dr * ccx + w2_;
+        y = dr * ccy + h2_;
         if (swap_xy_) {
             std::swap(x, y);
         }
@@ -321,15 +317,11 @@ void ExifLensCorrection::correctCA(double &x, double &y, int cx, int cy, int cha
 void ExifLensCorrection::processVignette(int width, int height, float** rawData) const
 {
     if (data_) {
-        const float w2 = width * 0.5f;
-        const float h2 = height * 0.5f;
-        const float r = 1 / std::sqrt(SQR(w2) + SQR(h2));
-        
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
-                float cx = x - w2;
-                float cy = y - h2;
-                float sf = interpolate(knots_, vig_, r * std::sqrt(SQR(cx) + SQR(cy)));
+                float cx = x - w2_;
+                float cy = y - h2_;
+                float sf = interpolate(knots_, vig_, r_ * std::sqrt(SQR(cx) + SQR(cy)));
                 rawData[y][x] /= SQR(sf);
             }
         }

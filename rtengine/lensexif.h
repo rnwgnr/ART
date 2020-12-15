@@ -51,9 +51,10 @@ private:
     std::vector<float> dist_;
     std::vector<float> vig_;
     std::array<std::vector<float>, 3> ca_;
-    int width_;
-    int height_;
     bool swap_xy_;
+    float w2_;
+    float h2_;
+    float r_;
 };
 
 } // namespace rtengine
