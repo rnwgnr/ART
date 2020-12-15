@@ -1833,15 +1833,16 @@ TP_LABMASKS_PARAMETRIC;Parametric mask
 TP_LENSGEOM_AUTOCROP;Auto-Crop
 TP_LENSGEOM_FILL;Auto-fill
 TP_LENSGEOM_LABEL;Lens / Geometry
-TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatically
+TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatic from database
+TP_LENSPROFILE_CORRECTION_EXIF;Embedded in metadata
 TP_LENSPROFILE_CORRECTION_LCPFILE;LCP file
-TP_LENSPROFILE_CORRECTION_MANUAL;Manually
+TP_LENSPROFILE_CORRECTION_MANUAL;Manual from database
 TP_LENSPROFILE_LABEL;Profiled Lens Correction
 TP_LENSPROFILE_LENS_WARNING;Warning: the crop factor used for lens profiling is larger than the crop factor of the camera, the results might be wrong.
-TP_LENSPROFILE_MODE_HEADER;Select the lens profile:
+TP_LENSPROFILE_MODE_HEADER;Lens profile:
 TP_LENSPROFILE_USE_CA;Chromatic aberration
 TP_LENSPROFILE_USE_GEOMETRIC;Geometric
-TP_LENSPROFILE_USE_HEADER;Select distortions to correct:
+TP_LENSPROFILE_USE_HEADER;Distortions to correct:
 TP_LENSPROFILE_USE_VIGNETTING;Vignetting
 TP_LOCALCONTRAST_CONTRAST;Residual contrast
 TP_LOCALCONTRAST_CURVE;Local contrast curve

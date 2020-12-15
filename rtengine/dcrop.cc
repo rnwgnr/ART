@@ -473,7 +473,7 @@ bool check_need_larger_crop_for_transform(int fw, int fh, int x, int y, int w, i
     if (params.perspective.enabled) {
         adjust = 1; // TODO -- ask PerspectiveCorrection the right value
         return true;
-    } else if (params.lensProf.useDist && (params.lensProf.useLensfun() || params.lensProf.useLcp())) {
+    } else if (params.lensProf.useDist && params.lensProf.needed()) {
         adjust = 0.15;
         return true;
     }

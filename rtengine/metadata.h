@@ -60,6 +60,7 @@ public:
     void setExifKeys(const std::vector<std::string> *keys);
 
     void getDimensions(int &w, int &h) const;
+    std::unordered_map<std::string, std::string> getMakernotes() const;
 
     static Glib::ustring xmpSidecarPath(const Glib::ustring &path);
     static Exiv2::XmpData getXmpSidecar(const Glib::ustring &path);
@@ -70,6 +71,7 @@ public:
     static void embedProcParamsData(const Glib::ustring &fname, const std::string &data);
    
 private:
+    static std::unordered_map<std::string, std::string> getExiftoolMakernotes(const Glib::ustring &path);
     void do_merge_xmp(Exiv2::Image *dst) const;
     void import_exif_pairs(Exiv2::ExifData &out) const;
     void import_iptc_pairs(Exiv2::IptcData &out) const;
@@ -89,6 +91,9 @@ private:
     typedef std::pair<std::shared_ptr<Exiv2::Image>, Glib::TimeVal> CacheVal;
     typedef Cache<Glib::ustring, CacheVal> ImageCache;
     static std::unique_ptr<ImageCache> cache_;
+    typedef std::pair<std::unordered_map<std::string, std::string>, Glib::TimeVal> JSONCacheVal;
+    typedef Cache<Glib::ustring, JSONCacheVal> JSONCache;
+    static std::unique_ptr<JSONCache> jsoncache_;
 };
 
 } // namespace rtengine

@@ -32,6 +32,7 @@
 #include "../rtgui/pathutils.h"
 #include "../rtgui/multilangmgr.h"
 #include "subprocess.h"
+#include "cJSON.h"
 
 
 namespace rtengine {
@@ -39,6 +40,7 @@ namespace rtengine {
 extern const Settings *settings;
 
 std::unique_ptr<Exiv2Metadata::ImageCache> Exiv2Metadata::cache_(nullptr);
+std::unique_ptr<Exiv2Metadata::JSONCache> Exiv2Metadata::jsoncache_(nullptr);
 
 namespace {
 
@@ -613,6 +615,7 @@ Exiv2::XmpData Exiv2Metadata::getXmpSidecar(const Glib::ustring &path)
 void Exiv2Metadata::init(const Glib::ustring &base_dir, const Glib::ustring &user_dir)
 {
     cache_.reset(new ImageCache(IMAGE_CACHE_SIZE));
+    jsoncache_.reset(new JSONCache(IMAGE_CACHE_SIZE));
     const gchar *exiftool_base_dir_env = g_getenv("ART_EXIFTOOL_BASE_DIR");
     if (exiftool_base_dir_env) {
         exiftool_base_dir = exiftool_base_dir_env;
@@ -642,6 +645,75 @@ void Exiv2Metadata::embedProcParamsData(const Glib::ustring &fname, const std::s
             throw exc;
         }
     }
+}
+
+
+std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernotes(const Glib::ustring &fname)
+{
+    JSONCacheVal val;
+    auto finfo = Gio::File::create_for_path(fname)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+    if (jsoncache_  && jsoncache_->get(fname, val) && val.second >= finfo->modification_time()) {
+        return val.first;
+    }
+
+    Glib::ustring exiftool = settings->exiftool_path;
+    if (exiftool == exiftool_default) {
+        Glib::ustring e = Glib::build_filename(exiftool_base_dir, exiftool);
+        if (Glib::file_test(e, Glib::FILE_TEST_EXISTS)) {
+            exiftool = e;
+        }
+    }
+    std::vector<Glib::ustring> argv = {
+        exiftool,
+        "-json",
+        "-MakerNotes:all",
+        "-RAF:all",
+        "-PanasonicRaw:all",
+        fname
+    };
+    std::string out, err;
+    std::unordered_map<std::string, std::string> ret;
+    try {
+        subprocess::exec_sync("", argv, true, &out, &err);
+    } catch (subprocess::error &exc) {
+        return ret;
+    }
+
+    cJSON *root = cJSON_Parse(out.c_str());
+    if (!root) {
+        return ret;
+    }
+
+    if (cJSON_IsArray(root) && cJSON_GetArraySize(root) == 1) {
+        cJSON *obj = cJSON_GetArrayItem(root, 0);
+        if (obj && cJSON_IsObject(obj)) {
+            for (cJSON *e = obj->child; e != nullptr; e = e->next) {
+                if (e->type & cJSON_String) {
+                    ret[e->string] = e->valuestring;
+                } else if (e->type & cJSON_Number) {
+                    ret[e->string] = std::to_string(e->valuedouble);
+                } else if (e->type & cJSON_True) {
+                    ret[e->string] = "true";
+                } else if (e->type & cJSON_False) {
+                    ret[e->string] = "false";
+                }
+            }
+        }
+    }
+
+    cJSON_Delete(root);
+
+    if (jsoncache_) {
+        jsoncache_->set(fname, JSONCacheVal(ret, finfo->modification_time()));
+    }
+    
+    return ret;
+}
+
+
+std::unordered_map<std::string, std::string> Exiv2Metadata::getMakernotes() const
+{
+    return getExiftoolMakernotes(src_);
 }
 
 } // namespace rtengine

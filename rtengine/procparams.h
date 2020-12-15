@@ -879,7 +879,8 @@ struct LensProfParams {
         NONE,               // No lens correction
         LENSFUNAUTOMATCH,   // Lens correction using auto matched lensfun database entry
         LENSFUNMANUAL,      // Lens correction using manually selected lensfun database entry
-        LCP                 // Lens correction using lcp file
+        LCP,                // Lens correction using lcp file
+        EXIF                // Lens correction from EXIF metadata
     };
 
     LcMode lcMode;
@@ -898,6 +899,8 @@ struct LensProfParams {
     bool lfAutoMatch() const;
     bool useLcp() const;
     bool lfManual() const;
+    bool useExif() const;
+    bool needed() const;
 
     const std::vector<const char*>& getMethodStrings() const;
     Glib::ustring getMethodString(LcMode mode) const;

@@ -36,6 +36,7 @@
 #include "rtlensfun.h"
 #include "pdaflinesfilter.h"
 #include "camconst.h"
+#include "lensexif.h"
 #include "../rtgui/multilangmgr.h"
 #define BENCHMARK
 #include "StopWatch.h"
@@ -1448,6 +1449,8 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         std::unique_ptr<LensCorrection> pmap;
         if (lensProf.useLensfun()) {
             pmap = LFDatabase::getInstance()->findModifier(lensProf, idata, W, H, coarse, -1);
+        } else if (lensProf.useExif()) {
+            pmap.reset(new ExifLensCorrection(idata, W, H, coarse, -1));
         } else {
             const std::shared_ptr<LCPProfile> pLCPProf = LCPStore::getInstance()->getProfile(lensProf.lcpFile);
 

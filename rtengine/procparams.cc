@@ -2095,13 +2095,27 @@ bool LensProfParams::lfManual() const
     return lcMode == LcMode::LENSFUNMANUAL;
 }
 
+
+bool LensProfParams::useExif() const
+{
+    return lcMode == LcMode::EXIF;
+}
+
+
+bool LensProfParams::needed() const
+{
+    return useLensfun() || useLcp() || useExif();
+}
+
+
 const std::vector<const char*>& LensProfParams::getMethodStrings() const
 {
     static const std::vector<const char*> method_strings = {
         "none",
         "lfauto",
         "lfmanual",
-        "lcp"
+        "lcp",
+        "exif"
     };
     return method_strings;
 }

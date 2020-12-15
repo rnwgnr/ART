@@ -26,6 +26,7 @@
 #include "opthelper.h"
 #include "rtlensfun.h"
 #include "perspectivecorrection.h"
+#include "lensexif.h"
 #include "../rtgui/multilangmgr.h"
 
 
@@ -551,7 +552,15 @@ void ImProcFunctions::transform(Imagefloat* original, Imagefloat* transformed, i
 
     std::unique_ptr<const LensCorrection> pLCPMap;
 
-    if (needsLensfun()) {
+    if (params->lensProf.useExif()) {
+        auto corr = new ExifLensCorrection(metadata, oW, oH, params->coarse, rawRotationDeg);
+        pLCPMap.reset(corr);
+        if (!corr->ok()) {
+            LensProfParams lf;
+            lf.lcMode = LensProfParams::LcMode::LENSFUNAUTOMATCH;
+            pLCPMap = LFDatabase::getInstance()->findModifier(lf, metadata, oW, oH, params->coarse, rawRotationDeg);
+        }
+    } else if (needsLensfun()) {
         pLCPMap = LFDatabase::getInstance()->findModifier(params->lensProf, metadata, oW, oH, params->coarse, rawRotationDeg);
     } else if (needsLCP()) { // don't check focal length to allow distortion correction for lenses without chip
         const std::shared_ptr<LCPProfile> pLCPProf = LCPStore::getInstance()->getProfile (params->lensProf.lcpFile);
@@ -572,7 +581,7 @@ void ImProcFunctions::transform(Imagefloat* original, Imagefloat* transformed, i
     if (needsCA() || scale == 1) {
         highQuality = true;
     }
-    const bool needs_dist_rot_ca = needsCA() || needsDistortion() || needsRotation() || needsLCP() || needsLensfun();
+    const bool needs_dist_rot_ca = needsCA() || needsDistortion() || needsRotation() || params->lensProf.needed();
     const bool needs_luminance = needsVignetting();
     const bool needs_lcp_ca = highQuality && pLCPMap && params->lensProf.useCA && pLCPMap->isCACorrectionAvailable();
     const bool needs_perspective = needsPerspective() || needs_lcp_ca;
@@ -1368,12 +1377,12 @@ bool ImProcFunctions::needsLensfun()
 
 bool ImProcFunctions::needsTransform()
 {
-    return needsCA() || needsDistortion() || needsRotation() || needsPerspective() || needsVignetting() || needsLCP() || needsLensfun();
+    return needsCA() || needsDistortion() || needsRotation() || needsPerspective() || needsVignetting() || params->lensProf.needed();
 }
 
 bool ImProcFunctions::needsLuminanceOnly()
 {
-    return !(needsCA() || needsDistortion() || needsRotation() || needsPerspective() || needsLCP() || needsLensfun()) && needsVignetting();
+    return !(needsCA() || needsDistortion() || needsRotation() || needsPerspective() || params->lensProf.needed()) && needsVignetting();
 }
 
 

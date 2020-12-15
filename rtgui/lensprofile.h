@@ -47,6 +47,7 @@ public:
 
     void setDefaults(const rtengine::procparams::ProcParams *def) override;
     void toolReset(bool to_initial) override;
+    void enabledChanged() override;
 
 private:
     class LFDbHelper final
@@ -90,8 +91,7 @@ private:
         void fillLensfunLenses();
     };
 
-    void updateDisabled(bool enable);
-
+    void updateDisabled();
     bool setLensfunCamera(const Glib::ustring& make, const Glib::ustring& model);
     bool setLensfunLens(const Glib::ustring& lens);
     bool checkLensfunCanCorrect(bool automatch);
@@ -118,6 +118,7 @@ private:
     Gtk::Grid* const modesGrid;
     Gtk::Grid* const distGrid;
     Gtk::RadioButton::Group corrGroup;
+    Gtk::RadioButton *corrExif;
     Gtk::RadioButton* const corrLensfunAutoRB;
     Gtk::RadioButton* const corrLensfunManualRB;
     Gtk::RadioButton* const corrLcpFileRB;

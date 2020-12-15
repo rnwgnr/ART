@@ -157,6 +157,7 @@ set(RTENGINESOURCEFILES
     gainmap.cc
     base64.cc
     imgiomanager.cc
+    lensexif.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)
