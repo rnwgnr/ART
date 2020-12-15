@@ -25,10 +25,7 @@
 #include "lensgeom.h"
 #include "toolpanel.h"
 
-class LensProfilePanel final :
-    public ToolParamBlock,
-    public FoldableToolPanel
-{
+class LensProfilePanel: public ToolParamBlock, public FoldableToolPanel {
 public:
     LensProfilePanel();
 
@@ -47,15 +44,11 @@ public:
 
     void setDefaults(const rtengine::procparams::ProcParams *def) override;
     void toolReset(bool to_initial) override;
-    void enabledChanged() override;
 
 private:
-    class LFDbHelper final
-    {
+    class LFDbHelper {
     public:
-        class LFModelCam final :
-            public Gtk::TreeModel::ColumnRecord
-        {
+        class LFModelCam: public Gtk::TreeModel::ColumnRecord {
         public:
             LFModelCam()
             {
@@ -66,9 +59,7 @@ private:
             Gtk::TreeModelColumn<Glib::ustring> model;
         };
 
-        class LFModelLens final :
-            public Gtk::TreeModel::ColumnRecord
-        {
+        class LFModelLens: public Gtk::TreeModel::ColumnRecord {
         public:
             LFModelLens()
             {

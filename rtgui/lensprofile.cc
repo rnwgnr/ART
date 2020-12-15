@@ -51,8 +51,6 @@ LensProfilePanel::LensProfilePanel() :
     metadata(nullptr),
     modesGrid(Gtk::manage(new Gtk::Grid())),
     distGrid(Gtk::manage((new Gtk::Grid()))),
-    // corrUnchangedRB(Gtk::manage((new Gtk::RadioButton(M("GENERAL_UNCHANGED"))))),
-    // corrOffRB(Gtk::manage((new Gtk::RadioButton(corrGroup, M("GENERAL_NONE"))))),
     corrExif(Gtk::manage((new Gtk::RadioButton(corrGroup, M("TP_LENSPROFILE_CORRECTION_EXIF"))))),
     corrLensfunAutoRB(Gtk::manage((new Gtk::RadioButton(corrGroup, M("TP_LENSPROFILE_CORRECTION_AUTOMATCH"))))),
     corrLensfunManualRB(Gtk::manage((new Gtk::RadioButton(corrGroup, M("TP_LENSPROFILE_CORRECTION_MANUAL"))))),
@@ -142,7 +140,6 @@ LensProfilePanel::LensProfilePanel() :
 
     // Populate modes grid:
 
-    // modesGrid->attach(*corrOffRB, 0, 0, 3, 1);
     modesGrid->attach(*corrExif, 0, 0, 3, 1);
     modesGrid->attach(*corrLensfunAutoRB, 0, 1, 3, 1);
     modesGrid->attach(*corrLensfunManualRB, 0, 2, 3, 1);
@@ -183,7 +180,6 @@ LensProfilePanel::LensProfilePanel() :
 
     lensfunCameras->signal_changed().connect(sigc::mem_fun(*this, &LensProfilePanel::onLensfunCameraChanged));
     lensfunLenses->signal_changed().connect(sigc::mem_fun(*this, &LensProfilePanel::onLensfunLensChanged));
-    // corrOffRB->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &LensProfilePanel::onCorrModeChanged), corrOffRB));
     corrExif->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &LensProfilePanel::onCorrModeChanged), corrExif));
     corrLensfunAutoRB->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &LensProfilePanel::onCorrModeChanged), corrLensfunAutoRB));
     corrLensfunManualRB->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &LensProfilePanel::onCorrModeChanged), corrLensfunManualRB));
@@ -195,13 +191,11 @@ void LensProfilePanel::read(const rtengine::procparams::ProcParams* pp)
     disableListener();
     conUseDist.block(true);
 
-    // corrLensfunAutoRB->set_sensitive(true);
     setEnabled(true);
 
     switch (pp->lensProf.lcMode) {
         case procparams::LensProfParams::LcMode::LCP: {
             corrLcpFileRB->set_active(true);
-            setManualParamsVisibility(false);
             break;
         }
 
@@ -216,7 +210,6 @@ void LensProfilePanel::read(const rtengine::procparams::ProcParams* pp)
         }
 
         case procparams::LensProfParams::LcMode::EXIF: {
-            setManualParamsVisibility(false);
             if (metadata) {
                 if (rtengine::ExifLensCorrection::ok(metadata)) {
                     corrExif->set_active(true);
@@ -235,8 +228,6 @@ void LensProfilePanel::read(const rtengine::procparams::ProcParams* pp)
             
         case procparams::LensProfParams::LcMode::NONE: {
             setEnabled(false);
-            // corrOffRB->set_active(true);
-            // setManualParamsVisibility(false);
             break;
         }
     }
@@ -258,6 +249,8 @@ void LensProfilePanel::read(const rtengine::procparams::ProcParams* pp)
         updateDisabled();
     }
 
+    setManualParamsVisibility(corrLensfunAutoRB->get_active() || corrLensfunManualRB->get_active());
+    
     const LFDatabase* const db = LFDatabase::getInstance();
     LFCamera c;
 
@@ -464,22 +457,7 @@ void LensProfilePanel::onLensfunLensChanged()
 void LensProfilePanel::onCorrModeChanged(const Gtk::RadioButton* rbChanged)
 {
     if (rbChanged->get_active()) {
-        // because the method gets called for the enabled AND the disabled RadioButton, we do the processing only for the enabled one
         Glib::ustring mode;
-
-        // if (rbChanged == corrOffRB) {
-        //     lcModeChanged = true;
-        //     useLensfunChanged = true;
-        //     lensfunAutoChanged = true;
-        //     lcpFileChanged = false;
-
-        //     ckbUseDist->set_sensitive(false);
-        //     ckbUseVign->set_sensitive(false);
-        //     ckbUseCA->set_sensitive(false);
-
-        //     mode = M("GENERAL_NONE");
-            
-        // } else
         if (rbChanged == corrLensfunAutoRB) {
             lcModeChanged = true;
             useLensfunChanged = true;
@@ -802,15 +780,8 @@ void LensProfilePanel::toolReset(bool to_initial)
     if (to_initial) {
         pp.lensProf = initial_params;
     }
-    //pp.lensProf.enabled = getEnabled();
     read(&pp);
     if (listener && !getEnabled()) {
         listener->panelChanged(EvToolReset, M("GENERAL_RESET"));
     }
-}
-
-
-void LensProfilePanel::enabledChanged()
-{
-    FoldableToolPanel::enabledChanged();
 }
