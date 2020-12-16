@@ -518,7 +518,7 @@ endif()
 
 # check if possible to use the fast_float pluging of LCMS
 set(LCMS_VERSION_INFO ${LCMS_VERSION})
-if(LCMS_VERSION VERSION_GREATER_EQUAL 2.10)
+if(LCMS_VERSION VERSION_GREATER 2.9)
     include(CheckCSourceCompiles)
     set(CMAKE_REQUIRED_INCLUDES ${LCMS_INCLUDE_DIRS})
     set(CMAKE_REQUIRED_LIBRARIES ${LCMS_LIBRARIES} m)
