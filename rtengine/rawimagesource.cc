@@ -3112,7 +3112,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
             case CAMERA_ICC_TYPE_NIKON:
             case CAMERA_ICC_TYPE_GENERIC:
             default:
-                hTransform = cmsCreateTransform (in, TYPE_RGB_FLT, prophoto, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE );  // NOCACHE is important for thread safety
+                hTransform = cmsCreateTransform (in, TYPE_RGB_FLT, prophoto, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE );  // NOCACHE is important for thread safety
                 break;
         }
 
@@ -3121,7 +3121,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
         if (hTransform == nullptr) {
             // Fallback: create transform from camera profile. Should not happen normally.
             lcmsMutex->lock ();
-            hTransform = cmsCreateTransform (camprofile, TYPE_RGB_FLT, prophoto, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE );
+            hTransform = cmsCreateTransform (camprofile, TYPE_RGB_FLT, prophoto, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE );
             lcmsMutex->unlock ();
         }
 

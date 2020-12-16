@@ -110,6 +110,7 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     delete lcmsMutex;
     lcmsMutex = new MyMutex;
     fftwMutex = new MyMutex;
+
     return 0;
 }
 

@@ -76,7 +76,7 @@ set(RTENGINESOURCEFILES
     improcfun.cc
     impulse_denoise.cc
     init.cc
-    iplab2rgb.cc
+    iprgb2out.cc
     ipresize.cc
     ipsharpen.cc
     iptransform.cc
@@ -160,6 +160,27 @@ set(RTENGINESOURCEFILES
     lensexif.cc
     )
 
+if(LCMS_FAST_FLOAT)
+    set(lcms2_fast_float_SRC
+        lcms2_fast_float/fast_16_tethra.c
+        lcms2_fast_float/fast_8_curves.c
+        lcms2_fast_float/fast_8_matsh.c
+        lcms2_fast_float/fast_8_matsh_sse.c
+        lcms2_fast_float/fast_8_tethra.c
+        lcms2_fast_float/fast_float_15bits.c
+        lcms2_fast_float/fast_float_15mats.c
+        lcms2_fast_float/fast_float_cmyk.c
+        lcms2_fast_float/fast_float_curves.c
+        lcms2_fast_float/fast_float_matsh.c
+        lcms2_fast_float/fast_float_separate.c
+        lcms2_fast_float/fast_float_sup.c
+        lcms2_fast_float/fast_float_tethra.c
+        )
+    add_library(lcms2_fast_float ${lcms2_fast_float_SRC})
+    target_link_libraries(lcms2_fast_float ${LCMS_LIBRARIES})
+    set_source_files_properties(iccstore.cc PROPERTIES COMPILE_DEFINITIONS RT_LCMS_FAST_FLOAT)
+endif()
+
 if(LENSFUN_HAS_LOAD_DIRECTORY)
     set_source_files_properties(rtlensfun.cc PROPERTIES COMPILE_DEFINITIONS RT_LENSFUN_HAS_LOAD_DIRECTORY)
 endif()
@@ -215,5 +236,8 @@ target_link_libraries(rtengine
     ${RSVG_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
+if(LCMS_FAST_FLOAT)
+    target_link_libraries(rtengine lcms2_fast_float)
+endif()
 
 install(FILES ${CAMCONSTSFILE} DESTINATION "${DATADIR}" PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)

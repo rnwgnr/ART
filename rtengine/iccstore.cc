@@ -41,16 +41,28 @@
 #include "color.h"
 
 #include "cJSON.h"
+
+#ifdef RT_LCMS_FAST_FLOAT
+#  include "lcms2_fast_float/lcms2_fast_float.h"
+#endif
+
+
 #define inkc_constant 0x696E6B43
-namespace rtengine
-{
+
+namespace rtengine {
 
 extern const Settings* settings;
 
-}
+#ifdef RT_LCMS_FAST_FLOAT
+cmsUInt32Number ICCStore::FLAGS_NOOPTIMIZE = 0;
+#else
+cmsUInt32Number ICCStore::FLAGS_NOOPTIMIZE = cmsFLAGS_NOOPTIMIZE;
+#endif
 
-namespace
-{
+} // namespace rtengine
+
+
+namespace {
 
 // Not recursive
 void loadProfiles(
@@ -1041,6 +1053,9 @@ rtengine::ICCStore* rtengine::ICCStore::getInstance()
 
 void rtengine::ICCStore::init(const Glib::ustring& usrICCDir, const Glib::ustring& stdICCDir, bool loadAll)
 {
+#ifdef RT_LCMS_FAST_FLOAT
+    cmsPlugin(cmsFastFloatExtensions());
+#endif
     implementation->init(usrICCDir, stdICCDir, loadAll);
 }
 

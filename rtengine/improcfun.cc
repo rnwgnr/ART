@@ -169,7 +169,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                 monitorTransform = cmsCreateProofingTransform (
                                        iprof, TYPE_Lab_FLT,
                                        monitor, TYPE_RGB_FLT,
-                                       softproof, //oprof,
+                                       softproof,
                                        monitorIntent, outIntent,
                                        flags
                                    );
@@ -191,16 +191,6 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                 }
             }
         } else if (gamutCheck) {
-            // flags = cmsFLAGS_GAMUTCHECK | cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
-            // if (settings->monitorBPC) {
-            //     flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
-            // }
-
-            // monitorTransform = cmsCreateProofingTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_8, monitor, monitorIntent, monitorIntent, flags);
-
-            // if (monitorTransform) {
-            //     softProofCreated = true;
-            // }
             gamutprof = monitor;
             if (settings->monitorBPC) {
                 gamutbpc = cmsFLAGS_BLACKPOINTCOMPENSATION;

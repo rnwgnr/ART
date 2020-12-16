@@ -294,7 +294,7 @@ void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagement
 
         lcmsMutex->lock ();
         cmsHTRANSFORM hTransform = cmsCreateTransform (in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC,
-                                   cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+                                                       ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
         lcmsMutex->unlock ();
 
         if(hTransform) {

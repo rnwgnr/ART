@@ -392,13 +392,13 @@ void Crop::update(int todo)
     PipetteBuffer::setReady();
 
     // Computing the preview image, i.e. converting from lab->Monitor color space (soft-proofing disabled) or lab->Output profile->Monitor color space (soft-proofing enabled)
-    parent->ipf.lab2monitorRgb(bufs_[2], cropImg);
+    parent->ipf.rgb2monitor(bufs_[2], cropImg);
 
     if (cropImageListener) {
         // Computing the internal image for analysis, i.e. conversion from lab->Output profile (rtSettings.HistogramWorking disabled) or lab->WCS (rtSettings.HistogramWorking enabled)
 
         // internal image in output color space for analysis
-        Image8 *cropImgtrue = parent->ipf.lab2rgb(bufs_[2], 0, 0, cropImg->getWidth(), cropImg->getHeight(), params.icm);
+        Image8 *cropImgtrue = parent->ipf.rgb2out(bufs_[2], 0, 0, cropImg->getWidth(), cropImg->getHeight(), params.icm);
 
         int finalW = rqcropw;
 

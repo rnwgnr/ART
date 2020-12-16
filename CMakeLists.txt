@@ -515,6 +515,36 @@ else()
     set(COMPILER_INFO "gcc ${GCC_VERSION}")
 endif()
 
+
+# check if possible to use the fast_float pluging of LCMS
+set(LCMS_VERSION_INFO ${LCMS_VERSION})
+if(LCMS_VERSION VERSION_GREATER_EQUAL 2.10)
+    include(CheckCSourceCompiles)
+    set(CMAKE_REQUIRED_INCLUDES ${LCMS_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${LCMS_LIBRARIES} m)
+    set(CMAKE_REQUIRED_FLAGS ${LCMS_LDFLAGS})
+    check_c_source_compiles(
+        "#include <lcms2.h>
+extern cmsBool  _cmsOptimizePipeline(cmsContext ContextID,
+                              cmsPipeline** Lut,
+                              cmsUInt32Number  Intent,
+                              cmsUInt32Number* InputFormat,
+                              cmsUInt32Number* OutputFormat,
+                              cmsUInt32Number* dwFlags);
+int main()
+{
+    _cmsOptimizePipeline(cmsGetPipelineContextID(NULL), NULL, 0, NULL, NULL, NULL);
+    return 0;
+}" LCMS_INTERNAL_VISIBLE)
+    
+    if(LCMS_INTERNAL_VISIBLE)
+        set(LCMS_FAST_FLOAT 1)
+        message(STATUS "Enabling lcms2 fast_float")
+        set(LCMS_VERSION_INFO "${LCMS_VERSION}-fast_float")
+    endif()
+endif()
+
+
 # Get C++ and linker flags for rtengine (the GUI's C++ flags may have fewer flags):
 set(CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${UPPER_CMAKE_BUILD_TYPE}} ${RTENGINE_CXX_FLAGS}")
 set(LFLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${UPPER_CMAKE_BUILD_TYPE}}")
@@ -529,7 +559,8 @@ set(ABOUT_COMMAND_WITH_ARGS ${CMAKE_COMMAND}
     -DOPTION_OMP:STRING=${OPTION_OMP}
     -DWITH_MYFILE_MMAP:STRING=${WITH_MYFILE_MMAP}
     -DLENSFUN_VERSION:STRING=${LENSFUN_VERSION}
-    -DEXIV2_VERSION:STRING=${EXIV2_VERSION})
+    -DEXIV2_VERSION:STRING=${EXIV2_VERSION}
+    -DLCMS_VERSION_INFO:STRING="${LCMS_VERSION_INFO}")
 
 if(WIN32)
     list(APPEND ABOUT_COMMAND_WITH_ARGS -DSYSTEM:STRING=Windows

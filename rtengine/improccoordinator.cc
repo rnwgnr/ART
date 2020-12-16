@@ -583,11 +583,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 
             try {
                 // Computing the preview image, i.e. converting from WCS->Monitor color space (soft-proofing disabled) or WCS->Printer profile->Monitor color space (soft-proofing enabled)
-                ipf.lab2monitorRgb(bufs_[2], previmg);
+                ipf.rgb2monitor(bufs_[2], previmg);
 
                 // Computing the internal image for analysis, i.e. conversion from WCS->Output profile
                 delete workimg;
-                workimg = ipf.lab2rgb(bufs_[2], 0, 0, pW, pH, params.icm);
+                workimg = ipf.rgb2out(bufs_[2], 0, 0, pW, pH, params.icm);
             } catch (char * str) {
                 progress("Error converting file...", 0);
                 return;
@@ -924,7 +924,7 @@ void rgb2lab(const Image8 &src, int x, int y, int w, int h, float L[], float a[]
     }
 
     if (oprof) {
-        cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE; // NOCACHE is important for thread safety
+        cmsUInt32Number flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE; // NOCACHE is important for thread safety
 
         if (icm.outputBPC) {
             flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;

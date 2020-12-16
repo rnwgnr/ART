@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -28,20 +29,13 @@
 
 #include "color.h"
 
-namespace rtengine
-{
+namespace rtengine {
 
-namespace procparams
-{
-
-    struct ColorManagementParams;
-
-}
+namespace procparams { struct ColorManagementParams; }
 
 typedef const double(*TMatrix)[3];
 
-class ProfileContent
-{
+class ProfileContent {
 public:
     ProfileContent();
 
@@ -55,9 +49,10 @@ private:
     std::string data;
 };
 
-class ICCStore
-{
+class ICCStore {
 public:
+    static cmsUInt32Number FLAGS_NOOPTIMIZE;
+    
     enum class ProfileType {
         MONITOR,
         PRINTER,

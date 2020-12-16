@@ -1128,9 +1128,9 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     Image8 *readyImg = nullptr;
     if (forMonitor) {
         readyImg = new Image8 (fw, fh);
-        ipf.lab2monitorRgb(baseImg, readyImg);
+        ipf.rgb2monitor(baseImg, readyImg);
     } else {
-        readyImg = ipf.lab2rgb(baseImg, 0, 0, fw, fh, params.icm, false);
+        readyImg = ipf.rgb2out(baseImg, 0, 0, fw, fh, params.icm, false);
     }
     delete baseImg;
 

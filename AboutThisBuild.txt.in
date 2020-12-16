@@ -9,6 +9,7 @@ Bit depth: ${PROC_BIT_DEPTH}
 Gtkmm: V${GTKMM_VERSION}
 Lensfun: V${LENSFUN_VERSION}
 Exiv2: V${EXIV2_VERSION}
+LCMS2: V${LCMS_VERSION_INFO}
 Build type: ${BUILD_TYPE}
 Build flags: ${CXX_FLAGS}
 Link flags: ${LFLAGS}
