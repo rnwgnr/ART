@@ -425,6 +425,42 @@ public:
         return true;
     }
 
+    bool button2Pressed(int modifierKey) override
+    {
+        bool shift = modifierKey & GDK_SHIFT_MASK;
+        bool ctrl = shift || (modifierKey & GDK_CONTROL_MASK);
+        int incr = (modifierKey & GDK_MOD1_MASK) ? 10 : 1;
+        if (update_brush(ctrl, shift, incr)) {
+            EditSubscriber::action = ES_ACTION_PICKING;
+            return true;            
+        }
+        return false;
+    }
+
+    bool button3Pressed(int modifierKey) override
+    {
+        bool shift = modifierKey & GDK_SHIFT_MASK;
+        bool ctrl = shift || (modifierKey & GDK_CONTROL_MASK);
+        int incr = (modifierKey & GDK_MOD1_MASK) ? -10 : -1;
+        if (update_brush(ctrl, shift, incr)) {
+            EditSubscriber::action = ES_ACTION_PICKING;
+            return true;
+        }
+        return false;
+    }
+
+    bool button2Released() override
+    {
+        EditSubscriber::action = ES_ACTION_NONE;
+        return false;
+    }
+
+    bool button3Released() override
+    {
+        EditSubscriber::action = ES_ACTION_NONE;
+        return false;
+    }
+
     bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override
     {
         double delta = (abs(deltaX) > abs(deltaY)) ? deltaX : deltaY;
@@ -433,19 +469,28 @@ public:
 
         bool ctrl = bstate & GDK_CONTROL_MASK;
         bool shift = bstate & GDK_SHIFT_MASK;
-        if (ctrl && !shift) {
-            radius_->setValue(std::max(radius_->getValue() + incr, 0.0));
-            update_pen(false);
+
+        if (update_brush(ctrl, shift, incr)) {
             propagateEvent = false;
             return true;
-        } else if (ctrl && shift) {
-            hardness_->setValue(std::max(hardness_->getValue() + incr, 0.0));
-            propagateEvent = false;
-            return true;
+        } else {
+            propagateEvent = true;
+            return false;
         }
         
-        propagateEvent = true;
-        return false;
+        // if (ctrl && !shift) {
+        //     radius_->setValue(std::max(radius_->getValue() + incr, 0.0));
+        //     update_pen(false);
+        //     propagateEvent = false;
+        //     return true;
+        // } else if (ctrl && shift) {
+        //     hardness_->setValue(std::max(hardness_->getValue() + incr, 0.0));
+        //     propagateEvent = false;
+        //     return true;
+        // }
+        
+        // propagateEvent = true;
+        // return false;
     }
 
     void switchOffEditMode() override
@@ -453,9 +498,9 @@ public:
         toggle_->set_active(false);
     }
 
-    void setTargetMask(rtengine::procparams::DrawnMask *mask)
+    void setTargetMask(rtengine::procparams::DrawnMask *mask, bool force=false)
     {
-        if (mask != mask_) {
+        if (mask != mask_ || force) {
             mask_ = nullptr;
             undo_stack_.clear();
             if (mask) {
@@ -479,6 +524,19 @@ public:
     SigDrawUpdated signal_draw_updated() { return sig_draw_updated_; }
     
 private:
+    bool update_brush(bool ctrl, bool shift, int incr)
+    {
+        if (ctrl && !shift) {
+            radius_->setValue(std::max(radius_->getValue() + incr, 0.0));
+            update_pen(false);
+            return true;
+        } else if (ctrl && shift) {
+            hardness_->setValue(std::max(hardness_->getValue() + incr, 0.0));
+            return true;
+        }
+        return false;
+    }
+    
     void on_toggled()
     {
         if (mask_ && getEnabled() && getEditProvider()) {
@@ -1419,9 +1477,10 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaEH->setValue(r.deltaEMask.weight_H, r.deltaEMask.H);
         deltaERange->setValue(r.deltaEMask.range);
         deltaEDecay->setValue(r.deltaEMask.decay);
-        static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);        
+        static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
     }
-    static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&r.drawnMask);
+    static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&r.drawnMask,
+                                                            !list_only);
 
     int n = cp_->getColumnCount();
     auto row = list_model_->children()[idx];
