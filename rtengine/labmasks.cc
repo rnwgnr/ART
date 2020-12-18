@@ -420,7 +420,9 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
                     }
                 }
 
-                ++curflag_;
+                if (neg_ != s.erase || hardness_ != s.hardness || !s.radius) {
+                    ++curflag_;
+                }
             }
 
             int cx = width_ * s.x - ox_;

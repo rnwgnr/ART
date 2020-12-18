@@ -280,7 +280,7 @@ void Gradient::editToggled ()
     }
 }
 
-CursorShape Gradient::getCursor(const int objectID)
+CursorShape Gradient::getCursor(int objectID)
 {
     switch (objectID) {
     case (0):
@@ -306,7 +306,7 @@ CursorShape Gradient::getCursor(const int objectID)
     }
 }
 
-bool Gradient::mouseOver(const int modifierKey)
+bool Gradient::mouseOver(int modifierKey)
 {
     EditDataProvider* editProvider = getEditProvider();
 
@@ -336,7 +336,7 @@ bool Gradient::mouseOver(const int modifierKey)
     return false;
 }
 
-bool Gradient::button1Pressed(const int modifierKey)
+bool Gradient::button1Pressed(int modifierKey)
 {
     if (lastObject < 0) {
         return false;
@@ -415,7 +415,7 @@ bool Gradient::button1Released()
     return true;
 }
 
-bool Gradient::drag1(const int modifierKey)
+bool Gradient::drag1(int modifierKey)
 {
     // compute the polar coordinate of the mouse position
     EditDataProvider *provider = getEditProvider();

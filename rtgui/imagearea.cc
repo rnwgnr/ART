@@ -263,9 +263,16 @@ bool ImageArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
 
 bool ImageArea::on_motion_notify_event (GdkEventMotion* event)
 {
+    auto device = gdk_event_get_source_device(reinterpret_cast<GdkEvent *>(event));
+    double pressure = rtengine::RT_NAN;
+    if (device && event->axes) {
+        if (!gdk_device_get_axis(device, event->axes, GDK_AXIS_PRESSURE, &pressure)) {
+            pressure = rtengine::RT_NAN;
+        }
+    }
 
     if (focusGrabber) {
-        focusGrabber->pointerMoved (event->state, event->x, event->y);
+        focusGrabber->pointerMoved (event->state, event->x, event->y, pressure);
     } else {
         CropWindow* cw = getCropWindow (event->x, event->y);
 
@@ -279,7 +286,7 @@ bool ImageArea::on_motion_notify_event (GdkEventMotion* event)
                 flawnOverWindow = cw;
             }
 
-            cw->pointerMoved (event->state, event->x, event->y);
+            cw->pointerMoved (event->state, event->x, event->y, pressure);
         } else if (flawnOverWindow) {
             flawnOverWindow->flawnOver(false);
             flawnOverWindow = nullptr;
@@ -291,14 +298,21 @@ bool ImageArea::on_motion_notify_event (GdkEventMotion* event)
 
 bool ImageArea::on_button_press_event (GdkEventButton* event)
 {
+    auto device = gdk_event_get_source_device(reinterpret_cast<GdkEvent *>(event));
+    double pressure = rtengine::RT_NAN;
+    if (device && event->axes) {
+        if (!gdk_device_get_axis(device, event->axes, GDK_AXIS_PRESSURE, &pressure)) {
+            pressure = rtengine::RT_NAN;
+        }
+    }
 
     if (focusGrabber) {
-        focusGrabber->buttonPress (event->button, event->type, event->state, event->x, event->y);
+        focusGrabber->buttonPress(event->button, event->type, event->state, event->x, event->y, pressure);
     } else {
-        CropWindow* cw = getCropWindow (event->x, event->y);
+        CropWindow* cw = getCropWindow(event->x, event->y);
 
         if (cw) {
-            cw->buttonPress (event->button, event->type, event->state, event->x, event->y);
+            cw->buttonPress(event->button, event->type, event->state, event->x, event->y, pressure);
         }
     }
 

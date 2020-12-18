@@ -280,7 +280,7 @@ rteMaskShape::Type AreaMask::getGeometryType()
     return geomType;
 }
 
-CursorShape AreaMask::getCursor(const int objectID)
+CursorShape AreaMask::getCursor(int objectID)
 {
     switch (geomType) {
     case rteMaskShape::Type::RECTANGLE:
@@ -319,7 +319,7 @@ CursorShape AreaMask::getCursor(const int objectID)
 }
 
 
-bool AreaMask::mouseOver(const int modifierKey)
+bool AreaMask::mouseOver(int modifierKey)
 {
     EditDataProvider *provider = getEditProvider();
 
@@ -423,7 +423,7 @@ bool AreaMask::mouseOver(const int modifierKey)
 }
 
 
-bool AreaMask::button1Pressed(const int modifierKey)
+bool AreaMask::button1Pressed(int modifierKey)
 {
     EditDataProvider *provider = getEditProvider();
     int imW, imH;
@@ -577,7 +577,7 @@ bool AreaMask::button1Released()
 }
 
 
-bool AreaMask::drag1(const int modifierKey)
+bool AreaMask::drag1(int modifierKey)
 {
     // compute the polar coordinate of the mouse position
     EditDataProvider *provider = getEditProvider();
@@ -741,7 +741,7 @@ bool AreaMask::drag1(const int modifierKey)
     return false;
 }
 
-bool AreaMask::button3Pressed(const int modifierKey)
+bool AreaMask::button3Pressed(int modifierKey)
 {
     if (geomType == rteMaskShape::Type::POLYGON
         && (modifierKey & GDK_CONTROL_MASK)
@@ -753,7 +753,7 @@ bool AreaMask::button3Pressed(const int modifierKey)
     return false;
 }
 
-bool AreaMask::pick3 (const bool picked)
+bool AreaMask::pick3(bool picked)
 {
     action = ES_ACTION_NONE;
     if (picked) {

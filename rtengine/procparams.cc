@@ -1279,8 +1279,22 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
         Glib::ustring raw;
         if (assignFromKeyfile(keyfile, group_name, prefix + "DrawnMaskStrokes" + suffix, raw)) {
             ret = true;
-            std::vector<double> vv = unpack_list(raw);//.raw());
+            std::vector<double> vv = unpack_list(raw);
             drawnMask.strokes_from_list(vv);
+            if (ppVersion < 1022 && !drawnMask.strokes.empty()) {
+                std::vector<DrawnMask::Stroke> stmp;
+                stmp.swap(drawnMask.strokes);
+                drawnMask.strokes.push_back(stmp[0]);
+                for (size_t i = 1; i < stmp.size(); ++i) {
+                    auto &p = drawnMask.strokes.back();
+                    auto &s = stmp[i];
+                    if (p.radius != s.radius && p.radius > 0 && s.radius > 0 &&
+                        p.hardness == s.hardness && p.erase == s.erase) {
+                        drawnMask.strokes.push_back(DrawnMask::Stroke());
+                    }
+                    drawnMask.strokes.push_back(s);
+                }
+            }
         }
     }
     

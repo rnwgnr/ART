@@ -519,7 +519,7 @@ public:
 
     /** @brief Get the cursor to be displayed when above handles
     @param objectID object currently "hovered" */
-    virtual CursorShape getCursor (const int objectID);
+    virtual CursorShape getCursor (int objectID);
 
     /** @brief Get the cursor to be displayed when above handles
     @param objectID object currently "hovered"
@@ -531,13 +531,14 @@ public:
     This method is also triggered when the cursor is moving over the image in ET_PIPETTE mode
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool mouseOver (const int modifierKey);
+    virtual bool mouseOver(int modifierKey);
 
     /** @brief Triggered when mouse button 1 is pressed, together with the CTRL modifier key if the subscriber is of type ET_PIPETTE
     Once the key is pressed, RT will enter in drag1 mode on subsequent mouse movements
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button1Pressed (const int modifierKey);
+    virtual bool button1Pressed(int modifierKey);
+    virtual bool button1Pressed(int modifierKey, double pressure) { return button1Pressed(modifierKey); }
 
     /** @brief Triggered when mouse button 1 is released
     @return true if the preview has to be redrawn, false otherwise */
@@ -547,7 +548,8 @@ public:
     Once the key is pressed, RT will enter in drag2 mode on subsequent mouse movements
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button2Pressed (const int modifierKey);
+    virtual bool button2Pressed (int modifierKey);
+    virtual bool button2Pressed(int modifierKey, double pressure) { return button2Pressed(modifierKey); }
 
     /** @brief Triggered when mouse button 2 is released (middle button)
     @return true if the preview has to be redrawn, false otherwise */
@@ -557,7 +559,8 @@ public:
     Once the key is pressed, RT will enter in drag3 mode on subsequent mouse movements
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button3Pressed (const int modifierKey);
+    virtual bool button3Pressed (int modifierKey);
+    virtual bool button3Pressed(int modifierKey, double pressure) { return button3Pressed(modifierKey); }
 
     /** @brief Triggered when mouse button 3 is released (right button)
     @return true if the preview has to be redrawn, false otherwise */
@@ -566,36 +569,39 @@ public:
     /** @brief Triggered when the user is moving while holding down mouse button 1
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool drag1 (const int modifierKey);
+    virtual bool drag1(int modifierKey);
+    virtual bool drag1(int modifierKey, double pressure) { return drag1(modifierKey); }
 
     /** @brief Triggered when the user is moving while holding down mouse button 2
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool drag2 (const int modifierKey);
+    virtual bool drag2(int modifierKey);
+    virtual bool drag2(int modifierKey, double pressure) { return drag2(modifierKey); }
 
     /** @brief Triggered when the user is moving while holding down mouse button 3
     @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool drag3 (const int modifierKey);
+    virtual bool drag3(int modifierKey);
+    virtual bool drag3(int modifierKey, double pressure) { return drag3(modifierKey); }
 
     /** @brief Triggered when the user is releasing mouse button 1 while in action==ES_ACTION_PICKING mode
     No modifier key is provided, since having a different modifier key than on button press will set picked to false.
     @param picked True if the cursor is still above the the same object than on button pressed and with the same modifier keys.
                   If false, the user moved the cursor away or the modifier key is different, so the element is considered as NOT selected.
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool pick1 (const bool picked);
+    virtual bool pick1 (bool picked);
 
     /** @brief Triggered when the user is releasing mouse button 2 while in action==ES_ACTION_PICKING mode
     @param picked True if the cursor is still above the the same object than on button pressed and with the same modifier keys.
                   If false, the user moved the cursor away or the modifier key is different, so the element is considered as NOT selected.
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool pick2 (const bool picked);
+    virtual bool pick2 (bool picked);
 
     /** @brief Triggered when the user is releasing mouse button 3 while in action==ES_ACTION_PICKING mode
     @param picked True if the cursor is still above the the same object than on button pressed and with the same modifier keys.
                   If false, the user moved the cursor away or the modifier key is different, so the element is considered as NOT selected.
     @return true if the preview has to be redrawn, false otherwise */
-    virtual bool pick3 (const bool picked);
+    virtual bool pick3 (bool picked);
 
     /**
      * triggered for scroll wheel events. Only for ET_OBJECTS types
@@ -801,15 +807,15 @@ inline EditDataProvider* EditSubscriber::getEditProvider () const {
     return provider;
 }
 
-inline CursorShape EditSubscriber::getCursor (const int objectID) {
+inline CursorShape EditSubscriber::getCursor (int objectID) {
     return CSHandOpen;
 }
 
-inline bool EditSubscriber::mouseOver (const int modifierKey) {
+inline bool EditSubscriber::mouseOver (int modifierKey) {
     return false;
 }
 
-inline bool EditSubscriber::button1Pressed (const int modifierKey) {
+inline bool EditSubscriber::button1Pressed (int modifierKey) {
     return false;
 }
 
@@ -817,7 +823,7 @@ inline bool EditSubscriber::button1Released () {
     return false;
 }
 
-inline bool EditSubscriber::button2Pressed (const int modifierKey) {
+inline bool EditSubscriber::button2Pressed (int modifierKey) {
     return false;
 }
 
@@ -825,7 +831,7 @@ inline bool EditSubscriber::button2Released () {
     return false;
 }
 
-inline bool EditSubscriber::button3Pressed (const int modifierKey) {
+inline bool EditSubscriber::button3Pressed (int modifierKey) {
     return false;
 }
 
@@ -833,27 +839,27 @@ inline bool EditSubscriber::button3Released () {
     return false;
 }
 
-inline bool EditSubscriber::drag1 (const int modifierKey) {
+inline bool EditSubscriber::drag1 (int modifierKey) {
     return false;
 }
 
-inline bool EditSubscriber::drag2 (const int modifierKey) {
+inline bool EditSubscriber::drag2 (int modifierKey) {
     return false;
 }
 
-inline bool EditSubscriber::drag3 (const int modifierKey) {
+inline bool EditSubscriber::drag3 (int modifierKey) {
     return false;
 }
 
-inline bool EditSubscriber::pick1 (const bool picked) {
+inline bool EditSubscriber::pick1 (bool picked) {
     return false;
 }
 
-inline bool EditSubscriber::pick2 (const bool picked) {
+inline bool EditSubscriber::pick2 (bool picked) {
     return false;
 }
 
-inline bool EditSubscriber::pick3 (const bool picked) {
+inline bool EditSubscriber::pick3 (bool picked) {
     return false;
 }
 

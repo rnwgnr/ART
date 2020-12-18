@@ -218,7 +218,7 @@ void PCVignette::editToggled()
     }
 }
 
-CursorShape PCVignette::getCursor(const int objectID)
+CursorShape PCVignette::getCursor(int objectID)
 {
     switch (objectID) {
     case 0:
@@ -229,7 +229,7 @@ CursorShape PCVignette::getCursor(const int objectID)
     }
 }
 
-bool PCVignette::mouseOver(const int modifierKey)
+bool PCVignette::mouseOver(int modifierKey)
 {
     EditDataProvider *editProvider = getEditProvider();
 
@@ -249,7 +249,7 @@ bool PCVignette::mouseOver(const int modifierKey)
     return false;
 }
 
-bool PCVignette::button1Pressed(const int modifierKey)
+bool PCVignette::button1Pressed(int modifierKey)
 {
     if (lastObject < 0) {
         return false;
@@ -286,7 +286,7 @@ bool PCVignette::button1Released()
 }
 
 
-bool PCVignette::drag1(const int modifierKey)
+bool PCVignette::drag1(int modifierKey)
 {
     // compute the polar coordinate of the mouse position
     EditDataProvider *provider = getEditProvider();

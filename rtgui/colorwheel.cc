@@ -509,7 +509,7 @@ void ColorWheel::setDefault(double x, double y, double s)
 
 
 // EditSubscriber interface
-CursorShape ColorWheel::getCursor(const int objectID)
+CursorShape ColorWheel::getCursor(int objectID)
 {
     return CSHandOpen;
 }
@@ -530,7 +530,7 @@ double find_scale(double x, double y)
 } // namespace
 
 
-bool ColorWheel::mouseOver(const int modifierKey)
+bool ColorWheel::mouseOver(int modifierKey)
 {
     auto p = getEditProvider();
     if (p && p->object) {
@@ -543,7 +543,7 @@ bool ColorWheel::mouseOver(const int modifierKey)
 }
 
 
-bool ColorWheel::button1Pressed(const int modifierKey)
+bool ColorWheel::button1Pressed(int modifierKey)
 {
     auto p = getEditProvider();
     if (p && p->object) {

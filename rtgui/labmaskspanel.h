@@ -115,7 +115,7 @@ public:
     float blendPipetteValues(CurveEditor *ce, float chan1, float chan2, float chan3) override;
 
     bool button1Released() override;
-    bool pick3 (const bool picked) override;
+    bool pick3(bool picked) override;
     bool scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override;
     void switchOffEditMode() override;
     void setEditProvider(EditDataProvider *provider);

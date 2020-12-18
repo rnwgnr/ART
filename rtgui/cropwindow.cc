@@ -342,7 +342,8 @@ void CropWindow::scroll (int state, GdkScrollDirection direction, int x, int y, 
     }
 }
 
-void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
+
+void CropWindow::buttonPress(int button, int type, int bstate, int x, int y, double pressure)
 {
 
     bool needRedraw = true;  // most common case ; not redrawing are exceptions
@@ -432,7 +433,7 @@ void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
                         }
                     } else if (iarea->getToolMode() == TMHand && editSubscriber) {
                         if ((cropgl && cropgl->inImageArea(iarea->posImage.x, iarea->posImage.y) && (editSubscriber->getEditingType() == ET_PIPETTE && (bstate & GDK_CONTROL_MASK))) || editSubscriber->getEditingType() == ET_OBJECTS) {
-                            needRedraw = editSubscriber->button1Pressed(bstate);
+                            needRedraw = editSubscriber->button1Pressed(bstate, pressure);
                             if (editSubscriber->isDragging()) {
                                 state = SEditDrag1;
                             } else if (editSubscriber->isPicking()) {
@@ -543,7 +544,7 @@ void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
                     EditSubscriber *editSubscriber = iarea->getCurrSubscriber();
 
                     if (editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
-                        needRedraw = editSubscriber->button1Pressed(bstate);
+                        needRedraw = editSubscriber->button1Pressed(bstate, pressure);
 
                         if (editSubscriber->isDragging()) {
                             state = SEditDrag1;
@@ -578,7 +579,7 @@ void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
             EditSubscriber *editSubscriber = iarea->getCurrSubscriber();
             bool done = false;
             if (editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
-                needRedraw = editSubscriber->button2Pressed(bstate);
+                needRedraw = editSubscriber->button2Pressed(bstate, pressure);
 
                 if (editSubscriber->isDragging()) {
                     state = SEditDrag2;
@@ -607,7 +608,7 @@ void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
         if (iarea->getToolMode() == TMHand) {
             EditSubscriber *editSubscriber = iarea->getCurrSubscriber();
             if (editSubscriber && editSubscriber->getEditingType() == ET_OBJECTS) {
-                needRedraw = editSubscriber->button3Pressed(bstate);
+                needRedraw = editSubscriber->button3Pressed(bstate, pressure);
 
                 if (editSubscriber->isDragging()) {
                     state = SEditDrag3;
@@ -670,7 +671,8 @@ void CropWindow::buttonPress (int button, int type, int bstate, int x, int y)
     updateCursor(x, y, bstate);
 }
 
-void CropWindow::buttonRelease (int button, int num, int bstate, int x, int y)
+
+void CropWindow::buttonRelease(int button, int num, int bstate, int x, int y)
 {
     EditSubscriber *editSubscriber = iarea->getCurrSubscriber();
 
@@ -850,7 +852,8 @@ void CropWindow::buttonRelease (int button, int num, int bstate, int x, int y)
     updateCursor(x, y, bstate);
 }
 
-void CropWindow::pointerMoved (int bstate, int x, int y)
+
+void CropWindow::pointerMoved(int bstate, int x, int y, double pressure)
 {
 
     EditSubscriber *editSubscriber = iarea->getCurrSubscriber();
@@ -1059,15 +1062,15 @@ void CropWindow::pointerMoved (int bstate, int x, int y)
             //printf("          action_ & xy (%d x %d) -> (%d x %d) = (%d x %d) + (%d x %d) / deltaPrev(%d x %d)\n", action_x, action_y, currPos.x, currPos.y, iarea->posScreen.x, iarea->posScreen.y, iarea->deltaScreen.x, iarea->deltaScreen.y, iarea->deltaPrevScreen.x, iarea->deltaPrevScreen.y);
 
             if (state == SEditDrag1) {
-                if (editSubscriber->drag1(bstate)) {
+                if (editSubscriber->drag1(bstate, pressure)) {
                     iarea->redraw ();
                 }
             } else if (state == SEditDrag2) {
-                if (editSubscriber->drag2(bstate)) {
+                if (editSubscriber->drag2(bstate, pressure)) {
                     iarea->redraw ();
                 }
             } else if (state == SEditDrag3) {
-                if (editSubscriber->drag3(bstate)) {
+                if (editSubscriber->drag3(bstate, pressure)) {
                     iarea->redraw ();
                 }
             }

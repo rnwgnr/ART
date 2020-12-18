@@ -41,13 +41,13 @@ public:
     AreaMask();
     ~AreaMask();
     
-    CursorShape getCursor(const int objectID) override;
-    bool mouseOver(const int modifierKey) override;
-    bool button1Pressed(const int modifierKey) override;
+    CursorShape getCursor(int objectID) override;
+    bool mouseOver(int modifierKey) override;
+    bool button1Pressed(int modifierKey) override;
     bool button1Released() override;
-    bool drag1(const int modifierKey) override;
-    bool button3Pressed(const int modifierKey) override;
-    bool pick3 (const bool picked) override;
+    bool drag1(int modifierKey) override;
+    bool button3Pressed(int modifierKey) override;
+    bool pick3(bool picked) override;
     bool scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override;
 
     size_t getPolygonSize();

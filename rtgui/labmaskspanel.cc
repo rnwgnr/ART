@@ -208,18 +208,24 @@ private:
 
 
 class DrawnMaskPanel: public MyExpander, public EditSubscriber, public AdjusterListener, public CurveListener {
+private:
+    enum PressureMode {
+        PRESSURE_OFF,
+        PRESSURE_RADIUS,
+        PRESSURE_HARDNESS
+    };
+    
 public:
     DrawnMaskPanel():
         MyExpander(true, M("TP_LABMASKS_DRAWNMASK")),
         EditSubscriber(ET_OBJECTS),
-        prev_erase_(false)
+        prev_erase_(false),
+        pressure_mode_(PRESSURE_OFF),
+        cur_pressure_(rtengine::RT_NAN)
     {
         // Editing geometry; create the spot rectangle
         pen_ = new Circle();
         pen_->radiusInImageSpace = true;
-        // pen_->setInnerLineColor(255, 255, 255);
-        // pen_->setHoverable(false);
-        // pen_->setInnerLineWidth(1.f);
         pen_->filled = false;
     
         visibleGeometry.push_back(pen_);
@@ -299,11 +305,11 @@ public:
         Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
         f->add(*vb);
 
-        radius_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_RADIUS"), 0.1, 100, 0.1, 10));
+        radius_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_RADIUS"), 0.1, 100, 0.1, 10, Gtk::manage(new RTImage("pen-ocra-small.png"))));
         radius_->setLogScale(2, 0);
         vb->pack_start(*radius_);
 
-        hardness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_HARDNESS"), 0, 100, 1, 100));
+        hardness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_HARDNESS"), 0, 100, 1, 100, Gtk::manage(new RTImage("pen-ocra-small.png"))));
         vb->pack_start(*hardness_);
 
         erase_ = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_DRAWNMASK_ERASE")));
@@ -385,18 +391,25 @@ public:
     
     bool mouseOver(int modifierKey) override
     {
-        bool ctrl = modifierKey & GDK_CONTROL_MASK;
-        bool shift = modifierKey & GDK_SHIFT_MASK;
-        if ((!ctrl && shift) != prev_erase_) {
-            prev_erase_ = (!ctrl && shift);
-            erase_->set_active(!erase_->get_active());
+        if (pressure_mode_ == PRESSURE_OFF) {
+            bool ctrl = modifierKey & GDK_CONTROL_MASK;
+            bool shift = modifierKey & GDK_SHIFT_MASK;
+            if ((!ctrl && shift) != prev_erase_) {
+                prev_erase_ = (!ctrl && shift);
+                erase_->set_active(!erase_->get_active());
+            }
         }
         update_pen(false);
         return true;
     }
     
-    bool button1Pressed(int modifierKey) override
+    bool button1Pressed(int modifierKey, double pressure) override
     {
+        if (std::isnan(pressure) && cur_pressure_ != PRESSURE_OFF) {
+            update_pressure(PRESSURE_OFF);
+        }
+        begin_update_strokes();
+        cur_pressure_ = pressure;
         EditSubscriber::action = ES_ACTION_DRAGGING;
         undo_stack_.push_back(mask_->strokes.size());
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
@@ -411,8 +424,12 @@ public:
         return true;
     }
 
-    bool drag1(int modifierKey) override
+    bool drag1(int modifierKey, double pressure) override
     {
+        if (std::isnan(pressure) && pressure_mode_ != PRESSURE_OFF) {
+            update_pressure(PRESSURE_OFF);
+        }
+        cur_pressure_ = pressure;
         add_stroke(true);
         update_pen(true);
         return true;
@@ -421,30 +438,40 @@ public:
     bool button1Released() override
     {
         EditSubscriber::action = ES_ACTION_NONE;
+        end_update_strokes();
         sig_draw_updated_.emit();
         return true;
     }
 
-    bool button2Pressed(int modifierKey) override
+    bool button2Pressed(int modifierKey, double pressure) override
     {
+        cur_pressure_ = pressure;
+        bool ctrl = modifierKey & GDK_CONTROL_MASK;
+        bool alt = modifierKey & GDK_MOD1_MASK;
         bool shift = modifierKey & GDK_SHIFT_MASK;
-        bool ctrl = shift || (modifierKey & GDK_CONTROL_MASK);
-        int incr = (modifierKey & GDK_MOD1_MASK) ? 10 : 1;
-        if (update_brush(ctrl, shift, incr)) {
+        if (std::isnan(pressure)) {
+            update_pressure(PRESSURE_OFF);
+        } else if (!ctrl) {
+            if (alt) {
+                update_brush(true, false, shift ? -3 : 3);
+            } else {
+                erase_->set_active(!erase_->get_active());
+            }
             EditSubscriber::action = ES_ACTION_PICKING;
-            return true;            
         }
         return false;
     }
 
-    bool button3Pressed(int modifierKey) override
+    bool button3Pressed(int modifierKey, double pressure) override
     {
-        bool shift = modifierKey & GDK_SHIFT_MASK;
-        bool ctrl = shift || (modifierKey & GDK_CONTROL_MASK);
-        int incr = (modifierKey & GDK_MOD1_MASK) ? -10 : -1;
-        if (update_brush(ctrl, shift, incr)) {
+        cur_pressure_ = pressure;
+        bool ctrl = modifierKey & GDK_CONTROL_MASK;
+        bool alt = modifierKey & GDK_MOD1_MASK;
+        if (!std::isnan(pressure) && !ctrl) {
+            update_pressure(alt ? PRESSURE_RADIUS : PRESSURE_HARDNESS);
             EditSubscriber::action = ES_ACTION_PICKING;
-            return true;
+        } else {
+            switchOffEditMode();
         }
         return false;
     }
@@ -477,25 +504,12 @@ public:
             propagateEvent = true;
             return false;
         }
-        
-        // if (ctrl && !shift) {
-        //     radius_->setValue(std::max(radius_->getValue() + incr, 0.0));
-        //     update_pen(false);
-        //     propagateEvent = false;
-        //     return true;
-        // } else if (ctrl && shift) {
-        //     hardness_->setValue(std::max(hardness_->getValue() + incr, 0.0));
-        //     propagateEvent = false;
-        //     return true;
-        // }
-        
-        // propagateEvent = true;
-        // return false;
     }
 
     void switchOffEditMode() override
     {
         toggle_->set_active(false);
+        update_pressure(PRESSURE_OFF);
     }
 
     void setTargetMask(rtengine::procparams::DrawnMask *mask, bool force=false)
@@ -517,6 +531,7 @@ public:
                 set_mode(int(mask->mode));
             }
             mask_ = mask;
+            update_pressure(PRESSURE_OFF);
         }
     }
 
@@ -524,6 +539,31 @@ public:
     SigDrawUpdated signal_draw_updated() { return sig_draw_updated_; }
     
 private:
+    void update_pressure(PressureMode m)
+    {
+        if (pressure_mode_ == m) {
+            pressure_mode_ = PRESSURE_OFF;
+        } else {
+            pressure_mode_ = m;
+        }
+        radius_->setEnabled(true);
+        hardness_->setEnabled(true);
+        radius_->showIcons(false);
+        hardness_->showIcons(false);
+        switch (pressure_mode_) {
+        case PRESSURE_RADIUS:
+            radius_->setEnabled(false);
+            radius_->showIcons(true);
+            break;
+        case PRESSURE_HARDNESS:
+            hardness_->setEnabled(false);
+            hardness_->showIcons(true);
+            break;
+        default:
+            break;
+        }
+    }
+    
     bool update_brush(bool ctrl, bool shift, int incr)
     {
         if (ctrl && !shift) {
@@ -595,17 +635,54 @@ private:
         auto provider = getEditProvider();
         int w, h;
         provider->getImageSize(w, h);
-        mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
-        auto &s = mask_->strokes.back();
         rtengine::Coord p = provider->posImage;
         if (dragging) {
             p += provider->deltaImage;
         }
-        s.x = double(p.x) / double(w);
-        s.y = double(p.y) / double(h);
-        s.radius = radius_->getValue() / 100.0;
-        s.erase = erase_->get_active();
-        s.hardness = hardness_->getValue() / 100.0;
+        double x = double(p.x) / double(w);
+        double y = double(p.y) / double(h);
+        double radius = 0;
+        if (pressure_mode_ == PRESSURE_RADIUS) {
+            radius = rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0);
+        } else {
+            radius = radius_->getValue() / 100.0;
+        }
+        double hardness = 0;
+        if (pressure_mode_ == PRESSURE_HARDNESS) {
+            hardness = rtengine::LIM01(int(cur_pressure_ * 100.0) / 75.0);
+        } else {
+            hardness = hardness_->getValue() / 100.0;
+        }
+        bool erase = erase_->get_active();
+
+        if (dragging) {
+            auto prev = mask_->strokes.back();
+            double dx = x - prev.x;
+            double dy = y - prev.y;
+            double dr = radius - prev.radius;
+            double distance = std::sqrt(rtengine::SQR(dx * w) + rtengine::SQR(dy * h));
+            double delta = std::min(radius, prev.radius) * std::min(w, h) * 0.25 * 0.3;
+            if (delta > 0.0) {
+                int steps = distance / delta + 0.5;
+                for (int i = 1; i < steps; ++i) {
+                    mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
+                    auto &s = mask_->strokes.back();
+                    s.x = prev.x + (dx / steps) * i;
+                    s.y = prev.y + (dy / steps) * i;
+                    s.radius = prev.radius + (dr / steps) * i;
+                    s.hardness = hardness;
+                    s.erase = erase;
+                }
+            }
+        }
+        
+        mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
+        auto &s = mask_->strokes.back();
+        s.x = x;
+        s.y = y;
+        s.radius = radius;
+        s.hardness = hardness;
+        s.erase = erase;
         info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
     }
 
@@ -618,7 +695,11 @@ private:
         if (dragging) {
             pen_->center += provider->deltaImage;
         }
-        pen_->radius = radius_->getValue() / 100.0 * std::min(w, h) * 0.25;
+        if (pressure_mode_ == PRESSURE_RADIUS) {
+            pen_->radius = rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0) * std::min(w, h) * 0.25;
+        } else {
+            pen_->radius = radius_->getValue() / 100.0 * std::min(w, h) * 0.25;
+        }
     }
 
     void set_mode(int i)
@@ -664,6 +745,50 @@ private:
             sig_draw_updated_.emit();
         }
     }
+
+    void begin_update_strokes()
+    {
+        if (pressure_mode_ != PRESSURE_OFF) {
+            stroke_idx_ = mask_->strokes.size();
+        } else {
+            stroke_idx_ = -1;
+        }
+    }
+
+    void end_update_strokes()
+    {
+        double p = cur_pressure_;
+        if (stroke_idx_ >= 0) {
+            auto &s = mask_->strokes;
+            p = 0;
+            if (pressure_mode_ == PRESSURE_HARDNESS) {
+                for (size_t i = stroke_idx_; i < s.size(); ++i) {
+                    p = std::max(p, s[i].hardness);
+                }
+                for (size_t i = stroke_idx_; i < s.size(); ++i) {
+                    s[i].hardness = p;
+                }
+            } else if (pressure_mode_ == PRESSURE_RADIUS) {
+                for (size_t i = stroke_idx_; i < s.size(); ++i) {
+                    p += s[i].radius;
+                }
+                if (!s.empty()) {
+                    p /= s.size();
+                }
+            }
+        }
+        stroke_idx_ = -1;
+        if (!mask_->strokes.empty() && pressure_mode_ != PRESSURE_OFF) {
+            if (pressure_mode_ == PRESSURE_RADIUS) {
+                radius_->setValue(p * 100.0);
+            } else {
+                hardness_->setValue(p * 100.0);
+            }
+        }
+        if (pressure_mode_ == PRESSURE_HARDNESS) {
+            mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
+        }            
+    }
     
     rtengine::procparams::DrawnMask *mask_;
     Circle *pen_;
@@ -684,6 +809,10 @@ private:
     SigDrawUpdated sig_draw_updated_;
     bool prev_erase_;
     std::vector<size_t> undo_stack_;
+
+    PressureMode pressure_mode_;
+    double cur_pressure_;
+    int stroke_idx_;
 };
 
 bool on_release_event_ignore(GdkEventButton *event)
@@ -1620,7 +1749,7 @@ bool LabMasksPanel::button1Released()
 }
 
 
-bool LabMasksPanel::pick3 (const bool picked)
+bool LabMasksPanel::pick3(bool picked)
 {
     if (AreaMask::pick3(picked)) {
         onAreaShapeSelectionChanged();

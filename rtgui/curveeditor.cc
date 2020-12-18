@@ -455,7 +455,7 @@ void CurveEditor::showEditButton(bool yes)
 }
 
 
-bool CurveEditor::mouseOver(const int modifierKey)
+bool CurveEditor::mouseOver(int modifierKey)
 {
     EditDataProvider* provider = getEditProvider();
     subGroup->pipetteMouseOver(provider, modifierKey);
@@ -463,7 +463,7 @@ bool CurveEditor::mouseOver(const int modifierKey)
     return true; // return true will ask the preview to be redrawn, for the cursor
 }
 
-bool CurveEditor::button1Pressed(const int modifierKey)
+bool CurveEditor::button1Pressed(int modifierKey)
 {
     EditDataProvider* provider = getEditProvider();
 
@@ -488,7 +488,7 @@ bool CurveEditor::button1Released()
     return true;
 }
 
-bool CurveEditor::drag1(const int modifierKey)
+bool CurveEditor::drag1(int modifierKey)
 {
     EditDataProvider* provider = getEditProvider();
     subGroup->pipetteDrag(provider, modifierKey);
@@ -496,7 +496,7 @@ bool CurveEditor::drag1(const int modifierKey)
     return false;
 }
 
-CursorShape CurveEditor::getCursor(const int objectID)
+CursorShape CurveEditor::getCursor(int objectID)
 {
     if (remoteDrag) {
         return CSResizeHeight;

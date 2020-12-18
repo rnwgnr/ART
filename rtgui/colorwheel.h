@@ -111,9 +111,9 @@ public:
     void reset(bool toInitial) { grid.reset(toInitial); }
     void setListener(ToolPanelListener *l) { grid.setListener(l); }
 
-    CursorShape getCursor(const int objectID) override;
-    bool mouseOver(const int modifierKey) override;
-    bool button1Pressed(const int modifierKey) override;
+    CursorShape getCursor(int objectID) override;
+    bool mouseOver(int modifierKey) override;
+    bool button1Pressed(int modifierKey) override;
     void subscribe() override;
     void unsubscribe() override;
 
