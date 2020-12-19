@@ -211,8 +211,8 @@ class DrawnMaskPanel: public MyExpander, public EditSubscriber, public AdjusterL
 private:
     enum PressureMode {
         PRESSURE_OFF,
-        PRESSURE_RADIUS,
-        PRESSURE_HARDNESS
+        PRESSURE_HARDNESS,
+        PRESSURE_RADIUS
     };
     
 public:
@@ -448,12 +448,11 @@ public:
         cur_pressure_ = pressure;
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool alt = modifierKey & GDK_MOD1_MASK;
-        bool shift = modifierKey & GDK_SHIFT_MASK;
         if (std::isnan(pressure)) {
             update_pressure(PRESSURE_OFF);
         } else if (!ctrl) {
             if (alt) {
-                update_brush(true, false, shift ? -3 : 3);
+                update_brush(true, false, 3);
             } else {
                 erase_->set_active(!erase_->get_active());
             }
@@ -467,8 +466,13 @@ public:
         cur_pressure_ = pressure;
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool alt = modifierKey & GDK_MOD1_MASK;
+        bool shift = modifierKey & GDK_SHIFT_MASK;
         if (!std::isnan(pressure) && !ctrl) {
-            update_pressure(alt ? PRESSURE_RADIUS : PRESSURE_HARDNESS);
+            if (alt) {
+                update_brush(true, false, -3);
+            } else {
+                update_pressure(PressureMode((int(cur_pressure_) + (shift ? -1 : 1)) % 3));
+            }
             EditSubscriber::action = ES_ACTION_PICKING;
         } else {
             switchOffEditMode();
