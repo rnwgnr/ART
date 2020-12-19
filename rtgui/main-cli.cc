@@ -442,6 +442,9 @@ int processLineParams ( int argc, char **argv )
                 case 'q':
                     break;
 
+                case 'V':
+                    break;
+
                 case 'Y':
                     overwriteFiles = true;
                     break;
