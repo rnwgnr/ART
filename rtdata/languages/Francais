@@ -1816,7 +1816,7 @@ TP_LABMASKS_DELTAE_PICK;Choisir
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Pondération dans le calcul du ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Sélectionne des régions de couleurs similaires\n(selon la définition de la métrique CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Masque au pinceau
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Basculer en mode tracé avec le pinceau.\nMaintenir <b>Shift</b> pour basculer temporairement en "mode effacement".\nUtiliser <b>Ctrl+scroll wheel</b> pour changer le rayon du pinceau, <b>Ctrl+Shift+scroll wheel</b> pour changer la dureté du pinceau,\net <b>Ctrl+click</b> pour commencer de nouveaux tracés sans changer les paramètres \n(de sorte que des tracés multiples sur la même zone s'additionnent).
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Basculer en mode tracé avec le pinceau.\n\n<i>Lors de l'utilisation de la souris :</i>\n- Maintenir <b>Shift</b> pour basculer temporairement en "mode effacement";\n- Utiliser <b>Ctrl+molette</b> pour changer le rayon du pinceau,\n- <b>Ctrl+Shift+molette</b> pour changer la dureté du pinceau,\n- et <b>Ctrl+click</b> pour commencer de nouveaux tracés sans changer les paramètres \n(de sorte que des tracés multiples sur la même zone s'additionnent).\n\n<i>Lors de l'utilisation d'un outil sensible à la pression :</i>\n- Utiliser le <b>premier bouton</b> pour basculer en "mode effacement";\n- Utiliser <b>Alt+premier bouton</b> pour augmenter le rayon du pinceau, et\n- <b>Alt+second bouton</b> pour le diminuer;\n- Utiliser le <b>second bouton</b> pour faire défiler les modes de sensibilité à la pression disponibles : inactif, dureté, rayon (maintenez <b>Shift</b> enfoncé pour inverser la direction);\n- Utiliser <b>Ctrl+second bouton</b> pour désactiver l'outil.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Paramètres du pinceau
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Effacer tous les tracés
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Eliminer le dernier groupe de tracés
@@ -1833,15 +1833,16 @@ TP_LABMASKS_PARAMETRIC;Masque paramétrique
 TP_LENSGEOM_AUTOCROP;Rognage auto
 TP_LENSGEOM_FILL;Remplir automatiquement
 TP_LENSGEOM_LABEL;Objectif / Géométrie
-TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatiquement
+TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatique à partir des bases de données
+TP_LENSPROFILE_CORRECTION_EXIF;Intégrées dans les métadonnées
 TP_LENSPROFILE_CORRECTION_LCPFILE;Profil LCP
-TP_LENSPROFILE_CORRECTION_MANUAL;Manuellement
+TP_LENSPROFILE_CORRECTION_MANUAL;Manuelle à partir des bases de données
 TP_LENSPROFILE_LABEL;Correction d'Objectif par Profil
 TP_LENSPROFILE_LENS_WARNING;Attention: le facteur de rognage utilisé pour la caractérisation d'un objectif est plus grand que le facteur de rognage du capteur, les résultats pourraient être faux.
-TP_LENSPROFILE_MODE_HEADER;Selectionner le profil d'objectif :
+TP_LENSPROFILE_MODE_HEADER;Profil d'objectif :
 TP_LENSPROFILE_USE_CA;Aberrations chromatiques
 TP_LENSPROFILE_USE_GEOMETRIC;Géometrique
-TP_LENSPROFILE_USE_HEADER;Selectionner les distortions à corriger:
+TP_LENSPROFILE_USE_HEADER;Distortions à corriger:
 TP_LENSPROFILE_USE_VIGNETTING;Vignetage
 TP_LOCALCONTRAST_CONTRAST;Contraste résiduel
 TP_LOCALCONTRAST_CURVE;Courbe de contraste local

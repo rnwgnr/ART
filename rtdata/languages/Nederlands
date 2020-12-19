@@ -20,6 +20,7 @@
 #19 2020-04-30 update to ART v1.3 by pm
 #20 2020-06-03 update to ART v1.4 by pm
 #21 2020-11-16 update to ART v1.6 by pm
+#22 2020-12-19 update to ART v1.7 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -988,7 +989,7 @@ MAIN_TOOLTIP_PREVIEWFOCUSMASK;Bekijk het <b>Focusmasker</b>.\nSneltoets: <b>Shif
 MAIN_TOOLTIP_PREVIEWG;Bekijk het <b>groene kanaal</b>.\nSneltoets: <b>g</b>
 MAIN_TOOLTIP_PREVIEWL;Bekijk de <b>Luminositeit</b>.\nSneltoets: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Bekijk het <b>rode kanaal</b>.\nSneltoets: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Bekijk het <b>scherptecontrastmasker</b>.\nSneltoets: <b>Shift-p</b>\nWerkt alleen als verscherping is geactiveerd en het zoomniveau >= 100%.
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Bekijk het <b>scherptecontrastmasker</b>.\nSneltoets: <b>Shift-p</b>\nWerkt alleen als verscherping is geactiveerd en is slechts accuraat bij een zoomniveau >= 100%.
 MAIN_TOOLTIP_QINFO;Beknopte fotogegevens\nSneltoets: <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Toon/verberg linkerpaneel.\nSneltoets: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Toon/verberg rechterpaneel\nSneltoets: <b>Ctrl+l</b>
@@ -1376,6 +1377,7 @@ QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op  locatie, w
 QUEUE_LOCATION_TITLE;Uitvoerlocatie
 QUEUE_STARTSTOP_TOOLTIP;Start of stop de verwerking van foto's in de rij.\n\nSneltoets: <b>Ctrl+s</b>
 
+RENAME_DIALOG_BASEDIR;Basismap
 RENAME_DIALOG_PATTERN;Patroon bestandsnaam
 RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextentie\n<b>%C</b>: naam camera (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> to <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: '%'-karakter.
 RENAME_DIALOG_ALLOW_WHITESPACE;Sta spaties in nieuwe naam toe
@@ -1442,6 +1444,7 @@ THRESHOLDSELECTOR_TR;Bovenkant-rechts
 TOOLBAR_TOOLTIP_COLORPICKER;Vergrendelbare kleurenkiezer\n\nIndien geactiveerd:\nVoeg kiezer toe: <b>linksklik</b>\nVerplaats  kiezer:<b>linksklik en sleep</b>\nVerwijder kiezer: <b>rechtsklik</b>\nVerwijder alle kiezers:<b>Ctrl+Shift+rechtsklik</b>b\nTerug naar handgereedschap: <b>rechtsklik</b> buiten een kiezer.
 TOOLBAR_TOOLTIP_CROP;Bijsnijden.\nSneltoets: <b>c</b>\nVerplaats uitsnede met <b>Shift+muis</b>\nGrootte uitsnede wijzigen: <b>Ctrl+muis</b>.
 TOOLBAR_TOOLTIP_HAND;Handgereedschap.\nSneltoets: <b>h</b>
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Perspectiefcorrectie</b>.\nSneltoets: <b>p</b>\n\nBewerk controlelijnen om perspectivische vervorming te corrigeren. Klik opnieuw op deze knop om de correctie toe te passen.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Rechtzetten</b> / <b>Kleine rotaties</b>.\nSneltoets: <b>s</b>\n\nBepaal de verticale of horizontale as door een hulplijn over de foto te trekken. De rotatiehoek wordt naast de hulplijn getoond. Het draaicentrum is het geometrische midden van de afbeelding.
 TOOLBAR_TOOLTIP_WB;Spot-witbalans.\nSneltoets: <b>w</b>
 TP_SATURATION_LABEL;Verzadiging/levendigheid
@@ -1879,7 +1882,7 @@ TP_LABMASKS_DELTAE_PICK;Kies kleur
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Gewicht in de ΔE-berekening
 TP_LABMASKS_DELTAE_TOOLTIP;Kies gebieden van gelijke kleur\n(volgens de CIELAB ΔE*-metriek)
 TP_LABMASKS_DRAWNMASK;Penseelmasker
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Schakelt het tekenen met de kwast in of uit.\nHoud de <b>Shift</b>-toets ingedrukt om tijdelijk naar de Gum-modus om te schakelen.\nGebruik <b>Ctrl+muiswiel</b> om de kwastgrootte te veranderen,\n<b>Ctrl+Shift+muiswiel</b> om de hardheid te wijzigen,\nen <b>Ctrl+klik</b> om een nieuwe 'penseelgroep' te starten zonder de perameters te veranderen\n(zodat meerdere kwaststreken in hetzelfde gebied elkaar versterken).
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Schakelt het tekenen met de kwast in of uit.\n\n<i>Bij muisgebruik:</i>\n- Houd de <b>Shift</b>-toets ingedrukt om tijdelijk naar de Gum-modus om te schakelen;\n- Gebruik <b>Ctrl+muiswiel</b> om de kwastgrootte te veranderen, \n- <b>Ctrl+Shift+muiswiel</b> om de hardheid van de kwast te wijzigen,\n- en <b>Ctrl+klik</b> om een nieuwe penseelgroep te starten zonder de parameters te veranderen (zodat meerdere kwaststreken in hetzelfde gebied bij elkaar worden opgeteld);\n- Gebruik de <b>derde knop</b> om het kwastgereedschap uit te schakelen.\n\n<i>Bij gebruik van een drukgevoelig apparaat:</i>\n- Gebruik de <b>eerste knop</b> om naar de Gum-modus om te schakelen;\n- Gebruik <b>Alt+eerste knop</b> om de kwaststraal te vergroten, en\n- <b>Alt+tweede knop</b> om deze te verkleinen;\n- Gebruik de <b>tweede knop</b> om te wisselen tussen de beschikbare modi voor drukgevoeligheid: uit, hardheid, straal (houd  <b>Shift</b> ingedrukt om de richting om te keren);\n- gebruik <b>Ctrl+tweede knop</b> om het kwastgereedschap uit te schakelen.
 
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Penseelinstellingen
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Wis alles penseelstreken
@@ -1893,23 +1896,21 @@ TP_LABMASKS_DRAWNMASK_INFO;%1 penseelstreken
 TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Doorsnij penseelmasker met de andere maskers
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Plaats penseelmasker bovenop de andere maskers
 TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Plaats penseelmasker boven de andere maskers, maar alleen binnen het actieve gebiedsmasker
-
 TP_LABMASKS_PARAMETRIC;Parametrisch masker
-
-
 TP_LENSGEOM_AUTOCROP;Automatisch bijsnijden
 TP_LENSGEOM_FILL;Automatisch uitvullen
 TP_LENSGEOM_LABEL;Objectief / Geometrie
 
 # module Lenscorrectieprofielen
-TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatisch
-TP_LENSPROFILE_CORRECTION_MANUAL;Handmatig
+TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatisch via database
+TP_LENSPROFILE_CORRECTION_EXIF;Ingebed in metadata
+TP_LENSPROFILE_CORRECTION_MANUAL;Handmatig via database
 TP_LENSPROFILE_CORRECTION_LCPFILE;LCP-bestand
-TP_LENSPROFILE_MODE_HEADER;Selecteer lensprofiel
+TP_LENSPROFILE_MODE_HEADER;Lensprofiel
 TP_LENSPROFILE_LABEL;Lenscorrectieprofielen
 TP_LENSPROFILE_USE_CA;Chromatische aberratie
 TP_LENSPROFILE_USE_GEOMETRIC;Geometrie
-TP_LENSPROFILE_USE_HEADER;Welke vervormingen corrigeren:
+TP_LENSPROFILE_USE_HEADER;Te corrigeren vervormingen:
 TP_LENSPROFILE_USE_VIGNETTING;Vignettering
 
 TP_NEUTRAL;Terugzetten
