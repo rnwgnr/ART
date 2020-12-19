@@ -44,7 +44,7 @@ std::map<std::string, std::vector<WBPreset>> load(const Glib::ustring &path)
     FILE *const f = g_fopen(fileName.c_str(), "r");
 
     if (rtengine::settings->verbose) {
-        std::cout << "trying to load extra working spaces from " << fileName << std::flush;
+        std::cout << "trying to load white balance presets from " << fileName << std::flush;
     }
     
     if (!f) {
