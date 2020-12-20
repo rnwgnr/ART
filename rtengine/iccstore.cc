@@ -43,7 +43,11 @@
 #include "cJSON.h"
 
 #ifdef RT_LCMS_FAST_FLOAT
-#  include "lcms2_fast_float/lcms2_fast_float.h"
+#  ifdef RT_LCMS_FAST_FLOAT_SYSTEM
+#    include <lcms2_fast_float.h>
+#  else
+#    include "lcms2_fast_float/lcms2_fast_float.h"
+#  endif
 #endif
 
 
@@ -412,7 +416,8 @@ public:
     Implementation() :
         loadAll(true),
         xyz(createXYZProfile()),
-        srgb(cmsCreate_sRGBProfile())
+        srgb(cmsCreate_sRGBProfile()),
+        thumb_monitor_xform_(nullptr)
     {
         //cmsErrorAction(LCMS_ERROR_SHOW);
 
@@ -428,6 +433,10 @@ public:
 
     ~Implementation()
     {
+        if (thumb_monitor_xform_) {
+            cmsDeleteTransform(thumb_monitor_xform_);
+        }
+        
         for (auto &p : wProfiles) {
             if (p.second) {
                 cmsCloseProfile(p.second);
@@ -493,6 +502,8 @@ public:
         // initialize the alarm colours for lcms gamut checking -- we use bright green
         cmsUInt16Number cms_alarm_codes[cmsMAXCHANNELS] = { 0, 65535, 65535 };
         cmsSetAlarmCodes(cms_alarm_codes);
+
+        update_thumbnail_monitor_transform();
     }
 
     cmsHPROFILE workingSpace(const Glib::ustring& name) const
@@ -546,37 +557,7 @@ public:
     cmsHPROFILE getProfile(const Glib::ustring& name)
     {
         MyMutex::MyLock lock(mutex);
-
-        const ProfileMap::const_iterator r = fileProfiles.find(name);
-
-        if (r != fileProfiles.end()) {
-            return r->second;
-        }
-
-        if (!name.compare(0, 5, "file:")) {
-            const ProfileContent content(name.substr(5));
-            const cmsHPROFILE profile = content.toProfile();
-
-            if (profile) {
-                fileProfiles.emplace(name, profile);
-                fileProfileContents.emplace(name, content);
-
-                return profile;
-            }
-        } else if (!loadAll) {
-            // Look for a standard profile
-            if (!loadProfile(name, profilesDir, &fileProfiles, &fileProfileContents)) {
-                loadProfile(name, userICCDir, &fileProfiles, &fileProfileContents);
-            }
-
-            const ProfileMap::const_iterator r = fileProfiles.find(name);
-
-            if (r != fileProfiles.end()) {
-                return r->second;
-            }
-        }
-
-        return nullptr;
+        return getProfile_unlocked(name);
     }
 
     cmsHPROFILE getStdProfile(const Glib::ustring& name)
@@ -740,6 +721,7 @@ public:
     {
         MyMutex::MyLock lock(mutex);
         defaultMonitorProfile = name;
+        update_thumbnail_monitor_transform();
     }
 
     std::vector<Glib::ustring> getWorkingProfiles()
@@ -756,7 +738,67 @@ public:
         return res;
     }
 
+    cmsHTRANSFORM getThumbnailMonitorTransform()
+    {
+        return thumb_monitor_xform_;
+    }
+
 private:
+    void update_thumbnail_monitor_transform()
+    {
+        if (thumb_monitor_xform_) {
+            cmsDeleteTransform(thumb_monitor_xform_);
+        }
+        
+        cmsHPROFILE monitor = nullptr;
+#if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
+        monitor = getProfile_unlocked(defaultMonitorProfile);
+#else
+        monitor = getProfile_unlocked(settings->srgb);
+#endif
+
+        if (monitor) {
+            cmsHPROFILE iprof = cmsCreateLab4Profile(nullptr);
+            cmsUInt32Number flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+            thumb_monitor_xform_ = cmsCreateTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, settings->monitorIntent, flags);
+            cmsCloseProfile(iprof);
+        }
+    }
+
+    cmsHPROFILE getProfile_unlocked(const Glib::ustring& name)
+    {
+        const ProfileMap::const_iterator r = fileProfiles.find(name);
+
+        if (r != fileProfiles.end()) {
+            return r->second;
+        }
+
+        if (!name.compare(0, 5, "file:")) {
+            const ProfileContent content(name.substr(5));
+            const cmsHPROFILE profile = content.toProfile();
+
+            if (profile) {
+                fileProfiles.emplace(name, profile);
+                fileProfileContents.emplace(name, content);
+
+                return profile;
+            }
+        } else if (!loadAll) {
+            // Look for a standard profile
+            if (!loadProfile(name, profilesDir, &fileProfiles, &fileProfileContents)) {
+                loadProfile(name, userICCDir, &fileProfiles, &fileProfileContents);
+            }
+
+            const ProfileMap::const_iterator r = fileProfiles.find(name);
+
+            if (r != fileProfiles.end()) {
+                return r->second;
+            }
+        }
+
+        return nullptr;
+    }        
+    
     using CVector = std::array<double, 3>;
     using CMatrix = std::array<CVector, 3>;
     struct PMatrix {
@@ -1043,6 +1085,8 @@ parse_error:
     const cmsHPROFILE srgb;
 
     mutable MyMutex mutex;
+
+    cmsHTRANSFORM thumb_monitor_xform_;
 };
 
 rtengine::ICCStore* rtengine::ICCStore::getInstance()
@@ -1159,6 +1203,12 @@ std::uint8_t rtengine::ICCStore::getOutputIntents(const Glib::ustring& name) con
 std::uint8_t rtengine::ICCStore::getProofIntents(const Glib::ustring& name) const
 {
     return implementation->getProofIntents(name);
+}
+
+
+cmsHTRANSFORM rtengine::ICCStore::getThumbnailMonitorTransform()
+{
+    return implementation->getThumbnailMonitorTransform();
 }
 
 rtengine::ICCStore::ICCStore() :

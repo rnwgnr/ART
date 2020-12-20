@@ -525,6 +525,25 @@ if(LCMS_VERSION VERSION_GREATER 2.9)
     set(CMAKE_REQUIRED_FLAGS ${LCMS_LDFLAGS})
     check_c_source_compiles(
         "#include <lcms2.h>
+#include <lcms2_plugin.h>
+#include <lcms2_fast_float.h>
+
+int main()
+{
+    cmsPlugin(cmsFastFloatExtensions());
+    return 0;
+}
+" LCMS_FAST_FLOAT_SYSTEM)
+    if(LCMS_FAST_FLOAT_SYSTEM)
+        set(LCMS_FAST_FLOAT 1)
+        message(STATUS "Enabling lcms2 fast_float")
+        set(LCMS_VERSION_INFO "${LCMS_VERSION}-fast_float")
+    else()
+        set(CMAKE_REQUIRED_INCLUDES ${LCMS_INCLUDE_DIRS})
+        set(CMAKE_REQUIRED_LIBRARIES ${LCMS_LIBRARIES} m)
+        set(CMAKE_REQUIRED_FLAGS ${LCMS_LDFLAGS})
+        check_c_source_compiles(
+            "#include <lcms2.h>
 extern cmsBool  _cmsOptimizePipeline(cmsContext ContextID,
                               cmsPipeline** Lut,
                               cmsUInt32Number  Intent,
@@ -536,11 +555,12 @@ int main()
     _cmsOptimizePipeline(cmsGetPipelineContextID(NULL), NULL, 0, NULL, NULL, NULL);
     return 0;
 }" LCMS_INTERNAL_VISIBLE)
-    
-    if(LCMS_INTERNAL_VISIBLE)
-        set(LCMS_FAST_FLOAT 1)
-        message(STATUS "Enabling lcms2 fast_float")
-        set(LCMS_VERSION_INFO "${LCMS_VERSION}-fast_float")
+        
+        if(LCMS_INTERNAL_VISIBLE)
+            set(LCMS_FAST_FLOAT 1)
+            message(STATUS "Enabling lcms2 fast_float")
+            set(LCMS_VERSION_INFO "${LCMS_VERSION}-fast_float")
+        endif()
     endif()
 endif()
 

@@ -161,24 +161,28 @@ set(RTENGINESOURCEFILES
     )
 
 if(LCMS_FAST_FLOAT)
-    set(lcms2_fast_float_SRC
-        lcms2_fast_float/fast_16_tethra.c
-        lcms2_fast_float/fast_8_curves.c
-        lcms2_fast_float/fast_8_matsh.c
-        lcms2_fast_float/fast_8_matsh_sse.c
-        lcms2_fast_float/fast_8_tethra.c
-        lcms2_fast_float/fast_float_15bits.c
-        lcms2_fast_float/fast_float_15mats.c
-        lcms2_fast_float/fast_float_cmyk.c
-        lcms2_fast_float/fast_float_curves.c
-        lcms2_fast_float/fast_float_matsh.c
-        lcms2_fast_float/fast_float_separate.c
-        lcms2_fast_float/fast_float_sup.c
-        lcms2_fast_float/fast_float_tethra.c
-        )
-    add_library(lcms2_fast_float ${lcms2_fast_float_SRC})
-    target_link_libraries(lcms2_fast_float ${LCMS_LIBRARIES})
-    set_source_files_properties(iccstore.cc PROPERTIES COMPILE_DEFINITIONS RT_LCMS_FAST_FLOAT)
+    if(NOT LCMS_FAST_FLOAT_SYSTEM)
+        set(lcms2_fast_float_SRC
+            lcms2_fast_float/fast_16_tethra.c
+            lcms2_fast_float/fast_8_curves.c
+            lcms2_fast_float/fast_8_matsh.c
+            lcms2_fast_float/fast_8_matsh_sse.c
+            lcms2_fast_float/fast_8_tethra.c
+            lcms2_fast_float/fast_float_15bits.c
+            lcms2_fast_float/fast_float_15mats.c
+            lcms2_fast_float/fast_float_cmyk.c
+            lcms2_fast_float/fast_float_curves.c
+            lcms2_fast_float/fast_float_matsh.c
+            lcms2_fast_float/fast_float_separate.c
+            lcms2_fast_float/fast_float_sup.c
+            lcms2_fast_float/fast_float_tethra.c
+            )
+        add_library(lcms2_fast_float ${lcms2_fast_float_SRC})
+        target_link_libraries(lcms2_fast_float ${LCMS_LIBRARIES})
+        set_source_files_properties(iccstore.cc PROPERTIES COMPILE_DEFINITIONS RT_LCMS_FAST_FLOAT)
+    else()
+        set_source_files_properties(iccstore.cc PROPERTIES COMPILE_DEFINITIONS "RT_LCMS_FAST_FLOAT;RT_LCMS_FAST_FLOAT_SYSTEM")
+    endif()
 endif()
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)
@@ -236,7 +240,7 @@ target_link_libraries(rtengine
     ${RSVG_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
-if(LCMS_FAST_FLOAT)
+if(LCMS_FAST_FLOAT AND NOT LCMS_FAST_FLOAT_SYSTEM)
     target_link_libraries(rtengine lcms2_fast_float)
 endif()
 

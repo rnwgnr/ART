@@ -122,7 +122,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
             cmsHPROFILE oprof = nullptr;
             RenderingIntent outIntent;
             
-            flags = cmsFLAGS_SOFTPROOFING | cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+            flags = cmsFLAGS_SOFTPROOFING | ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
 
             if (!settings->printerProfile.empty()) {
                 oprof = ICCStore::getInstance()->getProfile (settings->printerProfile);
@@ -199,7 +199,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
         }
 
         if (!softProofCreated) {
-            flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+            flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
 
             if (settings->monitorBPC) {
                 flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;

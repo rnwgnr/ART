@@ -1091,7 +1091,8 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     double tscale = 0.0;
     getDimensions (origFW, origFH, tscale);
     ipf.setScale((origFW * tscale) / rwidth);
-    ipf.updateColorProfiles (ICCStore::getInstance()->getDefaultMonitorProfileName(), options.rtSettings.monitorIntent, false, false);
+    //ipf.updateColorProfiles (ICCStore::getInstance()->getDefaultMonitorProfileName(), options.rtSettings.monitorIntent, false, false);
+    ipf.setMonitorTransform(ICCStore::getInstance()->getThumbnailMonitorTransform());
 
     LUTu hist16 (65536);
 
@@ -1142,6 +1143,9 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     }
 
     myscale = 1.0 / myscale;
+
+    ipf.setMonitorTransform(nullptr);
+    
     return readyImg;
 }
 

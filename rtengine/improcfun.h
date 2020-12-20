@@ -60,6 +60,7 @@ public:
     void setScale(double iscale);
 
     void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, bool gamutCheck);
+    void setMonitorTransform(cmsHTRANSFORM xform) { monitorTransform = xform; }
 
     void setDCPProfile(DCPProfile *dcp, const DCPProfile::ApplyState &as)
     {

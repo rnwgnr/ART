@@ -27,8 +27,8 @@
 #include "alignedbuffer.h"
 #include "color.h"
 
-#define BENCHMARK
-#include "StopWatch.h"
+// #define BENCHMARK
+// #include "StopWatch.h"
 
 namespace rtengine {
 
@@ -81,6 +81,8 @@ inline void copyAndClamp(Imagefloat *src, unsigned char *dst, const double rgb_x
 
 void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image)
 {
+    //BENCHFUN
+        
     image->allocate(img->getWidth(), img->getHeight());
     
     if (monitorTransform) {
@@ -246,7 +248,7 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
 
 Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorManagementParams &icm)
 {
-    BENCHFUN
+    //BENCHFUN
         
     constexpr int cx = 0;
     constexpr int cy = 0;

@@ -36,14 +36,14 @@ GamutWarning::GamutWarning(cmsHPROFILE iprof, cmsHPROFILE gamutprof, RenderingIn
     if (cmsIsMatrixShaper(gamutprof) && !cmsIsCLUT(gamutprof, intent, LCMS_USED_AS_OUTPUT)) {
         cmsHPROFILE aces = ICCStore::getInstance()->workingSpace("ACESp0");
         if (aces) {
-            lab2ref = cmsCreateTransform(iprof, TYPE_Lab_FLT, aces, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
-            lab2softproof = cmsCreateTransform(iprof, TYPE_Lab_FLT, gamutprof, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+            lab2ref = cmsCreateTransform(iprof, TYPE_Lab_FLT, aces, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+            lab2softproof = cmsCreateTransform(iprof, TYPE_Lab_FLT, gamutprof, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
             softproof2ref = cmsCreateTransform(gamutprof, TYPE_RGB_FLT, aces, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE | (gamutbpc ? cmsFLAGS_BLACKPOINTCOMPENSATION : 0));
         }
     } else {
         lab2ref = nullptr;
-        lab2softproof = cmsCreateTransform(iprof, TYPE_Lab_FLT, gamutprof, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
-        softproof2ref = cmsCreateTransform(gamutprof, TYPE_RGB_FLT, iprof, TYPE_Lab_FLT, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE | (gamutbpc ? cmsFLAGS_BLACKPOINTCOMPENSATION : 0));
+        lab2softproof = cmsCreateTransform(iprof, TYPE_Lab_FLT, gamutprof, TYPE_RGB_FLT, INTENT_ABSOLUTE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+        softproof2ref = cmsCreateTransform(gamutprof, TYPE_RGB_FLT, iprof, TYPE_Lab_FLT, INTENT_ABSOLUTE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE | (gamutbpc ? cmsFLAGS_BLACKPOINTCOMPENSATION : 0));
     }
 
     if (!softproof2ref) {
