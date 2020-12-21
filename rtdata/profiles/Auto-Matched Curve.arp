@@ -8,9 +8,9 @@ CurveMode=FilmLike
 Curve2=0;
 
 [LensProfile]
-LcMode=lfauto
+LcMode=exif
 UseDistortion=true
-UseVignette=false
+UseVignette=true
 UseCA=false
 
 [Color Management]
