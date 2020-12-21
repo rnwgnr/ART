@@ -1407,6 +1407,26 @@ QUEUE_LOCATION_TEMPLATE;Use modelo
 QUEUE_LOCATION_TEMPLATE_TOOLTIP;Podes usar as seguintes sequências de formatação:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ..., <b>%r</b>, <b>%s1</b>, <b>%s2</b>, ...\n\nEssas cadeias de formatação referem-se às diferentes partes do endereço do nome da foto, alguns atributos da foto ou um índice de sequência arbitrário no processamento em lote.\n\nPor exemplo, se a foto que está sendo processada tiver o seguinte endereço do nome:\n<b><i>/inicio/rodrigo/fotos/2010-10-31/dsc0042.nef</i></b>\no significado das cadeias de formatação são:\n<b>%d4</b> = <i>inicio</i>\n<b>%d3</b> = <i>rodrigo</i>\n<b>%d2</b> = <i>fotos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/inicio/rodrigo/fotos/2010-10-31/</i>\n<b>%p2</b> = <i>/inicio/rodrigo/fotos/</i>\n<b>%p3</b> = <i>/inicio/rodrigo/</i>\n<b>%p4</b> = <i>/inicio/</i>\n\n<b>%r</b> será substituído pela classificação da foto. Se a foto não tiver classificação, %r será substituído por '0'. Se a foto estiver na lixeira, %r será substituído por 'x'.\n\n<b>%s1</b>, <b>%s2</b>, etc. será substituído por um índice de sequência que é preenchido entre 1 e 9 dígitos. O índice de sequência iniciará em 1 sempre que o processamento da fila for iniciado e será incrementado em 1 para cada imagem processada.\n\nSe quiseres salvar a imagem de saída no local onde se encontra a original, escreva:\n<b>%p1/%f</b>\n\nSe quiseres salvar a imagem de saída num diretório chamado "<i>convertido</i>" localizado no diretório da imagem aberta, escreva:\n<b>%p1/convertido/%f</b>\n\nSe quiseres salvar a imagem de saída num diretório chamado\n"<i>/inicio/rodrigo/fotos/convertido/2010-10-31</i>", escreva:\n<b>%p2/convertido/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Local da Saída
 QUEUE_STARTSTOP_TOOLTIP;Inicia ou para o processamento das imagens na fila.\n\nAtalho: <b>Ctrl</b>+<b>s</b>
+RENAME_DIALOG_BASEDIR;Diretório base
+RENAME_DIALOG_PATTERN;Padrão do nome do arquivo
+RENAME_DIALOG_PATTERN_TIP;Especificar o nome de saída baseado no nome e metadados da foto de origem.\n\nOs significados das strings de formatação são os seguintes:\n<b>%f</b>: nome do arquivo sem extensão\n<b>%e</b>: extensão do arquivo\n<b>%C</b>: nome da câmera (fabricante e modelo)\n<b>%M</b>: marca da câmera\n<b>%N</b>: modelo da câmera\n<b>%Y</b>: data da foto, ano (4 dígitos)\n<b>%y</b>: data da foto, ano (2 dígitos)\n<b>%m</b>: data da foto, mês (numérico)\n<b>%b</b>: data da foto, mês (nome abreviado)\n<b>%B</b>: data da foto, mês (nome completo)\n<b>%d</b>: data da foto, dia (numérico)\n<b>%a</b>: data da foto, dia (nome abreviado)\n<b>%A</b>: data da foto, dia (nome completo)\n<b>%n1</b> to <b>%n9</b>: número progressivo, com o número especificando o desvio com zeros (e.g. <b>%n2</b> resulta em <i>01</i>)\n<b>%I</b>: Velocidade do ISO\n<b>%L</b>: nome da lente\n<b>%F</b>: abertura da lente (número F)\n<b>%l</b>: distância focal\n<b>%E</b>: compensação de exposição\n<b>%s</b>: velocidade do Obturador\n<b>%r</b>: avaliação da foto\n<b>%T[<i>nomdedaetiqueta</i>]</b>: conteúdo da etiqueta de metadados <i>nomedaetiqueta</i> (com caracteres inválidos substituídos por '_')\n<b>%%</b>: '%' caractere.
+RENAME_DIALOG_ALLOW_WHITESPACE;Permitir espaços em branco no nome de saída
+RENAME_DIALOG_NAME_NORMALIZATION;Normalização do nome do arquivo
+RENAME_DIALOG_NORM_OFF;Nenhum
+RENAME_DIALOG_NORM_UPPERCASE;Caixa alta
+RENAME_DIALOG_NORM_LOWERCASE;Caixa baixa
+RENAME_DIALOG_EXT_NORMALIZATION;Normalização da extensão do arquivo
+RENAME_DIALOG_ON_EXISTING;Ação quando destino já existe
+RENAME_DIALOG_SKIP;Pular
+RENAME_DIALOG_RENAME;Gerar um nome único
+RENAME_DIALOG_PROGRESSIVE;Número progressivo
+RENAME_DIALOG_SIDECARS;Sidecars adicionais
+RENAME_DIALOG_SIDECARS_TIP;Lista de extensões de sidecars adicionais para renomear, separados por um caractere ';'. Se uma extensão começa com um '+', ela é anexada ao nome original em vez de substituir sua extensão.\nPor exemplo, se o arquivo de entrada <i>arquivo.raw</i>, especificando <i>ext1;+ext2</i> resulta nos sidecars <i>arquivo.ext1</i> e <i>arquivo.raw.ext2</i>.
+RENAME_DIALOG_FILENAMES;Arquivos para renomear
+RENAME_DIALOG_PREVIEW;Previsão
+RENAME_DIALOG_INVALID_PATTERN;Padrão inválido
+RENAME_DIALOG_INVALID_SIDECARS;Lista inválida de sidecars
+RENAME_DIALOG_ERROR;Falhou em renomear %1 para %2
 SAMPLEFORMAT_0;Formato de dados desconhecido
 SAMPLEFORMAT_1;8 bits sem assinatura
 SAMPLEFORMAT_2;16-bits sem assinatura
@@ -1445,6 +1465,7 @@ THRESHOLDSELECTOR_TR;Superior direito
 TOOLBAR_TOOLTIP_COLORPICKER;Seletor de Cores com Trava\n\nQuando a ferramenta está ativada:\n- Adicionar um seletor de cores: <b>clique esquerdo</b>.\n- Arrastar um seletor de cores: <b>clique esquerdo e arraste</b>.\n- Excluir um seletor de cores: <b>clique direito</b>.\n- Excluir todos os seletores de cores: <b>Ctrl</b>+<b>Shift</b>+<b>clique direito</b>.\n- Reverter para a ferramenta de Mão: <b>clique direito</b> fora de qualquer seletor de cores.
 TOOLBAR_TOOLTIP_CROP;<b>Cortar</b> seleção.\nAtalho: <b>c</b>\nMover a área de corte usando <b>Shift</b>+<b>arrastar mouse</b>\nRedimensionar o corte usando <b>Ctrl</b>+<b>arrastar mouse</b>.
 TOOLBAR_TOOLTIP_HAND;Ferramenta de mão.\nAtalho: <b>h</b>
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correção de perspectiva</b>.\nAtalho: <b>p</b>\n\nEditar linhas de controle para corrigir distorção de perspectiva. Clique neste botão novamente para aplicar a correção.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Endireitar</b> / <b>rotação fina</b>.\nAtalho: <b>s</b>\n\nIndique a vertical ou horizontal, desenhando uma linha guia sobre a visualização da imagem. O ângulo de rotação será mostrado ao lado da linha da guia. O centro de rotação é o centro geométrico da imagem.
 TOOLBAR_TOOLTIP_WB;Balanço de branco no local.\nAtalho: <b>w</b>
 TP_SATURATION_LABEL;Saturação e Vibração
@@ -1797,15 +1818,16 @@ TP_LABMASKS_PARAMETRIC;Máscara paramétrica
 TP_LENSGEOM_AUTOCROP;Corte automático
 TP_LENSGEOM_FILL;Preenchimento automático
 TP_LENSGEOM_LABEL;Lente / Geometria
-TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automaticamente
+TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automaticamente da base de dados
+TP_LENSPROFILE_CORRECTION_EXIF;Embutido nos metadados
 TP_LENSPROFILE_CORRECTION_LCPFILE;Ficheiro LCP
-TP_LENSPROFILE_CORRECTION_MANUAL;Manualmente
+TP_LENSPROFILE_CORRECTION_MANUAL;Manualmente da base de dados
 TP_LENSPROFILE_LABEL;Correção de lente perfilada
 TP_LENSPROFILE_LENS_WARNING;Aviso: o fator de corte usado para o perfil da lente é maior que o fator de corte da câmera. Os resultados podem ficar errados.
-TP_LENSPROFILE_MODE_HEADER;Selecionar o perfil da lente:
+TP_LENSPROFILE_MODE_HEADER;Perfil da lente:
 TP_LENSPROFILE_USE_CA;Aberração cromática
 TP_LENSPROFILE_USE_GEOMETRIC;Geométrica
-TP_LENSPROFILE_USE_HEADER;Selecionar distorções para corrigir:
+TP_LENSPROFILE_USE_HEADER;Distorções para corrigir:
 TP_LENSPROFILE_USE_VIGNETTING;Vinhetagem
 TP_LOCALCONTRAST_CONTRAST;Contraste residual
 TP_LOCALCONTRAST_CURVE;Curva de contraste local
