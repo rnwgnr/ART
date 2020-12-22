@@ -16,6 +16,9 @@
 // CANON EOS M6
 // FUJIFILM X-S10
 // SONY ILCE-6600
+// PANASONIC DMC-GX80
+// PANASONIC DC-GX800
+// PANASONIC DC-GX880
 
 [
   {
@@ -5565,6 +5568,42 @@
       { "name" : "4500K", "multipliers" : [ 2.53516, 1, 2 ] },
       { "name" : "6000K", "multipliers" : [ 2.97656, 1, 1.64844 ] },
       { "name" : "8500K", "multipliers" : [ 3.44141, 1, 1.39453 ] }
+    ]
+  },
+  {
+    "make_model" : "PANASONIC DMC-GX80",
+    "presets" : [
+      {"name" : "fine weather", "multipliers" : [2.46875, 1.0, 1.56640625]},
+      {"name" : "cloudy", "multipliers" : [2.6640625, 1.0, 1.45703125]},
+      {"name" : "shade", "multipliers" : [2.859375, 1.0, 1.3828125]},
+      {"name" : "tungsten (incandescent)", "multipliers" : [1.63671875, 1.0, 2.29296875]},
+      {"name" : "flash", "multipliers" : [2.5703125, 1.0, 1.4609375]},
+      {"name" : "D55", "multipliers" : [2.3125, 1.0, 1.5703125]},
+      {"name" : "ISO studio tungsten", "multipliers" : [1.63671875, 1.0, 2.29296875]}
+    ]
+  },
+  {
+    "make_model" : "PANASONIC DC-GX800",
+    "presets" : [
+      {"name" : "fine weather", "multipliers" : [2.37890625, 1.0, 1.56640625]},
+      {"name" : "cloudy", "multipliers" : [2.5546875, 1.0, 1.4609375]},
+      {"name" : "shade", "multipliers" : [2.734375, 1.0, 1.38671875]},
+      {"name" : "tungsten (incandescent)", "multipliers" : [1.625, 1.0, 2.2734375]},
+      {"name" : "flash", "multipliers" : [2.45703125, 1.0, 1.4296875]},
+      {"name" : "D55", "multipliers" : [2.23828125, 1.0, 1.5703125]},
+      {"name" : "ISO studio tungsten", "multipliers" : [1.625, 1.0, 2.2734375]}
+    ]
+  },
+  {
+    "make_model" : "PANASONIC DC-GX880",
+    "presets" : [
+      {"name" : "fine weather", "multipliers" : [2.3671875, 1.0, 1.5703125]},
+      {"name" : "cloudy", "multipliers" : [2.546875, 1.0, 1.46484375]},
+      {"name" : "shade", "multipliers" : [2.7265625, 1.0, 1.39453125]},
+      {"name" : "tungsten (incandescent)", "multipliers" : [1.61328125, 1.0, 2.2578125]},
+      {"name" : "flash", "multipliers" : [2.44921875, 1.0, 1.4375]},
+      {"name" : "D55", "multipliers" : [2.2265625, 1.0, 1.57421875]},
+      {"name" : "ISO studio tungsten", "multipliers" : [1.61328125, 1.0, 2.2578125]}
     ]
   }
 ]
