@@ -194,7 +194,7 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
             in = ICCStore::getInstance()->getsRGBProfile();
         }
         cmsHPROFILE out = ICCStore::getInstance()->workingSpace(workingProfile);
-        cmsHTRANSFORM xform = cmsCreateTransform(in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+        cmsHTRANSFORM xform = cmsCreateTransform(in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
         lcmsMutex->unlock();
 
         for (auto &c : colormap) {

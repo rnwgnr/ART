@@ -124,10 +124,18 @@ void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image)
                 float* ra = img->r(i);
                 float* rb = img->b(i);
 
-                for (int j = 0; j < W; j++) {
-                    buffer[iy++] = rL[j] / 327.68f;
-                    buffer[iy++] = ra[j] / 327.68f;
-                    buffer[iy++] = rb[j] / 327.68f;
+                if (gamutWarning) {
+                    for (int j = 0; j < W; j++) {
+                        buffer[iy++] = rL[j] / 327.68f;
+                        buffer[iy++] = ra[j] / 327.68f;
+                        buffer[iy++] = rb[j] / 327.68f;
+                    }
+                } else {
+                    for (int j = 0; j < W; j++) {
+                        buffer[iy++] = rtengine::LIM(rL[j] / 327.68f, 0.f, 100.f);
+                        buffer[iy++] = rtengine::LIM(ra[j] / 327.68f, 0.f, 100.f);
+                        buffer[iy++] = rtengine::LIM(rb[j] / 327.68f, 0.f, 100.f);
+                    }
                 }
 
                 cmsDoTransform(monitorTransform, buffer, outbuffer, W);
@@ -144,7 +152,7 @@ void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image)
 }
 
 
-Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings)
+Image8 *ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings)
 {
     if (cx < 0) {
         cx = 0;
@@ -186,7 +194,7 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
         img->setMode(Imagefloat::Mode::RGB, true);
         
         cmsHPROFILE oprofG = oprof;
-        cmsUInt32Number flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+        cmsUInt32Number flags = cmsFLAGS_NOCACHE;
 
         if (icm.outputBPC) {
             flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
@@ -222,9 +230,9 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
                 float* rb = img->b(i);
 
                 for (int j = cx; j < cx + cw; j++) {
-                    buffer[iy++] = rr[j] / 65535.f;
-                    buffer[iy++] = rg[j] / 65535.f;
-                    buffer[iy++] = rb[j] / 65535.f;
+                    buffer[iy++] = rtengine::LIM01(rr[j] / 65535.f);
+                    buffer[iy++] = rtengine::LIM01(rg[j] / 65535.f);
+                    buffer[iy++] = rtengine::LIM01(rb[j] / 65535.f);
                 }
 
                 cmsDoTransform(hTransform, buffer, outbuffer, cw);
@@ -246,7 +254,7 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
 }
 
 
-Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorManagementParams &icm)
+Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorManagementParams &icm, bool clipping)
 {
     //BENCHFUN
         
@@ -261,7 +269,7 @@ Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorMan
     if (oprof) {
         img->setMode(Imagefloat::Mode::RGB, multiThread);
         
-        cmsUInt32Number flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+        cmsUInt32Number flags = (!clipping ? cmsFLAGS_NOOPTIMIZE : 0) | cmsFLAGS_NOCACHE;
 
         if (icm.outputBPC) {
             flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
@@ -272,7 +280,7 @@ Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorMan
         cmsHTRANSFORM hTransform = cmsCreateTransform(iprof, TYPE_RGB_FLT, oprof, TYPE_RGB_FLT, icm.outputIntent, flags);
         lcmsMutex->unlock();
 
-        image->ExecCMSTransform(hTransform, img);
+        image->ExecCMSTransform(hTransform, img, clipping);
         cmsDeleteTransform(hTransform);
     } else if (icm.outputProfile != procparams::ColorManagementParams::NoProfileString) {
         img->setMode(Imagefloat::Mode::XYZ, multiThread);

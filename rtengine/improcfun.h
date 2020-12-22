@@ -152,7 +152,7 @@ public:
     
     Image8 *rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings = true);
 
-    Imagefloat *rgb2out(Imagefloat *img, const procparams::ColorManagementParams &icm);
+    Imagefloat *rgb2out(Imagefloat *img, const procparams::ColorManagementParams &icm, bool clipping);
 
     void rgb2lab(Imagefloat &src, LabImage &dst, const Glib::ustring &workingSpace);
     void rgb2lab(Imagefloat &src, LabImage &dst) { rgb2lab(src, dst, params->icm.workingProfile); }

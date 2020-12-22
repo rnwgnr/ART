@@ -396,7 +396,7 @@ private:
             ipf.prsharpening(img);
         }
 
-        Imagefloat *readyImg = ipf.rgb2out(img, params.icm);
+        Imagefloat *readyImg = ipf.rgb2out(img, params.icm, params.isClipping());
 
         if (settings->verbose) {
             printf ("Output profile_: \"%s\"\n", params.icm.outputProfile.c_str());

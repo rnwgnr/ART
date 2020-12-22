@@ -107,7 +107,7 @@ public:
     void normalizeFloatTo65535(bool multithread=true);
     void calcCroppedHistogram(const ProcParams &params, float scale, LUTu & hist);
     void ExecCMSTransform(cmsHTRANSFORM hTransform);
-    void ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *img);//labImage, int cx, int cy);
+    void ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *img, bool clipping);
 
     enum class Mode {
         RGB = 0, // r = red, g = green, b = blue

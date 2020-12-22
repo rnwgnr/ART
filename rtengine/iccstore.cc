@@ -57,12 +57,6 @@ namespace rtengine {
 
 extern const Settings* settings;
 
-#ifdef RT_LCMS_FAST_FLOAT
-cmsUInt32Number ICCStore::FLAGS_NOOPTIMIZE = 0;
-#else
-cmsUInt32Number ICCStore::FLAGS_NOOPTIMIZE = cmsFLAGS_NOOPTIMIZE;
-#endif
-
 } // namespace rtengine
 
 
@@ -759,7 +753,7 @@ private:
 
         if (monitor) {
             cmsHPROFILE iprof = cmsCreateLab4Profile(nullptr);
-            cmsUInt32Number flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+            cmsUInt32Number flags = cmsFLAGS_NOCACHE;
             thumb_monitor_xform_ = cmsCreateTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, settings->monitorIntent, flags);
             cmsCloseProfile(iprof);
         }

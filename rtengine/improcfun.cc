@@ -122,7 +122,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
             cmsHPROFILE oprof = nullptr;
             RenderingIntent outIntent;
             
-            flags = cmsFLAGS_SOFTPROOFING | ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+            flags = cmsFLAGS_SOFTPROOFING | cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
 
             if (!settings->printerProfile.empty()) {
                 oprof = ICCStore::getInstance()->getProfile (settings->printerProfile);
@@ -198,18 +198,18 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
             gamutintent = monitorIntent;
         }
 
+        if (gamutCheck && gamutprof) {
+            gamutWarning.reset(new GamutWarning(iprof, gamutprof, gamutintent, gamutbpc));
+        }
+
         if (!softProofCreated) {
-            flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+            flags = (gamutWarning ? cmsFLAGS_NOOPTIMIZE : 0) | cmsFLAGS_NOCACHE;
 
             if (settings->monitorBPC) {
                 flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
             }
 
             monitorTransform = cmsCreateTransform (iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, monitorIntent, flags);
-        }
-
-        if (gamutCheck && gamutprof) {
-            gamutWarning.reset(new GamutWarning(iprof, gamutprof, gamutintent, gamutbpc));
         }
 
         cmsCloseProfile (iprof);

@@ -287,25 +287,19 @@ void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagement
     }
 
     if (!skipTransform && in) {
-        if(in == embedded && cmsGetColorSpace(in) != cmsSigRgbData) { // if embedded profile is not an RGB profile, use sRGB
+        if (in == embedded && cmsGetColorSpace(in) != cmsSigRgbData) { // if embedded profile is not an RGB profile, use sRGB
             printf("embedded profile is not an RGB profile, using sRGB as input profile\n");
-            in = ICCStore::getInstance()->getsRGBProfile ();
+            in = ICCStore::getInstance()->getsRGBProfile();
         }
 
-        lcmsMutex->lock ();
-        cmsHTRANSFORM hTransform = cmsCreateTransform (in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC,
-                                                       ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
-        lcmsMutex->unlock ();
+        lcmsMutex->lock();
+        cmsHTRANSFORM hTransform = cmsCreateTransform(in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+        lcmsMutex->unlock();
 
-        if(hTransform) {
-            // Convert to the [0.0 ; 1.0] range
+        if (hTransform) {
             im->normalizeFloatTo1();
-
             im->ExecCMSTransform(hTransform);
-
-            // Converting back to the [0.0 ; 65535.0] range
             im->normalizeFloatTo65535();
-
             cmsDeleteTransform(hTransform);
         } else {
             printf("Could not convert from %s to %s\n", in == embedded ? "embedded profile" : cmp.inputProfile.data(), cmp.workingProfile.data());

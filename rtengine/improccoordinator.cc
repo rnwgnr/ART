@@ -924,7 +924,7 @@ void rgb2lab(const Image8 &src, int x, int y, int w, int h, float L[], float a[]
     }
 
     if (oprof) {
-        cmsUInt32Number flags = ICCStore::FLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE; // NOCACHE is important for thread safety
+        cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE; // NOCACHE is important for thread safety
 
         if (icm.outputBPC) {
             flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
