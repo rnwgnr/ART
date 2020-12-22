@@ -42,15 +42,6 @@
 
 #include "cJSON.h"
 
-#ifdef RT_LCMS_FAST_FLOAT
-#  ifdef RT_LCMS_FAST_FLOAT_SYSTEM
-#    include <lcms2_fast_float.h>
-#  else
-#    include "lcms2_fast_float/lcms2_fast_float.h"
-#  endif
-#endif
-
-
 #define inkc_constant 0x696E6B43
 
 namespace rtengine {
@@ -753,7 +744,7 @@ private:
 
         if (monitor) {
             cmsHPROFILE iprof = cmsCreateLab4Profile(nullptr);
-            cmsUInt32Number flags = cmsFLAGS_NOCACHE;
+            cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
             thumb_monitor_xform_ = cmsCreateTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, settings->monitorIntent, flags);
             cmsCloseProfile(iprof);
         }
@@ -1091,9 +1082,6 @@ rtengine::ICCStore* rtengine::ICCStore::getInstance()
 
 void rtengine::ICCStore::init(const Glib::ustring& usrICCDir, const Glib::ustring& stdICCDir, bool loadAll)
 {
-#ifdef RT_LCMS_FAST_FLOAT
-    cmsPlugin(cmsFastFloatExtensions());
-#endif
     implementation->init(usrICCDir, stdICCDir, loadAll);
 }
 

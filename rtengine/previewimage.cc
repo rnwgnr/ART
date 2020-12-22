@@ -199,7 +199,8 @@ Image8 *PreviewImage::load_img(const Glib::ustring &fname, int w, int h)
                 img->getEmbeddedProfile(),
                 TYPE_RGB_FLT,
                 ICCStore::getInstance()->getsRGBProfile(), TYPE_RGB_FLT,
-                INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOCACHE);
+                INTENT_RELATIVE_COLORIMETRIC,
+                cmsFLAGS_NOOPTIMIZE|cmsFLAGS_NOCACHE);
             lcmsMutex->unlock();
             f->normalizeFloatTo1();
             f->ExecCMSTransform(xform);

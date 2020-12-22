@@ -5481,18 +5481,6 @@ int ProcParams::write(ProgressListener *pl,
 }
 
 
-bool ProcParams::isClipping() const
-{
-    return (toneCurve.enabled ||
-            rgbCurves.enabled ||
-            localContrast.enabled ||
-            softlight.enabled ||
-            filmSimulation.enabled ||
-            blackwhite.enabled ||
-            labCurve.enabled);
-}
-
-
 FullPartialProfile::FullPartialProfile(const ProcParams &pp):
     pp_(pp)
 {

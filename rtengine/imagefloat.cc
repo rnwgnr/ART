@@ -531,7 +531,7 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform)
 }
 
 // Parallelized transformation; create transform with cmsFLAGS_NOCACHE!
-void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *src, bool clipping)
+void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *src)
 {
     mode_ = Mode::RGB;
     constexpr int cx = 0, cy = 0;
@@ -559,18 +559,10 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *sr
             psG = src->g(y) + cx;
             psB = src->b(y) + cx;
 
-            if (clipping) {
-                for (int x = 0; x < width; x++) {
-                    *(pSrc++) = LIM01(*(psR++) / 65535.f);
-                    *(pSrc++) = LIM01(*(psG++) / 65535.f);
-                    *(pSrc++) = LIM01(*(psB++) / 65535.f);
-                }
-            } else {
-                for (int x = 0; x < width; x++) {
-                    *(pSrc++) = *(psR++) / 65535.f;
-                    *(pSrc++) = *(psG++) / 65535.f;
-                    *(pSrc++) = *(psB++) / 65535.f;
-                }
+            for (int x = 0; x < width; x++) {
+                *(pSrc++) = *(psR++) / 65535.f;
+                *(pSrc++) = *(psG++) / 65535.f;
+                *(pSrc++) = *(psB++) / 65535.f;
             }
 
             cmsDoTransform(hTransform, bufferSrc.data, bufferRGB.data, width);

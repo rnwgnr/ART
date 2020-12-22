@@ -51,8 +51,6 @@ private:
 
 class ICCStore {
 public:
-    static cmsUInt32Number FLAGS_NOOPTIMIZE;
-    
     enum class ProfileType {
         MONITOR,
         PRINTER,

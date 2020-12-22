@@ -198,18 +198,18 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
             gamutintent = monitorIntent;
         }
 
-        if (gamutCheck && gamutprof) {
-            gamutWarning.reset(new GamutWarning(iprof, gamutprof, gamutintent, gamutbpc));
-        }
-
         if (!softProofCreated) {
-            flags = (gamutWarning ? cmsFLAGS_NOOPTIMIZE : 0) | cmsFLAGS_NOCACHE;
+            flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
 
             if (settings->monitorBPC) {
                 flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
             }
 
             monitorTransform = cmsCreateTransform (iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, monitorIntent, flags);
+        }
+
+        if (gamutCheck && gamutprof) {
+            gamutWarning.reset(new GamutWarning(iprof, gamutprof, gamutintent, gamutbpc));
         }
 
         cmsCloseProfile (iprof);
