@@ -42,7 +42,7 @@ public:
     class CorrectionData {
     public:
         virtual ~CorrectionData() = default;
-        virtual void get_coeffs(std::vector<float> &knots, std::vector<float> &dist, std::vector<float> &vig, std::array<std::vector<float>, 3> &ca) const = 0;
+        virtual void get_coeffs(std::vector<float> &knots, std::vector<float> &dist, std::vector<float> &vig, std::array<std::vector<float>, 3> &ca, bool &is_dng) const = 0;
     };
     
 private:
@@ -51,6 +51,7 @@ private:
     std::vector<float> dist_;
     std::vector<float> vig_;
     std::array<std::vector<float>, 3> ca_;
+    bool is_dng_;
     bool swap_xy_;
     float w2_;
     float h2_;

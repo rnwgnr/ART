@@ -81,7 +81,8 @@ FramesData::FramesData(const Glib::ustring &fname):
     isHDR(false),
     rating_(0),
     w_(-1),
-    h_(-1)
+    h_(-1),
+    dng_(false)
 {
     memset(&time, 0, sizeof(time));
     timeStamp = 0;
@@ -350,6 +351,8 @@ FramesData::FramesData(const Glib::ustring &fname):
         }
 
         meta.getDimensions(w_, h_);
+
+        dng_ = find_exif_tag("Exif.Image.DNGVersion");
         
         // -----------------------
         // Special file type detection (HDR, PixelShift)

@@ -56,6 +56,7 @@ private:
     std::vector<GainMap> gain_maps_;
     int w_;
     int h_;
+    bool dng_;
     
 public:
     FramesData (const Glib::ustring& fname);
@@ -94,6 +95,8 @@ public:
     }
 
     void setDimensions(int w, int h);
+    void setDNG(bool yes) { dng_ = yes; }
+    bool isDNG() const override { return dng_; }
 };
 
 
