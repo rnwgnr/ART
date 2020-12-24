@@ -399,6 +399,10 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
             int r = std::min(width_, height_) * s.radius * 0.25;
 
             if (r != radius_ || neg_ != s.erase || hardness_ != s.hardness) {
+                if (neg_ != s.erase || hardness_ != s.hardness || !s.radius) {
+                    ++curflag_;
+                }
+
                 radius_ = r;
                 neg_ = s.erase;
                 hardness_ = s.hardness;
@@ -418,10 +422,6 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
                             buf_[y][x] = RT_NAN;
                         }
                     }
-                }
-
-                if (neg_ != s.erase || hardness_ != s.hardness || !s.radius) {
-                    ++curflag_;
                 }
             }
 
