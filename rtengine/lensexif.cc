@@ -72,6 +72,8 @@ public:
         dist.resize(nc);
         vig.resize(nc);
 
+        constexpr float vig_scaling = 0.7f; // empirically determined on my lenses
+
         for (int i = 0; i < nc; i++) {
             knots[i] = float(i) / (nc - 1);
 
@@ -81,7 +83,7 @@ public:
             ca[0][i] *= ca_r[i] * std::pow(2.f, -21.f) + 1;
             ca[2][i] *= ca_b[i] * std::pow(2.f, -21.f) + 1;
 
-            vig[i] = std::pow(2.f, 0.5f - std::pow(2.f, vignetting[i] * std::pow(2.f, -13.f)  -1));
+            vig[i] = std::pow(2.f, 0.5f - std::pow(2.f, vig_scaling * vignetting[i] * std::pow(2.f, -13.f) -1));
         }
     }    
 };
