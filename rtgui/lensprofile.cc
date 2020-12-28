@@ -65,8 +65,8 @@ LensProfilePanel::LensProfilePanel() :
     ckbUseVign(Gtk::manage((new Gtk::CheckButton(M("TP_LENSPROFILE_USE_VIGNETTING"))))),
     ckbUseCA(Gtk::manage((new Gtk::CheckButton(M("TP_LENSPROFILE_USE_CA")))))
 {
-    EvToolEnabled.set_action(TRANSFORM);
-    EvToolReset.set_action(TRANSFORM);
+    EvToolEnabled.set_action(DARKFRAME); // might need to redo vignetting
+    EvToolReset.set_action(DARKFRAME);
     
     if (!lf) {
         lf = new LFDbHelper();
