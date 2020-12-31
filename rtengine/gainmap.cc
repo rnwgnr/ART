@@ -210,16 +210,16 @@ void RawImageSource::apply_gain_map(unsigned short black[4], std::vector<GainMap
     for (auto &m : maps) {
         mvals(m.map_points_h, m.map_points_v, &(m.map_gain[0]), 0);
 
-        const float col_scale = float(m.map_points_h) / float(W / m.col_pitch);
-        const float row_scale = float(m.map_points_v) / float(H / m.row_pitch);
+        const float col_scale = float(m.map_points_h-1) / float(W);
+        const float row_scale = float(m.map_points_v-1) / float(H);
 
 #ifdef _OPENMP
 #       pragma omp parallel for
 #endif
         for (unsigned y = m.top; y < m.bottom; y += m.row_pitch) {
-            float ys = y / m.row_pitch * row_scale;
+            float ys = y * row_scale;
             for (unsigned x = m.left; x < m.right; x += m.col_pitch) {
-                float xs = x / m.col_pitch * col_scale;
+                float xs = x * col_scale;
                 float f = getBilinearValue(mvals, xs, ys);
                 //int i = y * raw_width + x;
                 float b = fblack[FC(y, x)];
