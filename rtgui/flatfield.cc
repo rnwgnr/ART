@@ -220,6 +220,7 @@ void FlatField::read(const rtengine::procparams::ProcParams* pp)
 
     disableListener();
     embedded->set_active(pp->raw.ff_embedded);
+    embedded->set_sensitive(true);
     if (ffp && !ffp->hasEmbeddedFF()) {
         embedded->set_sensitive(false);
         embedded->set_active(false);
