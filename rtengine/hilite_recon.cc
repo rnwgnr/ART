@@ -33,9 +33,10 @@
 #include "rawimagesource.h"
 #include "rt_math.h"
 #include "settings.h"
+#include "gauss.h"
+#include "rescale.h"
 
-namespace
-{
+namespace {
 
 void boxblur2(const float* const* src, float** dst, float** temp, int startY, int startX, int H, int W, int bufferW, int box)
 {
@@ -286,8 +287,7 @@ void boxblur_resamp(const float* const* src, float** dst, float** temp, int H, i
 
 } // namespace
 
-namespace rtengine
-{
+namespace rtengine {
 
 extern const Settings *settings;
 
@@ -413,10 +413,10 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
         return;
     }
 
-    if (plistener) {
-        progress += 0.05;
-        plistener->setProgress(progress);
-    }
+    // if (plistener) {
+    //     progress += 0.05;
+    //     plistener->setProgress(progress);
+    // }
 
     constexpr int blurBorder = 256;
     minx = std::max(0, minx - blurBorder);
@@ -434,17 +434,17 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 
     boxblur2(red, channelblur[0], temp, miny, minx, blurHeight, blurWidth, bufferWidth, 4);
 
-    if (plistener) {
-        progress += 0.07;
-        plistener->setProgress(progress);
-    }
+    // if (plistener) {
+    //     progress += 0.07;
+    //     plistener->setProgress(progress);
+    // }
 
     boxblur2(green, channelblur[1], temp, miny, minx, blurHeight, blurWidth, bufferWidth, 4);
 
-    if (plistener) {
-        progress += 0.07;
-        plistener->setProgress(progress);
-    }
+    // if (plistener) {
+    //     progress += 0.07;
+    //     plistener->setProgress(progress);
+    // }
 
     boxblur2(blue, channelblur[2], temp, miny, minx, blurHeight, blurWidth, bufferWidth, 4);
  
@@ -929,6 +929,19 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // now reconstruct clipped channels using color ratios
+    array2D<float> mask(W/2, H/2, ARRAY2D_CLEAR_DATA);    
+    array2D<float> rbuf(W/2, H/2);
+    array2D<float> gbuf(W/2, H/2);
+    array2D<float> bbuf(W/2, H/2);
+
+    {
+        array2D<float> rsrc(W, H, red, ARRAY2D_BYREFERENCE);
+        array2D<float> gsrc(W, H, green, ARRAY2D_BYREFERENCE);
+        array2D<float> bsrc(W, H, blue, ARRAY2D_BYREFERENCE);
+        rescaleNearest(rsrc, rbuf, true);
+        rescaleNearest(gsrc, gbuf, true);
+        rescaleNearest(bsrc, bbuf, true);
+    }
 
 #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic,16)
@@ -1079,10 +1092,10 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
                 continue;
             }
 
+            float maskval = 1.f;
             //now correct clipped channels
             if (pixel[0] > max_f[0] && pixel[1] > max_f[1] && pixel[2] > max_f[2]) {
                 //all channels clipped
-
                 const float mult = whitept / (0.299f * clipfix[0] + 0.587f * clipfix[1] + 0.114f * clipfix[2]);
                 red[i + miny][j + minx]   = clipfix[0] * mult;
                 green[i + miny][j + minx] = clipfix[1] * mult;
@@ -1108,6 +1121,8 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
                     blue[i + miny][j + minx]  = max(pixel[2], clipfix[2] * ((notclipped[0] * pixel[0] + notclipped[1] * pixel[1]) /
                                                    (notclipped[0] * clipfix[0] + notclipped[1] * clipfix[1] + epsilon)));
                 }
+
+                maskval = 1.f - (notclipped[0] + notclipped[1] + notclipped[2]) / 6.f;
             }
 
             Y = 0.299f * red[i + miny][j + minx] + 0.587f * green[i + miny][j + minx] + 0.114f * blue[i + miny][j + minx];
@@ -1119,6 +1134,46 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
                 green[i + miny][j + minx] *= mult;
                 blue[i + miny][j + minx]  *= mult;
             }
+
+            int ii = (i + miny) / 2;
+            int jj = (j + minx) / 2;
+            rbuf[ii][jj] = red[i + miny][j + minx];
+            gbuf[ii][jj] = green[i + miny][j + minx];
+            bbuf[ii][jj] = blue[i + miny][j + minx];
+            mask[ii][jj] = maskval;
+        }
+    }
+
+    if (plistener) {
+        progress += 0.05;
+        plistener->setProgress(progress);
+    }
+    
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+    {
+        gaussianBlur(mask, mask, W/2, H/2, 3);
+        gaussianBlur(rbuf, rbuf, W/2, H/2, 1);
+        gaussianBlur(gbuf, gbuf, W/2, H/2, 1);
+        gaussianBlur(bbuf, bbuf, W/2, H/2, 1);
+    }
+
+    {
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif
+        for (int y = 0; y < H; ++y) {
+            float fy = y * 0.5f;
+            for (int x = 0; x < W; ++x) {
+                float fx = x * 0.5f;
+                float m = mask[int(fy)][int(fx)];
+                if (m > 0.f) {
+                    red[y][x] = intp(m, getBilinearValue(rbuf, fx, fy), red[y][x]);
+                    green[y][x] = intp(m, getBilinearValue(gbuf, fx, fy), green[y][x]);
+                    blue[y][x] = intp(m, getBilinearValue(bbuf, fx, fy), blue[y][x]);
+                }
+            }
         }
     }
 
@@ -1126,7 +1181,7 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
         plistener->setProgress(1.00);
     }
 
-}// end of HLReconstruction
-
 }
+
+} // namespace rtengine
 
