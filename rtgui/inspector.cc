@@ -30,6 +30,7 @@
 #include "../rtengine/previewimage.h"
 #include "../rtengine/imagedata.h"
 #include "focusmask.h"
+#include "rtwindow.h"
 
 extern Options options;
 
@@ -645,6 +646,10 @@ void Inspector::switchImage(const Glib::ustring &fullPath)
         ins_[active_].setInfoText(get_info_text(active_));
     }
     ins_[active_].switchImage(fullPath);
+    auto &root = getToplevelWindow(this);
+    if (RTWindow *w = dynamic_cast<RTWindow *>(&root)) {
+        w->set_title_decorated(fullPath);
+    }
 }
 
 

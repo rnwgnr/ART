@@ -644,11 +644,11 @@ void RTWindow::on_mainNB_switch_page (Gtk::Widget* widget, guint page_num)
             EditorPanel *ep = static_cast<EditorPanel*> (mainNB->get_nth_page (page_num));
             ep->setAspect();
 
-            if (!isSingleTabMode()) {
-                if (filesEdited.size() > 0) {
-                    set_title_decorated (ep->getFileName());
-                }
-            }
+            //if (!isSingleTabMode()) {
+            //    if (filesEdited.size() > 0) {
+            set_title_decorated (ep->getFileName());
+            //    }
+            //}
         } else {
             previewLoader->speedUp();
             thumbImageUpdater->speedUp();
