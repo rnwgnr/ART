@@ -334,13 +334,13 @@ void LensProfilePanel::write(rtengine::procparams::ProcParams* pp)
 void LensProfilePanel::setRawMeta(bool raw, const rtengine::FramesMetaData* pMeta)
 {
     disableListener();
-    if ((!raw || pMeta->getFocusDist() <= 0)) {
+    // if ((!raw || pMeta->getFocusDist() <= 0)) {
 
-        // CA is very focus layer dependent, otherwise it might even worsen things
-        allowFocusDep = false;
-        ckbUseCA->set_active(false);
-        ckbUseCA->set_sensitive(false);
-    }
+    //     // CA is very focus layer dependent, otherwise it might even worsen things
+    //     allowFocusDep = false;
+    //     ckbUseCA->set_active(false);
+    //     ckbUseCA->set_sensitive(false);
+    // }
 
     isRaw = raw;
     metadata = pMeta;
@@ -617,7 +617,7 @@ void LensProfilePanel::updateDisabled()
     ckbUseCA->set_sensitive(true);
     
     ckbUseVign->set_sensitive(isRaw);
-    ckbUseCA->set_sensitive(allowFocusDep || corrExif->get_active());
+    // ckbUseCA->set_sensitive(allowFocusDep || corrExif->get_active());
 }
 
 bool LensProfilePanel::setLensfunCamera(const Glib::ustring& make, const Glib::ustring& model)
@@ -723,6 +723,10 @@ void LensProfilePanel::updateLensfunWarning()
 {
     warning->hide();
 
+    ckbUseVign->set_sensitive(isRaw);
+    ckbUseDist->set_sensitive(true);
+    ckbUseCA->set_sensitive(true);
+        
     if (corrLensfunManualRB->get_active() || corrLensfunAutoRB->get_active()) {
         const LFDatabase* const db = LFDatabase::getInstance();
 
@@ -749,7 +753,7 @@ void LensProfilePanel::updateLensfunWarning()
 
         ckbUseVign->set_sensitive(l.hasVignettingCorrection());
         ckbUseDist->set_sensitive(l.hasDistortionCorrection());
-        ckbUseCA->set_sensitive(l.hasCACorrection() && allowFocusDep);
+        ckbUseCA->set_sensitive(l.hasCACorrection()); // && allowFocusDep);
 
         if (!isRaw || !l.hasVignettingCorrection()) {
             ckbUseVign->set_active(false);
