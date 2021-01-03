@@ -63,92 +63,35 @@ void WhiteBalance::cleanup ()
 
 namespace {
 
-constexpr double wbgamma = 3.0;
+constexpr double PIVOTPOINT = 0.75;
+constexpr double PIVOTTEMP = CENTERTEMP * 2;
+constexpr double RANGE_1 = PIVOTPOINT * (MAXTEMP - MINTEMP);
+constexpr double RANGE_2 = (1.0 - PIVOTPOINT) * (MAXTEMP - MINTEMP);
 
 double wbSlider2Temp(double sval)
 {
-    double r = (MAXTEMP - MINTEMP);
-    double v = (sval - MINTEMP) / r;
-    return rtengine::LIM(MINTEMP + std::pow(v, wbgamma) * r, MINTEMP, MAXTEMP);
-
-    // if (sval <= 5000) {
-    //     // linear below center-temp
-    //     temp = MINTEMP + (sval / 5000.0) * (CENTERTEMP - MINTEMP);
-    // } else {
-    //     const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
-    //     double x = (sval - 5000) / 5000; // x 0..1
-    //     double y = x * slope + (1.0 - slope) * pow(x, 4.0);
-    //     //double y = pow(x, 4.0);
-    //     temp = CENTERTEMP + y * (MAXTEMP - CENTERTEMP);
-    // }
-
-    // if (temp < MINTEMP) {
-    //     temp = MINTEMP;
-    // }
-
-    // if (temp > MAXTEMP) {
-    //     temp = MAXTEMP;
-    // }
-
-    // return temp;
+    double s = sval - MINTEMP;
+    if (s <= RANGE_1) {
+        double r = s / RANGE_1;
+        return MINTEMP + r * (PIVOTTEMP - MINTEMP);
+    } else {
+        double r = (s - RANGE_1) / RANGE_2;
+        return PIVOTTEMP + r * (MAXTEMP - PIVOTTEMP);
+    }
 }
 
 
 double wbTemp2Slider(double temp)
 {
-    double r = (MAXTEMP - MINTEMP);
-    double v = (temp - MINTEMP) / r;
-    return rtengine::LIM(MINTEMP + std::pow(v, 1.0/wbgamma) * r, MINTEMP, MAXTEMP);
-    
-    // double sval;
-
-    // if (temp <= CENTERTEMP) {
-    //     sval = ((temp - MINTEMP) / (CENTERTEMP - MINTEMP)) * 5000.0;
-    // } else {
-    //     const double slope = (double)(CENTERTEMP - MINTEMP) / (MAXTEMP - CENTERTEMP);
-    //     const double y = (temp - CENTERTEMP) / (MAXTEMP - CENTERTEMP);
-    //     double x = pow(y, 0.25); // rough guess of x, will be a little lower
-    //     double k = 0.1;
-    //     bool add = true;
-
-    //     // the y=f(x) function is a mess to invert, therefore we have this trial-refinement loop instead.
-    //     // from tests, worst case is about 20 iterations, ie no problem
-    //     for (;;) {
-    //         double y1 = x * slope + (1.0 - slope) * pow(x, 4.0);
-
-    //         if (5000 * fabs(y1 - y) < 0.1) {
-    //             break;
-    //         }
-
-    //         if (y1 < y) {
-    //             if (!add) {
-    //                 k /= 2;
-    //             }
-
-    //             x += k;
-    //             add = true;
-    //         } else {
-    //             if (add) {
-    //                 k /= 2;
-    //             }
-
-    //             x -= k;
-    //             add = false;
-    //         }
-    //     }
-
-    //     sval = 5000.0 + x * 5000.0;
-    // }
-
-    // if (sval < 0) {
-    //     sval = 0;
-    // }
-
-    // if (sval > 10000) {
-    //     sval = 10000;
-    // }
-
-    // return sval;
+    if (temp <= PIVOTTEMP) {
+        double t = temp - MINTEMP;
+        double r = t / (PIVOTTEMP - MINTEMP);
+        return MINTEMP + r * RANGE_1;
+    } else {
+        double t = temp - PIVOTTEMP;
+        double r = t / (MAXTEMP - PIVOTTEMP);
+        return MINTEMP + RANGE_1 + r * RANGE_2;
+    }
 }
 
 } // namespace
