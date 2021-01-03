@@ -930,11 +930,13 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // now reconstruct clipped channels using color ratios
-    array2D<float> mask(W/2, H/2, ARRAY2D_CLEAR_DATA);    
-    array2D<float> rbuf(W/2, H/2);
-    array2D<float> gbuf(W/2, H/2);
-    array2D<float> bbuf(W/2, H/2);
-    array2D<float> guide(W/2, H/2);
+    const int W2 = float(W) / 2.f + 0.5f;
+    const int H2 = float(H) / 2.f + 0.5f;
+    array2D<float> mask(W2, H2, ARRAY2D_CLEAR_DATA);
+    array2D<float> rbuf(W2, H2);
+    array2D<float> gbuf(W2, H2);
+    array2D<float> bbuf(W2, H2);
+    array2D<float> guide(W2, H2);
 
     {
         array2D<float> rsrc(W, H, red, ARRAY2D_BYREFERENCE);
@@ -947,8 +949,8 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 #ifdef _OPENMP
 #       pragma omp parallel for
 #endif
-        for (int y = 0; y < H/2; ++y) {
-            for (int x = 0; x < W/2; ++x) {
+        for (int y = 0; y < H2; ++y) {
+            for (int x = 0; x < W2; ++x) {
                 guide[y][x] = Color::igamma_srgb(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam));
             }
         }
@@ -1183,9 +1185,11 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 #endif
         for (int y = 0; y < H; ++y) {
             float fy = y * 0.5f;
+            int yy = y / 2;
             for (int x = 0; x < W; ++x) {
                 float fx = x * 0.5f;
-                float m = mask[int(fy)][int(fx)];
+                int xx = x / 2;
+                float m = mask[yy][xx];
                 if (m > 0.f) {
                     red[y][x] = intp(m, getBilinearValue(rbuf, fx, fy), red[y][x]);
                     green[y][x] = intp(m, getBilinearValue(gbuf, fx, fy), green[y][x]);
