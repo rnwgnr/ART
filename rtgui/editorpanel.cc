@@ -1056,12 +1056,12 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
     is->setProgressListener ( this );
 
     // try to load the last saved parameters from the cache or from the paramfile file
-    ProcParams* ldprof = openThm->createProcParamsForUpdate (true, false); // will be freed by initProfile
+    std::unique_ptr<ProcParams> ldprof(openThm->createProcParamsForUpdate (true, false)); // will be freed by initProfile
 
     // initialize profile
     Glib::ustring defProf = openThm->getType() == FT_Raw ? options.defProfRaw : options.defProfImg;
     auto metadata = openThm->getMetaData();
-    profilep->initProfile (defProf, ldprof, metadata.get());
+    profilep->initProfile (defProf, ldprof.get(), metadata.get());
     profilep->setInitialFileName (fname);
 
     openThm->addThumbnailListener (this);

@@ -896,6 +896,8 @@ CameraConstantsStore::parse_camera_constants_file(Glib::ustring filename_)
                 if (settings->verbose) {
                     printf("Merging camera constants for \"%s\"\n", make_model.c_str());
                 }
+
+                delete cc;
             }
 
             if (is_array) {
