@@ -220,8 +220,9 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     box_combined = Gtk::manage(new Gtk::VBox());
     box_rgb = Gtk::manage(new Gtk::VBox());
 
-    wheel = Gtk::manage(new ColorWheel(EvColorWheel, M("TP_COLORCORRECTION_ABVALUES")));
+    wheel = Gtk::manage(new ColorWheel());
     wheel->setEditID(EUID_ColorCorrection_Wheel, BT_IMAGEFLOAT);
+    wheel->signal_changed().connect(sigc::mem_fun(*this, &ColorCorrection::wheelChanged));
     box_combined->pack_start(*wheel);
 
     Gtk::Frame *satframe = Gtk::manage(new Gtk::Frame(M("TP_COLORCORRECTION_SATURATION")));
@@ -289,6 +290,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
 
     box_hsl = Gtk::manage(new Gtk::VBox());
+    Gtk::HBox *box_hsl_h = Gtk::manage(new Gtk::HBox());
     for (int c = 0; c < 3; ++c) {
         const char *chan = (c == 0 ? "SLOPE" : (c == 1 ? "OFFSET" : "POWER"));
         Gtk::Frame *f = Gtk::manage(new Gtk::Frame(M(std::string("TP_COLORCORRECTION_") + chan)));
@@ -296,15 +298,21 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         vb->set_spacing(2);
         vb->set_border_width(2);
     
-        huesat[c] = Gtk::manage(new ThresholdAdjuster(M("TP_COLORCORRECTION_HUESAT"), 0., 100., 0., M("TP_COLORCORRECTION_S"), 1., 0., 360., 0., M("TP_COLORCORRECTION_H"), 1., nullptr, false));
-        huesat[c]->setAdjusterListener(this);
-        huesat[c]->setBgColorProvider(this, c+1);
-        huesat[c]->setUpdatePolicy(RTUP_DYNAMIC);
-        vb->pack_start(*huesat[c]);
+        double sscale = c == 0 ? 1.4 : (c == 1 ? 3 : 1.8);
+        huesat[c] = Gtk::manage(new HueSatColorWheel(sscale));
+        huesat[c]->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &ColorCorrection::hslWheelChanged), c));
+        auto s = RTScalable::getScale();
+        huesat[c]->set_size_request(200 * s, -1);
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        hb->pack_start(*Gtk::manage(new Gtk::Label("")), Gtk::PACK_EXPAND_WIDGET, 10);
+        hb->pack_start(*huesat[c], Gtk::PACK_SHRINK);
+        hb->pack_start(*Gtk::manage(new Gtk::Label("")), Gtk::PACK_EXPAND_WIDGET, 10);
+        vb->pack_start(*hb);
 
-        lfactor[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_L"), -50.0, 50.0, c == 1 ? 0.01 : 0.1, 0));
         if (c == 1) {
-            lfactor[c]->setLogScale(100, 0, true);
+            lfactor[c] = Gtk::manage(new Adjuster("", -10.0, 10.0, 0.01, 0, Gtk::manage(new RTImage("circle-black-small.png")), Gtk::manage(new RTImage("circle-white-small.png")), nullptr, nullptr, false, false));
+        } else {
+            lfactor[c] = Gtk::manage(new Adjuster("", -50.0, 50.0, 0.1, 0, Gtk::manage(new RTImage("circle-black-small.png")), Gtk::manage(new RTImage("circle-white-small.png")), nullptr, nullptr, false, false));
         }
         lfactor[c]->setAdjusterListener(this);
         vb->pack_start(*lfactor[c]);
@@ -312,6 +320,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         f->add(*vb);
         box_hsl->pack_start(*f);
     }
+    box_hsl->pack_start(*box_hsl_h);
 
         
     inSaturation->delay = options.adjusterMaxDelay;
@@ -450,13 +459,13 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
                 double h, s, l;
                 if (evt == EvSlope) {
                     l = lfactor[0]->getValue();
-                    huesat[0]->getValue(s, h);
+                    huesat[0]->getParams(h, s);
                 } else if (evt == EvOffset) {
                     l = lfactor[1]->getValue();
-                    huesat[1]->getValue(s, h);
+                    huesat[1]->getParams(h, s);
                 } else {
                     l = lfactor[2]->getValue();
-                    huesat[2]->getValue(s, h);
+                    huesat[2]->getParams(h, s);
                 }
                 msg = Glib::ustring::compose("H=%1 S=%2 L=%3", h, s, l);
             }
@@ -552,7 +561,7 @@ void ColorCorrection::regionGet(int idx)
     }
     for (int c = 0; c < 3; ++c) {
         double b, t;
-        huesat[c]->getValue(b, t);
+        huesat[c]->getParams(t, b);
         r.hue[c] = t;
         r.sat[c] = b;
         r.factor[c] = lfactor[c]->getValue();
@@ -594,7 +603,7 @@ void ColorCorrection::regionShow(int idx)
         pivot_rgb[c]->setValue(r.pivot[c]);
     }
     for (int c = 0; c < 3; ++c) {
-        huesat[c]->setValue(r.sat[c], r.hue[c]);
+        huesat[c]->setParams(r.hue[c], r.sat[c], false);
         lfactor[c]->setValue(r.factor[c]);
     }
     modeChanged();
@@ -626,7 +635,6 @@ void ColorCorrection::modeChanged()
 void ColorCorrection::setListener(ToolPanelListener *tpl)
 {
      ToolPanel::setListener(tpl);
-     wheel->setListener(tpl);
 }
 
 
@@ -644,55 +652,11 @@ void ColorCorrection::setDeltaEColorProvider(DeltaEColorProvider *p)
 
 void ColorCorrection::adjusterChanged(ThresholdAdjuster *a, double newBottom, double newTop)
 {
-    if (listener && getEnabled()) {
-        rtengine::ProcEvent evt;
-        float lval = 0.f;
-        for (int c = 0; c < 3; ++c) {
-            if (a == huesat[c]) {
-                evt = (c == 0 ? EvSlope : (c == 1 ? EvOffset : EvPower));
-                lval = lfactor[c]->getValue();
-                break;
-            }
-        }
-        listener->panelChanged(evt, Glib::ustring::compose("H=%1 S=%2 L=%3", newTop, newBottom, lval));
-    }
 }
 
 
 void ColorCorrection::colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller)
 {
-
-    float R = 0.f, G = 0.f, B = 0.f;
-
-    const auto to_hue =
-        [](float x) -> float
-        {
-            x -= 0.05f;
-            if (x < 0.f) {
-                x += 1.f;
-            }
-            return x;
-        };
-
-    if (callerId >= 1 && callerId <= 3) {
-        if (valY <= 0.5) {
-            // the hue range
-            Color::hsv2rgb01(to_hue(valX), 1.0f, 0.65f, R, G, B);
-        } else {
-            // the strength applied to the current hue
-            double strength, hue;
-            huesat[callerId-1]->getValue(strength, hue);
-            Color::hsv2rgb01(to_hue(hue / 360.f), 1.f, 1.f, R, G, B);
-            const double gray = 0.46;
-            R = (gray * (1.0 - valX)) + R * valX;
-            G = (gray * (1.0 - valX)) + G * valX;
-            B = (gray * (1.0 - valX)) + B * valX;
-        }
-    }
-
-    caller->ccRed = double(R);
-    caller->ccGreen = double(G);
-    caller->ccBlue = double(B);
 }
 
 
@@ -704,4 +668,35 @@ void ColorCorrection::toolReset(bool to_initial)
     }
     pp.colorcorrection.enabled = getEnabled();
     read(&pp);
+}
+
+
+void ColorCorrection::wheelChanged()
+{
+    if (listener && getEnabled()) {
+        const auto round =
+            [](float v) -> float
+            {
+                return int(v * 1000) / 1000.f;
+            };
+        double x, y, s;
+        wheel->getParams(x, y, s);
+        listener->panelChanged(EvColorWheel, Glib::ustring::compose(M("TP_COLORCORRECTION_ABVALUES"), round(x), round(y)));
+    }
+}
+
+
+void ColorCorrection::hslWheelChanged(int c)
+{
+    if (listener && getEnabled()) {
+        const auto round =
+            [](float v) -> float
+            {
+                return int(v * 10) / 10.f;
+            };
+        double h, s, l;
+        huesat[c]->getParams(h, s);
+        l = lfactor[c]->getValue();
+        listener->panelChanged(c == 0 ? EvSlope : (c == 1 ? EvOffset : EvPower), Glib::ustring::compose("H=%1 S=%2 L=%3", round(h), round(s), l));
+    }
 }

@@ -77,6 +77,8 @@ private:
     void regionShow(int idx);
     void modeChanged();
     void syncSlidersToggled();
+    void wheelChanged();
+    void hslWheelChanged(int c);
     
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvColorWheel;
@@ -130,7 +132,7 @@ private:
     Gtk::CheckButton *sync_rgb_sliders;
     
     Adjuster *lfactor[3];
-    ThresholdAdjuster *huesat[3];
+    HueSatColorWheel *huesat[3];
 
     rtengine::procparams::ColorCorrectionParams initial_params;
 };

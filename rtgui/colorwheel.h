@@ -46,7 +46,7 @@
 
 class ColorWheelArea: public Gtk::DrawingArea, public BackBuffer {
 public:
-    ColorWheelArea(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low=true);
+    ColorWheelArea(bool enable_low=true);//rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low=true);
 
     void getParams(double &x, double &y) const;
     void setParams(double x, double y, bool notify);
@@ -54,7 +54,7 @@ public:
     void setEdited(bool yes);
     bool getEdited() const;
     void reset(bool toInitial);
-    void setListener(ToolPanelListener *l);
+    //void setListener(ToolPanelListener *l);
 
     void setScale(double s, bool notify);
     double getScale() const;
@@ -68,9 +68,11 @@ public:
     void get_preferred_width_vfunc(int &minimum_width, int &natural_width) const override;
     void get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const override;
 
+    sigc::signal<void> signal_changed() { return sig_changed_; }
+
 private:
-    rtengine::ProcEvent evt;
-    Glib::ustring evtMsg;
+    // rtengine::ProcEvent evt;
+    // Glib::ustring evtMsg;
     
     double low_a;
     double x_;
@@ -94,6 +96,8 @@ private:
     double scale;
     double defaultScale;
 
+    sigc::signal<void> sig_changed_;
+    
     bool notifyListener();
     void getLitPoint();
 };
@@ -101,7 +105,7 @@ private:
 
 class ColorWheel: public Gtk::HBox, public EditSubscriber {
 public:
-    ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg);
+    ColorWheel(bool use_scale=true);
 
     void getParams(double &x, double &y, double &s) const;
     void setParams(double x, double y, double s, bool notify);
@@ -109,7 +113,7 @@ public:
     void setEdited(bool yes) { grid.setEdited(yes); }
     bool getEdited() const { return grid.getEdited(); }
     void reset(bool toInitial) { grid.reset(toInitial); }
-    void setListener(ToolPanelListener *l) { grid.setListener(l); }
+    sigc::signal<void> signal_changed() { return grid.signal_changed(); }
 
     CursorShape getCursor(int objectID) override;
     bool mouseOver(int modifierKey) override;
@@ -117,16 +121,32 @@ public:
     void subscribe() override;
     void unsubscribe() override;
 
-private:
+protected:
+    virtual void onResetPressed() {} 
     bool resetPressed(GdkEventButton *event);
     void scaleChanged();
 
     ColorWheelArea grid;
     Gtk::VScale *scale;
     Gtk::ToggleButton *edit_;
+    Gtk::VBox *scalebox_;
     sigc::connection scaleconn;
     sigc::connection timerconn;
     sigc::connection editconn_;
     std::array<double, 3> savedparams_;
 };
 
+
+class HueSatColorWheel: public ColorWheel {
+public:
+    HueSatColorWheel(double sat_scale=1);
+    ~HueSatColorWheel();
+
+    void getParams(double &hue, double &sat) const;
+    void setParams(double hue, double sat, bool notify);
+    void setDefault(double hue, double sat);
+
+private:
+    void onResetPressed();
+    double satscale_;
+};

@@ -50,21 +50,13 @@ using rtengine::Color;
 
 bool ColorWheelArea::notifyListener()
 {
-    if (listener) {
-        const auto round =
-            [](float v) -> float
-            {
-                return int(v * 1000) / 1000.f;
-            };
-        listener->panelChanged(evt, Glib::ustring::compose(evtMsg, round(x_ * scale), round(y_ * scale)));
-    }
+    sig_changed_.emit();
     return false;
 }
 
 
-ColorWheelArea::ColorWheelArea(rtengine::ProcEvent evt, const Glib::ustring &msg, bool enable_low):
+ColorWheelArea::ColorWheelArea(bool enable_low):
     Gtk::DrawingArea(),
-    evt(evt), evtMsg(msg),
     x_(0.f), y_(0.f),
     default_x_(0.f), default_y_(0.f),
     listener(nullptr),
@@ -150,12 +142,6 @@ bool ColorWheelArea::getEdited() const
 }
 
 
-void ColorWheelArea::setListener(ToolPanelListener *l)
-{
-    listener = l;
-}
-
-
 void ColorWheelArea::on_style_updated()
 {
     setDirty(true);
@@ -195,12 +181,6 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         cr->set_operator(Cairo::OPERATOR_CLEAR);
         cr->paint();
         cr->set_operator(Cairo::OPERATOR_OVER);
-        style->render_background(cr,
-                inset * s + padding.get_left() - s,
-                inset * s + padding.get_top() - s,
-                width - 2 * inset * s - padding.get_right() - padding.get_left() + 2 * s,
-                height - 2 * inset * s - padding.get_top() - padding.get_bottom() + 2 * s
-                );
 
         // drawing the cells
         cr->translate(inset * s + padding.get_left(), inset * s + padding.get_top());
@@ -405,9 +385,9 @@ void ColorWheelArea::get_preferred_height_for_width_vfunc(int width, int &minimu
 // ColorWheel
 //-----------------------------------------------------------------------------
 
-ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
+ColorWheel::ColorWheel(bool use_scale):
     EditSubscriber(ET_PIPETTE),
-    grid(evt, msg),
+    grid(),
     savedparams_{}
 {
     Gtk::Button *reset = Gtk::manage(new Gtk::Button());
@@ -432,25 +412,34 @@ ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
     Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
     vb->pack_start(*reset, false, false, 4);
     vb->pack_start(*edit_, false, false, 4);
-    scale = Gtk::manage(new Gtk::VScale(0.2, 2.5, 0.01));
-    scale->set_inverted(true);
-    scale->set_value(1.0);
-    scale->set_draw_value(false);
-    RTImage *icon = Gtk::manage(new RTImage("volume-small.png"));
-    vb->pack_start(*icon, false, false);
-    vb->pack_start(*scale, true, true);
+    if (use_scale) {
+        scale = Gtk::manage(new Gtk::VScale(0.2, 2.5, 0.01));
+        scale->set_inverted(true);
+        scale->set_value(1.0);
+        scale->set_draw_value(false);
+        RTImage *icon = Gtk::manage(new RTImage("volume-small.png"));
+        vb->pack_start(*icon, false, false);
+        vb->pack_start(*scale, true, true);
+    } else {
+        scale = nullptr;
+    }
+    scalebox_ = vb;
 
     pack_start(grid, true, true);
     pack_start(*vb, false, false);
 
-    scaleconn = scale->signal_value_changed().connect(sigc::mem_fun(*this, &ColorWheel::scaleChanged));
+    if (use_scale) {
+        scaleconn = scale->signal_value_changed().connect(sigc::mem_fun(*this, &ColorWheel::scaleChanged));
+    }
 
     const auto toggle_subscription =
         [this]()
         {
             if (edit_->get_active()) {
                 this->subscribe();
-                grid.setScale(scale->get_value(), true);
+                if (scale) {
+                    grid.setScale(scale->get_value(), true);
+                }
             } else {
                 this->switchOffEditMode();
             }
@@ -464,8 +453,11 @@ ColorWheel::ColorWheel(rtengine::ProcEvent evt, const Glib::ustring &msg):
 bool ColorWheel::resetPressed(GdkEventButton *event)
 {
     grid.reset(event->state & GDK_CONTROL_MASK);
-    ConnectionBlocker sb(scaleconn);
-    scale->set_value(grid.getScale());
+    if (scale) {
+        ConnectionBlocker sb(scaleconn);
+        scale->set_value(grid.getScale());
+    }
+    onResetPressed();
     return false;
 }
 
@@ -496,7 +488,9 @@ void ColorWheel::setParams(double x, double y, double s, bool notify)
     if (ph.radius > 1) {
         s *= ph.radius;
     }
-    scale->set_value(s);
+    if (scale) {
+        scale->set_value(s);
+    }
     grid.setScale(s, false);
     grid.setParams(x / s, y / s, notify);
 }
@@ -571,4 +565,73 @@ void ColorWheel::unsubscribe()
     edit_->set_active(false);
     EditSubscriber::unsubscribe();
     setParams(savedparams_[0], savedparams_[1], savedparams_[2], true);
+}
+
+
+//-----------------------------------------------------------------------------
+// HueSatColorWheel
+//-----------------------------------------------------------------------------
+
+HueSatColorWheel::HueSatColorWheel(double sat_scale):
+    ColorWheel(false),
+    satscale_(sat_scale)
+{
+    removeIfThere(scalebox_, edit_);
+}
+
+
+HueSatColorWheel::~HueSatColorWheel()
+{
+    edit_->unreference();
+}
+
+
+void HueSatColorWheel::getParams(double &hue, double &sat) const
+{
+    double x, y;
+    grid.getParams(x, y);
+    hue = std::atan2(y, x) * 180 / rtengine::RT_PI;
+    if (hue < 0) {
+        hue += 360;
+    } else if (hue > 360) {
+        hue -= 360;
+    }
+    double s = std::sqrt(x * x + y * y);
+    sat = s * 100;
+    if (satscale_ > 0) {
+        sat /= satscale_;
+    }
+}
+
+
+void HueSatColorWheel::setParams(double hue, double sat, bool notify)
+{
+    double h = hue * rtengine::RT_PI / 180.0;
+    double s = sat / 100.0;
+    if (satscale_ > 0) {
+        s = std::min(s * satscale_, 1.0);
+    }
+    double x = s * std::cos(h);
+    double y = s * std::sin(h);
+    grid.setScale(1.5, false);
+    grid.setParams(x, y, notify);
+}
+
+
+void HueSatColorWheel::setDefault(double hue, double sat)
+{
+    double h = hue * rtengine::RT_PI / 180.0;
+    double s = sat / 100.0;
+    if (satscale_ > 0) {
+        s = std::min(s * satscale_, 1.0);
+    }
+    double x = s * std::cos(h);
+    double y = s * std::sin(h);
+    ColorWheel::setDefault(x, y, 1.5);
+}
+
+
+void HueSatColorWheel::onResetPressed()
+{
+    grid.setScale(1.5, false);
 }
