@@ -1436,6 +1436,24 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
     }
 
+    if ( ri->getSensorType() == ST_BAYER && (raw.hotPixelFilter > 0 || raw.deadPixelFilter > 0) && raw.enable_hotdeadpix) {
+        if (plistener) {
+            plistener->setProgressStr ("Hot/Dead Pixel Filter...");
+            plistener->setProgress (0.0);
+        }
+
+        if(!bitmapBads) {
+            bitmapBads.reset(new PixelsMap(W, H));
+        }
+
+        int nFound = findHotDeadPixels(*(bitmapBads.get()), raw.hotdeadpix_thresh, raw.hotPixelFilter, raw.deadPixelFilter );
+        totBP += nFound;
+
+        if( settings->verbose && nFound > 0) {
+            printf( "Correcting %d hot/dead pixels found inside image\n", nFound );
+        }
+    }
+
     if(numFrames == 4) {
         for(int i=0; i<4; ++i) {
             scaleColors( 0, 0, W, H, raw, *rawDataFrames[i]);
@@ -1477,23 +1495,23 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
 
     defGain = 0.0;//log(initialGain) / log(2.0);
 
-    if ( ri->getSensorType() == ST_BAYER && (raw.hotPixelFilter > 0 || raw.deadPixelFilter > 0) && raw.enable_hotdeadpix) {
-        if (plistener) {
-            plistener->setProgressStr ("Hot/Dead Pixel Filter...");
-            plistener->setProgress (0.0);
-        }
+    // if ( ri->getSensorType() == ST_BAYER && (raw.hotPixelFilter > 0 || raw.deadPixelFilter > 0) && raw.enable_hotdeadpix) {
+    //     if (plistener) {
+    //         plistener->setProgressStr ("Hot/Dead Pixel Filter...");
+    //         plistener->setProgress (0.0);
+    //     }
 
-        if(!bitmapBads) {
-            bitmapBads.reset(new PixelsMap(W, H));
-        }
+    //     if(!bitmapBads) {
+    //         bitmapBads.reset(new PixelsMap(W, H));
+    //     }
 
-        int nFound = findHotDeadPixels(*(bitmapBads.get()), raw.hotdeadpix_thresh, raw.hotPixelFilter, raw.deadPixelFilter );
-        totBP += nFound;
+    //     int nFound = findHotDeadPixels(*(bitmapBads.get()), raw.hotdeadpix_thresh, raw.hotPixelFilter, raw.deadPixelFilter );
+    //     totBP += nFound;
 
-        if( settings->verbose && nFound > 0) {
-            printf( "Correcting %d hot/dead pixels found inside image\n", nFound );
-        }
-    }
+    //     if( settings->verbose && nFound > 0) {
+    //         printf( "Correcting %d hot/dead pixels found inside image\n", nFound );
+    //     }
+    // }
 
     if (ri->getSensorType() == ST_BAYER && raw.bayersensor.pdafLinesFilter && raw.bayersensor.enable_preproc) {
         PDAFLinesFilter f(ri);
