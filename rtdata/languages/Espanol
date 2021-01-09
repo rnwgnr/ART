@@ -3,6 +3,7 @@
 #02 2021-01-03 mrleemon, some fixes
 #03 2021-01-04 mrleemon, some fixes and missing translations
 #04 2021-01-04 mrleemon, small fix
+#05 2021-01-09 mrleemon, fix some shortcuts
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -198,7 +199,7 @@ FILEBROWSER_SHOWTRASHHINT;Mostrar el contenido de la papelera.\nAtajo: <b>Ctrl-t
 FILEBROWSER_SHOWUNCOLORHINT;Mostrar imágenes sin etiqueta de color.\nAtajo: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Mostrar imágenes sin puntuación.\nAtajo: <b>0</b>
 FILEBROWSER_THUMBSIZE;Tamaño de las miniaturas
-FILEBROWSER_UNRANK_TOOLTIP;Quitar puntuación.\nAtajo: <b>Shift-0</b>
+FILEBROWSER_UNRANK_TOOLTIP;Quitar puntuación.\nAtajo: <b>Mayús-0</b>
 FILEBROWSER_ZOOMINHINT;Aumenta el tamaño de las miniaturas.\n\nAtajos:\n<b>+</b> - Modo de pestañas de editor múltiple,\n<b>Alt</b>-<b>+</b> - Modo de pestañas de un solo editor.
 FILEBROWSER_ZOOMOUTHINT;Disminuye el tamaño de las miniaturas.\n\nAtajos:\n<b>-</b> - Modo de pestañas de editor múltiple,\n<b>Alt</b>-<b>-</b> - Modo de pestañas de un solo editor.
 FILECHOOSER_FILTER_ANY;Todos los archivos
@@ -681,7 +682,7 @@ ICCPROFCREATOR_SAVEDIALOG_TITLE;Guardar perfil ICC como...
 ICCPROFCREATOR_SLOPE;Pendiente
 ICCPROFCREATOR_TRC_PRESET;La curva de respuesta del tono:
 INSPECTOR_ENABLE_CMS;Activar la gestión del color.
-INSPECTOR_FOCUS_MASK;Máscara de foco.\nAtajo: <b>Shift-f</b>.
+INSPECTOR_FOCUS_MASK;Máscara de foco.\nAtajo: <b>Mayús-f</b>.
 INSPECTOR_HISTOGRAM;Histograma.\nAtajo: <b>h</b>.
 INSPECTOR_INFO;Información breve.\nAtajo: <b>i</b>.
 INSPECTOR_PREVIEW;Vista previa de imagen incrustada.\nAtajo: <b>j</b>.
@@ -811,7 +812,7 @@ MAIN_TOOLTIP_PREVIEWFOCUSMASK;Vista previa de la <b>máscara de foco</b>.\nAtajo
 MAIN_TOOLTIP_PREVIEWG;Vista previa del <b>canal verde</b>.\nAtajo: <b>g</b>
 MAIN_TOOLTIP_PREVIEWL;Vista previa de la <b>luminosidad</b>.\nAtajo: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Vista previa del <b>canal rojo</b>.\nAtajo: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista previa de la <b>máscara de contraste de enfoque</b>.\nAtajo: <b>Shift-p</b>\n\nSolo funciona cuando se activa el enfoque, y es precisa solo cuando el zoom >= 100%.
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista previa de la <b>máscara de contraste de enfoque</b>.\nAtajo: <b>Mayús-p</b>\n\nSolo funciona cuando se activa el enfoque, y es precisa solo cuando el zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Información breve sobre la imagen.\nAtajo: <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostrar/Ocultar el panel izquierdo.\nAtajo: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Mostrar/Ocultar el panel derecho.\nAtajo: <b>Ctrl-l</b>

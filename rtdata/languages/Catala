@@ -1,5 +1,6 @@
 #00 Catalan
 #01 2021-01-05 mrleemon, initial translation following Softcatalà style guide as close as possible
+#02 2021-01-09 mrleemon, fix some shortcuts
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -195,7 +196,7 @@ FILEBROWSER_SHOWTRASHHINT;Mostra el contingut de la paperera.\nDrecera: <b>Ctrl-
 FILEBROWSER_SHOWUNCOLORHINT;Mostra imatges sense etiqueta de color.\nDrecera: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Mostra imatges sense puntuació.\nDrecera: <b>0</b>
 FILEBROWSER_THUMBSIZE;Mida de les miniatures
-FILEBROWSER_UNRANK_TOOLTIP;Treu puntuació.\nDrecera: <b>Shift-0</b>
+FILEBROWSER_UNRANK_TOOLTIP;Treu puntuació.\nDrecera: <b>Majús-0</b>
 FILEBROWSER_ZOOMINHINT;Augmenta la mida de les miniatures.\n\nDreceres:\n<b>+</b> - Mode de pestanyes d'editor múltiple,\n<b>Alt</b>-<b>+</b> - Mode de pestanyes d'un sol editor.
 FILEBROWSER_ZOOMOUTHINT;Disminueix la mida de les miniatures.\n\nDreceres:\n<b>-</b> - Mode de pestanyes d'editor múltiple,\n<b>Alt</b>-<b>-</b> - Mode de pestanyes d'un sol editor.
 FILECHOOSER_FILTER_ANY;Tots els fitxers
@@ -678,7 +679,7 @@ ICCPROFCREATOR_SAVEDIALOG_TITLE;Desa el perfil ICC com a...
 ICCPROFCREATOR_SLOPE;Pendent
 ICCPROFCREATOR_TRC_PRESET;La corba de resposta del to:
 INSPECTOR_ENABLE_CMS;Activa la gestió del color.
-INSPECTOR_FOCUS_MASK;Màscara de focus.\nDrecera: <b>Shift-f</b>.
+INSPECTOR_FOCUS_MASK;Màscara de focus.\nDrecera: <b>Majús-f</b>.
 INSPECTOR_HISTOGRAM;Histograma.\nDrecera: <b>h</b>.
 INSPECTOR_INFO;Informació breu.\nDrecera: <b>i</b>.
 INSPECTOR_PREVIEW;Vista prèvia de la imatge incrustada.\nDrecera: <b>j</b>.
@@ -808,7 +809,7 @@ MAIN_TOOLTIP_PREVIEWFOCUSMASK;Vista prèvia de la <b>màscara de focus</b>.\nDre
 MAIN_TOOLTIP_PREVIEWG;Vista prèvia del <b>canal verd</b>.\nDrecera: <b>g</b>
 MAIN_TOOLTIP_PREVIEWL;Vista prèvia de la <b>lluminositat</b>.\nDrecera: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Vista prèvia del <b>canal vermell</b>.\nDrecera: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista prèvia de la <b>màscara de contrast d'enfocament</b>.\nDrecera: <b>Shift-p</b>\n\nNomés funciona quan s'activa l'enfocament, i és precisa només quan el zoom >= 100%.
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista prèvia de la <b>màscara de contrast d'enfocament</b>.\nDrecera: <b>Majús-p</b>\n\nNomés funciona quan s'activa l'enfocament, i és precisa només quan el zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Informació breu sobre la imatge.\nDrecera: <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostra/Oculta el panell esquerre.\nDrecera: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Mostra/Oculta el panell dret.\nDrecera: <b>Ctrl-l</b>
