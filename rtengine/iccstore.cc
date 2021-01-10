@@ -397,6 +397,11 @@ const std::string& rtengine::ProfileContent::getData() const
 
 class rtengine::ICCStore::Implementation
 {
+    using ProfileMap = std::map<Glib::ustring, cmsHPROFILE>;
+    using MatrixMap = std::map<Glib::ustring, TMatrix>;
+    using ContentMap = std::map<Glib::ustring, ProfileContent>;
+    using NameMap = std::map<Glib::ustring, Glib::ustring>;
+
 public:
     Implementation() :
         loadAll(true),
@@ -612,13 +617,11 @@ public:
         return srgb;
     }
 
-    std::vector<Glib::ustring> getProfiles(ProfileType type) const
+    std::vector<Glib::ustring> doGetProfiles(const ProfileMap &profiles, ProfileType type) const
     {
         std::vector<Glib::ustring> res;
 
-        MyMutex::MyLock lock(mutex);
-
-        for (const auto &profile : fileProfiles) {
+        for (const auto &profile : profiles) {
             if (
                 (
                     type == ICCStore::ProfileType::MONITOR
@@ -644,21 +647,25 @@ public:
         return res;
     }
 
-    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName) const
+    std::vector<Glib::ustring> getProfiles(ProfileType type) const
     {
-        std::vector<Glib::ustring> res;
+        MyMutex::MyLock lock(mutex);
+
+        return doGetProfiles(fileProfiles, type);
+    }
+
+    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName, bool include_defaults, ProfileType type) const
+    {
         ProfileMap profiles;
 
         MyMutex::MyLock lock(mutex);
 
-        loadProfiles(profilesDir, &profiles, nullptr, nullptr, false);
+        if (include_defaults) {
+            loadProfiles(profilesDir, &profiles, nullptr, nullptr, false);
+        }
         loadProfiles(dirName, &profiles, nullptr, nullptr, false);
 
-        for (const auto& profile : profiles) {
-            res.push_back(profile.first);
-        }
-
-        return res;
+        return doGetProfiles(profiles, type);
     }
 
     std::uint8_t getInputIntents(cmsHPROFILE profile)
@@ -1039,11 +1046,6 @@ parse_error:
         return false;
     }
 
-    using ProfileMap = std::map<Glib::ustring, cmsHPROFILE>;
-    using MatrixMap = std::map<Glib::ustring, TMatrix>;
-    using ContentMap = std::map<Glib::ustring, ProfileContent>;
-    using NameMap = std::map<Glib::ustring, Glib::ustring>;
-
     ProfileMap wProfiles;
     // ProfileMap wProfilesGamma;
     MatrixMap wMatrices;
@@ -1152,9 +1154,9 @@ std::vector<Glib::ustring> rtengine::ICCStore::getProfiles(ProfileType type) con
     return implementation->getProfiles(type);
 }
 
-std::vector<Glib::ustring> rtengine::ICCStore::getProfilesFromDir(const Glib::ustring& dirName) const
+std::vector<Glib::ustring> rtengine::ICCStore::getProfilesFromDir(const Glib::ustring& dirName, bool include_defaults, ProfileType type) const
 {
-    return implementation->getProfilesFromDir(dirName);
+    return implementation->getProfilesFromDir(dirName, include_defaults, type);
 }
 
 std::uint8_t rtengine::ICCStore::getInputIntents(cmsHPROFILE profile) const

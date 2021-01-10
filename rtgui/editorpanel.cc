@@ -161,7 +161,7 @@ private:
             profileBox.set_active (0);
         }
 
-        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
+        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
 
         for (const auto &profile : profiles) {
             profileBox.append(profile);

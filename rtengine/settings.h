@@ -30,6 +30,7 @@ class Settings
 {
 public:
     Glib::ustring   iccDirectory;           ///< The directory containing the possible output icc profiles
+    Glib::ustring monitorIccDirectory;
     int             viewingdevice;          // white of output device (D50...D65..)
     int             viewingdevicegrey;      // level of grey output device
     int             viewinggreySc;          // level of grey Scene

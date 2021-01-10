@@ -78,7 +78,7 @@ public:
     cmsHPROFILE      getsRGBProfile() const;
 
     std::vector<Glib::ustring> getProfiles(ProfileType type = ProfileType::MONITOR) const;
-    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName) const;
+    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName, bool include_defaults=false, ProfileType type=ProfileType::MONITOR) const;
 
     std::uint8_t     getInputIntents(cmsHPROFILE profile) const;
     std::uint8_t     getOutputIntents(cmsHPROFILE profile) const;

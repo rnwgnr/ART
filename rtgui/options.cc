@@ -544,6 +544,8 @@ void Options::setDefaults()
 //   rtSettings.viewingdevicegrey = 3;
     //  rtSettings.viewinggreySc = 1;
 
+    rtSettings.monitorIccDirectory = rtSettings.iccDirectory;
+
     rtSettings.printerProfile = Glib::ustring();
     rtSettings.printerIntent = rtengine::RI_RELATIVE;
     rtSettings.printerBPC = true;
@@ -1499,6 +1501,11 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Color Management", "ICCDirectory")) {
                     rtSettings.iccDirectory = keyFile.get_string("Color Management", "ICCDirectory");
                 }
+                if (keyFile.has_key("Color Management", "MonitorICCDirectory")) {
+                    rtSettings.monitorIccDirectory = keyFile.get_string("Color Management", "MonitorICCDirectory");
+                } else {
+                    rtSettings.monitorIccDirectory = rtSettings.iccDirectory;
+                }
 
                 if (keyFile.has_key("Color Management", "PrinterIntent")) {
                     rtSettings.printerIntent = static_cast<rtengine::RenderingIntent>(keyFile.get_integer("Color Management", "PrinterIntent"));
@@ -2254,6 +2261,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Color Management", "PrinterBPC", rtSettings.printerBPC);
 
         keyFile.set_string("Color Management", "ICCDirectory", rtSettings.iccDirectory);
+        keyFile.set_string("Color Management", "MonitorICCDirectory", rtSettings.monitorIccDirectory);
         keyFile.set_string("Color Management", "MonitorProfile", rtSettings.monitorProfile);
         keyFile.set_boolean("Color Management", "AutoMonitorProfile", rtSettings.autoMonitorProfile);
         keyFile.set_boolean("Color Management", "Autocielab", rtSettings.autocielab);

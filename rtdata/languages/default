@@ -994,7 +994,8 @@ PREFERENCES_GIMPPATH;GIMP installation directory
 PREFERENCES_HISTOGRAMPOSITIONLEFT;Histogram in left panel
 PREFERENCES_HISTOGRAM_TOOLTIP;If enabled, the working profile is used for rendering the main histogram and the Navigator panel, otherwise the gamma-corrected output profile is used.
 PREFERENCES_HLTHRESHOLD;Threshold for clipped highlights
-PREFERENCES_ICCDIR;Directory containing color profiles
+PREFERENCES_ICCDIR;Directory containing output color profiles
+PREFERENCES_MONITORICCDIR;Directory containing monitor color profiles
 PREFERENCES_IMPROCPARAMS;Default Processing Profile
 PREFERENCES_INSPECT_LABEL;Inspect
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;Maximum number of cached images

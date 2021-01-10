@@ -448,12 +448,33 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     iccdgrid->attach (*pdlabel, 0, 0, 1, 1);
     iccdgrid->attach (*iccDir, 1, 0, 1, 1);
+
     iccdgrid->attach (*monProfileRestartNeeded, 2, 0, 1, 1);
 
-    iccDir->signal_selection_changed ().connect (sigc::mem_fun (this, &Preferences::iccDirChanged));
+    //iccDir->signal_selection_changed ().connect (sigc::mem_fun (this, &Preferences::iccDirChanged));
 
     vbColorMan->pack_start (*iccdgrid, Gtk::PACK_SHRINK);
 
+    monitorIccDir = Gtk::manage (new MyFileChooserButton (M ("PREFERENCES_MONITORICCDIR"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER));
+    setExpandAlignProperties(monitorIccDir, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
+    pdlabel = Gtk::manage(new Gtk::Label(M("PREFERENCES_MONITORICCDIR") + ":", Gtk::ALIGN_START));
+    setExpandAlignProperties(pdlabel, false, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
+
+    iccdgrid = Gtk::manage(new Gtk::Grid ());
+    setExpandAlignProperties(iccdgrid, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_FILL);
+    iccdgrid->set_column_spacing (4);
+
+    monProfileRestartNeeded = Gtk::manage ( new Gtk::Label (Glib::ustring (" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")") );
+    setExpandAlignProperties(monProfileRestartNeeded, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+
+    iccdgrid->attach(*pdlabel, 0, 0, 1, 1);
+    iccdgrid->attach(*monitorIccDir, 1, 0, 1, 1);
+    iccdgrid->attach(*monProfileRestartNeeded, 2, 0, 1, 1);
+
+    monitorIccDir->signal_selection_changed ().connect (sigc::mem_fun (this, &Preferences::iccDirChanged));
+
+    vbColorMan->pack_start(*iccdgrid, Gtk::PACK_SHRINK);
+    
     //------------------------- MONITOR ----------------------
 
     Gtk::Frame* fmonitor = Gtk::manage ( new Gtk::Frame (M ("PREFERENCES_MONITOR")) );
@@ -473,7 +494,7 @@ Gtk::Widget* Preferences::getColorManPanel ()
     monProfile->append (M ("PREFERENCES_PROFILE_NONE"));
     monProfile->set_active (0);
 
-    const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance ()->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
+    const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance ()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
 
     for (const auto &profile : profiles) {
         if (profile.find("file:") != 0) {
@@ -1512,6 +1533,7 @@ void Preferences::storePreferences ()
 #endif
 
     moptions.rtSettings.iccDirectory = iccDir->get_filename ();
+    moptions.rtSettings.monitorIccDirectory = monitorIccDir->get_filename ();
 
     moptions.prevdemo = (prevdemo_t)cprevdemo->get_active_row_number ();
     moptions.serializeTiffRead = ctiffserialize->get_active();
@@ -1665,6 +1687,10 @@ void Preferences::fillPreferences ()
         iccDir->set_current_folder (moptions.rtSettings.iccDirectory);
     }
 
+    if (Glib::file_test(moptions.rtSettings.monitorIccDirectory, Glib::FILE_TEST_IS_DIR)) {
+        monitorIccDir->set_current_folder(moptions.rtSettings.monitorIccDirectory);
+    }
+    
     cprevdemo->set_active (moptions.prevdemo);
 
     languages->set_active_text (moptions.language);
@@ -2044,7 +2070,7 @@ void Preferences::bundledProfilesChanged ()
 void Preferences::iccDirChanged ()
 {
     const auto currentSelection = monProfile->get_active_text ();
-    const auto profiles = rtengine::ICCStore::getInstance ()->getProfilesFromDir (iccDir->get_filename ());
+    const auto profiles = rtengine::ICCStore::getInstance ()->getProfilesFromDir(monitorIccDir->get_filename());
 
     monProfile->remove_all();
 

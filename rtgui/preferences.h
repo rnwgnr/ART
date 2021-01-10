@@ -96,6 +96,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::CheckButton* showExpComp;
 
     MyFileChooserButton* iccDir;
+    MyFileChooserButton* monitorIccDir;
     Gtk::ComboBoxText* prtProfile;
     Gtk::ComboBoxText* prtIntent;
     Gtk::CheckButton* prtBPC;
