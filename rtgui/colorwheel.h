@@ -69,6 +69,7 @@ public:
     void get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const override;
 
     sigc::signal<void> signal_changed() { return sig_changed_; }
+    sigc::signal<void> signal_right_click() { return sig_right_click_; }
 
 private:
     // rtengine::ProcEvent evt;
@@ -97,6 +98,7 @@ private:
     double defaultScale;
 
     sigc::signal<void> sig_changed_;
+    sigc::signal<void> sig_right_click_;
     
     bool notifyListener();
     void getLitPoint();
@@ -122,7 +124,8 @@ public:
     void unsubscribe() override;
 
 protected:
-    virtual void onResetPressed() {} 
+    virtual void onResetPressed() {}
+    virtual void onRightClickPressed();
     bool resetPressed(GdkEventButton *event);
     void scaleChanged();
 
@@ -148,5 +151,7 @@ public:
 
 private:
     void onResetPressed();
+    void onRightClickPressed();
+    
     double satscale_;
 };

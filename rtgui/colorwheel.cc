@@ -272,6 +272,8 @@ bool ColorWheelArea::on_button_press_event(GdkEventButton *event)
             lock_radius_ = event->state & GDK_SHIFT_MASK;
         }
         return false;
+    } else if (event->button == 3 && point_active_) {
+        sig_right_click_.emit();
     }
     return true;
 }
@@ -447,6 +449,8 @@ ColorWheel::ColorWheel(bool use_scale):
     editconn_ = edit_->signal_toggled().connect(sigc::slot<void>(toggle_subscription));
     
     show_all_children();
+
+    grid.signal_right_click().connect(sigc::slot<void>([this]() { onRightClickPressed(); }));
 }
 
 
@@ -499,6 +503,59 @@ void ColorWheel::setParams(double x, double y, double s, bool notify)
 void ColorWheel::setDefault(double x, double y, double s)
 {
     grid.setDefault(x, y, s);
+}
+
+
+void ColorWheel::onRightClickPressed()
+{
+    Gtk::Popover p(grid);
+    p.set_pointing_to(Gdk::Rectangle(0, grid.get_height()/2, grid.get_width(), grid.get_height()/2));
+    Gtk::HBox hb;
+    p.set_border_width(16);
+    p.add(hb);
+    Gtk::Label lx("X: ");
+    Gtk::SpinButton x;
+    x.set_range(0, 2);
+    x.set_digits(3);
+    x.set_increments(0.01, 0.1);
+    Gtk::Label ly("Y: ");
+    Gtk::SpinButton y;
+    y.set_range(0, 2);
+    y.set_digits(3);
+    y.set_increments(0.01, 0.1);
+    hb.pack_start(lx);
+    hb.pack_start(x);
+    Gtk::Label spc("  ");
+    hb.pack_start(spc);
+    hb.pack_start(ly);
+    hb.pack_start(y);
+
+    double vx, vy, vs;
+    getParams(vx, vy, vs);
+    x.set_value(vx);
+    y.set_value(vy);
+    
+    int result = 0;
+
+    p.signal_closed().connect(
+        sigc::slot<void>(
+            [&]()
+            {
+                result = 1;
+                if (x.get_value() != vx || y.get_value() != vy) {
+                    setParams(x.get_value(), y.get_value(), vs, true);
+                }
+            })
+        );
+
+    p.show_all_children();
+    p.set_modal(true);
+    p.show();
+    //p.popup();
+
+    while (result == 0) {
+        gtk_main_iteration();
+    }
 }
 
 
@@ -634,4 +691,57 @@ void HueSatColorWheel::setDefault(double hue, double sat)
 void HueSatColorWheel::onResetPressed()
 {
     grid.setScale(1.5, false);
+}
+
+
+void HueSatColorWheel::onRightClickPressed()
+{
+    Gtk::Popover p(grid);
+    p.set_pointing_to(Gdk::Rectangle(0, grid.get_height()/2, grid.get_width(), grid.get_height()/2));
+    Gtk::HBox hb;
+    p.set_border_width(16);
+    p.add(hb);
+    Gtk::Label lx(M("TP_COLORCORRECTION_H") + ": ");
+    Gtk::SpinButton hue;
+    hue.set_range(0, 360);
+    hue.set_digits(1);
+    hue.set_increments(0.1, 1);
+    Gtk::Label ly(M("TP_COLORCORRECTION_S") + ": ");
+    Gtk::SpinButton sat;
+    sat.set_range(0, 100);
+    sat.set_digits(1);
+    sat.set_increments(0.1, 1);
+    hb.pack_start(lx);
+    hb.pack_start(hue);
+    Gtk::Label spc("  ");
+    hb.pack_start(spc);
+    hb.pack_start(ly);
+    hb.pack_start(sat);
+
+    double vhue, vsat;
+    getParams(vhue, vsat);
+    hue.set_value(vhue);
+    sat.set_value(vsat);
+    
+    int result = 0;
+
+    p.signal_closed().connect(
+        sigc::slot<void>(
+            [&]()
+            {
+                result = 1;
+                if (hue.get_value() != vhue || sat.get_value() != vsat) {
+                    setParams(hue.get_value(), sat.get_value(), true);
+                }
+            })
+        );
+
+    p.show_all_children();
+    p.set_modal(true);
+    p.show();
+    //p.popup();
+
+    while (result == 0) {
+        gtk_main_iteration();
+    }
 }
