@@ -515,12 +515,12 @@ void ColorWheel::onRightClickPressed()
     p.add(hb);
     Gtk::Label lx("X: ");
     Gtk::SpinButton x;
-    x.set_range(0, 2);
+    x.set_range(-2.5, 2.5);
     x.set_digits(3);
     x.set_increments(0.01, 0.1);
     Gtk::Label ly("Y: ");
     Gtk::SpinButton y;
-    y.set_range(0, 2);
+    y.set_range(-2.5, 2.5);
     y.set_digits(3);
     y.set_increments(0.01, 0.1);
     hb.pack_start(lx);
