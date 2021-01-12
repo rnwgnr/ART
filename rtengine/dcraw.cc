@@ -10680,6 +10680,11 @@ dng_skip:
 notraw:
   if (flip == UINT_MAX) flip = tiff_flip;
   if (flip == UINT_MAX) flip = 0;
+
+  // ART
+  if (make[0] == 0) {
+      is_raw = 0;
+  }  
 }
 
 //#ifndef NO_LCMS
