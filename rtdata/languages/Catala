@@ -638,7 +638,7 @@ HISTORY_SNAPSHOT;Instantània
 HISTORY_SNAPSHOTS;Instantànies
 HISTORY_SNAPSHOT_CONFIRM_UPDATE;Voleu sobreescriure la instantània actual?
 ICCPROFCREATOR_COPYRIGHT;Copyright:
-ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Restableix al copyright predeterminat, atorgat a "ART, CC0"
+ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Restableix al copyright predeterminat, atorgat a "RawTherapee, CC0"
 ICCPROFCREATOR_CUSTOM;Personalitzat
 ICCPROFCREATOR_DESCRIPTION;Descripció:
 ICCPROFCREATOR_DESCRIPTION_ADDPARAM;Annexa els valors de gamma i pendent a la descripció

@@ -638,7 +638,7 @@ HISTORY_SNAPSHOT;Instantané
 HISTORY_SNAPSHOTS;Instantanés
 HISTORY_SNAPSHOT_CONFIRM_UPDATE;Ecraser l'Instantané actuel ?
 ICCPROFCREATOR_COPYRIGHT;Copyright :
-ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Réinitialise au copyright par défaut, attribué à "ART, CC0"
+ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Réinitialise au copyright par défaut, attribué à "RawTherapee, CC0"
 ICCPROFCREATOR_CUSTOM;Personnalisé
 ICCPROFCREATOR_DESCRIPTION;Description :
 ICCPROFCREATOR_DESCRIPTION_ADDPARAM;Ajouter les valeurs gamma et pente à la description
