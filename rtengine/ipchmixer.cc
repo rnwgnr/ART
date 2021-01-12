@@ -72,14 +72,10 @@ void get_mixer_matrix(const ChannelMixerParams &chmix, const Glib::ustring &work
             float y = xyz[1] / sum;
             return { x, y, 1.f - x - y };
         };
-    
-    const auto get_matrix =
-        [&](const A3 &r, const A3 &g, const A3 &b, const A3 &white) -> M33
-        {
-            auto r_xy = rgb2xy(r);
-            auto g_xy = rgb2xy(g);
-            auto b_xy = rgb2xy(b);
 
+    const auto get_matrix =
+        [&](const A3 &r_xy, const A3 &g_xy, const A3 &b_xy, const A3 &white) -> M33
+        {
             M33 m = {
                 A3{ r_xy[0], g_xy[0], b_xy[0] },
                 A3{ r_xy[1], g_xy[1], b_xy[1] },
@@ -105,34 +101,34 @@ void get_mixer_matrix(const ChannelMixerParams &chmix, const Glib::ustring &work
     A3 green = {0.f, 1.f, 0.f};
     A3 blue = {0.f, 0.f, 1.f};
 
-    M33 M = get_matrix(red, green, blue, D65_bb_white);
+    A3 r_xy = rgb2xy(red);
+    A3 g_xy = rgb2xy(green);
+    A3 b_xy = rgb2xy(blue);
+    M33 M = get_matrix(r_xy, g_xy, b_xy, D65_bb_white);
 
     const auto tweak =
-        [](const A3 &c, int hue, int sat, float hrange) -> A3
+        [&](const A3 &c, int hue, int sat, float hrange, float srange) -> A3
         {
-            float h, s, l;
-            Color::rgb2hsl(c[0] * 65535.f, c[1] * 65535.f, c[2] * 65535.f, h, s, l);
-            float dh = float(hue)/100.f * hrange;
-            h += dh;
-            if (h > 1.f) {
-                h -= 1.f;
-            } else if (h < 0.f) {
-                h += 1.f;
-            }
-            float ds = 1.f + (float(sat) / 100.f * 0.3f);
-            s *= ds;
-            A3 ret;
-            Color::hsl2rgb(h, s, l, ret[0], ret[1], ret[2]);
-            ret[0] /= 65535.f;
-            ret[1] /= 65535.f;
-            ret[2] /= 65535.f;
+            const float x = c[0], y = c[1];
+            const CoordD w(D65_x, D65_y);
+            
+            PolarCoord p(CoordD(x, y) - w);
+            const float dh = float(hue) / 100.f * 360.f * hrange;
+            const float ds = 1.f + (float(sat) / 100.f * srange);
+            p.radius *= ds;
+            p.angle += dh;
+            CoordD d(p);
+            d += w;
 
-            return ret;
+            return A3{ float(d.x), float(d.y), float(1.0 - d.x - d.y) };
         };
 
-    M33 N = get_matrix(tweak(red, chmix.hue_tweak[0], chmix.sat_tweak[0], 0.075f),
-                       tweak(green, chmix.hue_tweak[1], chmix.sat_tweak[1], 0.12f),
-                       tweak(blue, chmix.hue_tweak[2], chmix.sat_tweak[2], 0.075f),
+    M33 N = get_matrix(tweak(r_xy, chmix.hue_tweak[0], chmix.sat_tweak[0],
+                             0.075f, 0.3f),
+                       tweak(g_xy, chmix.hue_tweak[1], chmix.sat_tweak[1],
+                             0.1f, 0.5f),
+                       tweak(b_xy, chmix.hue_tweak[2], chmix.sat_tweak[2],
+                             0.075f, 0.5f),
                        D65_bb_white);
 
     M33 Minv;
