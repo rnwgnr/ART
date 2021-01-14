@@ -588,6 +588,14 @@ bool ColorWheel::mouseOver(int modifierKey)
         double x = p->pipetteVal[0];
         double y = p->pipetteVal[2];
         double s = find_scale(x, y);
+        if (modifierKey & GDK_CONTROL_MASK) {
+            // invert
+            rtengine::PolarCoord p(rtengine::CoordD(x, y));
+            p.angle += 180;
+            rtengine::CoordD c(p);
+            x = c.x;
+            y = c.y;
+        }
         setParams(x, y, s, false);
     }
     return true;
@@ -601,6 +609,14 @@ bool ColorWheel::button1Pressed(int modifierKey)
         double x = p->pipetteVal[0];
         double y = p->pipetteVal[2];
         double s = find_scale(x, y);
+        if (modifierKey & GDK_CONTROL_MASK) {
+            // invert
+            rtengine::PolarCoord p(rtengine::CoordD(x, y));
+            p.angle += 180;
+            rtengine::CoordD c(p);
+            x = c.x;
+            y = c.y;
+        }
         setParams(x, y, s, true);
         getParams(savedparams_[0], savedparams_[1], savedparams_[2]);
         switchOffEditMode();
