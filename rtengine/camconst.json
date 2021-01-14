@@ -1498,6 +1498,11 @@ Camera constants:
         "raw_crop": [ 0, 0, 0, -18 ] // 18 rows at bottom are garbage
     },
 
+    { // Quality C, only black level offset
+        "make_model": "Leica D-Lux 7",
+        "ranges" : { "black" : 15 }
+    },
+    
     { // Quality C
         "make_model": "LG mobile LG-H815",
         "dcraw_matrix": [ 5859,547,-1250,-6484,15547,547,-2422,5625,3906 ], // DNG D65
@@ -2283,7 +2288,7 @@ Camera constants:
     },
 
     { // Quality B, samples by Ingo, missing some long exposure at high ISO samples with LENR ON
-        "make_model": [ "Panasonic DMC-LX100", "Leica D-LUX (Typ 109)" ],
+        "make_model": [ "Panasonic DMC-LX100", "Leica D-LUX (Typ 109)", "Leica D-LUX 7" ],
         "dcraw_matrix": [ 8844,-3538,-768,-3709,11762,2200,-698,1792,5220 ], // DNG_V8.7 d65
         //"dcraw_matrix": [ 6538,-1614,-549,-5475,13096,2646,-1780,2799,5612 ], // calculated from DxO D50
         "ranges": {
