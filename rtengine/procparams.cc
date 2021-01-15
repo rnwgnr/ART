@@ -2638,6 +2638,7 @@ ColorCorrectionParams::Region::Region():
     hue{0,0,0},
     sat{0,0,0},
     factor{0,0,0},
+    rgbluminance(false),
     mode(ColorCorrectionParams::Mode::YUV)
 {
 }
@@ -2657,6 +2658,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
         && hue == other.hue
         && sat == other.sat
         && factor == other.factor
+        && rgbluminance == other.rgbluminance
         && mode == other.mode;
 }
 
@@ -3761,6 +3763,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("Offset_") + n, l.offset[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Power_") + n, l.power[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Pivot_") + n, l.pivot[0], keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
@@ -5035,6 +5038,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     get("InSaturation_", cur.inSaturation);
                     get("OutSaturation_", cur.outSaturation);
                 }                
+                if (assignFromKeyfile(keyFile, ccgroup, prefix + "RGBLuminance_" + n, cur.rgbluminance)) {
+                    found = true;
+                    done = false;
+                }
                 if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
                     found = true;
                     done = false;

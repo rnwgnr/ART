@@ -136,12 +136,15 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float roffset[n][3];
     float rpower[n][3];
     float rpivot[n][3];
-    bool rgbmode[n];
+    char rgbmode[n];
     bool enabled[n];
     for (int i = 0; i < n; ++i) {
         auto &r = params->colorcorrection.regions[i];
-        rgbmode[i] = r.mode != ColorCorrectionParams::Mode::YUV;
+        rgbmode[i] = int(r.mode != ColorCorrectionParams::Mode::YUV);
         if (rgbmode[i]) {
+            if (r.rgbluminance) {
+                rgbmode[i] = 2;
+            }
             abca[i] = 0.f;
             abcb[i] = 0.f;
         } else {
@@ -201,6 +204,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         }
     }
 
+    const float max_ws = max(ws[1][0], ws[1][1], ws[1][2]);
+    const float fR = max_ws / ws[1][0];
+    const float fG = max_ws / ws[1][1];
+    const float fB = max_ws / ws[1][2];
+
     const auto CDL = 
         [&](int region, float &Y, float &u, float &v) -> void
         {
@@ -231,7 +239,16 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                         }
                         rgb[i] = v * 65535.f;
                     }
-                    Color::rgb2yuv(rgb[0], rgb[1], rgb[2], Y, u, v, ws);
+                    if (rgbmode[region] != 2) {
+                        Color::rgb2yuv(rgb[0], rgb[1], rgb[2], Y, u, v, ws);
+                    } else {
+                        float rr, gg, bb;
+                        Color::yuv2rgb(Y, u, v, rr, gg, bb, ws);
+                        Y = Color::rgbLuminance(rr + (rgb[0] - rr) * fR,
+                                                gg + (rgb[1] - gg) * fG,
+                                                bb + (rgb[2] - bb) * fB,
+                                                ws);
+                    }
                 } else {
                     float v = (Y / 65535.f) * slope[0] + offset[0]/2.f;
                     if (v > 0.f) {
@@ -268,6 +285,10 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         }
     }
 
+    const vfloat vfR = F2V(fR);
+    const vfloat vfG = F2V(fG);
+    const vfloat vfB = F2V(fB);
+
     const auto CDL_v =
         [&](int region, vfloat &Y, vfloat &u, vfloat &v) -> void
         {
@@ -301,7 +322,16 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                         }
                         rgb[i] = v * v65535;
                     }
-                    Color::rgb2yuv(rgb[0], rgb[1], rgb[2], Y, u, v, vws);
+                    if (rgbmode[region] != 2) {
+                        Color::rgb2yuv(rgb[0], rgb[1], rgb[2], Y, u, v, vws);
+                    } else {
+                        vfloat rr, gg, bb;
+                        Color::yuv2rgb(Y, u, v, rr, gg, bb, vws);
+                        Y = Color::rgbLuminance(rr + (rgb[0] - rr) * vfR,
+                                                gg + (rgb[1] - gg) * vfG,
+                                                bb + (rgb[2] - bb) * vfB,
+                                                vws);
+                    }
                 } else {
                     vfloat vslope = F2V(slope[0]);
                     vfloat voffset = F2V(offset[0] / 2.f);

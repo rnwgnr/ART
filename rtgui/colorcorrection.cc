@@ -188,6 +188,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvPower = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_POWER");
     EvPivot = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PIVOT");
     EvMode = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_MODE");
+    EvRgbLuminance = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK");
@@ -255,6 +256,17 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
 
     sync_rgb_sliders = Gtk::manage(new Gtk::CheckButton(M("TP_COLORCORRECTION_SYNC_SLIDERS")));
     box_rgb->pack_start(*sync_rgb_sliders, Gtk::PACK_SHRINK, 4);
+
+    rgbluminance = Gtk::manage(new Gtk::CheckButton(M("TP_COLORCORRECTION_RGBLUMINANCE")));
+    rgbluminance->signal_toggled().connect(
+        sigc::slot<void>(
+            [this]() -> void
+            {
+                if (listener && getEnabled()) {
+                    listener->panelChanged(EvRgbLuminance, rgbluminance->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+                }
+            }));
+    box_rgb->pack_start(*rgbluminance, Gtk::PACK_SHRINK, 4);
     
     for (int c = 0; c < 3; ++c) {
         const char *chan = (c == 0 ? "R" : (c == 1 ? "G" : "B"));
@@ -566,6 +578,7 @@ void ColorCorrection::regionGet(int idx)
         r.sat[c] = b;
         r.factor[c] = lfactor[c]->getValue();
     }
+    r.rgbluminance = rgbluminance->get_active();
 }
 
 
@@ -606,6 +619,7 @@ void ColorCorrection::regionShow(int idx)
         huesat[c]->setParams(r.hue[c], r.sat[c], false);
         lfactor[c]->setValue(r.factor[c]);
     }
+    rgbluminance->set_active(r.rgbluminance);
     modeChanged();
     if (disable) {
         enableListener();

@@ -133,31 +133,31 @@ void get_mixer_matrix(const ChannelMixerParams &chmix, const Glib::ustring &work
 
     M33 Minv;
     if (!invertMatrix(M, Minv)) {
-        rr = 100.f;
+        rr = 1.f;
         rg = 0.f;
         rb = 0.f;
 
         gr = 0.f;
-        gg = 100.f;
+        gg = 1.f;
         gb = 0.f;
 
         br = 0.f;
         bg = 0.f;
-        bb = 100.f;
+        bb = 1.f;
     } else {
         M33 res = dotProduct(N, Minv);
 
-        rr = res[0][0] * 100.f;
-        rg = res[0][1] * 100.f;
-        rb = res[0][2] * 100.f;
+        rr = res[0][0];
+        rg = res[0][1];
+        rb = res[0][2];
 
-        gr = res[1][0] * 100.f;
-        gg = res[1][1] * 100.f;
-        gb = res[1][2] * 100.f;
+        gr = res[1][0];
+        gg = res[1][1];
+        gb = res[1][2];
 
-        br = res[2][0] * 100.f;
-        bg = res[2][1] * 100.f;
-        bb = res[2][2] * 100.f;
+        br = res[2][0];
+        bg = res[2][1];
+        bb = res[2][2];
     }
 }
 
@@ -167,15 +167,15 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
     if (params->chmixer.enabled) {
         img->setMode(Imagefloat::Mode::RGB, multiThread);
         
-        float RR = float(params->chmixer.red[0])/10.f;
-        float RG = float(params->chmixer.red[1])/10.f;
-        float RB = float(params->chmixer.red[2])/10.f;
-        float GR = float(params->chmixer.green[0])/10.f;
-        float GG = float(params->chmixer.green[1])/10.f;
-        float GB = float(params->chmixer.green[2])/10.f;
-        float BR = float(params->chmixer.blue[0])/10.f;
-        float BG = float(params->chmixer.blue[1])/10.f;
-        float BB = float(params->chmixer.blue[2])/10.f;
+        float RR = float(params->chmixer.red[0])/1000.f;
+        float RG = float(params->chmixer.red[1])/1000.f;
+        float RB = float(params->chmixer.red[2])/1000.f;
+        float GR = float(params->chmixer.green[0])/1000.f;
+        float GG = float(params->chmixer.green[1])/1000.f;
+        float GB = float(params->chmixer.green[2])/1000.f;
+        float BR = float(params->chmixer.blue[0])/1000.f;
+        float BG = float(params->chmixer.blue[1])/1000.f;
+        float BB = float(params->chmixer.blue[2])/1000.f;
 
 
         if (params->chmixer.mode == ChannelMixerParams::Mode::PRIMARIES_CHROMA){
@@ -205,7 +205,6 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
         vfloat vBR = F2V(BR);
         vfloat vBG = F2V(BG);
         vfloat vBB = F2V(BB);
-        vfloat v100 = F2V(100.f);
 #endif // __SSE2__
 
 #ifdef _OPENMP
@@ -219,9 +218,9 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
                 vfloat g = LVF(img->g(y, x));
                 vfloat b = LVF(img->b(y, x));
 
-                vfloat rmix = (r * vRR + g * vRG + b * vRB) / v100;
-                vfloat gmix = (r * vGR + g * vGG + b * vGB) / v100;
-                vfloat bmix = (r * vBR + g * vBG + b * vBB) / v100;
+                vfloat rmix = (r * vRR + g * vRG + b * vRB);
+                vfloat gmix = (r * vGR + g * vGG + b * vGB);
+                vfloat bmix = (r * vBR + g * vBG + b * vBB);
 
                 STVF(img->r(y, x), rmix);
                 STVF(img->g(y, x), gmix);
@@ -233,9 +232,9 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
                 float g = img->g(y, x);
                 float b = img->b(y, x);
 
-                float rmix = (r * RR + g * RG + b * RB) / 100.f;
-                float gmix = (r * GR + g * GG + b * GB) / 100.f;
-                float bmix = (r * BR + g * BG + b * BB) / 100.f;
+                float rmix = (r * RR + g * RG + b * RB);
+                float gmix = (r * GR + g * GG + b * GB);
+                float bmix = (r * BR + g * BG + b * BB);
 
                 img->r(y, x) = rmix;
                 img->g(y, x) = gmix;
