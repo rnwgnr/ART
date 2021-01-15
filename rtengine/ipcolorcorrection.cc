@@ -244,10 +244,16 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     } else {
                         float rr, gg, bb;
                         Color::yuv2rgb(Y, u, v, rr, gg, bb, ws);
-                        Y = Color::rgbLuminance(rr + (rgb[0] - rr) * fR,
-                                                gg + (rgb[1] - gg) * fG,
-                                                bb + (rgb[2] - bb) * fB,
-                                                ws);
+                        float Y1 = Color::rgbLuminance(rr + (rgb[0] - rr) * fR,
+                                                       gg + (rgb[1] - gg) * fG,
+                                                       bb + (rgb[2] - bb) * fB,
+                                                       ws);
+                        if (Y > 0.f) {
+                            float f = Y1 / Y;
+                            u *= f;
+                            v *= f;
+                        }
+                        Y = Y1;
                     }
                 } else {
                     float v = (Y / 65535.f) * slope[0] + offset[0]/2.f;
@@ -327,10 +333,18 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     } else {
                         vfloat rr, gg, bb;
                         Color::yuv2rgb(Y, u, v, rr, gg, bb, vws);
-                        Y = Color::rgbLuminance(rr + (rgb[0] - rr) * vfR,
-                                                gg + (rgb[1] - gg) * vfG,
-                                                bb + (rgb[2] - bb) * vfB,
-                                                vws);
+                        vfloat Y1 = Color::rgbLuminance(rr + (rgb[0] - rr) * vfR,
+                                                       gg + (rgb[1] - gg) * vfG,
+                                                       bb + (rgb[2] - bb) * vfB,
+                                                       vws);
+                        for (int k = 0; k < 4; ++k) {
+                            if (Y[k] > 0.f) {
+                                float f = Y1[k] / Y[k];
+                                u[k] *= f;
+                                v[k] *= f;
+                            }
+                        }
+                        Y = Y1;
                     }
                 } else {
                     vfloat vslope = F2V(slope[0]);
