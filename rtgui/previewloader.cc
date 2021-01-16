@@ -21,6 +21,8 @@
 #include "previewloader.h"
 #include "guiutils.h"
 #include "threadutils.h"
+#include <thread>
+#include <chrono>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -81,6 +83,7 @@ public:
         //threadCount = 1;
 
         threadPool_ = new Glib::ThreadPool(initial_thread_count_, 0);
+        slowing_down_ = false;
     }
 
     int initial_thread_count_;
@@ -88,6 +91,7 @@ public:
     MyMutex mutex_;
     JobSet jobs_;
     gint nConcurrentThreads;
+    bool slowing_down_;
 // Issue 2406   std::vector<OutputJob *> output_;
 
     void processNextJob()
@@ -137,6 +141,10 @@ public:
 // Issue 2406               fdn = new FileBrowserEntry(tmb,j.dir_entry_);
             }
 
+            if (slowing_down_) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+
         } catch (Glib::Error &e) {} catch(...) {}
 
         /* Issue 2406
@@ -166,6 +174,7 @@ public:
 
     void slowDown()
     {
+        slowing_down_ = true;
         if (initial_thread_count_ > 1) {
             threadPool_->set_max_threads(initial_thread_count_-1);
         }
@@ -173,6 +182,7 @@ public:
 
     void speedUp()
     {
+        slowing_down_ = false;
         threadPool_->set_max_threads(initial_thread_count_);
     }
 };
