@@ -772,7 +772,7 @@ inline float hue_interpolate(float f0, float hue0, float f1, float hue1)
         res = f0 * h1 + f1 * h2;
     }
 
-    assert(fabs((f0 * hue0 + f1 * hue1) - res) <= 0.1f);
+//    assert(fabs((f0 * hue0 + f1 * hue1) - res) <= 0.1f);
     
     return res;
 }
