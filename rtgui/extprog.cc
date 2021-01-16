@@ -351,7 +351,8 @@ bool openInGimp(const Glib::ustring &fileName)
 #if defined WIN32
 
     auto executable = Glib::build_filename (options.gimpDir, "bin", "gimp-win-remote");
-    auto success = ShellExecute( NULL, "open", executable.c_str(), fileName.c_str(), NULL, SW_SHOWNORMAL );
+    auto fn = '"' + fileName + '"';
+    auto success = ShellExecute( NULL, "open", executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
 
 #elif defined __APPLE__
 
@@ -433,7 +434,8 @@ bool openInCustomEditor(const Glib::ustring& fileName)
 #if defined WIN32
 
     const auto cmdLine = Glib::ustring("\"") + options.customEditorProg + Glib::ustring("\"");
-    auto success = ShellExecute( NULL, "open", cmdLine.c_str(), ('"' + fileName + '"').c_str(), NULL, SW_SHOWNORMAL );
+    auto fn = '"' + fileName + '"';
+    auto success = ShellExecute( NULL, "open", cmdLine.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
     return (uintptr_t)success > 32;
 
 #elif defined __APPLE__
