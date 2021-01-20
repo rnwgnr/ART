@@ -107,7 +107,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
             };
 
         array2D<float> St(TW, TH, ARRAY2D_CLEAR_DATA);
-        array2D<double> SW(TW, TH, ARRAY2D_CLEAR_DATA);
+        array2D<float> SW(TW, TH, ARRAY2D_CLEAR_DATA);
         
         for (int ty = -search_radius; ty <= search_radius; ++ty) {
             for (int tx = -search_radius; tx <= search_radius; ++tx) {
@@ -141,9 +141,9 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                     
                         float dist2 = St[sty + patch_radius][stx + patch_radius] + St[sty - patch_radius][stx - patch_radius] - St[sty + patch_radius][stx - patch_radius] - St[sty - patch_radius][stx + patch_radius];
                         dist2 = std::max(dist2, 0.f);
-                        float weight = xexpf(-std::min(dist2/(h2 * mask[y][x]), 12.f));
+                        float weight = xexpf(-dist2/(h2 * mask[y][x]));
                         SW[y-start_y][x-start_x] += weight;
-                        double Y = weight * src[sy][sx];
+                        float Y = weight * src[sy][sx];
                         dst->g(y, x) += Y;
 
                         assert(!xisinff(dst->g(y, x)));
