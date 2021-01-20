@@ -100,9 +100,9 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 
     // process by tiles to avoid numerical accuracy errors in the computation
     // of the integral image
-    constexpr int tile_size = 512;
-    const int ntiles_x = int(std::ceil(float(WW) / (tile_size-border)));
-    const int ntiles_y = int(std::ceil(float(HH) / (tile_size-border)));
+    const int tile_size = 150;
+    const int ntiles_x = int(std::ceil(float(WW) / (tile_size-2*border)));
+    const int ntiles_y = int(std::ceil(float(HH) / (tile_size-2*border)));
     const int ntiles = ntiles_x * ntiles_y;
 
 #ifdef __SSE2__
@@ -134,7 +134,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 return SQR(src[Y(zy)][X(zx)] - src[Y(zy + ty)][X(zx + tx)]);
             };
 
-        array2D<float> St(TW, TH, ARRAY2D_CLEAR_DATA);
+        array2D<float> St(TW, TH);
         array2D<float> SW(TW, TH, ARRAY2D_CLEAR_DATA);
 
         for (int ty = -search_radius; ty <= search_radius; ++ty) {
