@@ -105,6 +105,11 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const int ntiles_y = int(std::ceil(float(HH) / (tile_size-border)));
     const int ntiles = ntiles_x * ntiles_y;
 
+#ifdef __SSE2__
+    vfloat zerov = F2V(0.0);
+    vfloat h2v = F2V(h2);
+#endif
+
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread) schedule(dynamic)
 #endif
@@ -131,7 +136,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 
         array2D<float> St(TW, TH, ARRAY2D_CLEAR_DATA);
         array2D<float> SW(TW, TH, ARRAY2D_CLEAR_DATA);
-        
+
         for (int ty = -search_radius; ty <= search_radius; ++ty) {
             for (int tx = -search_radius; tx <= search_radius; ++tx) {
                 // Step 1 — Compute the integral image St
@@ -151,7 +156,26 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 // V(x), V(y) with y = x + t
                 for (int yy = start_y+border; yy < end_y-border; ++yy) {
                     int y = yy - border;
-                    for (int xx = start_x+border; xx < end_x-border; ++xx) {
+                    int xx = start_x+border;
+#ifdef __SSE2__
+                    for (; xx < end_x-border-3; xx += 4) {
+                        int x = xx - border;
+                        int sx = xx + tx;
+                        int sy = yy + ty;
+
+                        int sty = yy - start_y;
+                        int stx = xx - start_x;
+                    
+                        vfloat dist2 = LVFU(St[sty + patch_radius][stx + patch_radius]) + LVFU(St[sty - patch_radius][stx - patch_radius]) - LVFU(St[sty + patch_radius][stx - patch_radius]) - LVFU(St[sty - patch_radius][stx + patch_radius]);
+                        dist2 = vmaxf(dist2, zerov);
+                        vfloat d = -dist2/(h2v * LVFU(mask[y][x]));
+                        vfloat weight = xexpf(d);
+                        STVFU(SW[y-start_y][x-start_x], LVFU(SW[y-start_y][x-start_x]) + weight);
+                        vfloat Y = weight * LVFU(src[sy][sx]);
+                        STVFU(dst->g(y, x), LVFU(dst->g(y, x)) + Y);
+                    }
+#endif
+                    for (/*int xx = start_x+border*/; xx < end_x-border; ++xx) {
                         int x = xx - border;
                         int sx = xx + tx;
                         int sy = yy + ty;
@@ -161,7 +185,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                     
                         float dist2 = St[sty + patch_radius][stx + patch_radius] + St[sty - patch_radius][stx - patch_radius] - St[sty + patch_radius][stx - patch_radius] - St[sty - patch_radius][stx + patch_radius];
                         dist2 = std::max(dist2, 0.f);
-                        float weight = xexpf(-dist2/(h2 * mask[y][x]));
+                        float d = -dist2/(h2 * mask[y][x]);
+                        float weight = xexpf(d);
                         SW[y-start_y][x-start_x] += weight;
                         float Y = weight * src[sy][sx];
                         dst->g(y, x) += Y;
