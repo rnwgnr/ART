@@ -85,6 +85,9 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const int ntiles_y = int(std::ceil(float(HH) / (tile_size-border)));
     const int ntiles = ntiles_x * ntiles_y;
 
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread) schedule(dynamic)
+#endif
     for (int tile = 0; tile < ntiles; ++tile) {
         const int tile_y = tile / ntiles_x;
         const int tile_x = tile % ntiles_x;
@@ -126,9 +129,6 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 }
                 // Step 2 — Compute weight and estimate for patches
                 // V(x), V(y) with y = x + t
-#ifdef _OPENMP
-#               pragma omp parallel for if (multithread)
-#endif
                 for (int yy = start_y+border; yy < end_y-border; ++yy) {
                     int y = yy - border;
                     for (int xx = start_x+border; xx < end_x-border; ++xx) {
@@ -154,9 +154,6 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         }
 
         // Compute final estimate at pixel x = (x1, x2)
-#ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
-#endif
         for (int yy = start_y+border; yy < end_y-border; ++yy) {
             int y = yy - border;
             for (int xx = start_x+border; xx < end_x-border; ++xx) {
