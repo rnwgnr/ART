@@ -1730,14 +1730,9 @@ DenoiseParams::DenoiseParams() :
     chrominanceRedGreen(0),
     chrominanceBlueYellow(0),
     smoothingEnabled(false),
-    smoothingMethod(SmoothingMethod::GUIDED),
-    medianType(MedianType::TYPE_3X3_SOFT),
-    medianMethod(MedianMethod::CHROMINANCE),
-    medianIterations(1),
-    guidedLumaRadius(2),
     guidedChromaRadius(3),
-    guidedLumaStrength(0),
-    guidedChromaStrength(100)
+    nlDetail(80),
+    nlStrength(0)
 {
 }
 
@@ -1758,14 +1753,9 @@ bool DenoiseParams::operator ==(const DenoiseParams& other) const
         && chrominanceRedGreen == other.chrominanceRedGreen
         && chrominanceBlueYellow == other.chrominanceBlueYellow
         && smoothingEnabled == other.smoothingEnabled
-        && smoothingMethod == other.smoothingMethod
-        && medianType == other.medianType
-        && medianMethod == other.medianMethod
-        && medianIterations == other.medianIterations
-        && guidedLumaRadius == other.guidedLumaRadius
         && guidedChromaRadius == other.guidedChromaRadius
-        && guidedLumaStrength == other.guidedLumaStrength
-        && guidedChromaStrength == other.guidedChromaStrength;
+        && nlDetail == other.nlDetail
+        && nlStrength == other.nlStrength;
 }
 
 
@@ -3454,14 +3444,9 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Denoise", "ChrominanceRedGreen", denoise.chrominanceRedGreen, keyFile);
             saveToKeyfile("Denoise", "ChrominanceBlueYellow", denoise.chrominanceBlueYellow, keyFile);
             saveToKeyfile("Denoise", "SmoothingEnabled", denoise.smoothingEnabled, keyFile);
-            saveToKeyfile("Denoise", "SmoothingMethod", int(denoise.smoothingMethod), keyFile);
-            saveToKeyfile("Denoise", "MedianType", int(denoise.medianType), keyFile);
-            saveToKeyfile("Denoise", "MedianMethod", int(denoise.medianMethod), keyFile);
-            saveToKeyfile("Denoise", "MedianIterations", denoise.medianIterations, keyFile);
-            saveToKeyfile("Denoise", "GuidedLumaRadius", denoise.guidedLumaRadius, keyFile);
             saveToKeyfile("Denoise", "GuidedChromaRadius", denoise.guidedChromaRadius, keyFile);
-            saveToKeyfile("Denoise", "GuidedLumaStrength", denoise.guidedLumaStrength, keyFile);
-            saveToKeyfile("Denoise", "GuidedChromaStrength", denoise.guidedChromaStrength, keyFile);
+            saveToKeyfile("Denoise", "NLDetail", denoise.nlDetail, keyFile);
+            saveToKeyfile("Denoise", "NLStrength", denoise.nlStrength, keyFile);
         }
 
 // TextureBoost
@@ -4350,9 +4335,6 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
         if (ppVersion < 346) {
             if (keyFile.has_group("Directional Pyramid Denoising") && RELEVANT_(denoise)) { //TODO: No longer an accurate description for FT denoise
                 assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Enabled", denoise.enabled);
-                if (assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Median", denoise.smoothingEnabled)) {
-                    denoise.smoothingMethod = DenoiseParams::SmoothingMethod::MEDIAN;
-                }
                 assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Luma", denoise.luminance);
                 assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Ldetail", denoise.luminanceDetail);
                 assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Chroma", denoise.chrominance);
@@ -4367,23 +4349,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 if (assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "SMethod", val)) {
                     denoise.aggressive = (val == "shalbi");
                 }
-                if (assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "MedMethod", val)) {
-                    const std::vector<Glib::ustring> medtps = { "soft", "33", "55soft", "55", "77", "99" };
-                    auto it = std::find(medtps.begin(), medtps.end(), val);
-                    if (it != medtps.end()) {
-                        denoise.medianType = static_cast<DenoiseParams::MedianType>(it - medtps.begin());
-                    }
-                }
-                if (assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "MethodMed", val)) {
-                    const std::vector<Glib::ustring> med = { "Lonly", "ab", "Lpab", "Lab", "RGB" };
-                    auto it = std::find(med.begin(), med.end(), val);
-                    if (it != med.end()) {
-                        denoise.medianMethod = static_cast<DenoiseParams::MedianMethod>(it - med.begin());
-                    }
-                }
                 assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Redchro", denoise.chrominanceRedGreen);
                 assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Bluechro", denoise.chrominanceBlueYellow);
-                assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Passes", denoise.medianIterations);
             }
         } else {
             if (keyFile.has_group("Denoise") && RELEVANT_(denoise)) {
@@ -4409,20 +4376,12 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 assignFromKeyfile(keyFile, "Denoise", "ChrominanceRedGreen", denoise.chrominanceRedGreen);
                 assignFromKeyfile(keyFile, "Denoise", "ChrominanceBlueYellow", denoise.chrominanceBlueYellow);
                 assignFromKeyfile(keyFile, "Denoise", "SmoothingEnabled", denoise.smoothingEnabled);
-                if (assignFromKeyfile(keyFile, "Denoise", "SmoothingMethod", val)) {
-                    denoise.smoothingMethod = static_cast<DenoiseParams::SmoothingMethod>(val);
+                if (assignFromKeyfile(keyFile, "Denoise", "SmoothingMethod", val) && val != 1) {
+                    denoise.smoothingEnabled = false;
                 }
-                if (assignFromKeyfile(keyFile, "Denoise", "MedianType", val)) {
-                    denoise.medianType = static_cast<DenoiseParams::MedianType>(val);
-                }
-                if (assignFromKeyfile(keyFile, "Denoise", "MedianMethod", val)) {
-                    denoise.medianMethod = static_cast<DenoiseParams::MedianMethod>(val);
-                }
-                assignFromKeyfile(keyFile, "Denoise", "MedianIterations", denoise.medianIterations);
-                assignFromKeyfile(keyFile, "Denoise", "GuidedLumaRadius", denoise.guidedLumaRadius);
                 assignFromKeyfile(keyFile, "Denoise", "GuidedChromaRadius", denoise.guidedChromaRadius);
-                assignFromKeyfile(keyFile, "Denoise", "GuidedLumaStrength", denoise.guidedLumaStrength);
-                assignFromKeyfile(keyFile, "Denoise", "GuidedChromaStrength", denoise.guidedChromaStrength);
+                assignFromKeyfile(keyFile, "Denoise", "NLDetail", denoise.nlDetail);
+                assignFromKeyfile(keyFile, "Denoise", "NLStrength", denoise.nlStrength);
             }
         }            
 

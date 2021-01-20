@@ -224,7 +224,7 @@ namespace denoise {
 
 void denoiseGuidedSmoothing(ImProcData &im, Imagefloat *rgb)
 {
-    if (!im.params->denoise.smoothingEnabled || im.params->denoise.smoothingMethod != procparams::DenoiseParams::SmoothingMethod::GUIDED) {
+    if (!im.params->denoise.smoothingEnabled || im.params->denoise.guidedChromaRadius == 0) {
         return;
     }
 
@@ -240,10 +240,8 @@ void denoiseGuidedSmoothing(ImProcData &im, Imagefloat *rgb)
     TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(im.params->icm.workingProfile);
 
     const float c_eps = 0.001f;
-    const float l_eps = c_eps;//0.000125f;
 
-    guided_smoothing<true>(R, G, B, ws, iws, Channel::C, im.params->denoise.guidedChromaRadius, c_eps, im.params->denoise.guidedChromaStrength, im.scale, im.multiThread);
-    guided_smoothing<true>(R, G, B, ws, iws, Channel::L, im.params->denoise.guidedLumaRadius, l_eps, im.params->denoise.guidedLumaStrength, im.scale, im.multiThread);
+    guided_smoothing<false>(R, G, B, ws, iws, Channel::C, im.params->denoise.guidedChromaRadius, c_eps, 100, im.scale, im.multiThread);
     
     rgb->normalizeFloatTo65535(im.multiThread);
 }

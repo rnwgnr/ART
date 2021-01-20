@@ -43,6 +43,7 @@
 #include "guidedfilter.h"
 #include "gauss.h"
 #include "ipdenoise.h"
+#include "rescale.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -1404,6 +1405,69 @@ void laplacian(const array2D<float> &src, array2D<float> &dst, float threshold, 
 } // namespace
 
 
+void detail_mask(const array2D<float> &src, array2D<float> &mask, float threshold, float ceiling, float factor, bool addcontrast, float blur, bool multithread)
+{
+    const int W = src.width();
+    const int H = src.height();
+    mask(W, H);
+
+    array2D<float> L2(W/4, H/4);
+    array2D<float> m2(W/4, H/4);
+    rescaleBilinear(src, L2, multithread);
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H/4; ++y) {
+        for (int x = 0; x < W/4; ++x) {
+            L2[y][x] = xlin2log(L2[y][x], 50.f);
+        }
+    }
+    laplacian(L2, m2, threshold, ceiling, factor, multithread);
+    rescaleBilinear(m2, mask, multithread);
+    
+    const auto scurve =
+        addcontrast ? 
+        [](float x) -> float { return xlin2log(SQR(x), 100.f); }
+        :
+        [](float x) -> float { return x; }
+        ;
+
+    const float thr = 1.f - factor;
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            mask[y][x] = scurve(LIM01(mask[y][x] + thr));
+        }
+    }
+
+// #ifdef _OPENMP
+// #   pragma omp parallel if (multithread)
+// #endif
+//     {
+//         gaussianBlur(mask, mask, W, H, 2.f / scale);
+//     }
+    if (int(blur) > 0) {
+        for (int i = 0; i < 3; ++i) {
+            boxblur(mask, mask, blur, W, H, multithread);
+        }
+    }        
+
+#if 0
+    {
+        Imagefloat tmp(W, H);
+        for (int i = 0; i < H; ++i) {
+            for (int j = 0; j < W; ++j) {
+                tmp.r(i, j) = tmp.g(i, j) = tmp.b(i, j) = mask[i][j] * 65535.f;
+            }
+        }
+        tmp.saveTIFF("/tmp/mask.tif", 16);
+    }
+#endif
+}
+
+
 void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin, int numtiles, int numthreads, int denoiseNestedLevels, float **LbloxArray, float **fLbloxArray, size_t blox_array_size, float params_Ldetail, int detail_thresh, array2D<float> &tilemask_in, array2D<float> &tilemask_out, fftwf_plan *plan_forward_blox, fftwf_plan *plan_backward_blox, int max_numblox_W, double scale, bool denoise_aggressive)
 {
     const auto compute_detail =
@@ -1429,44 +1493,9 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
 
     array2D<float> mask;
     if (detail_thresh > 0) {
-        mask(width, height);
-        // float s_scale = std::sqrt(scale);
-        // float cthresh = (denoise_aggressive ? 0.1f : 0.3f) * s_scale;
-        float amount = LIM01(float(detail_thresh)/100.f);
-        float thr = 1.f - amount;
-        //buildBlendMask(labdn->L, mask, width, height, cthresh, amount, false, 2.f / s_scale);
         array2D<float> LL(width, height, labdn->L, ARRAY2D_BYREFERENCE);
-        laplacian(LL, mask, 25.f, 10000.f, amount, false);//numthreads > 1);
-        // array2D<float> guide(width, height);
-        // LUTf ll(65536);
-        // for (int i = 0; i < 65536; ++i) {
-        //     ll[i] = pow_F(float(i)/65535.f, 3.f); //xlin2log(float(i) / 65535.f, 25.f);
-        // }
-        // for (int i = 0; i < height; ++i) {
-        //     for (int j = 0; j < width; ++j) {
-        //         guide[i][j] = ll[labdn->L[i][j]];
-        //     }
-        // }
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-                mask[i][j] = LIM01(mask[i][j] + thr);//ll[LIM01(mask[i][j] + thr) * 65535.f];
-            }
-        }
-        // guidedFilter(guide, mask, mask, 100.f / scale, 0.01f, numthreads > 1);
-        for (int i = 0; i < 3; ++i) {
-            boxblur(mask, mask, 10 / scale, width, height, false);// / scale);
-        }
-#if 0
-        {
-            Imagefloat tmp(width, height);
-            for (int i = 0; i < height; ++i) {
-                for (int j = 0; j < width; ++j) {
-                    tmp.r(i, j) = tmp.g(i, j) = tmp.b(i, j) = mask[i][j] * 65535.f;
-                }
-            }
-            tmp.saveTIFF("/tmp/mask.tif", 16);
-        }
-#endif
+        float amount = LIM01(float(detail_thresh)/100.f);
+        detail_mask(LL, mask, 25.f, 10000.f, amount, false, 10.f / scale, false);
     }   
     
     if (numtiles == 1) {
@@ -1614,7 +1643,7 @@ BENCHFUN
     t1e.set();
 
 //#endif
-    const bool medianEnabled = dnparams.smoothingEnabled && dnparams.smoothingMethod == procparams::DenoiseParams::SmoothingMethod::MEDIAN;
+    constexpr bool medianEnabled = false;
     if (dnparams.luminance == 0 && dnparams.chrominance == 0 && !medianEnabled && !noiseLCurve && !noiseCCurve) {
         //nothing to do; copy src to dst or do nothing in case src == dst
         if (src != dst) {
@@ -1741,7 +1770,7 @@ BENCHFUN
 
     const short int imheight = src->getHeight(), imwidth = src->getWidth();
 
-    if (dnparams.luminance != 0 || dnparams.chrominance != 0 || dnparams.medianMethod == procparams::DenoiseParams::MedianMethod::LAB || dnparams.medianMethod == procparams::DenoiseParams::MedianMethod::LUMINANCE) {
+    if (dnparams.luminance != 0 || dnparams.chrominance != 0) {
         // gamma transform for input data
         float gam = dnparams.gamma;
         float gamthresh = 0.001f;
@@ -2164,7 +2193,7 @@ BENCHFUN
                         float interm_medT = static_cast<float>(dnparams.chrominance) / 10.0;
                         bool execwavelet = true;
 
-                        if (!denoiseLuminance && interm_medT < 0.05f && medianEnabled && (dnparams.medianMethod == procparams::DenoiseParams::MedianMethod::LAB || dnparams.medianMethod == procparams::DenoiseParams::MedianMethod::LUMINANCE)) {
+                        if (!denoiseLuminance && interm_medT < 0.05f && medianEnabled) {
                             execwavelet = false;    //do not exec wavelet if sliders luminance and chroma are very small and median need
                         }
 

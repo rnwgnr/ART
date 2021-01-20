@@ -158,6 +158,7 @@ set(RTENGINESOURCEFILES
     base64.cc
     imgiomanager.cc
     lensexif.cc
+    nlmeans.cc
     )
 
 

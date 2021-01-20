@@ -39,31 +39,13 @@ void adjust_params(procparams::DenoiseParams &dnparams, double scale)
     }
     
     double scale_factor = 1.0 / scale;
-    double noise_factor_c = std::pow(scale_factor, 0.46);//scale_factor * 1.8;
-    double noise_factor_l = std::pow(scale_factor, 0.62);//scale_factor * 1.5; //std::pow(scale_factor, scale_factor);
-    //dnparams.luminance *= noise_factor_l;
+    double noise_factor_c = std::pow(scale_factor, 0.46);
+    double noise_factor_l = std::pow(scale_factor, 0.62);
     dnparams.luminance *= noise_factor_l;
-    //dnparams.luminanceDetail += dnparams.luminanceDetail * noise_factor_l;
-    dnparams.luminanceDetail *= (1.0 + std::pow(1.0 - scale_factor, 2.2));//scale_factor * 1.2);
-    // if (dnparams.chrominanceMethod == procparams::DenoiseParams::ChrominanceMethod::MANUAL) {
-        dnparams.chrominance *= noise_factor_c;
-        dnparams.chrominanceRedGreen *= noise_factor_c;
-        dnparams.chrominanceBlueYellow *= noise_factor_c;
-    // }
-    // if (scale > 2) {
-    //     dnparams.aggressive = false;
-    // }
-
-    if (dnparams.smoothingEnabled) {
-        int j = int(dnparams.medianType) - int(1.0 / scale_factor);
-        if (j < 0 && dnparams.smoothingMethod == procparams::DenoiseParams::SmoothingMethod::MEDIAN) {
-            dnparams.smoothingEnabled = false;
-        } else {
-            dnparams.medianType = static_cast<procparams::DenoiseParams::MedianType>(j);
-        }
-    }
-
-    // guided params don't need to be adjusted here, they are already scaled in ImProcFunctions::guidedSmoothing
+    dnparams.luminanceDetail *= (1.0 + std::pow(1.0 - scale_factor, 2.2));
+    dnparams.chrominance *= noise_factor_c;
+    dnparams.chrominanceRedGreen *= noise_factor_c;
+    dnparams.chrominanceBlueYellow *= noise_factor_c;
 }
 
 
@@ -670,7 +652,6 @@ void RGB_denoise_info(ImProcData &im, Imagefloat * src, Imagefloat * provicalc, 
 
 } // End of main RGB_denoise
 
-
 } // namespace
 
 
@@ -995,63 +976,11 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
         });
 
     ImProcData im(params, scale, multiThread);
-    denoise::RGB_denoise(im, 0, img, img, calclum, dnstore.ch_M, dnstore.max_r, dnstore.max_b, imgsrc->isRAW(), denoiseParams, 0/*imgsrc->getDirPyrDenoiseExpComp()*/, noiseLCurve, noiseCCurve, nresi, highresi);
+    denoise::RGB_denoise(im, 0, img, img, calclum, dnstore.ch_M, dnstore.max_r, dnstore.max_b, imgsrc->isRAW(), denoiseParams, 0, noiseLCurve, noiseCCurve, nresi, highresi);
 
     if (denoiseParams.smoothingEnabled) {
-        if (denoiseParams.smoothingMethod == DenoiseParams::SmoothingMethod::MEDIAN) {
-            denoise::Median median_type[3];
-            int median_iterations[3];
-            for (int i = 0; i < 3; ++i) {
-                median_type[i] = denoise::Median(int(denoiseParams.medianType));
-                median_iterations[i] = denoiseParams.medianIterations;
-            }
-            if (denoiseParams.medianMethod != DenoiseParams::MedianMethod::RGB) {
-                img->setMode(Imagefloat::Mode::YUV, multiThread);
-                switch (denoiseParams.medianMethod) {
-                case DenoiseParams::MedianMethod::LUMINANCE:
-                    median_iterations[1] = median_iterations[2] = 0;
-                    break;
-                case DenoiseParams::MedianMethod::CHROMINANCE:
-                    median_iterations[0] = 0;
-                    break;
-                case DenoiseParams::MedianMethod::LAB_WEIGHTED:
-                    switch (median_type[0]) {
-                    case denoise::Median::TYPE_3X3_SOFT:
-                        break;
-                    case denoise::Median::TYPE_3X3_STRONG:
-                    case denoise::Median::TYPE_5X5_SOFT:
-                        median_type[0] = denoise::Median::TYPE_3X3_SOFT;
-                        break;
-                    case denoise::Median::TYPE_5X5_STRONG:
-                    case denoise::Median::TYPE_7X7:
-                        median_type[0] = denoise::Median::TYPE_3X3_STRONG;
-                        break;
-                    case denoise::Median::TYPE_9X9:
-                        median_type[0] = denoise::Median::TYPE_5X5_SOFT;
-                        break;
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
-            int num_threads = 1;
-#ifdef _OPENMP
-            if (multiThread) {
-                num_threads = omp_get_max_threads();
-            }
-#endif
-            array2D<float> buf(W, H);
-            float **channels[3] = { img->g.ptrs, img->r.ptrs, img->b.ptrs };
-            for (int c = 0; c < 3; ++c) {
-                if (median_iterations[c] > 0) {
-                    denoise::Median_Denoise(channels[c], channels[c], W, H, median_type[c], median_iterations[c], num_threads, buf);
-                }
-            }
-            img->setMode(Imagefloat::Mode::RGB, multiThread);
-        } else {
-            denoise::denoiseGuidedSmoothing(im, img);
-        }
+        denoise::denoiseGuidedSmoothing(im, img);
+        denoise::NLMeans(img, denoiseParams.nlStrength, denoiseParams.nlDetail, scale, multiThread);
     }
 }
 

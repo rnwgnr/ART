@@ -671,28 +671,6 @@ struct DenoiseParams {
         AUTOMATIC
     };
 
-    enum class MedianType {
-        TYPE_3X3_SOFT,
-        TYPE_3X3_STRONG,
-        TYPE_5X5_SOFT,
-        TYPE_5X5_STRONG,
-        TYPE_7X7,
-        TYPE_9X9
-    };
-
-    enum class MedianMethod {
-        LUMINANCE,
-        CHROMINANCE,
-        LAB_WEIGHTED,
-        LAB,
-        RGB
-    };
-
-    enum class SmoothingMethod {
-        MEDIAN,
-        GUIDED
-    };
-
     enum class ColorSpace {
         RGB,
         LAB
@@ -715,16 +693,9 @@ struct DenoiseParams {
     double chrominanceBlueYellow;
 
     bool smoothingEnabled;
-    SmoothingMethod smoothingMethod;
-
-    MedianType medianType;
-    MedianMethod medianMethod;
-    int medianIterations;
-
-    int guidedLumaRadius;
     int guidedChromaRadius;
-    int guidedLumaStrength;
-    int guidedChromaStrength;
+    int nlDetail;
+    int nlStrength;
 
     DenoiseParams();
 
