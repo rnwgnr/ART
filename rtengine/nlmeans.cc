@@ -124,6 +124,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 
 #ifdef __SSE2__
     const vfloat zerov = F2V(0.0);
+    const vfloat v1e_5f = F2V(1e-5f);
+    const vfloat v65535f = F2V(65535.f);
 #endif
 
 #ifdef _OPENMP
@@ -217,7 +219,17 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         // Compute final estimate at pixel x = (x1, x2)
         for (int yy = start_y+border; yy < end_y-border; ++yy) {
             int y = yy - border;
-            for (int xx = start_x+border; xx < end_x-border; ++xx) {
+            int xx = start_x+border;
+#ifdef __SSE2__
+            for (; xx < end_x-border-3; xx += 4) {
+                int x = xx - border;
+            
+                const vfloat Y = LVFU(dst->g(y, x));
+                const vfloat f = (v1e_5f + LVFU(SW[y-start_y][x-start_x]));
+                STVFU(dst->g(y, x), (Y / f) * v65535f);
+            }
+#endif
+            for (; xx < end_x-border; ++xx) {
                 int x = xx - border;
             
                 const float Y = dst->g(y, x);
