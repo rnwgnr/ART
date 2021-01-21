@@ -43,6 +43,10 @@ namespace denoise {
 // "Parameter-Free Fast Pixelwise Non-Local Means Denoising"
 // by Jacques Froment
 
+//
+// thanks to Ingo Weyrich <heckflosse67@gmx.de> for many speedup suggestions!
+//
+
 void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool multithread)
 {
     if (!strength) {
@@ -178,7 +182,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 }
                 for (int yy = 1; yy < TH; ++yy) {
                     for (int xx = 1; xx < TW; ++xx) {
-                        St[yy][xx] = St[yy][xx-1] + St[yy-1][xx] - St[yy-1][xx-1] + score(tx, ty, xx, yy);
+                        St[yy][xx] = (St[yy][xx-1] + St[yy-1][xx]) - (St[yy-1][xx-1] - score(tx, ty, xx, yy));
                     }
                 }
                 // Step 2 — Compute weight and estimate for patches
