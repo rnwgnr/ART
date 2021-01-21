@@ -71,15 +71,6 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         detail_mask(LL, mask, 1e-3f, 1.f, amount, true, 10.f / scale, multithread);
     }
 
-#ifdef _OPENMP
-#   pragma omp parallel for if (multithread)
-#endif
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            mask[y][x] = -1.f / (mask[y][x] * h2);
-        }
-    }
-
     Imagefloat *dst = img;
     const int border = search_radius + patch_radius;
     const int WW = W + border * 2;
@@ -107,6 +98,23 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         }
     }
 
+    constexpr int lutsz = 8192;
+    constexpr float lutfactor = 100.f / float(lutsz-1);
+    LUTf explut(lutsz);
+    for (int i = 0; i < lutsz; ++i) {
+        float x = float(i) * lutfactor;
+        explut[i] = xexpf(-x);
+    }
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            mask[y][x] = (1.f / (mask[y][x] * h2)) / lutfactor;
+        }
+    }
+    
     // process by tiles to avoid numerical accuracy errors in the computation
     // of the integral image
     const int tile_size = 150;
@@ -115,7 +123,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const int ntiles = ntiles_x * ntiles_y;
 
 #ifdef __SSE2__
-    vfloat zerov = F2V(0.0);
+    const vfloat zerov = F2V(0.0);
 #endif
 
 #ifdef _OPENMP
@@ -177,7 +185,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                         vfloat dist2 = LVFU(St[sty + patch_radius][stx + patch_radius]) + LVFU(St[sty - patch_radius][stx - patch_radius]) - LVFU(St[sty + patch_radius][stx - patch_radius]) - LVFU(St[sty - patch_radius][stx + patch_radius]);
                         dist2 = vmaxf(dist2, zerov);
                         vfloat d = dist2 * LVFU(mask[y][x]);
-                        vfloat weight = xexpf(d);
+                        vfloat weight = explut[d];
                         STVFU(SW[y-start_y][x-start_x], LVFU(SW[y-start_y][x-start_x]) + weight);
                         vfloat Y = weight * LVFU(src[sy][sx]);
                         STVFU(dst->g(y, x), LVFU(dst->g(y, x)) + Y);
@@ -194,7 +202,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                         float dist2 = St[sty + patch_radius][stx + patch_radius] + St[sty - patch_radius][stx - patch_radius] - St[sty + patch_radius][stx - patch_radius] - St[sty - patch_radius][stx + patch_radius];
                         dist2 = std::max(dist2, 0.f);
                         float d = dist2 * mask[y][x];
-                        float weight = xexpf(d);
+                        float weight = explut[d];
                         SW[y-start_y][x-start_x] += weight;
                         float Y = weight * src[sy][sx];
                         dst->g(y, x) += Y;
@@ -213,7 +221,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 int x = xx - border;
             
                 const float Y = dst->g(y, x);
-                const float f = (1e-5f + float(SW[y-start_y][x-start_x]));
+                const float f = (1e-5f + SW[y-start_y][x-start_x]);
                 dst->g(y, x) = (Y / f) * 65535.f;
 
                 assert(!xisnanf(dst->g(y, x)));
