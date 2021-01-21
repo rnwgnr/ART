@@ -32,6 +32,7 @@
 #include "../rtengine/LUT.h"
 #include "../rtengine/noncopyable.h"
 
+using rtengine::array2D;
 class HistogramArea;
 
 struct HistogramAreaIdleHelper {

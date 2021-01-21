@@ -45,6 +45,7 @@ struct EditorPanelIdleHelper {
 };
 
 class RTWindow;
+using rtengine::array2D;
 
 class EditorPanel final :
     public Gtk::VBox,

@@ -28,8 +28,11 @@
 #include "median.h"
 //#define BENCHMARK
 #include "StopWatch.h"
-namespace
-{
+
+using namespace std;
+using namespace rtengine;
+
+namespace {
 
 float greenDiff(float a, float b, float stddevFactor, float eperIso, float nreadIso, float prnu)
 {
@@ -291,10 +294,8 @@ void calcFrameBrightnessFactor(unsigned int frame, uint32_t datalen, LUTu *histo
 
 }
 
-}
+} // namespace
 
-using namespace std;
-using namespace rtengine;
 void RawImageSource::pixelshift(int winx, int winy, int winw, int winh, const RAWParams &rawParamsIn, unsigned int frame, const std::string &make, const std::string &model, float rawWpCorrection)
 {
 BENCHFUN

@@ -25,8 +25,10 @@
 //#define BENCHMARK
 #include "StopWatch.h"
 
-namespace
-{
+namespace rtengine {
+
+namespace {
+
 unsigned fc(const unsigned int cfa[2][2], int r, int c) {
     return cfa[r & 1][c & 1];
 }
@@ -55,10 +57,8 @@ inline void sum5x5(const array2D<float>& in, int col, float &sum) {
 #endif
 
 }
-}
 
-namespace rtengine
-{
+} // namespace
 
 /* interpolateBadPixelsBayer: correct raw pixels looking at the bitmap
  * takes into consideration if there are multiple bad pixels in the neighborhood

@@ -42,6 +42,7 @@ public:
     /** @brief Allocate aligned memory
     * @param size Number of elements of size T to allocate, i.e. allocated size will be sizeof(T)*size ; set it to 0 if you want to defer the allocation
     * @param align Expressed in bytes; SSE instructions need 128 bits alignment, which mean 16 bytes, which is the default value
+    *   align=0 means unaligned
     */
     AlignedBuffer(size_t size=0, size_t align=16):
         real(nullptr),
@@ -74,7 +75,7 @@ public:
     * @param structSize if non null, will let you override the default struct's size (unit: byte)
     * @return True is everything went fine, including freeing memory when size==0, false if the allocation failed
     */
-    bool resize(size_t size, int structSize = 0)
+    bool resize(size_t size, int structSize=0)
     {
         if (size == 0) {
             if (real) {
@@ -95,7 +96,7 @@ public:
             size_t space = amount + alignment;
             real = realloc(real, space);
             void *p = real;
-            if (!p || !std::align(alignment, amount, p, space)) {
+            if (!p || (alignment && !std::align(alignment, amount, p, space))) {
                 if (real) {
                     free(real);
                     real = nullptr;
