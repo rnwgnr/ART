@@ -70,7 +70,16 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         array2D<float> LL(W, H, img->g.ptrs, ARRAY2D_BYREFERENCE);
         detail_mask(LL, mask, 1e-3f, 1.f, amount, true, 10.f / scale, multithread);
     }
-    
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            mask[y][x] = -1.f / (mask[y][x] * h2);
+        }
+    }
+
     Imagefloat *dst = img;
     const int border = search_radius + patch_radius;
     const int WW = W + border * 2;
@@ -107,7 +116,6 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 
 #ifdef __SSE2__
     vfloat zerov = F2V(0.0);
-    vfloat h2v = F2V(h2);
 #endif
 
 #ifdef _OPENMP
@@ -168,7 +176,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                     
                         vfloat dist2 = LVFU(St[sty + patch_radius][stx + patch_radius]) + LVFU(St[sty - patch_radius][stx - patch_radius]) - LVFU(St[sty + patch_radius][stx - patch_radius]) - LVFU(St[sty - patch_radius][stx + patch_radius]);
                         dist2 = vmaxf(dist2, zerov);
-                        vfloat d = -dist2/(h2v * LVFU(mask[y][x]));
+                        vfloat d = dist2 * LVFU(mask[y][x]);
                         vfloat weight = xexpf(d);
                         STVFU(SW[y-start_y][x-start_x], LVFU(SW[y-start_y][x-start_x]) + weight);
                         vfloat Y = weight * LVFU(src[sy][sx]);
@@ -185,7 +193,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                     
                         float dist2 = St[sty + patch_radius][stx + patch_radius] + St[sty - patch_radius][stx - patch_radius] - St[sty + patch_radius][stx - patch_radius] - St[sty - patch_radius][stx + patch_radius];
                         dist2 = std::max(dist2, 0.f);
-                        float d = -dist2/(h2 * mask[y][x]);
+                        float d = dist2 * mask[y][x];
                         float weight = xexpf(d);
                         SW[y-start_y][x-start_x] += weight;
                         float Y = weight * src[sy][sx];
