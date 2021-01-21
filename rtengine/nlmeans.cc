@@ -39,24 +39,6 @@ extern const Settings *settings;
 
 namespace denoise {
 
-namespace {
-
-template <class T>
-class AlignedArray: public PlanarWhateverData<T> {
-public:
-    AlignedArray(int w, int h, bool clear=false):
-        PlanarWhateverData<T>(w, h)
-    {
-        if (clear) {
-            char *mem = reinterpret_cast<char *>(this->data);
-            std::fill(mem, mem+this->getRowStride()*this->getHeight(), 0);
-        }
-    }
-    operator T **() { return this->v.ptrs; }
-};
-
-} // namespace
-
 // basic idea taken from Algorithm 3 in the paper:
 // "Parameter-Free Fast Pixelwise Non-Local Means Denoising"
 // by Jacques Froment
@@ -83,7 +65,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const float h2 = SQR(std::sqrt(float(strength) / 100.f) / 30.f / scale);
 
     float amount = LIM(float(detail_thresh)/100.f, 0.f, 0.99f);
-    array2D<float> mask(W, H);
+    array2D<float> mask(W, H, ARRAY2D_ALIGNED);
     {
         array2D<float> LL(W, H, img->g.ptrs, ARRAY2D_BYREFERENCE);
         detail_mask(LL, mask, 1e-3f, 1.f, amount, true, 10.f / scale, multithread);
@@ -94,7 +76,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const int WW = W + border * 2;
     const int HH = H + border * 2;
 
-    AlignedArray<float> src(WW, HH);
+    array2D<float> src(WW, HH, ARRAY2D_ALIGNED);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
@@ -152,8 +134,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 return SQR(src[Y(zy)][X(zx)] - src[Y(zy + ty)][X(zx + tx)]);
             };
 
-        AlignedArray<float> St(TW, TH);
-        AlignedArray<float> SW(TW, TH, true);
+        array2D<float> St(TW, TH, ARRAY2D_ALIGNED);
+        array2D<float> SW(TW, TH, ARRAY2D_ALIGNED|ARRAY2D_CLEAR_DATA);
 
         for (int ty = -search_radius; ty <= search_radius; ++ty) {
             for (int tx = -search_radius; tx <= search_radius; ++tx) {

@@ -63,9 +63,9 @@ void guided_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, c
         const int W = R.width();
         const int H = R.height();
 
-        array2D<float> iR(W, H, R, 0);
-        array2D<float> iG(W, H, G, 0);
-        array2D<float> iB(W, H, B, 0);
+        array2D<float> iR(W, H, R, ARRAY2D_ALIGNED);
+        array2D<float> iG(W, H, G, ARRAY2D_ALIGNED);
+        array2D<float> iB(W, H, B, ARRAY2D_ALIGNED);
 
         const float blend = LIM01(float(strength) / 100.f);
         const bool rgb = (chan == Channel::LC);
@@ -80,7 +80,7 @@ void guided_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, c
                 return;
             }
         } else {
-            array2D<float> guide(W, H);
+            array2D<float> guide(W, H, ARRAY2D_ALIGNED);
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
@@ -190,9 +190,9 @@ void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B,
         blur(B);
     } else {
         const bool luminance = (chan == Channel::L);
-        array2D<float> iR(W, H, R, 0);
-        array2D<float> iG(W, H, G, 0);
-        array2D<float> iB(W, H, B, 0);
+        array2D<float> iR(W, H, R, ARRAY2D_ALIGNED);
+        array2D<float> iG(W, H, G, ARRAY2D_ALIGNED);
+        array2D<float> iB(W, H, B, ARRAY2D_ALIGNED);
 
         blur(R);
         blur(G);

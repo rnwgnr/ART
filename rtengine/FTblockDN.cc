@@ -1411,8 +1411,8 @@ void detail_mask(const array2D<float> &src, array2D<float> &mask, float threshol
     const int H = src.height();
     mask(W, H);
 
-    array2D<float> L2(W/4, H/4);
-    array2D<float> m2(W/4, H/4);
+    array2D<float> L2(W/4, H/4, ARRAY2D_ALIGNED);
+    array2D<float> m2(W/4, H/4, ARRAY2D_ALIGNED);
     rescaleBilinear(src, L2, multithread);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
@@ -1488,10 +1488,10 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
     //DCT block data storage
 
     //residual between input and denoised L channel
-    array2D<float> Ldetail(width, height, ARRAY2D_CLEAR_DATA);
-    array2D<float> totwt(width, height, ARRAY2D_CLEAR_DATA); //weight for combining DCT blocks
+    array2D<float> Ldetail(width, height, ARRAY2D_CLEAR_DATA|ARRAY2D_ALIGNED);
+    array2D<float> totwt(width, height, ARRAY2D_CLEAR_DATA|ARRAY2D_ALIGNED); //weight for combining DCT blocks
 
-    array2D<float> mask;
+    array2D<float> mask(ARRAY2D_ALIGNED);
     if (detail_thresh > 0) {
         array2D<float> LL(width, height, labdn->L, ARRAY2D_BYREFERENCE);
         float amount = LIM01(float(detail_thresh)/100.f);
@@ -1799,8 +1799,8 @@ BENCHFUN
         const float gain = pow(2.0f, float(expcomp));
         float params_Ldetail = min(float(dnparams.luminanceDetail), 99.9f); // max out to avoid div by zero when using noisevar_Ldetail as divisor
 
-        array2D<float> tilemask_in(TS, TS);
-        array2D<float> tilemask_out(TS, TS);
+        array2D<float> tilemask_in(TS, TS, ARRAY2D_ALIGNED);
+        array2D<float> tilemask_out(TS, TS, ARRAY2D_ALIGNED);
 
         if (denoiseLuminance) {
             const int border = MAX(2, TS / 16);

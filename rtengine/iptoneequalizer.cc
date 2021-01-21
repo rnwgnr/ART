@@ -70,7 +70,7 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
 {
     const int W = R.width();
     const int H = R.height();
-    array2D<float> Y(W, H);
+    array2D<float> Y(W, H, ARRAY2D_ALIGNED);
 
     const auto log2 =
         [](float x) -> float
@@ -132,7 +132,7 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
     }
 
     if (pp.regularization > 1) {
-        array2D<float> Y2(W, H);
+        array2D<float> Y2(W, H, ARRAY2D_ALIGNED);
         constexpr float base_epsilon = 0.004f;
         constexpr float base_posterization = 5.f;
         

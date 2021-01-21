@@ -46,7 +46,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     int W = Y.width();
     int H = Y.height();
 
-    array2D<float> tmpY;
+    array2D<float> tmpY(ARRAY2D_ALIGNED);
     array2D<float> *src = &Y;
     if (fradius > 1.f && delta > 1.01f) {
         W = int(W * delta + 0.5f);
@@ -56,8 +56,8 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
         src = &tmpY;
     }
     
-    array2D<float> mid(W, H);
-    array2D<float> base(W, H);
+    array2D<float> mid(W, H, ARRAY2D_ALIGNED);
+    array2D<float> base(W, H, ARRAY2D_ALIGNED);
 
     const auto scurve =
         s >= 0 ? 
@@ -207,7 +207,7 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
 
         const int W = rgb->getWidth();
         const int H = rgb->getHeight();
-        array2D<float> Y(W, H, rgb->g.ptrs, 0);
+        array2D<float> Y(W, H, rgb->g.ptrs, ARRAY2D_ALIGNED);
 
         for (int i = 0; i < n; ++i) {
             if (!params->textureBoost.labmasks[i].enabled) {

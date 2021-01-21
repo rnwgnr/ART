@@ -181,10 +181,10 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             }
         }
     } else {
-        array2D<float> Y(W, H);
+        array2D<float> Y(W, H, ARRAY2D_ALIGNED);
         {
             constexpr float base_posterization = 20.f;
-            array2D<float> Y2(W, H);
+            array2D<float> Y2(W, H, ARRAY2D_ALIGNED);
         
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
@@ -255,7 +255,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
     const int w = img.getWidth();
     const int h = img.getHeight();
 
-    array2D<float> Y(w, h);
+    array2D<float> Y(w, h, ARRAY2D_ALIGNED);
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             float r = img.r(y, x), g = img.g(y, x), b = img.b(y, x);
