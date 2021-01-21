@@ -129,7 +129,18 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 #endif
 
 #ifdef _OPENMP
-#   pragma omp parallel for if (multithread) schedule(dynamic)
+#   pragma omp parallel if (multithread) 
+#endif
+    {
+
+#ifdef __SSE2__
+    // flush denormals to zero to avoid performance penalty
+    const auto oldMode = _MM_GET_FLUSH_ZERO_MODE();
+    _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+#endif
+        
+#ifdef _OPENMP
+#   pragma omp for schedule(dynamic)
 #endif
     for (int tile = 0; tile < ntiles; ++tile) {
         const int tile_y = tile / ntiles_x;
@@ -241,6 +252,11 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         }
     }
 
+#ifdef __SSE2__
+    _MM_SET_FLUSH_ZERO_MODE(oldMode);
+#endif
+    } // omp parallel
+    
     dst->setMode(Imagefloat::Mode::RGB, multithread);
 }
 
