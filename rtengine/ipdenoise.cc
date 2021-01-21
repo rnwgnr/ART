@@ -930,6 +930,12 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
     if (!dnparams.enabled) {
         return;
     }
+
+    ProgressListener *pl = cur_pipeline == Pipeline::PREVIEW ? plistener : nullptr;
+    if (pl) {
+        pl->setProgressStr("PROGRESSBAR_DENOISING");
+        pl->setProgress(0);
+    }
     
     procparams::DenoiseParams denoiseParams = dnparams;
     NoiseCurve noiseLCurve;
@@ -975,12 +981,24 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
         0.35
         });
 
+    if (pl) {
+        pl->setProgress(0.1);
+    }
+
     ImProcData im(params, scale, multiThread);
     denoise::RGB_denoise(im, 0, img, img, calclum, dnstore.ch_M, dnstore.max_r, dnstore.max_b, imgsrc->isRAW(), denoiseParams, 0, noiseLCurve, noiseCCurve, nresi, highresi);
+
+    if (pl) {
+        pl->setProgress(0.8);
+    }
 
     if (denoiseParams.smoothingEnabled) {
         denoise::denoiseGuidedSmoothing(im, img);
         denoise::NLMeans(img, denoiseParams.nlStrength, denoiseParams.nlDetail, scale, multiThread);
+    }
+
+    if (pl) {
+        pl->setProgress(1);
     }
 }
 
