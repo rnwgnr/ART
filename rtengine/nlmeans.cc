@@ -39,6 +39,24 @@ extern const Settings *settings;
 
 namespace denoise {
 
+namespace {
+
+template <class T>
+class AlignedArray: public PlanarWhateverData<T> {
+public:
+    AlignedArray(int w, int h, bool clear=false):
+        PlanarWhateverData<T>(w, h)
+    {
+        if (clear) {
+            char *mem = reinterpret_cast<char *>(this->data);
+            std::fill(mem, mem+this->getRowStride()*this->getHeight(), 0);
+        }
+    }
+    operator T **() { return this->v.ptrs; }
+};
+
+} // namespace
+
 // basic idea taken from Algorithm 3 in the paper:
 // "Parameter-Free Fast Pixelwise Non-Local Means Denoising"
 // by Jacques Froment
@@ -76,7 +94,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const int WW = W + border * 2;
     const int HH = H + border * 2;
 
-    array2D<float> src(WW, HH);
+    AlignedArray<float> src(WW, HH);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
@@ -134,8 +152,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 return SQR(src[Y(zy)][X(zx)] - src[Y(zy + ty)][X(zx + tx)]);
             };
 
-        array2D<float> St(TW, TH);
-        array2D<float> SW(TW, TH, ARRAY2D_CLEAR_DATA);
+        AlignedArray<float> St(TW, TH);
+        AlignedArray<float> SW(TW, TH, true);
 
         for (int ty = -search_radius; ty <= search_radius; ++ty) {
             for (int tx = -search_radius; tx <= search_radius; ++tx) {
@@ -175,7 +193,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                         STVFU(dst->g(y, x), LVFU(dst->g(y, x)) + Y);
                     }
 #endif
-                    for (/*int xx = start_x+border*/; xx < end_x-border; ++xx) {
+                    for (; xx < end_x-border; ++xx) {
                         int x = xx - border;
                         int sx = xx + tx;
                         int sy = yy + ty;
