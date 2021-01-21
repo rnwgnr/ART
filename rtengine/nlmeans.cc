@@ -72,7 +72,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     array2D<float> mask(W, H, ARRAY2D_ALIGNED);
     {
         array2D<float> LL(W, H, img->g.ptrs, ARRAY2D_BYREFERENCE);
-        detail_mask(LL, mask, 1e-3f, 1.f, amount, true, 10.f / scale, multithread);
+        detail_mask(LL, mask, 1e-3f, 1.f, amount, 100, BlurType::GAUSS, 2.f / scale, multithread);
     }
 
     Imagefloat *dst = img;
