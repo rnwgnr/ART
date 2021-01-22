@@ -251,9 +251,9 @@ void subtract_black(Imagefloat *img, int percent, bool multithread)
 
     float black[3] = { RT_INFINITY_F, RT_INFINITY_F, RT_INFINITY_F };
     {
-        array2D<float> rr(ww, hh);
-        array2D<float> gg(ww, hh);
-        array2D<float> bb(ww, hh);
+        array2D<float> rr(ww, hh, ARRAY2D_ALIGNED);
+        array2D<float> gg(ww, hh, ARRAY2D_ALIGNED);
+        array2D<float> bb(ww, hh, ARRAY2D_ALIGNED);
         rescaleNearest(img->r.ptrs, W, H, static_cast<float **>(rr), ww, hh, multithread);
         rescaleNearest(img->g.ptrs, W, H, static_cast<float **>(gg), ww, hh, multithread);
         rescaleNearest(img->b.ptrs, W, H, static_cast<float **>(bb), ww, hh, multithread);
@@ -262,14 +262,6 @@ void subtract_black(Imagefloat *img, int percent, bool multithread)
         boxblur(rr, rr, radius, ww, hh, multithread);
         boxblur(gg, gg, radius, ww, hh, multithread);
         boxblur(bb, bb, radius, ww, hh, multithread);
-// #ifdef _OPENMP
-// #       pragma omp parallel if (multithread)
-// #endif
-//         {
-//             gaussianBlur(rr, rr, ww, hh, std::max(ww, hh) * 0.1);
-//             gaussianBlur(gg, gg, ww, hh, std::max(ww, hh) * 0.1);
-//             gaussianBlur(bb, bb, ww, hh, std::max(ww, hh) * 0.1);
-//         }
     
         for (int y = 0; y < hh; ++y) {
             for (int x = 0; x < ww; ++x) {
@@ -355,7 +347,7 @@ void ImProcFunctions::dehaze(Imagefloat *img)
     //     std::cout << "dehaze: strength = " << strength << std::endl;
     // }
 
-    array2D<float> dark(W, H);
+    array2D<float> dark(W, H, ARRAY2D_ALIGNED);
 
     int patchsize = max(int(5 / scale), 2);
     float ambient[3];
@@ -365,8 +357,8 @@ void ImProcFunctions::dehaze(Imagefloat *img)
     {
         //array2D<float> R(W, H);
         array2D<float> &R = dark; // R and dark can safely use the same buffer, which is faster and reduces memory allocations/deallocations
-        array2D<float> G(W, H);
-        array2D<float> B(W, H);
+        array2D<float> G(W, H, ARRAY2D_ALIGNED);
+        array2D<float> B(W, H, ARRAY2D_ALIGNED);
         extract_channels(img, R, G, B, patchsize, 1e-1, multiThread);
 
         {
@@ -374,9 +366,9 @@ void ImProcFunctions::dehaze(Imagefloat *img)
             float r = float(W)/float(H);
             int ww = r >= 1.f ? sizecap : float(sizecap) / r;
             int hh = r >= 1.f ? float(sizecap) / r : sizecap;
-            array2D<float> RR(ww, hh);
-            array2D<float> GG(ww, hh);
-            array2D<float> BB(ww, hh);
+            array2D<float> RR(ww, hh, ARRAY2D_ALIGNED);
+            array2D<float> GG(ww, hh, ARRAY2D_ALIGNED);
+            array2D<float> BB(ww, hh, ARRAY2D_ALIGNED);
             rescaleNearest(R, RR, multiThread);
             rescaleNearest(G, GG, multiThread);
             rescaleNearest(B, BB, multiThread);
