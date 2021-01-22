@@ -366,9 +366,9 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                     float wb = working.b(yy, xx);
 
                     if (add) {
-                        wr += r;
-                        wg += g;
-                        wb += b;
+                        wr = (wr + r) / 2.f;
+                        wg = (wg + g) / 2.f;
+                        wb = (wb + b) / 2.f;
                     }
                     rgb->r(y, x) = intp(blend[y][x], wr, r);
                     rgb->g(y, x) = intp(blend[y][x], wg, g);
