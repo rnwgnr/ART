@@ -1405,7 +1405,7 @@ void laplacian(const array2D<float> &src, array2D<float> &dst, float threshold, 
 } // namespace
 
 
-void detail_mask(const array2D<float> &src, array2D<float> &mask, float threshold, float ceiling, float factor, int contrast, BlurType blur_type, float blur, bool multithread)
+void detail_mask(const array2D<float> &src, array2D<float> &mask, float scaling, float threshold, float ceiling, float factor, BlurType blur_type, float blur, bool multithread)
 {
     const int W = src.width();
     const int H = src.height();
@@ -1419,40 +1419,27 @@ void detail_mask(const array2D<float> &src, array2D<float> &mask, float threshol
 #endif
     for (int y = 0; y < H/4; ++y) {
         for (int x = 0; x < W/4; ++x) {
-            L2[y][x] = xlin2log(L2[y][x], 50.f);
+            L2[y][x] = xlin2log(L2[y][x]/scaling, 50.f);
         }
     }
-    laplacian(L2, m2, threshold, ceiling, factor, multithread);
+    laplacian(L2, m2, threshold/scaling, ceiling/scaling, factor, multithread);
     rescaleBilinear(m2, mask, multithread);
 
-    const double pivot = 0.1;
-    const double b = 1 + contrast;
-    const double a = std::log((std::exp(std::log(b) * pivot) - 1) / (b - 1)) / std::log(pivot);
-    
     const auto scurve =
-        [=](float x) -> float
+        [](float x) -> float
         {
-            return xlin2log(pow_F(x/ceiling, a), b) * ceiling;
+            constexpr float b = 101.f;
+            constexpr float a = 2.23f;
+            return xlin2log(pow_F(x, a), b);
         };
 
     const float thr = 1.f - factor;
-    if (contrast > 0) {
 #ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
+#   pragma omp parallel for if (multithread)
 #endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                mask[y][x] = scurve(LIM01(mask[y][x] + thr));
-            }
-        }
-    } else {
-#ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                mask[y][x] += thr;
-            }
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            mask[y][x] = scurve(LIM01(mask[y][x] + thr));
         }
     }
 
@@ -1512,7 +1499,7 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
     if (detail_thresh > 0) {
         array2D<float> LL(width, height, labdn->L, ARRAY2D_BYREFERENCE);
         float amount = LIM01(float(detail_thresh)/100.f);
-        detail_mask(LL, mask, 25.f, 10000.f, amount, 0, BlurType::BOX, 10.f / scale, false);
+        detail_mask(LL, mask, 65535.f, 25.f, 10000.f, amount, BlurType::BOX, 10.f / scale, false);
     }   
     
     if (numtiles == 1) {
