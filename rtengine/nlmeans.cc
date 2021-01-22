@@ -55,6 +55,9 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     
     BENCHFUN
 
+    // these two can be changed if needed. increasing max_patch_radius doesn't
+    // affect performance, whereas max_search_radius *really* does
+    // (the complexity is O(max_search_radius^2 * W * H))
     constexpr int max_patch_radius = 2;
     constexpr int max_search_radius = 5;
     
@@ -66,8 +69,21 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     const int W = img->getWidth();
     const int H = img->getHeight();
 
+    // the strength parameter controls the scaling of the weights
+    // (called h^2 in the papers)
     const float h2 = SQR(std::sqrt(float(strength) / 100.f) / 30.f / scale);
 
+    // this is the main difference between our version and more conventional
+    // nl-means implementations: instead of varying the patch size, we control
+    // the detail preservation by using a varying weight scaling for the
+    // pixels, depending on our estimate of how much details there are in the
+    // pixel neighborhood. We do this by computing a "detail mask", using a
+    // laplacian filter with additional averaging and smoothing. The
+    // detail_thresh parameter controls the degree of detail preservation: the
+    // (averaged, smoothed) laplacian is first normalized to [0,1], and then
+    // modified by compression and offseting depending on the detail_thresh
+    // parameter, i.e. mask[y][x] = mask[y][x] * (1 - f) + f,
+    // where f = detail_thresh / 100
     float amount = LIM(float(detail_thresh)/100.f, 0.f, 0.99f);
     array2D<float> mask(W, H, ARRAY2D_ALIGNED);
     {
@@ -182,6 +198,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                 }
                 for (int yy = 1; yy < TH; ++yy) {
                     for (int xx = 1; xx < TW; ++xx) {
+                        // operation grouping tuned for performance (empirically)
                         St[yy][xx] = (St[yy][xx-1] + St[yy-1][xx]) - (St[yy-1][xx-1] - score(tx, ty, xx, yy));
                     }
                 }
