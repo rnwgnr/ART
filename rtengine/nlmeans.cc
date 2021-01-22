@@ -71,7 +71,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 
     // the strength parameter controls the scaling of the weights
     // (called h^2 in the papers)
-    const float h2 = SQR(std::sqrt(float(strength) / 100.f) / 30.f / scale);
+    const float h2 = SQR(std::pow(float(strength) / 100.f, 0.9f) / 30.f / scale);
 
     // this is the main difference between our version and more conventional
     // nl-means implementations: instead of varying the patch size, we control
