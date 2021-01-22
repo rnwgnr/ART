@@ -2569,7 +2569,8 @@ SmoothingParams::Region::Region():
     radius(0),
     sigma(0),
     epsilon(0),
-    iterations(1)
+    iterations(1),
+    falloff(1)
 {
 }
 
@@ -2581,7 +2582,8 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && radius == other.radius
         && sigma == other.sigma
         && epsilon == other.epsilon
-        && iterations == other.iterations;
+        && iterations == other.iterations
+        && falloff == other.falloff;
 }
 
 
@@ -3702,6 +3704,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("Sigma_") + n, r.sigma, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Epsilon_") + n, r.epsilon, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Iterations_") + n, r.iterations, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Falloff_") + n, r.falloff, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
@@ -4865,6 +4868,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     done = false;
                 }
                 if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Iterations_") + n, cur.iterations)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Falloff_") + n, cur.falloff)) {
                     found = true;
                     done = false;
                 }

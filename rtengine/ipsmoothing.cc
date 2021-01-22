@@ -333,12 +333,16 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> G(ww, hh, working.g.ptrs, ARRAY2D_BYREFERENCE);
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
+            const bool add = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_ADD;
             Channel ch = Channel(int(r.channel));
-            if (r.mode == SmoothingParams::Region::Mode::GAUSSIAN) {
+            if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 // do a gaussian blur here
                 AlignedBuffer<float> buf(ww * hh);
+                double sigma = r.sigma;
+                double falloff = std::max(r.falloff, 0.1);
                 for (int i = 0; i < r.iterations; ++i) {
-                    gaussian_smoothing(R, G, B, buf.data, ws, ch, r.sigma, scale, multiThread);
+                    gaussian_smoothing(R, G, B, buf.data, ws, ch, sigma, scale, multiThread);
+                    sigma /= falloff;
                 }
             } else {
                 const float epsilon = std::max(0.001f * std::pow(2, -r.epsilon), 1e-6);
@@ -354,9 +358,21 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 int yy = y - min_y;
                 for (int x = min_x; x < max_x; ++x) {
                     int xx = x - min_x;
-                    rgb->r(y, x) = intp(blend[y][x], working.r(yy, xx), rgb->r(y, x));
-                    rgb->g(y, x) = intp(blend[y][x], working.g(yy, xx), rgb->g(y, x));
-                    rgb->b(y, x) = intp(blend[y][x], working.b(yy, xx), rgb->b(y, x));
+                    float r = rgb->r(y, x);
+                    float g = rgb->g(y, x);
+                    float b = rgb->b(y, x);
+                    float wr = working.r(yy, xx);
+                    float wg = working.g(yy, xx);
+                    float wb = working.b(yy, xx);
+
+                    if (add) {
+                        wr += r;
+                        wg += g;
+                        wb += b;
+                    }
+                    rgb->r(y, x) = intp(blend[y][x], wr, r);
+                    rgb->g(y, x) = intp(blend[y][x], wg, g);
+                    rgb->b(y, x) = intp(blend[y][x], wb, b);
                 }
             }
         }

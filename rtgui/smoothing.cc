@@ -166,6 +166,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvIterations = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_ITERATIONS");
     EvMode = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_MODE");
     EvSigma = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_SIGMA");
+    EvFalloff = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_FALLOFF");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_PARAMETRICMASK");
@@ -198,6 +199,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     mode = Gtk::manage(new MyComboBoxText());
     mode->append(M("TP_SMOOTHING_MODE_GUIDED"));
     mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN"));
+    mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN_ADD"));
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &Smoothing::modeChanged));
     hb = Gtk::manage(new Gtk::HBox());
@@ -220,7 +222,12 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     sigma = Gtk::manage(new Adjuster(M("TP_SMOOTHING_SIGMA"), 0, 500, 0.01, 0));
     sigma->setLogScale(100, 0);
     sigma->setAdjusterListener(this);
+    falloff = Gtk::manage(new Adjuster(M("TP_SMOOTHING_FALLOFF"), 0.1, 10, 0.01, 1));
+    falloff->setLogScale(10, 1, true);
+    falloff->setAdjusterListener(this);
+
     gaussian_box->pack_start(*sigma);
+    gaussian_box->pack_start(*falloff);
     
     box->pack_start(*guided_box);
     box->pack_start(*gaussian_box);
@@ -279,6 +286,7 @@ void Smoothing::setDefaults(const ProcParams *defParams)
     epsilon->setDefault(defParams->smoothing.regions[0].epsilon);
     iterations->setDefault(defParams->smoothing.regions[0].iterations);
     sigma->setDefault(defParams->smoothing.regions[0].sigma);
+    falloff->setDefault(defParams->smoothing.regions[0].falloff);
 
     initial_params = defParams->smoothing;
 }
@@ -297,6 +305,8 @@ void Smoothing::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvIterations, a->getTextValue());
         } else if (a == sigma) {
             listener->panelChanged(EvSigma, a->getTextValue());
+        } else if (a == falloff) {
+            listener->panelChanged(EvFalloff, a->getTextValue());
         }
     }
 }
@@ -354,6 +364,7 @@ void Smoothing::regionGet(int idx)
     r.epsilon = epsilon->getValue();
     r.iterations = iterations->getValue();
     r.sigma = sigma->getValue();
+    r.falloff = falloff->getValue();
 }
 
 
@@ -371,6 +382,7 @@ void Smoothing::regionShow(int idx)
     epsilon->setValue(r.epsilon);
     iterations->setValue(r.iterations);
     sigma->setValue(r.sigma);
+    falloff->setValue(r.falloff);
     
     if (disable) {
         enableListener();

@@ -1201,7 +1201,8 @@ struct SmoothingParams {
         };
         enum class Mode {
             GUIDED,
-            GAUSSIAN
+            GAUSSIAN,
+            GAUSSIAN_ADD
         };
         Mode mode;
         Channel channel;
@@ -1209,6 +1210,7 @@ struct SmoothingParams {
         double sigma;
         int epsilon;
         int iterations;
+        double falloff;
 
         Region();
         bool operator==(const Region &other) const;
