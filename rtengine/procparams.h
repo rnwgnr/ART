@@ -1202,7 +1202,7 @@ struct SmoothingParams {
         enum class Mode {
             GUIDED,
             GAUSSIAN,
-            GAUSSIAN_ADD
+            GAUSSIAN_GLOW
         };
         Mode mode;
         Channel channel;

@@ -199,7 +199,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     mode = Gtk::manage(new MyComboBoxText());
     mode->append(M("TP_SMOOTHING_MODE_GUIDED"));
     mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN"));
-    mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN_ADD"));
+    mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN_GLOW"));
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &Smoothing::modeChanged));
     hb = Gtk::manage(new Gtk::HBox());
@@ -223,19 +223,20 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     sigma->setLogScale(100, 0);
     sigma->setAdjusterListener(this);
     gaussian_box->pack_start(*sigma);
-    
+
     box->pack_start(*guided_box);
     box->pack_start(*gaussian_box);
 
     iterations = Gtk::manage(new Adjuster(M("TP_SMOOTHING_ITERATIONS"), 1, 10, 1, 1));
     iterations->setAdjusterListener(this);
-    falloff = Gtk::manage(new Adjuster(M("TP_SMOOTHING_FALLOFF"), 0.1, 10, 0.01, 1));
-    falloff->setLogScale(10, 1, true);
-    falloff->setAdjusterListener(this);
 
     box->pack_start(*iterations);
-    box->pack_start(*falloff);
 
+    falloff = Gtk::manage(new Adjuster(M("TP_SMOOTHING_FALLOFF"), 0.5, 2, 0.01, 1));
+    falloff->setLogScale(2, 1, true);
+    falloff->setAdjusterListener(this);
+    box->pack_start(*falloff);
+    
     radius->delay = options.adjusterMaxDelay;
     epsilon->delay = options.adjusterMaxDelay;
     iterations->delay = options.adjusterMaxDelay;
@@ -408,6 +409,7 @@ void Smoothing::modeChanged()
         guided_box->hide();
         gaussian_box->show();
     }
+    falloff->set_visible(mode->get_active_row_number() == 2);
     if (listener && getEnabled()) {
         listener->panelChanged(EvMode, mode->get_active_text());
     }

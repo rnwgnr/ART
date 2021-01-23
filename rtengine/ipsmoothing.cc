@@ -333,26 +333,52 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> G(ww, hh, working.g.ptrs, ARRAY2D_BYREFERENCE);
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
-            const bool add = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_ADD;
-            const double falloff = std::max(r.falloff, 0.1);
+            const bool glow = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_GLOW;
+            if (glow) {
+                rgb->setMode(Imagefloat::Mode::YUV, multiThread);
+            }
             Channel ch = Channel(int(r.channel));
             if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
-                // do a gaussian blur here
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;
                 for (int i = 0; i < r.iterations; ++i) {
                     gaussian_smoothing(R, G, B, buf.data, ws, ch, sigma, scale, multiThread);
-                    sigma /= falloff;
+                    if (glow) {
+                        sigma *= 1.5;
+                        float f = pow_F(r.falloff, i);
+                        float f2 = 1.f + 1.f/f;
+
+#ifdef _OPENMP
+#                       pragma omp parallel for if (multiThread)
+#endif
+                        for (int y = min_y; y < max_y; ++y) {
+                            int yy = y - min_y;
+                            for (int x = min_x; x < max_x; ++x) {
+                                int xx = x - min_x;
+                                float &r = R[yy][xx];
+                                float &g = G[yy][xx];
+                                float &b = B[yy][xx];
+                                float Y, u, v;
+                                Color::rgb2yuv(r, g, b, Y, u, v, ws);
+                                Y = (rgb->g(y, x) + Y / f) / f2;
+                                u = (rgb->b(y, x) + u) / 2.f;
+                                v = (rgb->r(y, x) + v) / 2.f;
+                                Color::yuv2rgb(Y, u, v, r, g, b, ws);
+                            }
+                        }
+                    }
                 }
             } else {
                 const float epsilon = std::max(0.001f * std::pow(2, -r.epsilon), 1e-6);
                 int radius = r.radius;
                 for (int i = 0; i < r.iterations; ++i) {
                     guided_smoothing<false>(R, G, B, ws, iws, ch, radius, epsilon, 100, scale, multiThread);
-                    radius = int(double(radius) / falloff + 0.5);
                 }
             }
             
+            if (glow) {
+                rgb->setMode(Imagefloat::Mode::RGB, multiThread);
+            }
 #ifdef _OPENMP
 #           pragma omp parallel for if (multiThread)
 #endif
@@ -366,12 +392,6 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                     float wr = working.r(yy, xx);
                     float wg = working.g(yy, xx);
                     float wb = working.b(yy, xx);
-
-                    if (add) {
-                        wr = (wr + r) / 2.f;
-                        wg = (wg + g) / 2.f;
-                        wb = (wb + b) / 2.f;
-                    }
                     rgb->r(y, x) = intp(blend[y][x], wr, r);
                     rgb->g(y, x) = intp(blend[y][x], wg, g);
                     rgb->b(y, x) = intp(blend[y][x], wb, b);
