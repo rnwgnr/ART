@@ -222,24 +222,25 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     sigma = Gtk::manage(new Adjuster(M("TP_SMOOTHING_SIGMA"), 0, 500, 0.01, 0));
     sigma->setLogScale(100, 0);
     sigma->setAdjusterListener(this);
-    falloff = Gtk::manage(new Adjuster(M("TP_SMOOTHING_FALLOFF"), 0.1, 10, 0.01, 1));
-    falloff->setLogScale(10, 1, true);
-    falloff->setAdjusterListener(this);
-
     gaussian_box->pack_start(*sigma);
-    gaussian_box->pack_start(*falloff);
     
     box->pack_start(*guided_box);
     box->pack_start(*gaussian_box);
 
     iterations = Gtk::manage(new Adjuster(M("TP_SMOOTHING_ITERATIONS"), 1, 10, 1, 1));
     iterations->setAdjusterListener(this);
+    falloff = Gtk::manage(new Adjuster(M("TP_SMOOTHING_FALLOFF"), 0.1, 10, 0.01, 1));
+    falloff->setLogScale(10, 1, true);
+    falloff->setAdjusterListener(this);
+
     box->pack_start(*iterations);
+    box->pack_start(*falloff);
 
     radius->delay = options.adjusterMaxDelay;
     epsilon->delay = options.adjusterMaxDelay;
     iterations->delay = options.adjusterMaxDelay;
     sigma->delay = options.adjusterMaxDelay;
+    falloff->delay = options.adjusterMaxDelay;
 
     labMasksContentProvider.reset(new SmoothingMasksContentProvider(this));
     labMasks = Gtk::manage(new LabMasksPanel(labMasksContentProvider.get()));

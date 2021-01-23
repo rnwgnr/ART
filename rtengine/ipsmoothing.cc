@@ -334,20 +334,22 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
             const bool add = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_ADD;
+            const double falloff = std::max(r.falloff, 0.1);
             Channel ch = Channel(int(r.channel));
             if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 // do a gaussian blur here
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;
-                double falloff = std::max(r.falloff, 0.1);
                 for (int i = 0; i < r.iterations; ++i) {
                     gaussian_smoothing(R, G, B, buf.data, ws, ch, sigma, scale, multiThread);
                     sigma /= falloff;
                 }
             } else {
                 const float epsilon = std::max(0.001f * std::pow(2, -r.epsilon), 1e-6);
+                int radius = r.radius;
                 for (int i = 0; i < r.iterations; ++i) {
-                    guided_smoothing<false>(R, G, B, ws, iws, ch, r.radius, epsilon, 100, scale, multiThread);
+                    guided_smoothing<false>(R, G, B, ws, iws, ch, radius, epsilon, 100, scale, multiThread);
+                    radius = int(double(radius) / falloff + 0.5);
                 }
             }
             
