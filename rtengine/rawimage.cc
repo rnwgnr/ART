@@ -15,6 +15,7 @@
 #include "settings.h"
 #include "camconst.h"
 #include "utils.h"
+#include "metadata.h"
 
 namespace rtengine {
 
@@ -338,7 +339,33 @@ skip_block:
             pre_mul_[2] = this->get_cam_mul(2);
             pre_mul_[3] = this->get_cam_mul(3);
         } else {
-            fprintf(stderr, "Cannot use camera white balance.\n");
+            // try getting from makernotes
+            bool ok = true;
+            float cmul[4];
+            try {
+                Exiv2Metadata md(get_filename());
+                auto m = md.getMakernotes();
+                auto it = m.find("WB_RGGBLevelsAsShot");
+                if (it != m.end()) {
+                    std::istringstream src(it->second);
+                    for (int i = 0; i < 4; ++i) {
+                        if (!(src >> cmul[i])) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    std::swap(cmul[2], cmul[3]);
+                }
+            } catch (std::exception &) {
+                ok = false;
+            }
+            if (!ok) {
+                fprintf(stderr, "Cannot use camera white balance.\n");
+            } else {
+                for (int i = 0; i < 4; ++i) {
+                    pre_mul_[i] = cam_mul[i] = cmul[i];
+                }
+            }
         }
     }
 
