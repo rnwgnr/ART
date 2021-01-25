@@ -87,12 +87,12 @@ private:
             ptr_ = nullptr;
         }
 
-        size_t cursz = width_ * height_;
-        size_t reqsz = w * h;
+        size_t cursz = rowstride(width_) * height_;
+        size_t reqsz = rowstride(w) * h;
 
         bool ok = true;
         if ((reqsz > cursz) || (reqsz < (cursz / 4))) {
-            ok = buf_.resize(reqsz + offset);
+            ok = buf_.resize(reqsz + offset * sizeof(T), 1);
         }
 
         if (!ok) {
@@ -111,11 +111,23 @@ private:
         width_ = w;
         height_ = h;
         
+        // for (int i = 0; i < h; ++i) {
+        //     ptr_[i] = buf_.data + offset + w * i;
+        // }
+        char *start = reinterpret_cast<char *>(buf_.data);
+        size_t stride = rowstride(w);
+
         for (int i = 0; i < h; ++i) {
-            ptr_[i] = buf_.data + offset + w * i;
+            int k = i * stride + offset * sizeof(T);
+            ptr_[i] = reinterpret_cast<T *>(start + k);
         }
 
         owner_ = true;
+    }
+
+    size_t rowstride(int w) const // in bytes
+    {
+        return (flags_ & ARRAY2D_ALIGNED) ? ((w * sizeof(T) + 15) / 16 * 16) : w * sizeof(T);
     }
     
 public:
@@ -140,17 +152,24 @@ public:
         flags_ = flgs;
         owner_ = true;
 
-        buf_.resize(w * h);
+        size_t stride = rowstride(w);
+        buf_.resize(stride * h, 1);
         width_ = w;
         height_ = h;
         ptr_ = new T*[h];
 
-        for (int i = 0; i < h; i++) {
-            ptr_[i] = buf_.data + i * w;
-        }
+        // for (int i = 0; i < h; i++) {
+        //     ptr_[i] = buf_.data + i * w;
+        // }
+        char *start = reinterpret_cast<char *>(buf_.data);
+        for (int i = 0; i < h; ++i) {
+            int k = i * stride;
+            ptr_[i] = reinterpret_cast<T *>(start + k);
+        }        
 
         if (flags_ & ARRAY2D_CLEAR_DATA) {
-            memset(buf_.data, 0, buf_.getSize() * sizeof(T));
+            //memset(buf_.data, 0, buf_.getSize() * sizeof(T));
+            fill(0);
         }
     }
 
@@ -160,26 +179,41 @@ public:
     {
         flags_ = flgs;
         owner_ = !(flags_ & ARRAY2D_BYREFERENCE);
+        size_t stride = rowstride(w);
 
         if (owner_) {
-            buf_.resize(w * h);
+            buf_.resize(stride * h, 1);
         }
 
         width_ = w;
         height_ = h;
         ptr_ = new T*[h];
 
-        for (int i = 0; i < h; ++i) {
-            if (owner_) {
-                ptr_[i] = buf_.data + i * w;
-
+        if (!owner_) {
+            for (int i = 0; i < h; ++i) {
+                ptr_[i] = source[i];
+            }
+        } else {
+            char *start = reinterpret_cast<char *>(buf_.data);
+            for (int i = 0; i < h; ++i) {
+                int k = i * stride;
+                ptr_[i] = reinterpret_cast<T *>(start + k);
                 for (int j = 0; j < w; ++j) {
                     ptr_[i][j] = source[i][j];
                 }
-            } else {
-                ptr_[i] = source[i];
             }
         }
+        // for (int i = 0; i < h; ++i) {
+        //     if (owner_) {
+        //         ptr_[i] = buf_.data + i * w;
+
+        //         for (int j = 0; j < w; ++j) {
+        //             ptr_[i][j] = source[i][j];
+        //         }
+        //     } else {
+        //         ptr_[i] = source[i];
+        //     }
+        // }
     }
 
     // destructor
@@ -193,9 +227,10 @@ public:
     void fill(const T val)
     {
         for (int i = 0; i < height_; ++i) {
-            for (int j = 0; j < width_; ++j) {
-                ptr_[i][j] = val;
-            }
+            // for (int j = 0; j < width_; ++j) {
+            //     ptr_[i][j] = val;
+            // }
+            std::fill(ptr_[i], ptr_[i]+width_, val);
         }
     }
 
@@ -240,7 +275,8 @@ public:
         ar_realloc(w, h, offset);
 
         if (flags_ & ARRAY2D_CLEAR_DATA) {
-            memset(buf_.data + offset, 0, w * h * sizeof(T));
+            //memset(buf_.data + offset, 0, w * h * sizeof(T));
+            fill(0);
         }
     }
 
@@ -250,7 +286,13 @@ public:
         flags_ = flgs;
 
         ar_realloc(w, h);
-        memcpy(buf_.data, copy, w * h * sizeof(T));
+        //memcpy(buf_.data, copy, w * h * sizeof(T));
+        for (int y = 0; y < h; ++y) {
+            std::copy(ptr_[y], ptr_[y]+w, copy + y*w);
+            // for (int x = 0; x < w; ++x) {
+            //     ptr_[y][x] = copy[y*w+x];
+            // }
+        }
     }
     
     int width() const { return width_; }
