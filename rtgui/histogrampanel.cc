@@ -42,7 +42,12 @@ constexpr float rgb_B[3] = { 0.f, 0.25f, 1.f };
 
 void set_arr(array2D<int> &dst, const array2D<int> &src)
 {
-    dst(src.width(), src.height(), static_cast<int *>(const_cast<array2D<int>&>(src)));
+    dst(src.width(), src.height());
+    for (int y = 0; y < src.height(); ++y) {
+        for (int x = 0; x < src.width(); ++x) {
+            dst[y][x] = src[y][x];
+        }
+    }
 }
 
 constexpr double padding = 0;
