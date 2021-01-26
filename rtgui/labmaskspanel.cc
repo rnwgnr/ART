@@ -1257,6 +1257,26 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     for (auto e : mask_expanders_) {
         e->signal_button_release_event().connect_notify(sigc::bind(sigc::mem_fun(this, &LabMasksPanel::onMaskExpanded), e));
     }
+
+    add_events(Gdk::KEY_PRESS_MASK);
+    const auto keypress =
+        [this](GdkEventKey *evt) -> bool
+        {
+            bool ctrl = evt->state & GDK_CONTROL_MASK;
+            bool shift = evt->state & GDK_SHIFT_MASK;
+            bool alt = evt->state & GDK_MOD1_MASK;
+
+            if (ctrl && !shift && !alt) {
+                switch (evt->keyval) {
+                case GDK_KEY_m:
+                case GDK_KEY_M:
+                    showMask->set_active(!showMask->get_active());
+                    return true;
+                }
+            }
+            return false;
+        };
+    signal_key_press_event().connect(sigc::slot<bool, GdkEventKey *>(keypress), false);
 }
 
 
