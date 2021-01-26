@@ -160,7 +160,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 #endif
         
 #ifdef _OPENMP
-#   pragma omp for schedule(dynamic)
+#   pragma omp for schedule(dynamic, 2)
 #endif
     for (int tile = 0; tile < ntiles; ++tile) {
         const int tile_y = tile / ntiles_x;
