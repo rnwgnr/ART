@@ -1758,18 +1758,18 @@ inline const rtengine::ProcEvent &LabMasksPanel::areaMaskEvent() const
 
 bool LabMasksPanel::button1Released()
 {
-        if (last_object_ != -1) {
-            if (getGeometryType() == Shape::Type::RECTANGLE) {
-                updateRectangleAreaMask(true);
-            }
-            onAreaShapeSelectionChanged();
-            populateShapeList(selected_, area_shape_index_);
-            auto l = getListener();
-            if (l) {
-                l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
-            }
+    if (last_object_ != -1) {
+        if (getGeometryType() == Shape::Type::RECTANGLE) {
+            updateRectangleAreaMask(true);
         }
-        return AreaMask::button1Released();
+        onAreaShapeSelectionChanged();
+        populateShapeList(selected_, area_shape_index_);
+        auto l = getListener();
+        if (l) {
+            l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
+        }
+    }
+    return AreaMask::button1Released();
 }
 
 
@@ -1787,17 +1787,57 @@ bool LabMasksPanel::pick3(bool picked)
     return false;
 }
 
+
 bool LabMasksPanel::scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent)
 {
-    if (AreaMask::scroll(modifierKey, direction, deltaX, deltaY, propagateEvent)) {
+    if (getGeometryType() == Shape::Type::RECTANGLE) {
+        EditDataProvider *provider = getEditProvider();
+        if (!provider) {
+            return false;
+        }
+        
+        bool shift = modifierKey & GDK_SHIFT_MASK;
+        bool ctrl = modifierKey & GDK_CONTROL_MASK;
+        bool alt = modifierKey & GDK_MOD1_MASK;
+
+        int imW, imH;
+        provider->getImageSize(imW, imH);
+
+        double delta = (direction == GDK_SCROLL_SMOOTH ?
+                        deltaY
+                        : (direction == GDK_SCROLL_UP ? 3. : -3.));
+        Adjuster *target = nullptr;
+        if (shift && !ctrl && !alt) {
+            target = areaMaskRoundness;
+        } else if (ctrl && !shift && !alt) {
+            target = areaMaskShapeFeather;
+        } else if (alt && !shift && !ctrl) {
+            target = areaMaskShapeBlur;
+        }
+        if (target) {
+            double old_val = target->getValue();
+            double new_val = old_val - delta;
+            target->trimValue(new_val);
+            if (new_val != old_val) {
+                target->setValue(new_val);
+                if (scrollDelayConn.connected()) {
+                    scrollDelayConn.disconnect();
+                }
+                scrollDelayConn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &LabMasksPanel::onKnotRoundnessUpdated), 500);
+            }
+            propagateEvent = false;
+            return true;
+        }
+    } else if (AreaMask::scroll(modifierKey, direction, deltaX, deltaY, propagateEvent)) {
         if (scrollDelayConn.connected()) {
-            scrollDelayConn.disconnect ();
+            scrollDelayConn.disconnect();
         }
         scrollDelayConn = Glib::signal_timeout().connect (sigc::mem_fun(*this, &LabMasksPanel::onKnotRoundnessUpdated), 500);
         return true;
     }
     return false;
 }
+
 
 bool LabMasksPanel::onKnotRoundnessUpdated()
 {
@@ -1816,6 +1856,7 @@ void LabMasksPanel::switchOffEditMode()
     
     areaMaskToggle->set_active(false);
     AreaMask::switchOffEditMode();
+    grab_focus();
 }
 
 
