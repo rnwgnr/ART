@@ -504,6 +504,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - Masque flou
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - Ombres/Déboucher
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - Pivot
 HISTORY_MSG_COLORCORRECTION_POWER;CC - Tons moyens/Gamma
+HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - mode luminance
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - Saturation en entrée
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - Saturation en sortie
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - Montrer le masque
@@ -513,14 +514,12 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - Masque au pinceau
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - Masque paramétrique
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correction de Couleur
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RdB - Force Chroma auto.
-HISTORY_MSG_DENOISE_GUIDED_EPSILON;RdB - Epsilon du filtre guidé
-HISTORY_MSG_DENOISE_GUIDED_ITERATIONS;RdB - Iterations du filtre guidé
-HISTORY_MSG_DENOISE_GUIDED_LUMA_RADIUS;RdB - Rayon L du filtre guidé
-HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RdB - Rayon C du filtre guidé
-HISTORY_MSG_DENOISE_GUIDED_LUMA_STRENGTH;RdB - Force L du filtre guidé
+HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Lissage final C
 HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;RdB - Seuil des détails
 HISTORY_MSG_DENOISE_LUMINANCE_CURVE;RdB - Courbe de Luminance
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;RdB - Force C du filtre guidé
+HISTORY_MSG_DENOISE_NL_DETAIL;NR - Lissage final détail
+HISTORY_MSG_DENOISE_NL_STRENGTH;NR - Lissage final L
 HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RdB - Méthode de lissage
 HISTORY_MSG_DEHAZE_BLACKPOINT;Dehaze - Correction du point noir
 HISTORY_MSG_DEHAZE_DEPTH;EB - Profondeur
@@ -603,6 +602,7 @@ HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Netteté - RLD Echelle
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Netteté - RLD Augmentation du rayon 
 HISTORY_MSG_SH_COLORSPACE;O/HL - Espace colorimétrique
 HISTORY_MSG_SMOOTHING_ENABLED;Lissage 
+HISTORY_MSG_SMOOTHING_FALLOFF;Lissage - atténuation
 HISTORY_MSG_SMOOTHING_MODE;Lissage - mode
 HISTORY_MSG_SMOOTHING_CHANNEL;Lissage - Canal
 HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Lissage - Seuil de contraste du masque
@@ -638,7 +638,7 @@ HISTORY_SNAPSHOT;Instantané
 HISTORY_SNAPSHOTS;Instantanés
 HISTORY_SNAPSHOT_CONFIRM_UPDATE;Ecraser l'Instantané actuel ?
 ICCPROFCREATOR_COPYRIGHT;Copyright :
-ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Réinitialise au copyright par défaut, attribué à "RawTherapee, CC0"
+ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Réinitialise au copyright par défaut, attribué à "Rawtherapee, CC0"
 ICCPROFCREATOR_CUSTOM;Personnalisé
 ICCPROFCREATOR_DESCRIPTION;Description :
 ICCPROFCREATOR_DESCRIPTION_ADDPARAM;Ajouter les valeurs gamma et pente à la description
@@ -995,6 +995,7 @@ PREFERENCES_HISTOGRAMPOSITIONLEFT;Histogramme dans le panneau de gauche
 PREFERENCES_HISTOGRAM_TOOLTIP;Si activé, le profil colorimétrique de travail est utilisé pour les données d'histogramme et le panneau Navigateur, sinon le profil colorimétrique de travail de sortie "gamma-corrigé" est utilisé.
 PREFERENCES_HLTHRESHOLD;Seuil pour l'écrêtage des Hautes Lumières
 PREFERENCES_ICCDIR;Dossier des profils colorimétriques
+PREFERENCES_MONITORICCDIR;Dossier des profils couleurs des écrans
 PREFERENCES_IMPROCPARAMS;Profil de traitement par défaut
 PREFERENCES_INSPECT_LABEL;Inspecter
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;Nombre maximum d'images mises en cache
@@ -1128,6 +1129,7 @@ PROFILEPANEL_TOOLTIPCOPY;Copier le profil courant dans le presse-papier\n<b>CTRL
 PROFILEPANEL_TOOLTIPLOAD;Charger un profil depuis un fichier\n<b>CTRL-clic</b> pour sélectionner les paramètres à charger.
 PROFILEPANEL_TOOLTIPPASTE;Coller le profil depuis le presse-papier\n<b>CTRL-clic</b> pour sélectionner les paramètres à coller.
 PROFILEPANEL_TOOLTIPSAVE;Enregistrer le profil actuel\n<b>CTRL-clic</b> pour sélectionner les paramètres à enregistrer.
+PROGRESSBAR_DENOISING;Réduction du bruit...
 PROGRESSBAR_HLREC;Reconstruction des Hautes Lumières...
 PROGRESSBAR_LOADING;Chargement de l'image...
 PROGRESSBAR_LOADINGTHUMBS;Chargement des vignettes...
@@ -1295,6 +1297,7 @@ TP_COLORCORRECTION_LIST_TITLE;Correction
 TP_COLORCORRECTION_OFFSET;Ombres/Déboucher
 TP_COLORCORRECTION_PIVOT;Pivot
 TP_COLORCORRECTION_POWER;Tons moyens/Gamma
+TP_COLORCORRECTION_RGBLUMINANCE;Mode luminance
 TP_COLORCORRECTION_SATURATION;Saturation
 TP_COLORCORRECTION_SLOPE;Hautes lumières/Gain
 TP_COLORCORRECTION_SYNC_SLIDERS;Lier les curseurs correspondants
@@ -1779,9 +1782,11 @@ TP_SHARPENING_THRESHOLD;Seuil
 TP_SHARPENING_USM;Masque flou (USM)
 TP_SMOOTHING_LABEL;Lissage
 TP_SMOOTHING_LIST_TITLE;Pamamétres de lissage
+TP_SMOOTHING_FALLOFF;Atténuation
 TP_SMOOTHING_MODE;Mode
 TP_SMOOTHING_MODE_GUIDED;Guidé
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussien
+TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lueur
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminance
 TP_SMOOTHING_CHANNEL_C;Chrominance

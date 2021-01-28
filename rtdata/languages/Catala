@@ -1,6 +1,7 @@
 #00 Catalan
 #01 2021-01-05 mrleemon, initial translation following Softcatalà style guide as close as possible
 #02 2021-01-09 mrleemon, fix some shortcuts
+#30 2021-01-28 mrleemon, update for 1.8
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -504,6 +505,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - desenfocament de màscara de regió
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - ombres/aclareix
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - pivot
 HISTORY_MSG_COLORCORRECTION_POWER;CC - tons mitjans/gamma
+HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - mode luminància
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - saturació d'entrada
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - saturació de sortida
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - mostra màscara de regió
@@ -513,6 +515,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - màscara de pinzell
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - màscara paramètrica
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correcció de color
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RS - intensitat de crominància automàtica
+HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RS - Suavitzat final C
 HISTORY_MSG_DENOISE_GUIDED_EPSILON;RS - Epsilon de FG
 HISTORY_MSG_DENOISE_GUIDED_ITERATIONS;RS - Iteracions de FG
 HISTORY_MSG_DENOISE_GUIDED_LUMA_RADIUS;RS - Radi L de FG
@@ -521,6 +524,8 @@ HISTORY_MSG_DENOISE_GUIDED_LUMA_STRENGTH;RS - Intensitat L de FG
 HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;RS - Llindar de detall
 HISTORY_MSG_DENOISE_LUMINANCE_CURVE;RS - Corba de luminància
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;RS - Intensitat C de FG
+HISTORY_MSG_DENOISE_NL_DETAIL;RS - Suavitzat final detall
+HISTORY_MSG_DENOISE_NL_STRENGTH;RS - Suavitzat final L
 HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RS - Mètode de suavitzat
 HISTORY_MSG_DEHAZE_BLACKPOINT;Elimina boirina - Correcció de punts negres
 HISTORY_MSG_DEHAZE_DEPTH;Elimina boirina - Profunditat
@@ -603,6 +608,7 @@ HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfocament - Latitud de les cantonades
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfocament - Augment del radi de les cantonades RLD
 HISTORY_MSG_SH_COLORSPACE;O/AL - Espai de color
 HISTORY_MSG_SMOOTHING_ENABLED;Suavitzat
+HISTORY_MSG_SMOOTHING_FALLOFF;Suavitzat - difuminat
 HISTORY_MSG_SMOOTHING_MODE;Suavitzat - mode
 HISTORY_MSG_SMOOTHING_CHANNEL;Suavitzat - canal
 HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Suavitzat - màscara de llindar de contrast
@@ -994,7 +1000,8 @@ PREFERENCES_GIMPPATH;Carpeta d'instal·lació de GIMP
 PREFERENCES_HISTOGRAMPOSITIONLEFT;Histograma al panell esquerre
 PREFERENCES_HISTOGRAM_TOOLTIP;Si està activat, el perfil de treball es fa servir per renderitzar l'histograma principal i el panell navegador, en cas contrari es fa servir el perfil de sortida gamma corregit.
 PREFERENCES_HLTHRESHOLD;Llindar d'altes llums retallades
-PREFERENCES_ICCDIR;Carpeta amb perfils de color
+PREFERENCES_ICCDIR;Carpeta amb perfils de color de sortida
+PREFERENCES_MONITORICCDIR;Carpeta amb perfils de color de monitor
 PREFERENCES_IMPROCPARAMS;Perfil de processament predeterminat
 PREFERENCES_INSPECT_LABEL;Inspecciona
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;Nombre màxim d'imatges a la memòria cau
@@ -1128,6 +1135,7 @@ PROFILEPANEL_TOOLTIPCOPY;Copia els paràmetres de processament al porta-retalls.
 PROFILEPANEL_TOOLTIPLOAD;Carrega el perfil d'un fitxer.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a carregar.
 PROFILEPANEL_TOOLTIPPASTE;Enganxa el perfil del porta-retalls.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a enganxar.
 PROFILEPANEL_TOOLTIPSAVE;Desa el perfil actual.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a desar.
+PROGRESSBAR_DENOISING;Reducció de soroll...
 PROGRESSBAR_HLREC;Recuperació d'altes llums...
 PROGRESSBAR_LOADING;Carregant imatge...
 PROGRESSBAR_LOADINGTHUMBS;Carregant miniatures...
@@ -1295,6 +1303,7 @@ TP_COLORCORRECTION_LIST_TITLE;Correcció
 TP_COLORCORRECTION_OFFSET;Ombres/Aclareix
 TP_COLORCORRECTION_PIVOT;Pivot
 TP_COLORCORRECTION_POWER;Tons mitjans/Gamma
+TP_COLORCORRECTION_RGBLUMINANCE;Mode luminància
 TP_COLORCORRECTION_SATURATION;Saturació
 TP_COLORCORRECTION_SLOPE;Altes llums/Guany
 TP_COLORCORRECTION_SYNC_SLIDERS;Vincula els controls lliscants corresponents
@@ -1779,9 +1788,11 @@ TP_SHARPENING_THRESHOLD;Llindar
 TP_SHARPENING_USM;Màscara d'enfocament
 TP_SMOOTHING_LABEL;Suavitzat
 TP_SMOOTHING_LIST_TITLE;Paràmetres de suavitzat
+TP_SMOOTHING_FALLOFF;Difuminat
 TP_SMOOTHING_MODE;Mode
 TP_SMOOTHING_MODE_GUIDED;Guiat
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussià
+TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lluentor
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminància
 TP_SMOOTHING_CHANNEL_C;Crominància

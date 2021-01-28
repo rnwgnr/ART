@@ -4,6 +4,7 @@
 #03 2021-01-04 mrleemon, some fixes and missing translations
 #04 2021-01-04 mrleemon, small fix
 #05 2021-01-09 mrleemon, fix some shortcuts
+#06 2021-01-28 mrleemon, update for 1.8
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -507,6 +508,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - desenfoque de máscara de región
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - sombras/aclarar
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - pivote
 HISTORY_MSG_COLORCORRECTION_POWER;CC - tonos medios/gamma
+HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - modo luminancia
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - saturación de entrada
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - saturación de salida
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - mostrar máscara de región
@@ -516,6 +518,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - máscara de pincel
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - máscara paramétrica
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Corrección de color
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RR - intensidad de crominancia automática
+HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RR - Suavizado final C
 HISTORY_MSG_DENOISE_GUIDED_EPSILON;RR - Epsilon de FG
 HISTORY_MSG_DENOISE_GUIDED_ITERATIONS;RR - Iteraciones de FG
 HISTORY_MSG_DENOISE_GUIDED_LUMA_RADIUS;RR - Radio L de FG
@@ -524,6 +527,8 @@ HISTORY_MSG_DENOISE_GUIDED_LUMA_STRENGTH;RR - Intensidad L de FG
 HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;RR - Umbral de detalle
 HISTORY_MSG_DENOISE_LUMINANCE_CURVE;RR - Curva de luminancia
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;RR - Intensidad C de FG
+HISTORY_MSG_DENOISE_NL_DETAIL;RR - Suavizado final detalle
+HISTORY_MSG_DENOISE_NL_STRENGTH;RR - Suavizado final L
 HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RR - Método de suavizado
 HISTORY_MSG_DEHAZE_BLACKPOINT;Eliminar neblina - Corrección de puntos negros
 HISTORY_MSG_DEHAZE_DEPTH;Eliminar neblina - Profundidad
@@ -606,6 +611,7 @@ HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfoque - Latitud de las esquinas RLD
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfoque - Aumento del radio de las esquinas RLD
 HISTORY_MSG_SH_COLORSPACE;S/AL - Espacio de color
 HISTORY_MSG_SMOOTHING_ENABLED;Suavizado
+HISTORY_MSG_SMOOTHING_FALLOFF;Suavizado - difuminación
 HISTORY_MSG_SMOOTHING_MODE;Suavizado - modo
 HISTORY_MSG_SMOOTHING_CHANNEL;Suavizado - canal
 HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Suavizado - máscara de umbral de contraste
@@ -997,7 +1003,8 @@ PREFERENCES_GIMPPATH;Carpeta de instalación de GIMP
 PREFERENCES_HISTOGRAMPOSITIONLEFT;Histograma en el panel izquierdo
 PREFERENCES_HISTOGRAM_TOOLTIP;Si está activado, el perfil de trabajo se usa para renderizar el histograma principal y el panel navegador, de lo contrario se usa el perfil de salida gamma corregido.
 PREFERENCES_HLTHRESHOLD;Umbral de altas luces recortadas
-PREFERENCES_ICCDIR;Carpeta con perfiles de color
+PREFERENCES_ICCDIR;Carpeta con perfiles de color de salida
+PREFERENCES_MONITORICCDIR;Carpeta con perfiles de color de monitor
 PREFERENCES_IMPROCPARAMS;Perfil de procesamiento predeterminado
 PREFERENCES_INSPECT_LABEL;Inspeccionar
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;Número máximo de imágenes en caché
@@ -1131,6 +1138,7 @@ PROFILEPANEL_TOOLTIPCOPY;Copiar parámetros de procesamiento al portapapeles.\n<
 PROFILEPANEL_TOOLTIPLOAD;Cargar perfil de un archivo.\n<b>Ctrl-clic</b> para seleccionar los parámetros a cargar.
 PROFILEPANEL_TOOLTIPPASTE;Pegar perfil del portapapeles.\n<b>Ctrl-clic</b> para seleccionar los parámetros a pegar.
 PROFILEPANEL_TOOLTIPSAVE;Guardar perfil actual.\n<b>Ctrl-clic</b> para seleccionar los parámetros a guardar.
+PROGRESSBAR_DENOISING;Reducción de ruido...
 PROGRESSBAR_HLREC;Recuperación de altas luces...
 PROGRESSBAR_LOADING;Cargando imagen...
 PROGRESSBAR_LOADINGTHUMBS;Cargando miniaturas...
@@ -1298,6 +1306,7 @@ TP_COLORCORRECTION_LIST_TITLE;Corrección
 TP_COLORCORRECTION_OFFSET;Sombras/Aclarar
 TP_COLORCORRECTION_PIVOT;Pivote
 TP_COLORCORRECTION_POWER;Tonos medios/Gamma
+TP_COLORCORRECTION_RGBLUMINANCE;Modo luminancia
 TP_COLORCORRECTION_SATURATION;Saturación
 TP_COLORCORRECTION_SLOPE;Altas luces/Ganancia
 TP_COLORCORRECTION_SYNC_SLIDERS;Vincular controles deslizantes correspondientes
@@ -1782,9 +1791,11 @@ TP_SHARPENING_THRESHOLD;Umbral
 TP_SHARPENING_USM;Máscara de enfoque
 TP_SMOOTHING_LABEL;Suavizado
 TP_SMOOTHING_LIST_TITLE;Parámetros de suavizado
+TP_SMOOTHING_FALLOFF;Difuminación
 TP_SMOOTHING_MODE;Modo
 TP_SMOOTHING_MODE_GUIDED;Guiado
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussiano
+TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Resplandor
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminancia
 TP_SMOOTHING_CHANNEL_C;Crominancia
