@@ -1043,7 +1043,7 @@ PREFERENCES_PERFORMANCE_THREADS;Fils d'exécution
 PREFERENCES_PERFORMANCE_THREADS_LABEL;Nombre maximum de fils d'exécution pour la Réduction du Bruit et les Niveaux d'Ondelettes (0 = Automatique)
 PREFERENCES_PREVDEMO;Précision de l'aperçu
 PREFERENCES_PREVDEMO_FAST;Rapide
-PREFERENCES_PREVDEMO_LABEL;Méthode de dématriçage utilisé pour l'aperçu à un zoom <100%:
+PREFERENCES_PREVDEMO_LABEL;Méthode de dématriçage utilisée pour l'aperçu à un zoom <100%:
 PREFERENCES_PREVDEMO_SIDECAR;Comme le profil ARP
 PREFERENCES_PRINTER;Imprimante (épreuve numérique)
 PREFERENCES_PROFILEHANDLING;Gestion des profils de traitement
@@ -1062,7 +1062,7 @@ PREFERENCES_PRTINTENT;Intention de rendu
 PREFERENCES_PRTPROFILE;Profil colorimétrique
 PREFERENCES_PSPATH;Dossier d'installation d'Adobe Photoshop
 PREFERENCES_REMEMBERZOOMPAN;Se souvenir du niveau de zoom et de la position de l'image
-PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Retient le niveau de zoom et la position de l'image courante lors de l'ouverture d'une nouvelle image.\n\nCette option ne fonctionne que dans le mode "Onglet Éditeur Unique" et quand "Méthode de dématriçage utilisé pour l'aperçu à un zoom <100%" est fixé à "Comme dans profil ARP"
+PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Retient le niveau de zoom et la position de l'image courante lors de l'ouverture d'une nouvelle image.\n\nCette option ne fonctionne que dans le mode "Onglet Éditeur Unique" et quand "Méthode de dématriçage utilisée pour l'aperçu à un zoom <100%" est fixé à "Comme dans profil ARP"
 PREFERENCES_SAVE_TP_OPEN_NOW;Sauver l'état replié/déplié maintenant
 PREFERENCES_SELECTLANG;Choix de la langue
 PREFERENCES_SERIALIZE_TIFF_READ;Réglages de lecture des images TIFF
@@ -1786,7 +1786,7 @@ TP_SMOOTHING_FALLOFF;Atténuation
 TP_SMOOTHING_MODE;Mode
 TP_SMOOTHING_MODE_GUIDED;Guidé
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussien
-TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lueur
+TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lumière diffuse
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminance
 TP_SMOOTHING_CHANNEL_C;Chrominance
