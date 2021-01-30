@@ -1790,12 +1790,16 @@ bool LabMasksPanel::pick3(bool picked)
 
 bool LabMasksPanel::scroll(int modifierKey, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent)
 {
-    if (getGeometryType() == Shape::Type::RECTANGLE) {
-        EditDataProvider *provider = getEditProvider();
-        if (!provider) {
-            return false;
+    if (AreaMask::scroll(modifierKey, direction, deltaX, deltaY, propagateEvent)) {
+        if (scrollDelayConn.connected()) {
+            scrollDelayConn.disconnect();
         }
-        
+        scrollDelayConn = Glib::signal_timeout().connect (sigc::mem_fun(*this, &LabMasksPanel::onKnotRoundnessUpdated), 500);
+        return true;
+    }
+    EditDataProvider *provider = getEditProvider();
+    if (provider) {
+        bool is_rectangle = getGeometryType() == Shape::Type::RECTANGLE;
         bool shift = modifierKey & GDK_SHIFT_MASK;
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool alt = modifierKey & GDK_MOD1_MASK;
@@ -1807,7 +1811,7 @@ bool LabMasksPanel::scroll(int modifierKey, GdkScrollDirection direction, double
                         deltaY
                         : (direction == GDK_SCROLL_UP ? 3. : -3.));
         Adjuster *target = nullptr;
-        if (shift && !ctrl && !alt) {
+        if (is_rectangle && shift && !ctrl && !alt) {
             target = areaMaskRoundness;
         } else if (ctrl && !shift && !alt) {
             target = areaMaskShapeFeather;
@@ -1828,12 +1832,6 @@ bool LabMasksPanel::scroll(int modifierKey, GdkScrollDirection direction, double
             propagateEvent = false;
             return true;
         }
-    } else if (AreaMask::scroll(modifierKey, direction, deltaX, deltaY, propagateEvent)) {
-        if (scrollDelayConn.connected()) {
-            scrollDelayConn.disconnect();
-        }
-        scrollDelayConn = Glib::signal_timeout().connect (sigc::mem_fun(*this, &LabMasksPanel::onKnotRoundnessUpdated), 500);
-        return true;
     }
     return false;
 }
