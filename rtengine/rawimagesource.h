@@ -126,7 +126,7 @@ public:
         return rgbSourceModified;   // tracks whether cached rgb output of demosaic has been modified
     }
 
-    void        processFlatField(const RAWParams &raw, RawImage *riFlatFile, unsigned short black[4]);
+    void        processFlatField(const RAWParams &raw, RawImage *riFlatFile, array2D<float> &rawData, unsigned short black[4]);
     void        copyOriginalPixels(const RAWParams &raw, RawImage *ri, RawImage *riDark, RawImage *riFlatFile, array2D<float> &rawData  );
     void        cfaboxblur  (RawImage *riFlatFile, float* cfablur, int boxH, int boxW);
     void        scaleColors (int winx, int winy, int winw, int winh, const RAWParams &raw, array2D<float> &rawData); // raw for cblack
