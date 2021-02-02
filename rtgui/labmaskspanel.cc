@@ -214,6 +214,49 @@ private:
         PRESSURE_HARDNESS,
         PRESSURE_RADIUS
     };
+
+    class BrushPreview: public Rectangle {
+    public:
+        BrushPreview(): Rectangle()
+        {
+            image_w = 0;
+            image_h = 0;
+            filled = true;
+        }
+
+        void drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override
+        {
+        }
+        
+        void drawToMOChannel(Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override
+        {
+        }
+        
+        void drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) override
+        {
+            if (!strokes.empty()) {
+                flags = F_AUTO_COLOR;
+                state = PRELIGHT;
+                RGBColor c = getInnerLineColor();
+                cr->set_source_rgb(c.getR(), c.getG(), c.getB());
+
+                double r = std::min(image_w, image_h) * 0.25;
+
+                
+                for (auto &s : strokes) {
+                    double cx, cy;
+                    double radius = coordSystem.scaleValueToCanvas(s.radius * r);
+                    coordSystem.imageCoordToScreen(s.x * image_w, s.y * image_h, cx, cy);
+                    cr->arc(cx + 0.5, cy + 0.5, radius, 0., 2.*rtengine::RT_PI);
+                    cr->fill();
+                }
+            }
+        }
+
+        std::vector<rtengine::procparams::DrawnMask::Stroke> strokes;
+        int image_w;
+        int image_h;
+    };
     
 public:
     DrawnMaskPanel():
@@ -223,11 +266,14 @@ public:
         pressure_mode_(PRESSURE_OFF),
         cur_pressure_(rtengine::RT_NAN)
     {
+        brush_preview_ = new BrushPreview();
+        
         // Editing geometry; create the spot rectangle
         pen_ = new Circle();
         pen_->radiusInImageSpace = true;
         pen_->filled = false;
-    
+
+        visibleGeometry.push_back(brush_preview_);
         visibleGeometry.push_back(pen_);
 
         const auto set_btn_style =
@@ -358,6 +404,7 @@ public:
 
     ~DrawnMaskPanel()
     {
+        brush_preview_clear_conn_.disconnect();
         for (auto geometry : visibleGeometry) {
             delete geometry;
         }
@@ -676,6 +723,8 @@ private:
                     s.radius = prev.radius + (dr / steps) * i;
                     s.hardness = hardness;
                     s.erase = erase;
+
+                    brush_preview_->strokes.push_back(s);
                 }
             }
         }
@@ -688,6 +737,8 @@ private:
         s.hardness = hardness;
         s.erase = erase;
         info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
+
+        brush_preview_->strokes.push_back(s);
     }
 
     void update_pen(bool dragging)
@@ -752,11 +803,21 @@ private:
 
     void begin_update_strokes()
     {
+        auto provider = getEditProvider();
+        if (provider) {
+            provider->getImageSize(brush_preview_->image_w, brush_preview_->image_h);
+        }
+        
         if (pressure_mode_ != PRESSURE_OFF) {
             stroke_idx_ = mask_->strokes.size();
         } else {
             stroke_idx_ = -1;
         }
+
+        if (brush_preview_clear_conn_.connected()) {
+            brush_preview_clear_conn_.disconnect();
+        }
+        brush_preview_->strokes.clear();
     }
 
     void end_update_strokes()
@@ -791,11 +852,26 @@ private:
         }
         if (pressure_mode_ == PRESSURE_HARDNESS) {
             mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
-        }            
+        }
+
+        const auto clear_strokes =
+            [this]() -> bool
+            {
+                brush_preview_->strokes.clear();
+                return false;
+            };
+        if (options.adjusterMinDelay > 0) {
+            brush_preview_clear_conn_ = Glib::signal_timeout().connect(sigc::slot<bool>(clear_strokes), options.adjusterMinDelay);
+        } else {
+            clear_strokes();
+        }
     }
     
     rtengine::procparams::DrawnMask *mask_;
     Circle *pen_;
+    BrushPreview *brush_preview_;
+    sigc::connection brush_preview_clear_conn_;
+    
     Gtk::ToggleButton *toggle_;
     Gtk::Label *info_;
     Gtk::Button *reset_;
