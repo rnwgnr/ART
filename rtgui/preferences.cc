@@ -807,6 +807,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
 
     appearanceFrame->add(*appearanceGrid);
     //vbGeneral->attach_next_to(*appearanceFrame, *flang, Gtk::POS_BOTTOM, 2, 1);
+    abox->set_spacing(4);
     abox->pack_start(*appearanceFrame, Gtk::PACK_EXPAND_WIDGET);
     vbGeneral->attach_next_to(*abox, *fworklflow, Gtk::POS_BOTTOM, 2, 1);
 
@@ -869,9 +870,23 @@ Gtk::Widget* Preferences::getGeneralPanel ()
 
     navigationGrid->attach_next_to (*rememberZoomPanCheckbutton, *panFactorLabel, Gtk::POS_BOTTOM, 2, 1);
 
-    fnav->add (*navigationGrid);
-    vbGeneral->attach_next_to (*fnav, *fclip, Gtk::POS_RIGHT, 1, 1);
+    fnav->add(*navigationGrid);
+    {
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        hb->set_spacing(4);
+        hb->pack_start(*fnav, Gtk::PACK_EXPAND_WIDGET);
+        vbGeneral->attach_next_to(*hb/*fnav*/, *fclip, Gtk::POS_RIGHT, 1, 1);
 
+
+        Gtk::Frame *finspector = Gtk::manage(new Gtk::Frame(M("PREFERENCES_INSPECT_LABEL")));
+        Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+        thumbnailInspectorHover = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_INSPECTOR_HOVER")));
+        vb->pack_start(*thumbnailInspectorHover);
+        setExpandAlignProperties(thumbnailInspectorHover, false, false, Gtk::ALIGN_START, Gtk::ALIGN_START);
+        finspector->add(*vb);
+        hb->pack_start(*finspector, Gtk::PACK_SHRINK);
+    }
+    
     // ---------------------------------------------
 
     Gtk::Frame* fdg = Gtk::manage ( new Gtk::Frame (M ("PREFERENCES_EXTERNALEDITOR")) );
@@ -1399,6 +1414,9 @@ void Preferences::storePreferences ()
     moptions.dateFormat = dateformat->get_text();
     moptions.panAccelFactor = (int)panFactor->get_value();
     moptions.rememberZoomAndPan = rememberZoomPanCheckbutton->get_active();
+
+    moptions.thumbnail_inspector_hover = thumbnailInspectorHover->get_active();
+    
     moptions.fbShowDateTime = showDateTime->get_active ();
     moptions.fbShowBasicExif = showBasicExif->get_active ();
     moptions.fbShowExpComp = showExpComp->get_active ();
@@ -1638,6 +1656,9 @@ void Preferences::fillPreferences ()
     dateformat->set_text (moptions.dateFormat);
     panFactor->set_value (moptions.panAccelFactor);
     rememberZoomPanCheckbutton->set_active (moptions.rememberZoomAndPan);
+
+    thumbnailInspectorHover->set_active(moptions.thumbnail_inspector_hover);
+    
     ctiffserialize->set_active (moptions.serializeTiffRead);
     denoiseZoomedOut->set_active(moptions.denoiseZoomedOut);
     wbpreview->set_active(int(moptions.wb_preview_mode));

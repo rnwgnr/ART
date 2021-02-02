@@ -621,6 +621,7 @@ void Options::setDefaults()
     thumbnail_inspector_show_info = false;
     thumbnail_inspector_enable_cms = false;
     thumbnail_inspector_show_histogram = false;
+    thumbnail_inspector_hover = false;
 
     thumbnail_rating_mode = Options::ThumbnailRatingMode::XMP;
 #if defined WIN32 || defined __APPLE__
@@ -1186,6 +1187,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("Inspector", "BrowserWidth")) {
                     browser_width_for_inspector = keyFile.get_integer("Inspector", "BrowserWidth");
+                }
+
+                if (keyFile.has_key("Inspector", "ThumbnailHover")) {
+                    thumbnail_inspector_hover = keyFile.get_boolean("Inspector", "ThumbnailHover");
                 }
             }
 
@@ -2130,6 +2135,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Inspector", "ShowHistogram", thumbnail_inspector_show_histogram);
         keyFile.set_boolean("Inspector", "EnableCMS", thumbnail_inspector_enable_cms);
         keyFile.set_integer("Inspector", "BrowserWidth", browser_width_for_inspector);
+        keyFile.set_boolean("Inspector", "ThumbnailHover", thumbnail_inspector_hover);
 
         keyFile.set_string("Output", "Format", saveFormat.format);
         keyFile.set_integer("Output", "JpegQuality", saveFormat.jpegQuality);

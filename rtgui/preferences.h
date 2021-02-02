@@ -196,6 +196,8 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::Entry *exiftoolPath;
     Gtk::ComboBoxText *wbpreview;
 
+    Gtk::CheckButton *thumbnailInspectorHover;
+    
     Glib::ustring storedValueRaw;
     Glib::ustring storedValueImg;
 

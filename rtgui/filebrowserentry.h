@@ -51,7 +51,7 @@ class FileBrowserEntry : public ThumbBrowserEntryBase,
 
     double scale;
     static bool iconsLoaded;
-    // bool wasInside;
+    bool wasInside;
     int press_x, press_y, action_x, action_y;
     double rot_deg;
     int coarse_rotate;

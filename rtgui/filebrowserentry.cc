@@ -42,7 +42,7 @@ Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::hdr;
 Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::ps;
 
 FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
-    : ThumbBrowserEntryBase (fname), /*wasInside(false),*/ press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
+    : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
 {
     refresh_status_ = RefreshStatus::READY;
     thumbnail = thm;
@@ -301,28 +301,28 @@ bool FileBrowserEntry::motionNotify (int x, int y)
     const int ix = x - startx - ofsX;
     const int iy = y - starty - ofsY;
 
-    // Inspector* inspector = parent->getInspector();
+    Inspector *inspector = parent->getInspector();
 
-    // if (selected && inspector && inspector->isActive() && !parent->isInTabMode()) {
-    //     const rtengine::Coord2D coord(getPosInImgSpace(x, y));
+    if (options.thumbnail_inspector_hover /*&& selected*/ && inspector && inspector->isActive() && !parent->isInTabMode()) {
+        const rtengine::Coord2D coord(getPosInImgSpace(x, y));
 
-    //     if (coord.x != -1.) {
-    //         if (!wasInside) {
-    //             inspector->switchImage(filename);
-    //             // idle_register.add(
-    //             //     [this]() -> bool
-    //             //     {
-    //             //         this->parent->selectEntry(this);
-    //             //         return false;
-    //             //     },
-    //             //     G_PRIORITY_LOW);
-    //             wasInside = true;
-    //         }
-    //         inspector->mouseMove(coord, 0);
-    //     } else {
-    //         wasInside = false;
-    //     }
-    // }
+        if (coord.x != -1.) {
+            if (!wasInside) {
+                inspector->switchImage(filename);
+                idle_register.add(
+                    [this]() -> bool
+                    {
+                        this->parent->selectEntry(this);
+                        return false;
+                    },
+                    G_PRIORITY_LOW);
+                wasInside = true;
+            }
+            inspector->mouseMove(coord, 0);
+        } else {
+            wasInside = false;
+        }
+    }
 
     // if (inside(x, y)) {
     //     updateCursor(ix, iy);
