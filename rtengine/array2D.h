@@ -58,6 +58,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <algorithm>
 
 #include "noncopyable.h"
 #include "alignedbuffer.h"
@@ -158,9 +159,6 @@ public:
         height_ = h;
         ptr_ = new T*[h];
 
-        // for (int i = 0; i < h; i++) {
-        //     ptr_[i] = buf_.data + i * w;
-        // }
         char *start = reinterpret_cast<char *>(buf_.data);
         for (int i = 0; i < h; ++i) {
             int k = i * stride;
@@ -168,7 +166,6 @@ public:
         }        
 
         if (flags_ & ARRAY2D_CLEAR_DATA) {
-            //memset(buf_.data, 0, buf_.getSize() * sizeof(T));
             fill(0);
         }
     }
@@ -203,17 +200,6 @@ public:
                 }
             }
         }
-        // for (int i = 0; i < h; ++i) {
-        //     if (owner_) {
-        //         ptr_[i] = buf_.data + i * w;
-
-        //         for (int j = 0; j < w; ++j) {
-        //             ptr_[i][j] = source[i][j];
-        //         }
-        //     } else {
-        //         ptr_[i] = source[i];
-        //     }
-        // }
     }
 
     // destructor
@@ -227,9 +213,6 @@ public:
     void fill(const T val)
     {
         for (int i = 0; i < height_; ++i) {
-            // for (int j = 0; j < width_; ++j) {
-            //     ptr_[i][j] = val;
-            // }
             std::fill(ptr_[i], ptr_[i]+width_, val);
         }
     }
@@ -275,7 +258,6 @@ public:
         ar_realloc(w, h, offset);
 
         if (flags_ & ARRAY2D_CLEAR_DATA) {
-            //memset(buf_.data + offset, 0, w * h * sizeof(T));
             fill(0);
         }
     }
@@ -286,12 +268,8 @@ public:
         flags_ = flgs;
 
         ar_realloc(w, h);
-        //memcpy(buf_.data, copy, w * h * sizeof(T));
         for (int y = 0; y < h; ++y) {
             std::copy(ptr_[y], ptr_[y]+w, copy + y*w);
-            // for (int x = 0; x < w; ++x) {
-            //     ptr_[y][x] = copy[y*w+x];
-            // }
         }
     }
     
