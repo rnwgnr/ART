@@ -5,6 +5,7 @@
 #04 2021-01-04 mrleemon, small fix
 #05 2021-01-09 mrleemon, fix some shortcuts
 #06 2021-01-28 mrleemon, update for 1.8
+#07 2021-02-02 mrleemon, second update for 1.8
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -1097,6 +1098,7 @@ PREFERENCES_TAB_GENERAL;General
 PREFERENCES_TAB_IMPROC;Procesamiento de imágenes
 PREFERENCES_TAB_PERFORMANCE;Rendimiento
 PREFERENCES_TAB_SOUND;Sonidos
+PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navegar y desplazarse pasando el cursor sobre las miniaturas
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Vista previa de JPEG incrustado
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Imagen para mostrar
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW;Renderizado raw rápido

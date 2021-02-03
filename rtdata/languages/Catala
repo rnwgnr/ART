@@ -1,7 +1,8 @@
 #00 Catalan
 #01 2021-01-05 mrleemon, initial translation following Softcatalà style guide as close as possible
 #02 2021-01-09 mrleemon, fix some shortcuts
-#30 2021-01-28 mrleemon, update for 1.8
+#03 2021-01-28 mrleemon, update for 1.8
+#04 2021-02-02 mrleemon, second update for 1.8
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -1094,6 +1095,7 @@ PREFERENCES_TAB_GENERAL;General
 PREFERENCES_TAB_IMPROC;Processament d'imatges
 PREFERENCES_TAB_PERFORMANCE;Rendiment
 PREFERENCES_TAB_SOUND;Sons
+PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navegueu i desplaceu-vos passant el cursor sobre les miniatures
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Vista prèvia de JPEG incrustat
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Imatge per mostrar
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW;Renderitzat raw ràpid
