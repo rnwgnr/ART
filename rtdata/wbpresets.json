@@ -18,10 +18,15 @@
 // PANASONIC DMC-GX80
 // PANASONIC DC-GX800
 // PANASONIC DC-GX880
-
 // updated on Wed Jan 27 21:32:44 2021:
 // CANON EOS R5
 // CANON EOS R6
+
+// updated on Wed Feb  3 09:05:45 2021:
+// FUJIFILM X-PRO3
+// FUJIFILM X100V
+// NIKON Z 7_2
+// OLYMPUS E-M10 MARK IV
 
 [
   {
@@ -5629,6 +5634,69 @@
       { "name" : "tungsten", "multipliers" : [ 1.30078125, 1, 2.291015625 ] },
       { "name" : "cool white fluorescent", "multipliers" : [ 1.544921875, 1, 2.216796875 ] },
       { "name" : "flash", "multipliers" : [ 2.0322265625, 1, 1.4384765625 ] }
+    ]
+  },
+  {
+    "make_model" : "FUJIFILM X-PRO3",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.86755, 1, 1.80795 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.01325, 1, 1.54636 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.25166, 1, 2.77152 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 2.01325, 1, 1.9702 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.36424, 1, 1.57616 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.93046, 1, 2.48675 ] },
+      { "name" : "underwater", "multipliers" : [ 1.86755, 1, 1.80795 ] }
+    ]
+  },
+  {
+    "make_model" : "FUJIFILM X100V",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.78477, 1, 1.76821 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.94702, 1, 1.51656 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.32782, 1, 1.53642 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.98013, 1, 1.90728 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.88742, 1, 2.42053 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.19205, 1, 2.70199 ] },
+      { "name" : "underwater", "multipliers" : [ 1.77815, 1, 1.75166 ] }
+    ]
+  },
+  {
+    "make_model" : "NIKON Z 7_2",
+    "presets" : [
+      { "name" : "direct sunlight", "multipliers" : [ 1.71484, 1, 1.35938 ] },
+      { "name" : "shade", "multipliers" : [ 2.11719, 1, 1.09766 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.83789, 1, 1.22852 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.11523, 1, 2.18359 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 1.10156, 1, 1.98242 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.59961, 1, 2.02344 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.60156, 1, 1.37891 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 1.82812, 1, 1.11328 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.30469, 1, 2.32812 ] },
+      { "name" : "high temp. mercury-vapor fluorescent", "multipliers" : [ 2.14844, 1, 1.34961 ] },
+      { "name" : "sodium-vapor fluorescent", "multipliers" : [ 1.03906, 1, 2.43359 ] },
+      { "name" : "flash", "multipliers" : [ 1.9043, 1, 1.18555 ] }
+    ]
+  },
+  {
+    "make_model" : "OLYMPUS E-M10 MARK IV",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 2.03906, 1, 1.82031 ] },
+      { "name" : "shade", "multipliers" : [ 2.375, 1, 1.41406 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.1875, 1, 1.63281 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.25781, 1, 3.41406 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.94531, 1, 2.61719 ] },
+      { "name" : "flash", "multipliers" : [ 2.32031, 1, 1.55469 ] },
+      { "name" : "3000K", "multipliers" : [ 1.25781, 1, 3.41406 ] },
+      { "name" : "3300K", "multipliers" : [ 1.5, 1, 2.625 ] },
+      { "name" : "3600K", "multipliers" : [ 1.60938, 1, 2.39844 ] },
+      { "name" : "3900K", "multipliers" : [ 1.69531, 1, 2.22656 ] },
+      { "name" : "4000K", "multipliers" : [ 1.94531, 1, 2.61719 ] },
+      { "name" : "4300K", "multipliers" : [ 1.79688, 1, 2.13281 ] },
+      { "name" : "4500K", "multipliers" : [ 1.97656, 1, 2.20312 ] },
+      { "name" : "4800K", "multipliers" : [ 1.92188, 1, 1.96094 ] },
+      { "name" : "5300K", "multipliers" : [ 2.03906, 1, 1.82031 ] },
+      { "name" : "6000K", "multipliers" : [ 2.1875, 1, 1.63281 ] },
+      { "name" : "6600K", "multipliers" : [ 2.29688, 1, 1.8125 ] }
     ]
   }
 ]
