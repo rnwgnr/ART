@@ -21,7 +21,7 @@
 #20 2020-06-03 update to ART v1.4 by pm
 #21 2020-11-16 update to ART v1.6 by pm
 #22 2020-12-19 update to ART v1.7 by pm
-#23 2021-01-28 update to ART v1.8 by pm
+#23 2021-02-03 update to ART v1.8 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -1310,7 +1310,7 @@ PREFERENCES_TAB_GENERAL;Algemeen
 PREFERENCES_TAB_IMPROC;Beeldverwerking
 PREFERENCES_TAB_PERFORMANCE;Prestaties
 PREFERENCES_TAB_SOUND;Geluiden
-
+PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Bekijk afbeeldingen door de muis over de miniaturen te bewegen
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Ingebed JPEG-voorbeeld
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Te tonen foto
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW;Snelle raw-rendering
