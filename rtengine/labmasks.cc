@@ -32,6 +32,7 @@
 #include "iccstore.h"
 #include "rt_algo.h"
 #include "opthelper.h"
+#include "../rtgui/multilangmgr.h"
 
 namespace rtengine {
 
@@ -60,7 +61,7 @@ void fastlin2log(float *x, float factor, float base, int w)
 #endif
 
 
-bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &global_mask)
+bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &global_mask, ProgressListener *plistener)
 {
     if (!areaMask.enabled || areaMask.shapes.empty() || (areaMask.isTrivial() && areaMask.blur <= 0.f)) {
         return false;
@@ -218,21 +219,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
-            /*
-            for (int y = 0; y < global_mask.height(); ++y) {
-                for (int x = 0; x < global_mask.width(); ++x) {
-                    if (shape_mask[y][x] == fgcolor || global_mask[y][x] == bgcolor) {
-                        continue;
-                    }
-                    else if (shape_mask[y][x] == bgcolor) {
-                        global_mask[y][x] = bgcolor;
-                    }
-                    else {
-                        global_mask[y][x] = rtengine::min<float>(global_mask[y][x] + shape_mask[y][x], 1.);
-                    }
-                }
-            }
-            */
             for (int y = 0; y < global_mask.height(); ++y) {
                 float *s = shape_mask[y];
                 float *g = global_mask[y];
@@ -257,13 +243,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
-            /*
-            for (int y = 0; y < global_mask.height(); ++y) {
-                for (int x = 0; x < global_mask.width(); ++x) {
-                    global_mask[y][x] *= shape_mask[y][x];
-                }
-            }
-            */
             for (int y = 0; y < global_mask.height(); ++y) {
                 float *s = shape_mask[y];
                 float *g = global_mask[y];
@@ -277,21 +256,6 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
-            /*
-            for (int y = 0; y < global_mask.height(); ++y) {
-                for (int x = 0; x < global_mask.width(); ++x) {
-                    if (shape_mask[y][x] == bgcolor || global_mask[y][x] == fgcolor) {
-                        continue;
-                    }
-                    else if (shape_mask[y][x] == fgcolor) {
-                        global_mask[y][x] = fgcolor;
-                    }
-                    else {
-                        global_mask[y][x] = rtengine::max<float>(global_mask[y][x] - (1. - shape_mask[y][x]), 0.);
-                    }
-                }
-            }
-            */
             for (int y = 0; y < global_mask.height(); ++y) {
                 float *s = shape_mask[y];
                 float *g = global_mask[y];
@@ -329,6 +293,8 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
         gaussianBlur(global_mask, global_mask, global_mask.width(), global_mask.height(), areaMask.blur / scale);
     }
 
+    bool is_empty = plistener ? true : false;
+
     // Apply contrast
     if (!contrast_curve.isIdentity()) {
         const auto contrast =
@@ -347,6 +313,9 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                 // }
                 global_mask[y][x] = contrast(v);
                 assert(global_mask[y][x] == global_mask[y][x]);
+                if (is_empty && global_mask[y][x]) {
+                    is_empty = false;
+                }
             }
         }
     } else {
@@ -357,8 +326,15 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
             for (int x = 0; x < global_mask.width(); ++x) {
                 global_mask[y][x] = LIM01(global_mask[y][x]);
                 assert(global_mask[y][x] == global_mask[y][x]);
+                if (is_empty && global_mask[y][x]) {
+                    is_empty = false;
+                }
             }
         }
+    }
+
+    if (is_empty && plistener) {
+        plistener->error(M("LABMASKS_AREA_MASK_EMPTY_WARNING"));
     }
 
     return true;
@@ -681,7 +657,7 @@ private:
 } // namespace
 
 
-bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x, int offset_y, int full_width, int full_height, double scale, bool multithread, int show_mask_idx, std::vector<array2D<float>> *Lmask, std::vector<array2D<float>> *abmask)
+bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x, int offset_y, int full_width, int full_height, double scale, bool multithread, int show_mask_idx, std::vector<array2D<float>> *Lmask, std::vector<array2D<float>> *abmask, ProgressListener *plistener)
 {
     int n = masks.size();
     if (show_mask_idx < 0 || show_mask_idx >= n || !masks[show_mask_idx].enabled) {
@@ -1006,7 +982,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     apply_brush(true);
     
     for (int i = begin_idx; i < end_idx; ++i) {
-        if (generate_area_mask(offset_x, offset_y, full_width, full_height, guide, masks[i].areaMask, scale, multithread, amask)) {
+        if (generate_area_mask(offset_x, offset_y, full_width, full_height, guide, masks[i].areaMask, scale, multithread, amask, plistener)) {
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
