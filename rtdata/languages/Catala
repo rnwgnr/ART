@@ -3,6 +3,7 @@
 #02 2021-01-09 mrleemon, fix some shortcuts
 #03 2021-01-28 mrleemon, update for 1.8
 #04 2021-02-02 mrleemon, second update for 1.8
+#05 2021-02-09 mrleemon, update for 1.8.1
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -739,6 +740,7 @@ IPTCPANEL_TITLE;Títol
 IPTCPANEL_TITLEHINT;Introduïu un nom curt i llegible per a la imatge, aquest pot ser el nom del fitxer.
 IPTCPANEL_TRANSREFERENCE;ID de tasca
 IPTCPANEL_TRANSREFERENCEHINT;Introduïu un número o identificador necessari per al control o seguiment del flux de treball.
+LABMASKS_AREA_MASK_EMPTY_WARNING;Advertiment: la combinació actual de formes d'àrea dóna com a resultat una màscara buida
 MAIN_BUTTON_FULLSCREEN;Pantalla completa
 MAIN_BUTTON_ICCPROFCREATOR;Creador del perfil ICC
 MAIN_BUTTON_NAVNEXT_TOOLTIP;Navega a la següent imatge relativa a la imatge oberta a l'editor.\nDrecera: <b>Majús-F4</b>\n\nNavega a la següent imatge relativa a la miniatura seleccionada actualment a l'explorador de fitxers o la tira de pel·lícula:\nDrecera: <b>F4</b>

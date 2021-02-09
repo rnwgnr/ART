@@ -6,6 +6,7 @@
 #05 2021-01-09 mrleemon, fix some shortcuts
 #06 2021-01-28 mrleemon, update for 1.8
 #07 2021-02-02 mrleemon, second update for 1.8
+#08 2021-02-09 mrleemon, update for 1.8.1
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -742,6 +743,7 @@ IPTCPANEL_TITLE;Título
 IPTCPANEL_TITLEHINT;Introduzca un nombre corto y legible para la imagen, este puede ser el nombre del archivo.
 IPTCPANEL_TRANSREFERENCE;ID de trabajo
 IPTCPANEL_TRANSREFERENCEHINT;Introduzca un número o identificador necesario para el control o seguimiento del flujo de trabajo.
+LABMASKS_AREA_MASK_EMPTY_WARNING;Advertencia: la combinación actual de formas de área da como resultado una máscara vacía
 MAIN_BUTTON_FULLSCREEN;Pantalla completa
 MAIN_BUTTON_ICCPROFCREATOR;Creador del perfil ICC
 MAIN_BUTTON_NAVNEXT_TOOLTIP;Navegar a la siguiente imagen relativa a la imagen abierta en el editor.\nAtajo: <b>Mayús-F4</b>\n\nNavegar a la siguiente imagen relativa a la miniatura seleccionada actualmente en el explorador de archivos o la tira de película:\nAtajo: <b>F4</b>
