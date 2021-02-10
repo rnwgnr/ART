@@ -116,7 +116,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     std::vector<array2D<float>> abmask(n);
     std::vector<array2D<float>> Lmask(n);
 
-    if (!generateLabMasks(rgb, params->colorcorrection.labmasks, offset_x, offset_y, full_width, full_height, scale, multiThread, show_mask_idx, &Lmask, &abmask, plistener)) {
+    if (!generateLabMasks(rgb, params->colorcorrection.labmasks, offset_x, offset_y, full_width, full_height, scale, multiThread, show_mask_idx, &Lmask, &abmask, cur_pipeline == Pipeline::NAVIGATOR ? plistener : nullptr)) {
         return true; // show mask is active, nothing more to do
     }
     
