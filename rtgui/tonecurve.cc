@@ -399,10 +399,10 @@ void ToneCurve::histmatchingToggled()
 }
 
 
-void ToneCurve::autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveParams::TcMode curveMode, const std::vector<double>& curve)
+void ToneCurve::autoMatchedToneCurveChanged(const std::vector<double> &curve, const std::vector<double> &curve2)
 {
-    nextToneCurveMode = curveMode;
     nextToneCurve = curve;
+    nextToneCurve2 = curve2;
 
     idle_register.add(
         [this]() -> bool
@@ -413,8 +413,9 @@ void ToneCurve::autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveParam
 
             // toneCurveMode->set_active(rtengine::toUnderlying(nextToneCurveMode));
             shape->setCurve(nextToneCurve);
-            // shape2->setCurve({ DCT_Linear });
+            shape2->setCurve(nextToneCurve2);
             shape->openIfNonlinear();
+            shape2->openIfNonlinear();
 
             enableListener();
             fromHistMatching = true;

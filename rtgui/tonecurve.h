@@ -55,8 +55,8 @@ protected:
     rtengine::ProcEvent EvPerceptualStrength;
 
     // used temporarily in eventing
-    rtengine::procparams::ToneCurveParams::TcMode nextToneCurveMode;
     std::vector<double> nextToneCurve;
+    std::vector<double> nextToneCurve2;
 
     void setHistmatching(bool enabled);
     void showPerceptualStrength();
@@ -98,7 +98,7 @@ public:
     );
 
     void histmatchingToggled();
-    void autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveParams::TcMode curveMode, const std::vector<double>& curve);
+    void autoMatchedToneCurveChanged(const std::vector<double> &curve, const std::vector<double> &curve2);
     void setRaw (bool raw);
 
     void adjusterChanged(Adjuster *a, double newval) override;

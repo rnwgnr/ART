@@ -355,7 +355,7 @@ public:
 
     // AutoExpListener interface
     void autoExpChanged(double expcomp, int bright, int contr, int black, int hlcompr, int hlcomprthresh, bool hlrecons) override;
-    void autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveParams::TcMode curveMode, const std::vector<double>& curve) override;
+    void autoMatchedToneCurveChanged(const std::vector<double> &curve, const std::vector<double> &curve2) override;
 
     void setAreaDrawListener(AreaDrawListener *listener) override;
 

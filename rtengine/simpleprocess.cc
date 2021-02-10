@@ -258,7 +258,7 @@ private:
 
         if (params.toneCurve.histmatching) {
             if (!params.toneCurve.fromHistMatching) {
-                imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve);
+                imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve, params.toneCurve.curve2);
             }
         }
         if (params.logenc.enabled && params.logenc.autocompute) {

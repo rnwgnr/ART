@@ -74,13 +74,14 @@ int get_b(const IImage8 &img, int y, int x)
 }
 
 
-CdfInfo getCdf(const IImage8 &img, PixelGetter getpix)
+CdfInfo getCdf(const IImage8 &img, PixelGetter getpix, float expcomp=0)
 {
     CdfInfo ret;
+    const float factor = std::pow(2.f, expcomp);
 
     for (int y = 0; y < img.getHeight(); ++y) {
         for (int x = 0; x < img.getWidth(); ++x) {
-            int lum = getpix(img, y, x);
+            int lum = LIM(int(getpix(img, y, x) * factor), 0, 255);
             ++ret.cdf[lum];
         }
     }
@@ -419,10 +420,26 @@ int max_corner_luminance(const IImage8 &img)
     return max(l_tl, l_tr, l_bl, l_br);
 }
 
+
+double get_expcomp(const FramesMetaData *md)
+{
+    if (md->getMake() == "FUJIFILM") {
+        auto mn = Exiv2Metadata(md->getFileName()).getMakernotes();
+        auto it = mn.find("RawExposureBias");
+        if (it != mn.end()) {
+            double e = -std::atof(it->second.c_str());
+            if (e > 1) {
+                return std::log2(e);
+            }
+        }
+    }
+    return 0.0;
+}
+
 } // namespace
 
 
-void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, std::vector<double> &outCurve)
+void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, std::vector<double> &outCurve, std::vector<double> &outCurve2)
 {
     BENCHFUN
 
@@ -446,10 +463,12 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
             std::cout << "tone curve found in cache" << std::endl;
         }
         outCurve = histMatchingCache;
+        outCurve2 = histMatchingCache2;
         return;
     }
 
     outCurve = { DCT_Linear };
+    outCurve2 = { DCT_Linear };
 
     int fw, fh;
     getFullSize(fw, fh, TR_NONE);
@@ -478,6 +497,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
                 std::cout << "histogram matching: no thumbnail found, generating a neutral curve" << std::endl;
             }
             histMatchingCache = outCurve;
+            histMatchingCache2 = outCurve2;
             histMatchingParams = cp;
             return;
         } else if (w * 10 < fw) {
@@ -485,6 +505,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
                 std::cout << "histogram matching: the embedded thumbnail is too small: " << w << "x" << h << std::endl;
             }
             histMatchingCache = outCurve;
+            histMatchingCache2 = outCurve2;
             histMatchingParams = cp;
             return;
         }
@@ -507,6 +528,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
                 std::cout << "histogram matching: raw decoding failed, generating a neutral curve" << std::endl;
             }
             histMatchingCache = outCurve;
+            histMatchingCache2 = outCurve2;
             histMatchingParams = cp;
             return;
         }
@@ -589,9 +611,10 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         &get_b
     };
     std::vector<std::vector<double>> candidates;
+    double expcomp = get_expcomp(getMetaData());
     for (auto g : getters) {
         CdfInfo scdf = getCdf(*source, g);
-        CdfInfo tcdf = getCdf(*target, g);
+        CdfInfo tcdf = getCdf(*target, g, expcomp);
 
         std::vector<int> mapping;
         int j = 0;
@@ -625,6 +648,11 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         }
     }
     outCurve = candidates[best];
+    if (expcomp > 0.f) {
+        double x = 0.3;
+        double y = x * std::pow(2.0, expcomp);
+        outCurve2 = { DCT_CatumullRom, 0.0, 0.0, x, y, 1.0, 1.0 };
+    }
 
     if (settings->verbose) {
         std::cout << "histogram matching: best match found at " << best
@@ -633,6 +661,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
     }
 
     histMatchingCache = outCurve;
+    histMatchingCache2 = outCurve2;
     histMatchingParams = cp;
 }
 

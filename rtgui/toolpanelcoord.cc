@@ -1197,9 +1197,9 @@ void ToolPanelCoordinator::autoExpChanged(double expcomp, int bright, int contr,
 }
 
 
-void ToolPanelCoordinator::autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveParams::TcMode curveMode, const std::vector<double>& curve)
+void ToolPanelCoordinator::autoMatchedToneCurveChanged(const std::vector<double>& curve, const std::vector<double>& curve2)
 {
-    toneCurve->autoMatchedToneCurveChanged(curveMode, curve);
+    toneCurve->autoMatchedToneCurveChanged(curve, curve2);
 }
 
 

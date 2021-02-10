@@ -501,12 +501,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         if (todo & M_AUTOEXP) {
             if (params.toneCurve.histmatching) {
                 if (!params.toneCurve.fromHistMatching) {
-                    imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve);
+                    imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve, params.toneCurve.curve2);
                 }
                 params.toneCurve.fromHistMatching = true;
     
                 if (aeListener) {
-                    aeListener->autoMatchedToneCurveChanged(params.toneCurve.curveMode, params.toneCurve.curve);
+                    aeListener->autoMatchedToneCurveChanged(params.toneCurve.curve, params.toneCurve.curve2);
                 }
             }
 

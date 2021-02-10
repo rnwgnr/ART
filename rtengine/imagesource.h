@@ -130,9 +130,10 @@ public:
     }
 
     // for RAW files, compute a tone curve using histogram matching on the embedded thumbnail
-    virtual void getAutoMatchedToneCurve(const ColorManagementParams &cp, std::vector<double> &outCurve)
+    virtual void getAutoMatchedToneCurve(const ColorManagementParams &cp, std::vector<double> &outCurve, std::vector<double> &outCurve2)
     {
-        outCurve = { 0.0 };
+        outCurve = { 0 };
+        outCurve2 = { 0 };
     }
     
     // double getDirPyrDenoiseExpComp()

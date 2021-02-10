@@ -336,7 +336,7 @@ public:
       * @param hlrecons set to true if HighLight Reconstruction is enabled */
     virtual void autoExpChanged(double brightness, int bright, int contrast, int black, int hlcompr, int hlcomprthresh, bool hlrecons) {}
 
-    virtual void autoMatchedToneCurveChanged(procparams::ToneCurveParams::TcMode curveMode, const std::vector<double>& curve) = 0;
+    virtual void autoMatchedToneCurveChanged(const std::vector<double> &curve, const std::vector<double> &curve2) = 0;
 };
 
 
