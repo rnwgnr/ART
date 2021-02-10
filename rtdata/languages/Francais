@@ -690,6 +690,7 @@ INSPECTOR_RAW_SHADOW;Rendu raw rapide avec courbe tonale amplifiant les ombres.\
 INSPECTOR_SPLIT;Vue dissociée. \nRaccourci : <b>y</b>.
 INSPECTOR_ZOOM_FIT;Ajuster à la fenêtre.\nRaccourci : <b>x</b>.
 INSPECTOR_ZOOM_11;Zoomer à 100%.\nRaccourci : <b>z</b>.
+LABMASKS_AREA_MASK_EMPTY_WARNING;Attention: la combinaison actuelle des formes dans le masque de zone résulte en un masque vide.
 IPTCPANEL_CATEGORY;Catégorie
 IPTCPANEL_CATEGORYHINT;Identifie le sujet de l'image selon l'opinion du fournisseur.
 IPTCPANEL_CITY;Ville
