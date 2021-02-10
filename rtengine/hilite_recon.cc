@@ -951,7 +951,7 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 #endif
         for (int y = 0; y < H2; ++y) {
             for (int x = 0; x < W2; ++x) {
-                guide[y][x] = Color::igamma_srgb(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam));
+                guide[y][x] = CLIP(Color::igamma_srgb(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam)));
             }
         }
     }
