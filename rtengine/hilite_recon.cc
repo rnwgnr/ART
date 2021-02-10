@@ -946,12 +946,17 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
         rescaleNearest(gsrc, gbuf, true);
         rescaleNearest(bsrc, bbuf, true);
 
+        LUTf gamma(65536);
+        for (int i = 0; i < 65536; ++i) {
+            gamma[i] = pow_F(float(i)/65535.f, 2.2f);
+        }
+
 #ifdef _OPENMP
 #       pragma omp parallel for
 #endif
         for (int y = 0; y < H2; ++y) {
             for (int x = 0; x < W2; ++x) {
-                guide[y][x] = CLIP(Color::igamma_srgb(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam)));
+                guide[y][x] = gamma[CLIP(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam))];
             }
         }
     }
