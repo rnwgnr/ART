@@ -428,7 +428,9 @@ double get_expcomp(const FramesMetaData *md)
         auto it = mn.find("RawExposureBias");
         if (it != mn.end()) {
             double e = -std::atof(it->second.c_str());
-            if (e > 0) {
+            if (e > 1) {
+                return std::log2(e);
+            } else if (e > 0) {
                 return e / 2.4;
             }
         }
