@@ -206,7 +206,8 @@ void lab_adjustments(const ImProcData &im, Imagefloat *img, LUTf &lcurve, LUTf &
         }
     }
 
-    if (histLCurve) { 
+    if (histLCurve) {
+        histLCurve->clear();
         const int compression = log2(32768.f / histLCurve->getSize());
 #ifdef _OPENMP
 #       pragma omp parallel for if (multiThread)
