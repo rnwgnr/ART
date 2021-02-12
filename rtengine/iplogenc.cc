@@ -192,7 +192,8 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
                     Y2[y][x] = norm(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), ws) / 65535.f;
-                    float l = xlogf(std::max(Y2[y][x], 1e-9f));
+                    Y2[y][x] = LIM(Y2[y][x], 1e-9f, 1024.f);
+                    float l = xlogf(Y2[y][x]);
                     float ll = round(l * base_posterization) / base_posterization;
                     Y[y][x] = xexpf(ll);
                     assert(std::isfinite(Y[y][x]));

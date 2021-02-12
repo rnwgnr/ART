@@ -120,7 +120,7 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            Y[y][x] = Color::rgbLuminance(R[y][x], G[y][x], B[y][x], ws);
+            Y[y][x] = LIM(Color::rgbLuminance(R[y][x], G[y][x], B[y][x], ws), 1e-5f, 1024.f);
         }
     }
 
