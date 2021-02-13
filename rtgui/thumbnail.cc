@@ -293,7 +293,7 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
     const CacheImageData* cfs = getCacheImageData();
     Glib::ustring defaultPparamsPath = options.findProfilePath(defProf);
     const bool create = (!hasProcParams() || force);
-    const bool run_cpb = false; //!options.CPBPath.empty() && !defaultPparamsPath.empty() && cfs && cfs->exifValid && create;
+    const bool run_cpb = !options.CPBPath.empty() && !defaultPparamsPath.empty() && cfs && cfs->exifValid && create;
 
     const Glib::ustring outFName =
         (options.paramsLoadLocation == PLL_Input && options.saveParamsFile) ?
