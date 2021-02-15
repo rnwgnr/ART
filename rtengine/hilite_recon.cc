@@ -398,7 +398,9 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
     int miny = height - 1;
     int maxy = 0;
 
+#ifdef _OPENMP
     #pragma omp parallel for reduction(min:minx,miny) reduction(max:maxx,maxy) schedule(dynamic, 16)
+#endif
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j< width; ++j) {
             if (red[i][j] >= max_f[0] || green[i][j] >= max_f[1] || blue[i][j] >= max_f[2]) {
@@ -413,11 +415,6 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
     if (minx > maxx || miny > maxy) { // nothing to reconstruct
         return;
     }
-
-    // if (plistener) {
-    //     progress += 0.05;
-    //     plistener->setProgress(progress);
-    // }
 
     constexpr int blurBorder = 256;
     minx = std::max(0, minx - blurBorder);
@@ -435,17 +432,7 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 
     boxblur2(red, channelblur[0], temp, miny, minx, blurHeight, blurWidth, bufferWidth, 4);
 
-    // if (plistener) {
-    //     progress += 0.07;
-    //     plistener->setProgress(progress);
-    // }
-
     boxblur2(green, channelblur[1], temp, miny, minx, blurHeight, blurWidth, bufferWidth, 4);
-
-    // if (plistener) {
-    //     progress += 0.07;
-    //     plistener->setProgress(progress);
-    // }
 
     boxblur2(blue, channelblur[2], temp, miny, minx, blurHeight, blurWidth, bufferWidth, 4);
  
@@ -930,8 +917,8 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // now reconstruct clipped channels using color ratios
-    const int W2 = float(W) / 2.f + 0.5f;
-    const int H2 = float(H) / 2.f + 0.5f;
+    const int W2 = blurWidth / 2.f + 0.5f;
+    const int H2 = blurHeight / 2.f + 0.5f;
     array2D<float> mask(W2, H2, ARRAY2D_CLEAR_DATA);
     array2D<float> rbuf(W2, H2);
     array2D<float> gbuf(W2, H2);
@@ -939,14 +926,17 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
     array2D<float> guide(W2, H2);
 
     {
-        array2D<float> rsrc(W, H, red, ARRAY2D_BYREFERENCE);
-        array2D<float> gsrc(W, H, green, ARRAY2D_BYREFERENCE);
-        array2D<float> bsrc(W, H, blue, ARRAY2D_BYREFERENCE);
-        rescaleNearest(rsrc, rbuf, true);
-        rescaleNearest(gsrc, gbuf, true);
-        rescaleNearest(bsrc, bbuf, true);
+        array2D<float> rbuffer(blurWidth, blurHeight, minx, miny, red, ARRAY2D_BYREFERENCE);
+        rescaleNearest(rbuffer, rbuf, true);
+        array2D<float> gbuffer(blurWidth, blurHeight, minx, miny, green, ARRAY2D_BYREFERENCE);
+        rescaleNearest(gbuffer, gbuf, true);
+        array2D<float> bbuffer(blurWidth, blurHeight, minx, miny, blue, ARRAY2D_BYREFERENCE);
+        rescaleNearest(bbuffer, bbuf, true);
 
         LUTf gamma(65536);
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif
         for (int i = 0; i < 65536; ++i) {
             gamma[i] = pow_F(float(i)/65535.f, 2.2f);
         }
@@ -1156,8 +1146,8 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
                 blue[yy][xx]  *= mult;
             }
 
-            int ii = (yy) / 2;
-            int jj = (xx) / 2;
+            int ii = i / 2;
+            int jj = j / 2;
             rbuf[ii][jj] = red[yy][xx];
             gbuf[ii][jj] = green[yy][xx];
             bbuf[ii][jj] = blue[yy][xx];
@@ -1186,19 +1176,19 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
 
     {
 #ifdef _OPENMP
-        #pragma omp parallel for
+        #pragma omp parallel for schedule(dynamic,16)
 #endif
-        for (int y = 0; y < H; ++y) {
-            float fy = y * 0.5f;
-            int yy = y / 2;
-            for (int x = 0; x < W; ++x) {
-                float fx = x * 0.5f;
-                int xx = x / 2;
-                float m = mask[yy][xx];
+        for (int y = 0; y < blurHeight; ++y) {
+            const float fy = y * 0.5f;
+            const int yy = y / 2;
+            for (int x = 0; x < blurWidth; ++x) {
+                const int xx = x / 2;
+                const float m = mask[yy][xx];
                 if (m > 0.f) {
-                    red[y][x] = intp(m, getBilinearValue(rbuf, fx, fy), red[y][x]);
-                    green[y][x] = intp(m, getBilinearValue(gbuf, fx, fy), green[y][x]);
-                    blue[y][x] = intp(m, getBilinearValue(bbuf, fx, fy), blue[y][x]);
+                    const float fx = x * 0.5f;
+                    red[y + miny][x + minx] = intp(m, getBilinearValue(rbuf, fx, fy), red[y + miny][x + minx]);
+                    green[y + miny][x + minx] = intp(m, getBilinearValue(gbuf, fx, fy), green[y + miny][x + minx]);
+                    blue[y + miny][x + minx] = intp(m, getBilinearValue(bbuf, fx, fy), blue[y + miny][x + minx]);
                 }
             }
         }

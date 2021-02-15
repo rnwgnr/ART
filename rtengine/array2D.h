@@ -130,6 +130,36 @@ private:
     {
         return (flags_ & ARRAY2D_ALIGNED) ? ((w * sizeof(T) + 15) / 16 * 16) : w * sizeof(T);
     }
+
+    void construct(int w, int h, int startx, int starty, T **source, unsigned int flgs)
+    {
+        flags_ = flgs;
+        owner_ = !(flags_ & ARRAY2D_BYREFERENCE);
+        size_t stride = rowstride(w);
+
+        if (owner_) {
+            buf_.resize(stride * h, 1);
+        }
+
+        width_ = w;
+        height_ = h;
+        ptr_ = new T*[h];
+
+        if (!owner_) {
+            for (int i = 0; i < h; ++i) {
+                ptr_[i] = source[i + starty] + startx;
+            }
+        } else {
+            char *start = reinterpret_cast<char *>(buf_.data);
+            for (int i = 0; i < h; ++i) {
+                int k = i * stride;
+                ptr_[i] = reinterpret_cast<T *>(start + k);
+                for (int j = 0; j < w; ++j) {
+                    ptr_[i][j] = source[i + starty][j + startx];
+                }
+            }
+        }
+    }
     
 public:
 
@@ -174,32 +204,13 @@ public:
     array2D(int w, int h, T **source, unsigned int flgs=0):
         buf_(0, (flgs & ARRAY2D_ALIGNED) && !(flgs & ARRAY2D_BYREFERENCE) ? 16 : 0)
     {
-        flags_ = flgs;
-        owner_ = !(flags_ & ARRAY2D_BYREFERENCE);
-        size_t stride = rowstride(w);
+        construct(w, h, 0, 0, source, flgs);
+    }
 
-        if (owner_) {
-            buf_.resize(stride * h, 1);
-        }
-
-        width_ = w;
-        height_ = h;
-        ptr_ = new T*[h];
-
-        if (!owner_) {
-            for (int i = 0; i < h; ++i) {
-                ptr_[i] = source[i];
-            }
-        } else {
-            char *start = reinterpret_cast<char *>(buf_.data);
-            for (int i = 0; i < h; ++i) {
-                int k = i * stride;
-                ptr_[i] = reinterpret_cast<T *>(start + k);
-                for (int j = 0; j < w; ++j) {
-                    ptr_[i][j] = source[i][j];
-                }
-            }
-        }
+    // creator type 3
+    array2D(int w, int h, int startx, int starty, T **source, unsigned int flgs=0)
+    {
+        construct(w, h, startx, starty, source, flgs);
     }
 
     // destructor
