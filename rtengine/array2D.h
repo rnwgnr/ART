@@ -276,11 +276,11 @@ public:
     // import from flat data
     void operator()(int w, int h, T* copy, unsigned int flgs=0)
     {
-        flags_ = flgs;
+        flags_ = flgs & ~(ARRAY2D_BYREFERENCE|ARRAY2D_ALIGNED);
 
         ar_realloc(w, h);
         for (int y = 0; y < h; ++y) {
-            std::copy(ptr_[y], ptr_[y]+w, copy + y*w);
+            std::copy(copy + y * w, copy + y * w + w, ptr_[y]);
         }
     }
     
