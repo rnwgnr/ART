@@ -284,7 +284,6 @@ void mappingToCurve(const std::vector<int> &mapping, std::vector<double> &curve)
     } else {
         curve.insert(curve.begin(), DCT_Spline);
         DiagonalCurve c(curve);
-        double x = 0.0;
         curve = { DCT_CatumullRom };
         double pivot = -1.0;
         for (int i = 25; i < 256; ++i) {
@@ -307,6 +306,7 @@ void mappingToCurve(const std::vector<int> &mapping, std::vector<double> &curve)
             curve.push_back(c.getVal(1.0));
             ensure_not_clipping(curve);
         } else {
+            double x = 0.0;
             double gap = 0.05;
             while (x < 1.0) {
                 curve.push_back(x);
@@ -429,7 +429,7 @@ double get_expcomp(const FramesMetaData *md)
         if (it != mn.end()) {
             double e = -std::atof(it->second.c_str());
             if (e > 1) {
-                return std::log2(e);
+                return std::log(e)/std::log(2.4);
             } else if (e > 0) {
                 return e / 2.4;
             }
@@ -654,6 +654,10 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         double x = 0.3;
         double y = x * std::pow(2.0, expcomp);
         outCurve2 = { DCT_CatumullRom, 0.0, 0.0, x, y, 1.0, 1.0 };
+        if (outCurve.size() > 5 && outCurve[4] > outCurve[3]) {
+            outCurve = outCurve2;
+            outCurve2 = { DCT_Linear };
+        }
     }
 
     if (settings->verbose) {
