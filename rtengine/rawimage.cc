@@ -17,6 +17,11 @@
 #include "utils.h"
 #include "metadata.h"
 
+#ifdef ART_USE_LIBRAW
+# include <libraw/libraw.h>
+#endif
+
+
 namespace rtengine {
 
 extern const Settings* settings;
@@ -456,6 +461,7 @@ skip_block:
     }
 }
 
+
 int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, ProgressListener *plistener, double progressRange, bool apply_corrections)
 {
     ifname = filename.c_str();
@@ -487,7 +493,54 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
     // set the number of the frame to extract. If the number is larger then number of existing frames - 1, dcraw will handle that correctly
 
     shot_select = imageNum;
+
+#ifndef ART_USE_LIBRAW
     identify();
+#else // ART_USE_LIBRAW
+    LibRaw libraw;
+    {
+        libraw.imgdata.params.shot_select = shot_select;
+        
+        int err = libraw.open_buffer(ifp->data, ifp->size);
+        if (err) {
+            return err;
+        }
+        auto &d = libraw.imgdata.idata;
+        is_raw = d.raw_count;
+        strcpy(make, d.normalized_make);
+        strcpy(model, d.normalized_model);
+        strcpy(software, d.software);
+        dng_version = d.dng_version;
+        filters = d.filters;
+        is_foveon = d.is_foveon;
+        colors = d.colors;
+        for (int i = 0; i < 6; ++i) {
+            for (int j = 0; j < 6; ++j) {
+                xtrans[i][j] = d.xtrans[i][j];
+                xtrans_abs[i][j] = d.xtrans_abs[i][j];
+            }
+        }
+        auto &s = libraw.imgdata.sizes;
+        raw_width = s.raw_width;
+        raw_height = s.raw_height;
+        width = s.width;
+        height = s.height;
+        top_margin = s.top_margin;
+        left_margin = s.left_margin;
+        iheight = s.iheight;
+        iwidth = s.iwidth;
+        flip = s.flip;
+
+        auto &o = libraw.imgdata.other;
+        iso_speed = o.iso_speed;
+        shutter = o.shutter;
+        aperture = o.aperture;
+        focal_len = o.focal_len;
+        timestamp = o.timestamp;
+        shot_order = o.shot_order;
+    }
+#endif
+    
     // in case dcraw didn't handle the above mentioned case...
     shot_select = std::min(shot_select, std::max(is_raw, 1u) - 1);
 
@@ -502,6 +555,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         return 2;
     }
 
+#ifndef ART_USE_LIBRAW
     if(!strcmp(make,"Fujifilm") && raw_height * raw_width * 2u != raw_size) {
         if (raw_width * raw_height * 7u / 4u == raw_size) {
             load_raw = &RawImage::fuji_14bit_load_raw;
@@ -509,6 +563,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             parse_fuji_compressed_header();
         }
     }
+#endif // ART_USE_LIBRAW
 
     if (flip == 5) {
         this->rotate_deg = 270;
@@ -534,6 +589,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         iheight = height;
         iwidth  = width;
 
+#ifndef ART_USE_LIBRAW
         if (filters || colors == 1) {
             raw_image = (ushort *) calloc ((static_cast<unsigned int>(raw_height) + 7u) * static_cast<unsigned int>(raw_width), 2);
             merror (raw_image, "main()");
@@ -547,17 +603,59 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             return 200;
         }
 
-        /* Issue 2467
-              if (setjmp (failure)) {
-                  if (image) { free (image); image=NULL; }
-                  if (raw_image) { free(raw_image); raw_image=NULL; }
-                  fclose(ifp); ifp=NULL;
-                  return 100;
-              }
-        */
         // Load raw pixels data
         fseek (ifp, data_offset, SEEK_SET);
         (this->*load_raw)();
+#else // ART_USE_LIBRAW
+        {
+            libraw.imgdata.params.use_camera_wb = 1;
+            libraw.imgdata.params.shot_select = shot_select;
+            
+            int err = libraw.open_buffer(ifp->data, ifp->size);
+            if (err) {
+                return err;
+            }
+            err = libraw.unpack();
+            if (err) {
+                return err;
+            }
+            auto &cd = libraw.imgdata.color;
+            black = cd.black;
+            maximum = cd.maximum;
+            for (size_t i = 0; i < sizeof(cblack)/sizeof(unsigned); ++i) {
+                cblack[i] = cd.cblack[i];
+            }
+            for (int i = 0; i < 4; ++i) {
+                cam_mul[i] = cd.cam_mul[i];
+                pre_mul[i] = cd.pre_mul[i];
+            }
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 4; ++j) {
+                    cmatrix[i][j] = cd.cmatrix[i][j];
+                    rgb_cam[i][j] = cd.rgb_cam[i][j];
+                }
+            }
+
+            auto &rd = libraw.imgdata.rawdata;
+            raw_image = rd.raw_image;
+            err = libraw.raw2image();
+            if (err) {
+                return err;
+            }
+            image = libraw.imgdata.image;
+            libraw.imgdata.image = nullptr;
+            if (rd.float_image) {
+                float_raw_image = new float[raw_width * raw_height];
+                for (int y = 0; y < raw_height; ++y) {
+                    for (int x = 0; x < raw_width; ++x) {
+                        float_raw_image[y][x] = rd.float_image[y][x];
+                    }
+                }
+            } else {
+                float_raw_image = nullptr;
+            }
+        }
+#endif // ART_USE_LIBRAW
 
         if (!float_raw_image) { // apply baseline exposure only for float DNGs
             RT_baseline_exposure = 0;
@@ -656,8 +754,10 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 }
             }
 
+#ifndef ART_USE_LIBRAW
             crop_masked_pixels();
             free (raw_image);
+#endif
             raw_image = nullptr;
         } else {
             if (get_maker() == "Sigma" && cc && cc->has_rawCrop(width, height)) { // foveon images
@@ -684,11 +784,19 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         }
 
         // Load embedded profile
+#ifndef ART_USE_LIBRAW
         if (profile_length) {
             profile_data = new char[profile_length];
             fseek ( ifp, profile_offset, SEEK_SET);
             fread ( profile_data, 1, profile_length, ifp);
         }
+#else // ART_USE_LIBRAW
+        if (libraw.imgdata.color.profile_length) {
+            profile_length = libraw.imgdata.color.profile_length;
+            profile_data = new char[profile_length];
+            memcpy(profile_data, libraw.imgdata.color.profile, profile_length);
+        }
+#endif // ART_USE_LIBRAW
 
         /*
           Setting the black level, there are three sources:
@@ -796,6 +904,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
 
     return 0;
 }
+
 
 float** RawImage::compress_image(unsigned int frameNum, bool freeImage)
 {
