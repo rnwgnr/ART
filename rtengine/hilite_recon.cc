@@ -933,12 +933,20 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
         array2D<float> bbuffer(blurWidth, blurHeight, minx, miny, blue, ARRAY2D_BYREFERENCE);
         rescaleNearest(bbuffer, bbuf, true);
 
+//         LUTf gamma(65536);
+// #ifdef _OPENMP
+//         #pragma omp parallel for
+// #endif
+//         for (int i = 0; i < 65536; ++i) {
+//             gamma[i] = pow_F(float(i)/65535.f, 1.0f);
+//         }
+
 #ifdef _OPENMP
 #       pragma omp parallel for
 #endif
         for (int y = 0; y < H2; ++y) {
             for (int x = 0; x < W2; ++x) {
-                guide[y][x] = CLIP(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam));
+                guide[y][x] = CLIP(Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam)) / 65535.f;
             }
         }
     }
@@ -1152,18 +1160,11 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
         plistener->setProgress(progress);
     }
     
-// #ifdef _OPENMP
-// #pragma omp parallel
-// #endif
     {
-        //gaussianBlur(mask, mask, W/2, H/2, 5);
-        // gaussianBlur(rbuf, rbuf, W/2, H/2, 1);
-        // gaussianBlur(gbuf, gbuf, W/2, H/2, 1);
-        // gaussianBlur(bbuf, bbuf, W/2, H/2, 1);
-        guidedFilter(guide, mask, mask, 2, 0.001f, true, 1);
-        guidedFilter(guide, rbuf, rbuf, 2, 0.01f * 65535.f, true, 1);
-        guidedFilter(guide, gbuf, gbuf, 2, 0.01f * 65535.f, true, 1);
-        guidedFilter(guide, bbuf, bbuf, 2, 0.01f * 65535.f, true, 1);
+        guidedFilter(guide, mask, mask, 2, 0.0001f, true, 1);
+        guidedFilter(guide, rbuf, rbuf, 2, 0.001f * 65535.f, true, 1);
+        guidedFilter(guide, gbuf, gbuf, 2, 0.001f * 65535.f, true, 1);
+        guidedFilter(guide, bbuf, bbuf, 2, 0.001f * 65535.f, true, 1);
     }
 
     {
