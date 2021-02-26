@@ -237,7 +237,7 @@ private:
             pl->setProgress (0.40);
         }
 
-        imgsrc->HLRecovery_Global(params.exposure);
+        //imgsrc->HLRecovery_Global(params.exposure);
 
 
         if (pl) {

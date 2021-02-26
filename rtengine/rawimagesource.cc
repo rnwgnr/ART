@@ -614,6 +614,8 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
 {
     MyMutex::MyLock lock(getImageMutex);
 
+    //HLRecovery_Global(hrp);
+
     tran = defTransform(ri, tran);
 
     // compute channel multipliers
@@ -723,15 +725,28 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
 
     const bool doClip = (chmax[0] >= clmax[0] || chmax[1] >= clmax[1] || chmax[2] >= clmax[2]) && !hrenabled && clampOOG;
 
-    float area = skip * skip;
-    rm /= area;
-    gm /= area;
-    bm /= area;
     bool doHr = (hrenabled && hrp.hrmode == procparams::ExposureParams::HR_BLEND);
     const float expcomp = std::pow(2, ri->getBaselineExposure());
     rm *= expcomp;
     gm *= expcomp;
     bm *= expcomp;
+
+    if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
+                        hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
+        if (!rgbSourceModified) {
+            if (settings->verbose) {
+                printf ("Applying Highlight Recovery: Color propagation...\n");
+            }
+            bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
+            HLRecovery_inpaint(soft, rm, gm, bm, red, green, blue);
+            rgbSourceModified = true;
+        }
+    }
+
+    float area = skip * skip;
+    rm /= area;
+    gm /= area;
+    bm /= area;
     
 #ifdef _OPENMP
     #pragma omp parallel if(!d1x)       // omp disabled for D1x to avoid race conditions (see Issue 1088 http://code.google.com/p/rawtherapee/issues/detail?id=1088)
@@ -1782,17 +1797,17 @@ void RawImageSource::flushRGB()
 
 void RawImageSource::HLRecovery_Global(const ExposureParams &hrp)
 {
-    if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
-                        hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
-        if (!rgbSourceModified) {
-            if (settings->verbose) {
-                printf ("Applying Highlight Recovery: Color propagation...\n");
-            }
-            bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
-            HLRecovery_inpaint(soft, red, green, blue);
-            rgbSourceModified = true;
-        }
-    }
+    // if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
+    //                     hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
+    //     if (!rgbSourceModified) {
+    //         if (settings->verbose) {
+    //             printf ("Applying Highlight Recovery: Color propagation...\n");
+    //         }
+    //         bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
+    //         HLRecovery_inpaint(soft, red, green, blue);
+    //         rgbSourceModified = true;
+    //     }
+    // }
 }
 
 
