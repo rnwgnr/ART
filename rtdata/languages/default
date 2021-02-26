@@ -1458,6 +1458,7 @@ TP_GRAIN_SCALE;Scale
 TP_GRAIN_STRENGTH;Strength
 TP_HLREC_BLEND;Blend
 TP_HLREC_COLOR;Color Propagation
+TP_HLREC_COLORSOFT;Soft Color Propagation
 TP_HLREC_OFF;Off
 TP_HLREC_LABEL;Highlight reconstruction
 TP_HSVEQUALIZER_CHANNEL;Channel

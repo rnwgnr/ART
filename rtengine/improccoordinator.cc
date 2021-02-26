@@ -349,9 +349,10 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             imageTypeListener->imageTypeChanged(imgsrc->isRAW(), imgsrc->getSensorType() == ST_BAYER, imgsrc->getSensorType() == ST_FUJI_XTRANS, imgsrc->isMono());
         }
 
-        const bool hrcolor = params.exposure.enabled && params.exposure.hrmode == procparams::ExposureParams::HR_COLOR;
+        //const bool hrcolor = params.exposure.enabled && (params.exposure.hrmode == procparams::ExposureParams::HR_COLOR || params.exposure.hrmode == procparams::ExposureParams::HR_COLORSOFT);
+        //const bool hrcolor = false;
         
-        if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded) || (!hrcolor && imgsrc->isRGBSourceModified())) {
+        if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded)) {// || (!hrcolor && imgsrc->isRGBSourceModified())) {
             if (settings->verbose) {
                 if (imgsrc->getSensorType() == ST_BAYER) {
                     std::cout << "Demosaic Bayer image n." << rp.bayersensor.imageNum + 1 << " using method: " << RAWParams::BayerSensor::getMethodString(rp.bayersensor.method) << std::endl;

@@ -469,7 +469,8 @@ struct ExposureParams {
     enum HighlightReconstruction {
         HR_OFF,
         HR_BLEND,
-        HR_COLOR
+        HR_COLOR,
+        HR_COLORSOFT
     };
     HighlightReconstruction hrmode;
     double expcomp;

@@ -292,7 +292,7 @@ namespace rtengine {
 
 extern const Settings *settings;
 
-void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue)
+void RawImageSource::HLRecovery_inpaint(bool soft, float** red, float** green, float** blue)
 {
     double progress = 0.0;
 
@@ -919,13 +919,19 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
     // now reconstruct clipped channels using color ratios
     const int W2 = blurWidth / 2.f + 0.5f;
     const int H2 = blurHeight / 2.f + 0.5f;
-    array2D<float> mask(W2, H2, ARRAY2D_CLEAR_DATA);
-    array2D<float> rbuf(W2, H2);
-    array2D<float> gbuf(W2, H2);
-    array2D<float> bbuf(W2, H2);
-    array2D<float> guide(W2, H2);
+    array2D<float> mask;
+    array2D<float> rbuf;
+    array2D<float> gbuf;
+    array2D<float> bbuf;
+    array2D<float> guide;
 
-    {
+    if (soft) {
+        mask(W2, H2, ARRAY2D_CLEAR_DATA);
+        rbuf(W2, H2);
+        gbuf(W2, H2);
+        bbuf(W2, H2);
+        guide(W2, H2);
+        
         array2D<float> rbuffer(blurWidth, blurHeight, minx, miny, red, ARRAY2D_BYREFERENCE);
         rescaleNearest(rbuffer, rbuf, true);
         array2D<float> gbuffer(blurWidth, blurHeight, minx, miny, green, ARRAY2D_BYREFERENCE);
@@ -1146,12 +1152,14 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
                 blue[yy][xx]  *= mult;
             }
 
-            int ii = i / 2;
-            int jj = j / 2;
-            rbuf[ii][jj] = red[yy][xx];
-            gbuf[ii][jj] = green[yy][xx];
-            bbuf[ii][jj] = blue[yy][xx];
-            mask[ii][jj] = maskval;
+            if (soft) {
+                int ii = i / 2;
+                int jj = j / 2;
+                rbuf[ii][jj] = red[yy][xx];
+                gbuf[ii][jj] = green[yy][xx];
+                bbuf[ii][jj] = blue[yy][xx];
+                mask[ii][jj] = maskval;
+            }
         }
     }
 
@@ -1160,14 +1168,14 @@ void RawImageSource::HLRecovery_inpaint(float** red, float** green, float** blue
         plistener->setProgress(progress);
     }
     
-    {
+    if (soft) {
         guidedFilter(guide, mask, mask, 2, 0.0001f, true, 1);
-        guidedFilter(guide, rbuf, rbuf, 2, 0.001f * 65535.f, true, 1);
-        guidedFilter(guide, gbuf, gbuf, 2, 0.001f * 65535.f, true, 1);
-        guidedFilter(guide, bbuf, bbuf, 2, 0.001f * 65535.f, true, 1);
-    }
+        constexpr int radius = 1;
+        constexpr float epsilon = 0.001f * 65535.f;
+        guidedFilter(guide, rbuf, rbuf, radius, epsilon, true, 1);
+        guidedFilter(guide, gbuf, gbuf, radius, epsilon, true, 1);
+        guidedFilter(guide, bbuf, bbuf, radius, epsilon, true, 1);
 
-    {
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif

@@ -71,7 +71,7 @@ public:
     virtual void flushRawData() {};
     virtual void flushRGB() {};
     virtual void HLRecovery_Global(const ExposureParams &hrp) {};
-    virtual void HLRecovery_inpaint(float** red, float** green, float** blue) {};
+    //virtual void HLRecovery_inpaint(float** red, float** green, float** blue) {};
 
     virtual bool isRGBSourceModified() const = 0; // tracks whether cached rgb output of demosaic has been modified
 

@@ -727,7 +727,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     rm /= area;
     gm /= area;
     bm /= area;
-    bool doHr = (hrenabled && hrp.hrmode != procparams::ExposureParams::HR_COLOR);
+    bool doHr = (hrenabled && hrp.hrmode == procparams::ExposureParams::HR_BLEND);
     const float expcomp = std::pow(2, ri->getBaselineExposure());
     rm *= expcomp;
     gm *= expcomp;
@@ -1782,13 +1782,14 @@ void RawImageSource::flushRGB()
 
 void RawImageSource::HLRecovery_Global(const ExposureParams &hrp)
 {
-    if (hrp.enabled && hrp.hrmode == procparams::ExposureParams::HR_COLOR) {
-        if(!rgbSourceModified) {
+    if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
+                        hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
+        if (!rgbSourceModified) {
             if (settings->verbose) {
                 printf ("Applying Highlight Recovery: Color propagation...\n");
             }
-
-            HLRecovery_inpaint (red, green, blue);
+            bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
+            HLRecovery_inpaint(soft, red, green, blue);
             rgbSourceModified = true;
         }
     }

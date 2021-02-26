@@ -3259,6 +3259,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             case ExposureParams::HR_OFF: hr = "Off"; break;
             case ExposureParams::HR_BLEND: hr = "Blend"; break;
             case ExposureParams::HR_COLOR: hr = "Color"; break;
+            case ExposureParams::HR_COLORSOFT: hr = "ColorSoft"; break;
             }
             saveToKeyfile("Exposure", "HLRecovery", hr, keyFile);
         }
@@ -4094,6 +4095,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         exposure.hrmode = ExposureParams::HR_BLEND;
                     } else if (hr == "Color") {
                         exposure.hrmode = ExposureParams::HR_COLOR;
+                    } else if (hr == "ColorSoft") {
+                        exposure.hrmode = ExposureParams::HR_COLORSOFT;
                     } else {
                         exposure.hrmode = ExposureParams::HR_OFF;
                     }

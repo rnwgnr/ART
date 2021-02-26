@@ -108,6 +108,7 @@ protected:
     inline void getRowStartEnd (int x, int &start, int &end);
     static void getProfilePreprocParams(cmsHPROFILE in, float& gammafac, float& lineFac, float& lineSum);
 
+    void HLRecovery_inpaint(bool soft, float** red, float** green, float** blue);
 
 public:
     RawImageSource ();
@@ -190,7 +191,6 @@ public:
     }
     static void inverse33 (const double (*coeff)[3], double (*icoeff)[3]);
 
-    void HLRecovery_inpaint (float** red, float** green, float** blue) override;
     static void HLRecovery_blend (float* rin, float* gin, float* bin, int width, float maxval, float* hlmax);
     static void init ();
     static void cleanup ();
