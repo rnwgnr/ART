@@ -275,7 +275,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
 
         ColorTemp preproc_wb;
-        const bool wb_todo = todo & (M_WHITEBALANCE | M_PREPROC);
+        const bool wb_todo = todo & (M_WHITEBALANCE | M_PREPROC | M_INIT);
 
         if (wb_todo) {
             updateWB();
@@ -306,6 +306,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             case Options::WB_AFTER:
             default:
                 break;
+            }
+            if (todo & M_INIT) {
+                preproc_wb = currWB;
             }
         }
         

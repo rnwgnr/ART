@@ -461,10 +461,10 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 rr[j] = red[y][x] * rm;
                 gg[j] = green[y][x] * gm;
                 bb[j] = blue[y][x] * bm;
+                clipped[i][j] = max(rr[j], gg[j], bb[j]) > clippt_soft;
             }
             HLRecovery_blend(rr, gg, bb, blurWidth, 65535.0, hlmax);
             for (int j = 0; j < blurWidth; ++j) {
-                clipped[i][j] = max(rr[j], gg[j], bb[j]) > clippt_soft;
                 luminance[i][j] = Color::rgbLuminance(rr[j] / rm, gg[j] / gm, bb[j] / bm, imatrices.xyz_cam);
             }
         }
@@ -1171,19 +1171,26 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 float &g = green[y + miny][x + minx];
                 float &b = blue[y + miny][x + minx];
                 float l2 = luminance[y][x];
-                if (clipped[y][x]) {
+                if (clipped[y][x] && l2 > 1.f) {
                     float l = Color::rgbLuminance(r, g, b, imatrices.xyz_cam);
                     if (l > 1.f) {
                         float f = l2 / l;
+                        if (f < 1.f) {
+                            f = pow_F(f, 0.25f);
+                        }
                         r *= f;
                         g *= f;
                         b *= f;
-                        if (f > 1.f) {
-                            float s = 0.9f/f;
+                        if (f < 1.f) {
+                            float s = SQR(f);
                             r = (r - l2) * s + l2;
                             g = (g - l2) * s + l2;
                             b = (b - l2) * s + l2;
                         }
+                        // if (f < 1.f) {
+                        //     r = b = 32768.f;
+                        //     g = 0.f;
+                        // }
                     }
                 }
             }

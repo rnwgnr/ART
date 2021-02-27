@@ -42,7 +42,7 @@ Exposure::Exposure():
     hrmode->append(M("TP_HLREC_OFF"));
     hrmode->append(M("TP_HLREC_BLEND"));
     hrmode->append(M("TP_HLREC_COLOR"));
-    hrmode->append(M("TP_HLREC_COLORSOFT"));
+    hrmode->append(M("TP_HLREC_COLORBLEND"));
 
     hrmode->set_active(ExposureParams::HR_OFF);
     Gtk::HBox *hlrbox = Gtk::manage(new Gtk::HBox());
