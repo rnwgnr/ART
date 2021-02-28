@@ -287,6 +287,12 @@ void boxblur_resamp(const float* const* src, float** dst, float** temp, int H, i
 }
 
 
+#define FLT_M(m) std::array<std::array<float, 3>, 3>({                  \
+    std::array<float, 3>({float(m[0][0]), float(m[0][1]), float(m[0][2])}), \
+    std::array<float, 3>({float(m[1][0]), float(m[1][1]), float(m[1][2])}), \
+    std::array<float, 3>({float(m[2][0]), float(m[2][1]), float(m[2][2])}) \
+        })
+
 } // namespace
 
 namespace rtengine {
@@ -444,11 +450,19 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
     const int blurHeight = maxy - miny + 1;
     const int bufferWidth = blurWidth + ((16 - (blurWidth % 16)) & 15);
 
+    const auto getlum =
+        [](float r, float g, float b) -> float
+        {
+            return (0.299f * r + 0.587f * g + 0.114f * b);
+            //return std::sqrt(SQR(r) + SQR(g) + SQR(b));
+            //return (r + g + b)/3.f;
+        };
+    
     array2D<float> luminance;
-    array2D<bool> clipped;
+//    array2D<bool> clipped;
     if (soft) {
         luminance(blurWidth, blurHeight);
-        clipped(blurWidth, blurHeight);
+        //clipped(blurWidth, blurHeight);
         std::vector<float> rr_v(blurWidth), gg_v(blurWidth), bb_v(blurWidth);
         float *rr = &rr_v[0];
         float *gg = &gg_v[0];
@@ -461,11 +475,11 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 rr[j] = red[y][x] * rm;
                 gg[j] = green[y][x] * gm;
                 bb[j] = blue[y][x] * bm;
-                clipped[i][j] = max(rr[j], gg[j], bb[j]) > clippt_soft;
+                //clipped[i][j] = max(rr[j], gg[j], bb[j]) > clippt_soft;
             }
             HLRecovery_blend(rr, gg, bb, blurWidth, 65535.0, hlmax);
             for (int j = 0; j < blurWidth; ++j) {
-                luminance[i][j] = Color::rgbLuminance(rr[j] / rm, gg[j] / gm, bb[j] / bm, imatrices.xyz_cam);
+                luminance[i][j] = getlum(rr[j] / rm, gg[j] / gm, bb[j] / bm);
             }
         }
     }
@@ -1162,6 +1176,29 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
     }
     
     if (soft) {
+        auto to_rec2020_m = dotProduct(FLT_M(rec2020_xyz), FLT_M(imatrices.xyz_cam));
+        auto to_cam_m = dotProduct(FLT_M(imatrices.cam_xyz), FLT_M(xyz_rec2020));
+
+        const auto to_rec2020 =
+            [&](float &r, float &g, float &b) -> void
+            {
+                std::array<float, 3> rgb({r * rm, g * gm, b * bm});
+                rgb = dotProduct(to_rec2020_m, rgb);
+                r = rgb[0];
+                g = rgb[1];
+                b = rgb[2];
+            };
+
+        const auto to_cam =
+            [&](float &r, float &g, float &b) -> void
+            {
+                std::array<float, 3> rgb({r, g, b});
+                rgb = dotProduct(to_cam_m, rgb);
+                r = rgb[0]/rm;
+                g = rgb[1]/gm;
+                b = rgb[2]/bm;
+            };
+        
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif
@@ -1171,26 +1208,21 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 float &g = green[y + miny][x + minx];
                 float &b = blue[y + miny][x + minx];
                 float l2 = luminance[y][x];
-                if (clipped[y][x] && l2 > 1.f) {
-                    float l = Color::rgbLuminance(r, g, b, imatrices.xyz_cam);
-                    if (l > 1.f) {
+                if (true) {//clipped[y][x]) {
+                    float l = getlum(r, g, b);
+                    if (l > 0.f) {
                         float f = l2 / l;
-                        if (f < 1.f) {
-                            f = pow_F(f, 0.25f);
-                        }
                         r *= f;
                         g *= f;
                         b *= f;
                         if (f < 1.f) {
-                            float s = SQR(f);
-                            r = (r - l2) * s + l2;
-                            g = (g - l2) * s + l2;
-                            b = (b - l2) * s + l2;
+                            to_rec2020(r, g, b);
+                            float h, s, v;
+                            Color::rgb2hsl(r, g, b, h, s, v);
+                            s *= f;
+                            Color::hsl2rgb(h, s, v, r, g, b);
+                            to_cam(r, g, b);
                         }
-                        // if (f < 1.f) {
-                        //     r = b = 32768.f;
-                        //     g = 0.f;
-                        // }
                     }
                 }
             }
