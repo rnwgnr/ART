@@ -33,7 +33,6 @@
 #include "rawimagesource.h"
 #include "rt_math.h"
 #include "settings.h"
-#include "gauss.h"
 #include "rescale.h"
 #include "guidedfilter.h"
 
@@ -454,15 +453,13 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
         [](float r, float g, float b) -> float
         {
             return (0.299f * r + 0.587f * g + 0.114f * b);
-            //return std::sqrt(SQR(r) + SQR(g) + SQR(b));
-            //return (r + g + b)/3.f;
         };
     
     array2D<float> luminance;
-//    array2D<bool> clipped;
+    array2D<float> clipped;
     if (soft) {
         luminance(blurWidth, blurHeight);
-        //clipped(blurWidth, blurHeight);
+        clipped(blurWidth, blurHeight, ARRAY2D_CLEAR_DATA);
         std::vector<float> rr_v(blurWidth), gg_v(blurWidth), bb_v(blurWidth);
         float *rr = &rr_v[0];
         float *gg = &gg_v[0];
@@ -1125,6 +1122,8 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 continue;
             }
 
+            if (soft) clipped[i][j] = 1.f;
+
             int yy = i + miny;
             int xx = j + minx;
 
@@ -1198,6 +1197,8 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 g = rgb[1]/gm;
                 b = rgb[2]/bm;
             };
+
+        guidedFilter(luminance, clipped, clipped, 10, 0.01f, true);
         
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
@@ -1208,22 +1209,21 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 float &g = green[y + miny][x + minx];
                 float &b = blue[y + miny][x + minx];
                 float l2 = luminance[y][x];
-                if (true) {//clipped[y][x]) {
-                    float l = getlum(r, g, b);
-                    if (l > 0.f) {
-                        float f = l2 / l;
-                        r *= f;
-                        g *= f;
-                        b *= f;
-                        if (f < 1.f) {
-                            to_rec2020(r, g, b);
-                            float h, s, v;
-                            Color::rgb2hsl(r, g, b, h, s, v);
-                            s *= f;
-                            Color::hsl2rgb(h, s, v, r, g, b);
-                            to_cam(r, g, b);
-                        }
-                    }
+                float l = getlum(r, g, b);
+                if (l > 0.f) {
+                    float f = l2 / l;
+                    r *= f;
+                    g *= f;
+                    b *= f;
+                }
+                if (clipped[y][x] > 0.f) {
+                    float f = 1.f - LIM01(min(r/max_f[0], b/max_f[2]));
+                    to_rec2020(r, g, b);
+                    float h, s, v;
+                    Color::rgb2hsl(r, g, b, h, s, v);
+                    s = intp(clipped[y][x], s * f, s);
+                    Color::hsl2rgb(h, s, v, r, g, b);
+                    to_cam(r, g, b);
                 }
             }
         }
