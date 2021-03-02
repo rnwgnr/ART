@@ -362,6 +362,7 @@ void Options::setDefaults()
     thumbSizeTab = 160;
     thumbSizeQueue = 160;
     sameThumbSize = false;               // preferring speed of switch between file browser and single editor tab
+    thumbnailOrder = ThumbnailOrder::FILENAME;
     showHistory = true;
     showInfo = true;
     cropPPI = 600;
@@ -997,6 +998,10 @@ void Options::readFromFile(Glib::ustring fname)
                     sameThumbSize = keyFile.get_integer("File Browser", "SameThumbSize");
                 }
 
+                if (keyFile.has_key("File Browser", "ThumbnailOrder")) {
+                    thumbnailOrder = ThumbnailOrder(keyFile.get_integer("File Browser", "ThumbnailOrder"));
+                }
+                
                 if (keyFile.has_key("File Browser", "BrowserShowsDate")) {
                     fbShowDateTime = keyFile.get_boolean("File Browser", "BrowserShowsDate");
                 }
@@ -2076,6 +2081,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("File Browser", "ThumbnailSizeTab", thumbSizeTab);
         keyFile.set_integer("File Browser", "ThumbnailSizeQueue", thumbSizeQueue);
         keyFile.set_integer("File Browser", "SameThumbSize", sameThumbSize);
+        keyFile.set_integer("File Browser", "ThumbnailOrder", int(thumbnailOrder));
         keyFile.set_integer("File Browser", "MaxPreviewHeight", maxThumbnailHeight);
         keyFile.set_integer("File Browser", "MaxPreviewWidth", maxThumbnailWidth);
         keyFile.set_integer("File Browser", "MaxCacheEntries", maxCacheEntries);

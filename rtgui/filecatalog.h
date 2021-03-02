@@ -33,6 +33,7 @@
 #include "previewloader.h"
 #include "multilangmgr.h"
 #include "threadutils.h"
+//#include "popupbutton.h"
 
 class FilePanel;
 /*
@@ -93,6 +94,8 @@ private:
     Gtk::ToggleButton* bOriginal;
     Gtk::ToggleButton* categoryButtons[20];
     Gtk::ToggleButton* exifInfo;
+    //PopUpButton *thumbOrder;
+    Gtk::MenuButton *thumbOrder;
     sigc::connection bCateg[20];
     Gtk::Image* iFilterClear, *igFilterClear;
     Gtk::Image* iranked[5], *igranked[5], *iUnRanked, *igUnRanked;

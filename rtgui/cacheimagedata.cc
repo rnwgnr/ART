@@ -28,7 +28,7 @@ CacheImageData::CacheImageData ()
       timeValid(false), year(0), month(0), day(0), hour(0), min(0), sec(0), exifValid(false), frameCount(1),
       fnumber(0.0), shutter(0.0), focalLen(0.0), focalLen35mm(0.0), focusDist(0.f), iso(0), isHDR (false),
       isPixelShift (false), sensortype(rtengine::ST_NONE), sampleFormat(rtengine::IIOSF_UNKNOWN),
-      rating(0),
+      rating(0), timestamp(-1),
       redAWBMul(-1.0), greenAWBMul(-1.0), blueAWBMul(-1.0),
       rotate(0), thumbImgType(0),
       width(-1), height(-1)
@@ -95,6 +95,16 @@ int CacheImageData::load (const Glib::ustring& fname)
                 if (keyFile.has_key ("DateTime", "Sec")) {
                     sec     = keyFile.get_integer ("DateTime", "Sec");
                 }
+
+                struct tm time;
+                memset(&time, 0, sizeof(time));
+                time.tm_year = year - 1900;
+                time.tm_mon = month - 1;
+                time.tm_mday = day;
+                time.tm_hour = hour;
+                time.tm_min = min;
+                time.tm_sec = sec;
+                timestamp = mktime(&time);
             }
 
             exifValid = false;

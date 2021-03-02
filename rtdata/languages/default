@@ -195,6 +195,14 @@ FILEBROWSER_SHOWRECENTLYSAVEDNOTHINT;Show unsaved images.\nShortcut: <b>Alt-6</b
 FILEBROWSER_SHOWTRASHHINT;Show contents of trash.\nShortcut: <b>Ctrl-t</b>
 FILEBROWSER_SHOWUNCOLORHINT;Show images without a color label.\nShortcut: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Show unranked images.\nShortcut: <b>0</b>
+FILEBROWSER_SORT_LABEL;Thumbnail order
+FILEBROWSER_SORT_FILENAME;File name
+FILEBROWSER_SORT_DATE;Date
+FILEBROWSER_SORT_DATE_REV;Date (reverse)
+FILEBROWSER_SORT_MODTIME;File modification time
+FILEBROWSER_SORT_MODTIME_REV;File modification time (reverse)
+FILEBROWSER_SORT_PROCTIME;Last saved time
+FILEBROWSER_SORT_PROCTIME_REV;Last saved time (reverse)
 FILEBROWSER_THUMBSIZE;Thumbnail size
 FILEBROWSER_UNRANK_TOOLTIP;Unrank.\nShortcut: <b>Shift-0</b>
 FILEBROWSER_ZOOMINHINT;Increase thumbnail size.\n\nShortcuts:\n<b>+</b> - Multiple Editor Tabs Mode,\n<b>Alt</b>-<b>+</b> - Single Editor Tab Mode.

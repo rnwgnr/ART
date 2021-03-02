@@ -821,6 +821,7 @@ int Thumbnail::infoFromImage (const Glib::ustring& fname)
         cfs.camMake      = idata->getMake();
         cfs.camModel     = idata->getModel();
         cfs.rating = idata->getRating();
+        cfs.timestamp = idata->getDateTimeAsTS();
 
         if (idata->getOrientation() == "Rotate 90 CW") {
             deg = 90;

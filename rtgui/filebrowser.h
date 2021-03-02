@@ -206,6 +206,8 @@ public:
 
     int getColumnWidth() const;
     bool isSelected(const Glib::ustring &fname) const;
+
+    void sortThumbnails();
 };
 
 #endif

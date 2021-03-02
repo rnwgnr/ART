@@ -167,6 +167,16 @@ public:
         VECTORSCOPE_HS,
         WAVEFORM
     };
+
+    enum class ThumbnailOrder {
+        FILENAME,
+        DATE,
+        DATE_REV,
+        MODTIME,
+        MODTIME_REV,
+        PROCTIME,
+        PROCTIME_REV
+    };
     
     SaveFormat saveFormat;
     SaveFormat saveFormatBatch;
@@ -235,6 +245,7 @@ public:
     int thumbSizeTab;
     int thumbSizeQueue;
     bool sameThumbSize;     // Will use only one thumb size for the file browser and the single editor tab, and avoid recomputing them
+    ThumbnailOrder thumbnailOrder;
     bool showHistory;
     bool showInfo;
     bool mainNBVertical;  // main notebook vertical tabs?

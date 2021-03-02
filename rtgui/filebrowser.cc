@@ -33,8 +33,7 @@
 
 extern Options options;
 
-namespace
-{
+namespace {
 
 const Glib::ustring* getOriginalExtension (const ThumbBrowserEntryBase* entry)
 {
@@ -123,7 +122,89 @@ void findOriginalEntries (const std::vector<ThumbBrowserEntryBase*>& entries)
     }
 }
 
-}
+
+class ThumbnailSorter {
+public:
+    ThumbnailSorter(Options::ThumbnailOrder order): order_(order) {}
+
+    bool operator()(const ThumbBrowserEntryBase *a, const ThumbBrowserEntryBase *b) const
+    {
+        switch (order_) {
+        case Options::ThumbnailOrder::DATE:
+        case Options::ThumbnailOrder::DATE_REV:
+            return lt_date(*a, *b, order_ == Options::ThumbnailOrder::DATE_REV);
+            break;
+        case Options::ThumbnailOrder::MODTIME:
+        case Options::ThumbnailOrder::MODTIME_REV:
+            return lt_modtime(*a, *b, order_ == Options::ThumbnailOrder::MODTIME_REV);
+            break;
+        case Options::ThumbnailOrder::PROCTIME:
+        case Options::ThumbnailOrder::PROCTIME_REV:
+            return lt_proctime(*a, *b, order_ == Options::ThumbnailOrder::PROCTIME_REV);
+            break;
+        case Options::ThumbnailOrder::FILENAME:
+        default:
+            return *a < *b;
+        }
+    }
+
+private:
+    bool lt_date(const ThumbBrowserEntryBase &a, const ThumbBrowserEntryBase &b, bool reverse) const
+    {
+        auto ca = a.thumbnail->getCacheImageData();
+        auto cb = b.thumbnail->getCacheImageData();
+        auto ta = ca->getDateTimeAsTS();
+        auto tb = cb->getDateTimeAsTS();
+        if (ta == tb) {
+            return a < b;
+        }
+        return (ta < tb) == !reverse;
+    }
+
+    bool lt_modtime(const ThumbBrowserEntryBase &a, const ThumbBrowserEntryBase &b, bool reverse) const
+    {
+        auto fa = a.thumbnail->getFileName();
+        auto fb = b.thumbnail->getFileName();
+
+        auto ia = Gio::File::create_for_path(fa)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+        auto ib = Gio::File::create_for_path(fb)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+        auto ta = ia->modification_time();
+        auto tb = ib->modification_time();
+        if (ta == tb) {
+            return a < b;
+        }
+        return (ta < tb) == !reverse;
+    }
+
+    bool lt_proctime(const ThumbBrowserEntryBase &a, const ThumbBrowserEntryBase &b, bool reverse) const
+    {
+        auto fa = options.getParamFile(a.thumbnail->getFileName());
+        auto fb = options.getParamFile(b.thumbnail->getFileName());
+
+        bool has_a = Glib::file_test(fa, Glib::FILE_TEST_EXISTS);
+        bool has_b = Glib::file_test(fb, Glib::FILE_TEST_EXISTS);
+
+        if (has_a != has_b) {
+            return reverse ? has_a : has_b;
+        } else if (has_a) {
+            auto ia = Gio::File::create_for_path(fa)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+            auto ib = Gio::File::create_for_path(fb)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+            auto ta = ia->modification_time();
+            auto tb = ib->modification_time();
+            if (ta == tb) {
+                return a < b;
+            }
+            return (ta < tb) == !reverse;
+        } else {
+            return a < b;
+        }
+    }
+
+    Options::ThumbnailOrder order_;
+};
+
+} // namespace
+
 
 FileBrowser::FileBrowser () :
     menuLabel(nullptr),
@@ -615,15 +696,18 @@ void FileBrowser::addEntry_ (FileBrowserEntry* entry)
     {
         MYWRITERLOCK(l, entryRW);
 
+        ThumbnailSorter order(options.thumbnailOrder);
+
         fd.insert(
             std::lower_bound(
                 fd.begin(),
                 fd.end(),
                 entry,
-                [](const ThumbBrowserEntryBase* a, const ThumbBrowserEntryBase* b)
-                {
-                    return *a < *b;
-                }
+                // [](const ThumbBrowserEntryBase* a, const ThumbBrowserEntryBase* b)
+                // {
+                //     return *a < *b;
+                // }
+                order
             ),
             entry
         );
@@ -2098,4 +2182,12 @@ bool FileBrowser::isSelected(const Glib::ustring &fname) const
         }
     }
     return false;
+}
+
+
+void FileBrowser::sortThumbnails()
+{
+    ThumbnailSorter order(options.thumbnailOrder);
+    std::sort(fd.begin(), fd.end(), order);
+    redraw(false);
 }

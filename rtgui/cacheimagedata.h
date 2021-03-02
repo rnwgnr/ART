@@ -62,6 +62,7 @@ public:
     Glib::ustring filetype;
     Glib::ustring expcomp;
     int rating;
+    time_t timestamp;
 
     // store a copy of the autoWB's multipliers computed in Thumbnail::_generateThumbnailImage
     // they are not stored in the cache file by this class, but by rtengine::Thumbnail
@@ -93,7 +94,7 @@ public:
     unsigned int getFrameCount () const override { return frameCount; }
     bool hasExif() const override  { return false; }
     tm getDateTime() const override { return tm{}; }
-    time_t getDateTimeAsTS() const override { return time_t(-1); }
+    time_t getDateTimeAsTS() const override { return timeValid ? timestamp : time_t(-1); }
     int getISOSpeed() const override { return iso; }
     double getFNumber() const override { return fnumber; }
     double getFocalLen() const override { return focalLen; }

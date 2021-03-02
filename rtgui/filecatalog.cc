@@ -473,6 +473,69 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     buttonBar->pack_start (*zoomBox, Gtk::PACK_SHRINK);
     buttonBar->pack_start (*Gtk::manage(new Gtk::VSeparator), Gtk::PACK_SHRINK);
 
+    // thumbOrder = Gtk::manage(new PopUpButton());
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_FILENAME"));
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_DATE"));
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_DATE_REV"));
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_MODTIME"));
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_MODTIME_REV"));
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_PROCTIME"));
+    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_PROCTIME_REV"));
+    // thumbOrder->setSelected(int(options.thumbnailOrder));
+    // thumbOrder->signal_changed().connect(
+    //     static_cast<sigc::slot<void, int>>(
+    //         [&](int sel) -> void
+    //         {
+    //             options.thumbnailOrder = Options::ThumbnailOrder(sel);
+    //             //reparseDirectory();
+    //             fileBrowser->sortThumbnails();
+    //         })
+    //     );
+    // setExpandAlignProperties(thumbOrder->buttonGroup, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
+    // thumbOrder->setRelief(Gtk::RELIEF_NONE);
+    // thumbOrder->show();
+    // buttonBar->pack_start(*thumbOrder->buttonGroup, Gtk::PACK_SHRINK);
+
+    {
+        thumbOrder = Gtk::manage(new Gtk::MenuButton());
+        thumbOrder->set_image(*Gtk::manage(new RTImage("az-sort.png")));
+        Gtk::Menu *menu = Gtk::manage(new Gtk::Menu());
+        thumbOrder->set_menu(*menu);
+
+        const auto on_activate =
+            [&]() -> void
+            {
+                int sel = thumbOrder->get_menu()->property_active();
+                auto mi = thumbOrder->get_menu()->get_active();
+                if (mi) {
+                    thumbOrder->set_tooltip_text(M("FILEBROWSER_SORT_LABEL") + ": " + mi->get_label());
+                }
+                options.thumbnailOrder = Options::ThumbnailOrder(sel);
+                fileBrowser->sortThumbnails();
+            };
+
+        const auto addItem =
+            [&](const Glib::ustring &lbl) -> void
+            {
+                Gtk::MenuItem *mi = Gtk::manage(new Gtk::MenuItem(lbl));
+                menu->append(*mi);
+                mi->signal_activate().connect(sigc::slot<void>(on_activate));
+            };
+        addItem(M("FILEBROWSER_SORT_FILENAME"));
+        addItem(M("FILEBROWSER_SORT_DATE"));
+        addItem(M("FILEBROWSER_SORT_DATE_REV"));
+        addItem(M("FILEBROWSER_SORT_MODTIME"));
+        addItem(M("FILEBROWSER_SORT_MODTIME_REV"));
+        addItem(M("FILEBROWSER_SORT_PROCTIME"));
+        addItem(M("FILEBROWSER_SORT_PROCTIME_REV"));
+        menu->show_all_children();
+        menu->set_active(int(options.thumbnailOrder));
+        on_activate();
+        thumbOrder->set_relief(Gtk::RELIEF_NONE);
+        buttonBar->pack_start(*thumbOrder, Gtk::PACK_SHRINK);
+    }
+        
+    
     //iRightArrow = new RTImage("right.png");
     //iRightArrow_red = new RTImage("right_red.png");
 
