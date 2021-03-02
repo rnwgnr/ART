@@ -922,7 +922,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     CurveListener::setMulti(true);
     
     const auto add_button =
-        [](Gtk::Button *btn, Gtk::Box *box, int h=20, Gtk::PackType type=Gtk::PackType::PACK_START) -> void
+        [](Gtk::Button *btn, Gtk::Box *box, int h=20, Gtk::PackType type=Gtk::PackType::PACK_START, int border=0) -> void
         {
             setExpandAlignProperties(btn, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
             btn->set_relief(Gtk::RELIEF_NONE);
@@ -932,10 +932,9 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
                 btn->set_size_request(-1, h);
             }
             if (type == Gtk::PackType::PACK_START) {
-                box->pack_start(*btn, false, false);
-            }
-            else {
-                box->pack_end(*btn, false, false);
+                box->pack_start(*btn, false, false, border);
+            } else {
+                box->pack_end(*btn, false, false, border);
             }
         };
     
@@ -1005,9 +1004,22 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
 
     Gtk::VBox *mask_box = Gtk::manage(new Gtk::VBox());
 
+    hb = Gtk::manage(new Gtk::HBox());
+
+    maskCopy = Gtk::manage(new Gtk::Button());
+    maskCopy->add(*Gtk::manage(new RTImage("copy.png")));
+    maskCopy->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_COPY_TOOLTIP"));
+    maskCopy->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onMaskCopyPressed));
+    add_button(maskCopy, hb, 24, Gtk::PackType::PACK_START, 2);
+    
+    maskPaste = Gtk::manage(new Gtk::Button());
+    maskPaste->add(*Gtk::manage(new RTImage("paste.png")));
+    maskPaste->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP"));
+    maskPaste->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onMaskPastePressed));
+    add_button(maskPaste, hb, 24, Gtk::PackType::PACK_START, 2);
+    
     showMask = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_SHOW")));
     showMask->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onShowMaskChanged));
-    hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*showMask);
 
     maskInverted = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_INVERTED")));
@@ -2779,3 +2791,28 @@ void LabMasksPanel::onMaskExpanded(GdkEventButton *evt, MyExpander *exp)
     }
 }
 
+
+void LabMasksPanel::onMaskCopyPressed()
+{
+    if (selected_ < masks_.size()) {
+        clipboard.setMask(masks_[selected_]);
+    }
+}
+
+
+void LabMasksPanel::onMaskPastePressed()
+{
+    if (selected_ < masks_.size() && clipboard.hasMask()) {
+        auto name = masks_[selected_].name;
+        auto enabled = masks_[selected_].enabled;
+        masks_[selected_] = clipboard.getMask();
+        masks_[selected_].name = name;
+        masks_[selected_].enabled = enabled;
+        maskShow(selected_, false);
+
+        auto l = getListener();
+        if (l) {
+            l->panelChanged(EvMaskList, M("HISTORY_CHANGED"));
+        }
+    }
+}

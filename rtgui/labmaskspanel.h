@@ -187,6 +187,9 @@ private:
     void disableListener();
     void enableListener();
 
+    void onMaskCopyPressed();
+    void onMaskPastePressed();
+
     const rtengine::ProcEvent &areaMaskEvent() const;
     const rtengine::ProcEvent &deltaEMaskEvent() const;
 
@@ -252,6 +255,8 @@ private:
     Gtk::Button *up;
     Gtk::Button *down;
     Gtk::Button *copy;
+    Gtk::Button *maskCopy;
+    Gtk::Button *maskPaste;
     MyExpander *parametricMask;
     CurveEditorGroup *maskEditorGroup;
     FlatCurveEditor *hueMask;
