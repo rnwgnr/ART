@@ -1508,6 +1508,11 @@ Camera constants:
         "raw_crop": [ 0, 0, 0, -18 ] // 18 rows at bottom are garbage
     },
 
+    { // Quality C, only raw crop
+        "make_model": "Leica SL2-S",
+        "raw_crop": [ 0, 2, 6024, 4042 ] // 2 rows at top and 4 rows at bottom are black
+    },    
+
     { // Quality C, only black level offset
         "make_model": "Leica D-Lux 7",
         "ranges" : { "black" : 15 }
