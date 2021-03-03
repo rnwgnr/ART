@@ -149,6 +149,8 @@ set(TCMALLOC_LIB_DIR "" CACHE PATH "Custom path for the tcmalloc library")
 
 option(ENABLE_MIMALLOC "Use the mimalloc library if available" OFF)
 
+option(ENABLE_LIBRAW "Use libraw for decoding" OFF)
+
 # Set installation directories:
 if(WIN32 OR APPLE)
     if(BUILD_BUNDLE)
@@ -646,6 +648,16 @@ if(ENABLE_MIMALLOC)
         set(MALLOC_LIBRARIES mimalloc CACHE INTERNAL "" FORCE)
     else()
         message(STATUS "mimalloc not found")
+    endif()
+endif()
+
+if(ENABLE_LIBRAW)
+    pkg_check_modules(LIBRAW libraw_r>=0.20)
+    if(LIBRAW_FOUND)
+        message(STATUS "using libraw library ${LIBRAW_VERSION}")
+        add_definitions(-DART_USE_LIBRAW)
+    else()
+        message(STATUS "libraw not found")
     endif()
 endif()
 
