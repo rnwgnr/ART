@@ -1094,7 +1094,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     const auto deltaAdj =
         [&](const Glib::ustring &lbl, double vmin, double vmax, double vdflt, unsigned int prec, int i) -> ThresholdAdjuster *
         {
-            ThresholdAdjuster *a = Gtk::manage(new ThresholdAdjuster(lbl, 0, 100, 100, M("TP_LABMASKS_DELTAE_CHAN_WEIGHT"), 0, vmin, vmax, vdflt, lbl, prec, nullptr));
+            ThresholdAdjuster *a = Gtk::manage(new ThresholdAdjuster(lbl, 0, 100, 100, M("TP_LABMASKS_DELTAE_CHAN_WEIGHT"), 0, vmin, vmax, vdflt, lbl, prec, nullptr, false, true));
             a->setBgColorProvider(this, i);
             a->setAdjusterListener(this);
             a->setUpdatePolicy(RTUP_DYNAMIC);
@@ -1103,20 +1103,22 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaEL = deltaAdj(M("TP_LABMASKS_DELTAE_L"), 0, 1, 0, 3, ID_HUE_MASK+2);
     deltaEC = deltaAdj(M("TP_LABMASKS_DELTAE_C"), 0, 1, 0, 3, ID_HUE_MASK+3);
     deltaEH = deltaAdj(M("TP_LABMASKS_DELTAE_H"), 0, 360, 0, 1, ID_HUE_MASK+4);
-    deltaERange = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_RANGE"), 1, 100, 0.1, 1));
+    deltaERange = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_RANGE"), 0.1, 100, 0.1, 1));
     deltaERange->setLogScale(10.f, 3.f, true);
     deltaERange->setAdjusterListener(this);
-    deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), -100, 100, 1, 0));
+    deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), 1, 100, 1, 1, nullptr, nullptr, nullptr, nullptr, false, false));//true));
     deltaEDecay->setLogScale(10.f, 10.f, true);
     deltaEDecay->setAdjusterListener(this);
+    deltaEInverted = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_INVERTED")));
     vb = Gtk::manage(new Gtk::VBox());
-    hb = Gtk::manage(new Gtk::HBox());
     vb->pack_start(*deltaERange);
     vb->pack_start(*deltaEDecay);
+    vb->pack_start(*deltaEInverted);
+    hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*vb);
     vb = Gtk::manage(new Gtk::VBox());
     deltaEPick = Gtk::manage(new Gtk::Button(M("TP_LABMASKS_DELTAE_PICK")));
-    vb->pack_start(*deltaEPick);
+    vb->pack_start(*deltaEPick, Gtk::PACK_SHRINK);
     vb->pack_start(*deltaEColor, Gtk::PACK_EXPAND_WIDGET, 4);
     hb->pack_start(*vb, Gtk::PACK_SHRINK, 4);
     tb = Gtk::manage(new ToolParamBlock());
@@ -1131,6 +1133,15 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     dE_area->setEditID(ede, BT_SINGLEPLANE_FLOAT);
     dE_area->signal_spot_requested().connect(sigc::mem_fun(*this, &LabMasksPanel::onDeltaESpotRequested));
     deltaEPick->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onDeltaEPickClicked));
+    deltaEInverted->signal_clicked().connect(
+        sigc::slot<void>(
+            [&]() -> void
+            {
+                auto l = getListener();
+                if (l) {
+                    l->panelChanged(deltaEMaskEvent(), M("GENERAL_CHANGED"));
+                }
+            }));
     //-------------------------------------------------------------------------
         
     areaMask = Gtk::manage(new MyExpander(true, M("TP_LABMASKS_AREA")));
@@ -1474,7 +1485,8 @@ void LabMasksPanel::maskGet(int idx)
     r.deltaEMask.H = t;
     r.deltaEMask.weight_H = b;
     r.deltaEMask.range = deltaERange->getValue();
-    r.deltaEMask.decay = deltaEDecay->getValue();
+    int sgn = deltaEInverted->get_active() ? -1 : 1;
+    r.deltaEMask.decay = sgn * deltaEDecay->getValue();
     r.name = maskName->get_text();
 }
 
@@ -1717,7 +1729,8 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaEC->setValue(r.deltaEMask.weight_C, r.deltaEMask.C);
         deltaEH->setValue(r.deltaEMask.weight_H, r.deltaEMask.H);
         deltaERange->setValue(r.deltaEMask.range);
-        deltaEDecay->setValue(r.deltaEMask.decay);
+        deltaEDecay->setValue(std::abs(r.deltaEMask.decay));
+        deltaEInverted->set_active(r.deltaEMask.decay < 0);
         static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
     }
     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&r.drawnMask,
