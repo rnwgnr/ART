@@ -1869,8 +1869,8 @@ LogEncodingParams::LogEncodingParams():
     autogray(false),
     sourceGray(18.0),
     targetGray(18.0),
-    blackEv(-5.0),
-    whiteEv(3.0),
+    blackEv(-13.5),
+    whiteEv(2.5),
     regularization(60)
 {
 }
