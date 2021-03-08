@@ -91,6 +91,12 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
 
     float minval = RT_INFINITY;
+    constexpr float lo = 1e-5f;
+    constexpr float hi = 32.f;
+#ifdef __SSE2__
+    const vfloat vlo = F2V(lo);
+    const vfloat vhi = F2V(hi);
+#endif
 
 #ifdef _OPENMP
 #   pragma omp parallel for reduction(min:minval) if (multithread)
@@ -101,12 +107,14 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
         for (; x < W-3; x += 4) {
             vfloat v = LVFU((*src)[y][x]) / v65535;
             STVFU((*src)[y][x], v);
+            STVFU(mid[y][x], vmaxf(vminf(v, vhi), vlo));
             minval = min(minval, v[0], v[1], v[2], v[3]);
         }
 #endif
         for (; x < W; ++x) {
             float v = (*src)[y][x] / 65535.f;
             (*src)[y][x] = v;
+            mid[y][x] = LIM(v, lo, hi);
             minval = min(minval, v);
         }
     }
@@ -116,7 +124,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
 
     for (int i = 0; i < pp.iterations; ++i) {
-        guidedFilter((*src), (*src), mid, radius, epsilon, multithread);
+        guidedFilter(mid, mid, mid, radius, epsilon, multithread);
         guidedFilter(mid, mid, base, radius * 4, epsilon / 10.f, multithread);
         
 #ifdef _OPENMP
@@ -124,7 +132,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
         for (int y = 0; y < H; ++y) {
             int x = 0;
-#ifdef __SSE2__
+#if 0//def __SSE2__
             for (; x < W-3; x += 4) {
                 vfloat vy = LVFU((*src)[y][x]);
                 vfloat vm = LVFU(mid[y][x]);

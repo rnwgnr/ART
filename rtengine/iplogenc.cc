@@ -185,6 +185,9 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
         {
             constexpr float base_posterization = 20.f;
             array2D<float> Y2(W, H, ARRAY2D_ALIGNED);
+
+            constexpr float lo = 1e-5f;
+            constexpr float hi = 128.f;
         
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
@@ -192,7 +195,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
                     Y2[y][x] = norm(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), ws) / 65535.f;
-                    Y2[y][x] = LIM(Y2[y][x], 1e-9f, 1024.f);
+                    Y2[y][x] = LIM(Y2[y][x], lo, hi);
                     float l = xlogf(Y2[y][x]);
                     float ll = round(l * base_posterization) / base_posterization;
                     Y[y][x] = xexpf(ll);
@@ -272,6 +275,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
             }
         }
     }
+    vmin *= 0.5f;
     vmax *= 1.5f;
 
     if (vmax > vmin) {
