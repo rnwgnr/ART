@@ -25,7 +25,8 @@
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"), false, true, true)
+LogEncoding::LogEncoding():
+    FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     const auto EVENT = LUMINANCECURVE;
@@ -52,13 +53,6 @@ LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"),
     whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 0.0, 32.0, 0.1, 2.5));
     regularization = Gtk::manage(new Adjuster(M("TP_LOGENC_REGULARIZATION"), 0, 100, 1, 65));
 
-    Gtk::Frame *evFrame = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_EV_LEVELS")));
-    evFrame->set_label_align(0.025, 0.5);
-
-    Gtk::VBox *evBox = Gtk::manage(new Gtk::VBox());
-    evBox->set_border_width(2);
-    evBox->set_spacing(2);
-
     sourceGray->delay = options.adjusterMaxDelay;
     blackEv->delay = options.adjusterMaxDelay;
     whiteEv->delay = options.adjusterMaxDelay;
@@ -82,14 +76,21 @@ LogEncoding::LogEncoding(): FoldableToolPanel(this, "log", M("TP_LOGENC_LABEL"),
     sourceGray->setLogScale(10, 18, true);
     targetGray->setLogScale(10, 18, true);
 
-    evBox->pack_start(*autocompute);
-    evBox->pack_start(*blackEv);
-    evBox->pack_start(*whiteEv);
-    evFrame->add(*evBox);
-    pack_start(*evFrame);
-    pack_start(*sourceGray);
+    Gtk::Frame *advanced = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_ADVANCED")));
+    advanced->set_label_align(0.025, 0.5);
+
+    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+    vb->set_border_width(2);
+    vb->set_spacing(2);
+    advanced->add(*vb);
+    vb->pack_start(*blackEv);
+    vb->pack_start(*sourceGray);
+    vb->pack_start(*regularization);
+
+    pack_start(*autocompute);
+    pack_start(*whiteEv);
     pack_start(*targetGray);
-    pack_start(*regularization);
+    pack_start(*advanced);
 }
 
 
@@ -228,3 +229,5 @@ void LogEncoding::toolReset(bool to_initial)
     pp.logenc.enabled = getEnabled();
     read(&pp);
 }
+
+

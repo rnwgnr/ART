@@ -1599,11 +1599,11 @@ TP_LOCALCONTRAST_CONTRAST;Residual contrast
 TP_LOCALCONTRAST_CURVE;Local contrast curve
 TP_LOCALCONTRAST_LABEL;Local Contrast
 TP_LOGENC_AUTO;Automatic
-TP_LOGENC_BLACK_EV;Black Ev
-TP_LOGENC_EV_LEVELS;Relative exposure levels
-TP_LOGENC_SOURCE_GRAY;Source gray point
-TP_LOGENC_WHITE_EV;White Ev
-TP_LOGENC_TARGET_GRAY;Target gray point
+TP_LOGENC_ADVANCED;Advanced settings
+TP_LOGENC_BLACK_EV;Black relative exposure (Ev)
+TP_LOGENC_SOURCE_GRAY;Source gray point (gain)
+TP_LOGENC_WHITE_EV;White relative exposure (Ev)
+TP_LOGENC_TARGET_GRAY;Target gray point (brightness)
 TP_LOGENC_LABEL;Log Tone Mapping
 TP_LOGENC_REGULARIZATION;Regularization
 TP_METADATA_EDIT;Apply modifications
