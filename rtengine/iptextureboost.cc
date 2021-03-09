@@ -132,7 +132,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
         for (int y = 0; y < H; ++y) {
             int x = 0;
-#if 0//def __SSE2__
+#ifdef __SSE2__
             for (; x < W-3; x += 4) {
                 vfloat vy = LVFU((*src)[y][x]);
                 vfloat vm = LVFU(mid[y][x]);
