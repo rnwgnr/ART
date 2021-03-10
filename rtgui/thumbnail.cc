@@ -65,10 +65,14 @@ Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::s
 
     cfs.md5 = md5;
     loadProcParams ();
+    //initial_ = !pparamsValid;
     _generateThumbnailImage ();
     cfs.recentlySaved = false;
 
     initial_ = false;
+    // if (cfs.thumbImgType == CacheImageData::QUICK_THUMBNAIL && pparamsValid) {
+    //     cfs.thumbImgType = CacheImageData::FULL_THUMBNAIL;
+    // }
 
     delete tpp;
     tpp = nullptr;

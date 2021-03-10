@@ -56,6 +56,7 @@ private:
     Gtk::HBox* hBox;
     Glib::ustring selectedDirectory;
     int selectedDirectoryId;
+    int refresh_counter_;
     bool enabled;
     bool inTabMode;  // Tab mode has e.g. different progress bar handling
     Glib::ustring imageToSelect_fname;

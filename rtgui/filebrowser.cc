@@ -2191,3 +2191,14 @@ void FileBrowser::sortThumbnails()
     std::sort(fd.begin(), fd.end(), order);
     redraw(false);
 }
+
+
+void FileBrowser::enableThumbRefresh(bool yes)
+{
+    for (auto &f : fd) {
+        static_cast<FileBrowserEntry *>(f)->enableThumbRefresh(yes);
+    }
+    if (yes) {
+        queue_draw();
+    }
+}

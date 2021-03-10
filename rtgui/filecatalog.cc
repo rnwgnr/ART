@@ -36,6 +36,7 @@
 #include "batchqueue.h"
 #include "placesbrowser.h"
 #include "fastexport.h"
+#include "../rtengine/imagedata.h"
 
 using namespace std;
 
@@ -101,6 +102,7 @@ private:
 FileCatalog::FileCatalog(FilePanel* filepanel) :
     filepanel(filepanel),
     selectedDirectoryId(1),
+    refresh_counter_(1),
     actionNextPrevious(NAV_NONE),
     listener(nullptr),
     fslistener(nullptr),
@@ -658,6 +660,7 @@ void FileCatalog::closeDir ()
 
     // ignore old requests
     ++selectedDirectoryId;
+    refresh_counter_ = 1;
 
     // terminate thumbnail preview loading
     previewLoader->removeAllJobs ();
@@ -677,6 +680,93 @@ void FileCatalog::closeDir ()
     hasValidCurrentEFS = false;
     redrawAll ();
 }
+
+
+namespace {
+
+class FileSorter {
+public:
+    FileSorter(Options::ThumbnailOrder order): order_(order) {}
+
+    bool operator()(const Glib::ustring &a, const Glib::ustring &b) const
+    {
+        switch (order_) {
+        case Options::ThumbnailOrder::DATE:
+        case Options::ThumbnailOrder::DATE_REV:
+            return lt_date(a, b, order_ == Options::ThumbnailOrder::DATE_REV);
+            break;
+        case Options::ThumbnailOrder::MODTIME:
+        case Options::ThumbnailOrder::MODTIME_REV:
+            return lt_modtime(a, b, order_ == Options::ThumbnailOrder::MODTIME_REV);
+            break;
+        case Options::ThumbnailOrder::PROCTIME:
+        case Options::ThumbnailOrder::PROCTIME_REV:
+            return lt_proctime(a, b, order_ == Options::ThumbnailOrder::PROCTIME_REV);
+            break;
+        case Options::ThumbnailOrder::FILENAME:
+        default:
+            return a < b;
+        }
+    }
+
+private:
+    bool lt_date(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
+    {
+        try {
+            rtengine::FramesData ma(a);
+            rtengine::FramesData mb(b);
+            auto ta = ma.getDateTimeAsTS();
+            auto tb = mb.getDateTimeAsTS();
+            if (ta == tb) {
+                return a < b;
+            }
+            return (ta < tb) == !reverse;
+        } catch (std::exception &) {
+            return a < b;
+        }
+    }
+
+    bool lt_modtime(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
+    {
+        auto ia = Gio::File::create_for_path(a)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+        auto ib = Gio::File::create_for_path(b)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+        auto ta = ia->modification_time();
+        auto tb = ib->modification_time();
+        if (ta == tb) {
+            return a < b;
+        }
+        return (ta < tb) == !reverse;
+    }
+
+    bool lt_proctime(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
+    {
+        auto fa = options.getParamFile(a);
+        auto fb = options.getParamFile(b);
+
+        bool has_a = Glib::file_test(fa, Glib::FILE_TEST_EXISTS);
+        bool has_b = Glib::file_test(fb, Glib::FILE_TEST_EXISTS);
+
+        if (has_a != has_b) {
+            return reverse ? has_a : has_b;
+        } else if (has_a) {
+            auto ia = Gio::File::create_for_path(fa)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+            auto ib = Gio::File::create_for_path(fb)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+            auto ta = ia->modification_time();
+            auto tb = ib->modification_time();
+            if (ta == tb) {
+                return a < b;
+            }
+            return (ta < tb) == !reverse;
+        } else {
+            return a < b;
+        }
+    }
+
+    Options::ThumbnailOrder order_;
+};
+
+
+} // namespace
 
 std::vector<Glib::ustring> FileCatalog::getFileList()
 {
@@ -733,6 +823,7 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
 
     }
 
+    std::sort(names.begin(), names.end(), FileSorter(options.thumbnailOrder));
     return names;
 }
 
@@ -858,6 +949,9 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
 
     // put it into the "full directory" browser
     fileBrowser->addEntry (fdn);
+    if (++refresh_counter_ % 30 == 0) {
+        fileBrowser->enableThumbRefresh(true);
+    }
 
     // update exif filter settings (minimal & maximal values of exif tags, cameras, lenses, etc...)
     const CacheImageData* cfs = fdn->thumbnail->getCacheImageData();
@@ -928,7 +1022,8 @@ void FileCatalog::previewsFinishedUI ()
 
     {
         GThreadLock lock; // All GUI access from idle_add callbacks or separate thread HAVE to be protected
-        redrawAll ();
+        fileBrowser->enableThumbRefresh(true);
+        //redrawAll ();
         previewsToLoad = 0;
 
         if (filterPanel) {

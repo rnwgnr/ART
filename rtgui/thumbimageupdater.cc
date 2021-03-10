@@ -72,7 +72,7 @@ public:
         inactive_waiting_(false)
     {
 #ifdef _OPENMP
-        initial_thread_count_ = omp_get_num_procs();
+        initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
 #else
         initial_thread_count_ = 1;
 #endif
@@ -178,9 +178,7 @@ public:
 
     void slowDown()
     {
-        if (initial_thread_count_ > 1) {
-            threadPool_->set_max_threads(initial_thread_count_-1);
-        }
+        threadPool_->set_max_threads(1);
     }
 
     void speedUp()

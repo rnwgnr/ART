@@ -71,6 +71,7 @@ class FileBrowserEntry : public ThumbBrowserEntryBase,
 
     enum class RefreshStatus { READY, PENDING, QUICK, FULL };
     RefreshStatus refresh_status_;
+    bool refresh_disabled_;
     void update_refresh_status();
     
 public:
@@ -104,6 +105,8 @@ public:
     bool    motionNotify  (int x, int y) override;
     bool    pressNotify   (int button, int type, int bstate, int x, int y) override;
     bool    releaseNotify (int button, int type, int bstate, int x, int y) override;
+
+    void enableThumbRefresh(bool yes);
 };
 
 #endif

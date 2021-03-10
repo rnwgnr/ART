@@ -23,6 +23,7 @@
 #include "threadutils.h"
 #include <thread>
 #include <chrono>
+#include <deque>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -76,7 +77,7 @@ public:
     Impl(): nConcurrentThreads(0)
     {
 #ifdef _OPENMP
-        initial_thread_count_ = omp_get_num_procs();
+        initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
 #else
         initial_thread_count_ = 1;
 #endif
@@ -89,7 +90,8 @@ public:
     int initial_thread_count_;
     Glib::ThreadPool* threadPool_;
     MyMutex mutex_;
-    JobSet jobs_;
+    //JobSet jobs_;
+    std::deque<Job> jobs_;
     gint nConcurrentThreads;
     bool slowing_down_;
 // Issue 2406   std::vector<OutputJob *> output_;
@@ -108,8 +110,10 @@ public:
             }
 
             // copy and remove front job
-            j = *jobs_.begin();
-            jobs_.erase(jobs_.begin());
+            // j = *jobs_.begin();
+            // jobs_.erase(jobs_.begin());
+            j = jobs_.front();
+            jobs_.pop_front();
             DEBUG("processing %s", j.dir_entry_.c_str());
             DEBUG("%d job(s) remaining", jobs_.size());
             /* Issue 2406
@@ -175,9 +179,10 @@ public:
     void slowDown()
     {
         slowing_down_ = true;
-        if (initial_thread_count_ > 1) {
-            threadPool_->set_max_threads(initial_thread_count_-1);
-        }
+        // if (initial_thread_count_ > 1) {
+        // threadPool_->set_max_threads(initial_thread_count_-1);
+        // }
+        threadPool_->set_max_threads(1);
     }
 
     void speedUp()
@@ -211,7 +216,8 @@ void PreviewLoader::add(int dir_id, const Glib::ustring& dir_entry, PreviewLoade
 
             // create a new job and append to queue
             DEBUG("saving job %s", dir_entry.c_str());
-            impl_->jobs_.insert(Impl::Job(dir_id, dir_entry, l));
+            //impl_->jobs_.insert(Impl::Job(dir_id, dir_entry, l));
+            impl_->jobs_.push_back(Impl::Job(dir_id, dir_entry, l));
         }
 
         // queue a run request
