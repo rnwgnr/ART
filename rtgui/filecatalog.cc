@@ -950,7 +950,7 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
     // put it into the "full directory" browser
     fileBrowser->addEntry (fdn);
     if (++refresh_counter_ % 30 == 0) {
-        fileBrowser->enableThumbRefresh(true);
+        fileBrowser->enableThumbRefresh();
     }
 
     // update exif filter settings (minimal & maximal values of exif tags, cameras, lenses, etc...)
@@ -1022,7 +1022,7 @@ void FileCatalog::previewsFinishedUI ()
 
     {
         GThreadLock lock; // All GUI access from idle_add callbacks or separate thread HAVE to be protected
-        fileBrowser->enableThumbRefresh(true);
+        fileBrowser->enableThumbRefresh();
         //redrawAll ();
         previewsToLoad = 0;
 

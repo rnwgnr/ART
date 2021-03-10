@@ -106,7 +106,7 @@ public:
     bool    pressNotify   (int button, int type, int bstate, int x, int y) override;
     bool    releaseNotify (int button, int type, int bstate, int x, int y) override;
 
-    void enableThumbRefresh(bool yes);
+    void enableThumbRefresh();
 };
 
 #endif

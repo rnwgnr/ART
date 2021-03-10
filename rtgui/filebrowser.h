@@ -209,7 +209,7 @@ public:
 
     void sortThumbnails();
 
-    void enableThumbRefresh(bool yes);
+    void enableThumbRefresh();
 };
 
 #endif

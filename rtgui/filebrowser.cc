@@ -2193,12 +2193,10 @@ void FileBrowser::sortThumbnails()
 }
 
 
-void FileBrowser::enableThumbRefresh(bool yes)
+void FileBrowser::enableThumbRefresh()
 {
     for (auto &f : fd) {
-        static_cast<FileBrowserEntry *>(f)->enableThumbRefresh(yes);
+        static_cast<FileBrowserEntry *>(f)->enableThumbRefresh();
     }
-    if (yes) {
-        queue_draw();
-    }
+    queue_draw();
 }
