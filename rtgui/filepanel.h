@@ -17,11 +17,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _FILEPANEL_
-#define _FILEPANEL_
+#pragma once
 
 #include <gtkmm.h>
-//#include "batchtoolpanelcoord.h"
 #include "filecatalog.h"
 #include "dirbrowser.h"
 #include "fileselectionlistener.h"
@@ -30,15 +28,13 @@
 #include "pparamschangelistener.h"
 #include "history.h"
 #include "filterpanel.h"
-//#include "exportpanel.h"
 #include "progressconnector.h"
 
 class RTWindow;
 
 class FilePanel final :
     public Gtk::HPaned,
-    public FileSelectionListener
-{
+    public FileSelectionListener {
 public:
     FilePanel ();
     ~FilePanel () override;
@@ -85,14 +81,13 @@ public:
 
     bool isInspectorVisible() const;
 
-    bool on_button_press_event(GdkEventButton *event) override;
+    bool on_button_release_event(GdkEventButton *event) override;
 
     RTWindow *getParent() { return parent; }
 
 private:
     void on_NB_switch_page(Gtk::Widget* page, guint page_num);
     void on_inspector_ready();
-    void on_position_changed();
 
     PlacesBrowser* placesBrowser;
     RecentBrowser* recentBrowser;
@@ -114,8 +109,4 @@ private:
 
     IdleRegister idle_register;
     int pane_pos_;
-    bool ignore_position_;
 };
-
-#endif
-
