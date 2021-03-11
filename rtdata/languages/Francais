@@ -195,6 +195,14 @@ FILEBROWSER_SHOWRECENTLYSAVEDNOTHINT; Afficher les images non sauvegardées\nRac
 FILEBROWSER_SHOWTRASHHINT;Afficher le contenu de la corbeille\nRaccourci : <b>Ctrl-t</b>
 FILEBROWSER_SHOWUNCOLORHINT;Afficher les images sans label de couleur\nRaccourci : <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Voir les images sans étoile\nRaccourci : <b>0</b>
+FILEBROWSER_SORT_LABEL;Ordre des vignettes
+FILEBROWSER_SORT_FILENAME;Nom de fichier
+FILEBROWSER_SORT_DATE;Date
+FILEBROWSER_SORT_DATE_REV;Date (inverser)
+FILEBROWSER_SORT_MODTIME;Modification de l'heure du fichier
+FILEBROWSER_SORT_MODTIME_REV;Modification de l'heure du fichier (inverser)
+FILEBROWSER_SORT_PROCTIME;Dernière heure sauvegardée
+FILEBROWSER_SORT_PROCTIME_REV;Dernière heure sauvegardée (inverser)
 FILEBROWSER_THUMBSIZE;Taille des vignettes
 FILEBROWSER_UNRANK_TOOLTIP;Désassigner le rang\nRaccourci : <b>Shift-0</b>
 FILEBROWSER_ZOOMINHINT;Augmenter la taille des vignettes.\nRaccourcis :\n<b>+</b> - Mode Onglets Editeurs Mutiples,\n<b>Alt</b>-<b>+</b> - Mode Onglet Editeur Unique
@@ -1456,8 +1464,9 @@ TP_GRAIN_ISO;Sensibilité d'émulsion (ISO)
 TP_GRAIN_LABEL;Grain d'émulsion
 TP_GRAIN_SCALE;Echelle
 TP_GRAIN_STRENGTH;Force
-TP_HLREC_BLEND;Blend (mélange)
+TP_HLREC_BLEND;Blend (Mélange)
 TP_HLREC_COLOR;Propagation de la couleur
+TP_HLREC_COLORBLEND;Equilibré
 TP_HLREC_OFF;Inactif
 TP_HLREC_LABEL;Reconstruction des Hautes Lumières
 TP_HSVEQUALIZER_CHANNEL;Canal
@@ -1590,11 +1599,11 @@ TP_LOCALCONTRAST_CONTRAST;Contraste résiduel
 TP_LOCALCONTRAST_CURVE;Courbe de contraste local
 TP_LOCALCONTRAST_LABEL;Contraste Local
 TP_LOGENC_AUTO;Automatique
-TP_LOGENC_BLACK_EV;EV Noir
-TP_LOGENC_EV_LEVELS;Niveaux d'exposition relatifs
-TP_LOGENC_SOURCE_GRAY;Point gris de la source
-TP_LOGENC_WHITE_EV;EV Blanc
-TP_LOGENC_TARGET_GRAY;Point gris ciblé
+TP_LOGENC_ADVANCED;Réglages avancés
+TP_LOGENC_BLACK_EV;Blanc exposition relative Black (Ev)
+TP_LOGENC_SOURCE_GRAY;Point gris source Source (gain)
+TP_LOGENC_WHITE_EV;Blanc exposition relative (Ev)
+TP_LOGENC_TARGET_GRAY;Point gris cible (luminosité)
 TP_LOGENC_LABEL;Mappage de tonalité Log
 TP_LOGENC_REGULARIZATION;Régularisation
 TP_METADATA_EDIT;Appliquer les modifications
