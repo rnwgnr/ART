@@ -476,7 +476,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
             }
             HLRecovery_blend(rr, gg, bb, blurWidth, 65535.0, hlmax);
             for (int j = 0; j < blurWidth; ++j) {
-                luminance[i][j] = getlum(rr[j] / rm, gg[j] / gm, bb[j] / bm);
+                luminance[i][j] = getlum(rr[j] / rm, gg[j] / gm, bb[j] / bm) / 65535.f;
             }
         }
     }
@@ -1198,7 +1198,18 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 b = rgb[2]/bm;
             };
 
-        guidedFilter(luminance, clipped, clipped, 10, 0.01f, true);
+        guidedFilter(luminance, clipped, clipped, min(width, height) / 10, 0.05f, true);
+#if 0
+        {
+            Imagefloat tmp(clipped.width(), clipped.height());
+            for (int y = 0; y < clipped.height(); ++y) {
+                for (int x = 0; x < clipped.width(); ++x) {
+                    tmp.r(y, x) = tmp.g(y, x) = tmp.b(y, x) = clipped[y][x] * 65535.f;
+                }
+            }
+            tmp.saveTIFF("/tmp/clipped.tif", 16);
+        }
+#endif
         
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
@@ -1208,7 +1219,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 float &r = red[y + miny][x + minx];
                 float &g = green[y + miny][x + minx];
                 float &b = blue[y + miny][x + minx];
-                float l2 = luminance[y][x];
+                float l2 = luminance[y][x] * 65535.f;
                 float l = getlum(r, g, b);
                 if (l > 0.f) {
                     float f = l2 / l;
