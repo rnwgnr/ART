@@ -654,18 +654,21 @@ public:
         return doGetProfiles(fileProfiles, type);
     }
 
-    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName, bool include_defaults, ProfileType type) const
+    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName, ProfileType type) const
     {
         ProfileMap profiles;
 
         MyMutex::MyLock lock(mutex);
 
-        if (include_defaults) {
-            loadProfiles(profilesDir, &profiles, nullptr, nullptr, false);
-        }
         loadProfiles(dirName, &profiles, nullptr, nullptr, false);
 
-        return doGetProfiles(profiles, type);
+        auto ret = doGetProfiles(profiles, type);
+        for (auto &p : profiles) {
+            if (fileProfiles.find(p.first) == fileProfiles.end()) {
+                fileProfiles.insert(p);
+            }
+        }
+        return ret;
     }
 
     std::uint8_t getInputIntents(cmsHPROFILE profile)
@@ -1056,7 +1059,7 @@ parse_error:
     // These contain profiles from user/system directory(supplied on init)
     Glib::ustring profilesDir;
     Glib::ustring userICCDir;
-    ProfileMap fileProfiles;
+    mutable ProfileMap fileProfiles;
     ContentMap fileProfileContents;
 
     //These contain standard profiles from RT. Keys are all in uppercase.
@@ -1154,9 +1157,9 @@ std::vector<Glib::ustring> rtengine::ICCStore::getProfiles(ProfileType type) con
     return implementation->getProfiles(type);
 }
 
-std::vector<Glib::ustring> rtengine::ICCStore::getProfilesFromDir(const Glib::ustring& dirName, bool include_defaults, ProfileType type) const
+std::vector<Glib::ustring> rtengine::ICCStore::getProfilesFromDir(const Glib::ustring& dirName, ProfileType type) const
 {
-    return implementation->getProfilesFromDir(dirName, include_defaults, type);
+    return implementation->getProfilesFromDir(dirName, type);
 }
 
 std::uint8_t rtengine::ICCStore::getInputIntents(cmsHPROFILE profile) const
