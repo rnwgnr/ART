@@ -1600,7 +1600,7 @@ TP_LOCALCONTRAST_CURVE;Courbe de contraste local
 TP_LOCALCONTRAST_LABEL;Contraste Local
 TP_LOGENC_AUTO;Automatique
 TP_LOGENC_ADVANCED;Réglages avancés
-TP_LOGENC_BLACK_EV;Blanc exposition relative Black (Ev)
+TP_LOGENC_BLACK_EV;Noir exposition relative (Ev)
 TP_LOGENC_SOURCE_GRAY;Point gris source Source (gain)
 TP_LOGENC_WHITE_EV;Blanc exposition relative (Ev)
 TP_LOGENC_TARGET_GRAY;Point gris cible (luminosité)
