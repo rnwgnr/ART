@@ -1218,6 +1218,9 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 }
                 if (clipped[y][x] > 0.f) {
                     float f = 1.f - LIM01(min(r/max_f[0], b/max_f[2]));
+                    if ((r - b)/max(r, b) > 0.1f && f > 0.f) {
+                        f = pow_F(f, 0.3f);
+                    }
                     to_rec2020(r, g, b);
                     float h, s, v;
                     Color::rgb2hsl(r, g, b, h, s, v);
