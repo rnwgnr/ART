@@ -1233,10 +1233,12 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                         f = pow_F(f, 0.3f);
                     }
                     to_rec2020(r, g, b);
-                    float h, s, v;
-                    Color::rgb2hsl(r, g, b, h, s, v);
+                    float Y, u, v, h, s;
+                    Color::rgb2yuv(r, g, b, Y, u, v, xyz_rec2020);
+                    Color::yuv2hsl(u, v, h, s);
                     s = intp(clipped[y][x], s * f, s);
-                    Color::hsl2rgb(h, s, v, r, g, b);
+                    Color::hsl2yuv(h, s, u, v);
+                    Color::yuv2rgb(Y, u, v, r, g, b, xyz_rec2020);
                     to_cam(r, g, b);
                 }
             }
