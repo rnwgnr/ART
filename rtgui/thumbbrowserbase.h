@@ -36,7 +36,7 @@ class ThumbBrowserBase  :  public Gtk::Grid
     class Internal : public Gtk::DrawingArea
     {
         //Cairo::RefPtr<Cairo::Context> cc;
-        int ofsX, ofsY;
+        // int ofsX, ofsY;
         ThumbBrowserBase* parent;
         bool dirty;
 
@@ -68,7 +68,8 @@ class ThumbBrowserBase  :  public Gtk::Grid
         bool on_scroll_event (GdkEventScroll* event) override;
         bool on_key_press_event (GdkEventKey* event) override;
         bool on_query_tooltip (int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip>& tooltip);
-        void setPosition (int x, int y);
+        // void setPosition (int x, int y);
+        // void getPosition(int &x, int &y);
 
         Glib::RefPtr<Gtk::StyleContext> getStyle() {
             return style;
@@ -183,6 +184,8 @@ protected:
     int numOfCols;
 
     Arrangement arrangement;
+    bool use_hscroll_;
+    bool use_vscroll_;
 
     std::set<Glib::ustring> editedFiles;
 

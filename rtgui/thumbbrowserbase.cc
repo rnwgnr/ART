@@ -29,7 +29,9 @@
 using namespace std;
 
 ThumbBrowserBase::ThumbBrowserBase ()
-    : location(THLOC_FILEBROWSER), inspector(nullptr), isInspectorActive(false), eventTime(0), lastClicked(nullptr), anchor(nullptr), previewHeight(options.thumbSize), numOfCols(1), arrangement(TB_Horizontal)
+    : location(THLOC_FILEBROWSER), inspector(nullptr), isInspectorActive(false), eventTime(0), lastClicked(nullptr), anchor(nullptr), previewHeight(options.thumbSize), numOfCols(1), arrangement(TB_Horizontal),
+      use_hscroll_(true),
+      use_vscroll_(true)
 {
     inW = -1;
     inH = -1;
@@ -57,12 +59,16 @@ void ThumbBrowserBase::scrollChanged ()
     {
         MYWRITERLOCK(l, entryRW);
 
+        double dx, dy;
+        getScrollPosition(dx, dy);
+        int x = dx, y = dy;
+
         for (size_t i = 0; i < fd.size(); i++) {
-            fd[i]->setOffset ((int)(hscroll.get_value()), (int)(vscroll.get_value()));
+            fd[i]->setOffset(x, y);
         }
     }
 
-    internal.setPosition ((int)(hscroll.get_value()), (int)(vscroll.get_value()));
+    // internal.setPosition ((int)(hscroll.get_value()), (int)(vscroll.get_value()));
 
     if (!internal.isDirty()) {
         internal.setDirty ();
@@ -575,11 +581,20 @@ void ThumbBrowserBase::configScrollBars ()
             ha->set_page_size(iw);
             if (iw >= inW) {
                 hscroll.hide();
+                use_hscroll_ = false;
             } else {
                 hscroll.show();
+                use_hscroll_ = true;
             }
         } else {
             hscroll.hide();
+            use_hscroll_ = false;
+            // int px, py;
+            // internal.getPosition(px, py);
+            // if (px > 0) {
+            //     internal.setPosition(0, py);
+            //     queue_draw();
+            // }
         }
 
         auto va = vscroll.get_adjustment();
@@ -592,9 +607,13 @@ void ThumbBrowserBase::configScrollBars ()
 
         if (ih >= inH) {
             vscroll.hide();
+            use_vscroll_ = false;
         } else {
             vscroll.show();
+            use_vscroll_ = true;
         }
+
+        scrollChanged();
     }
 }
 
@@ -798,7 +817,8 @@ void ThumbBrowserBase::on_style_updated ()
     refreshThumbImages ();
 }
 
-ThumbBrowserBase::Internal::Internal () : ofsX(0), ofsY(0), parent(nullptr), dirty(true)
+ThumbBrowserBase::Internal::Internal () : //ofsX(0), ofsY(0),
+                                          parent(nullptr), dirty(true)
 {
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     set_name("FileCatalog");
@@ -809,11 +829,19 @@ void ThumbBrowserBase::Internal::setParent (ThumbBrowserBase* p)
     parent = p;
 }
 
-void ThumbBrowserBase::Internal::setPosition (int x, int y)
-{
-    ofsX = x;
-    ofsY = y;
-}
+// void ThumbBrowserBase::Internal::setPosition (int x, int y)
+// {
+//     ofsX = x;
+//     ofsY = y;
+// }
+
+
+// void ThumbBrowserBase::Internal::getPosition(int &x, int &y)
+// {
+//     x = ofsX;
+//     y = ofsY;
+// }
+
 
 bool ThumbBrowserBase::Internal::on_key_press_event (GdkEventKey* event)
 {
@@ -1143,19 +1171,25 @@ void ThumbBrowserBase::enableTabMode(bool enable)
 
 void ThumbBrowserBase::initEntry (ThumbBrowserEntryBase* entry)
 {
-    entry->setOffset ((int)(hscroll.get_value()), (int)(vscroll.get_value()));
+    double x, y;
+    getScrollPosition(x, y);
+    entry->setOffset(x, y);
 }
 
 void ThumbBrowserBase::getScrollPosition (double& h, double& v)
 {
-    h = hscroll.get_value ();
-    v = vscroll.get_value ();
+    h = use_hscroll_ ? hscroll.get_value() : 0;
+    v = use_vscroll_ ? vscroll.get_value() : 0;
 }
 
 void ThumbBrowserBase::setScrollPosition (double h, double v)
 {
-    hscroll.set_value (h > hscroll.get_adjustment()->get_upper() ? hscroll.get_adjustment()->get_upper() : h);
-    vscroll.set_value (v > vscroll.get_adjustment()->get_upper() ? vscroll.get_adjustment()->get_upper() : v);
+    if (use_hscroll_) {
+        hscroll.set_value(h > hscroll.get_adjustment()->get_upper() ? hscroll.get_adjustment()->get_upper() : h);
+    }
+    if (use_vscroll_) {
+        vscroll.set_value (v > vscroll.get_adjustment()->get_upper() ? vscroll.get_adjustment()->get_upper() : v);
+    }
 }
 
 // needed for auto-height in single tab
