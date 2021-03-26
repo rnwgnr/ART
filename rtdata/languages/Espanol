@@ -7,6 +7,7 @@
 #06 2021-01-28 mrleemon, update for 1.8
 #07 2021-02-02 mrleemon, second update for 1.8
 #08 2021-02-09 mrleemon, update for 1.8.1
+#09 2021-03-26 mrleemon, update for 1.8.3
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -201,6 +202,14 @@ FILEBROWSER_SHOWRECENTLYSAVEDNOTHINT;Mostrar imágenes no guardadas.\nAtajo: <b>
 FILEBROWSER_SHOWTRASHHINT;Mostrar el contenido de la papelera.\nAtajo: <b>Ctrl-t</b>
 FILEBROWSER_SHOWUNCOLORHINT;Mostrar imágenes sin etiqueta de color.\nAtajo: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Mostrar imágenes sin puntuación.\nAtajo: <b>0</b>
+FILEBROWSER_SORT_LABEL;Orden de las miniaturas
+FILEBROWSER_SORT_FILENAME;Nombre del archivo
+FILEBROWSER_SORT_DATE;Fecha
+FILEBROWSER_SORT_DATE_REV;Fecha (inverso)
+FILEBROWSER_SORT_MODTIME;Hora de modificación del archivo
+FILEBROWSER_SORT_MODTIME_REV;Hora de modificación del archivo (inverso)
+FILEBROWSER_SORT_PROCTIME;Hora de último guardado
+FILEBROWSER_SORT_PROCTIME_REV;Hora de último guardado (inverso)
 FILEBROWSER_THUMBSIZE;Tamaño de las miniaturas
 FILEBROWSER_UNRANK_TOOLTIP;Quitar puntuación.\nAtajo: <b>Mayús-0</b>
 FILEBROWSER_ZOOMINHINT;Aumenta el tamaño de las miniaturas.\n\nAtajos:\n<b>+</b> - Modo de pestañas de editor múltiple,\n<b>Alt</b>-<b>+</b> - Modo de pestañas de un solo editor.
@@ -1469,6 +1478,7 @@ TP_GRAIN_SCALE;Escala
 TP_GRAIN_STRENGTH;Intensidad
 TP_HLREC_BLEND;Mezcla
 TP_HLREC_COLOR;Propagación de color
+TP_HLREC_COLORBLEND;Equilibrado
 TP_HLREC_OFF;Inactivo
 TP_HLREC_LABEL;Recuperación de altas luces
 TP_HSVEQUALIZER_CHANNEL;Canal
@@ -1601,11 +1611,11 @@ TP_LOCALCONTRAST_CONTRAST;Contraste residual
 TP_LOCALCONTRAST_CURVE;Curva de contraste local
 TP_LOCALCONTRAST_LABEL;Contraste local
 TP_LOGENC_AUTO;Automático
-TP_LOGENC_BLACK_EV;Ev negro
-TP_LOGENC_EV_LEVELS;Niveles de exposición relativos
-TP_LOGENC_SOURCE_GRAY;Punto gris origen
-TP_LOGENC_WHITE_EV;Ev blanco
-TP_LOGENC_TARGET_GRAY;Punto gris destino
+TP_LOGENC_ADVANCED;Ajustes avanzados
+TP_LOGENC_BLACK_EV;Exposición relativa al negro (Ev)
+TP_LOGENC_SOURCE_GRAY;Punto gris origen (ganancia)
+TP_LOGENC_WHITE_EV;Exposición relativa al blanco (Ev)
+TP_LOGENC_TARGET_GRAY;Punto gris destino (brillo)
 TP_LOGENC_LABEL;Mapeo de tonos logarítmico
 TP_LOGENC_REGULARIZATION;Regularización
 TP_METADATA_EDIT;Aplicar modificaciones

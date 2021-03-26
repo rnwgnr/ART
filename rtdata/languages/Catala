@@ -4,6 +4,7 @@
 #03 2021-01-28 mrleemon, update for 1.8
 #04 2021-02-02 mrleemon, second update for 1.8
 #05 2021-02-09 mrleemon, update for 1.8.1
+#06 2021-03-26 mrleemon, update for 1.8.3
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -198,6 +199,14 @@ FILEBROWSER_SHOWRECENTLYSAVEDNOTHINT;Mostra imatges no desades.\nDrecera: <b>Alt
 FILEBROWSER_SHOWTRASHHINT;Mostra el contingut de la paperera.\nDrecera: <b>Ctrl-t</b>
 FILEBROWSER_SHOWUNCOLORHINT;Mostra imatges sense etiqueta de color.\nDrecera: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Mostra imatges sense puntuació.\nDrecera: <b>0</b>
+FILEBROWSER_SORT_LABEL;Ordre de les miniatures
+FILEBROWSER_SORT_FILENAME;Nom del fitxer
+FILEBROWSER_SORT_DATE;Data
+FILEBROWSER_SORT_DATE_REV;Data (invers)
+FILEBROWSER_SORT_MODTIME;Hora modificació del fitxer
+FILEBROWSER_SORT_MODTIME_REV;Hora de modificació del fitxer (invers)
+FILEBROWSER_SORT_PROCTIME;Hora d'últim desat
+FILEBROWSER_SORT_PROCTIME_REV;Hora d'últim desat (invers)
 FILEBROWSER_THUMBSIZE;Mida de les miniatures
 FILEBROWSER_UNRANK_TOOLTIP;Treu puntuació.\nDrecera: <b>Majús-0</b>
 FILEBROWSER_ZOOMINHINT;Augmenta la mida de les miniatures.\n\nDreceres:\n<b>+</b> - Mode de pestanyes d'editor múltiple,\n<b>Alt</b>-<b>+</b> - Mode de pestanyes d'un sol editor.
@@ -1466,6 +1475,7 @@ TP_GRAIN_SCALE;Escala
 TP_GRAIN_STRENGTH;Intensitat
 TP_HLREC_BLEND;Barreja
 TP_HLREC_COLOR;Propagació de color
+TP_HLREC_COLORBLEND;Equilibrat
 TP_HLREC_OFF;Inactiu
 TP_HLREC_LABEL;Recuperació d'altes llums
 TP_HSVEQUALIZER_CHANNEL;Canal
@@ -1598,11 +1608,11 @@ TP_LOCALCONTRAST_CONTRAST;Contrast residual
 TP_LOCALCONTRAST_CURVE;Corba de contrast local
 TP_LOCALCONTRAST_LABEL;Contrast local
 TP_LOGENC_AUTO;Automàtic
-TP_LOGENC_BLACK_EV;Ev negre
-TP_LOGENC_EV_LEVELS;Nivells d'exposició relatius
-TP_LOGENC_SOURCE_GRAY;Punt gris origen
-TP_LOGENC_WHITE_EV;Ev blanc
-TP_LOGENC_TARGET_GRAY;Punto gris destí
+TP_LOGENC_ADVANCED;Opcions avançades
+TP_LOGENC_BLACK_EV;Exposició relativa al negre (Ev)
+TP_LOGENC_SOURCE_GRAY;Punt gris origen (guany)
+TP_LOGENC_WHITE_EV;Exposició relativa al blanc (Ev)
+TP_LOGENC_TARGET_GRAY;Punto gris destí (brillantor)
 TP_LOGENC_LABEL;Mapeig de tons logarítmic
 TP_LOGENC_REGULARIZATION;Regularització
 TP_METADATA_EDIT;Aplica modificacions
