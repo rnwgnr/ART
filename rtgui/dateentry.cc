@@ -124,16 +124,18 @@ void DateEntry::on_enter()
     std::string val = entry_->get_text();
     std::string fmt = options.dateFormat;
     std::istringstream s(val);
-    s.exceptions(std::istream::badbit | std::istream::failbit | std::istream::eofbit);
     try {
-        s >> std::get_time(&t, fmt.c_str());
-        Glib::Date d(t.tm_mday, Glib::Date::Month(t.tm_mon+1), 1900 + t.tm_year);
-        if (d.valid()) {
-            set_date(d);
+        if (s >> std::get_time(&t, fmt.c_str())) {
+            Glib::Date d(t.tm_mday, Glib::Date::Month(t.tm_mon+1), 1900 + t.tm_year);
+            if (d.valid()) {
+                set_date(d);
+            } else {
+                set_date(date_);
+            }
         } else {
             set_date(date_);
         }
-    } catch (std::istream::failure &) {
+    } catch (std::istream::failure &err) {
         set_date(date_);
     }
 }
