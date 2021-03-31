@@ -135,6 +135,7 @@ def main():
 export GTK_CSD=0
 d=$(dirname $0)
 export GDK_PIXBUF_MODULEDIR="$d/lib/gdk-pixbuf-2.0"
+export GDK_PIXBUF_MODULE_FILE="$d/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
 export GIO_MODULE_DIR="$d/lib/gio/modules"
 export LD_LIBRARY_PATH="$d"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
