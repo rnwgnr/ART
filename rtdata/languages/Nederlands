@@ -38,10 +38,10 @@ CURVEEDITOR_CATMULLROM;Flexibel
 CURVEEDITOR_CURVE;Curve
 CURVEEDITOR_CURVES;Curven
 CURVEEDITOR_CUSTOM;Standaard
-CURVEEDITOR_DARKS;Zwarten
+CURVEEDITOR_DARKS;Donkere delen
 CURVEEDITOR_EDITPOINT_HINT;Activeer wijzigen van node in/uit-waarden.\n\nRechtsklik op een node om die te selecteren.\nRechtsklik in een leeg gebied om de node te deselecteren.
 CURVEEDITOR_HIGHLIGHTS;Hoge lichten
-CURVEEDITOR_LIGHTS;Lichten
+CURVEEDITOR_LIGHTS;Lichte delen
 CURVEEDITOR_LINEAR;Uit
 CURVEEDITOR_LOADDLGLABEL;Laad curve...
 CURVEEDITOR_MINMAXCPOINTS;Equalizer
@@ -1615,7 +1615,7 @@ TP_LOGENC_AUTO;Automatisch
 TP_LOGENC_ADVANCED;Geavanceerde instellingen
 TP_LOGENC_BLACK_EV;Zwart relatieve belichting (LW)
 TP_LOGENC_SOURCE_GRAY;Bron grijspunt (versterking)
-TP_LOGENC_WHITE_EV;Wit relatieve belichting(LW)
+TP_LOGENC_WHITE_EV;Wit relatieve belichting (LW)
 TP_LOGENC_TARGET_GRAY;Doel grijspunt (helderheid)
 TP_LOGENC_BLACK_EV;Zwart EV
 TP_LOGENC_EV_LEVELS;Relatieve belichtingsniveaus
