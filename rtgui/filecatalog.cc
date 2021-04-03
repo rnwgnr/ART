@@ -911,19 +911,28 @@ void FileCatalog::_refreshProgressBar ()
         Gtk::Grid* grid = Gtk::manage(new Gtk::Grid());
         Gtk::Label *label = nullptr;
 
-        if (!previewsToLoad) {
-            grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
-            int filteredCount = min(fileBrowser->getNumFiltered(), previewsLoaded);
+        int tot = previewsToLoad ? previewsToLoad : previewsLoaded;
+        grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
+        int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : min(fileBrowser->getNumFiltered(), tot);
 
-            label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
-                                               (filteredCount != previewsLoaded ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
-                                               + Glib::ustring::format(previewsLoaded) +
-                                               (filteredCount != previewsLoaded ? "]" : ")")));
-        } else {
-            grid->attach_next_to(*Gtk::manage(new RTImage("magnifier.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
-            label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") + " [" + Glib::ustring::format(std::fixed, std::setprecision(0), std::setw(3), (double)previewsLoaded / previewsToLoad * 100 ) + "%]" ));
-            filepanel->loadingThumbs("", (double)previewsLoaded / previewsToLoad);
-        }
+        label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
+                                           (filteredCount != tot ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
+                                               + Glib::ustring::format(tot) +
+                                               (filteredCount != tot ? "]" : ")")));
+
+        // if (!previewsToLoad) {
+        //     grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
+        //     int filteredCount = min(fileBrowser->getNumFiltered(), previewsLoaded);
+
+        //     label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
+        //                                        (filteredCount != previewsLoaded ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
+        //                                        + Glib::ustring::format(previewsLoaded) +
+        //                                        (filteredCount != previewsLoaded ? "]" : ")")));
+        // } else {
+        //     grid->attach_next_to(*Gtk::manage(new RTImage("magnifier.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
+        //     label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") + " [" + Glib::ustring::format(std::fixed, std::setprecision(0), std::setw(3), (double)previewsLoaded / previewsToLoad * 100 ) + "%]" ));
+        //     filepanel->loadingThumbs("", (double)previewsLoaded / previewsToLoad);
+        // }
 
         if (options.mainNBVertical) {
             label->set_angle(90);

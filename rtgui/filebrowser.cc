@@ -218,7 +218,7 @@ FileBrowser::FileBrowser () :
     clearFromCacheFull(nullptr),
     colorLabel_actionData(nullptr),
     tbl(nullptr),
-    numFiltered(0)//,
+    numFiltered(-1)//,
 //    exportPanel(nullptr)
 {
     session_id_ = 0;
@@ -776,6 +776,7 @@ void FileBrowser::close ()
     }
 
     lastClicked = nullptr;
+    numFiltered = -1;
 }
 
 void FileBrowser::menuColorlabelActivated (Gtk::MenuItem* m)
