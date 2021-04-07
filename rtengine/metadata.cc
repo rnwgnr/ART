@@ -639,6 +639,9 @@ void Exiv2Metadata::init(const Glib::ustring &base_dir, const Glib::ustring &use
     }
     Exiv2::XmpParser::initialize();
     Exiv2::XmpProperties::registerNs("us/pixls/ART/", "ART");
+#ifdef EXV_ENABLE_BMFF
+    Exiv2::enableBMFF(true);
+#endif
     exiftool_config_dir = user_dir;
 }
 
