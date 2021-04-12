@@ -100,11 +100,9 @@ enum PPLoadLocation {PLL_Cache = 0, PLL_Input = 1};
 enum CPBKeyType {CPBKT_TID = 0, CPBKT_NAME = 1, CPBKT_TID_NAME = 2};
 enum prevdemo_t {PD_Sidecar = 1, PD_Fast = 0};
 
-class Options
-{
+class Options {
 public:
-    class Error: public std::exception
-    {
+    class Error: public std::exception {
     public:
         explicit Error (const Glib::ustring &msg): msg_ (msg) {}
         const char *what() const throw() override
@@ -347,6 +345,7 @@ public:
     int maxInspectorBuffers;   // maximum number of buffers (i.e. images) for the Inspector feature
     int inspectorDelay;
     int clutCacheSize;
+    int thumb_update_thread_limit;
     bool filledProfile;  // Used as reminder for the ProfilePanel "mode"
     prevdemo_t prevdemo; // Demosaicing method used for the <100% preview
     bool serializeTiffRead;

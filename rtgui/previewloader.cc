@@ -24,6 +24,7 @@
 #include <thread>
 #include <chrono>
 #include <deque>
+#include "options.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -77,7 +78,11 @@ public:
     Impl(): nConcurrentThreads(0)
     {
 #ifdef _OPENMP
-        initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
+        if (options.thumb_update_thread_limit > 0) {
+            initial_thread_count_ = options.thumb_update_thread_limit;
+        } else {
+            initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
+        }
 #else
         initial_thread_count_ = 1;
 #endif
@@ -179,10 +184,8 @@ public:
     void slowDown()
     {
         slowing_down_ = true;
-        // if (initial_thread_count_ > 1) {
-        // threadPool_->set_max_threads(initial_thread_count_-1);
-        // }
-        threadPool_->set_max_threads(1);
+        threadPool_->set_max_threads(std::max(initial_thread_count_/2, 1));
+        //threadPool_->set_max_threads(1);
     }
 
     void speedUp()

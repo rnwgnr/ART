@@ -418,6 +418,18 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     threadsHBox->pack_end (*threadsSpinBtn, Gtk::PACK_SHRINK, 2);
 
     threadsVBox->pack_start (*threadsHBox, Gtk::PACK_SHRINK);
+
+    threadsHBox = Gtk::manage(new Gtk::HBox(Gtk::PACK_SHRINK, 4));
+    threadsLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE") + " (" + M ("PREFERENCES_APPLNEXTSTARTUP") + ")" + ":", Gtk::ALIGN_START));
+    thumbUpdateThreadLimit = Gtk::manage(new Gtk::SpinButton());
+    thumbUpdateThreadLimit->set_digits(0);
+    thumbUpdateThreadLimit->set_increments(1, 5);
+    thumbUpdateThreadLimit->set_max_length(2); // Will this be sufficient? :)
+    thumbUpdateThreadLimit->set_range(0, maxThreadNumber);
+    threadsHBox->pack_start(*threadsLbl, Gtk::PACK_SHRINK, 2);
+    threadsHBox->pack_end(*thumbUpdateThreadLimit, Gtk::PACK_SHRINK, 2);
+    threadsVBox->pack_start(*threadsHBox, Gtk::PACK_SHRINK);
+    
     threadsFrame->add (*threadsVBox);
 
     vbPerformance->pack_start (*threadsFrame, Gtk::PACK_SHRINK, 4);
@@ -1617,6 +1629,7 @@ void Preferences::storePreferences ()
     moptions.rgbDenoiseThreadLimit = threadsSpinBtn->get_value_as_int();
     moptions.clutCacheSize = clutCacheSizeSB->get_value_as_int();
     moptions.maxInspectorBuffers = maxInspectorBuffersSB->get_value_as_int();
+    moptions.thumb_update_thread_limit = thumbUpdateThreadLimit->get_value_as_int();
 
 // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
@@ -1851,6 +1864,7 @@ void Preferences::fillPreferences ()
     threadsSpinBtn->set_value (moptions.rgbDenoiseThreadLimit);
     clutCacheSizeSB->set_value (moptions.clutCacheSize);
     maxInspectorBuffersSB->set_value (moptions.maxInspectorBuffers);
+    thumbUpdateThreadLimit->set_value(moptions.thumb_update_thread_limit);
 
     darkFrameDir->set_current_folder ( moptions.rtSettings.darkFramesPath );
     darkFrameChanged ();

@@ -1050,6 +1050,7 @@ PREFERENCES_PARSEDEXTDOWNHINT;Move selected extension down in the list.
 PREFERENCES_PARSEDEXTUPHINT;Move selected extension up in the list.
 PREFERENCES_PERFORMANCE_THREADS;Threads
 PREFERENCES_PERFORMANCE_THREADS_LABEL;Maximum number of threads for Noise Reduction and Wavelet Levels (0 = Automatic)
+PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE;Maximum number of threads for updating thumbnails (0 = Automatic)
 PREFERENCES_PREVDEMO;Preview Accuracy
 PREFERENCES_PREVDEMO_FAST;Fast
 PREFERENCES_PREVDEMO_LABEL;Demosaicing method used for the preview at <100% zoom:

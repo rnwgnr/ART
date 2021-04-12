@@ -26,6 +26,7 @@
 
 #include "guiutils.h"
 #include "threadutils.h"
+#include "options.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -72,7 +73,11 @@ public:
         inactive_waiting_(false)
     {
 #ifdef _OPENMP
-        initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
+        if (options.thumb_update_thread_limit > 0) {
+            initial_thread_count_ = options.thumb_update_thread_limit;
+        } else {
+            initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
+        }
 #else
         initial_thread_count_ = 1;
 #endif
@@ -178,7 +183,8 @@ public:
 
     void slowDown()
     {
-        threadPool_->set_max_threads(1);
+        //threadPool_->set_max_threads(1);
+        threadPool_->set_max_threads(std::max(initial_thread_count_/2, 1));
     }
 
     void speedUp()

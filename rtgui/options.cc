@@ -444,6 +444,7 @@ void Options::setDefaults()
 #else
     clutCacheSize = 1;
 #endif
+    thumb_update_thread_limit = 0;
     filledProfile = false;
     maxInspectorBuffers = 2; //  a rather conservative value for low specced systems...
     inspectorDelay = 0;
@@ -1162,6 +1163,10 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Performance", "WBPreviewMode")) {
                     int v = keyFile.get_integer("Performance", "WBPreviewMode");
                     wb_preview_mode = WBPreviewMode(rtengine::LIM(v, int(WB_AFTER), int(WB_BEFORE_HIGH_DETAIL)));
+                }
+
+                if (keyFile.has_key("Performance", "ThumbUpdateThreadLimit")) {
+                    thumb_update_thread_limit = keyFile.get_integer("Performance", "ThumbUpdateThreadLimit");
                 }
             }
 
@@ -2133,6 +2138,8 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("Performance", "PreviewDemosaicFromSidecar", prevdemo);
         keyFile.set_boolean("Performance", "SerializeTiffRead", serializeTiffRead);
         keyFile.set_boolean("Performance", "DenoiseZoomedOut", denoiseZoomedOut);
+        keyFile.set_integer("Performance", "ThumbUpdateThreadLimit", thumb_update_thread_limit);
+        
         keyFile.set_integer("Performance", "WBPreviewMode", wb_preview_mode);
         keyFile.set_integer("Inspector", "Mode", int(rtSettings.thumbnail_inspector_mode));
         keyFile.set_integer("Inspector", "RawCurve", int(rtSettings.thumbnail_inspector_raw_curve));

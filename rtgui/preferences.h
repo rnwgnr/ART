@@ -150,6 +150,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::SpinButton*  threadsSpinBtn;
     Gtk::SpinButton*  clutCacheSizeSB;
     Gtk::SpinButton*  maxInspectorBuffersSB;
+    Gtk::SpinButton* thumbUpdateThreadLimit;
 
     Gtk::CheckButton* ckbmenuGroupRank;
     Gtk::CheckButton* ckbmenuGroupLabel;
