@@ -1157,7 +1157,15 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
         ret |= assignFromKeyfile(keyfile, group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled);
     }
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "HueMask" + suffix, parametricMask.hue);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity);
+    if (assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity)) {
+        if (ppVersion < 1023) {
+            for (size_t i = 1; i < parametricMask.chromaticity.size(); i += 4) {
+                auto &x = parametricMask.chromaticity[i];
+                x = lin2log(log2lin(x, 10.0), 50.0);
+            }
+        }
+        ret = true;
+    }
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMask" + suffix, parametricMask.lightness);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMaskDetail" + suffix, parametricMask.lightnessDetail);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "ContrastThresholdMask" + suffix, parametricMask.contrastThreshold);

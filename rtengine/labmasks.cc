@@ -42,23 +42,23 @@ using procparams::DrawnMask;
 
 namespace {
 
-#ifdef __SSE2__
-void fastlin2log(float *x, float factor, float base, int w)
-{
-    float baseLog = 1.f / xlogf(base);
-    vfloat baseLogv = F2V(baseLog);
-    factor = factor * (base - 1.f);
-    vfloat factorv = F2V(factor);
-    vfloat onev = F2V(1.f);
-    int i = 0;
-    for (; i < w - 3; i += 4) {
-        STVFU(x[i], xlogf(LVFU(x[i]) * factorv + onev) * baseLogv);
-    }
-    for (; i < w; ++i) {
-        x[i] = xlogf(x[i] * factor + 1.f) * baseLog;
-    }
-}
-#endif
+// #ifdef __SSE2__
+// void fastlin2log(float *x, float factor, float base, int w)
+// {
+//     float baseLog = 1.f / xlogf(base);
+//     vfloat baseLogv = F2V(baseLog);
+//     factor = factor * (base - 1.f);
+//     vfloat factorv = F2V(factor);
+//     vfloat onev = F2V(1.f);
+//     int i = 0;
+//     for (; i < w - 3; i += 4) {
+//         STVFU(x[i], xlogf(LVFU(x[i]) * factorv + onev) * baseLogv);
+//     }
+//     for (; i < w; ++i) {
+//         x[i] = xlogf(x[i] * factor + 1.f) * baseLog;
+//     }
+// }
+// #endif
 
 
 bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &global_mask, ProgressListener *plistener)
@@ -678,6 +678,15 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     const int end_idx = (show_mask_idx < 0 ? n : show_mask_idx+1);
     bool has_mask = false;
 
+    const auto tweak =
+        [](std::vector<double> m) -> std::vector<double>
+        {
+            for (size_t i = 1; i < m.size(); i += 4) {
+                m[i] = xlog2lin(m[i], 50.f);
+            }
+            return m;
+        };
+
     for (int i = begin_idx; i < end_idx; ++i) {
         auto &r = masks[i];
         if (r.deltaEMask.enabled) {
@@ -688,7 +697,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             has_mask = true;
         }
         if (r.parametricMask.enabled && !r.parametricMask.chromaticity.empty() && r.parametricMask.chromaticity[0] != FCT_Linear && r.parametricMask.chromaticity != dflt.parametricMask.chromaticity) {
-            cmask[i].reset(new FlatCurve(r.parametricMask.chromaticity, false));
+            cmask[i].reset(new FlatCurve(tweak(r.parametricMask.chromaticity), false));
             has_mask = true;
         }
         if (r.parametricMask.enabled && !r.parametricMask.lightness.empty() && r.parametricMask.lightness[0] != FCT_Linear && r.parametricMask.lightness != dflt.parametricMask.lightness) {
@@ -788,7 +797,10 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             if (has_mask) {
                 // vectorized precalculation
                 Color::Lab2Lch(aBuffer, bBuffer, cBuffer, hBuffer, W);
-                fastlin2log(cBuffer, c_factor, 10.f, W);
+                //fastlin2log(cBuffer, c_factor, 100.f, W);
+                for (int x = 0; x < W; ++x) {
+                    cBuffer[x] *= c_factor;
+                }
             }
 #endif
             for (int x = 0; x < W; ++x) {
@@ -816,7 +828,8 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 #else
                     float c, h;
                     Color::Lab2Lch(a, b, c, h);
-                    c = xlin2log(c * c_factor, 10.f);
+                    //c = xlin2log(c * c_factor, 100.f);
+                    c *= c_factor;
 #endif
                         
                     h = Color::huelab_to_huehsv2(h);

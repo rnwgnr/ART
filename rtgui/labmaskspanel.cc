@@ -2137,7 +2137,7 @@ void LabMasksPanel::colorForValue(double valX, double valY, enum ColorCaller::El
 float LabMasksPanel::blendPipetteValues(CurveEditor *ce, float chan1, float chan2, float chan3)
 {
     if (ce == chromaticityMask && chan1 > 0.f) {
-        return rtengine::lin2log(chan1, 10.f);
+        return rtengine::lin2log(chan1, 50.f);
     } else if (ce == hueMask && chan1 > 0.f) {
         float x = chan1 + 1.f/6.f;
         if (x > 1.f) {

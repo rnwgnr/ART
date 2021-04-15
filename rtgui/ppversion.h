@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1022
+#define PPVERSION 1023
 
 /*
   Log of version changes
+  1023  2021-04-15
+        changed scale of the chromaticity curve mask 
   1022  2020-12-18
         brush strokes adaptation for better interaction with drawing tablets
   1021  2020-11-10
