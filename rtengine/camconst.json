@@ -1332,7 +1332,7 @@ Camera constants:
     },
 
     { // Quality C
-        "make_model": "FUJIFILM GFX 100",
+        "make_model": [ "FUJIFILM GFX 100", "FUJIFILM GFX100S" ],
         "raw_crop": [
             // multi-aspect crop to account for 16-shot pixel shift images
             { "frame" : [11808, 8754], "crop" : [ 0, 2, 11664, 8734 ] },
