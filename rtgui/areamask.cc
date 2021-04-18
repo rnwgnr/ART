@@ -41,11 +41,15 @@ AreaMask::AreaMask():
     last_object_(-1),
     dragged_point_old_angle_(-1000),
     dragged_point_adjuster_angle_(-1000),
+    dragged_feather_offset_(0),
     dragged_center_(0, 0),
     center_x_(0),
     center_y_(0),
     width_(100),
     height_(100),
+    strength_start_(100),
+    strength_end_(100.),
+    feather_(0.),
     angle_(0),
     top_id_(0),
     bottom_id_(0),
@@ -66,6 +70,11 @@ AreaMask::AreaMask():
     prev_poly_knot_id_(-1),
     next_poly_knot_id_(-1),
     dragged_element_(DraggedElement::NONE),
+    h_line_id_(0),
+    v_line_id_(0),
+    feather_line1_id_(0),
+    feather_line2_id_(0),
+    center_circle_id_(0),
     geomType (rteMaskShape::Type::RECTANGLE)
 {
 }
@@ -82,7 +91,7 @@ void AreaMask::deleteGeometry()
     }
     visibleGeometry.clear();
 
-    if (geomType == rteMaskShape::Type::RECTANGLE) {
+    if (geomType == rteMaskShape::Type::RECTANGLE || geomType == rteMaskShape::Type::GRADIENT) {
         for (auto geometry : mouseOverGeometry) {
             delete geometry;
         }
@@ -204,6 +213,41 @@ void AreaMask::createPolygonGeometry()
     next_poly_knot_id_ = -1;
 }
 
+void AreaMask::createGradientGeometry()
+{
+    const auto mkline = [](std::vector<Geometry *> &geom) -> int
+                        {
+                            Line *ret = new Line();
+                            ret->innerLineWidth = 2;
+                            ret->datum = Geometry::IMAGE;
+                            geom.push_back(ret);
+                            return geom.size() - 1;
+                        };
+
+    const auto mkcircle = [](std::vector<Geometry *> &geom, int radius) -> int
+                          {
+                              Circle *ret = new Circle();
+                              ret->datum = Geometry::IMAGE;
+                              ret->radiusInImageSpace = false;
+                              ret->radius = radius;
+                              ret->filled = true;
+                              geom.push_back(ret);
+                              return geom.size() - 1;
+                          };
+
+    h_line_id_ = mkline(visibleGeometry);
+    v_line_id_ = mkline(visibleGeometry);
+    feather_line1_id_ = mkline(visibleGeometry);
+    feather_line2_id_ = mkline(visibleGeometry);
+    center_circle_id_ = mkcircle(visibleGeometry, 6);
+
+    mkline(mouseOverGeometry);
+    mkline(mouseOverGeometry);
+    mkline(mouseOverGeometry);
+    mkline(mouseOverGeometry);
+    mkcircle(mouseOverGeometry, 20);
+}
+
 size_t AreaMask::getPolygonSize()
 {
     return poly_knots_.size();
@@ -268,6 +312,9 @@ void AreaMask::setGeometryType(rteMaskShape::Type newType)
         case rteMaskShape::Type::RECTANGLE:
             createRectangleGeometry();
             break;
+        case rteMaskShape::Type::GRADIENT:
+            createGradientGeometry();
+            break;
         case rteMaskShape::Type::POLYGON:
         default:
             createPolygonGeometry();
@@ -302,6 +349,24 @@ CursorShape AreaMask::getCursor(int objectID)
             return CSMove2D;
         }
         break;
+    case rteMaskShape::Type::GRADIENT:
+        if (objectID == h_line_id_ || objectID == v_line_id_) {
+            return CSMoveRotate;
+        }
+        else if (objectID == feather_line1_id_ || objectID == feather_line2_id_) {
+            if (angle_ < -135. || (angle_ >= -45. && angle_ <= 45.) || angle_ > 135.) {
+                return CSMove1DV;
+            }
+
+            return CSMove1DH;
+        }
+        else if (objectID == center_circle_id_) {
+            return CSMove2D;
+        }
+        else {
+            return CSArrow;
+        }
+        break;
     case rteMaskShape::Type::POLYGON:
         if (dragged_element_ != DraggedElement::NONE) {
             return CSEmpty;
@@ -334,6 +399,25 @@ bool AreaMask::mouseOver(int modifierKey)
             if (provider->object > -1) {
                 for (int i = top_id_; i <= center_id_; ++i) {
                     visibleGeometry[i]->state = Geometry::PRELIGHT;
+                }
+            }
+        }
+        else if (geomType == rteMaskShape::Type::GRADIENT) {
+            if (last_object_ > -1) {
+                if (last_object_ == 2 || last_object_ == 3) {
+                    visibleGeometry[2]->state = Geometry::NORMAL;
+                    visibleGeometry[3]->state = Geometry::NORMAL;
+                } else {
+                    visibleGeometry[last_object_]->state = Geometry::NORMAL;
+                }
+            }
+
+            if (provider->object > -1) {
+                if (provider->object == 2 || provider->object == 3) {
+                    visibleGeometry[2]->state = Geometry::PRELIGHT;
+                    visibleGeometry[3]->state = Geometry::PRELIGHT;
+                } else {
+                    visibleGeometry[provider->object]->state = Geometry::PRELIGHT;
                 }
             }
         }
@@ -464,6 +548,68 @@ bool AreaMask::button1Pressed(int modifierKey)
             return true;
         }
         break;
+    case rteMaskShape::Type::GRADIENT: {
+        if (!(modifierKey & GDK_CONTROL_MASK)) {
+            // button press is valid (no modifier key)
+            PolarCoord pCoord;
+            int imW, imH;
+            provider->getImageSize(imW, imH);
+            double halfSizeW = imW / 2.;
+            double halfSizeH = imH / 2.;
+            dragged_center_.set(int(halfSizeW + halfSizeW * (center_x_ / 100.)), int(halfSizeH + halfSizeH * (center_y_ / 100.)));
+
+            // trick to get the correct angle (clockwise/counter-clockwise)
+            rtengine::Coord p1 = dragged_center_;
+            rtengine::Coord p2 = provider->posImage;
+            int p = p1.y;
+            p1.y = p2.y;
+            p2.y = p;
+
+            pCoord = p2 - p1;
+            dragged_point_old_angle_ = pCoord.angle;
+            //printf("\ndraggedPointOldAngle=%.3f\n\n", dragged_point_old_angle_);
+            dragged_point_adjuster_angle_ = angle_;
+
+            if (last_object_ == 2 || last_object_ == 3) {
+                // Dragging a line to change the angle
+                PolarCoord draggedPoint;
+                rtengine::Coord currPos;
+                currPos = provider->posImage;
+                rtengine::Coord centerPos = dragged_center_;
+
+                double diagonal = sqrt(double(imW) * double(imW) + double(imH) * double(imH));
+
+                // trick to get the correct angle (clockwise/counter-clockwise)
+                int p = centerPos.y;
+                centerPos.y = currPos.y;
+                currPos.y = p;
+
+                draggedPoint = currPos - centerPos;
+                // compute the projected value of the dragged point
+                dragged_feather_offset_ = draggedPoint.radius * sin((draggedPoint.angle - angle_) / 180.*rtengine::RT_PI);
+
+                if (last_object_ == 3) {
+                    dragged_feather_offset_ = -dragged_feather_offset_;
+                }
+
+                dragged_feather_offset_ -= (feather_ / 200. * diagonal);
+            }
+
+            EditSubscriber::action = ES_ACTION_DRAGGING;
+            return false;
+        } else { // should theoretically always be true
+            // this will let this class ignore further drag events
+            if (last_object_ == 2 || last_object_ == 3) {
+                EditSubscriber::visibleGeometry.at(2)->state = Geometry::NORMAL;
+                EditSubscriber::visibleGeometry.at(3)->state = Geometry::NORMAL;
+            } else {
+                EditSubscriber::visibleGeometry.at(last_object_)->state = Geometry::NORMAL;
+            }
+
+            last_object_ = -1;
+            return true;
+        }
+    }
     case rteMaskShape::Type::POLYGON:
         if ((modifierKey & GDK_CONTROL_MASK)
              && sel_poly_knot_id_ == -1)
@@ -563,6 +709,13 @@ bool AreaMask::button1Released()
         }
         last_object_ = -1;
         break;
+    case rteMaskShape::Type::GRADIENT:
+        dragged_point_old_angle_ = -1000.;
+        for (int i = h_line_id_; i <= center_circle_id_; ++i) {
+            visibleGeometry[i]->state = Geometry::NORMAL;
+        }
+        last_object_ = -1;
+        break;
     case rteMaskShape::Type::POLYGON:
         // keep the point selected after dragging
         dragged_element_ = DraggedElement::NONE;
@@ -657,6 +810,100 @@ bool AreaMask::drag1(int modifierKey)
             // Dragging the circle to change the center
             dragged_center_ += provider->deltaPrevImage;
             rtengine::Coord currPos = dragged_center_;
+            currPos.clip(imW, imH);
+            double cx = (double(currPos.x) - halfSizeW) / halfSizeW * 100.;
+            double cy = (double(currPos.y) - halfSizeH) / halfSizeH * 100.;
+
+            if (cx != center_x_ || cy != center_y_) {
+                center_x_ = cx;
+                center_y_ = cy;
+                updateGeometry();
+                return true;
+            }
+        }
+        break;
+    }
+    case rteMaskShape::Type::GRADIENT:
+    {
+        double halfSizeW = imW / 2.;
+        double halfSizeH = imH / 2.;
+
+        if (last_object_ == 0 || last_object_ == 1) {
+
+            // Dragging a line to change the angle
+            PolarCoord draggedPoint;
+            rtengine::Coord currPos;
+            currPos = provider->posImage + provider->deltaImage;
+            rtengine::Coord centerPos = dragged_center_;
+
+            // trick to get the correct angle (clockwise/counter-clockwise)
+            std::swap(centerPos.y, currPos.y);
+
+            draggedPoint = currPos - centerPos;
+            double deltaAngle = draggedPoint.angle - dragged_point_old_angle_;
+
+            if (deltaAngle > 180.) { // crossing the boundary (0->360)
+                deltaAngle -= 360.;
+            } else if (deltaAngle < -180.) { // crossing the boundary (360->0)
+                deltaAngle += 360.;
+            }
+
+            dragged_point_old_angle_ = draggedPoint.angle;
+
+            dragged_point_adjuster_angle_ += deltaAngle;
+
+            if (dragged_point_adjuster_angle_ > 180.) {
+                dragged_point_adjuster_angle_ = -360. + dragged_point_adjuster_angle_;
+            } else if (dragged_point_adjuster_angle_ < -180.) {
+                dragged_point_adjuster_angle_ = 360. - dragged_point_adjuster_angle_;
+            }
+
+            //printf("dragged_point_old_angle_: %.3f /  From %d,%d to %d,%d -> angle = %.3f  /  ", dragged_point_adjuster_angle_, centerPos.x, centerPos.y, currPos.x, currPos.y, draggedPoint.angle);
+            //printf("currAngle: %.3f = degree: %.3f + deltaAngle: %.3f %s /  dragged_point_old_angle_: %.3f\n", dragged_point_adjuster_angle_, degree->getValue(), deltaAngle, degree->getValue()>180.?">180":degree->getValue()<180.?"<180":"", dragged_point_old_angle_);
+            if (dragged_point_adjuster_angle_ != angle_) {
+                angle_ = dragged_point_adjuster_angle_;
+                updateGeometry();
+                return true;
+            }
+        } else if (last_object_ == 2 || last_object_ == 3) {
+            // Dragging the upper or lower feather bar
+            PolarCoord draggedPoint;
+            rtengine::Coord currPos;
+            currPos = provider->posImage + provider->deltaImage;
+            rtengine::Coord centerPos = dragged_center_;
+
+            double diagonal = sqrt(double(imW) * double(imW) + double(imH) * double(imH));
+
+            // trick to get the correct angle (clockwise/counter-clockwise)
+            int p = centerPos.y;
+            centerPos.y = currPos.y;
+            currPos.y = p;
+
+            draggedPoint = currPos - centerPos;
+            double curr_dragged_feather_offset = draggedPoint.radius * sin((draggedPoint.angle - angle_) / 180.*rtengine::RT_PI);
+
+            if (last_object_ == 2)
+                // Dragging the upper feather bar
+            {
+                curr_dragged_feather_offset -= dragged_feather_offset_;
+            } else if (last_object_ == 3)
+                // Dragging the lower feather bar
+            {
+                curr_dragged_feather_offset = -curr_dragged_feather_offset + dragged_feather_offset_;
+            }
+
+            curr_dragged_feather_offset = curr_dragged_feather_offset * 200. / diagonal;
+
+            if (curr_dragged_feather_offset != feather_) {
+                feather_ = curr_dragged_feather_offset;
+                updateGeometry ();
+                return true;
+            }
+        } else if (last_object_ == 4) {
+            // Dragging the circle to change the center
+            rtengine::Coord currPos;
+            dragged_center_ += provider->deltaPrevImage;
+            currPos = dragged_center_;
             currPos.clip(imW, imH);
             double cx = (double(currPos.x) - halfSizeW) / halfSizeW * 100.;
             double cy = (double(currPos.y) - halfSizeH) / halfSizeH * 100.;
@@ -1012,6 +1259,57 @@ void AreaMask::updateGeometry(const int fullWidth, const int fullHeight)
 
         curve->points = rtengine::procparams::AreaMask::Polygon::get_tessellation(imgSpacePoly);
         curve->setVisible(poly_knots_.size() > 1);
+        break;
+    }
+    case rteMaskShape::Type::GRADIENT:
+    {
+        const auto decay = feather_ * rtengine::norm2<double> (imW, imH) / 200.0;
+        rtengine::Coord origin (imW / 2 + center_x_ * imW / 200, imH / 2 + center_y_ * imH / 200);
+
+        const auto updateLine = [&](Geometry* geometry, const float radius, const float begin, const float end)
+        {
+            const auto line = static_cast<Line*>(geometry);
+            line->begin = PolarCoord(radius, -angle_ + begin);
+            line->begin += origin;
+            line->end = PolarCoord(radius, -angle_ + end);
+            line->end += origin;
+        };
+
+        const auto updateLineWithDecay = [&](Geometry* geometry, const float radius, const float offSetAngle)
+        {
+            const auto line = static_cast<Line*>(geometry);
+            line->begin = PolarCoord (radius, -angle_ + 180.) + PolarCoord (decay, -angle_ + offSetAngle);
+            line->begin += origin;
+            line->end = PolarCoord (radius, -angle_) + PolarCoord (decay, -angle_ + offSetAngle);
+            line->end += origin;
+        };
+
+        const auto updateCircle = [&](Geometry* geometry)
+        {
+            const auto circle = static_cast<Circle*>(geometry);
+            circle->center = origin;
+        };
+
+        // update horizontal line
+        updateLine (visibleGeometry.at(h_line_id_), 1500., 0., 180.);
+        updateLine (mouseOverGeometry.at(h_line_id_), 1500., 0., 180.);
+
+        // update vertical line
+        updateLine (visibleGeometry.at(v_line_id_), 700., 90., 270.);
+        updateLine (mouseOverGeometry.at(v_line_id_), 700., 90., 270.);
+
+        // update upper feather line
+        updateLineWithDecay (visibleGeometry.at(feather_line1_id_), 350., 270.);
+        updateLineWithDecay (mouseOverGeometry.at(feather_line1_id_), 350., 270.);
+
+        // update lower feather line
+        updateLineWithDecay (visibleGeometry.at(feather_line2_id_), 350., 90.);
+        updateLineWithDecay (mouseOverGeometry.at(feather_line2_id_), 350., 90.);
+
+        // update circle's position
+        updateCircle (visibleGeometry.at(center_circle_id_));
+        updateCircle (mouseOverGeometry.at(center_circle_id_));
+
         break;
     }
     default:

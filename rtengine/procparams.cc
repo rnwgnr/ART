@@ -648,6 +648,17 @@ AreaMask::Rectangle::Rectangle():
 }
 
 
+AreaMask::Gradient::Gradient():
+    x(0.),
+    y(0.),
+    strengthStart(100.),
+    strengthEnd(0.),
+    angle(0.)
+{
+    feather = 25.;
+}
+
+
 std::unique_ptr<AreaMask::Shape> AreaMask::Rectangle::clone() const
 {
     return std::unique_ptr<Shape>(new Rectangle(*this));
@@ -673,6 +684,10 @@ std::unique_ptr<AreaMask::Shape> AreaMask::Polygon::clone() const
     return std::unique_ptr<Shape>(new Polygon(*this));
 }
 
+std::unique_ptr<AreaMask::Shape> AreaMask::Gradient::clone() const
+{
+    return std::unique_ptr<Shape>(new Gradient(*this));
+}
 
 bool AreaMask::Shape::operator==(const Shape &other) const
 {
@@ -785,6 +800,29 @@ bool AreaMask::Polygon::operator==(const Shape &other) const
 
 
 bool AreaMask::Polygon::operator!=(const Shape &other) const
+{
+    return !(*this == other);
+}
+
+
+bool AreaMask::Gradient::operator==(const Shape &other) const
+{
+    const Gradient *o = dynamic_cast<const Gradient *>(&other);
+    if (!o) {
+        return false;
+    }
+
+    return
+        x == o->x
+        && y == o->y
+        && strengthStart == o->strengthStart
+        && strengthEnd == o->strengthEnd
+        && angle == o->angle
+        && AreaMask::Shape::operator==(other);
+}
+
+
+bool AreaMask::Gradient::operator!=(const Shape &other) const
 {
     return !(*this == other);
 }
@@ -1125,6 +1163,9 @@ AreaMask::Shape::Type str2type(const Glib::ustring &type)
 {
     if (type == "rectangle") {
         return AreaMask::Shape::RECTANGLE;
+    }
+    else if (type == "gradient") {
+        return AreaMask::Shape::GRADIENT;
     } else {
         return AreaMask::Shape::POLYGON;
     }
@@ -1135,6 +1176,7 @@ Glib::ustring type2str(AreaMask::Shape::Type type)
 {
     switch (type) {
     case AreaMask::Shape::RECTANGLE: return "rectangle";
+    case AreaMask::Shape::GRADIENT: return "gradient";
     case AreaMask::Shape::POLYGON: return "polygon";
     default:
         assert(false);
@@ -1219,6 +1261,19 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                     shape.reset(poly);
                 } else {
                     delete poly;
+                }
+            } else if (str2type(type) == AreaMask::Shape::Type::GRADIENT) {
+                AreaMask::Gradient *gradient = new AreaMask::Gradient();
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + suffix, gradient->x);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Y" + suffix, gradient->y);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "StrengthStart" + suffix, gradient->strengthStart);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "StrengthEnd" + suffix, gradient->strengthEnd);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Angle" + suffix, gradient->angle);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Feather" + suffix, gradient->feather);
+                if (found) {
+                    shape.reset(gradient);
+                } else {
+                    delete gradient;
                 }
             }
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
@@ -1330,6 +1385,17 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
             std::vector<double> v;
             poly->knots_to_list(v);
             putToKeyfile(group_name, prefix + "AreaMask" + n + "Knots" + suffix, pack_list(v), keyfile);
+            break;
+        }
+        case AreaMask::Shape::Type::GRADIENT:
+        {
+            auto gradient = static_cast<AreaMask::Gradient*>(a.get());
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "X" + suffix, gradient->x, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Y" + suffix, gradient->y, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "StrengthStart" + suffix, gradient->strengthStart, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "StrengthEnd" + suffix, gradient->strengthEnd, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Angle" + suffix, gradient->angle, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Feather" + suffix, gradient->feather, keyfile); // copy of "AreaMask" + n + "ShapeFeather"
             break;
         }
         case AreaMask::Shape::Type::RECTANGLE:

@@ -59,17 +59,22 @@ public:
     void deleteGeometry();
     void createRectangleGeometry();
     void createPolygonGeometry();
+    void createGradientGeometry();
     void updateGeometry(const int fullWidth=-1, const int fullHeight=-1);
     
 protected:
     int last_object_;
     double dragged_point_old_angle_;
     double dragged_point_adjuster_angle_;
+    double dragged_feather_offset_;
     rtengine::Coord dragged_center_;
     double center_x_;
     double center_y_;
     double width_;
     double height_;
+    double strength_start_;
+    double strength_end_;
+    double feather_;
     double angle_;
 
     int top_id_;
@@ -96,6 +101,13 @@ protected:
     int next_poly_knot_id_;          // range identical to poly_knots_
     DraggedElement dragged_element_; // true if adjusting the Roundness value
     std::vector<rtengine::CoordD> dragged_points_;  // copy of initial points for dragging and bounds handling
+
+    // Gradient geometry IDs
+    int h_line_id_;
+    int v_line_id_;
+    int feather_line1_id_;
+    int feather_line2_id_;
+    int center_circle_id_;
 
 private:
     void setPolylineSize(size_t newSize);

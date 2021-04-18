@@ -106,7 +106,8 @@ struct AreaMask {
         };
         enum Type {
             RECTANGLE,
-            POLYGON
+            POLYGON,
+            GRADIENT
         };
         Mode mode;
         double feather; // [0,100]
@@ -163,6 +164,21 @@ struct AreaMask {
         bool operator!=(const Shape &other) const override;
         std::unique_ptr<Shape> clone() const override;
     };
+
+    struct Gradient: public Shape {
+        double x;             // [-100; 100] Percentage of image's width
+        double y;             // [-100; 100] Percentage of image's height
+        double strengthStart; // [0; 100] Strenght of the mask at the transition's begin
+        double strengthEnd;   // [0; 100] Strenght of the mask at the transition's end
+        double angle;         // [0; 360[ Angle of the gradient
+
+        Gradient();
+        Type getType() const override { return Type::GRADIENT; };
+        bool operator==(const Shape &other) const override;
+        bool operator!=(const Shape &other) const override;
+        std::unique_ptr<Shape> clone() const override;
+    };
+
     bool enabled;
     double feather; // [0,100]
     double blur;
@@ -177,7 +193,6 @@ struct AreaMask {
     bool operator!=(const AreaMask &other) const;
     bool isTrivial() const;
 };
-
 
 class DeltaEMask {
 public:
