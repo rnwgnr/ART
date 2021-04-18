@@ -1163,8 +1163,7 @@ AreaMask::Shape::Type str2type(const Glib::ustring &type)
 {
     if (type == "rectangle") {
         return AreaMask::Shape::RECTANGLE;
-    }
-    else if (type == "gradient") {
+    } else if (type == "gradient") {
         return AreaMask::Shape::GRADIENT;
     } else {
         return AreaMask::Shape::POLYGON;
@@ -1269,7 +1268,6 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                 found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "StrengthStart" + suffix, gradient->strengthStart);
                 found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "StrengthEnd" + suffix, gradient->strengthEnd);
                 found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Angle" + suffix, gradient->angle);
-                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Feather" + suffix, gradient->feather);
                 if (found) {
                     shape.reset(gradient);
                 } else {
@@ -1395,7 +1393,6 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
             putToKeyfile(group_name, prefix + "AreaMask" + n + "StrengthStart" + suffix, gradient->strengthStart, keyfile);
             putToKeyfile(group_name, prefix + "AreaMask" + n + "StrengthEnd" + suffix, gradient->strengthEnd, keyfile);
             putToKeyfile(group_name, prefix + "AreaMask" + n + "Angle" + suffix, gradient->angle, keyfile);
-            putToKeyfile(group_name, prefix + "AreaMask" + n + "Feather" + suffix, gradient->feather, keyfile); // copy of "AreaMask" + n + "ShapeFeather"
             break;
         }
         case AreaMask::Shape::Type::RECTANGLE:

@@ -1978,8 +1978,7 @@ bool LabMasksPanel::button1Released()
     if (last_object_ != -1) {
         if (getGeometryType() == Shape::Type::RECTANGLE) {
             updateRectangleAreaMask(true);
-        }
-        else if (getGeometryType() == Shape::Type::GRADIENT) {
+        } else if (getGeometryType() == Shape::Type::GRADIENT) {
             updateGradientAreaMask(true);
         }
         onAreaShapeSelectionChanged();

@@ -352,15 +352,13 @@ CursorShape AreaMask::getCursor(int objectID)
     case rteMaskShape::Type::GRADIENT:
         if (objectID == h_line_id_ || objectID == v_line_id_) {
             return CSMoveRotate;
-        }
-        else if (objectID == feather_line1_id_ || objectID == feather_line2_id_) {
+        } else if (objectID == feather_line1_id_ || objectID == feather_line2_id_) {
             if (angle_ < -135. || (angle_ >= -45. && angle_ <= 45.) || angle_ > 135.) {
                 return CSMove1DV;
             }
 
             return CSMove1DH;
-        }
-        else if (objectID == center_circle_id_) {
+        } else if (objectID == center_circle_id_) {
             return CSMove2D;
         }
         else {
@@ -401,8 +399,7 @@ bool AreaMask::mouseOver(int modifierKey)
                     visibleGeometry[i]->state = Geometry::PRELIGHT;
                 }
             }
-        }
-        else if (geomType == rteMaskShape::Type::GRADIENT) {
+        } else if (geomType == rteMaskShape::Type::GRADIENT) {
             if (last_object_ > -1) {
                 if (last_object_ == 2 || last_object_ == 3) {
                     visibleGeometry[2]->state = Geometry::NORMAL;
@@ -420,8 +417,7 @@ bool AreaMask::mouseOver(int modifierKey)
                     visibleGeometry[provider->object]->state = Geometry::PRELIGHT;
                 }
             }
-        }
-        else if (geomType == rteMaskShape::Type::POLYGON) {
+        } else if (geomType == rteMaskShape::Type::POLYGON) {
             int imW = 0;
             int imH = 0;
             provider->getImageSize(imW, imH);
