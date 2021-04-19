@@ -31,6 +31,7 @@
 #include "curves.h"
 #include "iccstore.h"
 #include "rt_algo.h"
+#include "rt_math.h"
 #include "opthelper.h"
 #include "../rtgui/multilangmgr.h"
 
@@ -104,9 +105,12 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
             // allocated once, when needed
             shape_mask(global_mask.width(), global_mask.height());
         }
-        std::fill(shape_mask[0],
-                  shape_mask[0] + (shape_mask.width() * shape_mask.height()),
-                  area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+        if (area_->getType() != AreaMask::Shape::GRADIENT) {
+            // GRADIENT will update the whole image, no need to initialize it here
+            std::fill(shape_mask[0],
+                      shape_mask[0] + (shape_mask.width() * shape_mask.height()),
+                      area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+        }
         float color;
 
         switch (area_->mode) {
@@ -194,19 +198,66 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 
             break;
         }
+        case AreaMask::Shape::GRADIENT:
+        {
+            auto area = static_cast<AreaMask::Gradient*>(area_.get());
+
+            Coord center(w2 + area->x / 100.0 * w2, h2 + area->y / 100.0 * h2);
+            float color_start = fgcolor * (area_->mode == AreaMask::Shape::SUBTRACT ?
+                                          (100. - area->strengthStart) :
+                                          area->strengthStart) / 100.;
+            float color_end =   fgcolor * (area_->mode == AreaMask::Shape::SUBTRACT ?
+                                          (100. - area->strengthEnd) :
+                                          area->strengthEnd) / 100.;
+            float color_diff = color_end - color_start;
+            float half_feather = area->feather * rtengine::norm2<double> (width, height) / 200.0;
+            float feather = 2 * half_feather;
+            int w = global_mask.width();
+            int h = global_mask.height();
+
+#ifdef _OPENMP
+#       pragma omp parallel if (multithread)
+#endif
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    Coord m(x, y);
+                    m += origin;
+                    m -= center;
+                    PolarCoord p(m);
+                    double r, a;
+                    p.get(r, a);
+                    p.set(r, a + area->angle);
+                    Coord point(p);
+                    point.y += half_feather;
+
+                    if (point.y < 0) {
+                        shape_mask[y][x] = color_start;
+                    }
+                    else if (point.y > feather) {
+                        shape_mask[y][x] = color_end;
+                    }
+                    else {
+                        // in the feather range
+                        shape_mask[y][x] = (point.y / feather) * color_diff + color_start;
+                    }
+                }
+            }
+
+            break;
+        }
         default:
             break;
         }
 
         // feather the shape's mask
-        if (area_->feather != 0.) {
+        if (area_->getType() != AreaMask::Shape::GRADIENT && area_->feather != 0.) {
             guidedFilter(guide, shape_mask, shape_mask, radius, 1e-7, multithread);
         }
 
         // No contrast applied per shape
 
         // blur the shape's mask
-        if (area_->blur > 0.) {
+        if (area_->getType() != AreaMask::Shape::GRADIENT && area_->blur > 0.) {
 #ifdef _OPENMP
 #       pragma omp parallel if (multithread)
 #endif

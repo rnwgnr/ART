@@ -1536,6 +1536,7 @@ TP_LABMASKS_AREA_ROUNDNESS;Roundness
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copy the current mask to the clipboard
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Edit the current rectangular area shape by drawing on the preview image
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Add a rectangular area shape by drawing on the preview image
+TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;Add a gradient
 TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Add a polygonal area shape by adding points on the preview image
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Display the current area shape on the preview image
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Paste a mask from the clipboard
@@ -1546,6 +1547,8 @@ TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Subtract
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Intersect
 TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 point(s)
 TP_LABMASKS_AREA_SHAPES;Area shapes
+TP_LABMASKS_AREA_STRENGTH_START;Start strength
+TP_LABMASKS_AREA_STRENGTH_END;End strength
 TP_LABMASKS_AREA_WIDTH;Width
 TP_LABMASKS_AREA_X;Center X
 TP_LABMASKS_AREA_Y;Center Y
