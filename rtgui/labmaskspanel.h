@@ -163,7 +163,7 @@ private:
     void onAreaMaskCopyPressed();
     void onAreaMaskPastePressed();
     void onAreaShapeModeChanged(int i);
-    void onRectangleAreaMaskDrawChanged();
+    // void onRectangleAreaMaskDrawChanged();
     void onAreaMaskDrawRectangleAddPressed();
     void onAreaMaskDrawPolygonAddPressed();
     void onAreaMaskDrawGradientAddPressed();
@@ -283,7 +283,7 @@ private:
     Gtk::Button *areaMaskDrawGradientAdd;
     Gtk::Button *areaMaskDrawPolygonAdd;
     Gtk::Button *areaMaskDrawRectangleAdd;
-    Gtk::ToggleButton *areaMaskDrawRectangle;
+    // Gtk::ToggleButton *areaMaskDrawRectangle;
     sigc::connection areaMaskDrawConn;
     Gtk::Button *areaMaskCopy;
     Gtk::Button *areaMaskPaste;

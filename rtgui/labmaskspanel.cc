@@ -1182,11 +1182,11 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     areaMaskDrawRectangleAdd->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onAreaMaskDrawRectangleAddPressed));
     add_button(areaMaskDrawRectangleAdd, hb, 24);
 
-    areaMaskDrawRectangle = new Gtk::ToggleButton();
-    areaMaskDrawRectangle->add(*Gtk::manage(new RTImage("area-shape-draw.png")));
-    areaMaskDrawRectangle->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP"));
-    areaMaskDrawConn = areaMaskDrawRectangle->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onRectangleAreaMaskDrawChanged));
-    add_button(areaMaskDrawRectangle, hb, 24);
+    // areaMaskDrawRectangle = new Gtk::ToggleButton();
+    // areaMaskDrawRectangle->add(*Gtk::manage(new RTImage("area-shape-draw.png")));
+    // areaMaskDrawRectangle->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP"));
+    // areaMaskDrawConn = areaMaskDrawRectangle->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onRectangleAreaMaskDrawChanged));
+    // add_button(areaMaskDrawRectangle, hb, 24);
     
     areaMaskToggle = new Gtk::ToggleButton();
     areaMaskToggle->add(*Gtk::manage(new RTImage("crosshair-adjust.png")));
@@ -1842,7 +1842,7 @@ void LabMasksPanel::setEditProvider(EditDataProvider *provider)
 void LabMasksPanel::onAreaMaskToggleChanged()
 {
     if (areaMaskToggle->get_active()) {
-        areaMaskDrawRectangle->set_active(false);
+        // areaMaskDrawRectangle->set_active(false);
         subscribe();
         Shape::Type shape_type = Shape::Type::RECTANGLE;
         if (selected_ < masks_.size()) {
@@ -2491,12 +2491,12 @@ void LabMasksPanel::toggleAreaShapeMode(int i)
 void LabMasksPanel::updateShapeButtonsSensitivity()
 {
     bool has_shape = false;
-    bool is_rectangle = false;
+    // bool is_rectangle = false;
     if (selected_ < masks_.size()) {
         auto &a = masks_[selected_].areaMask;
         if (area_shape_index_ < a.shapes.size()) {
             has_shape = true;
-            is_rectangle = a.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE;
+            // is_rectangle = a.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE;
         }
     }
     if (!has_shape && areaMaskToggle->get_active()) {
@@ -2504,7 +2504,7 @@ void LabMasksPanel::updateShapeButtonsSensitivity()
     }
     areaMaskCopy->set_sensitive(has_shape);
     areaMaskToggle->set_sensitive(has_shape);
-    areaMaskDrawRectangle->set_sensitive(is_rectangle);
+    // areaMaskDrawRectangle->set_sensitive(is_rectangle);
     for (int i = 0; i < 3; i++) {
         areaMaskMode[i]->set_sensitive(has_shape);
     }
@@ -2777,7 +2777,7 @@ void LabMasksPanel::updateRectangleArea(AreaDrawUpdater::Phase phase, int x1, in
         onAreaShapeSelectionChanged();
         populateShapeList(selected_, area_shape_index_);
         ConnectionBlocker blocker(areaMaskDrawConn);
-        areaMaskDrawRectangle->set_active(false);
+        // areaMaskDrawRectangle->set_active(false);
         areaMaskToggle->set_active(true);
 
         auto l = getListener();
@@ -2795,23 +2795,24 @@ void LabMasksPanel::cancelUpdateRectangleArea()
 }
 
 
-void LabMasksPanel::onRectangleAreaMaskDrawChanged()
-{
-    if (adl_) {
-        if (areaMaskDrawRectangle->get_active()) {
-            areaMaskToggle->set_active(false);
-            adl_->startRectangleDrawingArea(this);
-        } else {
-            adl_->stopRectangleDrawingArea();
-        }
-    }
-}
+// void LabMasksPanel::onRectangleAreaMaskDrawChanged()
+// {
+//     if (adl_) {
+//         if (areaMaskDrawRectangle->get_active()) {
+//             areaMaskToggle->set_active(false);
+//             adl_->startRectangleDrawingArea(this);
+//         } else {
+//             adl_->stopRectangleDrawingArea();
+//         }
+//     }
+// }
 
 
 void LabMasksPanel::onAreaMaskDrawRectangleAddPressed()
 {
     shapeAddPressed(Shape::Type::RECTANGLE, false);
-    areaMaskDrawRectangle->set_active(true);
+    // areaMaskDrawRectangle->set_active(true);
+    areaMaskToggle->set_active(true);
 }
 
 void LabMasksPanel::onAreaMaskDrawPolygonAddPressed()
