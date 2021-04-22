@@ -2812,7 +2812,10 @@ void LabMasksPanel::onAreaMaskDrawRectangleAddPressed()
 {
     shapeAddPressed(Shape::Type::RECTANGLE, false);
     // areaMaskDrawRectangle->set_active(true);
-    areaMaskToggle->set_active(true);
+//    areaMaskToggle->set_active(true);
+    if (adl_) {
+        adl_->startRectangleDrawingArea(this);
+    }
 }
 
 void LabMasksPanel::onAreaMaskDrawPolygonAddPressed()
