@@ -84,6 +84,10 @@ def extra_files(opts):
         ('share', [
             (D('~/.local/share/lensfun/updates/version_2'), 'lensfun'),
         ]),
+        ('.', [
+            D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so'),
+            D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfsdaemon.so'),
+        ]),
     ] + extra
 
 
@@ -130,17 +134,30 @@ def main():
     for name in ('ART', 'ART-cli'):
         shutil.move(os.path.join(opts.outdir, name),
                     os.path.join(opts.outdir, name + '.bin'))
-        with open(os.path.join(opts.outdir, name), 'w') as out:
-            out.write("""#!/bin/bash
+    with open(os.path.join(opts.outdir, 'ART'), 'w') as out:
+        out.write("""#!/bin/bash
 export GTK_CSD=0
 d=$(dirname $0)
+t=$(mktemp -d --suffix=-ART)
+"$d/lib/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so" > "$t/loader.cache"
+export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
 export GDK_PIXBUF_MODULEDIR="$d/lib/gdk-pixbuf-2.0"
-export GDK_PIXBUF_MODULE_FILE="$d/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
 export GIO_MODULE_DIR="$d/lib/gio/modules"
 export LD_LIBRARY_PATH="$d"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
-exec "$d/%s.bin" "$@"
-""" %  name)
+"$d/ART.bin" "$@"
+rm -rf "$t"
+""")
+    with open(os.path.join(opts.outdir, 'ART-cli'), 'w') as out:
+        out.write("""#!/bin/bash
+export GTK_CSD=0
+d=$(dirname $0)
+export GIO_MODULE_DIR="$d/lib/gio/modules"
+export LD_LIBRARY_PATH="$d"
+export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
+exec "$d/ART-cli.bin" "$@"
+""")
+    for name in ('ART', 'ART-cli'):
         os.chmod(os.path.join(opts.outdir, name), 0o755)
 
 if __name__ == '__main__':
