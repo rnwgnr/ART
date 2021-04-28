@@ -30,12 +30,13 @@ def getdlls(opts):
 	'libfreetype.so.6',
 	## 'libXrender.so.1',
 	## 'libdbus-1.so.3',
-	## 'libselinux.so.1',
+	'libselinux.so.1',
 	## 'libmount.so.1',
 	## 'libXau.so.6',
 	## 'libXdmcp.so.6',
-	## 'libsystemd.so.0',
+	'libsystemd.so.0',
         'librt.so.1',
+        'libstdc++.so.6',
         }
     res = []
     d = os.getcwd()
@@ -84,7 +85,7 @@ def extra_files(opts):
         ('share', [
             (D('~/.local/share/lensfun/updates/version_2'), 'lensfun'),
         ]),
-        ('.', [
+        ('lib', [
             D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so'),
             D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfsdaemon.so'),
         ]),
@@ -101,11 +102,13 @@ def main():
     if opts.verbose:
         print('copying %s to %s' % (os.getcwd(), opts.outdir))
     shutil.copytree(d, opts.outdir)
+    if not os.path.exists(os.path.join(opts.outdir, 'lib')):
+        os.mkdir(os.path.join(opts.outdir, 'lib'))
     for lib in getdlls(opts):
         if opts.verbose:
             print('copying: %s' % lib)
         shutil.copy2(lib,
-                     os.path.join(opts.outdir, os.path.basename(lib)))
+                     os.path.join(opts.outdir, 'lib', os.path.basename(lib)))
     for key, elems in extra_files(opts):
         for elem in elems:
             name = None
@@ -143,7 +146,7 @@ t=$(mktemp -d --suffix=-ART)
 export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
 export GDK_PIXBUF_MODULEDIR="$d/lib/gdk-pixbuf-2.0"
 export GIO_MODULE_DIR="$d/lib/gio/modules"
-export LD_LIBRARY_PATH="$d"
+export LD_LIBRARY_PATH="$d/lib"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
 "$d/ART.bin" "$@"
 rm -rf "$t"
@@ -153,7 +156,7 @@ rm -rf "$t"
 export GTK_CSD=0
 d=$(dirname $0)
 export GIO_MODULE_DIR="$d/lib/gio/modules"
-export LD_LIBRARY_PATH="$d"
+export LD_LIBRARY_PATH="$d/lib"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
 exec "$d/ART-cli.bin" "$@"
 """)
