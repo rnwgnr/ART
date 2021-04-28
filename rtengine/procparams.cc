@@ -147,6 +147,9 @@ std::vector<double> unpack_list(const std::string &data)
 
 std::string pack_list(const std::vector<double> &data)
 {
+    if (data.empty()) {
+        return "";
+    }
     std::vector<uint8_t> bytes(data.size() * sizeof(uint16_t));
     auto p = &(bytes[0]);
     size_t off = 0;
