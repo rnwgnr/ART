@@ -33,6 +33,7 @@
 #include "rt_algo.h"
 #include "rt_math.h"
 #include "opthelper.h"
+#include "rescale.h"
 #include "../rtgui/multilangmgr.h"
 
 namespace rtengine {
@@ -705,6 +706,47 @@ private:
     std::vector<cmsCIELab> refs_;
 };
 
+
+bool contrast_threshold_mask(int width, int height, float scale, array2D<float> &guide, int threshold, double blur, bool multithread, array2D<float> &mask)
+{
+    if (threshold == 0) {
+        return false;
+    }
+    
+    int W = guide.width();
+    int H = guide.height();
+    mask(W, H);
+
+    int d = std::max(W, H);
+    float s = float(d) / 1920.f;
+    array2D<float> *src = &guide;
+    array2D<float> *dst = &mask;
+    array2D<float> tmpsrc;
+    array2D<float> tmpdst;
+    if (s > 1.f) {
+        scale *= s;
+        int ww = W / s;
+        int hh = H / s;
+        tmpsrc(ww, hh);
+        rescaleBilinear(guide, tmpsrc, multithread);
+        src = &tmpsrc;
+        tmpdst(ww, hh);
+        dst = &tmpdst;
+    }
+    float s_scale = std::sqrt(scale);
+    
+    float thresh = float(std::abs(threshold))/100.f * s_scale;
+    float bl = std::max(blur, 2.0) / s_scale;
+    //bool neg = threshold < 0;
+    buildBlendMask(*src, *dst, src->width(), src->height(), thresh, 1.f, false, bl, 32768.f);
+
+    if (dst != &mask) {
+        rescaleBilinear(*dst, mask, multithread);
+    }
+
+    return true;
+}
+
 } // namespace
 
 
@@ -1018,14 +1060,10 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
         };
     
 
-    float s_scale = std::sqrt(scale);
     for (int i = begin_idx; i < end_idx; ++i) {
-        if (masks[i].parametricMask.enabled && masks[i].parametricMask.contrastThreshold != 0) {
-            amask(W, H);
-            float thresh = float(std::abs(masks[i].parametricMask.contrastThreshold))/100.f * s_scale;
-            float blur = std::max(masks[i].parametricMask.blur, 2.0) / s_scale;
+        if (masks[i].parametricMask.enabled && 
+            contrast_threshold_mask(full_width, full_height, scale, guide, masks[i].parametricMask.contrastThreshold, masks[i].parametricMask.blur, multithread, amask)) {
             bool neg = masks[i].parametricMask.contrastThreshold < 0;
-            buildBlendMask(guide, amask, W, H, thresh, 1.f, false, blur, 32768.f);
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
