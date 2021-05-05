@@ -689,23 +689,54 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
             exiftool = e;
         }
     }
+
+    std::unordered_map<std::string, std::string> ret;
+    
+    std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-exiftool-json-%1-XXXXXX", Glib::path_get_basename(fname)));
+    int fd = Glib::mkstemp(templ);
+    if (fd < 0) {
+        return ret;
+    }
+    Glib::ustring outname = Glib::filename_to_utf8(templ);
+    
     std::vector<Glib::ustring> argv = {
         exiftool,
         "-json",
         "-MakerNotes:all",
         "-RAF:all",
         "-PanasonicRaw:all",
+        "-w+", "%0f" + outname,
         fname
     };
-    std::string out, err;
-    std::unordered_map<std::string, std::string> ret;
     try {
-        subprocess::exec_sync("", argv, true, &out, &err);
+        subprocess::exec_sync("", argv, true, nullptr, nullptr);
     } catch (subprocess::error &exc) {
         return ret;
     }
 
-    cJSON *root = cJSON_Parse(out.c_str());
+    cJSON *root = nullptr;
+    close(fd);
+
+    FILE *src = g_fopen(outname.c_str(), "rb");
+    if (src) {
+        std::ostringstream data;
+        int c;
+        while (true) {
+            c = fgetc(src);
+            if (c != EOF) {
+                data << static_cast<unsigned char>(c);
+            } else {
+                break;
+            }
+        }
+        fclose(src);
+        std::string s = data.str();
+        root = cJSON_Parse(s.c_str());
+    }
+    if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
+        g_remove(outname.c_str());
+    }
+    
     if (!root) {
         return ret;
     }

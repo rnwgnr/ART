@@ -87,6 +87,13 @@ std::vector<Glib::ustring> split_command_line(const Glib::ustring &cmdl)
 // Therefore, we roll our own
 void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, std::string *out, std::string *err)
 {
+    // TODO - capturing stdout/stderr leads to ReadFile hanging sometimes on
+    // windows. I still have to figure out why though. In the meantime, we
+    // simply don't support it (currently in ART out and err are used only for
+    // informative purposes in verbose console output)
+    out = nullptr;
+    err = nullptr;
+    
     const auto add_quoted =
         [](std::wostream &out, const std::wstring &ws) -> void
         {
