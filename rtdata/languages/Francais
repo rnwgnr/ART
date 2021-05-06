@@ -579,11 +579,11 @@ HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contraste Local - Masque similarité de cou
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Contraste Local - Masque au pinceau
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Contraste Local - Masque paramétrique
 HISTORY_MSG_LOGENC_AUTO;Log - Automatique
-HISTORY_MSG_LOGENC_AUTOGRAY;Log - Gris auto.
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - Gain auto.
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Régularisation
 HISTORY_MSG_LOGENC_ENABLED;Encodage Logarithmique
 HISTORY_MSG_LOGENC_BLACK_EV;Log - EV Noir
-HISTORY_MSG_LOGENC_SOURCE_GRAY;Log - Point gris source
+HISTORY_MSG_LOGENC_GAIN;Log - Gain
 HISTORY_MSG_LOGENC_WHITE_EV;Log - EV Blanc
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Point gris cible
 HISTORY_MSG_METADATA_MODE;Mode de copie des métadonnées
@@ -1605,7 +1605,7 @@ TP_LOCALCONTRAST_LABEL;Contraste Local
 TP_LOGENC_AUTO;Automatique
 TP_LOGENC_ADVANCED;Réglages avancés
 TP_LOGENC_BLACK_EV;Noir exposition relative (Ev)
-TP_LOGENC_SOURCE_GRAY;Point gris source Source (gain)
+TP_LOGENC_GAIN;Gain (Ev)
 TP_LOGENC_WHITE_EV;Blanc exposition relative (Ev)
 TP_LOGENC_TARGET_GRAY;Point gris cible (luminosité)
 TP_LOGENC_LABEL;Mappage de tonalité Log
