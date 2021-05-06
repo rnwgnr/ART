@@ -1940,8 +1940,8 @@ bool TextureBoostParams::operator !=(const TextureBoostParams& other) const
 LogEncodingParams::LogEncodingParams():
     enabled(false),
     autocompute(false),
-    autogray(false),
-    sourceGray(18.0),
+    autogain(false),
+    gain(0.0),
     targetGray(18.0),
     blackEv(-13.5),
     whiteEv(2.5),
@@ -1954,8 +1954,8 @@ bool LogEncodingParams::operator ==(const LogEncodingParams& other) const
     return
         enabled == other.enabled
         && autocompute == other.autocompute
-        && autogray == other.autogray
-        && sourceGray == other.sourceGray
+        && autogain == other.autogain
+        && gain == other.gain
         && blackEv == other.blackEv
         && whiteEv == other.whiteEv
         && targetGray == other.targetGray
@@ -3552,8 +3552,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(logenc)) {
             saveToKeyfile("LogEncoding", "Enabled", logenc.enabled, keyFile);
             saveToKeyfile("LogEncoding", "Auto", logenc.autocompute, keyFile);
-            saveToKeyfile("LogEncoding", "AutoGray", logenc.autogray, keyFile);
-            saveToKeyfile("LogEncoding", "SourceGray", logenc.sourceGray, keyFile);
+            saveToKeyfile("LogEncoding", "AutoGray", logenc.autogain, keyFile);
+            saveToKeyfile("LogEncoding", "Gain", logenc.gain, keyFile);
             saveToKeyfile("LogEncoding", "TargetGray", logenc.targetGray, keyFile);
             saveToKeyfile("LogEncoding", "BlackEv", logenc.blackEv, keyFile);
             saveToKeyfile("LogEncoding", "WhiteEv", logenc.whiteEv, keyFile);
@@ -4521,11 +4521,19 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else {
                 logenc.autocompute = false;
             }
-            assignFromKeyfile(keyFile, "LogEncoding", "AutoGray", logenc.autogray);
+            assignFromKeyfile(keyFile, "LogEncoding", ppVersion < 1024 ? "AutoGray" : "AutoGain", logenc.autogain);
             if (ppVersion < 349) {
-                assignFromKeyfile(keyFile, "LogEncoding", "GrayPoint", logenc.sourceGray);
+                if (assignFromKeyfile(keyFile, "LogEncoding", "GrayPoint", logenc.gain) && logenc.gain > 0) {
+                    logenc.gain = std::log2(18.0/logenc.gain);
+                }
             } else {
-                assignFromKeyfile(keyFile, "LogEncoding", "SourceGray", logenc.sourceGray);
+                if (ppVersion < 1024) {
+                    if (assignFromKeyfile(keyFile, "LogEncoding", "SourceGray", logenc.gain) && logenc.gain > 0) {
+                        logenc.gain = std::log2(18.0/logenc.gain);
+                    }
+                } else {
+                    assignFromKeyfile(keyFile, "LogEncoding", "Gain", logenc.gain);
+                }
                 assignFromKeyfile(keyFile, "LogEncoding", "TargetGray", logenc.targetGray);
             }
             assignFromKeyfile(keyFile, "LogEncoding", "BlackEv", logenc.blackEv);

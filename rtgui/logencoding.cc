@@ -32,11 +32,11 @@ LogEncoding::LogEncoding():
     const auto EVENT = LUMINANCECURVE;
     EvEnabled = m->newEvent(RGBCURVE | M_AUTOEXP, "HISTORY_MSG_LOGENC_ENABLED");
     EvAuto = m->newEvent(AUTOEXP, "HISTORY_MSG_LOGENC_AUTO");
-    EvAutoGrayOn = m->newEvent(AUTOEXP, "HISTORY_MSG_LOGENC_AUTOGRAY");
-    EvAutoGrayOff = m->newEvent(M_VOID, "HISTORY_MSG_LOGENC_AUTOGRAY");
+    EvAutoGainOn = m->newEvent(AUTOEXP, "HISTORY_MSG_LOGENC_AUTOGAIN");
+    EvAutoGainOff = m->newEvent(M_VOID, "HISTORY_MSG_LOGENC_AUTOGAIN");
     EvAutoBatch = m->newEvent(M_VOID, "HISTORY_MSG_LOGENC_AUTO");
-    EvSourceGray = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_SOURCE_GRAY");
-    EvSourceGrayAuto = m->newEvent(AUTOEXP, "HISTORY_MSG_LOGENC_SOURCE_GRAY");
+    EvGain = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_GAIN");
+    EvGainAuto = m->newEvent(AUTOEXP, "HISTORY_MSG_LOGENC_GAIN");
     EvTargetGray = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_TARGET_GRAY");
     EvBlackEv = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_BLACK_EV");
     EvWhiteEv = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_WHITE_EV");
@@ -46,20 +46,20 @@ LogEncoding::LogEncoding():
     autocompute = Gtk::manage(new Gtk::ToggleButton(M("TP_LOGENC_AUTO")));
     autoconn = autocompute->signal_toggled().connect(sigc::mem_fun(*this, &LogEncoding::autocomputeToggled));
     
-    sourceGray = Gtk::manage(new Adjuster(M("TP_LOGENC_SOURCE_GRAY"), 1.0, 100.0, 0.1, 18.0));
-    sourceGray->addAutoButton();
+    gain = Gtk::manage(new Adjuster(M("TP_LOGENC_GAIN"), -10.0, 10.0, 0.1, 0.0));
+    gain->addAutoButton();
     targetGray = Gtk::manage(new Adjuster(M("TP_LOGENC_TARGET_GRAY"), 5.0, 80.0, 0.1, 18.0));
     blackEv = Gtk::manage(new Adjuster(M("TP_LOGENC_BLACK_EV"), -16.0, 0.0, 0.1, -13.5));
     whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 0.0, 32.0, 0.1, 2.5));
     regularization = Gtk::manage(new Adjuster(M("TP_LOGENC_REGULARIZATION"), 0, 100, 1, 65));
 
-    sourceGray->delay = options.adjusterMaxDelay;
+    gain->delay = options.adjusterMaxDelay;
     blackEv->delay = options.adjusterMaxDelay;
     whiteEv->delay = options.adjusterMaxDelay;
     targetGray->delay = options.adjusterMaxDelay;
     
     whiteEv->setAdjusterListener(this);
-    sourceGray->setAdjusterListener(this);
+    gain->setAdjusterListener(this);
     blackEv->setAdjusterListener(this);
     targetGray->setAdjusterListener(this);
     regularization->setAdjusterListener(this);
@@ -67,13 +67,13 @@ LogEncoding::LogEncoding():
     whiteEv->setLogScale(16, 0);
     blackEv->setLogScale(2, -8);
 
-    sourceGray->show();
+    gain->show();
     autocompute->show();
     whiteEv->show();
     blackEv->show();
     targetGray->show();
 
-    sourceGray->setLogScale(10, 18, true);
+    //gain->setLogScale(10, 18, true);
     targetGray->setLogScale(10, 18, true);
 
     Gtk::Frame *advanced = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_ADVANCED")));
@@ -84,7 +84,7 @@ LogEncoding::LogEncoding():
     vb->set_spacing(2);
     advanced->add(*vb);
     vb->pack_start(*blackEv);
-    vb->pack_start(*sourceGray);
+    vb->pack_start(*gain);
     vb->pack_start(*regularization);
 
     pack_start(*autocompute);
@@ -102,8 +102,8 @@ void LogEncoding::read(const ProcParams *pp)
     setEnabled(pp->logenc.enabled);
 
     autocompute->set_active(pp->logenc.autocompute);    
-    sourceGray->setValue(pp->logenc.sourceGray);
-    sourceGray->setAutoValue(pp->logenc.autogray);
+    gain->setValue(pp->logenc.gain);
+    gain->setAutoValue(pp->logenc.autogain);
     blackEv->setValue(pp->logenc.blackEv);
     whiteEv->setValue(pp->logenc.whiteEv);
     targetGray->setValue(pp->logenc.targetGray);
@@ -116,8 +116,8 @@ void LogEncoding::write(ProcParams *pp)
 {
     pp->logenc.enabled = getEnabled();
     pp->logenc.autocompute = autocompute->get_active();
-    pp->logenc.autogray = sourceGray->getAutoValue();
-    pp->logenc.sourceGray = sourceGray->getValue();
+    pp->logenc.autogain = gain->getAutoValue();
+    pp->logenc.gain = gain->getValue();
     pp->logenc.blackEv = blackEv->getValue();
     pp->logenc.whiteEv = whiteEv->getValue();
     pp->logenc.targetGray = targetGray->getValue();
@@ -126,7 +126,7 @@ void LogEncoding::write(ProcParams *pp)
 
 void LogEncoding::setDefaults(const ProcParams *defParams)
 {
-    sourceGray->setDefault(defParams->logenc.sourceGray);
+    gain->setDefault(defParams->logenc.gain);
     blackEv->setDefault(defParams->logenc.blackEv);
     whiteEv->setDefault(defParams->logenc.whiteEv);
     targetGray->setDefault(defParams->logenc.targetGray);
@@ -138,13 +138,13 @@ void LogEncoding::setDefaults(const ProcParams *defParams)
 void LogEncoding::adjusterChanged(Adjuster* a, double newval)
 {
     ConnectionBlocker cbl(autoconn);
-    if (a != sourceGray && a != targetGray) {
+    if (a != gain && a != targetGray) {
         autocompute->set_active(false);
     }
     
     if (listener && getEnabled()) {
-        if (a == sourceGray) {
-            listener->panelChanged(autocompute->get_active() ? EvSourceGrayAuto : EvSourceGray, a->getTextValue());
+        if (a == gain) {
+            listener->panelChanged(autocompute->get_active() ? EvGainAuto : EvGain, a->getTextValue());
         } else if (a == blackEv) {
             listener->panelChanged(EvBlackEv, a->getTextValue());
         } else if (a == whiteEv) {
@@ -160,8 +160,8 @@ void LogEncoding::adjusterChanged(Adjuster* a, double newval)
 void LogEncoding::adjusterAutoToggled(Adjuster* a, bool newval)
 {
     if (listener) {
-        if (a == sourceGray) {
-            auto e = (!newval) ? EvAutoGrayOff : EvAutoGrayOn;
+        if (a == gain) {
+            auto e = (!newval) ? EvAutoGainOff : EvAutoGainOn;
             listener->panelChanged(e, newval ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
         }
     }
@@ -211,7 +211,7 @@ void LogEncoding::logEncodingChanged(const LogEncodingParams &params)
     whiteEv->setEnabled(true);
 //    targetGray->setEnabled(true);
 
-    sourceGray->setValue(params.sourceGray);
+    gain->setValue(params.gain);
     blackEv->setValue(params.blackEv);
     whiteEv->setValue(params.whiteEv);
 //    targetGray->setValue(params.targetGray);

@@ -746,8 +746,8 @@ struct TextureBoostParams {
 struct LogEncodingParams {
     bool enabled;
     bool autocompute;
-    bool autogray;
-    double sourceGray;
+    bool autogain;
+    double gain;
     double targetGray;
     double blackEv;
     double whiteEv;

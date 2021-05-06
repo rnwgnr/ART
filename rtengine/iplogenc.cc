@@ -113,6 +113,18 @@ inline float norm(float r, float g, float b, TMatrix ws)
 }
 
 
+inline float ev2gray(float ev)
+{
+    return std::pow(2.f, -ev + std::log2(0.18f));
+}
+
+
+inline float gray2ev(float gray)
+{
+    return std::log2(0.18f / gray);
+}
+
+
 // basic log encoding taken from ACESutil.Lin_to_Log2, from
 // https://github.com/ampas/aces-dev
 // (as seen on pixls.us)
@@ -122,7 +134,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
         return;
     }
 
-    const float gray = params->logenc.sourceGray / 100.f;
+    const float gray = ev2gray(params->logenc.gain);
     const float shadows_range = params->logenc.blackEv;
     const float dynamic_range = std::max(params->logenc.whiteEv - params->logenc.blackEv, 0.5);
     const float noise = pow_F(2.f, -16.f);
@@ -286,7 +298,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                       << ", DR = " << dynamic_range << std::endl;
         }
 
-        if (lparams.autogray) {
+        if (lparams.autogain) {
             double tot = 0.f;
             int n = 0;
             float gmax = std::min(vmax / 2.f, 0.25f);
@@ -304,20 +316,20 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                 }
             }
             if (n > 0) {
-                lparams.sourceGray = tot / n * 100.f;
+                lparams.gain = gray2ev(tot / n * 100.f);
                 if (settings->verbose) {
-                    std::cout << "         computed gray point from " << n << " samples: " << lparams.sourceGray << std::endl;
+                    std::cout << "         computed gain from " << n << " samples: " << lparams.gain << std::endl;
                 }
             } else if (settings->verbose) {
-                std::cout << "         no samples found in range, resorting to default gray point value" << std::endl;
-                lparams.sourceGray = LogEncodingParams().sourceGray;
+                std::cout << "         no samples found in range, resorting to default gain value" << std::endl;
+                lparams.gain = LogEncodingParams().gain;
             }
         }
 
         constexpr double MIN_WHITE = 2.f;
         constexpr double MAX_BLACK = -3.5f;
         
-        float gray = float(lparams.sourceGray) / 100.f;
+        float gray = ev2gray(lparams.gain);
         lparams.whiteEv = std::max(double(xlogf(vmax / gray) / log2), MIN_WHITE);
         lparams.blackEv = std::min(lparams.whiteEv - dynamic_range, MAX_BLACK);
     }
