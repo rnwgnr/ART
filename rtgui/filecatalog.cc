@@ -958,8 +958,10 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
 
     // put it into the "full directory" browser
     fileBrowser->addEntry (fdn);
-    if (++refresh_counter_ % 30 == 0) {
-        fileBrowser->enableThumbRefresh();
+    if (!options.thumb_delay_update) {
+        if (++refresh_counter_ % 30 == 0) {
+            fileBrowser->enableThumbRefresh();
+        }
     }
 
     // update exif filter settings (minimal & maximal values of exif tags, cameras, lenses, etc...)

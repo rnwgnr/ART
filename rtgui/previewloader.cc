@@ -75,7 +75,7 @@ public:
 
     typedef std::set<Job, JobCompare> JobSet;
 
-    Impl(): nConcurrentThreads(0)
+    Impl(): nConcurrentThreads(0), job_count_(0)
     {
 #ifdef _OPENMP
         if (options.thumb_update_thread_limit > 0) {
@@ -99,6 +99,7 @@ public:
     std::deque<Job> jobs_;
     gint nConcurrentThreads;
     bool slowing_down_;
+    size_t job_count_;
 // Issue 2406   std::vector<OutputJob *> output_;
 
     void processNextJob()
@@ -150,9 +151,9 @@ public:
 // Issue 2406               fdn = new FileBrowserEntry(tmb,j.dir_entry_);
             }
 
-            if (slowing_down_) {
+            if (slowing_down_ || (++job_count_ % 20 == 0)) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
+            }                
 
         } catch (Glib::Error &e) {} catch(...) {}
 
