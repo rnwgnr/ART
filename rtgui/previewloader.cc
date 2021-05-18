@@ -81,7 +81,7 @@ public:
         if (options.thumb_update_thread_limit > 0) {
             initial_thread_count_ = options.thumb_update_thread_limit;
         } else {
-            initial_thread_count_ = std::max(omp_get_num_procs()-1, 1);
+            initial_thread_count_ = omp_get_num_procs();
         }
 #else
         initial_thread_count_ = 1;

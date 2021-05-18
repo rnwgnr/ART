@@ -92,9 +92,9 @@ class Thumbnail: public PParamsSnapshotListener {
     // vector of listeners
     std::vector<ThumbnailListener*> listeners;
 
-    void _loadThumbnail(bool firstTrial = true);
+    void _loadThumbnail(bool firstTrial=true, bool info_only=false);
     void _saveThumbnail();
-    void _generateThumbnailImage(bool save_in_cache=true);
+    void _generateThumbnailImage(bool save_in_cache=true, bool info_only=false);
     int infoFromImage(const Glib::ustring& fname);
     void loadThumbnail(bool firstTrial = true);
     void generateExifDateTimeStrings();
@@ -144,23 +144,23 @@ public:
 
     const Glib::ustring &getExifString();
     const Glib::ustring &getDateTimeString();
-    void getCamWB(double& temp, double& green)
-    {
-        if (tpp) {
-            tpp->getCamWB(temp, green);
-        } else {
-            temp = green = -1.0;
-        }
-    }
-    void getAutoWB(double& temp, double& green, double equal);
-    void getSpotWB(int x, int y, int rect, double& temp, double& green)
-    {
-        if (tpp) {
-            tpp->getSpotWB (getProcParams(), x, y, rect, temp, green);
-        } else {
-            temp = green = -1.0;
-        }
-    }
+    // void getCamWB(double& temp, double& green)
+    // {
+    //     if (tpp) {
+    //         tpp->getCamWB(temp, green);
+    //     } else {
+    //         temp = green = -1.0;
+    //     }
+    // }
+    // void getAutoWB(double& temp, double& green, double equal);
+    // void getSpotWB(int x, int y, int rect, double& temp, double& green)
+    // {
+    //     if (tpp) {
+    //         tpp->getSpotWB (getProcParams(), x, y, rect, temp, green);
+    //     } else {
+    //         temp = green = -1.0;
+    //     }
+    // }
 
     ThFileType getType();
     Glib::ustring getFileName() { return fname; }

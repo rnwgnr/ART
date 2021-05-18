@@ -959,7 +959,7 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
     // put it into the "full directory" browser
     fileBrowser->addEntry (fdn);
     if (!options.thumb_delay_update) {
-        if (++refresh_counter_ % 30 == 0) {
+        if (++refresh_counter_ % 20 == 0) {
             fileBrowser->enableThumbRefresh();
         }
     }

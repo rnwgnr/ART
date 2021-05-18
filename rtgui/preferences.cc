@@ -436,7 +436,13 @@ Gtk::Widget* Preferences::getPerformancePanel ()
 
     Gtk::Frame *thumbFrame = Gtk::manage(new Gtk::Frame(M("MAIN_FRAME_FILEBROWSER")));
     thumbDelayUpdate = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_DELAY_UPDATE")));
-    thumbFrame->add(*thumbDelayUpdate);
+    thumbLazyCaching = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_LAZY_CACHING")));
+    {
+        Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+        vb->pack_start(*thumbDelayUpdate);
+        vb->pack_start(*thumbLazyCaching);
+        thumbFrame->add(*vb);
+    }
     vbPerformance->pack_start(*thumbFrame, Gtk::PACK_SHRINK, 4);    
     
     swPerformance->add(*vbPerformance);
@@ -1637,6 +1643,7 @@ void Preferences::storePreferences ()
     moptions.maxInspectorBuffers = maxInspectorBuffersSB->get_value_as_int();
     moptions.thumb_update_thread_limit = thumbUpdateThreadLimit->get_value_as_int();
     moptions.thumb_delay_update = thumbDelayUpdate->get_active();
+    moptions.thumb_lazy_caching = thumbLazyCaching->get_active();
 
 // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
@@ -1873,6 +1880,7 @@ void Preferences::fillPreferences ()
     maxInspectorBuffersSB->set_value (moptions.maxInspectorBuffers);
     thumbUpdateThreadLimit->set_value(moptions.thumb_update_thread_limit);
     thumbDelayUpdate->set_active(moptions.thumb_delay_update);
+    thumbLazyCaching->set_active(moptions.thumb_lazy_caching);
 
     darkFrameDir->set_current_folder ( moptions.rtSettings.darkFramesPath );
     darkFrameChanged ();

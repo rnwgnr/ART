@@ -347,6 +347,7 @@ public:
     int clutCacheSize;
     int thumb_update_thread_limit;
     bool thumb_delay_update;
+    bool thumb_lazy_caching;
     bool filledProfile;  // Used as reminder for the ProfilePanel "mode"
     prevdemo_t prevdemo; // Demosaicing method used for the <100% preview
     bool serializeTiffRead;
