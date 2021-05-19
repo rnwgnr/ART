@@ -76,21 +76,21 @@ LogEncoding::LogEncoding():
     //gain->setLogScale(10, 18, true);
     targetGray->setLogScale(10, 18, true);
 
-    Gtk::Frame *advanced = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_ADVANCED")));
-    advanced->set_label_align(0.025, 0.5);
+    // Gtk::Frame *advanced = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_ADVANCED")));
+    // advanced->set_label_align(0.025, 0.5);
 
-    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
-    vb->set_border_width(2);
-    vb->set_spacing(2);
-    advanced->add(*vb);
-    vb->pack_start(*blackEv);
-    vb->pack_start(*gain);
-    vb->pack_start(*regularization);
+    // Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+    // vb->set_border_width(2);
+    // vb->set_spacing(2);
+    // advanced->add(*vb);
 
-    pack_start(*autocompute);
-    pack_start(*whiteEv);
     pack_start(*targetGray);
-    pack_start(*advanced);
+    pack_start(*gain);
+    pack_start(*whiteEv);
+    pack_start(*blackEv);
+    pack_start(*regularization);
+    // pack_start(*advanced);
+    pack_start(*autocompute);
 }
 
 
