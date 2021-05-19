@@ -136,6 +136,7 @@ private:
     IdleRegister idle_register;
 
     std::unique_ptr<Glib::ThreadPool> thread_pool_;
+    sigc::connection zoom_conn_;
 };
 
 #endif

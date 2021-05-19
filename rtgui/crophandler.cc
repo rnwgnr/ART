@@ -260,15 +260,39 @@ void CropHandler::setZoom (int z, int centerx, int centery)
 
     compDim ();
 
-    if (enabled && (oldZoom != zoom || oldcax != cax || oldcay != cay || oldCropX != cropX || oldCropY != cropY || oldCropW != cropW || oldCropH != cropH)) {
-        if (needsFullRefresh && !ipc->getHighQualComputed()) {
-            cropPixbuf.clear ();
-            ipc->startProcessing(M_HIGHQUAL);
-            ipc->setHighQualComputed();
-        } else {
-            update ();
+    bool needed = enabled && (oldZoom != zoom || oldcax != cax || oldcay != cay || oldCropX != cropX || oldCropY != cropY || oldCropW != cropW || oldCropH != cropH);
+
+    if (needed) {
+        const auto doit =
+            [&]() -> bool
+            {
+                if (needsFullRefresh && !ipc->getHighQualComputed()) {
+                    cropPixbuf.clear ();
+                    ipc->startProcessing(M_HIGHQUAL);
+                    ipc->setHighQualComputed();
+                } else {
+                    update ();
+                }
+                return false;
+            };
+
+        if (zoom_conn_.connected()) {
+            zoom_conn_.disconnect();
+            cropPixbuf.clear();
         }
+        zoom_conn_ = Glib::signal_timeout().connect(sigc::slot<bool>(doit), options.adjusterMaxDelay);
     }
+    
+    // if (enabled && (oldZoom != zoom || oldcax != cax || oldcay != cay || oldCropX != cropX || oldCropY != cropY || oldCropW != cropW || oldCropH != cropH)) {
+    //     if (needsFullRefresh && !ipc->getHighQualComputed()) {
+    //         cropPixbuf.clear ();
+    //         ipc->startProcessing(M_HIGHQUAL);
+    //         ipc->setHighQualComputed();
+    //     } else {
+    //         update ();
+    //     }
+    // }
+
 }
 
 float CropHandler::getZoomFactor ()
