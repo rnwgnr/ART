@@ -28,6 +28,10 @@
 #include "../rtengine/rt_math.h"
 #include "../rtengine/improcfun.h"
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
+
 using namespace rtengine;
 
 namespace {
@@ -112,13 +116,17 @@ CropHandler::CropHandler() :
     ciw(0),
     cih(0),
     cis(1),
-    isLowUpdatePriority(false),
     ipc(nullptr),
     crop(nullptr),
     displayHandler(nullptr),
     redraw_needed(false),
     initial(false)
 {
+    int nthreads = 1;
+#ifdef _OPENMP
+    nthreads = omp_get_num_procs();
+#endif
+    thread_pool_.reset(new Glib::ThreadPool(nthreads, false));
 }
 
 CropHandler::~CropHandler ()
@@ -499,11 +507,7 @@ void CropHandler::update ()
 
         // To save threads, try to mark "needUpdate" without a thread first
         if (crop->tryUpdate()) {
-            if (isLowUpdatePriority) {
-                Glib::Thread::create(sigc::mem_fun(*crop, &DetailedCrop::fullUpdate), 0, false, true, Glib::THREAD_PRIORITY_LOW);
-            } else {
-                Glib::Thread::create(sigc::mem_fun(*crop, &DetailedCrop::fullUpdate), false );
-            }
+            thread_pool_->push(sigc::mem_fun(*crop, &DetailedCrop::fullUpdate));
         }
     }
 }

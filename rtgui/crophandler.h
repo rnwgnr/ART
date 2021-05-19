@@ -124,7 +124,6 @@ private:
     std::vector<unsigned char> cropimg;
     std::vector<unsigned char> cropimgtrue;
     int cropimg_width, cropimg_height, cix, ciy, ciw, cih, cis;
-    bool isLowUpdatePriority;
 
     rtengine::StagedImageProcessor* ipc;
     rtengine::DetailedCrop* crop;
@@ -135,6 +134,8 @@ private:
     std::atomic<bool> initial;
 
     IdleRegister idle_register;
+
+    std::unique_ptr<Glib::ThreadPool> thread_pool_;
 };
 
 #endif
