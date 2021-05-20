@@ -320,6 +320,7 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     autosaveInterval->set_digits(0);
     autosaveInterval->set_max_length(2);
     autosaveInterval->set_range(0, 10);
+    autosaveInterval->set_increments(1, 1);
     {
         Gtk::HBox *hb2 = Gtk::manage(new Gtk::HBox());
         auto lbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_AUTOSAVE_INTERVAL")));
