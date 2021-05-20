@@ -764,6 +764,7 @@ MAIN_FRAME_QUEUE;Queue
 MAIN_FRAME_QUEUE_TOOLTIP;Processing queue.\nShortcut: <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Recent Folders
 MAIN_MSG_ALREADYEXISTS;File already exists.
+MAIN_MSG_AUTOSAVING;Auto saving...
 MAIN_MSG_CANNOTLOAD;Cannot load image
 MAIN_MSG_CANNOTSAVE;File saving error
 MAIN_MSG_CANNOTSTARTEDITOR;Cannot start editor.
@@ -939,6 +940,8 @@ PREFERENCES_APPEARANCE_THEME;Theme
 PREFERENCES_APPLNEXTSTARTUP;restart required
 PREFERENCES_AUTOMONPROFILE;Use operating system's main monitor color profile
 PREFERENCES_AUTOSAVE_TP_OPEN;Save tool collapsed/expanded state on exit
+PREFERENCES_AUTOSAVE;Auto Saving
+PREFERENCES_AUTOSAVE_INTERVAL;ARP auto saving interval (in minutes, 0 to disable)
 PREFERENCES_BATCH_PROCESSING;Batch Processing
 PREFERENCES_CACHECLEAR;Clear
 PREFERENCES_CACHECLEAR_ALL;Clear all cached files:

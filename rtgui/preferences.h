@@ -161,6 +161,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::CheckButton* ckbmenuGroupExtProg;
 
     Gtk::CheckButton* chOverwriteOutputFile;
+    Gtk::SpinButton *autosaveInterval;
 
     Gtk::ComboBoxText* saveParamsPreference;
     Gtk::CheckButton* useBundledProfiles;

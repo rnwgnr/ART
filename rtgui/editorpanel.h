@@ -197,6 +197,7 @@ private:
 
     void do_save_image(bool fast_export);
     void do_queue_image(bool fast_export);
+    bool autosave();
 
     Glib::ustring lastSaveAsFileName;
     bool realized;
@@ -282,5 +283,7 @@ private:
 
     rtengine::HistogramObservable* histogram_observable;
     Options::ScopeType histogram_scope_type;
+
+    sigc::connection autosave_conn_;
 };
 

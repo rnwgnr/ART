@@ -848,12 +848,15 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     if (tbTopPanel_1) {
         tbTopPanel_1->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::tbTopPanel_1_toggled) );
     }
-
 }
 
 
 EditorPanel::~EditorPanel ()
 {
+    if (autosave_conn_.connected()) {
+        autosave_conn_.disconnect();
+    }
+    
     idle_register.destroy();
 
     history->setHistoryBeforeAfterListener (nullptr);
@@ -1091,6 +1094,10 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
     // When passing a photo as an argument to the RawTherapee executable, the user wants
     // this auto-loaded photo's thumbnail to be selected and visible in the Filmstrip.
     syncFileBrowser();
+
+    if (options.sidecar_autosave_interval > 0) {
+        autosave_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &EditorPanel::autosave), options.sidecar_autosave_interval * 60000);
+    }
 }
 
 void EditorPanel::close ()
@@ -1138,6 +1145,10 @@ void EditorPanel::saveProfile ()
         return;
     }
 
+    if (autosave_conn_.connected()) {
+        autosave_conn_.disconnect();
+    }
+    
     // If the file was deleted, do not generate ghost entries
     if (Glib::file_test (fname, Glib::FILE_TEST_EXISTS)) {
         ProcParams params;
@@ -1145,6 +1156,10 @@ void EditorPanel::saveProfile ()
 
         // Will call updateCache, which will update both the cached and sidecar files if necessary
         openThm->setProcParams(FullPartialProfile(params), EDITOR);
+    }
+
+    if (options.sidecar_autosave_interval > 0) {
+        autosave_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &EditorPanel::autosave), options.sidecar_autosave_interval * 60000);
     }
 }
 
@@ -2546,3 +2561,19 @@ void EditorPanel::defaultMonitorProfileChanged (const Glib::ustring &profile_nam
     colorMgmtToolBar->defaultMonitorProfileChanged (profile_name, auto_monitor_profile);
 }
 
+
+bool EditorPanel::autosave()
+{
+    MyProgressBar* const pl = progressLabel;
+    auto prev = pl->get_text();
+    pl->set_text(M("MAIN_MSG_AUTOSAVING"));
+    const auto doit =
+        [pl, prev]() -> bool
+        {
+            pl->set_text(prev);
+            return false;
+        };
+    Glib::signal_timeout().connect(sigc::slot<bool>(doit), 1000);
+    saveProfile();
+    return false;
+}

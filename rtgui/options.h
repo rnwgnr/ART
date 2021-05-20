@@ -471,6 +471,8 @@ public:
     };
     RenameOptions renaming;
 
+    int sidecar_autosave_interval; // in seconds
+
     Options();
 
     Options *copyFrom(Options *other);

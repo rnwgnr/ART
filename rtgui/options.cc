@@ -666,6 +666,7 @@ void Options::setDefaults()
     };
 
     renaming = RenameOptions();
+    sidecar_autosave_interval = 0;
 }
 
 Options* Options::copyFrom(Options* other)
@@ -923,6 +924,10 @@ void Options::readFromFile(Glib::ustring fname)
                     
                 if (keyFile.has_key("Output", "BatchQueueProfile")) {
                     batch_queue_profile_path = keyFile.get_string("Output", "BatchQueueProfile");
+                }
+
+                if (keyFile.has_key("Output", "ProcParamsAutosaveInterval")) {
+                    sidecar_autosave_interval = keyFile.get_integer("Output", "ProcParamsAutosaveInterval");
                 }
             }
 
@@ -2190,6 +2195,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Output", "OverwriteOutputFile", overwriteOutputFile);
         keyFile.set_boolean("Output", "BatchQueueUseProfile", batch_queue_use_profile);
         keyFile.set_string("Output", "BatchQueueProfile", batch_queue_profile_path);
+        keyFile.set_integer("Output", "ProcParamsAutosaveInterval", sidecar_autosave_interval);
 
         keyFile.set_string("Profiles", "Directory", profilePath);
         keyFile.set_boolean("Profiles", "UseBundledProfiles", useBundledProfiles);

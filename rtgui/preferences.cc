@@ -310,7 +310,28 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     Gtk::Frame *owf = Gtk::manage(new Gtk::Frame(M("PREFERENCES_BATCH_PROCESSING")));
     chOverwriteOutputFile = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_OVERWRITEOUTPUTFILE")));
     owf->add(*chOverwriteOutputFile);
-    vbImageProcessing->pack_start(*owf, Gtk::PACK_SHRINK, 4);
+
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*owf, Gtk::PACK_EXPAND_WIDGET);
+    hb->pack_start(*Gtk::manage(new Gtk::Label("  ")), Gtk::PACK_SHRINK);
+
+    owf = Gtk::manage(new Gtk::Frame(M("PREFERENCES_AUTOSAVE")));
+    autosaveInterval = Gtk::manage(new Gtk::SpinButton());
+    autosaveInterval->set_digits(0);
+    autosaveInterval->set_max_length(2);
+    autosaveInterval->set_range(0, 10);
+    {
+        Gtk::HBox *hb2 = Gtk::manage(new Gtk::HBox());
+        auto lbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_AUTOSAVE_INTERVAL")));
+        hb2->pack_start(*lbl, Gtk::PACK_EXPAND_WIDGET, 4);
+        setExpandAlignProperties(lbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+        hb2->pack_start(*autosaveInterval, Gtk::PACK_SHRINK);
+        hb2->pack_start(*Gtk::manage(new Gtk::Label(" (" + M("PREFERENCES_APPLNEXTSTARTUP") + ")")), Gtk::PACK_SHRINK, 4);
+        owf->add(*hb2);
+    }
+    hb->pack_start(*owf, Gtk::PACK_EXPAND_WIDGET);
+    
+    vbImageProcessing->pack_start(*hb, Gtk::PACK_SHRINK, 4);
 
     swImageProcessing->add(*vbImageProcessing);
 
@@ -1635,6 +1656,7 @@ void Preferences::storePreferences ()
     moptions.hideTPVScrollbar = ckbHideTPVScrollbar->get_active();
     moptions.overwriteOutputFile = chOverwriteOutputFile->get_active ();
     moptions.adjuster_force_linear = adjuster_force_linear->get_active();
+    moptions.sidecar_autosave_interval = autosaveInterval->get_value();
 
     moptions.autoSaveTpOpen = ckbAutoSaveTpOpen->get_active();
 
@@ -1906,6 +1928,7 @@ void Preferences::fillPreferences ()
     bpconn.block (false);
 
     chOverwriteOutputFile->set_active (moptions.overwriteOutputFile);
+    autosaveInterval->set_value(moptions.sidecar_autosave_interval);
 
     // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
