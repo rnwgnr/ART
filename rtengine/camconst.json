@@ -1413,6 +1413,11 @@ Camera constants:
     },
 
     { // Quality C
+        "make_model": "FUJIFILM X-A20",
+        "ranges": { "white": 3838 }
+    },    
+
+    { // Quality C
         "make_model": "FUJIFILM X-S10",
         "raw_crop" : [56, 26, 6190, 4130]
     },
