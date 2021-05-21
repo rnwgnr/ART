@@ -23,6 +23,7 @@
 #22 2020-12-19 update to ART v1.7 by pm
 #23 2021-02-03 update to ART v1.8 by pm
 #24 2021-03-26 update to ART v1.8.3 by pm
+#25 2021-05-21 update to ART v1.9 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -580,32 +581,26 @@ HISTORY_MSG_ICM_OUTPUT_TEMP;Uitvoer - ICC-v4 illuminant D
 HISTORY_MSG_ICM_OUTPUT_TYPE;Uitvoer - Type
 HISTORY_MSG_LABMASKS_MASK_NAME;Maskernaam
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Lokaal contrast - Hoeveelheid
-HISTORY_MSG_LOCALCONTRAST_AREAMASK;Lokaal contrast - gebiedsmasker
-HISTORY_MSG_LOCALCONTRAST_CHROMATICITYMASK;Lokaal contrast - C-masker
 HISTORY_MSG_LOCALCONTRAST_CONTRAST;Lokaal contrast - Residueel contrast
 HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;Lokaal Contrast - Masker contrastdrempel
 HISTORY_MSG_LOCALCONTRAST_CURVE;Lokaal contrast - Curve
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;Lokaal contrast - Donker
-HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Lokaal contrast - kleurgelijkingsmasker
-HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Lokaal contrast - penseelmasker
 HISTORY_MSG_LOCALCONTRAST_ENABLED;Lokaal contrast
-HISTORY_MSG_LOCALCONTRAST_HUEMASK;Lokaal contrast - H-masker
 HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Lokaal contrast - Licht
-HISTORY_MSG_LOCALCONTRAST_LIGHTNESSMASK;Lokaal contrast - L-masker
-HISTORY_MSG_LOCALCONTRAST_LIST;Lokaal contrast - gebieden
-HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Lokaal contrast - maskervervaging
 HISTORY_MSG_LOCALCONTRAST_MODE;Lokaal contrast - Methode
-HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Lokaal contrast - parametrisch masker
 HISTORY_MSG_LOCALCONTRAST_RADIUS;Lokaal contrast - Straal
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Lokaal contrast - toon masker
-HISTORY_MSG_LOGENC_AUTOGRAY;Log - Auto-grijs
+HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Lokaal contrast - kleurgelijkheidsmasker
+HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Lokaal contrast- penseelmasker
+HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Lokaal contrast - parametrisch masker
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
-HISTORY_MSG_LOGENC_BLACK_EV;Log - Zwart EV
-HISTORY_MSG_LOGENC_ENABLED;Log toonmappen
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - Auto-versterking
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Reguleer
-HISTORY_MSG_LOGENC_SOURCE_GRAY;Log - Oorspronkelijk grijspunt
-HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Bestemming grijspunt
+HISTORY_MSG_LOGENC_ENABLED;Log toonmappen
+HISTORY_MSG_LOGENC_BLACK_EV;Log - Zwart EV
+HISTORY_MSG_LOGENC_GAIN;Log - Versterking
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Wit EV
+HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Bestemming grijspunt
 HISTORY_MSG_METADATA_MODE;Metadata kopieermodus
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrast - Contrastdrempel
 HISTORY_MSG_PCVIGNETTE_CENTER;VF - Centrum
@@ -784,6 +779,7 @@ MAIN_FRAME_QUEUE_TOOLTIP; Verwerkingsrij\nSneltoets: <b>Ctrl+F3</b>
 MAIN_FRAME_QUEUE;Verwerkingsrij
 MAIN_FRAME_RECENT;Recente mappen
 MAIN_MSG_ALREADYEXISTS;Bestand bestaat reeds.
+MAIN_MSG_AUTOSAVING;Automatisch opslaan...
 MAIN_MSG_CANNOTLOAD;Fout bij laden
 MAIN_MSG_CANNOTSAVE;Fout bij opslaan van de afbeelding
 MAIN_MSG_CANNOTSTARTEDITOR;Kan fotobewerker niet starten.
@@ -951,6 +947,8 @@ PREFERENCES_APPEARANCE_THEME;Thema
 PREFERENCES_APPEARANCE;Uiterlijk
 PREFERENCES_APPLNEXTSTARTUP;herstart vereist
 PREFERENCES_AUTOMONPROFILE;Gebruik standaard beeldschermprofiel van het besturingsysteem
+PREFERENCES_AUTOSAVE;Automatisch opslaan
+PREFERENCES_AUTOSAVE_INTERVAL;Interval autobewaren ARP-bestand (in minuten, 0 om uit te schakelen)
 PREFERENCES_AUTOSAVE_TP_OPEN;Bewaar positie gereedschappen (open/dicht) bij afsluiten
 PREFERENCES_BATCH_PROCESSING;Batch-verwerking
 PREFERENCES_CACHECLEAR_ALLBUTPROFILES;Wis alle bestanden in de cache behalve verwerkingsprofielen:
@@ -1062,6 +1060,7 @@ PREFERENCES_PARSEDEXTDOWNHINT;Verplaats extensie naar beneden
 PREFERENCES_PARSEDEXTUPHINT;Verplaats extensie naar boven
 PREFERENCES_PARSEDEXT;Verwerkte extensies
 PREFERENCES_PERFORMANCE_THREADS_LABEL;Maximum aantal threads voor ruisvermindering (0 = Automatisch)
+PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE;Maximaal aantal threads om miniaturen te verversen (0 = Automatisch)
 PREFERENCES_PERFORMANCE_THREADS;Threads
 PREFERENCES_PREVDEMO;Accuratesse voorbeeld
 PREFERENCES_PREVDEMO_FAST;Snel
@@ -1110,6 +1109,8 @@ PREFERENCES_TAB_GENERAL;Algemeen
 PREFERENCES_TAB_IMPROC;Beeldverwerking
 PREFERENCES_TAB_PERFORMANCE;Prestaties
 PREFERENCES_TAB_SOUND;Geluiden
+PREFERENCES_THUMBNAIL_DELAY_UPDATE;Vertraag verversen van miniaturen tijdens het openen van mappen
+PREFERENCES_THUMBNAIL_LAZY_CACHING;Miniaturen 'lui' in de cache plaatsen
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Bekijk afbeeldingen door de muis over de miniaturen te bewegen
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Ingebed JPEG-voorbeeld
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Te tonen foto
@@ -1541,10 +1542,12 @@ TP_LABMASKS_AREA;Gebiedsmasker
 TP_LABMASKS_AREA_HEIGHT;Hoogte
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Kopieer het huidige masker naar het klembord
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Voeg een rechthoekige vorm toe door te tekenen op het voorbeeld
+TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;Voeg verloop toe
 TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Voeg een gebied met meerdere hoeken toe door punten op het voorbeeld te plaatsen
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Bewerk het huidige rechthoekige gebied door op het voorbeeld te tekenen
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Plak een masker van het klembord
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Toon de huidige gebiedsvorm op het voorbeeld
+TP_LABMASKS_AREA_SHAPE;Vorm
 TP_LABMASKS_AREA_ROUNDNESS;Rondheid
 TP_LABMASKS_AREA_SHAPE_MODE_ADD;Toevoegen
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Doorsnede
@@ -1552,7 +1555,9 @@ TP_LABMASKS_AREA_SHAPE_MODE;Modus
 TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Aftrekken
 TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 punt(en)
 TP_LABMASKS_AREA_SHAPES;Gebiedsvormen
-TP_LABMASKS_AREA_SHAPE;Vorm
+TP_LABMASKS_AREA_STRENGTH_START;Kracht begin
+TP_LABMASKS_AREA_STRENGTH_END;Kracht eind
+
 TP_LABMASKS_AREA_WIDTH;Breedte
 TP_LABMASKS_AREA_X;Centrum X
 TP_LABMASKS_AREA_Y;Centrum Y
@@ -1614,6 +1619,7 @@ TP_LOCALCONTRAST_LIST_TITLE;Parameters
 TP_LOGENC_AUTO;Automatisch
 TP_LOGENC_ADVANCED;Geavanceerde instellingen
 TP_LOGENC_BLACK_EV;Zwart relatieve belichting (LW)
+TP_LOGENC_GAIN;Versterking (LW)
 TP_LOGENC_SOURCE_GRAY;Bron grijspunt (versterking)
 TP_LOGENC_WHITE_EV;Wit relatieve belichting (LW)
 TP_LOGENC_TARGET_GRAY;Doel grijspunt (helderheid)

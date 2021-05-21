@@ -8,6 +8,7 @@
 #07 2021-02-02 mrleemon, second update for 1.8
 #08 2021-02-09 mrleemon, update for 1.8.1
 #09 2021-03-26 mrleemon, update for 1.8.3
+#10 2021-05-21 mrleemon, update for 1.9
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -591,11 +592,11 @@ HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contraste local - máscara de similitud de 
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Contraste local - máscara de pincel
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Contraste local - máscara paramétrica
 HISTORY_MSG_LOGENC_AUTO;Log - Automático
-HISTORY_MSG_LOGENC_AUTOGRAY;Log - Gris automático
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - Ganancia automática
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regularización
 HISTORY_MSG_LOGENC_ENABLED;Codificación logarítmica
 HISTORY_MSG_LOGENC_BLACK_EV;Log - Ev negro
-HISTORY_MSG_LOGENC_SOURCE_GRAY;Log - Punto gris origen
+HISTORY_MSG_LOGENC_GAIN;Log - Ganancia
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Ev blanco
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Punto gris destino
 HISTORY_MSG_METADATA_MODE;Modo de copia de metadatos
@@ -776,6 +777,7 @@ MAIN_FRAME_QUEUE;Cola
 MAIN_FRAME_QUEUE_TOOLTIP;Cola de procesamiento.\nAtajo: <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Carpetas recientes
 MAIN_MSG_ALREADYEXISTS;Este archivo ya existe.
+MAIN_MSG_AUTOSAVING;Guardando automáticamente...
 MAIN_MSG_CANNOTLOAD;No se puede abrir imagen
 MAIN_MSG_CANNOTSAVE;Error al guardar archivo
 MAIN_MSG_CANNOTSTARTEDITOR;No se puede abrir el editor.
@@ -951,6 +953,8 @@ PREFERENCES_APPEARANCE_THEME;Tema
 PREFERENCES_APPLNEXTSTARTUP;requiere reinicio
 PREFERENCES_AUTOMONPROFILE;Usar el perfil de color del monitor principal en el sistema operativo
 PREFERENCES_AUTOSAVE_TP_OPEN;Guardar el estado contraído/expandido de las herramientas al salir
+PREFERENCES_AUTOSAVE;Guardado automático
+PREFERENCES_AUTOSAVE_INTERVAL;Intervalo de guardado automático de ARP (en minutos, 0 para desactivar)
 PREFERENCES_BATCH_PROCESSING;Procesamiento por lotes
 PREFERENCES_CACHECLEAR;Vaciar
 PREFERENCES_CACHECLEAR_ALL;Vaciar todos los archivos de la caché:
@@ -1061,7 +1065,8 @@ PREFERENCES_PARSEDEXTDELHINT;Borra la extensión seleccionada de la lista.
 PREFERENCES_PARSEDEXTDOWNHINT;Mueve la extensión seleccionada hacia abajo en la lista.
 PREFERENCES_PARSEDEXTUPHINT;Mueve la extensión seleccionada hacia arriba en la lista.
 PREFERENCES_PERFORMANCE_THREADS;Subprocesos
-PREFERENCES_PERFORMANCE_THREADS_LABEL;Número máximo de subprocesos para la reducción de ruido y los niveles de ondícula (0 = automático)
+PREFERENCES_PERFORMANCE_THREADS_LABEL;Número máximo de subprocesos para la reducción de ruido y los niveles de ondícula (0 = Automático)
+PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE;Número máximo de subprocesos para actualizar miniaturas (0 = Automático)
 PREFERENCES_PREVDEMO;Precisión de la vista previa
 PREFERENCES_PREVDEMO_FAST;Rápido
 PREFERENCES_PREVDEMO_LABEL;Método de interpolación usado para la vista previa al <100% de zoom:
@@ -1109,6 +1114,8 @@ PREFERENCES_TAB_GENERAL;General
 PREFERENCES_TAB_IMPROC;Procesamiento de imágenes
 PREFERENCES_TAB_PERFORMANCE;Rendimiento
 PREFERENCES_TAB_SOUND;Sonidos
+PREFERENCES_THUMBNAIL_DELAY_UPDATE;Retrasar la actualización de imágenes en miniatura al abrir directorios
+PREFERENCES_THUMBNAIL_LAZY_CACHING;Almacenamiento en caché diferido de imágenes en miniatura
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navegar y desplazarse pasando el cursor sobre las miniaturas
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Vista previa de JPEG incrustado
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Imagen para mostrar
@@ -1547,6 +1554,7 @@ TP_LABMASKS_AREA_ROUNDNESS;Redondez
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copie la máscara actual al portapapeles
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Edite la forma de área rectangular actual dibujando en la vista previa de la imagen
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Añada una forma de área rectangular dibujando en la vista previa de la imagen
+TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;Añada un filtro graduado
 TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Añada una forma de área poligonal añadiendo puntos en la vista previa de la imagen
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Muestre la forma de área actual en la vista previa de la imagen
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Pegue una máscara del portapapeles
@@ -1557,6 +1565,8 @@ TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Restar
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Intersecar
 TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 punto(s)
 TP_LABMASKS_AREA_SHAPES;Formas de área
+TP_LABMASKS_AREA_STRENGTH_START;Intensidad inicial
+TP_LABMASKS_AREA_STRENGTH_END;Intensidad final
 TP_LABMASKS_AREA_WIDTH;Ancho
 TP_LABMASKS_AREA_X;Centro X
 TP_LABMASKS_AREA_Y;Centro Y
@@ -1613,7 +1623,7 @@ TP_LOCALCONTRAST_LABEL;Contraste local
 TP_LOGENC_AUTO;Automático
 TP_LOGENC_ADVANCED;Ajustes avanzados
 TP_LOGENC_BLACK_EV;Exposición relativa al negro (Ev)
-TP_LOGENC_SOURCE_GRAY;Punto gris origen (ganancia)
+TP_LOGENC_GAIN;Ganancia (Ev)
 TP_LOGENC_WHITE_EV;Exposición relativa al blanco (Ev)
 TP_LOGENC_TARGET_GRAY;Punto gris destino (brillo)
 TP_LOGENC_LABEL;Mapeo de tonos logarítmico

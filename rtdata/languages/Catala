@@ -5,6 +5,7 @@
 #04 2021-02-02 mrleemon, second update for 1.8
 #05 2021-02-09 mrleemon, update for 1.8.1
 #06 2021-03-26 mrleemon, update for 1.8.3
+#07 2021-05-21 mrleemon, update for 1.9
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -588,11 +589,11 @@ HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contrast local - màscara de similitud de c
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Contrast local - màscara de pinzell
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Contrast local - màscara paramètrica
 HISTORY_MSG_LOGENC_AUTO;Log - Automàtic
-HISTORY_MSG_LOGENC_AUTOGRAY;Log - Gris automàtic
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - Guany automàtic
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regularització
 HISTORY_MSG_LOGENC_ENABLED;Codificació logarítmica
 HISTORY_MSG_LOGENC_BLACK_EV;Log - Ev negre
-HISTORY_MSG_LOGENC_SOURCE_GRAY;Log - Punt gris origen
+HISTORY_MSG_LOGENC_GAIN;Log - Guany
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Ev blanc
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Punt gris destí
 HISTORY_MSG_METADATA_MODE;Mode de còpia de metadades
@@ -773,6 +774,7 @@ MAIN_FRAME_QUEUE;Cua
 MAIN_FRAME_QUEUE_TOOLTIP;Cua de processament.\nDrecera: <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Carpetes recents
 MAIN_MSG_ALREADYEXISTS;Aquest fitxer ja existeix.
+MAIN_MSG_AUTOSAVING;Desant automàticament...
 MAIN_MSG_CANNOTLOAD;No es pot obrir la imatge
 MAIN_MSG_CANNOTSAVE;Error en desar el fitxer
 MAIN_MSG_CANNOTSTARTEDITOR;No es pot obrir l'editor.
@@ -948,6 +950,8 @@ PREFERENCES_APPEARANCE_THEME;Tema
 PREFERENCES_APPLNEXTSTARTUP;requereix reinici
 PREFERENCES_AUTOMONPROFILE;Utilitza el perfil de color del monitor principal en el sistema operatiu
 PREFERENCES_AUTOSAVE_TP_OPEN;Desa l'estat tancat/obert de les eines en sortir
+PREFERENCES_AUTOSAVE;Desada automàtica
+PREFERENCES_AUTOSAVE_INTERVAL;Interval de desada automàtica de ARP (en minuts, 0 per desactivar)
 PREFERENCES_BATCH_PROCESSING;Processament per lots
 PREFERENCES_CACHECLEAR;Buida
 PREFERENCES_CACHECLEAR_ALL;Buida tots els fitxers de la memòria cau:
@@ -1058,7 +1062,8 @@ PREFERENCES_PARSEDEXTDELHINT;Esborra l'extensió seleccionada de la llista.
 PREFERENCES_PARSEDEXTDOWNHINT;Mou l'extensió seleccionada cap avall a la llista.
 PREFERENCES_PARSEDEXTUPHINT;Mou l'extensió seleccionada cap amunt a la llista.
 PREFERENCES_PERFORMANCE_THREADS;Subprocessos
-PREFERENCES_PERFORMANCE_THREADS_LABEL;Nombre màxim de subprocessos per a la reducció de soroll i els nivells d'ondeta (0 = automàtic)
+PREFERENCES_PERFORMANCE_THREADS_LABEL;Nombre màxim de subprocessos per a la reducció de soroll i els nivells d'ondeta (0 = Automàtic)
+PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE;Nombre màxim de subprocessos per actualitzar miniatures (0 = Automàtic)
 PREFERENCES_PREVDEMO;Precisió de la vista prèvia
 PREFERENCES_PREVDEMO_FAST;Ràpid
 PREFERENCES_PREVDEMO_LABEL;Mètode d'interpolació utilitzat per a la vista prèvia al <100% de zoom:
@@ -1106,6 +1111,8 @@ PREFERENCES_TAB_GENERAL;General
 PREFERENCES_TAB_IMPROC;Processament d'imatges
 PREFERENCES_TAB_PERFORMANCE;Rendiment
 PREFERENCES_TAB_SOUND;Sons
+PREFERENCES_THUMBNAIL_DELAY_UPDATE;Endarrereix l'actualització d'imatges en miniatura en obrir directoris
+PREFERENCES_THUMBNAIL_LAZY_CACHING;Emmagatzematge en memòria cau diferit d'imatges en miniatura
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navegueu i desplaceu-vos passant el cursor sobre les miniatures
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Vista prèvia de JPEG incrustat
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Imatge per mostrar
@@ -1544,6 +1551,7 @@ TP_LABMASKS_AREA_ROUNDNESS;Rodonesa
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copieu la màscara actual al porta-retalls
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Editeu la forma d'àrea rectangular actual dibuixant a la vista prèvia de la imatge
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Afegiu una forma d'àrea rectangular dibuixant a la vista prèvia de la imatge
+TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;Afegiu un filtre graduat
 TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Afegiu una forma d'àrea poligonal afegint punts a la vista prèvia de la imatge
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Mostreu la forma d'àrea actual a la vista prèvia de la imatge
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Enganxeu una màscara del porta-retalls
@@ -1554,6 +1562,8 @@ TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Resta
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Interseca
 TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 punt(s)
 TP_LABMASKS_AREA_SHAPES;Formes d'àrea
+TP_LABMASKS_AREA_STRENGTH_START;Intensitat inicial
+TP_LABMASKS_AREA_STRENGTH_END;Intensitat final
 TP_LABMASKS_AREA_WIDTH;Amplada
 TP_LABMASKS_AREA_X;Centre X
 TP_LABMASKS_AREA_Y;Centre Y
@@ -1610,9 +1620,9 @@ TP_LOCALCONTRAST_LABEL;Contrast local
 TP_LOGENC_AUTO;Automàtic
 TP_LOGENC_ADVANCED;Opcions avançades
 TP_LOGENC_BLACK_EV;Exposició relativa al negre (Ev)
-TP_LOGENC_SOURCE_GRAY;Punt gris origen (guany)
+TP_LOGENC_GAIN;Guany (Ev)
 TP_LOGENC_WHITE_EV;Exposició relativa al blanc (Ev)
-TP_LOGENC_TARGET_GRAY;Punto gris destí (brillantor)
+TP_LOGENC_TARGET_GRAY;Punt gris destí (brillantor)
 TP_LOGENC_LABEL;Mapeig de tons logarítmic
 TP_LOGENC_REGULARIZATION;Regularització
 TP_METADATA_EDIT;Aplica modificacions
