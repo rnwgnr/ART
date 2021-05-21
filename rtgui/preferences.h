@@ -105,7 +105,6 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::CheckButton* monBPC;
     Gtk::CheckButton* cbAutoMonProfile;
     //Gtk::CheckButton* cbAutocielab;
-    Gtk::CheckButton* cbdaubech;
     Gtk::SpinButton*  hlThresh;
     Gtk::SpinButton*  shThresh;
 
@@ -207,7 +206,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
 
     Options moptions;
     sigc::connection tconn, sconn, fconn, cpfconn, addc, setc, dfconn, ffconn, bpconn, rpconn, ipconn;
-    sigc::connection autoMonProfileConn, sndEnableConn, langAutoDetectConn, autocielabConn;
+    sigc::connection autoMonProfileConn, sndEnableConn, langAutoDetectConn;
     Glib::ustring initialTheme;
     Glib::ustring initialFontFamily;
     int initialFontSize;
@@ -266,7 +265,6 @@ public:
     void autoMonProfileToggled ();
     void sndEnableToggled ();
     void langAutoDetectToggled ();
-    void autocielabToggled ();
 
     void selectStartupDir ();
     void addExtPressed ();

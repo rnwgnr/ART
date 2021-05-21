@@ -224,28 +224,8 @@ void Color::init ()
         // we can put other as gamma g=2.6 slope=11, etc.
         // but noting to do with real gamma !!!: it's only for data Lab # data RGB
         // finally I opted for gamma55 and with options we can change
-
-        switch(settings->denoiselabgamma) {
-            case 0:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseGammaTab[i] = 65535.0 * gamma26_11 (i / 65535.0);
-                }
-
-                break;
-
-            case 1:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseGammaTab[i] = 65535.0 * gamma4 (i / 65535.0);
-                }
-
-                break;
-
-            default:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseGammaTab[i] = 65535.0 * gamma55 (i / 65535.0);
-                }
-
-                break;
+        for (int i = 0; i < maxindex; i++) {
+            denoiseGammaTab[i] = 65535.0 * gamma55 (i / 65535.0);
         }
 
 #ifdef _OPENMP
@@ -256,27 +236,8 @@ void Color::init ()
         // but noting to do with real gamma !!!: it's only for data Lab # data RGB
         // finally I opted for gamma55 and with options we can change
 
-        switch(settings->denoiselabgamma) {
-            case 0:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseIGammaTab[i] = 65535.0 * igamma26_11 (i / 65535.0);
-                }
-
-                break;
-
-            case 1:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseIGammaTab[i] = 65535.0 * igamma4 (i / 65535.0);
-                }
-
-                break;
-
-            default:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseIGammaTab[i] = 65535.0 * igamma55 (i / 65535.0);
-                }
-
-                break;
+        for (int i = 0; i < maxindex; i++) {
+            denoiseIGammaTab[i] = 65535.0 * igamma55 (i / 65535.0);
         }
 
 #ifdef _OPENMP

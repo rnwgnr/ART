@@ -319,7 +319,7 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     autosaveInterval = Gtk::manage(new Gtk::SpinButton());
     autosaveInterval->set_digits(0);
     autosaveInterval->set_max_length(2);
-    autosaveInterval->set_range(0, 10);
+    autosaveInterval->set_range(0, 60);
     autosaveInterval->set_increments(1, 1);
     {
         Gtk::HBox *hb2 = Gtk::manage(new Gtk::HBox());
@@ -1970,11 +1970,6 @@ void Preferences::autoMonProfileToggled ()
     monProfile->set_sensitive (!cbAutoMonProfile->get_active());
 }
 
-/*
-void Preferences::autocielabToggled () {
-//  cbAutocielab->set_sensitive(cbAutocielab->get_active());
-}
-*/
 
 void Preferences::sndEnableToggled ()
 {

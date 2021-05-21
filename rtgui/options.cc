@@ -544,9 +544,6 @@ void Options::setDefaults()
 #else
     rtSettings.iccDirectory = "/usr/share/color/icc";
 #endif
-//   rtSettings.viewingdevice = 0;
-//   rtSettings.viewingdevicegrey = 3;
-    //  rtSettings.viewinggreySc = 1;
 
     rtSettings.monitorIccDirectory = rtSettings.iccDirectory;
 
@@ -568,20 +565,8 @@ void Options::setDefaults()
     rtSettings.ACESp0 = "RTv2_ACES-AP0";
     rtSettings.ACESp1 = "RTv2_ACES-AP1";
     rtSettings.verbose = false;
-    rtSettings.gamutICC = true;
-    rtSettings.gamutLch = true;
-    rtSettings.amchroma = 40;//between 20 and 140   low values increase effect..and also artifacts, high values reduces
-    rtSettings.level0_cbdl = 0;
-    rtSettings.level123_cbdl = 30;
 
-    rtSettings.protectred = 60;
-    rtSettings.protectredh = 0.3;
-    rtSettings.CRI_color = 0;
-    rtSettings.autocielab = true;
-    rtSettings.denoiselabgamma = 2;
     rtSettings.HistogramWorking = false;
-
-    rtSettings.daubech = false;
 
     // #4327 - Noise Reduction settings removed from Preferences
     rtSettings.nrauto = 10; // between 2 and 20
@@ -594,14 +579,10 @@ void Options::setDefaults()
     rtSettings.leveldnliss = 0;
     rtSettings.leveldnautsimpl = 0;
 
-//   rtSettings.colortoningab =0.7;
-//rtSettings.decaction =0.3;
-//  rtSettings.ciebadpixgauss=false;
-    rtSettings.rgbcurveslumamode_gamut = true;
     lastIccDir = rtSettings.iccDirectory;
     lastDarkframeDir = rtSettings.darkFramesPath;
     lastFlatfieldDir = rtSettings.flatFieldsPath;
-//  rtSettings.bw_complementary = true;
+
     // There is no reasonable default for curves. We can still suppose that they will take place
     // in a subdirectory of the user's own ProcParams presets, i.e. in a subdirectory
     // of the one pointed to by the "profile" field.
@@ -1557,14 +1538,6 @@ void Options::readFromFile(Glib::ustring fname)
                     rtSettings.autoMonitorProfile = keyFile.get_boolean("Color Management", "AutoMonitorProfile");
                 }
 
-                if (keyFile.has_key("Color Management", "Autocielab")) {
-                    rtSettings.autocielab = keyFile.get_boolean("Color Management", "Autocielab");
-                }
-
-                if (keyFile.has_key("Color Management", "RGBcurvesLumamode_Gamut")) {
-                    rtSettings.rgbcurveslumamode_gamut = keyFile.get_boolean("Color Management", "RGBcurvesLumamode_Gamut");
-                }
-
                 if (keyFile.has_key("Color Management", "Intent")) {
                     rtSettings.monitorIntent = static_cast<rtengine::RenderingIntent>(keyFile.get_integer("Color Management", "Intent"));
                 }
@@ -1573,142 +1546,13 @@ void Options::readFromFile(Glib::ustring fname)
                     rtSettings.monitorBPC = keyFile.get_boolean("Color Management", "MonitorBPC");
                 }
 
-                if (keyFile.has_key("Color Management", "CRI")) {
-                    rtSettings.CRI_color = keyFile.get_integer("Color Management", "CRI");
-                }
-
-                if (keyFile.has_key("Color Management", "DenoiseLabgamma")) {
-                    rtSettings.denoiselabgamma = keyFile.get_integer("Color Management", "DenoiseLabgamma");
-                }
-
-                /*
-                if (keyFile.has_key ("Color Management", "view")) {
-                rtSettings.viewingdevice = keyFile.get_integer ("Color Management", "view");
-                }
-
-                if (keyFile.has_key ("Color Management", "grey")) {
-                rtSettings.viewingdevicegrey = keyFile.get_integer ("Color Management", "grey");
-                }
-                */
-                /*
-                                if (keyFile.has_key ("Color Management", "greySc")) {
-                                    rtSettings.viewinggreySc = keyFile.get_integer ("Color Management", "greySc");
-                                }
-                */
-
-                if (keyFile.has_key("Color Management", "CBDLlevel0")) {
-                    rtSettings.level0_cbdl = keyFile.get_double("Color Management", "CBDLlevel0");
-                }
-
-                if (keyFile.has_key("Color Management", "CBDLlevel123")) {
-                    rtSettings.level123_cbdl = keyFile.get_double("Color Management", "CBDLlevel123");
-                }
-
-                //if (keyFile.has_key ("Color Management", "Colortoningab")) rtSettings.colortoningab = keyFile.get_double("Color Management", "Colortoningab");
-                //if (keyFile.has_key ("Color Management", "Decaction")) rtSettings.decaction = keyFile.get_double("Color Management", "Decaction");
-
                 if (keyFile.has_key("Color Management", "WhiteBalanceSpotSize")) {
                     whiteBalanceSpotSize = keyFile.get_integer("Color Management", "WhiteBalanceSpotSize");
-                }
-
-                if (keyFile.has_key("Color Management", "GamutICC")) {
-                    rtSettings.gamutICC = keyFile.get_boolean("Color Management", "GamutICC");
-                }
-
-                if (keyFile.has_key("Color Management", "AdobeRGB")) {
-                    rtSettings.adobe = keyFile.get_string("Color Management", "AdobeRGB");
-                    if (rtSettings.adobe == "RT_Medium_gsRGB"  || rtSettings.adobe == "RTv4_Medium") {
-                        rtSettings.adobe = "RTv2_Medium";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "ProPhoto")) {
-                    rtSettings.prophoto = keyFile.get_string("Color Management", "ProPhoto");
-                    if (rtSettings.prophoto == "RT_Large_gBT709"  || rtSettings.prophoto == "RTv4_Large") {
-                        rtSettings.prophoto = "RTv2_Large";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "WideGamut")) {
-                    rtSettings.widegamut = keyFile.get_string("Color Management", "WideGamut");
-                    if (rtSettings.widegamut == "WideGamutRGB"  || rtSettings.widegamut == "RTv4_Wide") {
-                        rtSettings.widegamut = "RTv2_Wide";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "sRGB")) {
-                    rtSettings.srgb = keyFile.get_string("Color Management", "sRGB");
-                    if (rtSettings.srgb == "RT_sRGB"  || rtSettings.srgb == "RTv2_sRGB") {
-                        rtSettings.srgb = "RTv4_sRGB";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "Beta")) {
-                    rtSettings.beta = keyFile.get_string("Color Management", "Beta");
-                    if (rtSettings.beta == "BetaRGB"  || rtSettings.beta == "RTv4_Beta") {
-                        rtSettings.beta = "RTv2_Beta";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "Best")) {
-                    rtSettings.best = keyFile.get_string("Color Management", "Best");
-                    if (rtSettings.best == "BestRGB" || rtSettings.best == "RTv4_Best") {
-                        rtSettings.best = "RTv2_Best";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "Rec2020")) {
-                    rtSettings.rec2020 = keyFile.get_string("Color Management", "Rec2020");
-                    if (rtSettings.rec2020 == "Rec2020"  || rtSettings.rec2020 == "RTv4_Rec2020") {
-                        rtSettings.rec2020 = "RTv2_Rec2020";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "Bruce")) {
-                    rtSettings.bruce = keyFile.get_string("Color Management", "Bruce");
-                    if (rtSettings.bruce == "Bruce"  || rtSettings.bruce == "RTv4_Bruce") {
-                        rtSettings.bruce = "RTv2_Bruce";
-                    }
-                }
-
-                if (keyFile.has_key("Color Management", "ACES-AP0")) {
-                    rtSettings.ACESp0 = keyFile.get_string("Color Management", "ACES-AP0");
-                    if (rtSettings.ACESp0 == "RTv4_ACES-AP0") {
-                        rtSettings.ACESp0 = "RTv2_ACES-AP0";
-                    }
-
-                }
-
-                if (keyFile.has_key("Color Management", "ACES-AP1")) {
-                    rtSettings.ACESp1 = keyFile.get_string("Color Management", "ACES-AP1");
-                    if (rtSettings.ACESp1 == "RTv4_ACES-AP1") {
-                        rtSettings.ACESp1 = "RTv2_ACES-AP1";
-                    }
-
-                }
-
-                if (keyFile.has_key("Color Management", "GamutLch")) {
-                    rtSettings.gamutLch = keyFile.get_boolean("Color Management", "GamutLch");
-                }
-
-                if (keyFile.has_key("Color Management", "ProtectRed")) {
-                    rtSettings.protectred = keyFile.get_integer("Color Management", "ProtectRed");
-                }
-
-                if (keyFile.has_key("Color Management", "ProtectRedH")) {
-                    rtSettings.protectredh = keyFile.get_double("Color Management", "ProtectRedH");
-                }
-
-                if (keyFile.has_key("Color Management", "Amountchroma")) {
-                    rtSettings.amchroma = keyFile.get_integer("Color Management", "Amountchroma");
                 }
 
                 if (keyFile.has_key("Color Management", "ClutsDirectory")) {
                     clutsDir = keyFile.get_string("Color Management", "ClutsDirectory");
                 }
-
-                //if( keyFile.has_key ("Color Management", "Ciebadpixgauss")) rtSettings.ciebadpixgauss = keyFile.get_boolean("Color Management", "Ciebadpixgauss");
-
             }
 
             if (keyFile.has_group("ICC Profile Creator")) {
@@ -2301,37 +2145,10 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("Color Management", "MonitorICCDirectory", rtSettings.monitorIccDirectory);
         keyFile.set_string("Color Management", "MonitorProfile", rtSettings.monitorProfile);
         keyFile.set_boolean("Color Management", "AutoMonitorProfile", rtSettings.autoMonitorProfile);
-        keyFile.set_boolean("Color Management", "Autocielab", rtSettings.autocielab);
-        keyFile.set_boolean("Color Management", "RGBcurvesLumamode_Gamut", rtSettings.rgbcurveslumamode_gamut);
         keyFile.set_integer("Color Management", "Intent", rtSettings.monitorIntent);
         keyFile.set_boolean("Color Management", "MonitorBPC", rtSettings.monitorBPC);
-        //keyFile.set_integer ("Color Management", "view", rtSettings.viewingdevice);
-        //keyFile.set_integer ("Color Management", "grey", rtSettings.viewingdevicegrey);
-//        keyFile.set_integer ("Color Management", "greySc", rtSettings.viewinggreySc);
 
-        keyFile.set_string("Color Management", "AdobeRGB", rtSettings.adobe);
-        keyFile.set_string("Color Management", "ProPhoto", rtSettings.prophoto);
-        keyFile.set_string("Color Management", "WideGamut", rtSettings.widegamut);
-        keyFile.set_string("Color Management", "sRGB", rtSettings.srgb);
-        keyFile.set_string("Color Management", "Beta", rtSettings.beta);
-        keyFile.set_string("Color Management", "Best", rtSettings.best);
-        keyFile.set_string("Color Management", "Rec2020", rtSettings.rec2020);
-        keyFile.set_string("Color Management", "Bruce", rtSettings.bruce);
-        keyFile.set_string("Color Management", "ACES-AP0", rtSettings.ACESp0);
-        keyFile.set_string("Color Management", "ACES-AP1", rtSettings.ACESp1);
         keyFile.set_integer("Color Management", "WhiteBalanceSpotSize", whiteBalanceSpotSize);
-        keyFile.set_boolean("Color Management", "GamutICC", rtSettings.gamutICC);
-        keyFile.set_boolean("Color Management", "GamutLch", rtSettings.gamutLch);
-        keyFile.set_integer("Color Management", "ProtectRed", rtSettings.protectred);
-        keyFile.set_integer("Color Management", "Amountchroma", rtSettings.amchroma);
-        keyFile.set_double("Color Management", "ProtectRedH", rtSettings.protectredh);
-        keyFile.set_integer("Color Management", "CRI", rtSettings.CRI_color);
-        keyFile.set_integer("Color Management", "DenoiseLabgamma", rtSettings.denoiselabgamma);
-        //keyFile.set_boolean ("Color Management", "Ciebadpixgauss", rtSettings.ciebadpixgauss);
-        keyFile.set_double("Color Management", "CBDLlevel0", rtSettings.level0_cbdl);
-        keyFile.set_double("Color Management", "CBDLlevel123", rtSettings.level123_cbdl);
-        //keyFile.set_double  ("Color Management", "Colortoningab", rtSettings.colortoningab);
-        //keyFile.set_double  ("Color Management", "Decaction", rtSettings.decaction);
         keyFile.set_string("Color Management", "ClutsDirectory", clutsDir);
 
         keyFile.set_string("ICC Profile Creator", "PimariesPreset", ICCPC_primariesPreset);

@@ -47,8 +47,6 @@ public:
     RenderingIntent monitorIntent;          ///< Colorimetric intent used with the above profile
     bool            monitorBPC;             ///< Black Point Compensation for the Labimage->Monitor transform (directly, i.e. not soft-proofing and no WCS in between)
     bool            autoMonitorProfile;     ///< Try to auto-determine the correct monitor color profile
-    bool            autocielab;
-    bool            rgbcurveslumamode_gamut;// controls gamut enforcement for RGB curves in lumamode
     bool            verbose;
     Glib::ustring   darkFramesPath;         ///< The default directory for dark frames
     Glib::ustring   flatFieldsPath;         ///< The default directory for flat fields
@@ -64,26 +62,12 @@ public:
     Glib::ustring   ACESp0;                 // filename of ACES P0      profile (default to the bundled one)
     Glib::ustring   ACESp1;                 // filename of ACES P1      profile (default to the bundled one)
 
-    bool            gamutICC; // no longer used
-    bool            gamutLch;
     bool            HistogramWorking;       // true: histogram is display the value of the image computed in the Working profile
                                             // false: histogram is display the value of the image computed in the Output profile
-    int             amchroma;
-    int             protectred;
-    double          protectredh;
     double          nrauto;
     double          nrautomax;
     double          nrhigh;
     int             nrwavlevel;
-    bool            daubech;
-    bool            ciebadpixgauss;
-    int             CRI_color; // Number for display Lab value; 0 = disabled
-    int             denoiselabgamma; // 0=gamma 26 11   1=gamma 40 5  2 =gamma 55 10
-    //  double          colortoningab; //
-    //  double          decaction;
-    //  bool            bw_complementary;
-    double          level0_cbdl;
-    double          level123_cbdl;
     Glib::ustring   lensfunDbDirectory; ///< The directory containing the lensfun database. If empty, the system defaults will be used (as described in http://lensfun.sourceforge.net/manual/dbsearch.html)
 
     enum class ThumbnailInspectorMode {
