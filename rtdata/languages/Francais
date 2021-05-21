@@ -764,6 +764,7 @@ MAIN_FRAME_QUEUE;File d'attente
 MAIN_FRAME_QUEUE_TOOLTIP; File de traitement.\nRaccourci : <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Fichiers récents 
 MAIN_MSG_ALREADYEXISTS;Le fichier existe déjà.
+MAIN_MSG_AUTOSAVING;Sauvegarde automatique...
 MAIN_MSG_CANNOTLOAD;Impossible de charger l'image
 MAIN_MSG_CANNOTSAVE;Erreur d'enregistrement du fichier
 MAIN_MSG_CANNOTSTARTEDITOR;Impossible de lancer l'éditeur.
@@ -939,6 +940,8 @@ PREFERENCES_APPEARANCE_THEME;Thème
 PREFERENCES_APPLNEXTSTARTUP;Redémarrage requis
 PREFERENCES_AUTOMONPROFILE;Utiliser le profil d'écran réglé dans le système d'exploitation
 PREFERENCES_AUTOSAVE_TP_OPEN;Sauvegarder l'état ouvert/fermé des outils en quittant
+PREFERENCES_AUTOSAVE;Sauvegarde automatique
+PREFERENCES_AUTOSAVE_INTERVAL;Intervalle d'enregistrement automatique des fichiers ARP (en minutes, 0 pour désactiver)
 PREFERENCES_BATCH_PROCESSING;Traitement par lot
 PREFERENCES_CACHECLEAR;Effacer
 PREFERENCES_CACHECLEAR_ALL;Effacer tous les fichiers mis en cache : 
@@ -1098,6 +1101,8 @@ PREFERENCES_TAB_GENERAL;Général
 PREFERENCES_TAB_IMPROC;Traitement de l'image
 PREFERENCES_TAB_PERFORMANCE;Performance
 PREFERENCES_TAB_SOUND;Sons
+PREFERENCES_THUMBNAIL_DELAY_UPDATE;Retarder la mise à jour des vignettes lors de l'ouverture des répertoires
+PREFERENCES_THUMBNAIL_LAZY_CACHING;Mise en cache des vignettes
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Naviguer et faire un panoramique en survolant les vignettes
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Prévisualisation de l'image JPEG incluse
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Image à montrer
