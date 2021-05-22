@@ -227,7 +227,7 @@ FileBrowser::FileBrowser () :
 
     pmenu = nullptr;
     pmenuColorLabels = nullptr;
-    build_menu();    
+    build_menu();
 }
 
 
@@ -1655,13 +1655,16 @@ void FileBrowser::fromTrashRequested (std::vector<FileBrowserEntry*> tbe)
 
 void FileBrowser::rankingRequested (std::vector<FileBrowserEntry*> tbe, int rank)
 {
+    const bool need_pp = options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS;
+    
     for (size_t i = 0; i < tbe.size(); i++) {
+        if (need_pp) {
+            // try to load the last saved parameters from the cache or from the paramfile file
+            tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
 
-        // try to load the last saved parameters from the cache or from the paramfile file
-        tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
-
-        // notify listeners TODO: should do this ONLY when params changed by customprofilebuilder?
-        tbe[i]->thumbnail->notifylisterners_procParamsChanged(FILEBROWSER);
+            // notify listeners TODO: should do this ONLY when params changed by customprofilebuilder?
+            tbe[i]->thumbnail->notifylisterners_procParamsChanged(FILEBROWSER);
+        }
 
         tbe[i]->thumbnail->setRank (rank);
         tbe[i]->thumbnail->updateCache (); // needed to save the colorlabel to disk in the procparam file(s) and the cache image data file
@@ -1673,17 +1676,21 @@ void FileBrowser::rankingRequested (std::vector<FileBrowserEntry*> tbe, int rank
         }
     }
 
-    applyFilter (filter);
+    applyFilter(filter);
 }
 
 void FileBrowser::colorlabelRequested (std::vector<FileBrowserEntry*> tbe, int colorlabel)
 {
+    const bool need_pp = options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS;
+    
     for (size_t i = 0; i < tbe.size(); i++) {
-        // try to load the last saved parameters from the cache or from the paramfile file
-        tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
+        if (need_pp) {
+            // try to load the last saved parameters from the cache or from the paramfile file
+            tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
 
-        // notify listeners TODO: should do this ONLY when params changed by customprofilebuilder?
-        tbe[i]->thumbnail->notifylisterners_procParamsChanged(FILEBROWSER);
+            // notify listeners TODO: should do this ONLY when params changed by customprofilebuilder?
+            tbe[i]->thumbnail->notifylisterners_procParamsChanged(FILEBROWSER);
+        }
 
         tbe[i]->thumbnail->setColorLabel (colorlabel);
         tbe[i]->thumbnail->updateCache(); // needed to save the colorlabel to disk in the procparam file(s) and the cache image data file
