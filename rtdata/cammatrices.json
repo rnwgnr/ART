@@ -3437,6 +3437,10 @@ Updated on Mon Mar 29 08:38:58 2021 (with Adobe DNG converter 13.2.0.738):
         "dcraw_matrix" : [7415, -2052, -721, -5185, 12788, 2682, -1446, 2157, 6773]
     },
     {
+        "make_model" : "PENTAX K-3 MARK III",
+        "dcraw_matrix" : [7003, -1618, -887, -4614,  12728,  2065, -645,  1441,  5734]
+    },
+    {
         "make_model" : "PENTAX K-30",
         "dcraw_matrix" : [8134, -2728, -645, -4365, 11987, 2693, -838, 1509, 6498]
     },
