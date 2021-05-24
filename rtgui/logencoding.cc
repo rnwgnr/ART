@@ -46,7 +46,7 @@ LogEncoding::LogEncoding():
     autocompute = Gtk::manage(new Gtk::ToggleButton(M("TP_LOGENC_AUTO")));
     autoconn = autocompute->signal_toggled().connect(sigc::mem_fun(*this, &LogEncoding::autocomputeToggled));
     
-    gain = Gtk::manage(new Adjuster(M("TP_LOGENC_GAIN"), -10.0, 10.0, 0.1, 0.0));
+    gain = Gtk::manage(new Adjuster(M("TP_LOGENC_GAIN"), -10.0, 10.0, 0.05, 0.0));
     gain->addAutoButton();
     targetGray = Gtk::manage(new Adjuster(M("TP_LOGENC_TARGET_GRAY"), 5.0, 80.0, 0.1, 18.0));
     blackEv = Gtk::manage(new Adjuster(M("TP_LOGENC_BLACK_EV"), -16.0, 0.0, 0.1, -13.5));

@@ -316,7 +316,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                 }
             }
             if (n > 0) {
-                lparams.gain = gray2ev(tot / n * 100.f);
+                lparams.gain = gray2ev(tot / n);
                 if (settings->verbose) {
                     std::cout << "         computed gain from " << n << " samples: " << lparams.gain << std::endl;
                 }
