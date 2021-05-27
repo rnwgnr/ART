@@ -91,6 +91,7 @@ private:
     MySpinButton *ppi;
     Gtk::Label *size_info_1;
     Gtk::Label *size_info_2;
+    Gtk::HBox *unitBox;
     Gtk::VBox *endBox;
     int maxw, maxh;
     int cropw, croph;

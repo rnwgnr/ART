@@ -106,7 +106,8 @@ Resize::Resize():
     allowUpscaling = Gtk::manage(new Gtk::CheckButton(M("TP_RESIZE_ALLOW_UPSCALING")));
     hbox->pack_start(*allowUpscaling);
     endBox->pack_start(*hbox);
-
+    unitBox = hbox;
+    unitBox->reference();
 
     // ppigrid START
     Gtk::Grid *ppigrid = Gtk::manage(new Gtk::Grid());
@@ -187,6 +188,7 @@ Resize::~Resize ()
 {
     idle_register.destroy();
     delete scale;
+    delete unitBox;
     delete sizeBox;
 }
 
@@ -272,6 +274,7 @@ void Resize::adjusterChanged(Adjuster* a, double newval)
     ConnectionBlocker hb(hconn);
     h->set_value((croph && appliesTo->get_active_row_number() == 0 ? croph : maxh) * a->getValue());
     w->set_value((cropw && appliesTo->get_active_row_number() == 0 ? cropw : maxw) * a->getValue());
+    updateInfoLabels();
 
     if (listener && getEnabled()) {
         listener->panelChanged (EvResizeScale, Glib::ustring::format (std::setw(5), std::fixed, std::setprecision(2), scale->getValue()));
@@ -564,6 +567,7 @@ void Resize::updateGUI ()
 
     removeIfThere(this, scale, false);
     removeIfThere(this, sizeBox, false);
+    removeIfThere(endBox, unitBox, false);
 
     switch (spec->get_active_row_number()) {
     case (0):
@@ -600,7 +604,11 @@ void Resize::updateGUI ()
         break;
     }
 
-    unit->set_sensitive(spec->get_active_row_number() > 0);
+    //unit->set_sensitive(spec->get_active_row_number() > 0);
+    if (spec->get_active_row_number() > 0) {
+        endBox->pack_start(*unitBox);
+        endBox->reorder_child(*unitBox, 0);
+    }
 }
 
 void Resize::notifyBBox()
