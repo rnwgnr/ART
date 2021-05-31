@@ -28,6 +28,7 @@ RawImage::RawImage(  const Glib::ustring &name )
     , rotate_deg(0)
     , profile_data(nullptr)
     , allocation(nullptr)
+    , has_raw_border_(true)
 {
     memset(maximum_c4, 0, sizeof(maximum_c4));
     RT_matrix_from_constant = ThreeValBool::X;
@@ -755,6 +756,10 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (static_cast<int>(cblack[c]) < black_c4[c]) {
                 cblack[c] = black_c4[c];
             }
+        }
+
+        if (cc && cc->has_rawBorder()) {
+            has_raw_border_ = cc->get_rawBorder();
         }
 
         if (settings->verbose) {

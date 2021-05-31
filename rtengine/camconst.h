@@ -26,6 +26,7 @@ private:
     std::vector<int> pdafPattern;
     int pdafOffset;
     int globalGreenEquilibration;
+    int rawBorder;
     
     CameraConst();
     static bool parseLevels(CameraConst *cc, int bw, void *ji);
@@ -54,6 +55,9 @@ public:
     void update_pdafOffset(int other);
     void update_globalGreenEquilibration(bool other);
     void update_rawMask(CameraConst *other);
+    bool has_rawBorder();
+    int get_rawBorder();
+    void update_rawBorder(bool other);
 };
 
 

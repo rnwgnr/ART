@@ -987,7 +987,10 @@ void RawImageSource::computeFullSize(const RawImage *ri, int tr, int &w, int &h)
     const int H = ri->get_height();
     const bool fuji = ri->get_FujiWidth() != 0;
     const bool d1x = !ri->get_model().compare("D1X");
-    const int border = (ri->getSensorType() == ST_BAYER ? 4 : (ri->getSensorType() == ST_FUJI_XTRANS ? 7 : 0));
+    const int border =
+        !ri->has_raw_border() ? 0 :
+        (ri->getSensorType() == ST_BAYER ? 4 :
+         (ri->getSensorType() == ST_FUJI_XTRANS ? 7 : 0));
     
     if (fuji) {
         w = ri->get_FujiWidth() * 2 + 1;
