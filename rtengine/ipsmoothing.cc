@@ -27,6 +27,7 @@
 #include "sleef.h"
 #include "gauss.h"
 #include "alignedbuffer.h"
+#include "ipdenoise.h"
 #include <iostream>
 #include <queue>
 
@@ -217,6 +218,71 @@ void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B,
     }
 }
 
+
+void nlmeans_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, const TMatrix &iws, Channel chan, int strength, int detail, int iterations, double scale, bool multithread)
+{
+    array2D<float> iY;
+    const int W = R.width(), H = R.height();
+
+    if (chan == Channel::L) {
+        iY(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            float u, v;
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
+            }
+        }
+        for (int i = 0; i < iterations; ++i) {
+            denoise::NLMeans(iY, 1.f, strength, detail, scale, multithread);
+        }
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            float Y, u, v;
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
+                Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
+            }
+        }
+    } else {
+        if (chan == Channel::C) {
+            iY(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                float u, v;
+                for (int x = 0; x < W; ++x) {
+                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
+                }
+            }
+        }
+        
+        for (int i = 0; i < iterations; ++i) {
+            denoise::NLMeans(R, 1.f, strength, detail, scale, multithread);
+            denoise::NLMeans(G, 1.f, strength, detail, scale, multithread);
+            denoise::NLMeans(B, 1.f, strength, detail, scale, multithread);
+        }
+        
+        if (chan == Channel::C) {
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                float Y, u, v;
+                for (int x = 0; x < W; ++x) {
+                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
+                    Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
+                }
+            }
+        }
+    }
+}
+
 } // namespace
 
 
@@ -338,7 +404,9 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 rgb->setMode(Imagefloat::Mode::YUV, multiThread);
             }
             Channel ch = Channel(int(r.channel));
-            if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
+            if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
+                nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
+            } else if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;
                 for (int i = 0; i < r.iterations; ++i) {

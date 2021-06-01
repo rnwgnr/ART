@@ -993,7 +993,12 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
 
     if (denoiseParams.smoothingEnabled) {
         denoise::denoiseGuidedSmoothing(im, img);
-        denoise::NLMeans(img, denoiseParams.nlStrength, denoiseParams.nlDetail, scale, multiThread);
+        if (denoiseParams.nlStrength) {
+            img->setMode(Imagefloat::Mode::YUV, multiThread);
+            array2D<float> tmp(img->getWidth(), img->getHeight(), img->g.ptrs, ARRAY2D_BYREFERENCE);
+            denoise::NLMeans(tmp, 65535.f, denoiseParams.nlStrength, denoiseParams.nlDetail, scale, multiThread);
+            img->setMode(Imagefloat::Mode::RGB, multiThread);
+        }
     }
 
     if (plistener) {

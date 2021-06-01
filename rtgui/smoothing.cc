@@ -167,6 +167,8 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvMode = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_MODE");
     EvSigma = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_SIGMA");
     EvFalloff = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_FALLOFF");
+    EvNLStrength = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_NLSTRENGTH");
+    EvNLDetail = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_NLDETAIL");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_PARAMETRICMASK");
@@ -200,6 +202,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     mode->append(M("TP_SMOOTHING_MODE_GUIDED"));
     mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN"));
     mode->append(M("TP_SMOOTHING_MODE_GAUSSIAN_GLOW"));
+    mode->append(M("TP_SMOOTHING_MODE_NLMEANS"));
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &Smoothing::modeChanged));
     hb = Gtk::manage(new Gtk::HBox());
@@ -224,8 +227,17 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     sigma->setAdjusterListener(this);
     gaussian_box->pack_start(*sigma);
 
+    nl_box = Gtk::manage(new Gtk::VBox());
+    nlstrength = Gtk::manage(new Adjuster(M("TP_SMOOTHING_NLSTRENGTH"), 0, 100, 1, 0));
+    nldetail = Gtk::manage(new Adjuster(M("TP_SMOOTHING_NLDETAIL"), 1, 100, 1, 50));
+    nldetail->setAdjusterListener(this);
+    nlstrength->setAdjusterListener(this);
+    nl_box->pack_start(*nlstrength);
+    nl_box->pack_start(*nldetail);
+    
     box->pack_start(*guided_box);
     box->pack_start(*gaussian_box);
+    box->pack_start(*nl_box);
 
     iterations = Gtk::manage(new Adjuster(M("TP_SMOOTHING_ITERATIONS"), 1, 10, 1, 1));
     iterations->setAdjusterListener(this);
@@ -242,6 +254,8 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     iterations->delay = options.adjusterMaxDelay;
     sigma->delay = options.adjusterMaxDelay;
     falloff->delay = options.adjusterMaxDelay;
+    nlstrength->delay = options.adjusterMaxDelay;
+    nldetail->delay = options.adjusterMaxDelay;
 
     labMasksContentProvider.reset(new SmoothingMasksContentProvider(this));
     labMasks = Gtk::manage(new LabMasksPanel(labMasksContentProvider.get()));
@@ -289,6 +303,8 @@ void Smoothing::setDefaults(const ProcParams *defParams)
     iterations->setDefault(defParams->smoothing.regions[0].iterations);
     sigma->setDefault(defParams->smoothing.regions[0].sigma);
     falloff->setDefault(defParams->smoothing.regions[0].falloff);
+    nlstrength->setDefault(defParams->smoothing.regions[0].nlstrength);
+    nldetail->setDefault(defParams->smoothing.regions[0].nldetail);
 
     initial_params = defParams->smoothing;
 }
@@ -309,6 +325,10 @@ void Smoothing::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvSigma, a->getTextValue());
         } else if (a == falloff) {
             listener->panelChanged(EvFalloff, a->getTextValue());
+        } else if (a == nlstrength) {
+            listener->panelChanged(EvNLStrength, a->getTextValue());
+        } else if (a == nldetail) {
+            listener->panelChanged(EvNLDetail, a->getTextValue());
         }
     }
 }
@@ -367,6 +387,8 @@ void Smoothing::regionGet(int idx)
     r.iterations = iterations->getValue();
     r.sigma = sigma->getValue();
     r.falloff = falloff->getValue();
+    r.nlstrength = nlstrength->getValue();
+    r.nldetail = nldetail->getValue();
 }
 
 
@@ -385,6 +407,8 @@ void Smoothing::regionShow(int idx)
     iterations->setValue(r.iterations);
     sigma->setValue(r.sigma);
     falloff->setValue(r.falloff);
+    nlstrength->setValue(r.nlstrength);
+    nldetail->setValue(r.nldetail);
     
     if (disable) {
         enableListener();
@@ -402,12 +426,16 @@ void Smoothing::channelChanged()
 
 void Smoothing::modeChanged()
 {
-    if (mode->get_active_row_number() == 0) {
+    int r = mode->get_active_row_number();
+    nl_box->hide();
+    gaussian_box->hide();
+    guided_box->hide();
+    if (r == 0) {
         guided_box->show();
-        gaussian_box->hide();
-    } else {
-        guided_box->hide();
+    } else if (r == 1 || r == 2) {
         gaussian_box->show();
+    } else {
+        nl_box->show();
     }
     falloff->set_visible(mode->get_active_row_number() == 2);
     if (listener && getEnabled()) {

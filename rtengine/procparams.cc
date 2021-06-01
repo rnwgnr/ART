@@ -2634,7 +2634,9 @@ SmoothingParams::Region::Region():
     sigma(0),
     epsilon(0),
     iterations(1),
-    falloff(1)
+    falloff(1),
+    nldetail(50),
+    nlstrength(0)
 {
 }
 
@@ -2647,7 +2649,9 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && sigma == other.sigma
         && epsilon == other.epsilon
         && iterations == other.iterations
-        && falloff == other.falloff;
+        && falloff == other.falloff
+        && nlstrength == other.nlstrength
+        && nldetail == other.nldetail;
 }
 
 
@@ -3770,6 +3774,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("Epsilon_") + n, r.epsilon, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Iterations_") + n, r.iterations, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Falloff_") + n, r.falloff, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NLStrength_") + n, r.nlstrength, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NLDetail_") + n, r.nldetail, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
@@ -4947,6 +4953,14 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     done = false;
                 }
                 if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Falloff_") + n, cur.falloff)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NLStrength_") + n, cur.nlstrength)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NLDetail_") + n, cur.nldetail)) {
                     found = true;
                     done = false;
                 }

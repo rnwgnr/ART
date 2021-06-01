@@ -68,6 +68,8 @@ private:
     rtengine::ProcEvent EvMode;
     rtengine::ProcEvent EvSigma;
     rtengine::ProcEvent EvFalloff;
+    rtengine::ProcEvent EvNLStrength;
+    rtengine::ProcEvent EvNLDetail;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -94,9 +96,12 @@ private:
     Adjuster *iterations;
     Adjuster *sigma;
     Adjuster *falloff;
+    Adjuster *nlstrength;
+    Adjuster *nldetail;
     Gtk::VBox *box;
     Gtk::VBox *guided_box;
     Gtk::VBox *gaussian_box;
+    Gtk::VBox *nl_box;
 
     rtengine::procparams::SmoothingParams initial_params;
 };
