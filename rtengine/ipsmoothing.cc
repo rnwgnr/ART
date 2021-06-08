@@ -400,9 +400,6 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
             const bool glow = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_GLOW;
-            if (glow) {
-                rgb->setMode(Imagefloat::Mode::YUV, multiThread);
-            }
             Channel ch = Channel(int(r.channel));
             if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
                 nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
@@ -426,12 +423,9 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                                 float &r = R[yy][xx];
                                 float &g = G[yy][xx];
                                 float &b = B[yy][xx];
-                                float Y, u, v;
-                                Color::rgb2yuv(r, g, b, Y, u, v, ws);
-                                Y = (rgb->g(y, x) + Y / f) / f2;
-                                u = (rgb->b(y, x) + u) / 2.f;
-                                v = (rgb->r(y, x) + v) / 2.f;
-                                Color::yuv2rgb(Y, u, v, r, g, b, ws);
+                                r = (rgb->r(y, x) + r / f) / f2;
+                                g = (rgb->g(y, x) + g / f) / f2;
+                                b = (rgb->b(y, x) + b / f) / f2;
                             }
                         }
                     }
@@ -444,9 +438,6 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 }
             }
             
-            if (glow) {
-                rgb->setMode(Imagefloat::Mode::RGB, multiThread);
-            }
 #ifdef _OPENMP
 #           pragma omp parallel for if (multiThread)
 #endif
