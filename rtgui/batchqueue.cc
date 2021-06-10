@@ -657,11 +657,17 @@ void BatchQueue::error(const Glib::ustring& descr)
 
     if (listener) {
         BatchQueueListener* const bql = listener;
+        const bool running = processing;
+        int qsize = 0;
+        {
+            MYREADERLOCK(l, entryRW);
+            qsize = fd.size();
+        }        
 
         idle_register.add(
-            [bql, descr]() -> bool
+            [bql, descr, qsize, running]() -> bool
             {
-                bql->queueSizeChanged(0, false, true, descr);
+                bql->queueSizeChanged(qsize, running/*false*/, true, descr);
                 return false;
             }
         );
