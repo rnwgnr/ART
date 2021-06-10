@@ -4539,6 +4539,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else {
                 logenc.regularization = 0;
             }
+            if (ppVersion < 1025) {
+                toneCurve.contrast *= 2;
+            }
         }
 
         if (keyFile.has_group("ToneEqualizer") && RELEVANT_(toneEqualizer)) {

@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1024
+#define PPVERSION 1025
 
 /*
   Log of version changes
+  1025  2021-06-10
+        finer-grained control of tone curve contrast with logenc enabled
   1024  2021-05-06
         log encoding -> source gray changed to EV gain (in log2 scale)
   1023  2021-04-15

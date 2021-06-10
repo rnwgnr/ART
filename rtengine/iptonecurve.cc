@@ -53,7 +53,7 @@ void apply_contrast(Imagefloat *rgb, const ImProcData &im, int contrast)
 
     if (im.params->logenc.enabled) {
         const double pivot = im.params->logenc.targetGray / 100.0;
-        const double b = contrast > 0 ? (1 + contrast * 0.25) : 1.0 / (1 - contrast * 0.25);
+        const double b = contrast > 0 ? (1 + contrast * 0.125) : 1.0 / (1 - contrast * 0.125);
         const double a = std::log((std::exp(std::log(b) * pivot) - 1) / (b - 1)) / std::log(pivot);
 
         // const auto scurve =
