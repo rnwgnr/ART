@@ -921,9 +921,9 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
                 float newr = state.Working2Prophoto[0][0] * r + state.Working2Prophoto[0][1] * g + state.Working2Prophoto[0][2] * b;
                 float newg = state.Working2Prophoto[1][0] * r + state.Working2Prophoto[1][1] * g + state.Working2Prophoto[1][2] * b;
                 float newb = state.Working2Prophoto[2][0] * r + state.Working2Prophoto[2][1] * g + state.Working2Prophoto[2][2] * b;
-                r = newr;
-                g = newg;
-                b = newb;
+                r = CLIP(newr);
+                g = CLIP(newg);
+                b = CLIP(newb);
             }
         };
 
@@ -934,19 +934,19 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
                 float newr = state.Prophoto2Working[0][0] * r + state.Prophoto2Working[0][1] * g + state.Prophoto2Working[0][2] * b;
                 float newg = state.Prophoto2Working[1][0] * r + state.Prophoto2Working[1][1] * g + state.Prophoto2Working[1][2] * b;
                 float newb = state.Prophoto2Working[2][0] * r + state.Prophoto2Working[2][1] * g + state.Prophoto2Working[2][2] * b;
-                r = newr;
-                g = newg;
-                b = newb;
+                r = CLIP(newr);
+                g = CLIP(newg);
+                b = CLIP(newb);
             }
         };
 
     for (size_t i = start; i < end; ++i) {
-        // float r = CLIP(rc[i]);
-        // float g = CLIP(gc[i]);
-        // float b = CLIP(bc[i]);
-        float r = rc[i];
-        float g = gc[i];
-        float b = bc[i];
+        float r = CLIP(rc[i]);
+        float g = CLIP(gc[i]);
+        float b = CLIP(bc[i]);
+        // float r = rc[i];
+        // float g = gc[i];
+        // float b = bc[i];
 
         to_prophoto(r, g, b);
 
@@ -1032,9 +1032,9 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
         if (!isfinite(J) || !isfinite(C) || !isfinite(h)) {
             // this can happen for dark noise colours or colours outside human gamut. Then we just return the curve's result.
             to_working(r, g, b);
-            rc[i] = intp(strength, r, std_r);
-            gc[i] = intp(strength, g, std_g);
-            bc[i] = intp(strength, b, std_b);
+            rc[i] = CLIP(intp(strength, r, std_r));
+            gc[i] = CLIP(intp(strength, g, std_g));
+            bc[i] = CLIP(intp(strength, b, std_b));
 
             continue;
         }
@@ -1197,9 +1197,9 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
         // rc[i] = r;
         // gc[i] = g;
         // bc[i] = b;
-        rc[i] = intp(strength, r, std_r);
-        gc[i] = intp(strength, g, std_g);
-        bc[i] = intp(strength, b, std_b);
+        rc[i] = CLIP(intp(strength, r, std_r));
+        gc[i] = CLIP(intp(strength, g, std_g));
+        bc[i] = CLIP(intp(strength, b, std_b));
     }
 }
 float PerceptualToneCurve::cf_range[2];
