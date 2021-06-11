@@ -111,7 +111,8 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     filterPanel(nullptr),
     previewsToLoad(0),
     previewsLoaded(0),
-    modifierKey(0)
+    modifierKey(0),
+    bqueue_(nullptr)
 {
     inTabMode = false;
 
@@ -1189,6 +1190,8 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
     }
 
     if (msd.run() == Gtk::RESPONSE_YES) {
+        removeFromBatchQueue(tbe);
+        
         for (unsigned int i = 0; i < tbe.size(); i++) {
             const auto fname = tbe[i]->filename;
             // remove from browser
@@ -1251,6 +1254,10 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
     //!!! TODO prevent dialog closing on "enter" key press
 
     if( fc.run() == Gtk::RESPONSE_OK ) {
+        if (moveRequested) {
+            removeFromBatchQueue(tbe);
+        }
+        
         options.lastCopyMovePath = fc.get_current_folder();
 
         // iterate through selected files
@@ -2663,4 +2670,28 @@ void FileCatalog::setupSidePanels()
     filepanel->placespaned->set_visible(options.browserDirPanelOpened);
     enableInspector();
     disableInspector();
+}
+
+
+void FileCatalog::removeFromBatchQueue(const std::vector<FileBrowserEntry*> &tbe)
+{
+    if (!bqueue_) {
+        return;
+    }
+
+    std::set<Glib::ustring> tbset;
+    for (auto entry : tbe) {
+        if (entry->thumbnail && entry->thumbnail->isEnqueued()) {
+            tbset.insert(entry->thumbnail->getFileName());
+        }
+    }
+
+    std::vector<ThumbBrowserEntryBase *> tocancel;
+    for (auto entry : bqueue_->getEntries()) {
+        if (entry->thumbnail && tbset.find(entry->thumbnail->getFileName()) != tbset.end()) {
+            tocancel.push_back(entry);
+        }
+    }
+
+    bqueue_->cancelItems(tocancel, true);
 }

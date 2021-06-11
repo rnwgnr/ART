@@ -36,6 +36,7 @@
 //#include "popupbutton.h"
 
 class FilePanel;
+class BatchQueue;
 /*
  * Class:
  *   - handling the list of file (add/remove them)
@@ -145,6 +146,8 @@ private:
 
     IdleRegister idle_register;
 
+    BatchQueue *bqueue_;    
+
     void addAndOpenFile (const Glib::ustring& fname);
     void addFile (const Glib::ustring& fName);
     std::vector<Glib::ustring> getFileList ();
@@ -154,6 +157,8 @@ private:
     void onBrowsePathChanged();
     Glib::ustring getBrowsePath();
 
+    void removeFromBatchQueue(const std::vector<FileBrowserEntry*>& tbe);
+    
 public:
     // thumbnail browsers
     FileBrowser* fileBrowser;
@@ -273,6 +278,7 @@ public:
 
     void on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal);
 
+    void setBatchQueue(BatchQueue *bq) { bqueue_ = bq; }
 };
 
 inline void FileCatalog::setDirSelector (const FileCatalog::DirSelectionSlot& selectDir)
