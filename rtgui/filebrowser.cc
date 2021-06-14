@@ -1604,12 +1604,15 @@ bool FileBrowser::checkFilter (ThumbBrowserEntryBase* entryb)   // true -> entry
 
 void FileBrowser::toTrashRequested (std::vector<FileBrowserEntry*> tbe)
 {
+    const bool need_pp = options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS;
 
     for (size_t i = 0; i < tbe.size(); i++) {
-        // try to load the last saved parameters from the cache or from the paramfile file
-        tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
+        if (need_pp) {
+            // try to load the last saved parameters from the cache or from the paramfile file
+            tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
 
-        // no need to notify listeners as item goes to trash, likely to be deleted
+            // no need to notify listeners as item goes to trash, likely to be deleted
+        }
 
         if (tbe[i]->thumbnail->getInTrash()) {
             continue;
