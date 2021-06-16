@@ -277,9 +277,9 @@ void Exiv2Metadata::load() const
         CacheVal val;
         auto finfo = Gio::File::create_for_path(src_)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
         if (cache_ && cache_->get(src_, val) && val.second >= finfo->modification_time()) {
-            if (settings->verbose) {
-                std::cout << "Metadata for " << src_ << " found in cache" << std::endl;
-            }
+            // if (settings->verbose) {
+            //     std::cout << "Metadata for " << src_ << " found in cache" << std::endl;
+            // }
             image_ = val.first;
         } else {
             try {
