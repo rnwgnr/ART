@@ -476,29 +476,6 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     buttonBar->pack_start (*zoomBox, Gtk::PACK_SHRINK);
     buttonBar->pack_start (*Gtk::manage(new Gtk::VSeparator), Gtk::PACK_SHRINK);
 
-    // thumbOrder = Gtk::manage(new PopUpButton());
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_FILENAME"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_DATE"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_DATE_REV"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_MODTIME"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_MODTIME_REV"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_PROCTIME"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_PROCTIME_REV"));
-    // thumbOrder->setSelected(int(options.thumbnailOrder));
-    // thumbOrder->signal_changed().connect(
-    //     static_cast<sigc::slot<void, int>>(
-    //         [&](int sel) -> void
-    //         {
-    //             options.thumbnailOrder = Options::ThumbnailOrder(sel);
-    //             //reparseDirectory();
-    //             fileBrowser->sortThumbnails();
-    //         })
-    //     );
-    // setExpandAlignProperties(thumbOrder->buttonGroup, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
-    // thumbOrder->setRelief(Gtk::RELIEF_NONE);
-    // thumbOrder->show();
-    // buttonBar->pack_start(*thumbOrder->buttonGroup, Gtk::PACK_SHRINK);
-
     {
         thumbOrder = Gtk::manage(new Gtk::MenuButton());
         thumbOrder->set_image(*Gtk::manage(new RTImage("az-sort.png")));
@@ -508,10 +485,16 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
         const auto on_activate =
             [&]() -> void
             {
+                for (size_t i = 0; i < thumbOrderItems.size(); ++i) {
+                    auto l = static_cast<Gtk::Label *>(thumbOrderItems[i]->get_children()[0]);
+                    l->set_markup(thumbOrderLabels[i]);
+                }
                 int sel = thumbOrder->get_menu()->property_active();
                 auto mi = thumbOrder->get_menu()->get_active();
                 if (mi) {
-                    thumbOrder->set_tooltip_text(M("FILEBROWSER_SORT_LABEL") + ": " + mi->get_label());
+                    thumbOrder->set_tooltip_text(M("FILEBROWSER_SORT_LABEL") + ": " + thumbOrderLabels[sel]);
+                    auto l = static_cast<Gtk::Label *>(mi->get_children()[0]);
+                    l->set_markup("<b>" + thumbOrderLabels[sel] + "</b>");
                 }
                 options.thumbnailOrder = Options::ThumbnailOrder(sel);
                 fileBrowser->sortThumbnails();
@@ -522,6 +505,8 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
             {
                 Gtk::MenuItem *mi = Gtk::manage(new Gtk::MenuItem(lbl));
                 menu->append(*mi);
+                thumbOrderItems.push_back(mi);
+                thumbOrderLabels.push_back(lbl);
                 mi->signal_activate().connect(sigc::slot<void>(on_activate));
             };
         addItem(M("FILEBROWSER_SORT_FILENAME"));
@@ -714,10 +699,12 @@ private:
     bool lt_date(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
     {
         try {
-            rtengine::FramesData ma(a);
-            rtengine::FramesData mb(b);
-            auto ta = ma.getDateTimeAsTS();
-            auto tb = mb.getDateTimeAsTS();
+            // rtengine::FramesData ma(a);
+            // rtengine::FramesData mb(b);
+            // auto ta = ma.getDateTimeAsTS();
+            // auto tb = mb.getDateTimeAsTS();
+            auto ta = get_date(a);
+            auto tb = get_date(b);
             if (ta == tb) {
                 return a < b;
             }
@@ -760,6 +747,20 @@ private:
             return (ta < tb) == !reverse;
         } else {
             return a < b;
+        }
+    }
+
+    time_t get_date(const Glib::ustring &us) const
+    {
+        CacheImageData d;
+        if (cacheMgr->getImageData(us, d)) {
+            if (!d.supported) {
+                return time_t(-1);
+            } else {
+                return d.getDateTimeAsTS();
+            }
+        } else {
+            return time_t(-1);
         }
     }
 

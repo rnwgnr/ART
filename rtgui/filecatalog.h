@@ -98,6 +98,8 @@ private:
     Gtk::ToggleButton* exifInfo;
     //PopUpButton *thumbOrder;
     Gtk::MenuButton *thumbOrder;
+    std::vector<Gtk::MenuItem *> thumbOrderItems;
+    std::vector<Glib::ustring> thumbOrderLabels;
     sigc::connection bCateg[20];
     Gtk::Image* iFilterClear, *igFilterClear;
     Gtk::Image* iranked[5], *igranked[5], *iUnRanked, *igUnRanked;
