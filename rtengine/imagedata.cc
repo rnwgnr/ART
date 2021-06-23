@@ -676,13 +676,14 @@ std::string FramesMetaData::apertureToString(double aperture)
 
 std::string FramesMetaData::shutterToString(double shutter)
 {
-
     char buffer[256];
 
     if (shutter > 0.0 && shutter <= 0.5) {
-        sprintf (buffer, "1/%0.0f", 1.0 / shutter);
+        sprintf(buffer, "1/%0.0f", 1.0 / shutter);
+    } else if (int(shutter) == shutter) {
+        sprintf(buffer, "%d", int(shutter));
     } else {
-        sprintf (buffer, "%0.1f", shutter);
+        sprintf(buffer, "%0.1f", shutter);
     }
 
     return buffer;
@@ -732,6 +733,9 @@ void set_exif(Exiv2::ExifData &exif, const std::string &key, T val)
     try {
         exif[key] = val;
     } catch (std::exception &exc) {
+        if (settings->verbose) {
+            std::cout << "Exif -- error setting " << key << " to " << val << ": " << exc.what() << std::endl;
+        }
     }
 }
 
@@ -745,7 +749,11 @@ void FramesData::fillBasicTags(Exiv2::ExifData &exif) const
     set_exif(exif, "Exif.Photo.ISOSpeedRatings", getISOSpeed());
     set_exif(exif, "Exif.Photo.FNumber", Exiv2::URationalValue(Exiv2::URational(round(getFNumber() * 10), 10)));
     auto s = shutterToString(getShutterSpeed());
-    if (s.find('/') == std::string::npos) {
+    auto p = s.find('.');
+    if (p != std::string::npos) {
+        assert(p == s.length()-2);
+        s = s.substr(0, p) + s.substr(p+1) + "/10";
+    } else if (s.find('/') == std::string::npos) {
         s += "/1";
     }
     set_exif(exif, "Exif.Photo.ExposureTime", s);
