@@ -3546,7 +3546,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(logenc)) {
             saveToKeyfile("LogEncoding", "Enabled", logenc.enabled, keyFile);
             saveToKeyfile("LogEncoding", "Auto", logenc.autocompute, keyFile);
-            saveToKeyfile("LogEncoding", "AutoGray", logenc.autogain, keyFile);
+            saveToKeyfile("LogEncoding", "AutoGain", logenc.autogain, keyFile);
             saveToKeyfile("LogEncoding", "Gain", logenc.gain, keyFile);
             saveToKeyfile("LogEncoding", "TargetGray", logenc.targetGray, keyFile);
             saveToKeyfile("LogEncoding", "BlackEv", logenc.blackEv, keyFile);
