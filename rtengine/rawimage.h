@@ -69,7 +69,6 @@ protected:
     }
 
     std::vector<std::array<int, 4>> raw_optical_black_med_;
-    bool has_raw_border_;
 
 public:
     bool has_gain_map(std::vector<uint8_t> *out_buf) const;
@@ -321,7 +320,6 @@ public:
     bool thumbNeedsRotation() const;
 
     float get_optical_black(int row, int col) const;
-    bool has_raw_border() const { return has_raw_border_; }
 };
 
 } // namespace rtengine

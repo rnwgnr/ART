@@ -26,7 +26,6 @@ CameraConst::CameraConst() : pdafOffset(0)
     // memset(raw_mask, 0, sizeof(raw_mask));
     white_max = 0;
     globalGreenEquilibration = -1;
-    rawBorder = -1;
 }
 
 
@@ -430,17 +429,6 @@ CameraConst::parseEntry(void *cJSON_, const char *make_model)
 
         cc->globalGreenEquilibration = (ji->type == cJSON_True);
     }
-
-    ji = cJSON_GetObjectItem(js, "raw_border");
-
-    if (ji) {
-        if (ji->type != cJSON_False && ji->type != cJSON_True) {
-            fprintf(stderr, "\"raw_border\" must be a boolean\n");
-            goto parse_error;
-        }
-
-        cc->rawBorder = (ji->type == cJSON_True);
-    }
     
     return cc;
 
@@ -767,22 +755,6 @@ CameraConst::update_globalGreenEquilibration(bool other)
     globalGreenEquilibration = (other ? 1 : 0);
 }
 
-bool CameraConst::has_rawBorder()
-{
-    return rawBorder >= 0;
-}
-
-int CameraConst::get_rawBorder()
-{
-    return rawBorder;
-}
-
-void CameraConst::update_rawBorder(bool other)
-{
-    rawBorder = other ? 1 : 0;
-}
-
-
 bool
 CameraConstantsStore::parse_camera_constants_file(Glib::ustring filename_)
 {
@@ -919,9 +891,6 @@ CameraConstantsStore::parse_camera_constants_file(Glib::ustring filename_)
                 existingcc->update_pdafOffset(cc->get_pdafOffset());
                 if (cc->has_globalGreenEquilibration()) {
                     existingcc->update_globalGreenEquilibration(cc->get_globalGreenEquilibration());
-                }
-                if (cc->has_rawBorder()) {
-                    existingcc->update_rawBorder(cc->get_rawBorder());
                 }
 
                 if (settings->verbose) {

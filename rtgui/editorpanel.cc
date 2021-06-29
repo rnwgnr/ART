@@ -1048,6 +1048,7 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
     tpc->initImage (ipc, tmb->getType() == FT_Raw);
     ipc->setHistogramListener (this);
     iareapanel->imageArea->indClippedPanel->silentlyDisableSharpMask();
+    ipc->setSizeListener(this);
 
 //    iarea->fitZoom ();   // tell to the editorPanel that the next image has to be fitted to the screen
     iareapanel->imageArea->setPreviewHandler (previewHandler);
@@ -1397,7 +1398,7 @@ void EditorPanel::info_toggled ()
                                               escapeHtmlChars (Glib::path_get_basename (openThm->getFileName()))  );
 
         int ww = -1, hh = -1;
-        idata->getDimensions(ww, hh);
+        //idata->getDimensions(ww, hh);
         if (ww <= 0) {
             ww = ipc->getFullWidth();
             hh = ipc->getFullHeight();
@@ -2576,4 +2577,13 @@ bool EditorPanel::autosave()
     Glib::signal_timeout().connect(sigc::slot<bool>(doit), 1000);
     saveProfile();
     return false;
+}
+
+
+void EditorPanel::sizeChanged(int w, int h, int ow, int oh)
+{
+    if (ipc) {
+        info_toggled();
+        navigator->setInvalid(ipc->getFullWidth(),ipc->getFullHeight());
+    }    
 }

@@ -54,7 +54,8 @@ class EditorPanel final :
     public ThumbnailListener,
     public HistoryBeforeAfterListener,
     public rtengine::HistogramListener,
-    public HistogramPanelListener
+    public HistogramPanelListener,
+    public rtengine::SizeListener
 {
 public:
     explicit EditorPanel (FilePanel* filePanel = nullptr);
@@ -144,6 +145,9 @@ public:
     // HistogramPanelListener
     void scopeTypeChanged(Options::ScopeType new_type) override;
 
+    // SizeListener
+    void sizeChanged(int w, int h, int ow, int oh) override;
+    
     // event handlers
     void info_toggled ();
     void hideHistoryActivated ();
