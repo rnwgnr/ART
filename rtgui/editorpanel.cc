@@ -2583,7 +2583,12 @@ bool EditorPanel::autosave()
 void EditorPanel::sizeChanged(int w, int h, int ow, int oh)
 {
     if (ipc) {
-        info_toggled();
-        navigator->setInvalid(ipc->getFullWidth(),ipc->getFullHeight());
+        idle_register.add(
+            [this]() -> bool
+            {
+                info_toggled();
+                navigator->setInvalid(ipc->getFullWidth(), ipc->getFullHeight());
+                return false;
+            });
     }    
 }
