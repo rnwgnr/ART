@@ -140,7 +140,7 @@ def main():
     with open(os.path.join(opts.outdir, 'ART'), 'w') as out:
         out.write("""#!/bin/bash
 export GTK_CSD=0
-d=$(dirname $0)
+d=$(dirname $(readlink -f "$0"))
 t=$(mktemp -d --suffix=-ART)
 "$d/lib/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so" > "$t/loader.cache"
 export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
@@ -154,7 +154,7 @@ rm -rf "$t"
     with open(os.path.join(opts.outdir, 'ART-cli'), 'w') as out:
         out.write("""#!/bin/bash
 export GTK_CSD=0
-d=$(dirname $0)
+d=$(dirname $(readlink -f "$0"))
 export GIO_MODULE_DIR="$d/lib/gio/modules"
 export LD_LIBRARY_PATH="$d/lib"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
