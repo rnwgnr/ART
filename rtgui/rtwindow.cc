@@ -645,9 +645,13 @@ void RTWindow::on_mainNB_switch_page (Gtk::Widget* widget, guint page_num)
             ep->setAspect();
 
             auto fn = ep->getFileName();
-            set_title_decorated(fn);
-            if (isSingleTabMode() && fpanel && !fn.empty()) {
-                fpanel->fileCatalog->selectImage(fn, false);
+            if (!fn.empty()) {
+                set_title_decorated(fn);
+                if (isSingleTabMode() && fpanel) {
+                    if (!fpanel->fileCatalog->isSelected(fn)) {
+                        fpanel->fileCatalog->selectImage(fn, false);
+                    }
+                }
             }
         } else {
             previewLoader->speedUp();

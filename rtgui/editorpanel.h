@@ -188,9 +188,9 @@ public:
     Gtk::Paned* catalogPane;
 
     void cleanup();
-
-private:
     void close ();
+    
+private:
 
     BatchQueueEntry *createBatchQueueEntry(bool fast_export=false);
     bool idle_imageSaved(ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);

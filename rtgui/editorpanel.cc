@@ -1138,6 +1138,7 @@ void EditorPanel::close ()
             openThm->decreaseRef ();
         }
     }
+    openThm = nullptr;
 }
 
 void EditorPanel::saveProfile ()

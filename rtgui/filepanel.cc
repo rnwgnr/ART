@@ -277,6 +277,9 @@ bool FilePanel::fileSelected (Thumbnail* thm)
     pl->pc = nullptr;
     pl->thm = thm;
     pendingLoads.push_back(pl);
+    if (!options.tabbedUI) {
+        parent->epanel->close();
+    }
     pendingLoadMutex.unlock();
 
     ProgressConnector<rtengine::InitialImage*> *ld = new ProgressConnector<rtengine::InitialImage*>();
