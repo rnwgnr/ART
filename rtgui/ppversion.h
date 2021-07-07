@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1025
+#define PPVERSION 1026
 
 /*
   Log of version changes
+  1026  2021-07-06
+        tone curve mode refactoring/simplification
   1025  2021-06-10
         finer-grained control of tone curve contrast with logenc enabled
   1024  2021-05-06

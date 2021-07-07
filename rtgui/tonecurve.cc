@@ -48,6 +48,7 @@ ToneCurve::ToneCurve():
     EvHistMatchingBatch = m->newEvent(M_VOID, "HISTORY_MSG_HISTMATCHING");
     EvSatCurve = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_SATCURVE");
     EvPerceptualStrength = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH");
+    EvContrastLegacy = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_CONTRAST_LEGACY");
     EvToolEnabled.set_action(AUTOEXP);
     EvToolReset.set_action(AUTOEXP);
 
@@ -83,7 +84,20 @@ ToneCurve::ToneCurve():
     curveEditorG = new CurveEditorGroup (options.lastToneCurvesDir, M("TP_EXPOSURE_CURVEEDITOR1"));
     curveEditorG->setCurveListener (this);
 
-    shape = static_cast<DiagonalCurveEditor*>(curveEditorG->addCurve(CT_Diagonal, "", toneCurveMode));
+    const auto mk_mode_box =
+        [&](MyComboBoxText *b) -> Gtk::HBox *
+        {
+            Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+            Gtk::Image *w = Gtk::manage(new RTImage("warning-small.png"));
+            w->set_tooltip_markup(M("GENERAL_DEPRECATED_TOOLTIP"));
+            hb->pack_start(*b, Gtk::PACK_EXPAND_WIDGET);
+            hb->pack_start(*w, Gtk::PACK_SHRINK, 2);
+            setExpandAlignProperties(hb, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+            return hb;
+        };
+    mode1_box_ = mk_mode_box(toneCurveMode);
+
+    shape = static_cast<DiagonalCurveEditor*>(curveEditorG->addCurve(CT_Diagonal, "", mode1_box_));
     shape->setEditID(EUID_ToneCurve1, BT_IMAGEFLOAT);
     shape->setBottomBarBgGradient(bottomMilestones);
     shape->setLeftBarBgGradient(bottomMilestones);
@@ -110,7 +124,8 @@ ToneCurve::ToneCurve():
     curveEditorG2 = new CurveEditorGroup (options.lastToneCurvesDir, M("TP_EXPOSURE_CURVEEDITOR2"));
     curveEditorG2->setCurveListener (this);
 
-    shape2 = static_cast<DiagonalCurveEditor*>(curveEditorG2->addCurve(CT_Diagonal, "", toneCurveMode2));
+    mode2_box_ = mk_mode_box(toneCurveMode2);
+    shape2 = static_cast<DiagonalCurveEditor*>(curveEditorG2->addCurve(CT_Diagonal, "", mode2_box_));
     shape2->setEditID(EUID_ToneCurve2, BT_IMAGEFLOAT);
     shape2->setBottomBarBgGradient(bottomMilestones);
     shape2->setLeftBarBgGradient(bottomMilestones);
@@ -123,7 +138,7 @@ ToneCurve::ToneCurve():
 
     tcmode2conn = toneCurveMode2->signal_changed().connect( sigc::mem_fun(*this, &ToneCurve::curveMode2Changed), true );
 
-    perceptualStrength = Gtk::manage(new Adjuster(M("TP_TONECURVE_PERCEPTUAL_STRENGTH"), 0, 100, 1, 100));
+    perceptualStrength = new Adjuster(M("TP_TONECURVE_PERCEPTUAL_STRENGTH"), 0, 100, 1, 100);
     pack_start(*perceptualStrength);
     perceptualStrength->setAdjusterListener(this);
 
@@ -137,6 +152,33 @@ ToneCurve::ToneCurve():
     satcurveG->show();
 
     pack_start(*satcurveG, Gtk::PACK_SHRINK, 2);
+
+    contrast_legacy_ = Gtk::manage(new Gtk::CheckButton(M("TP_TONECURVE_CONTRAST_LEGACY")));
+    contrast_legacy_box_ = new Gtk::HBox();
+    contrast_legacy_box_->pack_start(*contrast_legacy_, Gtk::PACK_EXPAND_WIDGET, 0);
+    {
+        Gtk::Image *w = Gtk::manage(new RTImage("warning-small.png"));
+        w->set_tooltip_markup(M("GENERAL_DEPRECATED_TOOLTIP"));
+        contrast_legacy_box_->pack_start(*w, Gtk::PACK_SHRINK, 2);
+    }
+    contrast_legacy_box_->show_all();
+
+    mode_ = Gtk::manage(new MyComboBoxText());
+    mode_->append(M("TP_EXPOSURE_TCMODE_STANDARD"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_WEIGHTEDSTD"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_FILMLIKE"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_LUMINANCE"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
+    mode_->set_active(0);
+    mode_->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::curveMode1Changed), true);
+    
+    mode_box_ = new Gtk::HBox();
+    mode_box_->pack_start(*Gtk::manage(new Gtk::Label(M("TP_TONECURVE_MODE") + ": ")), Gtk::PACK_SHRINK);
+    mode_box_->pack_start(*mode_, Gtk::PACK_EXPAND_WIDGET);
+    mode_box_->show_all();
+
+    contrast_legacy_->signal_toggled().connect(sigc::mem_fun(*this, &ToneCurve::contrastLegacyToggled));
 }
 
 
@@ -146,6 +188,9 @@ ToneCurve::~ToneCurve ()
 
     delete curveEditorG;
     delete curveEditorG2;
+    delete perceptualStrength;
+    delete contrast_legacy_box_;
+    delete mode_box_;
 }
 
 
@@ -179,6 +224,34 @@ void ToneCurve::read(const ProcParams* pp)
 
     showPerceptualStrength();
 
+    mode_->set_active(rtengine::toUnderlying(pp->toneCurve.curveMode));
+    contrast_legacy_->set_active(pp->toneCurve.contrastLegacyMode);
+
+    removeIfThere(this, mode_box_, false);
+    removeIfThere(this, contrast_legacy_box_, false);
+    removeIfThere(this, perceptualStrength, false);
+    
+    if (pp->toneCurve.contrast != 0 && pp->toneCurve.contrastLegacyMode) {
+        pack_start(*contrast_legacy_box_, Gtk::PACK_SHRINK, 2);
+        reorder_child(*contrast_legacy_box_, 1);
+    }
+
+    if (pp->toneCurve.perceptualStrength != 100) {
+        pack_start(*perceptualStrength, Gtk::PACK_SHRINK, 2);
+        reorder_child(*perceptualStrength, get_children().size()-2);
+    }
+
+    bool new_mode = (pp->toneCurve.curve.empty() || pp->toneCurve.curve[0] == DCT_Linear || pp->toneCurve.curve2.empty() || pp->toneCurve.curve2[0] == DCT_Linear || pp->toneCurve.curveMode == pp->toneCurve.curveMode2);
+    mode1_box_->set_visible(!new_mode);
+    mode2_box_->set_visible(!new_mode);
+    setExpandAlignProperties(shape->getCurveTypeButton()->buttonGroup, new_mode, true, Gtk::ALIGN_FILL, Gtk::ALIGN_FILL);
+    setExpandAlignProperties(shape2->getCurveTypeButton()->buttonGroup, new_mode, true, Gtk::ALIGN_FILL, Gtk::ALIGN_FILL);
+
+    if (new_mode) {
+        pack_start(*mode_box_, Gtk::PACK_SHRINK, 2);
+        reorder_child(*mode_box_, 0);
+    }
+    
     enableListener ();
 }
 
@@ -207,6 +280,9 @@ void ToneCurve::write(ProcParams* pp)
     pp->toneCurve.curve2 = shape2->getCurve ();
 
     int tcMode = toneCurveMode->get_active_row_number();
+    if (!toneCurveMode->is_visible()) {
+        tcMode = mode_->get_active_row_number();
+    }
 
     if (tcMode == 0) {
         pp->toneCurve.curveMode = ToneCurveParams::TcMode::STD;
@@ -244,6 +320,7 @@ void ToneCurve::write(ProcParams* pp)
     pp->toneCurve.saturation = satcurve->getCurve();
 
     pp->toneCurve.perceptualStrength = perceptualStrength->getValue();
+    pp->toneCurve.contrastLegacyMode = contrast_legacy_->get_active();
 }
 
 
@@ -457,4 +534,12 @@ void ToneCurve::toolReset(bool to_initial)
     }
     pp.toneCurve.enabled = getEnabled();
     read(&pp);
+}
+
+
+void ToneCurve::contrastLegacyToggled()
+{
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvContrastLegacy, contrast_legacy_->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+    }
 }

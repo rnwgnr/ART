@@ -49,10 +49,18 @@ protected:
     FlatCurveEditor *satcurve;
     Adjuster *perceptualStrength;
 
+    Gtk::HBox *mode1_box_;
+    Gtk::HBox *mode2_box_;
+    MyComboBoxText *mode_;
+    Gtk::CheckButton *contrast_legacy_;
+    Gtk::HBox *mode_box_;
+    Gtk::HBox *contrast_legacy_box_;
+
     rtengine::ProcEvent EvHistMatching;
     rtengine::ProcEvent EvHistMatchingBatch;
     rtengine::ProcEvent EvSatCurve;
     rtengine::ProcEvent EvPerceptualStrength;
+    rtengine::ProcEvent EvContrastLegacy;
 
     // used temporarily in eventing
     std::vector<double> nextToneCurve;
@@ -60,6 +68,7 @@ protected:
 
     void setHistmatching(bool enabled);
     void showPerceptualStrength();
+    void contrastLegacyToggled();
 
     rtengine::procparams::ToneCurveParams initial_params;
 

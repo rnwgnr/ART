@@ -141,6 +141,14 @@ void CurveEditorGroup::newLine()
 
         for (int i = numberOfPackedCurve; i < (int)(curveEditors.size()); ++i) {
             setExpandAlignProperties(curveEditors[i]->curveType->buttonGroup, !rwe, true, Gtk::ALIGN_FILL, Gtk::ALIGN_FILL);
+            // if (curveEditors[i]->relatedWidget != nullptr) {
+            //     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+            //     hb->pack_start(*curveEditors[i]->curveType->buttonGroup, Gtk::PACK_EXPAND_WIDGET, 3);
+            //     hb->pack_start(*curveEditors[i]->relatedWidget, !rwe ? Gtk::PACK_SHRINK : Gtk::PACK_EXPAND_WIDGET, 3);
+            //     currLine->attach(*hb, x++, 0, 1, 1);
+            // } else {
+            //     currLine->attach(*curveEditors[i]->curveType->buttonGroup, x++, 0, 1, 1);
+            // }
             currLine->attach(*curveEditors[i]->curveType->buttonGroup, x++, 0, 1, 1);
 
             if (curveEditors[i]->relatedWidget != nullptr) {

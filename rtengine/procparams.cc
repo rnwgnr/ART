@@ -1506,7 +1506,8 @@ ToneCurveParams::ToneCurveParams():
     saturation{
         FCT_Linear
     },
-    perceptualStrength(100)
+    perceptualStrength(100),
+    contrastLegacyMode(false)
 {
 }
 
@@ -1522,7 +1523,8 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
         && histmatching == other.histmatching
         && fromHistMatching == other.fromHistMatching
         && saturation == other.saturation
-        && perceptualStrength == other.perceptualStrength;
+        && perceptualStrength == other.perceptualStrength
+        && contrastLegacyMode == other.contrastLegacyMode;
 }
 
 
@@ -3356,12 +3358,19 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             };
 
             saveToKeyfile("ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode, keyFile);
-            saveToKeyfile("ToneCurve", "CurveMode2", tc_mapping, toneCurve.curveMode2, keyFile);
+            if (!toneCurve.curve2.empty() && toneCurve.curve2[0] != DCT_Linear && toneCurve.curveMode != toneCurve.curveMode2) {
+                saveToKeyfile("ToneCurve", "CurveMode2", tc_mapping, toneCurve.curveMode2, keyFile);
+            }
 
             saveToKeyfile("ToneCurve", "Curve", toneCurve.curve, keyFile);
             saveToKeyfile("ToneCurve", "Curve2", toneCurve.curve2, keyFile);
             saveToKeyfile("ToneCurve", "Saturation", toneCurve.saturation, keyFile);
-            saveToKeyfile("ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength, keyFile);
+            if (toneCurve.perceptualStrength != 100) {
+                saveToKeyfile("ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength, keyFile);
+            }
+            if (toneCurve.contrastLegacyMode) {
+                saveToKeyfile("ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode, keyFile);
+            }
         }
 
 // Local contrast
@@ -4194,7 +4203,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (keyFile.has_group("ToneCurve") && RELEVANT_(toneCurve)) {
                 assignFromKeyfile(keyFile, "ToneCurve", "Enabled", toneCurve.enabled);
                 assignFromKeyfile(keyFile, "ToneCurve", "Contrast", toneCurve.contrast);
-                assignFromKeyfile(keyFile, "ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode);
+                if (assignFromKeyfile(keyFile, "ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode)) {
+                    toneCurve.curveMode2 = toneCurve.curveMode;
+                }
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveMode2", tc_mapping, toneCurve.curveMode2);
 
                 assignFromKeyfile(keyFile, "ToneCurve", "Curve", toneCurve.curve);
@@ -4202,7 +4213,12 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 assignFromKeyfile(keyFile, "ToneCurve", "HistogramMatching", toneCurve.histmatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveFromHistogramMatching", toneCurve.fromHistMatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "Saturation", toneCurve.saturation);
-                assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength);
+                if (!assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength) && ppVersion >= 1026) {
+                    toneCurve.perceptualStrength = 100;
+                }
+                if (!assignFromKeyfile(keyFile, "ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode)) {
+                    toneCurve.contrastLegacyMode = (ppVersion < 1026);
+                }
             }
         }
 

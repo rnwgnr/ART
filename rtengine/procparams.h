@@ -533,6 +533,7 @@ struct ToneCurveParams {
     bool fromHistMatching;
     std::vector<double> saturation;
     int perceptualStrength;
+    bool contrastLegacyMode;
 
     ToneCurveParams();
 
