@@ -61,6 +61,7 @@ protected:
     rtengine::ProcEvent EvSatCurve;
     rtengine::ProcEvent EvPerceptualStrength;
     rtengine::ProcEvent EvContrastLegacy;
+    rtengine::ProcEvent EvMode;
 
     // used temporarily in eventing
     std::vector<double> nextToneCurve;
@@ -69,6 +70,7 @@ protected:
     void setHistmatching(bool enabled);
     void showPerceptualStrength();
     void contrastLegacyToggled();
+    void modeChanged();
 
     rtengine::procparams::ToneCurveParams initial_params;
 

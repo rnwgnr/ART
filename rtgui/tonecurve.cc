@@ -49,6 +49,7 @@ ToneCurve::ToneCurve():
     EvSatCurve = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_SATCURVE");
     EvPerceptualStrength = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH");
     EvContrastLegacy = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_CONTRAST_LEGACY");
+    EvMode = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_MODE");
     EvToolEnabled.set_action(AUTOEXP);
     EvToolReset.set_action(AUTOEXP);
 
@@ -171,7 +172,7 @@ ToneCurve::ToneCurve():
     mode_->append(M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     mode_->append(M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
     mode_->set_active(0);
-    mode_->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::curveMode1Changed), true);
+    mode_->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::modeChanged), true);
     
     mode_box_ = new Gtk::HBox();
     mode_box_->pack_start(*Gtk::manage(new Gtk::Label(M("TP_TONECURVE_MODE") + ": ")), Gtk::PACK_SHRINK);
@@ -279,9 +280,11 @@ void ToneCurve::write(ProcParams* pp)
     pp->toneCurve.curve = shape->getCurve ();
     pp->toneCurve.curve2 = shape2->getCurve ();
 
-    int tcMode = toneCurveMode->get_active_row_number();
-    if (!toneCurveMode->is_visible()) {
-        tcMode = mode_->get_active_row_number();
+    bool legacy_curve_mode = toneCurveMode->is_visible();
+    int tcMode = mode_->get_active_row_number();
+
+    if (legacy_curve_mode) {
+        tcMode = toneCurveMode->get_active_row_number();
     }
 
     if (tcMode == 0) {
@@ -298,7 +301,9 @@ void ToneCurve::write(ProcParams* pp)
         pp->toneCurve.curveMode = ToneCurveParams::TcMode::PERCEPTUAL;
     }
 
-    tcMode = toneCurveMode2->get_active_row_number();
+    if (legacy_curve_mode) {
+        tcMode = toneCurveMode2->get_active_row_number();
+    }
 
     if (tcMode == 0) {
         pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::STD;
@@ -541,5 +546,14 @@ void ToneCurve::contrastLegacyToggled()
 {
     if (listener && getEnabled()) {
         listener->panelChanged(EvContrastLegacy, contrast_legacy_->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+    }
+}
+
+
+void ToneCurve::modeChanged()
+{
+    showPerceptualStrength();
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvMode, mode_->get_active_text());
     }
 }
