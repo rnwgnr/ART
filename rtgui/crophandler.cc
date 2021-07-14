@@ -211,7 +211,10 @@ double CropHandler::getFitZoom ()
 
 void CropHandler::setZoom (int z, int centerx, int centery)
 {
-    assert (ipc);
+    //assert (ipc);
+    if (!ipc) {
+        return;
+    }
 
     int oldZoom = zoom;
     float oldScale = zoom >= 1000 ? float(zoom / 1000) : 10.f / float(zoom);

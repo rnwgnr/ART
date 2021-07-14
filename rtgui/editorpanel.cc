@@ -1123,6 +1123,9 @@ void EditorPanel::close ()
         previewHandler = nullptr;
 
         if (iareapanel) {
+            if (iareapanel->imageArea->mainCropWindow) {
+                iareapanel->imageArea->mainCropWindow->cropHandler.newImage(nullptr, false);
+            }
             iareapanel->imageArea->setPreviewHandler (nullptr);
             iareapanel->imageArea->setImProcCoordinator (nullptr);
             iareapanel->imageArea->unsubscribe();
@@ -2587,8 +2590,10 @@ void EditorPanel::sizeChanged(int w, int h, int ow, int oh)
         idle_register.add(
             [this]() -> bool
             {
-                info_toggled();
-                navigator->setInvalid(ipc->getFullWidth(), ipc->getFullHeight());
+                if (ipc) {
+                    info_toggled();
+                    navigator->setInvalid(ipc->getFullWidth(), ipc->getFullHeight());
+                }
                 return false;
             });
     }    

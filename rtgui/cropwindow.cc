@@ -1904,7 +1904,7 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
             }
 
             isPreviewImg = true;
-        } else {
+        } else if (iarea->getPreviewHandler()) {
             // cropHandler.cropPixbuf is null
             int cropX, cropY;
             cropHandler.getPosition (cropX, cropY);
