@@ -1800,6 +1800,24 @@ BENCHFUN
         LUTf igamcurve(65536, LUT_CLIP_BELOW);
         Color::gammaf2lut(igamcurve, igam, igamthresh, igamslope, 65535.f, 65535.f);
 
+        const auto apply_gamma =
+            [&](float v) -> float
+            {
+                if (gam > 1.f && v > 0.f) {
+                    v = v < 65535.f ? gamcurve[v] : (Color::gammaf(v / 65535.f, gam, gamthresh, gamslope) * 65535.f);
+                }
+                return v;
+            };
+
+        const auto apply_igamma =
+            [&](float v) -> float
+            {
+                if (gam > 1.f && v > 0.f) {
+                    v = v < 65536.f ? igamcurve[v] : (Color::gammaf(v / 65535.f, igam, igamthresh, igamslope) * 65535.f);
+                }
+                return v;
+            };
+
         const float gain = pow(2.0f, float(expcomp));
         float params_Ldetail = min(float(dnparams.luminanceDetail), 99.9f); // max out to avoid div by zero when using noisevar_Ldetail as divisor
 
@@ -2073,9 +2091,14 @@ BENCHFUN
                                     }
                                     
                                     //conversion colorspace to determine luminance with no gamma
-                                    X = X < 65535.f ? gamcurve[X] : (Color::gammaf(X / 65535.f, gam, gamthresh, gamslope) * 65535.f);
-                                    Y = Y < 65535.f ? gamcurve[Y] : (Color::gammaf(Y / 65535.f, gam, gamthresh, gamslope) * 65535.f);
-                                    Z = Z < 65535.f ? gamcurve[Z] : (Color::gammaf(Z / 65535.f, gam, gamthresh, gamslope) * 65535.f);
+                                    X = apply_gamma(X);
+                                    Y = apply_gamma(Y);
+                                    Z = apply_gamma(Z);
+                                    // if (gam > 1.f) {
+                                    //     X = X < 65535.f ? gamcurve[X] : (Color::gammaf(X / 65535.f, gam, gamthresh, gamslope) * 65535.f);
+                                    //     Y = Y < 65535.f ? gamcurve[Y] : (Color::gammaf(Y / 65535.f, gam, gamthresh, gamslope) * 65535.f);
+                                    //     Z = Z < 65535.f ? gamcurve[Z] : (Color::gammaf(Z / 65535.f, gam, gamthresh, gamslope) * 65535.f);
+                                    // }
                                     //end chroma
                                     // labdn->L[i1][j1] = Y;
                                     // labdn->a[i1][j1] = (X - Y);
@@ -2118,9 +2141,12 @@ BENCHFUN
                                     float btmp = Color::igammatab_srgb[ src->b(i, j) ];
                                     //modification Jacques feb 2013
                                     // gamma slider different from raw
-                                    rtmp = rtmp < 65535.f ? gamcurve[rtmp] : (Color::gammanf(rtmp / 65535.f, gam) * 65535.f);
-                                    gtmp = gtmp < 65535.f ? gamcurve[gtmp] : (Color::gammanf(gtmp / 65535.f, gam) * 65535.f);
-                                    btmp = btmp < 65535.f ? gamcurve[btmp] : (Color::gammanf(btmp / 65535.f, gam) * 65535.f);
+                                    rtmp = apply_gamma(rtmp);
+                                    gtmp = apply_gamma(gtmp);
+                                    btmp = apply_gamma(btmp);
+                                    // rtmp = rtmp < 65535.f ? gamcurve[rtmp] : (Color::gammanf(rtmp / 65535.f, gam) * 65535.f);
+                                    // gtmp = gtmp < 65535.f ? gamcurve[gtmp] : (Color::gammanf(gtmp / 65535.f, gam) * 65535.f);
+                                    // btmp = btmp < 65535.f ? gamcurve[btmp] : (Color::gammanf(btmp / 65535.f, gam) * 65535.f);
 
                                     // float X, Y, Z;
                                     // Color::rgbxyz(rtmp, gtmp, btmp, X, Y, Z, wp);
@@ -2485,9 +2511,9 @@ BENCHFUN
                                         }
 
 
-                                        X = X < 65536.f ? igamcurve[X] : (Color::gammaf(X / 65535.f, igam, igamthresh, igamslope) * 65535.f);
-                                        Y = Y < 65536.f ? igamcurve[Y] : (Color::gammaf(Y / 65535.f, igam, igamthresh, igamslope) * 65535.f);
-                                        Z = Z < 65536.f ? igamcurve[Z] : (Color::gammaf(Z / 65535.f, igam, igamthresh, igamslope) * 65535.f);
+                                        X = apply_igamma(X);
+                                        Y = apply_igamma(Y);
+                                        Z = apply_igamma(Z);
 
                                         if (lab_mode) {
                                             X = Color::denoiseGammaTab[X];
@@ -2540,9 +2566,12 @@ BENCHFUN
                                             Color::yuv2rgb(Y, u, v, r_, g_, b_, wpi);
                                         }
                                         //gamma slider is different from Raw
-                                        r_ = r_ < 65536.f ? igamcurve[r_] : (Color::gammanf(r_ / 65535.f, igam) * 65535.f);
-                                        g_ = g_ < 65536.f ? igamcurve[g_] : (Color::gammanf(g_ / 65535.f, igam) * 65535.f);
-                                        b_ = b_ < 65536.f ? igamcurve[b_] : (Color::gammanf(b_ / 65535.f, igam) * 65535.f);
+                                        r_ = apply_igamma(r_);
+                                        g_ = apply_igamma(g_);
+                                        b_ = apply_igamma(b_);
+                                        // r_ = r_ < 65536.f ? igamcurve[r_] : (Color::gammanf(r_ / 65535.f, igam) * 65535.f);
+                                        // g_ = g_ < 65536.f ? igamcurve[g_] : (Color::gammanf(g_ / 65535.f, igam) * 65535.f);
+                                        // b_ = b_ < 65536.f ? igamcurve[b_] : (Color::gammanf(b_ / 65535.f, igam) * 65535.f);
 
                                         if (numtiles == 1) {
                                             dsttmp->r(i, j) = newGain * r_;
