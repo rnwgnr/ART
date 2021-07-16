@@ -645,6 +645,8 @@ void Options::setDefaults()
         {100, "#FF7F00"},
         {108, "#FF0000"}
     };
+    clipped_highlights_color = "";
+    clipped_shadows_color = "";
 
     renaming = RenameOptions();
     sidecar_autosave_interval = 0;
@@ -1823,6 +1825,12 @@ void Options::readFromFile(Glib::ustring fname)
                     falseColorsMap.rbegin()->first < 108) {
                     falseColorsMap[108] = "#000000";
                 }
+                if (keyFile.has_key(g, "ClippedHighlights")) {
+                    clipped_highlights_color = keyFile.get_string(g, "ClippedHighlights");
+                }
+                if (keyFile.has_key(g, "ClippedShadows")) {
+                    clipped_shadows_color = keyFile.get_string(g, "ClippedShadows");
+                }
             }
 
             if (keyFile.has_group("Renaming")) {
@@ -2241,6 +2249,8 @@ void Options::saveToFile(Glib::ustring fname)
         for (auto &p : falseColorsMap) {
             keyFile.set_string("False Colors Map", "IRE_" + std::to_string(p.first), p.second);
         }
+        keyFile.set_string("False Colors Map", "ClippedHighlights", clipped_highlights_color);
+        keyFile.set_string("False Colors Map", "ClippedShadows", clipped_shadows_color);
 
         keyFile.set_string("Renaming", "Pattern", renaming.pattern);
         keyFile.set_string("Renaming", "Sidecars", renaming.sidecars);

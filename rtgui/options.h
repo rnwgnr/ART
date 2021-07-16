@@ -457,6 +457,8 @@ public:
     // taken from
     // https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
     std::map<int, std::string> falseColorsMap;
+    std::string clipped_highlights_color;
+    std::string clipped_shadows_color;
 
     struct RenameOptions {
         Glib::ustring pattern;

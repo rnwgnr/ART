@@ -1490,6 +1490,21 @@ void show_focus_mask(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf>
 }
 
 
+void get_rgb(const char *color, guint8 *rgb)
+{
+    const auto get =
+        [](const char *color, int i) -> guint8
+        {
+            int v = std::toupper(color[i]);
+            return (v >= 65 ? 10 + v - 65 : v - 48);
+        };
+
+    for (int c = 0; c < 3; ++c) {
+        rgb[c] = get(color, 2*c+1) * 16 + get(color, 2*c+2);
+    }
+}
+
+
 void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbuf> pixbuftrue)
 {
     guint8 *pix = pixbuf->get_pixels();
@@ -1509,21 +1524,6 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
         {
             constexpr float scale = (100.f - 7.5f) / (235.f - 16.f);
             return rtengine::LIM(int((val - 16) * scale + 7.5f), 0, 108);
-        };
-
-    const auto get =
-        [](const char *color, int i) -> guint8
-        {
-            int v = std::toupper(color[i]);
-            return (v >= 65 ? 10 + v - 65 : v - 48);
-        };
-
-    const auto get_rgb =
-        [&](const char *color, guint8 *rgb) -> void
-        {
-            for (int c = 0; c < 3; ++c) {
-                rgb[c] = get(color, 2*c+1) * 16 + get(color, 2*c+2);
-            }
         };
 
 #ifdef _OPENMP
@@ -1655,6 +1655,18 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
             }
 
 #endif
+            guint8 ch_color[3];
+            guint8 cs_color[3];
+            bool has_ch_color = false;
+            bool has_cs_color = false;
+            if (!options.clipped_highlights_color.empty()) {
+                has_ch_color = true;
+                get_rgb(options.clipped_highlights_color.c_str(), ch_color);
+            }
+            if (!options.clipped_shadows_color.empty()) {
+                has_cs_color = true;
+                get_rgb(options.clipped_shadows_color.c_str(), cs_color);
+            }
 
             if (showcs || showch || showR || showG || showB || showL || showFocusMask || showFalseColors) {
                 Glib::RefPtr<Gdk::Pixbuf> tmp = cropHandler.cropPixbuf->copy ();
@@ -1726,7 +1738,13 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
                                     delta *= HighlightFac;
 
                                     if (showclippedAny) {
-                                        curr[0] = curr[1] = curr[2] = delta;    // indicate clipped highlights in gray
+                                        if (has_ch_color) {
+                                            for (int c = 0; c < 3; ++c) {
+                                                curr[c] = ch_color[c];
+                                            }
+                                        } else {
+                                            curr[0] = curr[1] = curr[2] = delta;    // indicate clipped highlights in gray
+                                        }
                                     } else {
                                         curr[0] = 255;    // indicate clipped highlights in red
                                         curr[1] = curr[2] = delta;
@@ -1761,8 +1779,14 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
 
                                 if (changedSH) {
                                     if (showclippedAny) {
-                                        delta = 255 - (delta * ShawdowFac);
-                                        curr[0] = curr[1] = curr[2] = delta; // indicate clipped shadows in gray
+                                        if (has_cs_color) {
+                                            for (int c = 0; c < 3; ++c) {
+                                                curr[c] = cs_color[c];
+                                            }
+                                        } else {
+                                            delta = 255 - (delta * ShawdowFac);
+                                            curr[0] = curr[1] = curr[2] = delta; // indicate clipped shadows in gray
+                                        }
                                     } else {
                                         delta *= ShawdowFac;
                                         curr[2] = 255;
