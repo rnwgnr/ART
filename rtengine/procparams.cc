@@ -2638,7 +2638,11 @@ SmoothingParams::Region::Region():
     iterations(1),
     falloff(1),
     nldetail(50),
-    nlstrength(0)
+    nlstrength(0),
+    numblades(9),
+    angle(0),
+    curvature(0),
+    offset(0)
 {
 }
 
@@ -2653,7 +2657,11 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && iterations == other.iterations
         && falloff == other.falloff
         && nlstrength == other.nlstrength
-        && nldetail == other.nldetail;
+        && nldetail == other.nldetail
+        && numblades == other.numblades
+        && angle == other.angle
+        && curvature == other.curvature
+        && offset == other.offset;
 }
 
 
@@ -3785,6 +3793,10 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("Falloff_") + n, r.falloff, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("NLStrength_") + n, r.nlstrength, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("NLDetail_") + n, r.nldetail, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NumBlades_") + n, r.numblades, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Angle_") + n, r.angle, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Curvature_") + n, r.curvature, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Offset_") + n, r.offset, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
@@ -4980,6 +4992,22 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     done = false;
                 }
                 if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NLDetail_") + n, cur.nldetail)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NumBlades_") + n, cur.numblades)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Angle_") + n, cur.angle)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Curvature_") + n, cur.curvature)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Offset_") + n, cur.offset)) {
                     found = true;
                     done = false;
                 }

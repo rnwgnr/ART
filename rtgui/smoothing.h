@@ -70,6 +70,10 @@ private:
     rtengine::ProcEvent EvFalloff;
     rtengine::ProcEvent EvNLStrength;
     rtengine::ProcEvent EvNLDetail;
+    rtengine::ProcEvent EvNumBlades;
+    rtengine::ProcEvent EvAngle;
+    rtengine::ProcEvent EvCurvature;
+    rtengine::ProcEvent EvOffset;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -98,10 +102,16 @@ private:
     Adjuster *falloff;
     Adjuster *nlstrength;
     Adjuster *nldetail;
+    Adjuster *numblades;
+    Adjuster *angle;
+    Adjuster *curvature;
+    Adjuster *offset;
     Gtk::VBox *box;
+    Gtk::HBox *chan_box;
     Gtk::VBox *guided_box;
     Gtk::VBox *gaussian_box;
     Gtk::VBox *nl_box;
+    Gtk::VBox *lens_motion_box;
 
     rtengine::procparams::SmoothingParams initial_params;
 };

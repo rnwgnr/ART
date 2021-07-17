@@ -1220,7 +1220,9 @@ struct SmoothingParams {
             GUIDED,
             GAUSSIAN,
             GAUSSIAN_GLOW,
-            NLMEANS
+            NLMEANS,
+            MOTION,
+            LENS
         };
         Mode mode;
         Channel channel;
@@ -1231,6 +1233,10 @@ struct SmoothingParams {
         double falloff;
         int nldetail;
         int nlstrength;
+        int numblades;
+        double angle;
+        double curvature;
+        double offset;
 
         Region();
         bool operator==(const Region &other) const;
