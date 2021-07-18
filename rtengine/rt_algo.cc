@@ -17,6 +17,8 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <complex.h>
+#include <fftw3.h>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -33,8 +35,11 @@
 #include "rt_algo.h"
 #include "rt_math.h"
 #include "sleef.h"
+#include "../rtgui/threadutils.h"
+#include "imagefloat.h"
 
 namespace {
+
 float calcBlendFactor(float val, float threshold) {
     // sigmoid function
     // result is in ]0;1] range
@@ -159,9 +164,13 @@ float calcContrastThreshold(float** luminance, int tileY, int tileX, int tilesiz
 
     return c / 100.f;
 }
-}
+
+} // namespace
 
 namespace rtengine {
+
+extern MyMutex *fftwMutex;
+
 
 void findMinMaxPercentile(const float* data, size_t size, float minPrct, float& minOut, float maxPrct, float& maxOut, bool multithread)
 {
@@ -658,6 +667,217 @@ float polyFill(float **buffer, int width, int height, const std::vector<CoordD> 
     }
 
     return ret;//float(rtengine::min<int>(xEnd - xStart, yEnd - yStart));
+}
+
+
+namespace {
+
+inline int round_up_pow2(int dim)
+{
+    // from https://graphics.stanford.edu/~seander/bithacks.html
+    assert (dim > 0);
+    unsigned int v = dim;
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}
+
+inline int find_fast_dim(int dim)
+{
+    // as per the FFTW docs:
+    //
+    //   FFTW is generally best at handling sizes of the form
+    //     2^a 3^b 5^c 7^d 11^e 13^f,
+    //   where e+f is either 0 or 1.
+    //
+    // Here, we try to round up to the nearest dim that can be expressed in
+    // the above form. This is not exhaustive, but should be ok for pictures
+    // up to 100MPix at least
+
+    int d1 = round_up_pow2 (dim);
+    std::vector<int> d = {
+        d1 / 128 * 65,
+        d1 / 64 * 33,
+        d1 / 512 * 273,
+        d1 / 16 * 9,
+        d1 / 8 * 5,
+        d1 / 16 * 11,
+        d1 / 128 * 91,
+        d1 / 4 * 3,
+        d1 / 64 * 49,
+        d1 / 16 * 13,
+        d1 / 8 * 7,
+        d1
+    };
+
+    for (size_t i = 0; i < d.size(); ++i) {
+        if (d[i] >= dim) {
+            return d[i];
+        }
+    }
+
+    assert(false);
+    return dim;
+}
+
+
+void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW, float *buf, fftwf_complex *buf_fft, const array2D<float> &src, array2D<float> &dst, bool multithread)
+{
+    const int W = src.width();
+    const int H = src.height();
+    
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < pH; ++y) {
+        int yy = LIM(y - kernel_radius, 0, H-1);
+        for (int x = 0; x < pW; ++x) {
+            int xx = LIM(x - kernel_radius, 0, W-1);
+            buf[y * pW + x] = src[yy][xx];
+        }
+    }
+
+    auto plan = fftwf_plan_dft_r2c_2d(pH, pW, buf, buf_fft, FFTW_ESTIMATE);
+    fftwf_execute(plan);
+    fftwf_destroy_plan(plan);
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < pH; ++y) {
+        for (int x = 0, end = pW / 2 + 1; x < end; ++x) {
+            const int i = y * end + x;
+            float p = buf_fft[i][0], q = buf_fft[i][1];
+            float r = kernel_fft[i][0], s = kernel_fft[i][1];
+            buf_fft[i][0] = p * r - q * s;
+            buf_fft[i][1] = p * s + q * r;
+        }
+    }
+
+    plan = fftwf_plan_dft_c2r_2d(pH, pW, buf_fft, buf, FFTW_ESTIMATE);
+    fftwf_execute(plan);
+    fftwf_destroy_plan(plan);
+
+    const int K = 2 * kernel_radius;
+    const float norm = pH * pW;
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            src[y][x] = buf[(y + K) * pW + x + K] / norm;
+        }
+    }
+}
+
+
+fftwf_complex *prepare_kernel(const array2D<float> &kernel, float *buf, int pW, int pH, bool multithread)
+{
+    fftwf_complex *kernel_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+    const int K = kernel.width();
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < pH; ++y) {
+        for (int x = 0; x < pW; ++x) {
+            if (y < K && x < K) {
+                buf[y * pW + x] = kernel[y][x];
+            } else {
+                buf[y * pW + x] = 0.f;
+            }
+        }
+    }
+
+    auto plan = fftwf_plan_dft_r2c_2d(pH, pW, buf, kernel_fft, FFTW_ESTIMATE);
+    fftwf_execute(plan);
+    fftwf_destroy_plan(plan);
+
+    return kernel_fft;
+}
+
+} // namespace
+
+
+bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat *dst, bool multithread)
+{
+    if (kernel.width() != kernel.height() || src->getWidth() != dst->getWidth() || src->getHeight() != dst->getHeight()) {
+        return false;
+    }
+    
+    MyMutex::MyLock lock(*fftwMutex);
+
+#ifdef RT_FFTW3F_OMP
+    if (multithread) {
+        fftwf_init_threads();
+        fftwf_plan_with_nthreads(omp_get_max_threads());
+    }
+#endif
+
+    const int K = kernel.width();
+    const int W = src->getWidth();
+    const int H = src->getHeight();
+    const int pW = find_fast_dim(W + K);
+    const int pH = find_fast_dim(H + K);
+
+    float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
+    fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+
+    auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
+
+    for (int c = 0; c < 3; ++c) {
+        auto s = (c == 0 ? src->r.ptrs : (c == 1 ? src->g.ptrs : src->b.ptrs));
+        auto d = (c == 0 ? dst->r.ptrs : (c == 1 ? dst->g.ptrs : dst->b.ptrs));
+        array2D<float> asrc(W, H, s, ARRAY2D_BYREFERENCE);
+        array2D<float> adst(W, H, d, ARRAY2D_BYREFERENCE);
+        do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, asrc, adst, multithread);
+    }
+
+    fftwf_free(kernel_fft);
+    fftwf_free(buf_fft);
+    fftwf_free(buf);
+
+    return true;
+}
+
+
+bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2D<float> &dst, bool multithread)
+{
+    if (kernel.width() != kernel.height() || src.width() != dst.width() || src.height() != dst.height()) {
+        return false;
+    }
+
+    MyMutex::MyLock lock(*fftwMutex);
+
+#ifdef RT_FFTW3F_OMP
+    if (multithread) {
+        fftwf_init_threads();
+        fftwf_plan_with_nthreads(omp_get_max_threads());
+    }
+#endif
+
+    const int K = kernel.width();
+    const int W = src.width();
+    const int H = dst.width();
+    const int pW = find_fast_dim(W + K);
+    const int pH = find_fast_dim(H + K);
+
+    float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
+    fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+
+    auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
+    do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, src, dst, multithread);
+
+    fftwf_free(kernel_fft);
+    fftwf_free(buf_fft);
+    fftwf_free(buf);
+
+    return true;
 }
 
 } // namespace rtengine

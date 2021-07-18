@@ -26,6 +26,8 @@
 
 namespace rtengine {
 
+class Imagefloat;
+
 void findMinMaxPercentile(const float* data, size_t size, float minPrct, float& minOut, float maxPrct, float& maxOut, bool multiThread = true);
 
 void buildBlendMask(float** luminance, float **blend, int W, int H, float &contrastThreshold, float amount=1.f, bool autoContrast=false, float blur_radius=2.f, float luminance_factor=1.f);
@@ -40,4 +42,9 @@ void buildGradientsMask(int W, int H, float **luminance, float **out,
 // Fills the polygon into the buffer ; Range has to be updated to the PorcParams's AreaMask::Polygon::x/y range
 // Return the smallest dimension of the resulting bounding box
 float polyFill(float **buffer, int width, int height, const std::vector<CoordD> &poly, const float color);
+
+
+bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat *dst, bool multithread);
+bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2D<float> &dst, bool multithread);
+
 } // namespace rtengine
