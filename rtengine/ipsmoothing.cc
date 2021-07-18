@@ -571,8 +571,8 @@ void lens_motion_blur(ImProcData &im, Imagefloat *rgb, int region)
         const int pH = H + K;
 
         float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
-        fftwf_complex *kernel_fft = fftwf_alloc_complex(pH * pW / 2 + 1);
-        fftwf_complex *rgb_fft = fftwf_alloc_complex(pH * pW / 2 + 1);
+        fftwf_complex *kernel_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+        fftwf_complex *rgb_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (im.multiThread)
