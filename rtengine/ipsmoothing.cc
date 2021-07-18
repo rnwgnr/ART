@@ -616,7 +616,7 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
             const bool glow = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_GLOW;
-            Channel ch = Channel(int(r.channel));
+            Channel ch = glow ? Channel::LC : Channel(int(r.channel));
             if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
                 nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
             } else if (r.mode == SmoothingParams::Region::Mode::LENS || r.mode == SmoothingParams::Region::Mode::MOTION) {

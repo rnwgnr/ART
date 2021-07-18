@@ -490,7 +490,7 @@ void Smoothing::modeChanged()
         curvature->set_visible(r == 4);
         offset->set_visible(r == 4);
     }
-    chan_box->set_visible(r <= 3);
+    chan_box->set_visible(r <= 3 && r != 2);
     epsilon->set_visible(r == 0);
     falloff->set_visible(r == 2);
     iterations->set_visible(r <= 3);
