@@ -132,10 +132,37 @@ public:
     {
         auto &r = parent_->data[row];
 
-        return Glib::ustring::compose(
-            "%1 %2 %4 [%3]", r.radius, r.epsilon, 
-            r.channel == SmoothingParams::Region::Channel::LUMINANCE ? "L" :
-            (r.channel == SmoothingParams::Region::Channel::CHROMINANCE ? "C" : "RGB"), r.iterations);
+        switch (r.mode) {
+        case SmoothingParams::Region::Mode::GUIDED:
+            return Glib::ustring::compose(
+                "%5: %1 %2 %4 [%3]", r.radius, r.epsilon, 
+                r.channel == SmoothingParams::Region::Channel::LUMINANCE ? "L" :
+                (r.channel == SmoothingParams::Region::Channel::CHROMINANCE ? "C" : "RGB"), r.iterations, M("TP_SMOOTHING_MODE_GUIDED"));
+        case SmoothingParams::Region::Mode::GAUSSIAN:
+            return Glib::ustring::compose(
+                "%4: %1 %2 [%3]", r.sigma, r.iterations, 
+                r.channel == SmoothingParams::Region::Channel::LUMINANCE ? "L" :
+                (r.channel == SmoothingParams::Region::Channel::CHROMINANCE ? "C" : "RGB"), M("TP_SMOOTHING_MODE_GAUSSIAN"));
+        case SmoothingParams::Region::Mode::GAUSSIAN_GLOW:
+            return Glib::ustring::compose(
+                "%4: %1 %2 %3", r.sigma, r.iterations, r.falloff,
+                M("TP_SMOOTHING_MODE_GAUSSIAN_GLOW"));
+        case SmoothingParams::Region::Mode::NLMEANS:
+            return Glib::ustring::compose(
+                "%5: %1 %2 %3 [%4]", r.nlstrength, r.nldetail, r.iterations, 
+                r.channel == SmoothingParams::Region::Channel::LUMINANCE ? "L" :
+                (r.channel == SmoothingParams::Region::Channel::CHROMINANCE ? "C" : "RGB"), M("TP_SMOOTHING_MODE_NLMEANS"));
+        case SmoothingParams::Region::Mode::MOTION:
+            return Glib::ustring::compose(
+                "%5: %1 %2 %3 %4", r.radius, r.angle, r.curvature, r.offset,
+                M("TP_SMOOTHING_MODE_MOTION"));
+        case SmoothingParams::Region::Mode::LENS:
+            return Glib::ustring::compose(
+                "%4: %1 %2 %3", r.radius, r.numblades, r.angle,
+                M("TP_SMOOTHING_MODE_LENS"));
+        default:
+            return "";
+        }
     }
 
     void getEditIDs(EditUniqueID &hcurve, EditUniqueID &ccurve, EditUniqueID &lcurve, EditUniqueID &deltaE) override
