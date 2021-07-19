@@ -763,7 +763,7 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
 
-    const int K = 2 * kernel_radius;
+    const int K = 2 * kernel_radius + 1;
     const float norm = pH * pW;
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
