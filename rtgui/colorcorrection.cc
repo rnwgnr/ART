@@ -42,7 +42,7 @@ public:
         return parent_->box;
     }
 
-    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask) override
+    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask, rtengine::ProcEvent &mask_postprocess) override
     {
         mask_list = parent_->EvList;
         parametric_mask = parent_->EvParametricMask;
@@ -55,6 +55,7 @@ public:
         deltaE_mask = parent_->EvDeltaEMask;
         contrastThreshold_mask = parent_->EvContrastThresholdMask;
         drawn_mask = parent_->EvDrawnMask;
+        mask_postprocess = parent_->EvMaskPostprocess;
     }
 
     ToolPanelListener *listener() override
@@ -201,6 +202,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_DRAWNMASK");
+    EvMaskPostprocess = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS");
 
     EvToolReset.set_action(EVENT);
 

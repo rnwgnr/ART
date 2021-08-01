@@ -1113,7 +1113,9 @@ Mask::Mask():
     areaMask(),
     deltaEMask(),
     drawnMask(),
-    name("")
+    name(""),
+    curve{DCT_Linear},
+    regularization(0)
 {
 }
 
@@ -1126,7 +1128,9 @@ bool Mask::operator==(const Mask &other) const
         && areaMask == other.areaMask
         && deltaEMask == other.deltaEMask
         && drawnMask == other.drawnMask
-        && name == other.name;
+        && name == other.name
+        && curve == other.curve
+        && regularization == other.regularization;
 }
 
 
@@ -1361,6 +1365,8 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
             }
         }
     }
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskCurve" + suffix, curve);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskRegularization" + suffix, regularization);
     
     return ret;
 }
@@ -1371,6 +1377,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "MaskEnabled" + suffix, enabled, keyfile);
     putToKeyfile(group_name, prefix + "MaskInverted" + suffix, inverted, keyfile);
     putToKeyfile(group_name, prefix + "MaskName" + suffix, name, keyfile);
+    putToKeyfile(group_name, prefix + "MaskCurve" + suffix, curve, keyfile);
+    putToKeyfile(group_name, prefix + "MaskRegularization" + suffix, regularization, keyfile);
     putToKeyfile(group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled, keyfile);
     putToKeyfile(group_name, prefix + "HueMask" + suffix, parametricMask.hue, keyfile);
     putToKeyfile(group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity, keyfile);

@@ -271,6 +271,8 @@ public:
     DeltaEMask deltaEMask;
     DrawnMask drawnMask;
     Glib::ustring name;
+    std::vector<double> curve;
+    int regularization;
 
     Mask();
     bool operator==(const Mask &other) const;

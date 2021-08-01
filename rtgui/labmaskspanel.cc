@@ -914,7 +914,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaE_provider_(nullptr)
 {
     Gtk::Widget *child = cp_->getWidget();
-    cp_->getEvents(EvMaskList, EvParametricMask, EvHMask, EvCMask, EvLMask, EvMaskBlur, EvShowMask, EvAreaMask, EvDeltaEMask, EvContrastThresholdMask, EvDrawnMask);
+    cp_->getEvents(EvMaskList, EvParametricMask, EvHMask, EvCMask, EvLMask, EvMaskBlur, EvShowMask, EvAreaMask, EvDeltaEMask, EvContrastThresholdMask, EvDrawnMask, EvMaskPostprocess);
     EvAreaMaskVoid = ProcEventMapper::getInstance()->newEvent(M_VOID, EvAreaMask.get_message());
     EvDeltaEMaskVoid = ProcEventMapper::getInstance()->newEvent(M_VOID, EvDeltaEMask.get_message());
     EvMaskName = ProcEventMapper::getInstance()->newEvent(M_VOID, "HISTORY_MSG_LABMASKS_MASK_NAME");
@@ -1331,6 +1331,28 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     mask_box->pack_start(*drawnMask);
     static_cast<DrawnMaskPanel *>(drawnMask)->signal_draw_updated().connect(sigc::mem_fun(this, &LabMasksPanel::onDrawnMaskUpdated));
     
+
+    // -----------------------------------------------------------------------
+    MyExpander *ppMask = Gtk::manage(new MyExpander(false, M("TP_LABMASKS_POSTPROCESS")));
+    {
+        ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
+        ppMask->add(*tb, false);
+        ppMask->setLevel(1);
+
+        maskRegularization = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_REGULARIZATION"), 0, 5, 1, 0));
+        tb->pack_start(*maskRegularization);
+        maskRegularization->setAdjusterListener(this);
+        
+        CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_POSTPROCESS_CURVE")));
+        cg->setCurveListener(this);
+
+        maskCurve = static_cast<DiagonalCurveEditor *>(cg->addCurve(CT_Diagonal, ""));
+        cg->curveListComplete();
+        tb->pack_start(*cg, Gtk::PACK_SHRINK, 2);
+    }
+    mask_box->pack_start(*ppMask);
+    // -----------------------------------------------------------------------
+
     mask_box->set_border_width(4);
 
     MyExpander *mask_exp = nullptr;
@@ -1367,7 +1389,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         
     maskBlur->delay = options.adjusterMaxDelay;
 
-    mask_expanders_ = { parametricMask, areaMask, deltaEMask, drawnMask };
+    mask_expanders_ = { parametricMask, areaMask, deltaEMask, drawnMask, ppMask };
     for (auto e : mask_expanders_) {
         e->signal_button_release_event().connect_notify(sigc::bind(sigc::mem_fun(this, &LabMasksPanel::onMaskExpanded), e));
     }
@@ -1515,6 +1537,8 @@ void LabMasksPanel::maskGet(int idx)
     int sgn = deltaEInverted->get_active() ? -1 : 1;
     r.deltaEMask.decay = sgn * deltaEDecay->getValue();
     r.name = maskName->get_text();
+    r.curve = maskCurve->getCurve();
+    r.regularization = maskRegularization->getValue();
 }
 
 
@@ -1701,6 +1725,8 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         maskBlur->setValue(r.parametricMask.blur);
         maskInverted->set_active(r.inverted);
         maskName->set_text(r.name);
+        maskCurve->setCurve(r.curve);
+        maskRegularization->setValue(r.regularization);
 
         if (unsub && isCurrentSubscriber()) {
             if (areaMaskToggle->get_active()) {
@@ -2098,6 +2124,8 @@ void LabMasksPanel::curveChanged(CurveEditor* ce)
             l->panelChanged(EvCMask, M("HISTORY_CUSTOMCURVE"));
         } else if (ce == lightnessMask) {
             l->panelChanged(EvLMask, M("HISTORY_CUSTOMCURVE"));
+        } else if (ce == maskCurve) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_CURVE") + ": " + M("HISTORY_CUSTOMCURVE"));
         }
     }
 }
@@ -2128,6 +2156,10 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
     } else if (a == lightnessMaskDetail) {
         if (l) {
             l->panelChanged(EvLMask, a->getTextValue());
+        }
+    } else if (a == maskRegularization) {
+        if (l) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_REGULARIZATION") + ": " + a->getTextValue());
         }
     }
     maskShow(selected_, true);
@@ -2836,11 +2868,14 @@ void LabMasksPanel::on_map()
 {
     Gtk::VBox::on_map();
     if (first_mask_exp_) {
-        parametricMask->set_expanded(false);
-        areaMask->set_expanded(false);
-        deltaEMask->set_expanded(false);
-        drawnMask->set_expanded(false);
-        mask_exp_->set_expanded(false);
+        // parametricMask->set_expanded(false);
+        // areaMask->set_expanded(false);
+        // deltaEMask->set_expanded(false);
+        // drawnMask->set_expanded(false);
+        // mask_exp_->set_expanded(false);
+        for (auto e : mask_expanders_) {
+            e->set_expanded(false);
+        }
         first_mask_exp_ = false;
     }
 }

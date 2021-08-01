@@ -40,7 +40,7 @@ public:
         return parent_->box;
     }
 
-    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask) override
+    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask, rtengine::ProcEvent &mask_postprocess) override
     {
         mask_list = parent_->EvList;
         parametric_mask = parent_->EvParametricMask;
@@ -53,6 +53,7 @@ public:
         deltaE_mask = parent_->EvDeltaEMask;
         contrastThreshold_mask = parent_->EvContrastThresholdMask;
         drawn_mask = parent_->EvDrawnMask;
+        mask_postprocess = parent_->EvMaskPostprocess;
     }
 
     ToolPanelListener *listener() override
@@ -168,6 +169,7 @@ TextureBoost::TextureBoost(): FoldableToolPanel(this, "epd", M("TP_EPD_LABEL"), 
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_EPD_DRAWNMASK");
+    EvMaskPostprocess = m->newEvent(EVENT, "HISTORY_MSG_EPD_MASK_POSTPROCESS");
 
     EvToolEnabled.set_action(EVENT);
     EvToolReset.set_action(EVENT);

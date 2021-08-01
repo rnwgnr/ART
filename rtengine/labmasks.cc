@@ -44,25 +44,6 @@ using procparams::DrawnMask;
 
 namespace {
 
-// #ifdef __SSE2__
-// void fastlin2log(float *x, float factor, float base, int w)
-// {
-//     float baseLog = 1.f / xlogf(base);
-//     vfloat baseLogv = F2V(baseLog);
-//     factor = factor * (base - 1.f);
-//     vfloat factorv = F2V(factor);
-//     vfloat onev = F2V(1.f);
-//     int i = 0;
-//     for (; i < w - 3; i += 4) {
-//         STVFU(x[i], xlogf(LVFU(x[i]) * factorv + onev) * baseLogv);
-//     }
-//     for (; i < w; ++i) {
-//         x[i] = xlogf(x[i] * factor + 1.f) * baseLog;
-//     }
-// }
-// #endif
-
-
 bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &global_mask, ProgressListener *plistener)
 {
     if (!areaMask.enabled || areaMask.shapes.empty() || (areaMask.isTrivial() && areaMask.blur <= 0.f)) {
@@ -747,6 +728,53 @@ bool contrast_threshold_mask(int width, int height, float scale, array2D<float> 
     return true;
 }
 
+
+bool mask_postprocess(int width, int height, float scale, const array2D<float> &guide, const std::vector<double> &curve, int regularization, bool multithread, array2D<float> &mask)
+{
+    DiagonalCurve ccurve(curve);
+    if (!regularization && ccurve.isIdentity()) {
+        return false;
+    }
+
+    int W = mask.width();
+    int H = mask.height();
+
+    if (regularization) {
+        constexpr float posterization[] = { 30.f, 20.f, 10.f, 5.f, 3.f };
+        const int idx = LIM(regularization, 0, 5)-1;
+        const float p = posterization[idx];
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] = int(mask[y][x] * p) / p;
+            }
+        }
+    }
+
+    if (!ccurve.isIdentity()) {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] = ccurve.getVal(mask[y][x]);
+            }
+        }
+    }
+
+    if (regularization) {
+        constexpr float radius_coeff = 30.f;
+        const float radius = (max(width, height) / radius_coeff);
+        const float epsilon = 0.015f;
+        rtengine::guidedFilter(mask, mask, mask, radius, epsilon, multithread);
+    }
+
+    return true;
+}
+
+
 } // namespace
 
 
@@ -890,7 +918,6 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             if (has_mask) {
                 // vectorized precalculation
                 Color::Lab2Lch(aBuffer, bBuffer, cBuffer, hBuffer, W);
-                //fastlin2log(cBuffer, c_factor, 100.f, W);
                 for (int x = 0; x < W; ++x) {
                     cBuffer[x] *= c_factor;
                 }
@@ -1102,35 +1129,17 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     }
 
     apply_brush(false);
-//     for (int i = begin_idx; i < end_idx; ++i) {
-//         if (generate_drawn_mask(offset_x, offset_y, full_width, full_height, masks[i].drawnMask, guide, multithread, amask)) {
-//             const bool add = masks[i].drawnMask.addmode;
-//             const float alpha = 1.f - LIM01(masks[i].drawnMask.transparency);
-// #ifdef _OPENMP
-// #           pragma omp parallel for if (multithread)
-// #endif
-//             for (int y = 0; y < H; ++y) {
-//                 for (int x = 0; x < W; ++x) {
-//                     const float f = alpha * amask[y][x];
-//                     if (add) {
-//                         if (abmask) {
-//                             (*abmask)[i][y][x] = LIM01((*abmask)[i][y][x] + f);
-//                         }
-//                         if (Lmask) {
-//                             (*Lmask)[i][y][x] = LIM01((*Lmask)[i][y][x] + f);
-//                         }
-//                     } else {
-//                         if (abmask) {
-//                             (*abmask)[i][y][x] *= f;
-//                         }
-//                         if (Lmask) {
-//                             (*Lmask)[i][y][x] *= f;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
+
+    for (int i = begin_idx; i < end_idx; ++i) {
+        const auto &curve = masks[i].curve;
+        auto regularization = masks[i].regularization;
+        if (abmask) {
+            mask_postprocess(full_width, full_height, scale, guide, curve, regularization, multithread, (*abmask)[i]);
+        }
+        if (Lmask) {
+            mask_postprocess(full_width, full_height, scale, guide, curve, regularization, multithread, (*Lmask)[i]);
+        }
+    }
     
     for (int i = begin_idx; i < end_idx; ++i) {
         if (masks[i].inverted) {

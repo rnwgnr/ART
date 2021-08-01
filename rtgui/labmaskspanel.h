@@ -37,7 +37,7 @@ public:
     virtual ~LabMasksContentProvider() {}
 
     virtual Gtk::Widget *getWidget() = 0;
-    virtual void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask) = 0;
+    virtual void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask, rtengine::ProcEvent &mask_postprocess) = 0;
 
     virtual ToolPanelListener *listener() = 0;
 
@@ -222,6 +222,7 @@ private:
     rtengine::ProcEvent EvContrastThresholdMask;
     rtengine::ProcEvent EvDrawnMask;
     rtengine::ProcEvent EvMaskName;
+    rtengine::ProcEvent EvMaskPostprocess;
 
     class ListColumns: public Gtk::TreeModel::ColumnRecord {
     public:
@@ -329,4 +330,6 @@ private:
     std::vector<MyExpander *> mask_expanders_;
 
     Gtk::Entry *maskName;
+    DiagonalCurveEditor *maskCurve;
+    Adjuster *maskRegularization;
 };
