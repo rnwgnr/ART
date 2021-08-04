@@ -27,6 +27,7 @@
 #include "array2D.h"
 #include "guidedfilter.h"
 #include "rescale.h"
+#include "gauss.h"
 
 namespace rtengine {
 
@@ -42,6 +43,8 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     float s = pp.strength >= 0 ? pow_F(pp.strength / 2.f, 0.3f) * 2.f : pp.strength;
     float strength = s >= 0 ? 1.f + s : 1.f / (1.f - s);
     float strength2 = s >= 0 ? 1.f + s / 4.f: 1.f / (1.f - s / 2.f);
+
+    bool isguided = fradius >= 1.f;
 
     int W = Y.width();
     int H = Y.height();
@@ -124,16 +127,23 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
 
     for (int i = 0; i < pp.iterations; ++i) {
-        guidedFilter(mid, mid, mid, radius, epsilon, multithread);
+        if (isguided) {
+            guidedFilter(mid, mid, mid, radius, epsilon, multithread);
+        } else {
+#ifdef _OPENMP
+#           pragma omp parallel if (multithread)
+#endif
+            gaussianBlur(mid, mid, W, H, fradius);
+        }
         guidedFilter(mid, mid, base, radius * 4, epsilon / 10.f, multithread);
-        
+
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
         for (int y = 0; y < H; ++y) {
             int x = 0;
 #ifdef __SSE2__
-            for (; x < W-3; x += 4) {
+            for (; x < W - 3; x += 4) {
                 vfloat vy = LVFU((*src)[y][x]);
                 vfloat vm = LVFU(mid[y][x]);
                 vfloat vb = LVFU(base[y][x]);
