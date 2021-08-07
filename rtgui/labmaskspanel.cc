@@ -518,7 +518,7 @@ public:
             if (alt) {
                 update_brush(true, false, -3);
             } else {
-                update_pressure(PressureMode((int(cur_pressure_) + (shift ? -1 : 1)) % 3));
+                update_pressure(PressureMode((int(pressure_mode_) + (shift ? -1 : 1)) % 3));
             }
             EditSubscriber::action = ES_ACTION_PICKING;
         } else {
@@ -694,7 +694,7 @@ private:
         double y = double(p.y) / double(h);
         double radius = 0;
         if (pressure_mode_ == PRESSURE_RADIUS) {
-            radius = rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0);
+            radius = rtengine::SQR(rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0));
         } else {
             radius = radius_->getValue() / 100.0;
         }
@@ -751,7 +751,7 @@ private:
             pen_->center += provider->deltaImage;
         }
         if (pressure_mode_ == PRESSURE_RADIUS) {
-            pen_->radius = rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0) * std::min(w, h) * 0.25;
+            pen_->radius = rtengine::SQR(rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0)) * std::min(w, h) * 0.25;
         } else {
             pen_->radius = radius_->getValue() / 100.0 * std::min(w, h) * 0.25;
         }
