@@ -461,13 +461,17 @@ public:
         undo_stack_.push_back(mask_->strokes.size());
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool shift = modifierKey & GDK_SHIFT_MASK;
+        bool alt = modifierKey & GDK_MOD1_MASK;
+        bool dragging = alt && !mask_->strokes.empty();
         if (ctrl && !shift) {
             mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
+            dragging = false;
         } else if ((!ctrl && shift) != prev_erase_) {
             prev_erase_ = !ctrl && shift;
             erase_->set_active(!erase_->get_active());
+            dragging = false;
         }
-        add_stroke(false);
+        add_stroke(dragging);
         return true;
     }
 

@@ -18,6 +18,7 @@ Other contributors (profiles, ideas, mockups, testing, forum activity, translati
   Paul Matthijsse
   Serge Moreau
   mrleemon
+  Eigil Skovgaard
   Barry Thomas
 
 RawTherapee
