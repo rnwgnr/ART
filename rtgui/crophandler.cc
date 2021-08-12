@@ -281,8 +281,11 @@ void CropHandler::setZoom (int z, int centerx, int centery)
 
         if (zoom_conn_.connected()) {
             zoom_conn_.disconnect();
+        }
+        if (cropPixbuf) {
             cropPixbuf.clear();
         }
+
         zoom_conn_ = Glib::signal_timeout().connect(sigc::slot<bool>(doit), options.adjusterMaxDelay);
     }
     
