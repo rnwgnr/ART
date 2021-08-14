@@ -561,7 +561,7 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
     if (drawnMask.feather > 0) {
         int radius = int(drawnMask.feather / 100.0 * std::min(width, height) * 0.1 + 0.5);
         if (radius > 0) {
-            guidedFilter(guide, mask, mask, radius, 1e-5, multithread);
+            guidedFilterLog(guide, 2, /*mask,*/ mask, radius, 1e-5, multithread);
         }
     }
 
