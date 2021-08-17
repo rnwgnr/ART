@@ -270,7 +270,6 @@ void CropHandler::setZoom (int z, int centerx, int centery)
             [&]() -> bool
             {
                 if (needsFullRefresh && !ipc->getHighQualComputed()) {
-                    cropPixbuf.clear ();
                     ipc->startProcessing(M_HIGHQUAL);
                     ipc->setHighQualComputed();
                 } else {
@@ -284,6 +283,9 @@ void CropHandler::setZoom (int z, int centerx, int centery)
         }
         if (cropPixbuf) {
             cropPixbuf.clear();
+        }
+        if (cropPixbuftrue) {
+            cropPixbuftrue.clear();
         }
 
         zoom_conn_ = Glib::signal_timeout().connect(sigc::slot<bool>(doit), options.adjusterMaxDelay);
@@ -444,6 +446,7 @@ void CropHandler::setDetailedCrop(
 
                     if (redraw_needed.exchange(false)) {
                         cropPixbuf.clear ();
+                        cropPixbuftrue.clear ();
 
                         if (!enabled) {
                             cropimg.clear();
@@ -533,7 +536,10 @@ void CropHandler::update ()
     if (crop && enabled) {
 //        crop->setWindow (cropX, cropY, cropW, cropH, zoom>=1000 ? 1 : zoom); --> we use the "getWindow" hook instead of setting the size before
         crop->setListener (this);
+        cimg.lock();
         cropPixbuf.clear ();
+        cropPixbuftrue.clear();
+        cimg.unlock();
 
         // To save threads, try to mark "needUpdate" without a thread first
         if (crop->tryUpdate()) {
@@ -570,6 +576,8 @@ bool CropHandler::getEnabled ()
 
 void CropHandler::colorPick (const rtengine::Coord &pickerPos, float &r, float &g, float &b, float &rpreview, float &gpreview, float &bpreview, LockableColorPicker::Size size)
 {
+
+    MyMutex::MyLock lock(cimg);
 
     if (!cropPixbuf || !cropPixbuftrue) {
         r = g = b = 0.f;
