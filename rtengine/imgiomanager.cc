@@ -96,13 +96,6 @@ void ImageIOManager::init(const Glib::ustring &dirname)
 
                 Format fmt = FMT_TIFF_FLOAT;
 
-                Glib::ustring cmd;
-                if (kf.has_key(group, "ReadCommand")) {
-                    cmd = kf.get_string(group, "ReadCommand");
-                } else {
-                    continue;
-                }
-
                 std::string ext;
                 if (kf.has_key(group, "Extension")) {
                     ext = kf.get_string(group, "Extension").lowercase();
@@ -110,10 +103,14 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                     continue;
                 }
 
-                loaders_[ext] = cmd;
+                Glib::ustring cmd;
+                if (kf.has_key(group, "ReadCommand")) {
+                    cmd = kf.get_string(group, "ReadCommand");
+                    loaders_[ext] = cmd;
 
-                if (settings->verbose) {
-                    std::cout << "Found loader for extension \"" << ext << "\": " << S(cmd) << std::endl;
+                    if (settings->verbose) {
+                        std::cout << "Found loader for extension \"" << ext << "\": " << S(cmd) << std::endl;
+                    }
                 }
 
                 if (kf.has_key(group, "WriteCommand")) {
