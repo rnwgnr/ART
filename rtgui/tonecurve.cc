@@ -49,6 +49,7 @@ ToneCurve::ToneCurve():
     EvSatCurve = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_SATCURVE");
     EvPerceptualStrength = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH");
     EvContrastLegacy = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_CONTRAST_LEGACY");
+    EvWhitePoint = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_WHITEPOINT");
     EvMode = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_MODE");
     EvToolEnabled.set_action(AUTOEXP);
     EvToolReset.set_action(AUTOEXP);
@@ -164,6 +165,11 @@ ToneCurve::ToneCurve():
     }
     contrast_legacy_box_->show_all();
 
+    whitePoint = Gtk::manage(new Adjuster(M("TP_TONECURVE_WHITEPOINT"), 1, 100.0, 0.1, 1.0));
+    whitePoint->setAdjusterListener(this);
+    whitePoint->setLogScale(10, 1);
+    pack_start(*whitePoint);
+    
     mode_ = Gtk::manage(new MyComboBoxText());
     mode_->append(M("TP_EXPOSURE_TCMODE_STANDARD"));
     mode_->append(M("TP_EXPOSURE_TCMODE_WEIGHTEDSTD"));
@@ -252,8 +258,11 @@ void ToneCurve::read(const ProcParams* pp)
         pack_start(*mode_box_, Gtk::PACK_SHRINK, 2);
         reorder_child(*mode_box_, 0);
     }
+
+    whitePoint->setValue(pp->toneCurve.whitePoint);
+    showWhitePoint();
     
-    enableListener ();
+    enableListener();
 }
 
 
@@ -326,6 +335,8 @@ void ToneCurve::write(ProcParams* pp)
 
     pp->toneCurve.perceptualStrength = perceptualStrength->getValue();
     pp->toneCurve.contrastLegacyMode = contrast_legacy_->get_active();
+
+    pp->toneCurve.whitePoint = whitePoint->getValue();
 }
 
 
@@ -341,6 +352,7 @@ void ToneCurve::setDefaults(const ProcParams* defParams)
 {
     contrast->setDefault(defParams->toneCurve.contrast);
     perceptualStrength->setDefault(defParams->toneCurve.perceptualStrength);
+    whitePoint->setDefault(defParams->toneCurve.whitePoint);
 
     initial_params = defParams->toneCurve;
 }
@@ -348,6 +360,7 @@ void ToneCurve::setDefaults(const ProcParams* defParams)
 
 void ToneCurve::curveChanged(CurveEditor *ce)
 {
+    showWhitePoint();
     if (listener && getEnabled()) {
         if (ce == shape) {
             setHistmatching(false);
@@ -364,6 +377,7 @@ void ToneCurve::curveChanged(CurveEditor *ce)
 void ToneCurve::curveMode1Changed ()
 {
     showPerceptualStrength();
+    showWhitePoint();
     //if (listener)  listener->panelChanged (EvToneCurveMode, toneCurveMode->get_active_text());
     if (listener && getEnabled()) {
         //setHistmatching(false);
@@ -383,6 +397,7 @@ bool ToneCurve::curveMode1Changed_ ()
 void ToneCurve::curveMode2Changed ()
 {
     showPerceptualStrength();
+    showWhitePoint();
     //if (listener)  listener->panelChanged (EvToneCurveMode, toneCurveMode->get_active_text());
     if (listener && getEnabled()) {
         //setHistmatching(false);
@@ -426,6 +441,7 @@ void ToneCurve::enableAll(bool yes)
     satcurveG->set_sensitive(yes);
     contrast->set_sensitive(yes);
     perceptualStrength->set_sensitive(yes);
+    whitePoint->set_sensitive(yes);
 }
 
 
@@ -519,6 +535,8 @@ void ToneCurve::adjusterChanged(Adjuster *a, double newval)
         listener->panelChanged(EvContrast, costr);
     } else if (a == perceptualStrength) {
         listener->panelChanged(EvPerceptualStrength, costr);
+    } else if (a == whitePoint) {
+        listener->panelChanged(EvWhitePoint, a->getTextValue());
     }
 }
 
@@ -544,6 +562,7 @@ void ToneCurve::toolReset(bool to_initial)
 
 void ToneCurve::contrastLegacyToggled()
 {
+    showWhitePoint();
     if (listener && getEnabled()) {
         listener->panelChanged(EvContrastLegacy, contrast_legacy_->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
@@ -553,7 +572,16 @@ void ToneCurve::contrastLegacyToggled()
 void ToneCurve::modeChanged()
 {
     showPerceptualStrength();
+    showWhitePoint();
     if (listener && getEnabled()) {
         listener->panelChanged(EvMode, mode_->get_active_text());
     }
+}
+
+
+void ToneCurve::showWhitePoint()
+{
+    ProcParams pp;
+    write(&pp);
+    whitePoint->set_visible(pp.toneCurve.hasWhitePoint());
 }

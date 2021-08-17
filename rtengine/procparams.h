@@ -536,11 +536,14 @@ struct ToneCurveParams {
     std::vector<double> saturation;
     int perceptualStrength;
     bool contrastLegacyMode;
+    double whitePoint;
 
     ToneCurveParams();
 
     bool operator==(const ToneCurveParams &other) const;
     bool operator!=(const ToneCurveParams &other) const;
+
+    bool hasWhitePoint() const;
 };
 
 

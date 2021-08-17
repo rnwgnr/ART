@@ -6783,10 +6783,10 @@ inline void filmlike_clip_rgb_tone(float *r, float *g, float *b, const float L)
 
 } // namespace
 
-void Color::filmlike_clip(float *r, float *g, float *b)
+void Color::filmlike_clip(float *r, float *g, float *b, float Lmax)
 {
     // This is Adobe's hue-stable film-like curve with a diagonal, ie only used for clipping. Can probably be further optimized.
-    const float L = 65535.0;
+    const float L = Lmax;//65535.0;
 
     if (*r >= *g) {
         if (*g > *b) {         // Case 1: r >= g >  b
