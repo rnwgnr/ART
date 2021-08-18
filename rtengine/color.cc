@@ -329,6 +329,8 @@ void Color::rgb2lab01 (const Glib::ustring &profile, const Glib::ustring &profil
     cmsHPROFILE oprof = nullptr;
     if (workingSpace) {
         oprof = ICCStore::getInstance()->workingSpace(profileW);
+    } else if (profile == procparams::ColorManagementParams::NoICMString) {
+        oprof = ICCStore::getInstance()->getsRGBProfile();
     } else {
         oprof = ICCStore::getInstance()->getProfile(profile);
     }
