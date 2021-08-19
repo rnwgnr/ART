@@ -1515,7 +1515,8 @@ ToneCurveParams::ToneCurveParams():
         FCT_Linear
     },
     perceptualStrength(100),
-    contrastLegacyMode(false)
+    contrastLegacyMode(false),
+    whitePoint(1.0)    
 {
 }
 
@@ -1532,13 +1533,28 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
         && fromHistMatching == other.fromHistMatching
         && saturation == other.saturation
         && perceptualStrength == other.perceptualStrength
-        && contrastLegacyMode == other.contrastLegacyMode;
+        && contrastLegacyMode == other.contrastLegacyMode
+        && whitePoint == other.whitePoint;
 }
 
 
 bool ToneCurveParams::operator !=(const ToneCurveParams& other) const
 {
     return !(*this == other);
+}
+
+
+bool ToneCurveParams::hasWhitePoint() const
+{
+    const auto good =
+        [](const std::vector<double> &c, TcMode m) -> bool
+        {
+            if (c.empty() || c[0] == DCT_Empty || c[0] == DCT_Linear) {
+                return true;
+            }
+            return c[0] == DCT_Parametric && m != TcMode::SATANDVALBLENDING && m != TcMode::PERCEPTUAL;
+        };
+    return !contrastLegacyMode && !histmatching && good(curve, curveMode) && good(curve2, curveMode2);
 }
 
 
@@ -3387,6 +3403,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             if (toneCurve.contrastLegacyMode) {
                 saveToKeyfile("ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode, keyFile);
             }
+            saveToKeyfile("ToneCurve", "WhitePoint", toneCurve.whitePoint, keyFile);
         }
 
 // Local contrast
@@ -4239,6 +4256,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 if (!assignFromKeyfile(keyFile, "ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode)) {
                     toneCurve.contrastLegacyMode = (ppVersion < 1026);
                 }
+                assignFromKeyfile(keyFile, "ToneCurve", "WhitePoint", toneCurve.whitePoint);
             }
         }
 

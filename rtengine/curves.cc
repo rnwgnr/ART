@@ -565,8 +565,11 @@ void ToneCurve::Reset()
 }
 
 // Fill a LUT with X/Y, ranged 0xffff
-void ToneCurve::Set(const Curve &pCurve, float gamma)
+void ToneCurve::Set(const Curve &pCurve, float gamma, float whitecoeff)
 {
+    this->whitecoeff = whitecoeff;
+    this->curve = &pCurve;
+    this->whitept = 65535.f * whitecoeff;
     lutToneCurve(65536);
 
     if (gamma <= 0.0 || gamma == 1.) {

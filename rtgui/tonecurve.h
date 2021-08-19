@@ -48,6 +48,7 @@ protected:
     CurveEditorGroup *satcurveG;
     FlatCurveEditor *satcurve;
     Adjuster *perceptualStrength;
+    Adjuster *whitePoint;
 
     Gtk::HBox *mode1_box_;
     Gtk::HBox *mode2_box_;
@@ -62,6 +63,7 @@ protected:
     rtengine::ProcEvent EvPerceptualStrength;
     rtengine::ProcEvent EvContrastLegacy;
     rtengine::ProcEvent EvMode;
+    rtengine::ProcEvent EvWhitePoint;
 
     // used temporarily in eventing
     std::vector<double> nextToneCurve;
@@ -71,6 +73,7 @@ protected:
     void showPerceptualStrength();
     void contrastLegacyToggled();
     void modeChanged();
+    void showWhitePoint();
 
     rtengine::procparams::ToneCurveParams initial_params;
 

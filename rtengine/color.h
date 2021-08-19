@@ -1873,7 +1873,7 @@ public:
 
 
     // This is Adobe's hue-stable film-like curve with a diagonal, ie only used for clipping. Can probably be further optimized.
-    static void filmlike_clip(float *r, float *g, float *b);
+    static void filmlike_clip(float *r, float *g, float *b, float Lmax);
 };
 
 }
