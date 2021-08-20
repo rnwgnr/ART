@@ -31,12 +31,16 @@ class Exposure: public ToolParamBlock, public AdjusterListener, public FoldableT
 protected:
     MyComboBoxText *hrmode;
     rtengine::ProcEvent EvBlack;
+    rtengine::ProcEvent EvHRBlur;
 
     Gtk::HBox *abox;
     Adjuster *expcomp;
     Adjuster *black;
+    Adjuster *hrblur;
 
     rtengine::procparams::ExposureParams initial_params;
+
+    void showHRBlur();
 
 public:
     Exposure();

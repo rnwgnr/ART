@@ -365,14 +365,18 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
     buildBlendMask(Y, blend, W, H, contrast, 1.f, false, 2.f / s_scale);
     
     if (showMask) {
+        float **u = rgb->r.ptrs;
+        float **v = rgb->b.ptrs;
 #ifdef _OPENMP
 #       pragma omp parallel for if (multiThread)
 #endif
         for (int i = 0; i < H; ++i) {
             for (int j = 0; j < W; ++j) {
                 Y[i][j] = blend[i][j] * 65536.f;
+                u[i][j] = v[i][j] = 0.f;
             }
         }
+
         return true;
     }
 

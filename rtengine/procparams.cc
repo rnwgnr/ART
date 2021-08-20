@@ -1456,7 +1456,8 @@ ExposureParams::ExposureParams():
     enabled(true),
     hrmode(HR_OFF),
     expcomp(0),
-    black(0)
+    black(0),
+    hrblur(0)
 {
 }
 
@@ -1466,7 +1467,8 @@ bool ExposureParams::operator==(const ExposureParams &other) const
     return enabled == other.enabled
         && hrmode == other.hrmode
         && expcomp == other.expcomp
-        && black == other.black;
+        && black == other.black
+        && hrblur == other.hrblur;
 }
 
 
@@ -3364,6 +3366,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             case ExposureParams::HR_COLORSOFT: hr = "ColorBlend"; break;
             }
             saveToKeyfile("Exposure", "HLRecovery", hr, keyFile);
+            saveToKeyfile("Exposure", "HLRecoveryBlur", exposure.hrblur, keyFile);
         }
 
 // Brightness, Contrast, Saturation
@@ -4231,6 +4234,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         exposure.hrmode = ExposureParams::HR_OFF;
                     }
                 }
+                assignFromKeyfile(keyFile, "Exposure", "HLRecoveryBlur", exposure.hrblur);                
             }
             if (keyFile.has_group("Saturation") && RELEVANT_(saturation)) {
                 assignFromKeyfile(keyFile, "Saturation", "Enabled", saturation.enabled);

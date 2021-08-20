@@ -108,7 +108,7 @@ protected:
     inline void getRowStartEnd (int x, int &start, int &end);
     static void getProfilePreprocParams(cmsHPROFILE in, float& gammafac, float& lineFac, float& lineSum);
 
-    void HLRecovery_inpaint(bool soft, float rm, float gm, float bm, float** red, float** green, float** blue);
+    void HLRecovery_inpaint(bool soft, int blur, float rm, float gm, float bm, float** red, float** green, float** blue);
 
 public:
     RawImageSource ();
