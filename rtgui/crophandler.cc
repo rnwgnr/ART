@@ -577,7 +577,7 @@ bool CropHandler::getEnabled ()
 void CropHandler::colorPick (const rtengine::Coord &pickerPos, float &r, float &g, float &b, float &rpreview, float &gpreview, float &bpreview, LockableColorPicker::Size size)
 {
 
-    MyMutex::MyLock lock(cimg);
+    //MyMutex::MyLock lock(cimg);
 
     if (!cropPixbuf || !cropPixbuftrue) {
         r = g = b = 0.f;
