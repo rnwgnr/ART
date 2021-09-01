@@ -175,6 +175,40 @@ private:
 // ColorCorrection
 //-----------------------------------------------------------------------------
 
+namespace {
+
+constexpr double SLOPE_LO = 0.01;
+constexpr double SLOPE_HI = 32.0;
+constexpr double SLOPE_MID = (SLOPE_HI - SLOPE_LO) / 2;
+constexpr double SLOPE_MMID = SLOPE_LO + SLOPE_MID;
+constexpr double SLOPE_PIVOT = 1.0;
+constexpr double SLOPE_BASE = 32.0;
+
+double slope_slider2val(double slider)
+{
+    if (slider >= SLOPE_MMID) {
+        double range = SLOPE_HI - SLOPE_MMID;
+        double x = (slider - SLOPE_MMID) / range;
+        return SLOPE_PIVOT + (std::pow(SLOPE_BASE, x) - 1.0) / (SLOPE_BASE - 1.0) * (SLOPE_HI - SLOPE_PIVOT);
+    } else {
+        double range = SLOPE_MMID - SLOPE_LO;
+        return SLOPE_LO + (slider - SLOPE_LO) / range;
+    }
+}
+
+double slope_val2slider(double val)
+{
+    if (val >= SLOPE_PIVOT) {
+        double range = SLOPE_HI - SLOPE_PIVOT;
+        double x = (val - SLOPE_PIVOT) / range;
+        return (SLOPE_LO + SLOPE_MID) + std::log(x * (SLOPE_BASE - 1.0) + 1.0) / std::log(SLOPE_BASE) * SLOPE_MID;
+    } else {
+        return SLOPE_LO + (val - SLOPE_LO) * SLOPE_MID;
+    }
+}
+
+} // namespace
+
 ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M("TP_COLORCORRECTION_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
@@ -240,8 +274,11 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     satframe->add(*satbox);
     box->pack_start(*satframe);
 
-    slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1));
-    slope->setLogScale(10, 1, true);
+    double2double_fun slope_v2s = options.adjuster_force_linear ? nullptr : slope_val2slider;
+    double2double_fun slope_s2v = options.adjuster_force_linear ? nullptr : slope_slider2val;
+
+    slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 32.0, 0.001, 1, nullptr, nullptr, slope_s2v, slope_v2s));
+//    slope->setLogScale(32, 1, true);
     slope->setAdjusterListener(this);
     box_combined->pack_start(*slope);
     offset = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_OFFSET"), -0.1, 0.1, 0.001, 0));
@@ -283,8 +320,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         vb->set_spacing(2);
         vb->set_border_width(2);
     
-        slope_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1));
-        slope_rgb[c]->setLogScale(10, 1, true);
+        slope_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1, nullptr, nullptr, slope_s2v, slope_v2s));
+        //slope_rgb[c]->setLogScale(10, 1, true);
         slope_rgb[c]->setAdjusterListener(this);
         vb->pack_start(*slope_rgb[c]);
         offset_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_OFFSET"), -0.1, 0.1, 0.001, 0));

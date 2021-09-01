@@ -74,6 +74,7 @@ LogEncoding::LogEncoding():
     targetGray->show();
 
     //gain->setLogScale(10, 18, true);
+    gain->setLogScale(64, 0, true);
     targetGray->setLogScale(10, 18, true);
 
     // Gtk::Frame *advanced = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_ADVANCED")));
