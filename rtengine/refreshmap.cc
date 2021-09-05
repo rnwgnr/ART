@@ -34,7 +34,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     LUMINANCECURVE,   // EvBrightness,
     LUMINANCECURVE,   // EvContrast,
     RGBCURVE,         // EvBlack,
-    AUTOEXP,          // EvExpComp,
+    ALLNORAW,         // EvExpComp,
     RGBCURVE,         // EvHLCompr,
     RGBCURVE,         // EvSHCompr,
     LUMINANCECURVE,   // EvToneCurve1,

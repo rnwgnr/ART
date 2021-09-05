@@ -985,6 +985,15 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
     }
 
     ImProcData im(params, scale, multiThread);
+    double ecomp = params->exposure.enabled ? params->exposure.expcomp : 0.0;
+    ExposureParams expparams;
+    expparams.enabled = true;
+    expparams.expcomp = ecomp;
+
+    if (ecomp > 0) {
+        expcomp(img, &expparams);
+    }
+    
     denoise::RGB_denoise(im, 0, img, img, calclum, dnstore.ch_M, dnstore.max_r, dnstore.max_b, imgsrc->isRAW(), denoiseParams, 0, noiseLCurve, noiseCCurve, nresi, highresi);
 
     if (plistener) {
@@ -999,6 +1008,11 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
             denoise::NLMeans(tmp, 65535.f, denoiseParams.nlStrength, denoiseParams.nlDetail, scale, multiThread);
             img->setMode(Imagefloat::Mode::RGB, multiThread);
         }
+    }
+
+    if (ecomp > 0) {
+        expparams.expcomp = -ecomp;
+        expcomp(img, &expparams);
     }
 
     if (plistener) {

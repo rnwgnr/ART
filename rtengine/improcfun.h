@@ -236,6 +236,8 @@ private:
     void transformGeneral(bool highQuality, Imagefloat *original, Imagefloat *transformed, int cx, int cy, int sx, int sy, int oW, int oH, int fW, int fH, const LensCorrection *pLCPMap);
     void transformLCPCAOnly(Imagefloat *original, Imagefloat *transformed, int cx, int cy, const LensCorrection *pLCPMap);
 
+    void expcomp(Imagefloat *rgb, const procparams::ExposureParams *expparams);
+    
     bool needsCA();
     bool needsDistortion();
     bool needsRotation();
