@@ -738,7 +738,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
                 printf ("Applying Highlight Recovery: Color propagation...\n");
             }
             bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
-            int blur = hrp.hrblur;
+            int blur = soft ? 0 : hrp.hrblur;
             HLRecovery_inpaint(soft, blur, rm, gm, bm, red, green, blue);
             rgbSourceModified = true;
         }

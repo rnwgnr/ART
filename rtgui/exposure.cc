@@ -176,5 +176,5 @@ void Exposure::toolReset(bool to_initial)
 
 void Exposure::showHRBlur()
 {
-    hrblur->set_visible(hrmode->get_active_row_number() > 1);
+    hrblur->set_visible(hrmode->get_active_row_number() == 2);
 }

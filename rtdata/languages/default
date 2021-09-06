@@ -554,7 +554,7 @@ HISTORY_MSG_EPD_DRAWNMASK;TB - brush mask
 HISTORY_MSG_EPD_PARAMETRICMASK;TB - parametric mask
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - mask post-processing
 HISTORY_MSG_EXPOSURE_BLACK;Exposure - Black point
-HISTORY_MSG_EXPOSURE_HRBLUR;Exposure - Highlight reconstruction smoothness
+HISTORY_MSG_EXPOSURE_HRBLUR;Exposure - Color propagation smoothness
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Negative
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base color
 HISTORY_MSG_FILMNEGATIVE_VALUES;Film negative values
@@ -1430,7 +1430,7 @@ TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Please refer to the "Exposure > Tone Curves" Ra
 TP_EXPOSURE_EXPCOMP;Exposure compensation
 TP_EXPOSURE_HISTMATCHING;Auto-Matched Tone Curve
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;Automatically adjust sliders and curves (except exposure compensation) to match the look of the embedded JPEG thumbnail.
-TP_EXPOSURE_HRBLUR;Reconstruction smoothness
+TP_EXPOSURE_HRBLUR;Color propagation smoothness
 TP_EXPOSURE_LABEL;Exposure
 TP_EXPOSURE_TCMODE_FILMLIKE;Film-like
 TP_EXPOSURE_TCMODE_LABEL1;Curve mode 1
