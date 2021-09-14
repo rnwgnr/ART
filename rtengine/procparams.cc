@@ -3539,10 +3539,15 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(dehaze)) {
             saveToKeyfile("Dehaze", "Enabled", dehaze.enabled, keyFile);
             saveToKeyfile("Dehaze", "Strength", dehaze.strength, keyFile);        
-            saveToKeyfile("Dehaze", "ShowDepthMap", dehaze.showDepthMap, keyFile);        
-            saveToKeyfile("Dehaze", "Depth", dehaze.depth, keyFile);
-            saveToKeyfile("Dehaze", "Luminance", dehaze.luminance, keyFile);
             saveToKeyfile("Dehaze", "Blackpoint", dehaze.blackpoint, keyFile);
+            saveToKeyfile("Dehaze", "Luminance", dehaze.luminance, keyFile);
+            DehazeParams dp;
+            if (dehaze.depth != dp.depth) {
+                saveToKeyfile("Dehaze", "Depth", dehaze.depth, keyFile);
+            }
+            if (dehaze.showDepthMap != dp.showDepthMap) {
+                saveToKeyfile("Dehaze", "ShowDepthMap", dehaze.showDepthMap, keyFile);        
+            }
         }
 
 // Denoising
