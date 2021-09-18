@@ -59,7 +59,7 @@ public:
     
     void setScale(double iscale);
 
-    void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, bool gamutCheck);
+    void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, GamutCheck gamutCheck);
     void setMonitorTransform(cmsHTRANSFORM xform) { monitorTransform = xform; }
 
     void setDCPProfile(DCPProfile *dcp, const DCPProfile::ApplyState &as)
@@ -148,7 +148,7 @@ public:
     //----------------------------------------------------------------------
     // Lab/RGB conversion
     //----------------------------------------------------------------------
-    void rgb2monitor(Imagefloat *img, Image8* image);
+    void rgb2monitor(Imagefloat *img, Image8* image, bool bypass_out=false);
     
     Image8 *rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings = true);
 

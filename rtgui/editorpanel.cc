@@ -133,6 +133,7 @@ private:
     PopUpButton intentBox;
     Gtk::ToggleButton softProof;
     Gtk::ToggleButton spGamutCheck;
+    Gtk::ToggleButton spGamutCheckMonitor;
     sigc::connection profileConn, intentConn, softproofConn;
     Glib::ustring defprof;
 
@@ -203,6 +204,16 @@ private:
         spGamutCheck.set_active (false);
         spGamutCheck.set_sensitive (true);
         spGamutCheck.show ();
+
+        spGamutCheckImage = Gtk::manage(new RTImage("gamut-warning-monitor.png"));
+        spGamutCheckImage->set_padding(0, 0);
+        spGamutCheckMonitor.add(*spGamutCheckImage);
+        spGamutCheckMonitor.set_relief(Gtk::RELIEF_NONE);
+        spGamutCheckMonitor.set_tooltip_markup(M("SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP"));
+
+        spGamutCheckMonitor.set_active(false);
+        spGamutCheckMonitor.set_sensitive(true);
+        spGamutCheckMonitor.show();
     }
 
 #if !defined(__APPLE__)
@@ -224,7 +235,20 @@ private:
 
     void spGamutCheckToggled ()
     {
-        updateSoftProofParameters ();
+        if (spGamutCheck.get_active() && spGamutCheckMonitor.get_active()) {
+            spGamutCheckMonitor.set_active(false);
+        } else {
+            updateSoftProofParameters ();
+        }
+    }
+
+    void spGamutCheckMonitorToggled ()
+    {
+        if (spGamutCheck.get_active() && spGamutCheckMonitor.get_active()) {
+            spGamutCheck.set_active(false);
+        } else {
+            updateSoftProofParameters ();
+        }
     }
 
     void updateParameters (bool noEvent = false)
@@ -265,7 +289,8 @@ private:
             intentBox.set_sensitive (false);
             intentBox.setSelected (1);
             softProof.set_sensitive (false);
-            spGamutCheck.set_sensitive (false);
+            //spGamutCheck.set_sensitive (false);
+            spGamutCheckMonitor.set_sensitive (false);
 
             profileBox.set_tooltip_text ("");
 
@@ -281,19 +306,22 @@ private:
                 intentBox.setItemSensitivity (1, supportsRelativeColorimetric);
                 intentBox.setItemSensitivity (2, supportsAbsoluteColorimetric);
                 softProof.set_sensitive (true);
-                spGamutCheck.set_sensitive (true);
+                //spGamutCheck.set_sensitive (true);
             } else {
                 intentBox.setItemSensitivity (0, true);
                 intentBox.setItemSensitivity (1, true);
                 intentBox.setItemSensitivity (2, true);
                 intentBox.set_sensitive (false);
                 intentBox.setSelected (1);
-                softProof.set_sensitive (false);
-                spGamutCheck.set_sensitive (true);
+                //softProof.set_sensitive (false);
             }
+            spGamutCheck.set_sensitive(true);
+            spGamutCheckMonitor.set_sensitive(true);
 
             profileBox.set_tooltip_text (profileBox.get_active_text ());
+
         }
+        softProof.set_sensitive(softProof.get_sensitive() && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
 
 #endif
         rtengine::RenderingIntent intent;
@@ -322,7 +350,13 @@ private:
         }
 
         processor->setMonitorProfile (profile, intent);
-        processor->setSoftProofing (softProof.get_sensitive() && softProof.get_active(), spGamutCheck.get_sensitive() && spGamutCheck.get_active());
+        rtengine::GamutCheck gc = rtengine::GAMUT_CHECK_OFF;
+        if (spGamutCheck.get_sensitive() && spGamutCheck.get_active()) {
+            gc = rtengine::GAMUT_CHECK_OUTPUT;
+        } else if (spGamutCheckMonitor.get_sensitive() && spGamutCheckMonitor.get_active()) {
+            gc = rtengine::GAMUT_CHECK_MONITOR;
+        }
+        processor->setSoftProofing (softProof.get_sensitive() && softProof.get_active(), gc);
 
         if (!noEvent) {
             processor->endUpdateParams (rtengine::EvMonitorTransform);
@@ -332,7 +366,7 @@ private:
     void updateSoftProofParameters (bool noEvent = false)
     {
 #if !defined(__APPLE__) // monitor profile not supported on apple
-        softProof.set_sensitive (profileBox.get_active_row_number () > 0);
+        softProof.set_sensitive (profileBox.get_active_row_number () > 0 && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
         spGamutCheck.set_sensitive(profileBox.get_active_row_number () > 0);
 #endif
 
@@ -347,7 +381,13 @@ private:
                     processor->beginUpdateParams ();
                 }
 
-                processor->setSoftProofing (softProof.get_sensitive() && softProof.get_active(), spGamutCheck.get_active());
+                rtengine::GamutCheck gc = rtengine::GAMUT_CHECK_OFF;
+                if (spGamutCheck.get_sensitive() && spGamutCheck.get_active()) {
+                    gc = rtengine::GAMUT_CHECK_OUTPUT;
+                } else if (spGamutCheckMonitor.get_sensitive() && spGamutCheckMonitor.get_active()) {
+                    gc = rtengine::GAMUT_CHECK_MONITOR;
+                }
+                processor->setSoftProofing(softProof.get_sensitive() && softProof.get_active(), gc);
 
                 if (!noEvent) {
                     processor->endUpdateParams (rtengine::EvMonitorTransform);
@@ -375,6 +415,7 @@ public:
 
         softproofConn = softProof.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::softProofToggled));
         spGamutCheck.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckToggled));
+        spGamutCheckMonitor.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckMonitorToggled));
 #if !defined(__APPLE__) // monitor profile not supported on apple
         profileConn = profileBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::profileBoxChanged));
 #endif
@@ -389,6 +430,7 @@ public:
         grid->attach_next_to (*intentBox.buttonGroup, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to (softProof, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to (spGamutCheck, Gtk::POS_RIGHT, 1, 1);
+        grid->attach_next_to(spGamutCheckMonitor, Gtk::POS_RIGHT, 1, 1);
     }
 
     void updateProcessor()
@@ -451,6 +493,8 @@ public:
             setActiveTextOrIndex (profileBox, profile_name, 0);
 #endif
         }
+
+        softProof.set_sensitive(rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
     }
 
 };

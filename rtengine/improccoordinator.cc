@@ -74,7 +74,7 @@ ImProcCoordinator::ImProcCoordinator():
     ipf(&params, true),
     monitorIntent(RI_RELATIVE),
     softProof(false),
-    gamutCheck(false),
+    gamutCheck(GAMUT_CHECK_OFF),
     sharpMask(false),
     scale(10),
     highDetailPreprocessComputed(false),
@@ -1343,16 +1343,10 @@ void ImProcCoordinator::getMonitorProfile(Glib::ustring& profile, RenderingInten
     intent = monitorIntent;
 }
 
-void ImProcCoordinator::setSoftProofing(bool softProof, bool gamutCheck)
+void ImProcCoordinator::setSoftProofing(bool softProof, GamutCheck gamutCheck)
 {
     this->softProof = softProof;
     this->gamutCheck = gamutCheck;
-}
-
-void ImProcCoordinator::getSoftProofing(bool &softProof, bool &gamutCheck)
-{
-    softProof = this->softProof;
-    gamutCheck = this->gamutCheck;
 }
 
 void ImProcCoordinator::setSharpMask (bool sharpMask)
