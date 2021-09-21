@@ -178,30 +178,8 @@ void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image, bool bypass_ou
             }
         } // End of parallelization
     } else {
-        if (bypass_out) {
-            copyAndClamp(img, image->data, sRGB_xyz, multiThread);
-        } else {
-            img->setMode(Imagefloat::Mode::RGB, multiThread);
-            const int W = img->getWidth();
-            const int H = img->getHeight();
-            unsigned char *dst = image->data;
-#ifdef _OPENMP
-#           pragma omp parallel for schedule(dynamic,16) if (multiThread)
-#endif
-            for (int i = 0; i < H; ++i) {
-                float *rr = img->r.ptrs[i];
-                float *rg = img->g.ptrs[i];
-                float *rb = img->b.ptrs[i];
-        
-                int ix = i * 3 * W;
-
-                for (int j = 0; j < W; ++j) {
-                    dst[ix++] = uint16ToUint8Rounded(CLIP(rr[j]));
-                    dst[ix++] = uint16ToUint8Rounded(CLIP(rg[j]));
-                    dst[ix++] = uint16ToUint8Rounded(CLIP(rb[j]));
-                }
-            }
-        }
+        img->setMode(Imagefloat::Mode::LAB, multiThread);
+        copyAndClamp(img, image->data, sRGB_xyz, multiThread);
     }
 }
 
