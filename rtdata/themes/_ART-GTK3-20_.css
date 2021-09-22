@@ -122,3 +122,8 @@ dialog frame > border {
 popover {
     background-color: rgb(72,72,72);
 }
+
+checkbutton check, radiobutton radio {
+    border-color: rgb(0,0,0);
+    border-width: 0.05ex;
+}

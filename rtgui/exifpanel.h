@@ -78,6 +78,7 @@ private:
 
     Gtk::CellRendererToggle exif_active_renderer_;
     Gtk::TreeView::Column exif_active_column_;
+    Glib::RefPtr<Gtk::CssProvider> exif_tree_provider_;
 
     std::vector<std::pair<std::string, Glib::ustring>> editable_;
 
