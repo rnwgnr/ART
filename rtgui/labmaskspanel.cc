@@ -968,6 +968,10 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         list->get_column(col-1)->set_expand(true);
     }
     list->set_activate_on_single_click(true);
+    list_provider_ = Gtk::CssProvider::create();
+    list_provider_->load_from_data("* { background-image: none; border-color: rgba(0,0,0,0); }");
+    list->get_style_context()->add_provider(list_provider_, GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
     selectionConn = list->get_selection()->signal_changed().connect(sigc::mem_fun(this, &LabMasksPanel::onSelectionChanged));
     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
     Gtk::ScrolledWindow *scroll = Gtk::manage(new Gtk::ScrolledWindow());

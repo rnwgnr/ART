@@ -251,6 +251,7 @@ private:
     std::unique_ptr<ListColumns> list_model_columns_;
     Glib::RefPtr<Gtk::ListStore> list_model_;
     Gtk::TreeView *list;
+    Glib::RefPtr<Gtk::CssProvider> list_provider_;
     
     Gtk::Button *reset;
     Gtk::Button *add;
