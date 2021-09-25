@@ -26,14 +26,23 @@
 #include "multilangmgr.h"
 #include "rtimage.h"
 
-CurveEditorGroup::CurveEditorGroup (Glib::ustring& curveDir, Glib::ustring groupLabel, float curvesRatio) : curveDir(curveDir), line(0), curve_reset(nullptr),
-      displayedCurve(nullptr), flatSubGroup(nullptr), diagonalSubGroup(nullptr), cl(nullptr), numberOfPackedCurve(0), curvesRatio(curvesRatio)
+
+CurveEditorGroup::CurveEditorGroup(Glib::ustring& curveDir, Glib::ustring groupLabel, float curvesRatio):
+    curveDir(curveDir),
+    curve_reset(nullptr),
+    displayedCurve(nullptr),
+    flatSubGroup(nullptr),
+    diagonalSubGroup(nullptr),
+    cl(nullptr),
+    numberOfPackedCurve(0),
+    curvesRatio(curvesRatio)
 {
 
     // We set the label to the one provided as parameter, even if it's an empty string
     curveGroupLabel = Gtk::manage (new Gtk::Label (groupLabel.empty() ? groupLabel : (groupLabel + ": "), Gtk::ALIGN_START));
     setExpandAlignProperties(curveGroupLabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-    set_row_spacing(RTScalable::getScale());
+    //set_row_spacing(RTScalable::getScale());
+    set_spacing(RTScalable::getScale());
 }
 
 CurveEditorGroup::~CurveEditorGroup()
@@ -170,13 +179,18 @@ void CurveEditorGroup::newLine()
             currLine->attach(*curve_reset, x++, 0, 1, 1);
         }
 
-        attach(*currLine, 0, line++, 1, 1);
+        pack_start(*currLine);
     }
 }
 
 void CurveEditorGroup::attachCurve (Gtk::Grid* curve)
 {
-    attach(*curve, 0, line, 1, 1);
+    pack_start(*curve);
+    check_resize();
+    idle_register_.add([this]() -> bool {
+        queue_draw();
+        return false;
+    });
 }
 
 /*
