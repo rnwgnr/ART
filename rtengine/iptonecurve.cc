@@ -217,37 +217,22 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
     satcurve_lut(curve, sat, whitept);
 
     TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
-    float ws[3][3];
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            ws[i][j] = dws[i][j];
-        }
-    }
 
-    TMatrix diws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
-    float iws[3][3];
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            iws[i][j] = diws[i][j];
-        }
-    }
-    
+    rgb->setMode(Imagefloat::Mode::LAB, multithread);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
     for (int y = 0; y < rgb->getHeight(); ++y) {
+        //Color::LabGamutMunsell(rgb->g(y), rgb->r(y), rgb->b(y), rgb->getWidth(), true, false, true, true, dws);
         for (int x = 0; x < rgb->getWidth(); ++x) {
-            float R = rgb->r(y, x), G = rgb->g(y, x), B = rgb->b(y, x);
-            float Y = Color::rgbLuminance(R, G, B, ws);
+            float X, Y, Z;
+            Color::L2XYZ(rgb->g(y, x), X, Y, Z);
             float s = sat[Y];
-            // rgb->r(y, x) = Y + s * (r - Y);
-            // rgb->g(y, x) = Y + s * (g - Y);
-            // rgb->b(y, x) = Y + s * (b - Y);
-            float L, a, b;
-            Color::rgb2lab(R, G, B, L, a, b, ws);
-            Color::lab2rgb(L, a * s, b * s, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), iws);
+            rgb->r(y, x) *= s;
+            rgb->b(y, x) *= s;
         }
     }
+    rgb->setMode(Imagefloat::Mode::RGB, multithread);
 }
 
 
