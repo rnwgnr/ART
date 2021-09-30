@@ -216,7 +216,7 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
     LUTf sat;
     satcurve_lut(curve, sat, whitept);
 
-    TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
+    //TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
 
     rgb->setMode(Imagefloat::Mode::LAB, multithread);
 #ifdef _OPENMP
