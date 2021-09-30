@@ -332,5 +332,6 @@ private:
 
     Gtk::Entry *maskName;
     DiagonalCurveEditor *maskCurve;
-    Adjuster *maskRegularization;
+    Adjuster *maskPosterization;
+    Adjuster *maskSmoothing;
 };

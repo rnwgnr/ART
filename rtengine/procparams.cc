@@ -1115,7 +1115,8 @@ Mask::Mask():
     drawnMask(),
     name(""),
     curve{DCT_Linear},
-    regularization(0)
+    posterization(0),
+    smoothing(0)
 {
 }
 
@@ -1130,7 +1131,8 @@ bool Mask::operator==(const Mask &other) const
         && drawnMask == other.drawnMask
         && name == other.name
         && curve == other.curve
-        && regularization == other.regularization;
+        && posterization == other.posterization
+        && smoothing == other.smoothing;
 }
 
 
@@ -1366,7 +1368,8 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
         }
     }
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskCurve" + suffix, curve);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskRegularization" + suffix, regularization);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskPosterization" + suffix, posterization);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskSmoothing" + suffix, smoothing);
     
     return ret;
 }
@@ -1378,7 +1381,8 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "MaskInverted" + suffix, inverted, keyfile);
     putToKeyfile(group_name, prefix + "MaskName" + suffix, name, keyfile);
     putToKeyfile(group_name, prefix + "MaskCurve" + suffix, curve, keyfile);
-    putToKeyfile(group_name, prefix + "MaskRegularization" + suffix, regularization, keyfile);
+    putToKeyfile(group_name, prefix + "MaskPosterization" + suffix, posterization, keyfile);
+    putToKeyfile(group_name, prefix + "MaskSmoothing" + suffix, smoothing, keyfile);
     putToKeyfile(group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled, keyfile);
     putToKeyfile(group_name, prefix + "HueMask" + suffix, parametricMask.hue, keyfile);
     putToKeyfile(group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity, keyfile);

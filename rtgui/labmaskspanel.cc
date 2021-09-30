@@ -1347,9 +1347,13 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         ppMask->add(*tb, false);
         ppMask->setLevel(1);
 
-        maskRegularization = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_REGULARIZATION"), 0, 5, 1, 0));
-        tb->pack_start(*maskRegularization);
-        maskRegularization->setAdjusterListener(this);
+        maskPosterization = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_POSTERIZATION"), 0, 6, 1, 0));
+        tb->pack_start(*maskPosterization);
+        maskPosterization->setAdjusterListener(this);
+
+        maskSmoothing = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_SMOOTHING"), 0, 100, 1, 0));
+        tb->pack_start(*maskSmoothing);
+        maskSmoothing->setAdjusterListener(this);
         
         CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_POSTPROCESS_CURVE")));
         cg->setCurveListener(this);
@@ -1546,7 +1550,8 @@ void LabMasksPanel::maskGet(int idx)
     r.deltaEMask.decay = sgn * deltaEDecay->getValue();
     r.name = maskName->get_text();
     r.curve = maskCurve->getCurve();
-    r.regularization = maskRegularization->getValue();
+    r.posterization = maskPosterization->getValue();
+    r.smoothing = maskSmoothing->getValue();
 }
 
 
@@ -1734,7 +1739,8 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         maskInverted->set_active(r.inverted);
         maskName->set_text(r.name);
         maskCurve->setCurve(r.curve);
-        maskRegularization->setValue(r.regularization);
+        maskPosterization->setValue(r.posterization);
+        maskSmoothing->setValue(r.smoothing);
 
         if (unsub && isCurrentSubscriber()) {
             if (areaMaskToggle->get_active()) {
@@ -2165,9 +2171,13 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
         if (l) {
             l->panelChanged(EvLMask, a->getTextValue());
         }
-    } else if (a == maskRegularization) {
+    } else if (a == maskPosterization) {
         if (l) {
-            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_REGULARIZATION") + ": " + a->getTextValue());
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_POSTERIZATION") + ": " + a->getTextValue());
+        }
+    } else if (a == maskSmoothing) {
+        if (l) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_SMOOTHING") + ": " + a->getTextValue());
         }
     }
     maskShow(selected_, true);

@@ -272,7 +272,8 @@ public:
     DrawnMask drawnMask;
     Glib::ustring name;
     std::vector<double> curve;
-    int regularization;
+    int posterization;
+    int smoothing;
 
     Mask();
     bool operator==(const Mask &other) const;

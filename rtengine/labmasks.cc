@@ -729,20 +729,20 @@ bool contrast_threshold_mask(int width, int height, float scale, array2D<float> 
 }
 
 
-bool mask_postprocess(int width, int height, float scale, const array2D<float> &guide, const std::vector<double> &curve, int regularization, bool multithread, array2D<float> &mask)
+bool mask_postprocess(int width, int height, float scale, const array2D<float> &guide, const std::vector<double> &curve, int posterization, int smoothing, bool multithread, array2D<float> &mask)
 {
     DiagonalCurve ccurve(curve);
-    if (!regularization && ccurve.isIdentity()) {
+    if (!posterization && ccurve.isIdentity()) {
         return false;
     }
 
     int W = mask.width();
     int H = mask.height();
 
-    if (regularization) {
-        constexpr float posterization[] = { 30.f, 20.f, 10.f, 5.f, 3.f };
-        const int idx = LIM(regularization, 0, 5)-1;
-        const float p = posterization[idx];
+    if (posterization) {
+        constexpr float pp[] = { 30.f, 20.f, 10.f, 5.f, 3.f, 2.f };
+        const int idx = LIM(posterization, 0, 6)-1;
+        const float p = pp[idx];
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
@@ -764,11 +764,11 @@ bool mask_postprocess(int width, int height, float scale, const array2D<float> &
         }
     }
 
-    if (regularization) {
-        constexpr float radius_coeff = 30.f;
+    if (posterization && smoothing) {
+        const float radius_coeff = 101.f - float(LIM(smoothing, 0, 100));
         const float radius = (max(width, height) / radius_coeff);
         const float epsilon = 0.015f;
-        rtengine::guidedFilter(mask, mask, mask, radius, epsilon, multithread);
+        rtengine::guidedFilter(guide, mask, mask, radius, epsilon, multithread);
     }
 
     return true;
@@ -1132,12 +1132,13 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 
     for (int i = begin_idx; i < end_idx; ++i) {
         const auto &curve = masks[i].curve;
-        auto regularization = masks[i].regularization;
+        auto posterization = masks[i].posterization;
+        auto smoothing = masks[i].smoothing;
         if (abmask) {
-            mask_postprocess(full_width, full_height, scale, guide, curve, regularization, multithread, (*abmask)[i]);
+            mask_postprocess(full_width, full_height, scale, guide, curve, posterization, smoothing, multithread, (*abmask)[i]);
         }
         if (Lmask) {
-            mask_postprocess(full_width, full_height, scale, guide, curve, regularization, multithread, (*Lmask)[i]);
+            mask_postprocess(full_width, full_height, scale, guide, curve, posterization, smoothing, multithread, (*Lmask)[i]);
         }
     }
     
