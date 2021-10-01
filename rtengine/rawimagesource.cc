@@ -1465,7 +1465,13 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         if (lensProf.useLensfun()) {
             pmap = LFDatabase::getInstance()->findModifier(lensProf, idata, W, H, coarse, -1);
         } else if (lensProf.useExif()) {
-            pmap.reset(new ExifLensCorrection(idata, W, H, coarse, -1));
+            ExifLensCorrection *e = new ExifLensCorrection(idata, W, H, coarse, -1);
+            pmap.reset(e);
+            if (!e->ok()) {
+                LensProfParams lf = lensProf;
+                lf.lcMode = LensProfParams::LcMode::LENSFUNAUTOMATCH;
+                pmap = LFDatabase::getInstance()->findModifier(lf, idata, W, H, coarse, -1);
+            }
         } else {
             const std::shared_ptr<LCPProfile> pLCPProf = LCPStore::getInstance()->getProfile(lensProf.lcpFile);
 
