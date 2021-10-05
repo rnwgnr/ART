@@ -66,6 +66,13 @@ bool has_modifiers(GdkEventKey *event)
     return event->state & (GDK_CONTROL_MASK|GDK_MOD1_MASK|GDK_MOD2_MASK|GDK_MOD5_MASK);
 }
 
+enum {
+    DIRECTION_ZERO = 0,
+    DIRECTION_DOWN = -1,
+    DIRECTION_UP = 1,
+    DIRECTION_INITIAL = 2
+};
+
 } // namespace
 
 
@@ -81,15 +88,19 @@ bool ToolShortcutManager::keyPressed(GdkEventKey *event)
         case GDK_KEY_plus:
         case GDK_KEY_equal:
         case GDK_KEY_KP_Add:
-            doit(1);
+            doit(DIRECTION_UP);
             return true;
         case GDK_KEY_asterisk:
         case GDK_KEY_KP_Multiply:
-            doit(0);
+            doit(DIRECTION_ZERO);
+            return true;
+        case GDK_KEY_slash:
+        case GDK_KEY_KP_Divide:
+            doit(DIRECTION_INITIAL);
             return true;
         case GDK_KEY_minus:
         case GDK_KEY_KP_Subtract:
-            doit(-1);
+            doit(DIRECTION_DOWN);
             return true;
         default:
             break;
@@ -125,6 +136,8 @@ bool ToolShortcutManager::keyReleased(GdkEventKey *event)
         case GDK_KEY_KP_Add:
         case GDK_KEY_asterisk:
         case GDK_KEY_KP_Multiply:
+        case GDK_KEY_slash:
+        case GDK_KEY_KP_Divide:
         case GDK_KEY_minus:
         case GDK_KEY_KP_Subtract:
             return true;
@@ -148,7 +161,7 @@ bool ToolShortcutManager::scrollPressed(GdkEventScroll *event)
             conn_.disconnect();
         }
 
-        int dir = event->direction == GDK_SCROLL_DOWN ? -1 : 1;
+        int dir = event->direction == GDK_SCROLL_DOWN ? DIRECTION_DOWN : DIRECTION_UP;
         doit(dir);
         return true;
     }
@@ -166,8 +179,10 @@ void ToolShortcutManager::doit(int direction)
 {
     cur_tool_->disableListener();
     cur_tool_->setEnabled(true);
-    if (!direction) {
+    if (direction == DIRECTION_ZERO) {
         cur_adjuster_->resetValue(false);
+    } else if (direction == DIRECTION_INITIAL) {
+        cur_adjuster_->resetValue(true);
     } else {
         cur_adjuster_->setValue(cur_adjuster_->getValue() + direction * cur_adjuster_->getStepValue());
     }
