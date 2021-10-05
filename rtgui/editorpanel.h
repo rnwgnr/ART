@@ -67,10 +67,7 @@ public:
     void leftPaneButtonReleased (GdkEventButton *event);
     void rightPaneButtonReleased (GdkEventButton *event);
 
-    void setParent (RTWindow* p)
-    {
-        parent = p;
-    }
+    void setParent(RTWindow* p);
 
     void setParentWindow (Gtk::Window* p)
     {
@@ -172,6 +169,8 @@ public:
     Glib::ustring getShortName ();
     Glib::ustring getFileName ();
     bool handleShortcutKey (GdkEventKey* event);
+    bool keyReleased(GdkEventKey *event);
+    bool scrollPressed(GdkEventScroll *event);
 
     bool getIsProcessing() const
     {
@@ -289,5 +288,7 @@ private:
     Options::ScopeType histogram_scope_type;
 
     sigc::connection autosave_conn_;
+
+    std::unique_ptr<ToolShortcutManager> shortcut_mgr_;
 };
 

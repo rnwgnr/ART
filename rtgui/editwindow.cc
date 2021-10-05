@@ -69,6 +69,8 @@ EditWindow::EditWindow (RTWindow* p) : resolution(RTScalable::baseDPI), parent(p
     mainNB->signal_switch_page().connect_notify(sigc::mem_fun(*this, &EditWindow::on_mainNB_switch_page));
 
     signal_key_press_event().connect(sigc::mem_fun(*this, &EditWindow::keyPressed));
+    signal_key_release_event().connect(sigc::mem_fun(*this, &EditWindow::keyReleased));
+    signal_scroll_event().connect(sigc::mem_fun(*this, &EditWindow::scrollPressed), false);
 
     Gtk::VBox* mainBox = Gtk::manage(new Gtk::VBox());
     mainBox->pack_start(*mainNB);
@@ -399,4 +401,24 @@ void EditWindow::set_title_decorated(Glib::ustring fname)
     }
 
     set_title(Glib::ustring(RTNAME " ") + M("EDITWINDOW_TITLE") + subtitle);
+}
+
+
+bool EditWindow::keyReleased(GdkEventKey *event)
+{
+    if (mainNB->get_n_pages () > 0) {
+        EditorPanel* ep = static_cast<EditorPanel*>(mainNB->get_nth_page (mainNB->get_current_page()));
+        return ep->keyReleased(event);
+    }
+    return false;
+}
+
+
+bool EditWindow::scrollPressed(GdkEventScroll *event)
+{
+    if (mainNB->get_n_pages () > 0) {
+        EditorPanel* ep = static_cast<EditorPanel*>(mainNB->get_nth_page (mainNB->get_current_page()));
+        return ep->scrollPressed(event);
+    }
+    return false;
 }

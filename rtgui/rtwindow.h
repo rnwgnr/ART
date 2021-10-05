@@ -46,7 +46,10 @@ public:
     void addBatchQueueJob       (BatchQueueEntry* bqe, bool head = false);
     void addBatchQueueJobs      (const std::vector<BatchQueueEntry*>& entries);
 
-    bool keyPressed (GdkEventKey* event);
+    bool keyPressed(GdkEventKey* event);
+    bool keyReleased(GdkEventKey* event);
+    bool scrollPressed(GdkEventScroll *event);
+    
     bool on_configure_event (GdkEventConfigure* event) override;
     bool on_delete_event (GdkEventAny* event) override;
     bool on_window_state_event (GdkEventWindowState* event) override;
@@ -92,12 +95,16 @@ public:
 
     void writeToolExpandedStatus (std::vector<int> &tpOpen);
 
+    void showInfo(const Glib::ustring &msg, double duration=0.0);
+
 private:
+    void show_info_msg(const Glib::ustring &msg, bool is_error, double duration, size_t padding);
     bool hide_info_msg();
     Gtk::Overlay *main_overlay_;
     Gtk::Revealer *msg_revealer_;
     Gtk::Label *info_label_;
     Gtk::Box *info_box_;
+    RTImage *info_image_;
     std::set<Glib::ustring> unique_info_msg_;
     std::vector<Glib::ustring> info_msg_;
     int info_msg_num_;

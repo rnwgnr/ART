@@ -307,8 +307,19 @@ RTWindow::RTWindow():
     on_delete_has_run = false;
     is_fullscreen = false;
     property_destroy_with_parent().set_value (false);
+
+    add_events(Gdk::KEY_PRESS_MASK | Gdk::SCROLL_MASK);
     signal_window_state_event().connect ( sigc::mem_fun (*this, &RTWindow::on_window_state_event) );
     signal_key_press_event().connect ( sigc::mem_fun (*this, &RTWindow::keyPressed) );
+    signal_key_release_event().connect(sigc::mem_fun(*this, &RTWindow::keyReleased));
+    signal_scroll_event().connect(sigc::mem_fun(*this, &RTWindow::scrollPressed), false);
+    // signal_key_release_event().connect(
+    //     sigc::slot<bool, GdkEventKey*>(
+    //         [](GdkEventKey *event) -> bool
+    //         {
+    //             std::cout << "\n*** KEY RELEASED: " << event->keyval << " ***\n" << std::endl;
+    //             return false;
+    //         }));
 
     main_overlay_ = Gtk::manage(new Gtk::Overlay());
     add(*main_overlay_);
@@ -469,6 +480,7 @@ RTWindow::RTWindow():
 
         box->get_style_context()->add_class("app-notification");
         RTImage *icon = Gtk::manage(new RTImage("warning.png"));
+        info_image_ = icon;
         setExpandAlignProperties(icon, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
         icon->set_can_focus(false);
         
@@ -778,7 +790,6 @@ bool RTWindow::selectEditorPanel (const std::string &name)
 
 bool RTWindow::keyPressed (GdkEventKey* event)
 {
-
     bool ctrl = event->state & GDK_CONTROL_MASK;
     //bool shift = event->state & GDK_SHIFT_MASK;
 
@@ -853,6 +864,36 @@ bool RTWindow::keyPressed (GdkEventKey* event)
     }
 
     return false;
+}
+
+
+bool RTWindow::keyReleased(GdkEventKey* event)
+{
+    if (simpleEditor) {
+        return epanel->keyReleased(event);
+    } else if (mainNB->get_current_page() == mainNB->page_num (*fpanel)) {
+        return false;
+    } else if (mainNB->get_current_page() == mainNB->page_num (*bpanel)) {
+        return false;
+    } else {
+        EditorPanel* ep = static_cast<EditorPanel*> (mainNB->get_nth_page (mainNB->get_current_page()));
+        return ep->keyReleased(event);
+    }
+}
+
+
+bool RTWindow::scrollPressed(GdkEventScroll *event)
+{
+    if (simpleEditor) {
+        return epanel->scrollPressed(event);
+    } else if (mainNB->get_current_page() == mainNB->page_num (*fpanel)) {
+        return false;
+    } else if (mainNB->get_current_page() == mainNB->page_num (*bpanel)) {
+        return false;
+    } else {
+        EditorPanel* ep = static_cast<EditorPanel*> (mainNB->get_nth_page (mainNB->get_current_page()));
+        return ep->scrollPressed(event);
+    }
 }
 
 void RTWindow::addBatchQueueJob (BatchQueueEntry* bqe, bool head)
@@ -1067,71 +1108,72 @@ void RTWindow::setProgressState(bool inProcessing)
 
 void RTWindow::error(const Glib::ustring& descr)
 {
-    GThreadLock lock;
+    show_info_msg(descr, true, 0, 120);
+    // GThreadLock lock;
     
-    const auto wrap =
-        [](Glib::ustring s) -> Glib::ustring
-        {
-            Glib::ustring ret;
-            const size_t pad = 120;
-            while (s.size() > pad) {
-                if (!ret.empty()) {
-                    ret += "\n";
-                }
-                auto p1 = s.find_first_of(' ', pad);
-                auto p2 = s.find_last_of(' ', pad+1);
-                if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
-                    if (p1 - pad > pad - p2) {
-                        ret += s.substr(0, p2);
-                        s = s.substr(p2+1);
-                    } else {
-                        ret += s.substr(0, p1);
-                        s = s.substr(p1+1);
-                    }
-                } else if (p1 != Glib::ustring::npos) {
-                    ret += s.substr(0, p1);
-                    s = s.substr(p1+1);
-                } else if (p2 != Glib::ustring::npos) {
-                    ret += s.substr(0, p2);
-                    s = s.substr(p2+1);
-                } else {
-                    break;
-                }
-            }
-            if (!ret.empty()) {
-                ret += "\n";
-            }
-            ret += s;
-            return ret;
-        };
+    // const auto wrap =
+    //     [](Glib::ustring s) -> Glib::ustring
+    //     {
+    //         Glib::ustring ret;
+    //         const size_t pad = 120;
+    //         while (s.size() > pad) {
+    //             if (!ret.empty()) {
+    //                 ret += "\n";
+    //             }
+    //             auto p1 = s.find_first_of(' ', pad);
+    //             auto p2 = s.find_last_of(' ', pad+1);
+    //             if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
+    //                 if (p1 - pad > pad - p2) {
+    //                     ret += s.substr(0, p2);
+    //                     s = s.substr(p2+1);
+    //                 } else {
+    //                     ret += s.substr(0, p1);
+    //                     s = s.substr(p1+1);
+    //                 }
+    //             } else if (p1 != Glib::ustring::npos) {
+    //                 ret += s.substr(0, p1);
+    //                 s = s.substr(p1+1);
+    //             } else if (p2 != Glib::ustring::npos) {
+    //                 ret += s.substr(0, p2);
+    //                 s = s.substr(p2+1);
+    //             } else {
+    //                 break;
+    //             }
+    //         }
+    //         if (!ret.empty()) {
+    //             ret += "\n";
+    //         }
+    //         ret += s;
+    //         return ret;
+    //     };
 
-    if (!unique_info_msg_.insert(descr).second) {
-        return;
-    }
-    auto m = escapeHtmlChars(wrap(descr));
-    info_msg_.push_back(m);
-    ++info_msg_num_;
-    Glib::ustring msg;
-    const char *sep = "";
-    if (reveal_conn_.connected()) {
-        reveal_conn_.disconnect();
-        int n = int(info_msg_.size()) - options.max_error_messages;
-        if (options.max_error_messages > 0 && n > 0) {
-            info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
-        }
-        n = info_msg_num_ - options.max_error_messages;
-        if (n > 0) {
-            msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
-        }
-    }
-    for (auto &s : info_msg_) {
-        msg += sep + s;
-        sep = "\n";
-    }
-    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
-    info_box_->show();
-    msg_revealer_->set_reveal_child(true);
-    reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
+    // if (!unique_info_msg_.insert(descr).second) {
+    //     return;
+    // }
+    // auto m = escapeHtmlChars(wrap(descr));
+    // info_msg_.push_back(m);
+    // ++info_msg_num_;
+    // Glib::ustring msg;
+    // const char *sep = "";
+    // if (reveal_conn_.connected()) {
+    //     reveal_conn_.disconnect();
+    //     int n = int(info_msg_.size()) - options.max_error_messages;
+    //     if (options.max_error_messages > 0 && n > 0) {
+    //         info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
+    //     }
+    //     n = info_msg_num_ - options.max_error_messages;
+    //     if (n > 0) {
+    //         msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
+    //     }
+    // }
+    // for (auto &s : info_msg_) {
+    //     msg += sep + s;
+    //     sep = "\n";
+    // }
+    // info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
+    // info_box_->show();
+    // msg_revealer_->set_reveal_child(true);
+    // reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
 }
 
 
@@ -1343,4 +1385,88 @@ void RTWindow::createSetmEditor()
     epanel->tbTopPanel_1_visible (true); //show the toggle Top Panel button
     mainNB->append_page (*epanel, *editorLabelGrid);
 
+}
+
+
+void RTWindow::showInfo(const Glib::ustring &msg, double duration)
+{
+    show_info_msg(msg, false, duration, 0);
+}
+
+
+void RTWindow::show_info_msg(const Glib::ustring &descr, bool is_error, double duration, size_t padding)
+{
+    GThreadLock lock;
+    
+    const auto wrap =
+        [padding](Glib::ustring s) -> Glib::ustring
+        {
+            Glib::ustring ret;
+            const size_t pad = padding;
+            while (s.size() > pad) {
+                if (!ret.empty()) {
+                    ret += "\n";
+                }
+                auto p1 = s.find_first_of(' ', pad);
+                auto p2 = s.find_last_of(' ', pad+1);
+                if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
+                    if (p1 - pad > pad - p2) {
+                        ret += s.substr(0, p2);
+                        s = s.substr(p2+1);
+                    } else {
+                        ret += s.substr(0, p1);
+                        s = s.substr(p1+1);
+                    }
+                } else if (p1 != Glib::ustring::npos) {
+                    ret += s.substr(0, p1);
+                    s = s.substr(p1+1);
+                } else if (p2 != Glib::ustring::npos) {
+                    ret += s.substr(0, p2);
+                    s = s.substr(p2+1);
+                } else {
+                    break;
+                }
+            }
+            if (!ret.empty()) {
+                ret += "\n";
+            }
+            ret += s;
+            return ret;
+        };
+
+    auto m = escapeHtmlChars(padding > 0 ? wrap(descr) : descr);
+    if (is_error) {
+        if (!unique_info_msg_.insert(descr).second) {
+            return;
+        }
+        info_msg_.push_back(m);
+        ++info_msg_num_;
+    } else {
+        info_msg_.clear();
+        info_msg_.push_back(m);
+    }
+    Glib::ustring msg;
+    const char *sep = "";
+    if (reveal_conn_.connected()) {
+        reveal_conn_.disconnect();
+        if (is_error) {
+            int n = int(info_msg_.size()) - options.max_error_messages;
+            if (options.max_error_messages > 0 && n > 0) {
+                info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
+            }
+            n = info_msg_num_ - options.max_error_messages;
+            if (n > 0) {
+                msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
+            }
+        }
+    }
+    for (auto &s : info_msg_) {
+        msg += sep + s;
+        sep = "\n";
+    }
+    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
+    info_box_->show();
+    info_image_->set_visible(is_error);
+    msg_revealer_->set_reveal_child(true);
+    reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), duration > 0 ? duration : options.error_message_duration * (is_error ? 1.0 : 0.25));
 }

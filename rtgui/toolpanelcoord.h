@@ -364,6 +364,8 @@ public:
 
     void setProgressListener(rtengine::ProgressListener *pl);
 
+    void setToolShortcutManager(ToolShortcutManager *mgr);
+
 private:
     IdleRegister idle_register;
 };

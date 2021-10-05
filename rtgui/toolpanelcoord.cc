@@ -29,6 +29,30 @@
 
 using namespace rtengine::procparams;
 
+
+namespace {
+
+class TPScrolledWindow: public MyScrolledWindow {
+public:
+    TPScrolledWindow(): mgr_(nullptr) {}
+    
+    void setToolShortcutManager(ToolShortcutManager *mgr) { mgr_ = mgr; }
+
+    bool on_scroll_event(GdkEventScroll *event) override
+    {
+        if (mgr_ && mgr_->shouldHandleScroll()) {
+            return true;
+        }
+        return MyScrolledWindow::on_scroll_event(event);
+    }
+
+private:
+    ToolShortcutManager *mgr_;
+};
+
+} // namespace
+
+
 ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favoritePanelSW(nullptr), hasChanged (false), editDataProvider (nullptr)
 {
 
@@ -189,14 +213,14 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     toolPanelNotebook = new Gtk::Notebook ();
     toolPanelNotebook->set_name ("ToolPanelNotebook");
 
-    exposurePanelSW    = Gtk::manage (new MyScrolledWindow ());
-    detailsPanelSW     = Gtk::manage (new MyScrolledWindow ());
-    colorPanelSW       = Gtk::manage (new MyScrolledWindow ());
-    transformPanelSW   = Gtk::manage (new MyScrolledWindow ());
-    rawPanelSW         = Gtk::manage (new MyScrolledWindow ());
-    // advancedPanelSW    = Gtk::manage (new MyScrolledWindow ());
-    localPanelSW = Gtk::manage(new MyScrolledWindow());
-    effectsPanelSW = Gtk::manage(new MyScrolledWindow());
+    exposurePanelSW    = Gtk::manage (new TPScrolledWindow ());
+    detailsPanelSW     = Gtk::manage (new TPScrolledWindow ());
+    colorPanelSW       = Gtk::manage (new TPScrolledWindow ());
+    transformPanelSW   = Gtk::manage (new TPScrolledWindow ());
+    rawPanelSW         = Gtk::manage (new TPScrolledWindow ());
+    // advancedPanelSW    = Gtk::manage (new TPScrolledWindow ());
+    localPanelSW = Gtk::manage(new TPScrolledWindow());
+    effectsPanelSW = Gtk::manage(new TPScrolledWindow());
     updateVScrollbars (options.hideTPVScrollbar);
 
     // load panel endings
@@ -209,7 +233,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     }
 
     if(favoriteCount > 0) {
-        favoritePanelSW = Gtk::manage(new MyScrolledWindow());
+        favoritePanelSW = Gtk::manage(new TPScrolledWindow());
         favoritePanelSW->add(*favoritePanel);
         favoritePanel->pack_start(*Gtk::manage(new Gtk::HSeparator), Gtk::PACK_SHRINK, 0);
         favoritePanel->pack_start(*vbPanelEnd[0], Gtk::PACK_SHRINK, 4);
@@ -1233,4 +1257,21 @@ bool ToolPanelCoordinator::getDeltaELCH(EditUniqueID id, rtengine::Coord pos, fl
 void ToolPanelCoordinator::setProgressListener(rtengine::ProgressListener *pl)
 {
     metadata->setProgressListener(pl);
+}
+
+
+void ToolPanelCoordinator::setToolShortcutManager(ToolShortcutManager *mgr)
+{
+    for (auto p : toolPanels) {
+        p->registerShortcuts(mgr);
+    }
+
+    //static_cast<TPScrolledWindow *>(favoritePanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(exposurePanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(detailsPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(colorPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(transformPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(rawPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(localPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(effectsPanelSW)->setToolShortcutManager(mgr);
 }

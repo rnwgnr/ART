@@ -178,3 +178,9 @@ void Exposure::showHRBlur()
 {
     hrblur->set_visible(hrmode->get_active_row_number() == 2);
 }
+
+
+void Exposure::registerShortcuts(ToolShortcutManager *mgr)
+{
+    mgr->addShortcut(GDK_KEY_e, this, expcomp);
+}

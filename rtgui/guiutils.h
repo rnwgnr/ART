@@ -291,9 +291,8 @@ public:
 /**
  * @brief subclass of Gtk::ScrolledWindow in order to handle the scrollwheel
  */
-class MyScrolledWindow : public Gtk::ScrolledWindow
-{
-
+class MyScrolledWindow: public Gtk::ScrolledWindow {
+public:
     bool on_scroll_event (GdkEventScroll* event) override;
     void get_preferred_width_vfunc (int& minimum_width, int& natural_width) const override;
     void get_preferred_height_vfunc (int& minimum_height, int& natural_height) const override;

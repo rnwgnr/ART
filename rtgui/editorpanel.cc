@@ -1576,6 +1576,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
     bool altgr = event->state & GDK_MOD5_MASK;
 #endif
 
+    if (shortcut_mgr_ && shortcut_mgr_->keyPressed(event)) {
+        return true;
+    }
+
     // Editor Layout
     switch (event->keyval) {
         case GDK_KEY_L:
@@ -1644,12 +1648,13 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     tpc->coarse->rotateLeft();
                     return true;
 
-                case GDK_KEY_i:
+                //case GDK_KEY_i:
                 case GDK_KEY_I:
                     info->set_active (!info->get_active());
                     return true;
 
-                case GDK_KEY_B:
+                //case GDK_KEY_B:
+                case GDK_KEY_A:
                     beforeAfter->set_active (!beforeAfter->get_active());
                     return true;
 
@@ -1676,15 +1681,15 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                                     return true;
                 #endif
                 */
-                case GDK_KEY_r: //preview mode Red
+                case GDK_KEY_R: //preview mode Red
                     iareapanel->imageArea->previewModePanel->toggleR();
                     return true;
 
-                case GDK_KEY_g: //preview mode Green
+                case GDK_KEY_G: //preview mode Green
                     iareapanel->imageArea->previewModePanel->toggleG();
                     return true;
 
-                case GDK_KEY_b: //preview mode Blue
+                case GDK_KEY_B: //preview mode Blue
                     iareapanel->imageArea->previewModePanel->toggleB();
                     return true;
 
@@ -1692,7 +1697,7 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->indClippedPanel->toggleSharpMask();
                     return true;
 
-                case GDK_KEY_v: //preview mode Luminosity
+                case GDK_KEY_V: //preview mode Luminosity
                     iareapanel->imageArea->previewModePanel->toggleL();
                     return true;
 
@@ -1700,7 +1705,7 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->indClippedPanel->toggleFocusMask();
                     return true;
 
-                case GDK_KEY_e: // preview mode false colors
+                case GDK_KEY_E: // preview mode false colors
                     iareapanel->imageArea->indClippedPanel->toggleFalseColors();
                     return true;
 
@@ -1830,6 +1835,25 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
 
     return false;
 }
+
+
+bool EditorPanel::keyReleased(GdkEventKey *event)
+{
+    if (shortcut_mgr_ && shortcut_mgr_->keyReleased(event)) {
+        return true;
+    }
+    return false;
+}
+
+
+bool EditorPanel::scrollPressed(GdkEventScroll *event)
+{
+    if (shortcut_mgr_ && shortcut_mgr_->scrollPressed(event)) {
+        return true;
+    }
+    return false;
+}
+
 
 void EditorPanel::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 {
@@ -2297,6 +2321,9 @@ void EditorPanel::beforeAfterToggled ()
         }
 
         beforeIarea = new ImageAreaPanel ();
+        if (shortcut_mgr_) {
+            beforeIarea->imageArea->setToolShortcutManager(shortcut_mgr_.get());
+        }
 
         int HeaderBoxHeight = 17;
 
@@ -2641,4 +2668,13 @@ void EditorPanel::sizeChanged(int w, int h, int ow, int oh)
                 return false;
             });
     }    
+}
+
+
+void EditorPanel::setParent(RTWindow *p)
+{
+    parent = p;
+    shortcut_mgr_.reset(new ToolShortcutManager(p));
+    tpc->setToolShortcutManager(shortcut_mgr_.get());
+    iareapanel->imageArea->setToolShortcutManager(shortcut_mgr_.get());
 }

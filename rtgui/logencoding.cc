@@ -232,3 +232,9 @@ void LogEncoding::toolReset(bool to_initial)
 }
 
 
+void LogEncoding::registerShortcuts(ToolShortcutManager *mgr)
+{
+    mgr->addShortcut(GDK_KEY_g, this, gain);
+    mgr->addShortcut(GDK_KEY_b, this, targetGray);
+    mgr->addShortcut(GDK_KEY_w, this, whiteEv);
+}

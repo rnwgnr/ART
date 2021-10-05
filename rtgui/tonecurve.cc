@@ -585,3 +585,9 @@ void ToneCurve::showWhitePoint()
     write(&pp);
     whitePoint->set_visible(pp.toneCurve.hasWhitePoint());
 }
+
+
+void ToneCurve::registerShortcuts(ToolShortcutManager *mgr)
+{
+    mgr->addShortcut(GDK_KEY_c, this, contrast);
+}
