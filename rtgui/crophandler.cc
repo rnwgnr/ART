@@ -267,13 +267,15 @@ void CropHandler::setZoom (int z, int centerx, int centery)
 
     if (needed) {
         const auto doit =
-            [&]() -> bool
+            [this,needsFullRefresh]() -> bool
             {
-                if (needsFullRefresh && !ipc->getHighQualComputed()) {
-                    ipc->startProcessing(M_HIGHQUAL);
-                    ipc->setHighQualComputed();
-                } else {
-                    update ();
+                if (ipc) {
+                    if (needsFullRefresh && !ipc->getHighQualComputed()) {
+                        ipc->startProcessing(M_HIGHQUAL);
+                        ipc->setHighQualComputed();
+                    } else {
+                        update ();
+                    }
                 }
                 return false;
             };
