@@ -27,6 +27,7 @@
 #include "rtimage.h"
 #include "whitebalance.h"
 #include "threadutils.h"
+#include "editwindow.h"
 #include "../rtengine/profilestore.h"
 
 float fontScale = 1.f;
@@ -90,13 +91,181 @@ osx_open_file_cb (GtkosxApplication *app, gchar *path_, gpointer data)
 }
 #endif // __APPLE__
 
-RTWindow::RTWindow():
-    epanel(nullptr),
-    fpanel(nullptr),
+
+//-----------------------------------------------------------------------------
+// MessageWindow
+//-----------------------------------------------------------------------------
+
+MessageWindow::MessageWindow():
     main_overlay_(nullptr),
     msg_revealer_(nullptr),
     info_label_(nullptr),
-    info_msg_num_(0),
+    info_msg_num_(0)
+{
+}
+
+
+MessageWindow::~MessageWindow()
+{
+}
+
+
+void MessageWindow::init(Gtk::Widget *main_widget)
+{
+    main_overlay_ = Gtk::manage(new Gtk::Overlay());
+    add(*main_overlay_);
+    main_overlay_->add(*main_widget);
+    show_all();
+    
+    msg_revealer_ = Gtk::manage(new Gtk::Revealer());
+    {
+        info_label_ = Gtk::manage(new Gtk::Label());
+        Gtk::HBox *box = Gtk::manage(new Gtk::HBox());
+        info_box_ = box;
+        box->set_spacing(4);
+
+        info_label_->set_can_focus(false);
+        info_box_->set_can_focus(false);
+
+        box->get_style_context()->add_class("app-notification");
+        RTImage *icon = Gtk::manage(new RTImage("warning.png"));
+        info_image_ = icon;
+        setExpandAlignProperties(icon, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
+        icon->set_can_focus(false);
+        
+        box->pack_start(*icon, false, false, 20);
+        box->pack_start(*info_label_, false, true, 10);
+        msg_revealer_->add(*box);
+        msg_revealer_->set_transition_type(Gtk::REVEALER_TRANSITION_TYPE_CROSSFADE);
+        msg_revealer_->property_halign() = Gtk::ALIGN_CENTER;
+        msg_revealer_->property_valign() = Gtk::ALIGN_END;
+        msg_revealer_->property_margin_bottom() = 70;
+    }
+    main_overlay_->add_overlay(*msg_revealer_);
+    msg_revealer_->show_all();
+    msg_revealer_->set_reveal_child(false);
+}
+
+
+bool MessageWindow::hide_info_msg()
+{
+    msg_revealer_->set_reveal_child(false);
+    const auto hidebox =
+        [this]() -> bool
+        {
+            info_box_->hide();
+            return false;
+        };
+    Glib::signal_timeout().connect(sigc::slot<bool>(hidebox), msg_revealer_->get_transition_duration());
+    info_msg_.clear();
+    unique_info_msg_.clear();
+    info_msg_num_ = 0;
+    return false;
+}
+
+
+void MessageWindow::showInfo(const Glib::ustring &msg, double duration)
+{
+    show_info_msg(msg, false, duration, 0);
+}
+
+
+void MessageWindow::showError(const Glib::ustring& descr)
+{
+    show_info_msg(descr, true, 0, 120);
+}
+
+
+void MessageWindow::show_info_msg(const Glib::ustring &descr, bool is_error, double duration, size_t padding)
+{
+    GThreadLock lock;
+    
+    const auto wrap =
+        [padding](Glib::ustring s) -> Glib::ustring
+        {
+            Glib::ustring ret;
+            const size_t pad = padding;
+            while (s.size() > pad) {
+                if (!ret.empty()) {
+                    ret += "\n";
+                }
+                auto p1 = s.find_first_of(' ', pad);
+                auto p2 = s.find_last_of(' ', pad+1);
+                if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
+                    if (p1 - pad > pad - p2) {
+                        ret += s.substr(0, p2);
+                        s = s.substr(p2+1);
+                    } else {
+                        ret += s.substr(0, p1);
+                        s = s.substr(p1+1);
+                    }
+                } else if (p1 != Glib::ustring::npos) {
+                    ret += s.substr(0, p1);
+                    s = s.substr(p1+1);
+                } else if (p2 != Glib::ustring::npos) {
+                    ret += s.substr(0, p2);
+                    s = s.substr(p2+1);
+                } else {
+                    break;
+                }
+            }
+            if (!ret.empty()) {
+                ret += "\n";
+            }
+            ret += s;
+            return ret;
+        };
+
+    auto m = escapeHtmlChars(padding > 0 ? wrap(descr) : descr);
+    if (is_error) {
+        if (!unique_info_msg_.insert(descr).second) {
+            return;
+        }
+        info_msg_.push_back(m);
+        ++info_msg_num_;
+    } else {
+        info_msg_.clear();
+        info_msg_.push_back(m);
+    }
+    Glib::ustring msg;
+    const char *sep = "";
+    if (reveal_conn_.connected()) {
+        reveal_conn_.disconnect();
+        if (is_error) {
+            int n = int(info_msg_.size()) - options.max_error_messages;
+            if (options.max_error_messages > 0 && n > 0) {
+                info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
+            }
+            n = info_msg_num_ - options.max_error_messages;
+            if (n > 0) {
+                msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
+            }
+        }
+    }
+    for (auto &s : info_msg_) {
+        msg += sep + s;
+        sep = "\n";
+    }
+    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
+    info_box_->show();
+    info_image_->set_visible(is_error);
+    msg_revealer_->set_reveal_child(true);
+    reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), duration > 0 ? duration : options.error_message_duration * (is_error ? 1.0 : 0.25));
+}
+
+
+//-----------------------------------------------------------------------------
+// RTWindow
+//-----------------------------------------------------------------------------
+
+RTWindow::RTWindow():
+    MessageWindow(),
+    epanel(nullptr),
+    fpanel(nullptr),
+    // main_overlay_(nullptr),
+    // msg_revealer_(nullptr),
+    // info_label_(nullptr),
+    // info_msg_num_(0),
     mainNB(nullptr),
     bpanel(nullptr),
     splash(nullptr),
@@ -313,23 +482,13 @@ RTWindow::RTWindow():
     signal_key_press_event().connect ( sigc::mem_fun (*this, &RTWindow::keyPressed) );
     signal_key_release_event().connect(sigc::mem_fun(*this, &RTWindow::keyReleased));
     signal_scroll_event().connect(sigc::mem_fun(*this, &RTWindow::scrollPressed), false);
-    // signal_key_release_event().connect(
-    //     sigc::slot<bool, GdkEventKey*>(
-    //         [](GdkEventKey *event) -> bool
-    //         {
-    //             std::cout << "\n*** KEY RELEASED: " << event->keyval << " ***\n" << std::endl;
-    //             return false;
-    //         }));
 
-    main_overlay_ = Gtk::manage(new Gtk::Overlay());
-    add(*main_overlay_);
-
+    Gtk::Widget *main_widget = nullptr;
     if (simpleEditor) {
         epanel = Gtk::manage ( new EditorPanel (nullptr) );
         epanel->setParent (this);
         epanel->setParentWindow (this);
-        main_overlay_->add(*epanel);
-        show_all ();
+        main_widget = epanel;
 
         pldBridge = nullptr; // No progress listener
 
@@ -392,9 +551,6 @@ RTWindow::RTWindow():
 
         mainNB->set_current_page (mainNB->page_num (*fpanel));
 
-        //Gtk::VBox* mainBox = Gtk::manage (new Gtk::VBox ());
-        //mainBox->pack_start (*mainNB);
-
         // filling bottom box
         iFullscreen = new RTImage ("fullscreen-enter.png");
         iFullscreen_exit = new RTImage ("fullscreen-leave.png");
@@ -406,8 +562,6 @@ RTWindow::RTWindow():
         iccProfileCreator->set_tooltip_markup (M ("MAIN_BUTTON_ICCPROFCREATOR"));
         iccProfileCreator->signal_clicked().connect ( sigc::mem_fun (*this, &RTWindow::showICCProfileCreator) );
 
-        //Gtk::LinkButton* rtWeb = Gtk::manage (new Gtk::LinkButton ("http://rawtherapee.com"));   // unused... but fail to be linked anyway !?
-        //Gtk::Button* preferences = Gtk::manage (new Gtk::Button (M("MAIN_BUTTON_PREFERENCES")+"..."));
         Gtk::Button* preferences = Gtk::manage (new Gtk::Button ());
         setExpandAlignProperties (preferences, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         preferences->set_relief(Gtk::RELIEF_NONE);
@@ -415,7 +569,6 @@ RTWindow::RTWindow():
         preferences->set_tooltip_markup (M ("MAIN_BUTTON_PREFERENCES"));
         preferences->signal_clicked().connect ( sigc::mem_fun (*this, &RTWindow::showPreferences) );
 
-        //btn_fullscreen = Gtk::manage( new Gtk::Button(M("MAIN_BUTTON_FULLSCREEN")));
         btn_fullscreen = Gtk::manage ( new Gtk::Button());
         setExpandAlignProperties (btn_fullscreen, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         btn_fullscreen->set_relief(Gtk::RELIEF_NONE);
@@ -454,8 +607,7 @@ RTWindow::RTWindow():
 
         pldBridge = new PLDBridge (static_cast<rtengine::ProgressListener*> (this));
 
-        main_overlay_->add(*mainNB);
-        show_all ();
+        main_widget = mainNB;
 
         bpanel->init (this);
 
@@ -468,33 +620,7 @@ RTWindow::RTWindow():
         }
     }
 
-    msg_revealer_ = Gtk::manage(new Gtk::Revealer());
-    {
-        info_label_ = Gtk::manage(new Gtk::Label());
-        Gtk::HBox *box = Gtk::manage(new Gtk::HBox());
-        info_box_ = box;
-        box->set_spacing(4);
-
-        info_label_->set_can_focus(false);
-        info_box_->set_can_focus(false);
-
-        box->get_style_context()->add_class("app-notification");
-        RTImage *icon = Gtk::manage(new RTImage("warning.png"));
-        info_image_ = icon;
-        setExpandAlignProperties(icon, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
-        icon->set_can_focus(false);
-        
-        box->pack_start(*icon, false, false, 20);
-        box->pack_start(*info_label_, false, true, 10);
-        msg_revealer_->add(*box);
-        msg_revealer_->set_transition_type(Gtk::REVEALER_TRANSITION_TYPE_CROSSFADE);
-        msg_revealer_->property_halign() = Gtk::ALIGN_CENTER;
-        msg_revealer_->property_valign() = Gtk::ALIGN_END;
-        msg_revealer_->property_margin_bottom() = 70;
-    }
-    main_overlay_->add_overlay(*msg_revealer_);
-    msg_revealer_->show_all();
-    msg_revealer_->set_reveal_child(false);
+    init(main_widget);
 
     cacheMgr->setProgressListener(this);
     ProfileStore::getInstance()->setProgressListener(this);
@@ -1108,89 +1234,28 @@ void RTWindow::setProgressState(bool inProcessing)
 
 void RTWindow::error(const Glib::ustring& descr)
 {
-    show_info_msg(descr, true, 0, 120);
-    // GThreadLock lock;
-    
-    // const auto wrap =
-    //     [](Glib::ustring s) -> Glib::ustring
-    //     {
-    //         Glib::ustring ret;
-    //         const size_t pad = 120;
-    //         while (s.size() > pad) {
-    //             if (!ret.empty()) {
-    //                 ret += "\n";
-    //             }
-    //             auto p1 = s.find_first_of(' ', pad);
-    //             auto p2 = s.find_last_of(' ', pad+1);
-    //             if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
-    //                 if (p1 - pad > pad - p2) {
-    //                     ret += s.substr(0, p2);
-    //                     s = s.substr(p2+1);
-    //                 } else {
-    //                     ret += s.substr(0, p1);
-    //                     s = s.substr(p1+1);
-    //                 }
-    //             } else if (p1 != Glib::ustring::npos) {
-    //                 ret += s.substr(0, p1);
-    //                 s = s.substr(p1+1);
-    //             } else if (p2 != Glib::ustring::npos) {
-    //                 ret += s.substr(0, p2);
-    //                 s = s.substr(p2+1);
-    //             } else {
-    //                 break;
-    //             }
-    //         }
-    //         if (!ret.empty()) {
-    //             ret += "\n";
-    //         }
-    //         ret += s;
-    //         return ret;
-    //     };
-
-    // if (!unique_info_msg_.insert(descr).second) {
-    //     return;
-    // }
-    // auto m = escapeHtmlChars(wrap(descr));
-    // info_msg_.push_back(m);
-    // ++info_msg_num_;
-    // Glib::ustring msg;
-    // const char *sep = "";
-    // if (reveal_conn_.connected()) {
-    //     reveal_conn_.disconnect();
-    //     int n = int(info_msg_.size()) - options.max_error_messages;
-    //     if (options.max_error_messages > 0 && n > 0) {
-    //         info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
-    //     }
-    //     n = info_msg_num_ - options.max_error_messages;
-    //     if (n > 0) {
-    //         msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
-    //     }
-    // }
-    // for (auto &s : info_msg_) {
-    //     msg += sep + s;
-    //     sep = "\n";
-    // }
-    // info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
-    // info_box_->show();
-    // msg_revealer_->set_reveal_child(true);
-    // reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), options.error_message_duration);
+    showError(descr);
 }
 
 
-bool RTWindow::hide_info_msg()
+void RTWindow::showError(const Glib::ustring& descr)
 {
-    msg_revealer_->set_reveal_child(false);
-    const auto hidebox =
-        [this]() -> bool
-        {
-            info_box_->hide();
-            return false;
-        };
-    Glib::signal_timeout().connect(sigc::slot<bool>(hidebox), msg_revealer_->get_transition_duration());
-    info_msg_.clear();
-    unique_info_msg_.clear();
-    info_msg_num_ = 0;
-    return false;
+    if (options.multiDisplayMode > 0) {
+        EditWindow::getInstance(this)->showError(descr);
+    } else {
+        MessageWindow::showError(descr);
+    }
+}
+
+
+
+void RTWindow::showInfo(const Glib::ustring &msg, double duration=0.0)
+{
+    if (options.multiDisplayMode > 0) {
+        EditWindow::getInstance(this)->showInfo(msg, duration);
+    } else {
+        MessageWindow::showInfo(msg, duration);
+    }
 }
 
 
@@ -1385,88 +1450,4 @@ void RTWindow::createSetmEditor()
     epanel->tbTopPanel_1_visible (true); //show the toggle Top Panel button
     mainNB->append_page (*epanel, *editorLabelGrid);
 
-}
-
-
-void RTWindow::showInfo(const Glib::ustring &msg, double duration)
-{
-    show_info_msg(msg, false, duration, 0);
-}
-
-
-void RTWindow::show_info_msg(const Glib::ustring &descr, bool is_error, double duration, size_t padding)
-{
-    GThreadLock lock;
-    
-    const auto wrap =
-        [padding](Glib::ustring s) -> Glib::ustring
-        {
-            Glib::ustring ret;
-            const size_t pad = padding;
-            while (s.size() > pad) {
-                if (!ret.empty()) {
-                    ret += "\n";
-                }
-                auto p1 = s.find_first_of(' ', pad);
-                auto p2 = s.find_last_of(' ', pad+1);
-                if (p1 != Glib::ustring::npos && p2 != Glib::ustring::npos) {
-                    if (p1 - pad > pad - p2) {
-                        ret += s.substr(0, p2);
-                        s = s.substr(p2+1);
-                    } else {
-                        ret += s.substr(0, p1);
-                        s = s.substr(p1+1);
-                    }
-                } else if (p1 != Glib::ustring::npos) {
-                    ret += s.substr(0, p1);
-                    s = s.substr(p1+1);
-                } else if (p2 != Glib::ustring::npos) {
-                    ret += s.substr(0, p2);
-                    s = s.substr(p2+1);
-                } else {
-                    break;
-                }
-            }
-            if (!ret.empty()) {
-                ret += "\n";
-            }
-            ret += s;
-            return ret;
-        };
-
-    auto m = escapeHtmlChars(padding > 0 ? wrap(descr) : descr);
-    if (is_error) {
-        if (!unique_info_msg_.insert(descr).second) {
-            return;
-        }
-        info_msg_.push_back(m);
-        ++info_msg_num_;
-    } else {
-        info_msg_.clear();
-        info_msg_.push_back(m);
-    }
-    Glib::ustring msg;
-    const char *sep = "";
-    if (reveal_conn_.connected()) {
-        reveal_conn_.disconnect();
-        if (is_error) {
-            int n = int(info_msg_.size()) - options.max_error_messages;
-            if (options.max_error_messages > 0 && n > 0) {
-                info_msg_.assign(info_msg_.begin() + n, info_msg_.end());
-            }
-            n = info_msg_num_ - options.max_error_messages;
-            if (n > 0) {
-                msg = Glib::ustring::compose(M("ERROR_MSG_MAXERRORS"), n) + "\n";
-            }
-        }
-    }
-    for (auto &s : info_msg_) {
-        msg += sep + s;
-        sep = "\n";
-    }
-    info_label_->set_markup(Glib::ustring::compose("<span size=\"large\"><b>%1</b></span>", msg));
-    info_box_->show();
-    info_image_->set_visible(is_error);
-    msg_revealer_->set_reveal_child(true);
-    reveal_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &RTWindow::hide_info_msg), duration > 0 ? duration : options.error_message_duration * (is_error ? 1.0 : 0.25));
 }

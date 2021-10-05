@@ -83,6 +83,10 @@ bool ToolShortcutManager::keyPressed(GdkEventKey *event)
         case GDK_KEY_KP_Add:
             doit(1);
             return true;
+        case GDK_KEY_asterisk:
+        case GDK_KEY_KP_Multiply:
+            doit(0);
+            return true;
         case GDK_KEY_minus:
         case GDK_KEY_KP_Subtract:
             doit(-1);
@@ -119,7 +123,8 @@ bool ToolShortcutManager::keyReleased(GdkEventKey *event)
         case GDK_KEY_plus:
         case GDK_KEY_equal:
         case GDK_KEY_KP_Add:
-            return true;
+        case GDK_KEY_asterisk:
+        case GDK_KEY_KP_Multiply:
         case GDK_KEY_minus:
         case GDK_KEY_KP_Subtract:
             return true;
@@ -161,9 +166,13 @@ void ToolShortcutManager::doit(int direction)
 {
     cur_tool_->disableListener();
     cur_tool_->setEnabled(true);
-    cur_adjuster_->setValue(cur_adjuster_->getValue() + direction * cur_adjuster_->getStepValue());
+    if (!direction) {
+        cur_adjuster_->resetValue(false);
+    } else {
+        cur_adjuster_->setValue(cur_adjuster_->getValue() + direction * cur_adjuster_->getStepValue());
+    }
     Glib::ustring msg = cur_tool_->getUILabel() + ": " + cur_adjuster_->getLabel() + " = " + cur_adjuster_->getTextValue();
-    parent_->showInfo(msg);
+    parent_->showInfo(msg, 0.0);
 
     FoldableToolPanel *tool = cur_tool_;
     Adjuster *adjuster = cur_adjuster_;        

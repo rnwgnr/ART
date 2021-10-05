@@ -75,7 +75,8 @@ EditWindow::EditWindow (RTWindow* p) : resolution(RTScalable::baseDPI), parent(p
     Gtk::VBox* mainBox = Gtk::manage(new Gtk::VBox());
     mainBox->pack_start(*mainNB);
 
-    add(*mainBox);
+    //add(*mainBox);
+    init(mainBox);
 
 }
 

@@ -20,10 +20,10 @@
 #include <gtkmm.h>
 #include "filepanel.h"
 #include "editorpanel.h"
+#include "rtwindow.h"
 #include <set>
 
-class EditWindow : public Gtk::Window
-{
+class EditWindow: public MessageWindow {
 
 private:
     double resolution;
