@@ -69,6 +69,7 @@ EditWindow::EditWindow (RTWindow* p) : resolution(RTScalable::baseDPI), parent(p
     mainNB->signal_switch_page().connect_notify(sigc::mem_fun(*this, &EditWindow::on_mainNB_switch_page));
 
     signal_key_press_event().connect(sigc::mem_fun(*this, &EditWindow::keyPressed));
+    signal_key_press_event().connect(sigc::mem_fun(*this, &EditWindow::keyPressedBefore), false);
     signal_key_release_event().connect(sigc::mem_fun(*this, &EditWindow::keyReleased));
     signal_scroll_event().connect(sigc::mem_fun(*this, &EditWindow::scrollPressed), false);
 
@@ -312,6 +313,16 @@ bool EditWindow::keyPressed (GdkEventKey* event)
     }
 
 }
+
+bool EditWindow::keyPressedBefore(GdkEventKey *event)
+{
+    if (mainNB->get_n_pages () > 0) {
+        EditorPanel* ep = static_cast<EditorPanel *>(mainNB->get_nth_page (mainNB->get_current_page()));
+        return ep->keyPressedBefore(event);
+    }
+    return false;
+}
+
 
 void EditWindow::toggleFullscreen ()
 {

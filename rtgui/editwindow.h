@@ -59,6 +59,7 @@ public:
 
     void toFront();
     bool keyPressed(GdkEventKey *event);
+    bool keyPressedBefore(GdkEventKey *event);
     bool keyReleased(GdkEventKey *event);
     bool scrollPressed(GdkEventScroll *event);
     bool on_configure_event(GdkEventConfigure* event) override;

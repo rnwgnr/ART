@@ -2732,7 +2732,10 @@ void CropWindow::remoteMove (int deltaX, int deltaY)
 
 void CropWindow::remoteMoveReady ()
 {
-
+    if (state == SNormal) {
+        return;
+    }
+    
     cropHandler.update ();
     state = SNormal;
 

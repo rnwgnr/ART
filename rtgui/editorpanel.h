@@ -169,6 +169,7 @@ public:
     Glib::ustring getShortName ();
     Glib::ustring getFileName ();
     bool handleShortcutKey (GdkEventKey* event);
+    bool keyPressedBefore(GdkEventKey *event);
     bool keyReleased(GdkEventKey *event);
     bool scrollPressed(GdkEventScroll *event);
 

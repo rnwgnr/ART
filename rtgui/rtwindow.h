@@ -75,6 +75,7 @@ public:
     void addBatchQueueJobs      (const std::vector<BatchQueueEntry*>& entries);
 
     bool keyPressed(GdkEventKey* event);
+    bool keyPressedBefore(GdkEventKey* event);
     bool keyReleased(GdkEventKey* event);
     bool scrollPressed(GdkEventScroll *event);
     

@@ -480,6 +480,7 @@ RTWindow::RTWindow():
     add_events(Gdk::KEY_PRESS_MASK | Gdk::SCROLL_MASK);
     signal_window_state_event().connect ( sigc::mem_fun (*this, &RTWindow::on_window_state_event) );
     signal_key_press_event().connect ( sigc::mem_fun (*this, &RTWindow::keyPressed) );
+    signal_key_press_event().connect(sigc::mem_fun(*this, &RTWindow::keyPressedBefore), false);
     signal_key_release_event().connect(sigc::mem_fun(*this, &RTWindow::keyReleased));
     signal_scroll_event().connect(sigc::mem_fun(*this, &RTWindow::scrollPressed), false);
 
@@ -987,6 +988,25 @@ bool RTWindow::keyPressed (GdkEventKey* event)
     } else {
         EditorPanel* ep = static_cast<EditorPanel*> (mainNB->get_nth_page (mainNB->get_current_page()));
         return ep->handleShortcutKey (event);
+    }
+
+    return false;
+}
+
+
+bool RTWindow::keyPressedBefore(GdkEventKey* event)
+{
+    if (simpleEditor) {
+        return epanel->keyPressedBefore(event);
+    };
+
+    if (mainNB->get_current_page() == mainNB->page_num(*fpanel)) {
+        return false;
+    } else if (mainNB->get_current_page() == mainNB->page_num (*bpanel)) {
+        return false;
+    } else {
+        EditorPanel *ep = static_cast<EditorPanel *>(mainNB->get_nth_page (mainNB->get_current_page()));
+        return ep->keyPressedBefore(event);
     }
 
     return false;
