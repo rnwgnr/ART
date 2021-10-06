@@ -642,4 +642,5 @@ void WhiteBalance::fillMethods()
 void WhiteBalance::registerShortcuts(ToolShortcutManager *mgr)
 {
     mgr->addShortcut(GDK_KEY_t, this, temp);
+    mgr->addShortcut(GDK_KEY_i, this, green);
 }
