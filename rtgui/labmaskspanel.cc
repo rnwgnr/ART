@@ -440,9 +440,9 @@ public:
     {
         if (pressure_mode_ == PRESSURE_OFF) {
             bool ctrl = modifierKey & GDK_CONTROL_MASK;
-            bool shift = modifierKey & GDK_SHIFT_MASK;
-            if ((!ctrl && shift) != prev_erase_) {
-                prev_erase_ = (!ctrl && shift);
+            bool alt = modifierKey & GDK_MOD1_MASK;            
+            if ((!ctrl && alt) != prev_erase_) {
+                prev_erase_ = (!ctrl && alt);
                 erase_->set_active(!erase_->get_active());
             }
         }
@@ -462,12 +462,12 @@ public:
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool shift = modifierKey & GDK_SHIFT_MASK;
         bool alt = modifierKey & GDK_MOD1_MASK;
-        bool dragging = alt && !mask_->strokes.empty();
+        bool dragging = shift && !mask_->strokes.empty();
         if (ctrl && !shift) {
             mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
             dragging = false;
-        } else if ((!ctrl && shift) != prev_erase_) {
-            prev_erase_ = !ctrl && shift;
+        } else if ((!ctrl && alt) != prev_erase_) {
+            prev_erase_ = !ctrl && alt;
             erase_->set_active(!erase_->get_active());
             dragging = false;
         }
