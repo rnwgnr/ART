@@ -7,6 +7,7 @@
 #06 2021-03-26 mrleemon, update for 1.8.3
 #07 2021-05-21 mrleemon, update for 1.9
 #08 2021-07-08 mrleemon, update for 1.9.3
+#09 2021-10-07 mrleemon, update for 1.10
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -526,6 +527,7 @@ HISTORY_MSG_COLORCORRECTION_SLOPE;CC - altes llums/guany
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - màscara de similitud de color
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - màscara de pinzell
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - màscara paramètrica
+HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - post-processament de màscara
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correcció de color
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RS - intensitat de crominància automàtica
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RS - Suavitzat final C
@@ -562,7 +564,9 @@ HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;AT - màscara de llindar de contrast
 HISTORY_MSG_EPD_DELTAEMASK;AT - màscara de similitud de color
 HISTORY_MSG_EPD_DRAWNMASK;AT - màscara de pinzell
 HISTORY_MSG_EPD_PARAMETRICMASK;AT - màscara paramètrica
+HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - post-processament de màscara
 HISTORY_MSG_EXPOSURE_BLACK;Exposició - Punt negre
+HISTORY_MSG_EXPOSURE_HRBLUR;Exposició - Suavitzat de la propagació de color
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Negatiu de pel·lícula
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la pel·lícula
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valors del negatiu de pel·lícula
@@ -589,6 +593,7 @@ HISTORY_MSG_LOCALCONTRAST_RADIUS;Contrast local - Radi
 HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contrast local - màscara de similitud de color
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Contrast local - màscara de pinzell
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Contrast local - màscara paramètrica
+HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;Contrast local - post-processament de màscara
 HISTORY_MSG_LOGENC_AUTO;Log - Automàtic
 HISTORY_MSG_LOGENC_AUTOGAIN;Log - Guany automàtic
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regularització
@@ -641,6 +646,11 @@ HISTORY_MSG_SMOOTHING_DRAWNMASK;Suavitzat - màscara de pinzell
 HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Suavitzat - màscara paramètrica
 HISTORY_MSG_SMOOTHING_NLSTRENGTH;Suavitzat - intensitat MNL
 HISTORY_MSG_SMOOTHING_NLDETAIL;Suavitzat - detall MNL
+HISTORY_MSG_SMOOTHING_NUMBLADES;Suavitzat - fulles
+HISTORY_MSG_SMOOTHING_ANGLE;Suavitzat - angle
+HISTORY_MSG_SMOOTHING_CURVATURE;Suavitzat - curvatura
+HISTORY_MSG_SMOOTHING_OFFSET;Suavitzat - desplaçament
+HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Suavitzat - post-processament de màscara
 HISTORY_MSG_SOFTLIGHT_ENABLED;Llum tènue
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Llum tènue - Intensitat
 HISTORY_MSG_SPOT;Eliminació de taques
@@ -654,6 +664,7 @@ HISTORY_MSG_TONECURVE_SATCURVE;Corba tonal - Saturació
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Corba tonal - Intensitat perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Corba tonal - Mode antic de contrast 
 HISTORY_MSG_TONECURVE_MODE;Corba tonal - Mode
+HISTORY_MSG_TONECURVE_WHITEPOINT;Corba tonal - Punt blanc
 HISTORY_MSG_WBALANCE_MULT;BB - multiplicadors
 HISTORY_NEWSNAPSHOT;Afegeix
 HISTORY_NEWSNAPSHOT_TOOLTIP;Drecera: <b>Alt-s</b>
@@ -704,7 +715,7 @@ ICCPROFCREATOR_TRC_PRESET;La corba de resposta del to:
 INSPECTOR_ENABLE_CMS;Activa la gestió del color.
 INSPECTOR_FOCUS_MASK;Màscara de focus.\nDrecera: <b>Majús-f</b>.
 INSPECTOR_HISTOGRAM;Histograma.\nDrecera: <b>h</b>.
-INSPECTOR_INFO;Informació breu.\nDrecera: <b>i</b>.
+INSPECTOR_INFO;Informació breu.\nDrecera: <b>Majús-i</b>.
 INSPECTOR_PREVIEW;Vista prèvia de la imatge incrustada.\nDrecera: <b>j</b>.
 INSPECTOR_RAW_LINEAR;Renderitzat ràpid de raw amb una corba tonal lineal.\nDrecera: <b>r</b>.
 INSPECTOR_RAW_FILM;Renderitzat ràpid de raw amb una corba tonal similar a la d'una pel·lícula.\nDrecera: <b>f</b>.
@@ -825,22 +836,22 @@ MAIN_TOOLTIP_BACKCOLOR1;Color de fons de la vista prèvia: <b>negre</b>\nDrecera
 MAIN_TOOLTIP_BACKCOLOR2;Color de fons de la vista prèvia: <b>blanc</b>\nDrecera: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Color de fons de la vista prèvia: <b>gris mitjà</b>\nDrecera: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Bloqueja</b> / <b>Desbloqueja</b> la vista <b>Abans</b>\n\n<b>Bloqueja</b>: manté la vista <b>Abans</b> sense canvis.\nÚtil per avaluar l'efecte acumulatiu de diverses eines.\nA més, es pot fer una comparació amb qualsevol estat a l'historial.\n\n<b>Desbloqueja</b>: la vista <b>Abans</b> seguirà a la vista <b>Després</b> un pas per darrere, mostrant la imatge abans de l'efecte de l'eina que s'està utilitzant.
-MAIN_TOOLTIP_FALSECOLORS;Alterna la indicació de l'exposició mitjançant color fals.\nDrecera: <b>e</b>\n\nClau (Rang IRE):\n%1
+MAIN_TOOLTIP_FALSECOLORS;Alterna la indicació de l'exposició mitjançant color fals.\nDrecera: <b>Majús-e</b>\n\nClau (Rang IRE):\n%1
 MAIN_TOOLTIP_HIDEHP;Mostra/Oculta el panell esquerre (incloent la història).\nDrecera: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indicació d'altes llums retallades.\nDrecera: <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Indicació d'ombres retallades.\nDrecera: <b>&lt;</b>
-MAIN_TOOLTIP_PREVIEWB;Vista prèvia del <b>canal blau</b>.\nDrecera: <b>b</b>
+MAIN_TOOLTIP_PREVIEWB;Vista prèvia del <b>canal blau</b>.\nDrecera: <b>Majús-b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Vista prèvia de la <b>màscara de focus</b>.\nDrecera: <b>Majús-f</b>\n\nMés precís en imatges amb poca profunditat de camp, poc soroll i a majors nivells de zoom.\nAmplieu el zoom al 10-30% per millorar la precisió de la detecció en imatges amb soroll.
-MAIN_TOOLTIP_PREVIEWG;Vista prèvia del <b>canal verd</b>.\nDrecera: <b>g</b>
-MAIN_TOOLTIP_PREVIEWL;Vista prèvia de la <b>lluminositat</b>.\nDrecera: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
-MAIN_TOOLTIP_PREVIEWR;Vista prèvia del <b>canal vermell</b>.\nDrecera: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista prèvia de la <b>màscara de contrast d'enfocament</b>.\nDrecera: <b>Majús-p</b>\n\nNomés funciona quan s'activa l'enfocament, i és precisa només quan el zoom >= 100%.
+MAIN_TOOLTIP_PREVIEWG;Vista prèvia del <b>canal verd</b>.\nDrecera: <b>Majús-g</b>
+MAIN_TOOLTIP_PREVIEWL;Vista prèvia de la <b>lluminositat</b>.\nDrecera: <b>Majús-v</b>\n\n0.299*R + 0.587*G + 0.114*B
+MAIN_TOOLTIP_PREVIEWR;Vista prèvia del <b>canal vermell</b>.\nDrecera: <b>Majús-r</b>
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista prèvia de la <b>màscara de contrast d'enfocament</b>.\nDrecera: <b>Majús-o</b>\n\nNomés funciona quan s'activa l'enfocament, i és precisa només quan el zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Informació breu sobre la imatge.\nDrecera: <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostra/Oculta el panell esquerre.\nDrecera: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Mostra/Oculta el panell dret.\nDrecera: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Mostra/Oculta el panell superior.\nDrecera: <b>Majús-l</b>
 MAIN_TOOLTIP_THRESHOLD;Llindar
-MAIN_TOOLTIP_TOGGLE;Canvia la vista <b>abans</b>/<b>després</b>.\nDrecera: <b>Majús-b</b>
+MAIN_TOOLTIP_TOGGLE;Canvia la vista <b>abans</b>/<b>després</b>.\nDrecera: <b>Majús-a</b>
 METADATA_LOAD_ERROR;Error en carregar les metadades de %1: %2
 METADATA_SAVE_ERROR;Error en desar les metadades a %1: %2
 MONITOR_PROFILE_SYSTEM;Predeterminat del sistema
@@ -1238,21 +1249,23 @@ SAVEDLG_SUBSAMP_TOOLTIP;Millor compressió:\nJ:a:b 4:2:0\nh/v 2/2\nCroma dividid
 SAVEDLG_TIFFUNCOMPRESSED;TIFF sense compressió
 SAVEDLG_WARNFILENAME;S'assignarà un nom al fitxer
 SHCSELECTOR_TOOLTIP;Cliqueu amb el botó dret del ratolí per restablir la posició d'aquests 3 controls lliscants.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de la impressora, si està establert i la prova en pantalla està activada,\n- el perfil de sortida, si no s'ha establert un perfil d'impressora i la prova en pantalla està activada,\n- el perfil del monitor, si la prova en pantalla està desactivada.
-SOFTPROOF_TOOLTIP;La prova en pantalla simula l'aparença de la imatge:\n- quan s'imprimeix, si s'ha establert un perfil d'impressora a Preferències > Gestió de color,\n- quan es veu en una pantalla que fa servir el perfil de sortida actual, si no s'ha establert un perfil d'impressora.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa al perfil de sortida.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de la impressora, si està establert i la prova en pantalla està activada,\n- el perfil del monitor, si la prova en pantalla està desactivada.
+SOFTPROOF_TOOLTIP;La prova en pantalla simula l'aparença de la imatge quan s'imprimeix, si s'ha establert un perfil d'impressora a Preferències > Gestió de color.
 THRESHOLDSELECTOR_B;Inferior
 THRESHOLDSELECTOR_BL;Inferior esquerre
 THRESHOLDSELECTOR_BR;Inferior dret
-THRESHOLDSELECTOR_HINT;Manteniu la tecla <b>Majús</b> pressionada per moure punts de control individuals.
+THRESHOLDSELECTOR_HINT;Manteniu premuda la tecla <b>Majús</b> per moure punts de control individuals.
 THRESHOLDSELECTOR_T;Superior
 THRESHOLDSELECTOR_TL;Superior esquerre
 THRESHOLDSELECTOR_TR;Superior dret
+TOOL_SHORTCUT_HELP_HEADER;Dreceres d'eina:\n(manteniu premuda la tecla indicada i ajusteu el control lliscant mitjançant +/- o la roda del ratolí)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Selector de color bloquejablee\n\nQuan l'eina està activa:\n- Afegeix un selector: <b>clic amb el botó esquerre del ratolí</b>.\n- Arrossega un selector: <b>clic amb el botó esquerre del ratolí i arrossegar</b>.\n- Elimina un selector: <b>clic amb el botó dret de ratolí</b>.\n- Elimina tots els selectors: <b>Ctrl</b>+<b>Majús</b>+<b>clic amb el botó dret del ratolí</b>.\n- Torna a l'eina mà: <b>clic amb el botó dret del ratolí</b> fora de qualsevol selector.
-TOOLBAR_TOOLTIP_CROP;Selecció de <b>retallada</b>.\nDrecera: <b>c</b>\nMoveu la retallada mitjançant <b>Majús</b>+<b>arrossegament del ratolí</b>\nCanvieu la mida de la retallada mitjançant <b>Ctrl</b>+<b>arrossegament del ratolí</b>.
+TOOLBAR_TOOLTIP_CROP;Selecció de <b>retallada</b>.\nDrecera: <b>Majús-c</b>\nMoveu la retallada mitjançant <b>Majús</b>+<b>arrossegament del ratolí</b>\nCanvieu la mida de la retallada mitjançant <b>Ctrl</b>+<b>arrossegament del ratolí</b>.
 TOOLBAR_TOOLTIP_HAND;Eina mà.\nDrecera: <b>h</b>
-TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correcció de perspectiva</b>.\nDrecera: <b>p</b>\n\nEditeu les línies de control per corregir la distorsió de la perspectiva. Cliqueu amb aquest botó de nou per aplicar la correcció.
-TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Redreça</b> / <b>Rotació precisa</b>.\nDrecera: <b>s</b>\n\nIndiqueu la vertical o horitzontal dibuixant una línia guia sobre la vista prèvia de la imatge. L'angle de rotació es mostrarà al costat de la línia guia. El centre de rotació és el centre geomètric de la imatge.
-TOOLBAR_TOOLTIP_WB;Balanç de blancs puntual.\nDrecera: <b>w</b>
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correcció de perspectiva</b>.\nDrecera: <b>Majús-p</b>\n\nEditeu les línies de control per corregir la distorsió de la perspectiva. Cliqueu aquest botó de nou per aplicar la correcció.
+TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Redreça</b> / <b>Rotació precisa</b>.\nDrecera: <b>Majús-s</b>\n\nIndiqueu la vertical o horitzontal dibuixant una línia guia sobre la vista prèvia de la imatge. L'angle de rotació es mostrarà al costat de la línia guia. El centre de rotació és el centre geomètric de la imatge.
+TOOLBAR_TOOLTIP_WB;Balanç de blancs puntual.\nDrecera: <b>Majús-w</b>
 TP_SATURATION_LABEL;Saturació/Vivacitat
 TP_BRIGHTCONTRSAT_CONTRAST;Contrast
 TP_SATURATION_SATURATION;Saturació
@@ -1276,7 +1289,7 @@ TP_BWMIX_GAM_TOOLTIP;Corregeix el gamma de cada canal RGB
 TP_BWMIX_LABEL;Blanc i negre
 TP_BWMIX_NEUTRAL;Restableix
 TP_BWMIX_RGBLABEL;R: %1%%   G: %2%%   B: %3%%   Total: %4%%
-TP_BWMIX_RGBLABEL_HINT;Factors RGB finals que s'encarreguen de totes les opcions de l'mesclador.\n"Total" mostra la suma dels valors RGB:\n- sempre el 100% en el mode relatiu\n- major (més clar) o menor (més fosc) que el 100% en el mode absolut.
+TP_BWMIX_RGBLABEL_HINT;Factors RGB finals que s'encarreguen de totes les opcions del mesclador.\n"Total" mostra la suma dels valors RGB:\n- sempre el 100% en el mode relatiu\n- major (més clar) o menor (més fosc) que el 100% en el mode absolut.
 TP_BWMIX_RGB_TOOLTIP;Barreja els canals RGB. Utilitzeu els predefinits com a guia.\nTingueu en compte que valors negatius poden introduir defectes o resultats erràtics.
 TP_BWMIX_SETTING;Predefinits
 TP_BWMIX_SETTING_TOOLTIP;Diversos predefinits (pel·lícula, paisatge, etc.) o configuracions manuals del mesclador de canals.
@@ -1431,6 +1444,7 @@ TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Consulteu l'article de RawPedia "Exposició > C
 TP_EXPOSURE_EXPCOMP;Compensació d'exposició
 TP_EXPOSURE_HISTMATCHING;Corba tonal seleccionada automàticament
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;Ajusta automàticament els controls lliscants i les corbes (excepte la compensació d'exposició) perquè coincideixin amb l'aspecte de la miniatura JPEG incrustada.
+TP_EXPOSURE_HRBLUR;Suavitzat de la propagació de color
 TP_EXPOSURE_LABEL;Exposició
 TP_EXPOSURE_TCMODE_FILMLIKE;Similar a pel·lícula
 TP_EXPOSURE_TCMODE_LABEL1;Mode de corba 1
@@ -1591,7 +1605,7 @@ TP_LABMASKS_DELTAE_PICK;Tria
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Pes en el càlcul ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Seleccioneu les regions de color similar\n(segons la mètrica CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Màscara de pinzell
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Canvieu com pinta el pinzell en el llenç.\n\n<i>Si s'utilitza el ratolí:</i>\n- Premeu <b>Majús</b> per activar temporalment el "Mode esborrador";\n- Utilitzeu <b>Ctrl+roda del ratolí</b> per canviar el radi de l'pinzell,\n- <b>Ctrl+Majús+roda del ratolí</b> per canviar la duresa del pinzell,\n- i <b>Ctrl+clic</b> per començar un nou grup de traços sense canviar els paràmetres\n(de manera que se sumin diversos traços a la mateixa àrea);\n- Utilitzeu el <b>tercer botó</b> per desactivar la pintura en el llenç.\n\n<i>Si es fa servir un dispositiu sensible a la pressió:</i>n- Utilitzeu el <b>primer botó</b> per canviar al "Mode esborrador";\n- Utilitzeu <b>Alt+primer botó</b> per augmentar el radi del pinzell, i\n- <b>Alt+segon botó</b> per reduir-lo;\n- Utilitzeu el <b>segon botó</b> per recórrer els modes de sensibilitat a la pressió disponibles: inactiu, duresa, radi (premeu <b>Majús</b> per invertir la direcció);\n- Utilitzeu <b>Ctrl+segon botó</b> per desactivar la pintura en el llenç.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Canvieu com pinta el pinzell en el llenç.\n\n<i>Si s'utilitza el ratolí:</i>\n- Premeu <b>Majús</b> per activar temporalment el "Mode esborrador";\n- Premeu <b>Alt</b> per traçar una línia recta;\n- Utilitzeu <b>Ctrl+roda del ratolí</b> per canviar el radi del pinzell,\n- <b>Ctrl+Majús+roda del ratolí</b> per canviar la duresa del pinzell,\n- i <b>Ctrl+clic</b> per començar un nou grup de traços sense canviar els paràmetres\n(de manera que se sumin diversos traços a la mateixa àrea);\n- Utilitzeu el <b>tercer botó</b> per desactivar la pintura en el llenç.\n\n<i>Si es fa servir un dispositiu sensible a la pressió:</i>n- Utilitzeu el <b>primer botó</b> per canviar al "Mode esborrador";\n- Premeu <b>Alt</b> per traçar una línia recta;\n- Utilitzeu <b>Alt+primer botó</b> per augmentar el radi del pinzell, i\n- <b>Alt+segon botó</b> per reduir-lo;\n- Utilitzeu el <b>segon botó</b> per recórrer els modes de sensibilitat a la pressió disponibles: inactiu, duresa, radi (premeu <b>Majús</b> per invertir la direcció);\n- Utilitzeu <b>Ctrl+segon botó</b> per desactivar la pintura en el llenç.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Configuració de pinzell
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Esborra tots els traços
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Esborra l'últim grup de traços
@@ -1605,6 +1619,10 @@ TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Interseca la màscara de pinzell amb les
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Afegeix la màscara de pinzell sobre les altres màscares
 TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Afegeix la màscara de pinzell sobre les altres màscares, però només dins de la màscara d'àrea activa
 TP_LABMASKS_PARAMETRIC;Màscara paramètrica
+TP_LABMASKS_POSTPROCESS;Post-processament de màscara
+TP_LABMASKS_POSTPROCESS_CURVE;Corba tonal
+TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterització
+TP_LABMASKS_POSTPROCESS_SMOOTHING;Suavitzat
 TP_LENSGEOM_AUTOCROP;Retallada automàtica
 TP_LENSGEOM_FILL;Emplenat automàtic
 TP_LENSGEOM_LABEL;Lent / Geometria
@@ -1823,6 +1841,8 @@ TP_SMOOTHING_MODE_GUIDED;Guiat
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussià
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lluentor
 TP_SMOOTHING_MODE_NLMEANS;Mitjanes no locals
+TP_SMOOTHING_MODE_LENS;Desenfocament de lent
+TP_SMOOTHING_MODE_MOTION;Desenfocament de moviment
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminància
 TP_SMOOTHING_CHANNEL_C;Crominància
@@ -1833,6 +1853,10 @@ TP_SMOOTHING_SIGMA;Radi
 TP_SMOOTHING_ITERATIONS;Iteracions
 TP_SMOOTHING_NLSTRENGTH;Intensitat
 TP_SMOOTHING_NLDETAIL;Detall
+TP_SMOOTHING_NUMBLADES;Fulles
+TP_SMOOTHING_ANGLE;Angle
+TP_SMOOTHING_CURVATURE;Curvatura
+TP_SMOOTHING_OFFSET;Desplaçament
 TP_SOFTLIGHT_LABEL;Llum tènue
 TP_SOFTLIGHT_STRENGTH;Intensitat
 TP_SPOT_COUNTLABEL;%1 punt(s)
@@ -1857,6 +1881,7 @@ TP_TONECURVE_SATCURVE;Saturació
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Intensitat de la corba perceptual
 TP_TONECURVE_MODE;Mode
 TP_TONECURVE_CONTRAST_LEGACY;Mode antic de contrast
+TP_TONECURVE_WHITEPOINT;Punt blanc
 TP_TONE_EQUALIZER_BAND_0;Negres
 TP_TONE_EQUALIZER_BAND_1;Ombres
 TP_TONE_EQUALIZER_BAND_2;Tons mitjans
