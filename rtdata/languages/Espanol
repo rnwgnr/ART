@@ -10,6 +10,7 @@
 #09 2021-03-26 mrleemon, update for 1.8.3
 #10 2021-05-21 mrleemon, update for 1.9
 #11 2021-07-08 mrleemon, update for 1.9.3
+#12 2021-10-06 mrleemon, update for 1.10
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -529,6 +530,7 @@ HISTORY_MSG_COLORCORRECTION_SLOPE;CC - altas luces/ganancia
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - máscara de similitud de color
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - máscara de pincel
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - máscara paramétrica
+HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - post-procesamiento de máscara
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Corrección de color
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RR - intensidad de crominancia automática
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RR - Suavizado final C
@@ -565,7 +567,9 @@ HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;AT - máscara de umbral de contraste
 HISTORY_MSG_EPD_DELTAEMASK;AT - máscara de similitud de color
 HISTORY_MSG_EPD_DRAWNMASK;AT - máscara de pincel
 HISTORY_MSG_EPD_PARAMETRICMASK;AT - máscara paramétrica
+HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - post-procesamiento de máscara
 HISTORY_MSG_EXPOSURE_BLACK;Exposición - Punto negro
+HISTORY_MSG_EXPOSURE_HRBLUR;Exposición - Suavizado de la propagación de color
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Negativo de película
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la película
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valores del negativo de película
@@ -592,6 +596,7 @@ HISTORY_MSG_LOCALCONTRAST_RADIUS;Contraste local - Radio
 HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Contraste local - máscara de similitud de color
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Contraste local - máscara de pincel
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Contraste local - máscara paramétrica
+HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;Contraste local - post-procesamiento de máscara
 HISTORY_MSG_LOGENC_AUTO;Log - Automático
 HISTORY_MSG_LOGENC_AUTOGAIN;Log - Ganancia automática
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regularización
@@ -644,6 +649,11 @@ HISTORY_MSG_SMOOTHING_DRAWNMASK;Suavizado - máscara de pincel
 HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Suavizado - máscara paramétrica
 HISTORY_MSG_SMOOTHING_NLSTRENGTH;Suavizado - intensidad MNL
 HISTORY_MSG_SMOOTHING_NLDETAIL;Suavizado - detalle MNL
+HISTORY_MSG_SMOOTHING_NUMBLADES;Suavizado - hojas
+HISTORY_MSG_SMOOTHING_ANGLE;Suavizado - ángulo
+HISTORY_MSG_SMOOTHING_CURVATURE;Suavizado - curvatura
+HISTORY_MSG_SMOOTHING_OFFSET;Suavizado - desplazamiento
+HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Suavizado - post-procesamiento de máscara
 HISTORY_MSG_SOFTLIGHT_ENABLED;Luz tenue
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Luz tenue - Intensidad
 HISTORY_MSG_SPOT;Eliminación de manchas
@@ -657,6 +667,7 @@ HISTORY_MSG_TONECURVE_SATCURVE;Curva tonal - Saturación
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Curva tonal - Intensidad perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Curva tonal - Modo antiguo de contraste
 HISTORY_MSG_TONECURVE_MODE;Curva tonal - Modo
+HISTORY_MSG_TONECURVE_WHITEPOINT;Curva tonal - Punto blanco
 HISTORY_MSG_WBALANCE_MULT;BB - multiplicadores
 HISTORY_NEWSNAPSHOT;Añadir
 HISTORY_NEWSNAPSHOT_TOOLTIP;Atajo: <b>Alt-s</b>
@@ -707,7 +718,7 @@ ICCPROFCREATOR_TRC_PRESET;La curva de respuesta del tono:
 INSPECTOR_ENABLE_CMS;Activar la gestión del color.
 INSPECTOR_FOCUS_MASK;Máscara de foco.\nAtajo: <b>Mayús-f</b>.
 INSPECTOR_HISTOGRAM;Histograma.\nAtajo: <b>h</b>.
-INSPECTOR_INFO;Información breve.\nAtajo: <b>i</b>.
+INSPECTOR_INFO;Información breve.\nAtajo: <b>Mayús-i</b>.
 INSPECTOR_PREVIEW;Vista previa de imagen incrustada.\nAtajo: <b>j</b>.
 INSPECTOR_RAW_LINEAR;Renderizado rápido de raw con una curva tonal lineal.\nAtajo: <b>r</b>.
 INSPECTOR_RAW_FILM;Renderizado rápido de raw con una curva tonal similar a la de una película.\nAtajo: <b>f</b>.
@@ -828,22 +839,22 @@ MAIN_TOOLTIP_BACKCOLOR1;Color de fondo de la vista previa: <b>negro</b>\nAtajo: 
 MAIN_TOOLTIP_BACKCOLOR2;Color de fondo de la vista previa: <b>blanco</b>\nAtajo: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Color de fondo de la vista previa: <b>gris medio</b>\nAtajo: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Bloquear</b> / <b>Desbloquear</b> la vista <b>Antes</b>\n\n<b>Bloquear</b>: mantiene la vista <b>Antes</b> inalterada.\nÚtil para evaluar el efecto acumulativo de varias herramientas.\nAdemás, se puede hacer una comparación con cualquier estado en el historial.\n\n<b>Desbloquear</b>: la vista <b>Antes</b> seguirá a la vista <b>Después</b> un paso por detrás, mostrando la imagen antes del efecto de la herramienta que se está usando.
-MAIN_TOOLTIP_FALSECOLORS;Alternar la indicación de la exposición mediante color falso.\nAtajo: <b>e</b>\n\nClave (Rango IRE):\n%1
+MAIN_TOOLTIP_FALSECOLORS;Alternar la indicación de la exposición mediante color falso.\nAtajo: <b>Mayús-e</b>\n\nClave (Rango IRE):\n%1
 MAIN_TOOLTIP_HIDEHP;Mostrar/Ocultar el panel izquierdo (incluyendo la historia).\nAtajo: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indicación de altas luces recortadas.\nAtajo: <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Indicación de sombras recortadas.\nAtajo: <b>&lt;</b>
-MAIN_TOOLTIP_PREVIEWB;Vista previa del <b>canal azul</b>.\nAtajo: <b>b</b>
+MAIN_TOOLTIP_PREVIEWB;Vista previa del <b>canal azul</b>.\nAtajo: <b>Mayús-b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Vista previa de la <b>máscara de foco</b>.\nAtajo: <b>Mayús-f</b>\n\nMás preciso en imágenes con poca profundidad de campo, poco ruido y a mayores niveles de zoom.\nAmplíe el zoom al 10-30% para mejorar la precisión de la detección en imágenes con ruido.
-MAIN_TOOLTIP_PREVIEWG;Vista previa del <b>canal verde</b>.\nAtajo: <b>g</b>
-MAIN_TOOLTIP_PREVIEWL;Vista previa de la <b>luminosidad</b>.\nAtajo: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
-MAIN_TOOLTIP_PREVIEWR;Vista previa del <b>canal rojo</b>.\nAtajo: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista previa de la <b>máscara de contraste de enfoque</b>.\nAtajo: <b>Mayús-p</b>\n\nSolo funciona cuando se activa el enfoque, y es precisa solo cuando el zoom >= 100%.
+MAIN_TOOLTIP_PREVIEWG;Vista previa del <b>canal verde</b>.\nAtajo: <b>Mayús-g</b>
+MAIN_TOOLTIP_PREVIEWL;Vista previa de la <b>luminosidad</b>.\nAtajo: <b>Mayús-v</b>\n\n0.299*R + 0.587*G + 0.114*B
+MAIN_TOOLTIP_PREVIEWR;Vista previa del <b>canal rojo</b>.\nAtajo: <b>Mayús-r</b>
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista previa de la <b>máscara de contraste de enfoque</b>.\nAtajo: <b>Mayús-o</b>\n\nSolo funciona cuando se activa el enfoque, y es precisa solo cuando el zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Información breve sobre la imagen.\nAtajo: <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostrar/Ocultar el panel izquierdo.\nAtajo: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Mostrar/Ocultar el panel derecho.\nAtajo: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Mostrar/Ocultar el panel superior.\nAtajo: <b>Mayús-l</b>
 MAIN_TOOLTIP_THRESHOLD;Umbral
-MAIN_TOOLTIP_TOGGLE;Cambiar la vista <b>antes</b>/<b>después</b>.\nAtajo: <b>Mayús-b</b>
+MAIN_TOOLTIP_TOGGLE;Cambiar la vista <b>antes</b>/<b>después</b>.\nAtajo: <b>Mayús-a</b>
 METADATA_LOAD_ERROR;Error al cargar los metadatos de %1: %2
 METADATA_SAVE_ERROR;Error al guardar los metadatos a %1: %2
 MONITOR_PROFILE_SYSTEM;Predeterminado del sistema
@@ -1241,8 +1252,9 @@ SAVEDLG_SUBSAMP_TOOLTIP;Mejor compresión:\nJ:a:b 4:2:0\nh/v 2/2\nCroma dividida
 SAVEDLG_TIFFUNCOMPRESSED;TIFF sin compresión
 SAVEDLG_WARNFILENAME;Se asignará nombre al archivo
 SHCSELECTOR_TOOLTIP;Haga clic con el botón derecho del ratón para restablecer la posición de esos 3 controles deslizantes.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de la impresora, si está establecido y la prueba en pantalla está activada,\n- el perfil de salida, si no se ha establecido un perfil de impresora y la prueba en pantalla está activada,\n- el perfil del monitor, si la prueba en pantalla está desactivada.
-SOFTPROOF_TOOLTIP;La prueba en pantalla simula la apariencia de la imagen:\n- cuando se imprime, si se ha establecido un perfil de impresora en Preferencias > Gestión de color,\n- cuando se ve en una pantalla que usa el perfil de salida actual, si no se ha establecido un perfil de impresora.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto al perfil de salida.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de la impresora, si se ha establecido uno y la prueba en pantalla está activada,\n- el perfil del monitor, si la prueba en pantalla está desactivada.
+SOFTPROOF_TOOLTIP;La prueba en pantalla simula la apariencia de la imagen cuando se imprime, si se ha establecido un perfil de impresora en Preferencias > Gestión de color.
 THRESHOLDSELECTOR_B;Inferior
 THRESHOLDSELECTOR_BL;Inferior izquierdo
 THRESHOLDSELECTOR_BR;Inferior derecho
@@ -1250,12 +1262,13 @@ THRESHOLDSELECTOR_HINT;Mantenga la tecla <b>Mayús</b> presionada para mover pun
 THRESHOLDSELECTOR_T;Superior
 THRESHOLDSELECTOR_TL;Superior izquierdo
 THRESHOLDSELECTOR_TR;Superior derecho
+TOOL_SHORTCUT_HELP_HEADER;Atajos de herramienta:\n(mantenga pulsada la tecla indicada y ajuste el control deslizante mediante +/- o la rueda del ratón)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Selector de color bloqueable\n\nCuando la herramienta está activa:\n- Añadir un selector: <b>clic con el botón izquierdo del ratón</b>.\n- Arrastrar un selector: <b>clic con el botón izquierdo del ratón y arrastrar</b>.\n- Eliminar un selector: <b>clic con el botón derecho del ratón</b>.\n- Eliminar todos los selectores: <b>Ctrl</b>+<b>Mayús</b>+<b>clic con el botón derecho del ratón</b>.\n- Volver a la herramienta mano: <b>clic con el botón derecho del ratón</b> fuera de cualquier selector.
-TOOLBAR_TOOLTIP_CROP;Selección de <b>recorte</b>.\nAtajo: <b>c</b>\nMueva el recorte mediante <b>Mayús</b>+<b>arrastre del ratón</b>\nCambie el tamaño del recorte mediante <b>Ctrl</b>+<b>arrastre del ratón</b>.
+TOOLBAR_TOOLTIP_CROP;Selección de <b>recorte</b>.\nAtajo: <b>Mayús-c</b>\nMueva el recorte mediante <b>Mayús</b>+<b>arrastre del ratón</b>\nCambie el tamaño del recorte mediante <b>Ctrl</b>+<b>arrastre del ratón</b>.
 TOOLBAR_TOOLTIP_HAND;Herramienta mano.\nAtajo: <b>h</b>
-TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Corrección de perspectiva</b>.\nAtajo: <b>p</b>\n\nEdite las líneas de control para corregir la distorsión de la perspectiva. Haga clic con este botón de nuevo para aplicar la corrección.
-TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Enderezar</b> / <b>Rotación precisa</b>.\nAtajo: <b>s</b>\n\nIndique la vertical u horizontal dibujando una línea guía sobre la vista previa de la imagen. El ángulo de rotación se mostrará junto a la línea guía. El centro de rotación es el centro geométrico de la imagen.
-TOOLBAR_TOOLTIP_WB;Balance de blancos puntual.\nAtajo: <b>w</b>
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Corrección de perspectiva</b>.\nAtajo: <b>Mayús-p</b>\n\nEdite las líneas de control para corregir la distorsión de la perspectiva. Haga clic en este botón de nuevo para aplicar la corrección.
+TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Enderezar</b> / <b>Rotación precisa</b>.\nAtajo: <b>Mayús-s</b>\n\nIndique la vertical u horizontal dibujando una línea guía sobre la vista previa de la imagen. El ángulo de rotación se mostrará junto a la línea guía. El centro de rotación es el centro geométrico de la imagen.
+TOOLBAR_TOOLTIP_WB;Balance de blancos puntual.\nAtajo: <b>Mayús-w</b>
 TP_SATURATION_LABEL;Saturación/Vivacidad
 TP_BRIGHTCONTRSAT_CONTRAST;Contraste
 TP_SATURATION_SATURATION;Saturación
@@ -1434,6 +1447,7 @@ TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Por favor, consulte el artículo de RawPedia "E
 TP_EXPOSURE_EXPCOMP;Compensación de exposición
 TP_EXPOSURE_HISTMATCHING;Curva tonal seleccionada automáticamente
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;Ajusta automáticamente los controles deslizantes y las curvas (excepto la compensación de exposición) para que coincidan con el aspecto de la miniatura JPEG incrustada.
+TP_EXPOSURE_HRBLUR;Suavizado de la propagación de color
 TP_EXPOSURE_LABEL;Exposición
 TP_EXPOSURE_TCMODE_FILMLIKE;Similar a película
 TP_EXPOSURE_TCMODE_LABEL1;Modo de curva 1
@@ -1594,7 +1608,7 @@ TP_LABMASKS_DELTAE_PICK;Escoger
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Peso en el cálculo ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Seleccione las regiones de color similar\n(según la métrica CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Máscara de pincel
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Cambie cómo pinta el pincel en el lienzo.\n\n<i>Si se usa el ratón:</i>\n- Mantenga pulsado <b>Mayús</b> para activar temporalmente el "Modo borrador";\n- Use <b>Ctrl+rueda del ratón</b> para cambiar el radio del pincel,\n- <b>Ctrl+Mayús+rueda del ratón</b> para cambiar la dureza del pincel,\n- y <b>Ctrl+clic</b> para comenzar un nuevo grupo de trazos sin cambiar los parámetros\n(de modo que se sumen varios trazos en la misma área);\n- Use el <b>tercer botón</b> para desactivar la pintura en el lienzo.\n\n<i>Si se usa un dispositivo sensible a la presión:</i>n- Use el <b>primer botón</b> para cambiar al "Modo borrador";\n- Use <b>Alt+primer botón</b> para aumentar el radio del pincel, y\n- <b>Alt+segundo botón</b> para reducirlo;\n- Use el <b>segundo botón</b> para recorrer los modos de sensibilidad a la presión disponibles: inactivo, dureza, radio (mantenga pulsado <b>Mayús</b> para invertir la dirección);\n- Use <b>Ctrl+segundo botón</b> para desactivar la pintura en el lienzo.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Cambie cómo pinta el pincel en el lienzo.\n\n<i>Si se usa el ratón:</i>\n- Mantenga pulsado <b>Mayús</b> para activar temporalmente el "Modo borrador";\n- Mantenga pulsado <b>Alt</b> para dibujar una línea recta;\n- Use <b>Ctrl+rueda del ratón</b> para cambiar el radio del pincel,\n- <b>Ctrl+Mayús+rueda del ratón</b> para cambiar la dureza del pincel,\n- y <b>Ctrl+clic</b> para comenzar un nuevo grupo de trazos sin cambiar los parámetros\n(de modo que se sumen varios trazos en la misma área);\n- Use el <b>tercer botón</b> para desactivar la pintura en el lienzo.\n\n<i>Si se usa un dispositivo sensible a la presión:</i>n- Use el <b>primer botón</b> para cambiar al "Modo borrador";\n- Mantenga pulsado <b>Alt</b> para dibujar una línea recta;\n- Use <b>Alt+primer botón</b> para aumentar el radio del pincel, y\n- <b>Alt+segundo botón</b> para reducirlo;\n- Use el <b>segundo botón</b> para recorrer los modos de sensibilidad a la presión disponibles: inactivo, dureza, radio (mantenga pulsado <b>Mayús</b> para invertir la dirección);\n- Use <b>Ctrl+segundo botón</b> para desactivar la pintura en el lienzo.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Ajustes de pincel
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Borrar todos los trazos
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Borrar el último grupo de trazos
@@ -1608,6 +1622,10 @@ TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Interseca la máscara de pincel con las 
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Añade la máscara de pincel encima de las otras máscaras
 TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Añade la máscara de pincel encima de las otras máscaras, pero solo dentro de la máscara de área activa
 TP_LABMASKS_PARAMETRIC;Máscara paramétrica
+TP_LABMASKS_POSTPROCESS;Post-procesamiento de máscara
+TP_LABMASKS_POSTPROCESS_CURVE;Curva tonal
+TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterización
+TP_LABMASKS_POSTPROCESS_SMOOTHING;Suavizado
 TP_LENSGEOM_AUTOCROP;Recorte automático
 TP_LENSGEOM_FILL;Relleno automático
 TP_LENSGEOM_LABEL;Lente / Geometría
@@ -1826,6 +1844,8 @@ TP_SMOOTHING_MODE_GUIDED;Guiado
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussiano
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Resplandor
 TP_SMOOTHING_MODE_NLMEANS;Medias no locales
+TP_SMOOTHING_MODE_LENS;Desenfoque de lente
+TP_SMOOTHING_MODE_MOTION;Desenfoque de movimiento
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminancia
 TP_SMOOTHING_CHANNEL_C;Crominancia
@@ -1836,6 +1856,10 @@ TP_SMOOTHING_SIGMA;Radio
 TP_SMOOTHING_ITERATIONS;Iteraciones
 TP_SMOOTHING_NLSTRENGTH;Intensidad
 TP_SMOOTHING_NLDETAIL;Detalle
+TP_SMOOTHING_NUMBLADES;Hojas
+TP_SMOOTHING_ANGLE;Ángulo
+TP_SMOOTHING_CURVATURE;Curvatura
+TP_SMOOTHING_OFFSET;Desplazamiento
 TP_SOFTLIGHT_LABEL;Luz tenue
 TP_SOFTLIGHT_STRENGTH;Intensidad
 TP_SPOT_COUNTLABEL;%1 punto(s)
@@ -1860,6 +1884,7 @@ TP_TONECURVE_SATCURVE;Saturación
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Intensidad de la curva perceptual
 TP_TONECURVE_MODE;Modo
 TP_TONECURVE_CONTRAST_LEGACY;Modo antiguo de contraste
+TP_TONECURVE_WHITEPOINT;Punto blanco
 TP_TONE_EQUALIZER_BAND_0;Negros
 TP_TONE_EQUALIZER_BAND_1;Sombras
 TP_TONE_EQUALIZER_BAND_2;Tonos medios
