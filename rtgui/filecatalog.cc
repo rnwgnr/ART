@@ -2495,7 +2495,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
     if (!ctrl || (alt && !options.tabbedUI)) {
         switch(event->keyval) {
         case GDK_KEY_i:
-        case GDK_KEY_I:
+        //case GDK_KEY_I:
             exifInfo->set_active (!exifInfo->get_active());
             return true;
 
