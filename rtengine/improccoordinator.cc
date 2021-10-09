@@ -238,6 +238,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     bool highDetailNeeded_WB = highDetailNeeded;
     if ((todo & M_HIGHQUAL) || options.prevdemo == PD_Sidecar) {
         highDetailNeeded = true;
+        todo |= M_AUTOEXP;
     }
 
     ipf.setPipetteBuffer(nullptr);
