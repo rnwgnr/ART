@@ -7,6 +7,7 @@
 #06 2021-09-09 Ohnishi, Yasuo, some fixes
 #07 2021-10-06 Ohnishi, Yasuo, some fixes
 #08 2021-10-07 Ohnishi, Yasuo, updated for 1.10
+#09 2021-10-08 Ohnishi, Yasuo, updated
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -563,7 +564,7 @@ HISTORY_MSG_EXPOSURE_HRBLUR;露出 - 色の補間 (Color propagation) のスム�
 HISTORY_MSG_FILMNEGATIVE_ENABLED;ネガフィルム
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;フィルムベースカラー
 HISTORY_MSG_FILMNEGATIVE_VALUES;ネガフィルムの値
-HISTORY_MSG_FLATFIELD_EMBEDDED;フラットフィールド embedded
+HISTORY_MSG_FLATFIELD_EMBEDDED;フラットフィールド メタデータに埋込み
 HISTORY_MSG_GRAIN_ENABLED;フィルム粒状効果
 HISTORY_MSG_GRAIN_ISO;フィルム粒状効果 - ISO
 HISTORY_MSG_GRAIN_STRENGTH;フィルム粒状効果 - 強さ
@@ -708,7 +709,7 @@ ICCPROFCREATOR_TRC_PRESET;トーン再現カーブ:
 INSPECTOR_ENABLE_CMS;カラーマネジメント有効化.
 INSPECTOR_FOCUS_MASK;フォーカスマスク.\nショートカット: <b>Shift-f</b>.
 INSPECTOR_HISTOGRAM;ヒストグラム.\nショートカット: <b>h</b>.
-INSPECTOR_INFO;Quick info.\nショートカット: <b>i</b>.
+INSPECTOR_INFO;情報.\nショートカット: <b>Shift-i</b>.
 INSPECTOR_PREVIEW;埋込プレビュー画像.\nショートカット: <b>j</b>.
 INSPECTOR_RAW_LINEAR;リニアトーンカーブを使った高速Rawレンダリング.\nショートカット: <b>r</b>.
 INSPECTOR_RAW_FILM;フィルム状トーンカーブを使った高速Rawレンダリング.\nショートカット: <b>f</b>.
@@ -829,22 +830,22 @@ MAIN_TOOLTIP_BACKCOLOR1;プレビューの背景色を指定します: <b>黒</b
 MAIN_TOOLTIP_BACKCOLOR2;プレビューの背景色を指定します: <b>白</b>\nショートカット: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;プレビューの背景色を指定します: <b>中間のグレー</b>\nショートカット: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>固定</b> / <b>固定解除</b> - <b>補正前</b> の表示設定\n\n<b>固定</b>: <b>補正前</b>をそのまま表示し変更されません\n複数のツールの累積効果を評価するのに役立ちます\nさらに、比較は履歴上のどこからでも行うことができます\n\n<b>固定解除</b>: 現在使用のツールの効果が <b>補正後</b> に表示され、その1段階前が <b>補正前</b> に表示されます
-MAIN_TOOLTIP_FALSECOLORS;着色による露光量表示の切替.\nショートカット: <b>e</b>\n\n凡例 (IRE指数の範囲):\n%1
+MAIN_TOOLTIP_FALSECOLORS;着色による露光量表示の切替.\nショートカット: <b>Shift-e</b>\n\n凡例 (IRE指数の範囲):\n%1
 MAIN_TOOLTIP_HIDEHP;左パネル 表示/非表示 (履歴含む)\nショートカット:  <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;ハイライト・クリッピング領域の表示\nショートカット: <b>&lt
 MAIN_TOOLTIP_INDCLIPPEDS;シャドウ・クリッピング領域の表示\nショートカット: <b>&gt
-MAIN_TOOLTIP_PREVIEWB;<b>ブルー チャンネル</b>表示\nショートカット: <b>b</b>
+MAIN_TOOLTIP_PREVIEWB;<b>ブルー チャンネル</b>表示\nショートカット: <b>Shift-b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;<b>フォーカス・マスク</b>表示\nショートカット: <b>Shift-f</b>\n\n浅い被写界深度、低ノイズ、高ズームの画像の場合は、より正確に\n\nノイズの多い画像に対しては、検出精度を向上させるため10から30%縮小して評価します\n\nフォーカス・マスクをオンにすると表示に時間が掛かります
-MAIN_TOOLTIP_PREVIEWG;<b>グリーン チャンネル</b>表示\nショートカット: <b>g</b>
-MAIN_TOOLTIP_PREVIEWL;<b>輝度</b>表示\nショートカット: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
-MAIN_TOOLTIP_PREVIEWR;<b>レッド チャンネル</b>表示\nショートカット: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;プレビューで見る<b>シャープニング機能のコントラストマスク</b>\nショートカット： <b>p</b>\n\nこの機能が使えるのはシャープニング機能が有効で、画像が100％以上に拡大されている場合だけ
-MAIN_TOOLTIP_QINFO;画像の情報\nショートカット: <b>i</b>
+MAIN_TOOLTIP_PREVIEWG;<b>グリーン チャンネル</b>表示\nショートカット: <b>Shift-g</b>
+MAIN_TOOLTIP_PREVIEWL;<b>輝度</b>表示\nショートカット: <b>Shift-v</b>\n\n0.299*R + 0.587*G + 0.114*B
+MAIN_TOOLTIP_PREVIEWR;<b>レッド チャンネル</b>表示\nショートカット: <b>Shift-r</b>
+MAIN_TOOLTIP_PREVIEWSHARPMASK;プレビューで見る<b>シャープニング機能のコントラストマスク</b>\nショートカット： <b>Shift-o</b>\n\nこの機能が使えるのはシャープニング機能が有効で、画像が100％以上に拡大されている場合だけ
+MAIN_TOOLTIP_QINFO;画像の情報\nショートカット: <b>Shift-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;表示/非表示 左パネル\nショートカット: <b>l</b>
-MAIN_TOOLTIP_SHOWHIDERP1;表示/非表示 右パネル\nショートカット: <b>Alt-l</b>
-MAIN_TOOLTIP_SHOWHIDETP1;表示/非表示 上パネル\nショートカット: <b>Shift-L</b>
+MAIN_TOOLTIP_SHOWHIDERP1;表示/非表示 右パネル\nショートカット: <b>Ctrl-l</b>
+MAIN_TOOLTIP_SHOWHIDETP1;表示/非表示 上パネル\nショートカット: <b>Shift-l</b>
 MAIN_TOOLTIP_THRESHOLD;閾値
-MAIN_TOOLTIP_TOGGLE;<b>補正前</b>/<b>補正後</b> 切り替え\nショートカット: <b>Shift-b</b>
+MAIN_TOOLTIP_TOGGLE;<b>補正前</b>/<b>補正後</b> 切り替え\nショートカット: <b>Shift-a</b>
 METADATA_LOAD_ERROR;エラー %1 からメタデータ読込に失敗: %2
 METADATA_SAVE_ERROR;エラー %1 にメタデータ書込に失敗: %2
 MONITOR_PROFILE_SYSTEM;システムのデフォルト
@@ -1244,7 +1245,7 @@ SAVEDLG_WARNFILENAME;ファイルに名前が付けられます
 SHCSELECTOR_TOOLTIP;この3つのスライダーの位置をリセットするには\nマウスの右ボタンをクリック
 SOFTPROOF_GAMUTCHECK_TOOLTIP;有効にすると、出力プロファイルの色域から外れた色のピクセルをグレーで表示します
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;"以下に関して色空間外のピクセルをハイライト表示します:\n- ソフトプルーフィングが有効な場合, プリンタープロファイル,\n- ソフトプルーフィングが無効な場合, モニタープロファイル"
-SOFTPROOF_TOOLTIP;ソフトプルーフィング\n有効にすると、ICMツールの出力プロファイルを使った疑似的なレンダリングを行います。印刷した場合などの画像の印象を掴むのに大変便利です。
+SOFTPROOF_TOOLTIP;ソフトプルーフィングはプリントイメージをシミュレートします。\n但し、環境設定>カラーマネジメントでプリンタプロファイルを設定する必要があります。
 THRESHOLDSELECTOR_B;下
 THRESHOLDSELECTOR_BL;下-左
 THRESHOLDSELECTOR_BR;下-右
@@ -1252,13 +1253,13 @@ THRESHOLDSELECTOR_HINT;個々のコントロールポイントを移動するに
 THRESHOLDSELECTOR_T;上
 THRESHOLDSELECTOR_TL;上-左
 THRESHOLDSELECTOR_TR;上-右
-TOOL_SHORTCUT_HELP_HEADER;ツールショートカット:\n(所定のキーを押したままスライダーを +/- で調節するか、スクロールホイールで調節する)\n
+TOOL_SHORTCUT_HELP_HEADER;ツールショートカット:\n(所定のキーを押したままスライダーを +/- で調節するか、マウスホイールで調節する)\n
 TOOLBAR_TOOLTIP_COLORPICKER;ロック式カラーピッカー\n\n有効にすると:\nプレビュー画像上でマウスを左クリックするとカラーピッカーが追加されます。\n左のボタンを押しながらマウスを動かすとカラーピッカーも移動します\nカラーピッカーを削除する時はマウスを右クリックします\nカラーピッカー全てを削除する場合は、Shiftボタンを押しながらマウスを右クリックします\nカラーピッカーのマーク以外の部分でマウスを右クリックすれば、ハンドツールに戻ります
-TOOLBAR_TOOLTIP_CROP;切り抜き範囲選択\nショートカット:  <b>c</b>
+TOOLBAR_TOOLTIP_CROP;切り抜き範囲選択\nショートカット:  <b>Shift-c</b>\n切抜き範囲の移動は<b>マウスでドラッグ</b>する\n切抜き範囲の変更は範囲の境界線を動かす
 TOOLBAR_TOOLTIP_HAND;手の平ツール\nショートカット:  <b>h</b>
-TOOLBAR_TOOLTIP_PERSPECTIVE;<b>パース補正</b>.\nショートカット: <b>p</b>\n\nパースのゆがみを補正するコントロールラインを編集する.
-TOOLBAR_TOOLTIP_STRAIGHTEN;<b>直線選択</b> / <b>角度補正</b>\nショートカット: <b>s</b>\nプレビュー画像上にガイド線を描画し、垂直または水平方向を指示します。回転角度は、ガイド線の隣に表示されます。回転の中心は、プレビュー画像の中心です
-TOOLBAR_TOOLTIP_WB;スポット・ホワイトバランス\nショートカット:  <b>w</b>
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>パース補正</b>.\nショートカット: <b>Shift-p</b>\n\nパースのゆがみを補正するコントロールラインを編集する.
+TOOLBAR_TOOLTIP_STRAIGHTEN;<b>直線選択</b> / <b>角度補正</b>\nショートカット: <b>Shift-s</b>\nプレビュー画像上にガイド線を描画し、垂直または水平方向を指示します。回転角度は、ガイド線の隣に表示されます。回転の中心は、プレビュー画像の中心です
+TOOLBAR_TOOLTIP_WB;スポット・ホワイトバランス\nショートカット:  <b>Shift-w</b>
 TP_SATURATION_LABEL;彩度/自然な彩度
 TP_BRIGHTCONTRSAT_CONTRAST;コントラスト
 TP_SATURATION_SATURATION;彩度(Saturation)
@@ -1414,7 +1415,7 @@ TP_DIRPYRDENOISE_MEDIAN_METHOD_WEIGHTED;加重平均 L* (少なめ) + a*b* (普�
 TP_DIRPYRDENOISE_MEDIAN_PASSES;フィルタリングの繰り返し回数
 TP_DIRPYRDENOISE_MEDIAN_PASSES_TOOLTIP;計算領域が3x3ピクセルのメディアンフィルタを3回繰り返し適用する方が、計算領域が7x7ピクセルのメディアンフィルタを1回適用するより結果が良くなることがままあります。
 TP_DIRPYRDENOISE_MEDIAN_TYPE;フィルターの種類
-TP_DIRPYRDENOISE_MEDIAN_TYPE_TOOLTIP;適用するメディアンフィルタのサイズを決めます。大きくするとその分処理時間が増えます。大きいサイズを使うとそれだけ処理時間が増えます。\n\n3×3 ソフト: 3x3ピクセルの計算領域で5ピクセルを処理します\n3×3:3x3ピクセルの計算領域で9ピクセルを処理します\n5×5 ソフト: 5x5ピクセルの計算領域で13ピクセルを処理します\n5×5: 5x5ピクセルの計算領域で25ピクセルを処理します\n7×7: 7x7ピクセルの計算領域で49ピクセルを処理します\n9×9: 9x9ピクセルの計算領域で81ピクセルを処理します\n\n場合によっては、小さいウィンドウで複数回適用を繰り返す方が、大きいウィンドウを1回適用するより結果が良いことがあります。
+TP_DIRPYRDENOISE_MEDIAN_TYPE_TOOLTIP;適用するメディアンフィルタのサイズを決めます。大きくするとその分処理時間が増えます。大きいサイズを使うとそれだけ処理時間が増えます。\n\n3×3 ソフト: 3x3ピクセルの計算領域で5ピクセルを処理します\n3×3:3x3ピクセルの計算領域で9ピクセルを処理します\n5×5 ソフト: 5x5ピクセルの計算領域で13ピクセルを処理します\n5×5: 5x5ピクセルの計算領域で25ピクセルを処理します\n7×7: 7x7ピクセルの計算領域で49ピクセルを処理します\n9×9: 9x9ピクセルの計算領域で81ピクセルを処理します\n\n場合によっては、小さいウィンドウで複数回適用を繰り返す方が、大きいウィンドウを1回適用するより結果が良い場合があります。
 TP_DIRPYRDENOISE_TYPE_3X3;3×3
 TP_DIRPYRDENOISE_TYPE_3X3SOFT;3×3 ソフト
 TP_DIRPYRDENOISE_TYPE_5X5;5×5
@@ -1541,7 +1542,7 @@ TP_IMPULSEDENOISE_LABEL;インパルスノイズ低減
 TP_IMPULSEDENOISE_THRESH;閾値
 TP_LABCURVE_BRIGHTNESS;明度
 TP_LABCURVE_CHROMATICITY;彩度(Chromaticity)
-TP_LABCURVE_CHROMA_TOOLTIP;白黒トーンを適用するには、彩度を-100に設定します
+TP_LABCURVE_CHROMA_TOOLTIP;白黒トーンを適用するには、彩度(Chroma)を-100に設定します
 TP_LABCURVE_CONTRAST;コントラスト
 TP_LABCURVE_CURVEEDITOR_A_RANGE1;グリーン・純色
 TP_LABCURVE_CURVEEDITOR_A_RANGE2;グリーン・明清色
@@ -1598,7 +1599,7 @@ TP_LABMASKS_DELTAE_PICK;Pick
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;デルタEの計算にウエイト付け
 TP_LABMASKS_DELTAE_TOOLTIP;類似色領域を選択\n(CIELABデルタE メトリックに準拠)
 TP_LABMASKS_DRAWNMASK;ブラシマスク
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;"画面上でマウスをオン/オフしてブラシで描きます.\n\n<i>マウス使用時:</i>\n- <b>シフトキーを</b>押したままにすると一時的に ""消しゴムモード""になります.";"\n- Use <b>Ctrl+scroll wheel</b> to change the brush radius,\n- <b>Ctrl+Shift+scroll wheel</b> to change the brush hardness,\n- and <b>Ctrl+click</b> to begin a new strokes group without changing parameters\n(so that multiple strokes on the same area will add up)";"\n- Use the <b>third button</b> to turn off on-canvas painting.\n\n<i>When using a pressure-sensitive device:</i>\n- Use the <b>first button</b> to toggle ""Eraser mode""";\n- Hold <b>Alt</b> to draw a straight line;"\n- Use <b>Alt+first button</b> to increase the brush radius, and\n- <b>Alt+second button</b> to decrease it";"\n- Use the <b>second button</b> to cycle through the available pressure sensitivity modes: off, hardness, radius (hold <b>Shift</b> to reverse the direction)";\n- Use <b>Ctrl+second button</b> to turn off on-canvas painting.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;"画面上でマウスをオン/オフしてブラシで描きます.\n\n<i>マウス使用時:</i>\n- <b>シフトキーを</b>押したままにすると一時的に ""消しゴムモード""になります.";"\n- <b>Ctrl+マウスホイール</b>でブラシの太さを変えられます,\n- <b>Ctrl+Shift+マウスホイール</b>でブラシの硬さ(hardness)を変えられます,\n- <b>Ctrl+クリック</b>でパラメータを変えずに新しいストロークグループを開始します\n(そして同じエリアに複数のストロークが追加できます)"；"\n- <b>3番目のボタン</b>を押してキャンバスの描画を停止します.\n\n<i>感圧デバイスを使う場合:</i>\n- <b>1番目のボタン</b>で ""消しゴムモード""のオンオフを行います"；\n- <b>Alt</b>を押しながら直線を描きます；"\n- <b>Alt+1番目のボタン</b>でブラシの太さを太くします, そして\n- <b>Alt+2番目のボタン</b>で細くします"；"\n- <b>2番目のボタン</b>で感圧感度モードを切り替えます: オフ, 硬さ(hardness), 太さ (<b>Shift</b>を押しながら方向を逆転します)";\n- Use <b>Ctrl+2番目のボタン</b>でキャンバス上の描画を停止します.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;ブラシ設定
 TP_LABMASKS_DRAWNMASK_RESET_TIP;すべての軌跡を消去
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;最後の軌跡を消去

@@ -11,6 +11,7 @@
 #10 2021-05-21 mrleemon, update for 1.9
 #11 2021-07-08 mrleemon, update for 1.9.3
 #12 2021-10-06 mrleemon, update for 1.10
+#13 2021-10-09 mrleemon, some fixes
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -849,7 +850,7 @@ MAIN_TOOLTIP_PREVIEWG;Vista previa del <b>canal verde</b>.\nAtajo: <b>Mayús-g</
 MAIN_TOOLTIP_PREVIEWL;Vista previa de la <b>luminosidad</b>.\nAtajo: <b>Mayús-v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Vista previa del <b>canal rojo</b>.\nAtajo: <b>Mayús-r</b>
 MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista previa de la <b>máscara de contraste de enfoque</b>.\nAtajo: <b>Mayús-o</b>\n\nSolo funciona cuando se activa el enfoque, y es precisa solo cuando el zoom >= 100%.
-MAIN_TOOLTIP_QINFO;Información breve sobre la imagen.\nAtajo: <b>i</b>
+MAIN_TOOLTIP_QINFO;Información breve sobre la imagen.\nAtajo: <b>Mayús-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostrar/Ocultar el panel izquierdo.\nAtajo: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Mostrar/Ocultar el panel derecho.\nAtajo: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Mostrar/Ocultar el panel superior.\nAtajo: <b>Mayús-l</b>
@@ -1264,7 +1265,7 @@ THRESHOLDSELECTOR_TL;Superior izquierdo
 THRESHOLDSELECTOR_TR;Superior derecho
 TOOL_SHORTCUT_HELP_HEADER;Atajos de herramienta:\n(mantenga pulsada la tecla indicada y ajuste el control deslizante mediante +/- o la rueda del ratón)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Selector de color bloqueable\n\nCuando la herramienta está activa:\n- Añadir un selector: <b>clic con el botón izquierdo del ratón</b>.\n- Arrastrar un selector: <b>clic con el botón izquierdo del ratón y arrastrar</b>.\n- Eliminar un selector: <b>clic con el botón derecho del ratón</b>.\n- Eliminar todos los selectores: <b>Ctrl</b>+<b>Mayús</b>+<b>clic con el botón derecho del ratón</b>.\n- Volver a la herramienta mano: <b>clic con el botón derecho del ratón</b> fuera de cualquier selector.
-TOOLBAR_TOOLTIP_CROP;Selección de <b>recorte</b>.\nAtajo: <b>Mayús-c</b>\nMueva el recorte mediante <b>Mayús</b>+<b>arrastre del ratón</b>\nCambie el tamaño del recorte mediante <b>Ctrl</b>+<b>arrastre del ratón</b>.
+TOOLBAR_TOOLTIP_CROP;Selección de <b>recorte</b>.\nAtajo: <b>Mayús-c</b>\nMueva el recorte <b>arrastrando el ratón</b>\nCambie el tamaño del recorte moviendo los bordes del recorte.
 TOOLBAR_TOOLTIP_HAND;Herramienta mano.\nAtajo: <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Corrección de perspectiva</b>.\nAtajo: <b>Mayús-p</b>\n\nEdite las líneas de control para corregir la distorsión de la perspectiva. Haga clic en este botón de nuevo para aplicar la corrección.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Enderezar</b> / <b>Rotación precisa</b>.\nAtajo: <b>Mayús-s</b>\n\nIndique la vertical u horizontal dibujando una línea guía sobre la vista previa de la imagen. El ángulo de rotación se mostrará junto a la línea guía. El centro de rotación es el centro geométrico de la imagen.
@@ -1608,7 +1609,7 @@ TP_LABMASKS_DELTAE_PICK;Escoger
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Peso en el cálculo ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Seleccione las regiones de color similar\n(según la métrica CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Máscara de pincel
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Cambie cómo pinta el pincel en el lienzo.\n\n<i>Si se usa el ratón:</i>\n- Mantenga pulsado <b>Mayús</b> para activar temporalmente el "Modo borrador";\n- Mantenga pulsado <b>Alt</b> para dibujar una línea recta;\n- Use <b>Ctrl+rueda del ratón</b> para cambiar el radio del pincel,\n- <b>Ctrl+Mayús+rueda del ratón</b> para cambiar la dureza del pincel,\n- y <b>Ctrl+clic</b> para comenzar un nuevo grupo de trazos sin cambiar los parámetros\n(de modo que se sumen varios trazos en la misma área);\n- Use el <b>tercer botón</b> para desactivar la pintura en el lienzo.\n\n<i>Si se usa un dispositivo sensible a la presión:</i>n- Use el <b>primer botón</b> para cambiar al "Modo borrador";\n- Mantenga pulsado <b>Alt</b> para dibujar una línea recta;\n- Use <b>Alt+primer botón</b> para aumentar el radio del pincel, y\n- <b>Alt+segundo botón</b> para reducirlo;\n- Use el <b>segundo botón</b> para recorrer los modos de sensibilidad a la presión disponibles: inactivo, dureza, radio (mantenga pulsado <b>Mayús</b> para invertir la dirección);\n- Use <b>Ctrl+segundo botón</b> para desactivar la pintura en el lienzo.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Cambie cómo pinta el pincel en el lienzo.\n\n<i>Si se usa el ratón:</i>\n- Mantenga pulsado <b>Alt</b> para activar temporalmente el "Modo borrador";\n- Mantenga pulsado <b>Mayús</b> para dibujar una línea recta;\n- Use <b>Ctrl+rueda del ratón</b> para cambiar el radio del pincel,\n- <b>Ctrl+Mayús+rueda del ratón</b> para cambiar la dureza del pincel,\n- y <b>Ctrl+clic</b> para comenzar un nuevo grupo de trazos sin cambiar los parámetros\n(de modo que se sumen varios trazos en la misma área);\n- Use el <b>tercer botón</b> para desactivar la pintura en el lienzo.\n\n<i>Si se usa un dispositivo sensible a la presión:</i>n- Use el <b>primer botón</b> para cambiar al "Modo borrador";\n- Mantenga pulsado <b>Mayús</b> para dibujar una línea recta;\n- Use <b>Alt+primer botón</b> para aumentar el radio del pincel, y\n- <b>Alt+segundo botón</b> para reducirlo;\n- Use el <b>segundo botón</b> para recorrer los modos de sensibilidad a la presión disponibles: inactivo, dureza, radio (mantenga pulsado <b>Mayús</b> para invertir la dirección);\n- Use <b>Ctrl+segundo botón</b> para desactivar la pintura en el lienzo.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Ajustes de pincel
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Borrar todos los trazos
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Borrar el último grupo de trazos

@@ -834,7 +834,7 @@ MAIN_TOOLTIP_PREVIEWG;Affichage du <b>canal Vert</b>\nRaccourci : <b>Shift-g</b>
 MAIN_TOOLTIP_PREVIEWL;Affichage de la <b>Luminosité</b>\nRaccourci : <b>Shift-v</b>\n\n0.299*R + 0.587*V + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Affichage du <b>canal Rouge</b>\nRaccourci : <b>Shift-r</b>
 MAIN_TOOLTIP_PREVIEWSHARPMASK;Prévisualiser le <b>masque de contraste de netteté</b>.\nRaccourci : <b>Shift-o</b>\n\nNe fonctionne que si l'outil Netteté est activé et pour un zoom >= 100%.
-MAIN_TOOLTIP_QINFO;Informations rapides sur l'image\nRaccourci : <b>i</b>
+MAIN_TOOLTIP_QINFO;Informations rapides sur l'image\nRaccourci : <b>Shift-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Montrer/Cacher le panneau gauche\nRaccourci : <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Afficher/Cacher le panneau droit\nRaccourci : <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Afficher/Cacher le panneau supérieur\nRaccourci : <b>Shift-L</b>
@@ -1249,7 +1249,7 @@ THRESHOLDSELECTOR_TL;Haut-Gauche
 THRESHOLDSELECTOR_TR;Haut-droite
 TOOL_SHORTCUT_HELP_HEADER;Tool shortcuts:\n(hold the given key and adjust the slider with +/- or the scrollwheel)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Ancre de Vérification Couleur\n\nSi activé:\n- Ajouter une ancre : <b>clic-gauche</b>.\n- Déplacer une ancre : <b>clic-gauche et glisser</b>.\n- Supprimer une ancre : <b>clic-droit</b>.\n- Supprimer toutes les ancres : <b>ctrl</b>+<b>shift</b>+<b>clic-droit</b>.\n- Revenir au mode Déplacement : <b>clic-droit</b> en dehors de toute ancre.
-TOOLBAR_TOOLTIP_CROP;Sélection du rognage\nRaccourci : <b>Shift-c</b>\nDéplacez le rognage en utilisant Shift + Glisser
+TOOLBAR_TOOLTIP_CROP;Sélection du rognage\nRaccourci : <b>Shift-c</b>\nDéplacez le rognage en utilisant <b>déplaçant la souris</b>\nRedimensionner le rognage en déplaçant les bordures.
 TOOLBAR_TOOLTIP_HAND;Outil de navigation\nRaccourci : <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correction de Perspective</b>.\nRaccourci : <b>Shift-p</b>\n\nEditer les lignes de contrôle pour corriger la distortion de perspective. Cliquez à nouveau sur le bouton pour appliquer les corrections.
 TOOLBAR_TOOLTIP_STRAIGHTEN;Réglage de l'horizon\nRaccourci : <b>Shift-s</b>\n\nIndiquez la verticale ou l'horizontale en dessinant une ligne à travers l'image. L'angle de rotation sera affiché près de la ligne guide. Le centre de rotation est le centre géométrique de l'image.

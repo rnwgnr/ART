@@ -8,6 +8,7 @@
 #07 2021-05-21 mrleemon, update for 1.9
 #08 2021-07-08 mrleemon, update for 1.9.3
 #09 2021-10-07 mrleemon, update for 1.10
+#10 2021-10-09 mrleemon, some fixes
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -846,7 +847,7 @@ MAIN_TOOLTIP_PREVIEWG;Vista prèvia del <b>canal verd</b>.\nDrecera: <b>Majús-g
 MAIN_TOOLTIP_PREVIEWL;Vista prèvia de la <b>lluminositat</b>.\nDrecera: <b>Majús-v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Vista prèvia del <b>canal vermell</b>.\nDrecera: <b>Majús-r</b>
 MAIN_TOOLTIP_PREVIEWSHARPMASK;Vista prèvia de la <b>màscara de contrast d'enfocament</b>.\nDrecera: <b>Majús-o</b>\n\nNomés funciona quan s'activa l'enfocament, i és precisa només quan el zoom >= 100%.
-MAIN_TOOLTIP_QINFO;Informació breu sobre la imatge.\nDrecera: <b>i</b>
+MAIN_TOOLTIP_QINFO;Informació breu sobre la imatge.\nDrecera: <b>Majús-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostra/Oculta el panell esquerre.\nDrecera: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Mostra/Oculta el panell dret.\nDrecera: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Mostra/Oculta el panell superior.\nDrecera: <b>Majús-l</b>
@@ -1261,7 +1262,7 @@ THRESHOLDSELECTOR_TL;Superior esquerre
 THRESHOLDSELECTOR_TR;Superior dret
 TOOL_SHORTCUT_HELP_HEADER;Dreceres d'eina:\n(manteniu premuda la tecla indicada i ajusteu el control lliscant mitjançant +/- o la roda del ratolí)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Selector de color bloquejablee\n\nQuan l'eina està activa:\n- Afegeix un selector: <b>clic amb el botó esquerre del ratolí</b>.\n- Arrossega un selector: <b>clic amb el botó esquerre del ratolí i arrossegar</b>.\n- Elimina un selector: <b>clic amb el botó dret de ratolí</b>.\n- Elimina tots els selectors: <b>Ctrl</b>+<b>Majús</b>+<b>clic amb el botó dret del ratolí</b>.\n- Torna a l'eina mà: <b>clic amb el botó dret del ratolí</b> fora de qualsevol selector.
-TOOLBAR_TOOLTIP_CROP;Selecció de <b>retallada</b>.\nDrecera: <b>Majús-c</b>\nMoveu la retallada mitjançant <b>Majús</b>+<b>arrossegament del ratolí</b>\nCanvieu la mida de la retallada mitjançant <b>Ctrl</b>+<b>arrossegament del ratolí</b>.
+TOOLBAR_TOOLTIP_CROP;Selecció de <b>retallada</b>.\nDrecera: <b>Majús-c</b>\nMoveu la retallada <b>arrossegant el ratolí</b>\nCanvieu la mida de la retallada movent les vores de la retallada.
 TOOLBAR_TOOLTIP_HAND;Eina mà.\nDrecera: <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correcció de perspectiva</b>.\nDrecera: <b>Majús-p</b>\n\nEditeu les línies de control per corregir la distorsió de la perspectiva. Cliqueu aquest botó de nou per aplicar la correcció.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Redreça</b> / <b>Rotació precisa</b>.\nDrecera: <b>Majús-s</b>\n\nIndiqueu la vertical o horitzontal dibuixant una línia guia sobre la vista prèvia de la imatge. L'angle de rotació es mostrarà al costat de la línia guia. El centre de rotació és el centre geomètric de la imatge.
@@ -1605,7 +1606,7 @@ TP_LABMASKS_DELTAE_PICK;Tria
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Pes en el càlcul ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Seleccioneu les regions de color similar\n(segons la mètrica CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Màscara de pinzell
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Canvieu com pinta el pinzell en el llenç.\n\n<i>Si s'utilitza el ratolí:</i>\n- Premeu <b>Majús</b> per activar temporalment el "Mode esborrador";\n- Premeu <b>Alt</b> per traçar una línia recta;\n- Utilitzeu <b>Ctrl+roda del ratolí</b> per canviar el radi del pinzell,\n- <b>Ctrl+Majús+roda del ratolí</b> per canviar la duresa del pinzell,\n- i <b>Ctrl+clic</b> per començar un nou grup de traços sense canviar els paràmetres\n(de manera que se sumin diversos traços a la mateixa àrea);\n- Utilitzeu el <b>tercer botó</b> per desactivar la pintura en el llenç.\n\n<i>Si es fa servir un dispositiu sensible a la pressió:</i>n- Utilitzeu el <b>primer botó</b> per canviar al "Mode esborrador";\n- Premeu <b>Alt</b> per traçar una línia recta;\n- Utilitzeu <b>Alt+primer botó</b> per augmentar el radi del pinzell, i\n- <b>Alt+segon botó</b> per reduir-lo;\n- Utilitzeu el <b>segon botó</b> per recórrer els modes de sensibilitat a la pressió disponibles: inactiu, duresa, radi (premeu <b>Majús</b> per invertir la direcció);\n- Utilitzeu <b>Ctrl+segon botó</b> per desactivar la pintura en el llenç.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Canvieu com pinta el pinzell en el llenç.\n\n<i>Si s'utilitza el ratolí:</i>\n- Premeu <b>Alt</b> per activar temporalment el "Mode esborrador";\n- Premeu <b>Majús</b> per traçar una línia recta;\n- Utilitzeu <b>Ctrl+roda del ratolí</b> per canviar el radi del pinzell,\n- <b>Ctrl+Majús+roda del ratolí</b> per canviar la duresa del pinzell,\n- i <b>Ctrl+clic</b> per començar un nou grup de traços sense canviar els paràmetres\n(de manera que se sumin diversos traços a la mateixa àrea);\n- Utilitzeu el <b>tercer botó</b> per desactivar la pintura en el llenç.\n\n<i>Si es fa servir un dispositiu sensible a la pressió:</i>n- Utilitzeu el <b>primer botó</b> per canviar al "Mode esborrador";\n- Premeu <b>Majús</b> per traçar una línia recta;\n- Utilitzeu <b>Alt+primer botó</b> per augmentar el radi del pinzell, i\n- <b>Alt+segon botó</b> per reduir-lo;\n- Utilitzeu el <b>segon botó</b> per recórrer els modes de sensibilitat a la pressió disponibles: inactiu, duresa, radi (premeu <b>Majús</b> per invertir la direcció);\n- Utilitzeu <b>Ctrl+segon botó</b> per desactivar la pintura en el llenç.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Configuració de pinzell
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Esborra tots els traços
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Esborra l'últim grup de traços
