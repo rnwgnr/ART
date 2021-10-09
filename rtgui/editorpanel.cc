@@ -1842,10 +1842,10 @@ bool EditorPanel::keyPressedBefore(GdkEventKey *event)
     bool ctrl = event->state & GDK_CONTROL_MASK;
     int dx = 0, dy = 0;
     switch (event->keyval) {
-    case GDK_KEY_KP_Up: case GDK_KEY_Up: dy = 10; break;
-    case GDK_KEY_KP_Down: case GDK_KEY_Down: dy = -10; break;
-    case GDK_KEY_KP_Left: case GDK_KEY_Left: dx = 10; break;
-    case GDK_KEY_KP_Right: case GDK_KEY_Right: dx = -10; break;
+    case GDK_KEY_KP_Up: case GDK_KEY_Up: dy = -10; break;
+    case GDK_KEY_KP_Down: case GDK_KEY_Down: dy = 10; break;
+    case GDK_KEY_KP_Left: case GDK_KEY_Left: dx = -10; break;
+    case GDK_KEY_KP_Right: case GDK_KEY_Right: dx = 10; break;
     }
     if (dx || dy) {
         if (ctrl && iareapanel->imageArea->getMainCropWindow()) {
