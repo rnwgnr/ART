@@ -475,6 +475,8 @@ public:
 
     int sidecar_autosave_interval; // in seconds
 
+    int editor_keyboard_scroll_step; // in pixels
+
     Options();
 
     Options *copyFrom(Options *other);

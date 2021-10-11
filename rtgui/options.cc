@@ -650,6 +650,8 @@ void Options::setDefaults()
 
     renaming = RenameOptions();
     sidecar_autosave_interval = 0;
+
+    editor_keyboard_scroll_step = 50;
 }
 
 Options* Options::copyFrom(Options* other)
@@ -757,6 +759,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("General", "MaxErrorMessages")) {
                     max_error_messages = keyFile.get_integer("General", "MaxErrorMessages");
+                }
+
+                if (keyFile.has_key("General", "EditorKeyboardScrollStep")) {
+                    editor_keyboard_scroll_step = keyFile.get_integer("General", "EditorKeyboardScrollStep");
                 }
             }
 
@@ -1934,6 +1940,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("General", "Verbose", rtSettings.verbose);
         keyFile.set_integer("General", "ErrorMessageDuration", error_message_duration);
         keyFile.set_integer("General", "MaxErrorMessages", max_error_messages);
+        keyFile.set_integer("General", "EditorKeyboardScrollStep", editor_keyboard_scroll_step);
         keyFile.set_integer("External Editor", "EditorKind", editorToSendTo);
         keyFile.set_string("External Editor", "GimpDir", gimpDir);
         keyFile.set_string("External Editor", "PhotoshopDir", psDir);
