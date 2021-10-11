@@ -720,7 +720,7 @@ ICCPROFCREATOR_TRC_PRESET;Toonresponscurve:
 INSPECTOR_ENABLE_CMS;Activeer kleurbeheer.
 INSPECTOR_FOCUS_MASK;Focusmasker.\nSneltoets: <b>Shift+f</b>.
 INSPECTOR_HISTOGRAM;Histogram.\nSneltoets: <b>h</b>.
-INSPECTOR_INFO;Snelle info.\nSneltoets: <b>i</b>
+INSPECTOR_INFO;Snelle info.\nSneltoets: <b>Shift+i</b>
 INSPECTOR_PREVIEW;Ingebed voorbeeld.\nSneltoets: <b>j</b>.
 INSPECTOR_RAW_CLIP;Raw afgekapte pixels.\nSneltoets: <b>w</b>.
 INSPECTOR_RAW_FILM;Snelle raw-rendering met filmachtige tooncurve.\nSneltoets: <b>f</b>.
@@ -849,7 +849,7 @@ MAIN_TOOLTIP_PREVIEWG;Bekijk het <b>groene kanaal</b>.\nSneltoets: <b>Shift+g</b
 MAIN_TOOLTIP_PREVIEWL;Bekijk de <b>Luminositeit</b>.\nSneltoets: <b>Shift+v</b>\n\n0,299*R + 0,587*G + 0,114*B
 MAIN_TOOLTIP_PREVIEWR;Bekijk het <b>rode kanaal</b>.\nSneltoets: <b>Shift+r</b>
 MAIN_TOOLTIP_PREVIEWSHARPMASK;Bekijk het <b>scherptecontrastmasker</b>.\nSneltoets: <b>Shift-o</b>\nWerkt alleen als verscherping is geactiveerd en is slechts accuraat bij een zoomniveau >= 100%.
-MAIN_TOOLTIP_QINFO;Beknopte fotogegevens\nSneltoets: <b>i</b>
+MAIN_TOOLTIP_QINFO;Beknopte fotogegevens\nSneltoets: <b>Shift+i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Toon/verberg linkerpaneel.\nSneltoets: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Toon/verberg rechterpaneel\nSneltoets: <b>Ctrl+l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Toon/verberg bovenste paneel\nSneltoets: <b>Shift+l</b>
@@ -1259,7 +1259,7 @@ THRESHOLDSELECTOR_TL;Bovenkant-links
 THRESHOLDSELECTOR_TR;Bovenkant-rechts
 TOOL_SHORTCUT_HELP_HEADER;Gereedschapssneltoetsen:\n(druk een zekere toets en pas de schuif aan met +/- of het muiswiel)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Vergrendelbare kleurenkiezer\n\nIndien geactiveerd:\nVoeg kiezer toe: <b>linksklik</b>\nVerplaats kiezer:<b>linksklik en sleep</b>\nVerwijder kiezer: <b>rechtsklik</b>op een kiezer\nVerwijder alle kiezers:<b>Ctrl+Shift+rechtsklik</b> op een kiezer\nTerug naar handgereedschap: <b>rechtsklik</b> buiten een kiezer.
-TOOLBAR_TOOLTIP_CROP;<b>Snij selectie bij.\nSneltoets: <b>Shift+c</b>\nVerplaats uitsnede met <b>Shift+linkermuisklik</b>\nGrootte uitsnede wijzigen: <b>Ctrl+muis</b>.
+TOOLBAR_TOOLTIP_CROP;<b>Snij selectie bij.\nSneltoets: <b>Shift+c</b>\nVerplaats uitsnede met <b>linkermuisklik</b>\nWijzig grootte uitsnede door de randen te verplaatsen.
 TOOLBAR_TOOLTIP_HAND;Handgereedschap.\nSneltoets: <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Perspectiefcorrectie</b>.\nSneltoets: <b>Shift+p</b>\n\nBewerk controlelijnen om perspectivische vervorming te corrigeren. Klik opnieuw op deze knop om de correctie toe te passen.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Rechtzetten</b> / <b>Kleine rotaties</b>.\nSneltoets: <b>Shift+s</b>\n\nBepaal de verticale of horizontale as door een hulplijn over de foto te trekken met de Ctrl-toets ingedrukt. De rotatiehoek wordt naast de hulplijn getoond. Het draaicentrum is het geometrische midden van de afbeelding.
