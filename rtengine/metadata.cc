@@ -711,6 +711,9 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
     try {
         subprocess::exec_sync("", argv, true, nullptr, nullptr);
     } catch (subprocess::error &exc) {
+        if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
+            g_remove(outname.c_str());
+        }
         return ret;
     }
 
