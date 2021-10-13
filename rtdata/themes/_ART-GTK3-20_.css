@@ -127,3 +127,7 @@ checkbutton check, radiobutton radio {
     border-color: rgb(0,0,0);
     border-width: 0.05ex;
 }
+
+.app-notification {
+    background-color: rgba(0, 0, 0, 0.7);
+}
