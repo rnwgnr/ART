@@ -118,7 +118,9 @@ def main():
                 name = os.path.basename(elem)
             if opts.verbose:
                 print('copying: %s' % elem)
-            if os.path.isdir(elem):
+            if not os.path.exists(elem):
+                print('SKIPPING non-existing: %s' % elem)
+            elif os.path.isdir(elem):
                 shutil.copytree(elem, os.path.join(opts.outdir, key, name))
             else:
                 dest = os.path.join(opts.outdir, key, name)
