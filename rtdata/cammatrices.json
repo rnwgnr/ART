@@ -1070,7 +1070,7 @@ SONY XPERIA 5 WIDE-ANGLE CAMERA
     },
     {
         "make_model" : "CANON EOS 90D",
-        "dcraw_matrix" : [11498, -3759, -1516, -5073, 12954, 2349, -892, 1867, 6118]
+        "dcraw_matrix" : [7753, -1152, -957, -4715,  11850,  3130,  -1295,  2301,  6723]
     },
     {
         "make_model" : "CANON EOS D30",
