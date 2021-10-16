@@ -227,7 +227,7 @@ void LocalContrast::read(const ProcParams *pp)
         regionData.emplace_back(rtengine::procparams::LocalContrastParams::Region());
         m.emplace_back(rtengine::procparams::Mask());
     }
-    labMasks->setMasks(m, pp->localContrast.showMask);
+    labMasks->setMasks(m, pp->localContrast.selectedRegion);
 
     enableListener();
 }
@@ -239,6 +239,7 @@ void LocalContrast::write(ProcParams *pp)
     regionGet(labMasks->getSelected());
     pp->localContrast.regions = regionData;
     labMasks->getMasks(pp->localContrast.labmasks, pp->localContrast.showMask);
+    pp->localContrast.selectedRegion = labMasks->getSelected();
     assert(pp->localContrast.regions.size() == pp->localContrast.labmasks.size());
     labMasks->updateSelected();
 }

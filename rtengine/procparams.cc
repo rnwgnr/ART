@@ -1661,7 +1661,8 @@ LocalContrastParams::LocalContrastParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -1940,7 +1941,8 @@ TextureBoostParams::TextureBoostParams() :
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -2705,7 +2707,8 @@ SmoothingParams::SmoothingParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -2773,7 +2776,8 @@ ColorCorrectionParams::ColorCorrectionParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -3423,7 +3427,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Local Contrast", Glib::ustring("Curve") + n, r.curve, keyFile);
                 localContrast.labmasks[j].save(keyFile, "Local Contrast", "", n);
             }
-            saveToKeyfile("Local Contrast", "showMask", localContrast.showMask, keyFile);
+            saveToKeyfile("Local Contrast", "ShowMask", localContrast.showMask, keyFile);
+            saveToKeyfile("Local Contrast", "SelectedRegion", localContrast.selectedRegion, keyFile);
         }
 
 
@@ -3585,7 +3590,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("TextureBoost", Glib::ustring("Iterations") + n, r.iterations, keyFile);
                 textureBoost.labmasks[j].save(keyFile, "TextureBoost", "", n);
             }
-            saveToKeyfile("TextureBoost", "showMask", textureBoost.showMask, keyFile);
+            saveToKeyfile("TextureBoost", "ShowMask", textureBoost.showMask, keyFile);
+            saveToKeyfile("TextureBoost", "SelectedRegion", textureBoost.selectedRegion, keyFile);
         }
 
 // Fattal
@@ -3837,6 +3843,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
+            saveToKeyfile("Smoothing", "SelectedRegion", smoothing.selectedRegion, keyFile);
         }
 
 // ColorCorrection
@@ -3884,7 +3891,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
-            saveToKeyfile("ColorCorrection", "showMask", colorcorrection.showMask, keyFile);
+            saveToKeyfile("ColorCorrection", "ShowMask", colorcorrection.showMask, keyFile);
+            saveToKeyfile("ColorCorrection", "SelectedRegion", colorcorrection.selectedRegion, keyFile);
         }
         
 // Raw
@@ -4383,6 +4391,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(localContrast.regions.size() == localContrast.labmasks.size());
             assignFromKeyfile(keyFile, "Local Contrast", "ShowMask", localContrast.showMask);
+            assignFromKeyfile(keyFile, "Local Contrast", "SelectedRegion", localContrast.selectedRegion);
         }
 
         if (keyFile.has_group("Luminance Curve") && RELEVANT_(labCurve)) {
@@ -4568,6 +4577,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(textureBoost.regions.size() == textureBoost.labmasks.size());
             assignFromKeyfile(keyFile, tbgroup, "ShowMask", textureBoost.showMask);
+            assignFromKeyfile(keyFile, tbgroup, "SelectedRegion", textureBoost.selectedRegion);
         }
 
         if (keyFile.has_group("FattalToneMapping") && RELEVANT_(fattal)) {
@@ -5065,6 +5075,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(smoothing.regions.size() == smoothing.labmasks.size());
             assignFromKeyfile(keyFile, smoothing_group, "ShowMask", smoothing.showMask);
+            assignFromKeyfile(keyFile, smoothing_group, "SelectedRegion", smoothing.selectedRegion);
         }
 
         const char *ccgroup = "ColorCorrection";
@@ -5198,6 +5209,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(colorcorrection.regions.size() == colorcorrection.labmasks.size());
             assignFromKeyfile(keyFile, ccgroup, ppVersion < 348 ? "showMask" : "LabRegionsShowMask", colorcorrection.showMask);
+            assignFromKeyfile(keyFile, ccgroup, "SelectedRegion", colorcorrection.selectedRegion);
         }
 
         if (keyFile.has_group("RAW")) {

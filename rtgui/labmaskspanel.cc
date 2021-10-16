@@ -2216,7 +2216,7 @@ void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &mask
     
     masks_ = masks;
     selected_ = 0;
-    if (show_mask_idx >= 0) {
+    if (show_mask_idx >= 0 && size_t(show_mask_idx) < masks.size()) {
         selected_ = show_mask_idx;
         showMask->set_active(true);
     } else {

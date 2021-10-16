@@ -585,6 +585,7 @@ struct LocalContrastParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     LocalContrastParams();
 
@@ -743,6 +744,7 @@ struct TextureBoostParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     TextureBoostParams();
 
@@ -1253,6 +1255,7 @@ struct SmoothingParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     SmoothingParams();
 
@@ -1292,6 +1295,7 @@ struct ColorCorrectionParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     ColorCorrectionParams();
     bool operator==(const ColorCorrectionParams &other) const;

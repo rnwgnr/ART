@@ -411,7 +411,7 @@ void ColorCorrection::read(const ProcParams *pp)
         data.emplace_back(rtengine::procparams::ColorCorrectionParams::Region());
         m.emplace_back(rtengine::procparams::Mask());
     }
-    labMasks->setMasks(m, pp->colorcorrection.showMask);
+    labMasks->setMasks(m, pp->colorcorrection.selectedRegion);
 
     modeChanged();
     enabledChanged();
@@ -428,6 +428,7 @@ void ColorCorrection::write(ProcParams *pp)
     pp->colorcorrection.regions = data;
 
     labMasks->getMasks(pp->colorcorrection.labmasks, pp->colorcorrection.showMask);
+    pp->colorcorrection.selectedRegion = labMasks->getSelected();
     assert(pp->colorcorrection.regions.size() == pp->colorcorrection.labmasks.size());
 
     labMasks->updateSelected();
