@@ -63,7 +63,11 @@ namespace {
 
 bool has_modifiers(GdkEventKey *event)
 {
-    return event->state & (GDK_CONTROL_MASK|GDK_MOD1_MASK|GDK_MOD2_MASK|GDK_MOD5_MASK);
+#if defined(__APPLE__)
+    return event->state & (GDK_CONTROL_MASK|GDK_MOD1_MASK|GDK_MOD2_MASK);
+#else
+    return event->state & (GDK_CONTROL_MASK|GDK_MOD1_MASK);
+#endif
 }
 
 enum {
