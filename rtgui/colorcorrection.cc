@@ -115,7 +115,6 @@ public:
     bool resetPressed(int idx) override
     {
         parent_->data[idx] = ColorCorrectionParams::Region();
-        //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
 
@@ -411,7 +410,7 @@ void ColorCorrection::read(const ProcParams *pp)
         data.emplace_back(rtengine::procparams::ColorCorrectionParams::Region());
         m.emplace_back(rtengine::procparams::Mask());
     }
-    labMasks->setMasks(m, pp->colorcorrection.selectedRegion);
+    labMasks->setMasks(m, pp->colorcorrection.selectedRegion, pp->colorcorrection.showMask >= 0 && pp->colorcorrection.showMask == pp->colorcorrection.selectedRegion);
 
     modeChanged();
     enabledChanged();

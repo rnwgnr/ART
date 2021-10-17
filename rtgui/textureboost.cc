@@ -211,7 +211,7 @@ void TextureBoost::read(const ProcParams *pp)
         data.emplace_back(rtengine::procparams::TextureBoostParams::Region());
         m.emplace_back(rtengine::procparams::Mask());
     }
-    labMasks->setMasks(m, pp->textureBoost.selectedRegion);
+    labMasks->setMasks(m, pp->textureBoost.selectedRegion, pp->textureBoost.showMask >= 0 && pp->textureBoost.showMask == pp->textureBoost.selectedRegion);
 
     enableListener();
 }

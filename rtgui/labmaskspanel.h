@@ -105,7 +105,7 @@ public:
     LabMasksPanel(LabMasksContentProvider *cp);
     ~LabMasksPanel();
 
-    void setMasks(const std::vector<rtengine::procparams::Mask> &masks, int show_mask_idx);
+    void setMasks(const std::vector<rtengine::procparams::Mask> &masks, int selected_idx, bool show_mask);
     void getMasks(std::vector<rtengine::procparams::Mask> &masks, int &show_mask_idx);
     int getSelected();
 

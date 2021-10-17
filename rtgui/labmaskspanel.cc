@@ -2209,18 +2209,19 @@ void LabMasksPanel::adjusterAutoToggled(Adjuster *a, bool newval)
 }
 
 
-void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int show_mask_idx)
+void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int selected_idx, bool show_mask)
 {
     disableListener();
     ConnectionBlocker b(selectionConn);
     
     masks_ = masks;
     selected_ = 0;
-    if (show_mask_idx >= 0 && size_t(show_mask_idx) < masks.size()) {
-        selected_ = show_mask_idx;
-        showMask->set_active(true);
-    } else {
-        showMask->set_active(false);
+    showMask->set_active(false);
+    if (selected_idx >= 0 && size_t(selected_idx) < masks.size()) {
+        selected_ = selected_idx;
+        if (show_mask) {
+            showMask->set_active(true);
+        }
     }
     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(nullptr);
     populateList();
