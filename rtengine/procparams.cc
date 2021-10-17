@@ -2742,6 +2742,7 @@ ColorCorrectionParams::Region::Region():
     sat{0,0,0},
     factor{0,0,0},
     rgbluminance(false),
+    hueshift(0),
     mode(ColorCorrectionParams::Mode::YUV)
 {
 }
@@ -2762,6 +2763,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
         && sat == other.sat
         && factor == other.factor
         && rgbluminance == other.rgbluminance
+        && hueshift == other.hueshift
         && mode == other.mode;
 }
 
@@ -3888,6 +3890,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("Power_") + n, l.power[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Pivot_") + n, l.pivot[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("HueShift_") + n, l.hueshift, keyFile);
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
@@ -5194,6 +5197,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     found = true;
                     done = false;
                 }
+                get("HueShift_", cur.hueshift);
                 if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
                     found = true;
                     done = false;

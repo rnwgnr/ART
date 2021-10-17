@@ -146,14 +146,14 @@ public:
                 {
                     return Glib::ustring::compose("{s=%1,o=%2,p=%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("HSL S=%4 So=%5\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation);
+            return Glib::ustring::compose("HSL S=%4 So=%5 h=%6\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation, r.hueshift);
         }   break;
         default: {
             const auto round_ab = [](float v) -> float
                                   {
                                       return int(v * 1000) / 1000.f;
                                   };
-            return Glib::ustring::compose("x=%1 y=%2 S=%3 So=%8\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation);
+            return Glib::ustring::compose("x=%1 y=%2 S=%3 So=%8 h=%9\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation, r.hueshift);
         }   break;
         }
     }
@@ -223,6 +223,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvPivot = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PIVOT");
     EvMode = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_MODE");
     EvRgbLuminance = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE");
+    EvHueShift = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_HUESHIFT");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK");
@@ -252,6 +253,10 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_COLORCORRECTION_MODE") + ": ")), Gtk::PACK_SHRINK);
     hb->pack_start(*mode);
     box->pack_start(*hb);
+
+    hueshift = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_HUESHIFT"), -180, 180, 0.1, 0));
+    box->pack_start(*hueshift, Gtk::PACK_SHRINK, 4);
+    hueshift->setAdjusterListener(this);
     
     box_combined = Gtk::manage(new Gtk::VBox());
     box_rgb = Gtk::manage(new Gtk::VBox());
@@ -372,7 +377,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
     box_hsl->pack_start(*box_hsl_h);
 
-        
+    hueshift->delay = options.adjusterMaxDelay;
     inSaturation->delay = options.adjusterMaxDelay;
     outSaturation->delay = options.adjusterMaxDelay;
     slope->delay = options.adjusterMaxDelay;
@@ -436,6 +441,7 @@ void ColorCorrection::write(ProcParams *pp)
 
 void ColorCorrection::setDefaults(const ProcParams *defParams)
 {
+    hueshift->setDefault(defParams->colorcorrection.regions[0].hueshift);
     inSaturation->setDefault(defParams->colorcorrection.regions[0].inSaturation);
     outSaturation->setDefault(defParams->colorcorrection.regions[0].outSaturation);
     slope->setDefault(defParams->colorcorrection.regions[0].slope[0]);
@@ -469,6 +475,8 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
         evt = EvPower;
     } else if (a == pivot) {
         evt = EvPivot;
+    } else if (a == hueshift) {
+        evt = EvHueShift;
     } else {
         Adjuster **targets = nullptr;
         for (int c = 0; c < 3; ++c) {
@@ -593,6 +601,7 @@ void ColorCorrection::regionGet(int idx)
     }
     r.inSaturation = inSaturation->getValue();
     r.outSaturation = outSaturation->getValue();
+    r.hueshift = hueshift->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         wheel->getParams(r.a, r.b, r.abscale);
         for (int c = 0; c < 3; ++c) {
@@ -640,6 +649,7 @@ void ColorCorrection::regionShow(int idx)
     }
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
+    hueshift->setValue(r.hueshift);
     if (wheel->isCurrentSubscriber()) {
         wheel->unsubscribe();
     }
@@ -678,6 +688,7 @@ void ColorCorrection::modeChanged()
     } else {
         box->pack_start(*box_hsl);
     }
+    hueshift->set_visible(mode->get_active_row_number() != 1);
     if (listener && getEnabled()) {
         labMasks->setEdited(true);        
         listener->panelChanged(EvMode, mode->get_active_text());

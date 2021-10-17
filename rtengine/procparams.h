@@ -1284,6 +1284,7 @@ struct ColorCorrectionParams {
         std::array<double, 3> sat;
         std::array<double, 3> factor;
         bool rgbluminance;
+        double hueshift;
         Mode mode;
 
         Region();

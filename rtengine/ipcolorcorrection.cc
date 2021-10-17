@@ -138,6 +138,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float rpivot[n][3];
     char rgbmode[n];
     bool enabled[n];
+    float rhs[n];
     for (int i = 0; i < n; ++i) {
         auto &r = params->colorcorrection.regions[i];
         rgbmode[i] = int(r.mode != ColorCorrectionParams::Mode::YUV);
@@ -202,6 +203,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 }
             }
         }
+        if (r.mode != ColorCorrectionParams::Mode::RGB) {
+            rhs[i] = r.hueshift * RT_PI_F_180;
+            if (rhs[i] != 0.f) {
+                enabled[i] = true;
+            }
+        } else {
+            rhs[i] = 0.f;
+        }
     }
 
     const float max_ws = max(ws[1][0], ws[1][1], ws[1][2]);
@@ -218,6 +227,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 const float *power = rpower[region];
                 const float *pivot = rpivot[region];
                 const float saturation = rs[region];
+                const float hueshift = rhs[region];
+
+                if (hueshift != 0.f) {
+                    float h, s;
+                    Color::yuv2hsl(u, v, h, s);
+                    h += hueshift;
+                    Color::hsl2yuv(h, s, u, v);
+                }
                 
                 if (rgbmode[region]) {
                     if (saturation != 1.f) {
@@ -304,6 +321,16 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 const float *power = rpower[region];
                 const float *pivot = rpivot[region];
                 const float saturation = rs[region];
+                const float hueshift = rhs[region];
+
+                if (hueshift != 0.f) {
+                    float h, s;
+                    for (int k = 0; k < 4; ++k) {
+                        Color::yuv2hsl(u[k], v[k], h, s);
+                        h += hueshift;
+                        Color::hsl2yuv(h, s, u[k], v[k]);
+                    }
+                }
                 
                 if (rgbmode[region]) {
                     if (saturation != 1.f) {
