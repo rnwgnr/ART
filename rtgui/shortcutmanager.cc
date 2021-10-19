@@ -166,7 +166,7 @@ bool ToolShortcutManager::scrollPressed(GdkEventScroll *event)
         }
 
         int dir = event->direction == GDK_SCROLL_DOWN ? DIRECTION_DOWN : DIRECTION_UP;
-        doit(dir);
+        doit(dir, options.adjuster_shortcut_scrollwheel_factor);
         return true;
     }
     return false;
@@ -179,7 +179,7 @@ bool ToolShortcutManager::shouldHandleScroll() const
 }
 
 
-void ToolShortcutManager::doit(int direction)
+void ToolShortcutManager::doit(int direction, int speed)
 {
     cur_tool_->disableListener();
     cur_tool_->setEnabled(true);
@@ -188,7 +188,7 @@ void ToolShortcutManager::doit(int direction)
     } else if (direction == DIRECTION_INITIAL) {
         cur_adjuster_->resetValue(true);
     } else {
-        cur_adjuster_->setValue(cur_adjuster_->getValue() + direction * cur_adjuster_->getStepValue());
+        cur_adjuster_->setValue(cur_adjuster_->getValue() + direction * cur_adjuster_->getStepValue() * speed);
     }
     Glib::ustring msg = cur_tool_->getUILabel() + ": " + cur_adjuster_->getLabel() + " = " + cur_adjuster_->getTextValue();
     parent_->showInfo(msg, 0.0);

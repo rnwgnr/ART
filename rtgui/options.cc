@@ -652,6 +652,7 @@ void Options::setDefaults()
     sidecar_autosave_interval = 0;
 
     editor_keyboard_scroll_step = 50;
+    adjuster_shortcut_scrollwheel_factor = 4;
 }
 
 Options* Options::copyFrom(Options* other)
@@ -763,6 +764,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("General", "EditorKeyboardScrollStep")) {
                     editor_keyboard_scroll_step = keyFile.get_integer("General", "EditorKeyboardScrollStep");
+                }
+
+                if (keyFile.has_key("General", "AdjusterShortcutScrollWheelFactor")) {
+                    adjuster_shortcut_scrollwheel_factor = keyFile.get_integer("General", "AdjusterShortcutScrollWheelFactor");
                 }
             }
 
@@ -1941,6 +1946,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("General", "ErrorMessageDuration", error_message_duration);
         keyFile.set_integer("General", "MaxErrorMessages", max_error_messages);
         keyFile.set_integer("General", "EditorKeyboardScrollStep", editor_keyboard_scroll_step);
+        keyFile.set_integer("General", "AdjusterShortcutScrollWheelFactor", adjuster_shortcut_scrollwheel_factor);
         keyFile.set_integer("External Editor", "EditorKind", editorToSendTo);
         keyFile.set_string("External Editor", "GimpDir", gimpDir);
         keyFile.set_string("External Editor", "PhotoshopDir", psDir);

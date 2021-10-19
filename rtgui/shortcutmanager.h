@@ -40,7 +40,7 @@ public:
     void showHelp();
 
 private:
-    void doit(int direction);
+    void doit(int direction, int speed=1);
     
     RTWindow *parent_;
     std::unordered_map<guint, std::pair<FoldableToolPanel *, Adjuster *>> action_map_;

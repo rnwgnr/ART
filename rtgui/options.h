@@ -476,6 +476,7 @@ public:
     int sidecar_autosave_interval; // in seconds
 
     int editor_keyboard_scroll_step; // in pixels
+    int adjuster_shortcut_scrollwheel_factor; // to control the adjustment step when using tool shortcuts with the mouse wheel
 
     Options();
 
