@@ -1205,6 +1205,8 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
         bc[i] = CLIP(intp(strength, b, std_b));
     }
 }
+
+
 float PerceptualToneCurve::cf_range[2];
 float PerceptualToneCurve::cf[1000];
 float PerceptualToneCurve::f, PerceptualToneCurve::c, PerceptualToneCurve::nc, PerceptualToneCurve::yb, PerceptualToneCurve::la, PerceptualToneCurve::xw, PerceptualToneCurve::yw, PerceptualToneCurve::zw;
@@ -1305,4 +1307,142 @@ void PerceptualToneCurve::initApplyState(PerceptualToneCurveState &state, const 
     }
 }
 
+
+//-----------------------------------------------------------------------------
+// Open Display Transform tone curve
+//
+// Adapted from
+//   https://github.com/jedypod/open-display-transform
+//
+// license of the original code
+/*
+Copyright (c) 2021 Jed Smith
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+namespace {
+
+typedef std::array<float, 3> float3;
+
+constexpr std::array<float3, 3> xyz_to_lms = {
+    float3({0.257085f, 0.859943f, -0.031061f}),
+    float3({-0.394427, 1.175800f, 0.106423f}),
+    float3({0.064856f, -0.07625f, 0.559067f})
+};
+
+constexpr std::array<float3, 3> lms_to_xyz = { 
+    float3({1.80794659f, -1.2997166f, 0.34785879f}),
+    float3({0.6178396f, 0.39595453f, -0.04104687f}),
+    float3({-0.1254696f, 0.20478038f, 1.74274183f})
+};
+
+constexpr float3 catd65 = {1.07046f, 0.916817f, 0.594251f};
+
+} // namespace
+
+
+OpenDisplayTransformToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, float whitept):
+    whitepoint(whitept)
+{
+    TMatrix Work = ICCStore::getInstance()->workingSpaceMatrix(workingSpace);
+    std::array<float3, 3> t1, t2;
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            t2[i][j] = Work[i][j];
+            t1[i][j] = d65_d50[i][j];
+        }
+    }
+
+    wp_to_lms = dotProduct(xyz_to_lms, dotProduct(t1, t2));
+
+    Work = ICCStore::getInstance()->workingSpaceInverseMatrix (workingSpace);
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            t1[i][j] = Work[i][j];
+            t2[i][j] = d50_d65[i][j];
+        }
+    }
+
+    lms_to_wp = dotProduct(t1, dotProduct(t2, lms_to_xyz));
 }
+
+
+void OpenDisplayTransformToneCurve::BatchApply(const size_t start, const size_t end, float *rc, float *gc, float *bc, const ApplyState &state) const
+{
+    // saturation adjustment factor
+    const float sat = 1.f + 0.2 * std::pow(0.1f, std::pow(LIM01((state.whitepoint-1.f)/40.f), 0.7f));
+
+    // R G B weights for vector length norm. Affects luminance and chroma of output color.
+    constexpr float3 vw = {0.25f, 0.1f, 0.09f};
+
+    // Normalization for weighted vector length norm so that achromatic values are not scaled
+    const float vwn = std::sqrt(SQR(vw[0]) + SQR(vw[1]) + SQR(vw[2]));
+
+    // highlight dechroma     
+    constexpr float dch = 0.5;
+
+    const float Lw = state.whitepoint * 100.f;
+    const float sx = 0.016f * std::pow(Lw, 0.87f) - 0.17f;
+
+    float3 rgb;
+    float3 lms;
+    
+    for (size_t i = start; i < end; ++i) {
+        rgb[0] = rc[i] / 65535.f;
+        rgb[1] = gc[i] / 65535.f;
+        rgb[2] = bc[i] / 65535.f;
+
+        // convert to Truelight LMS
+        lms = dotProduct(state.wp_to_lms, rgb);
+
+        // Normalize D65 white to equal energy        
+        for (int j = 0; j < 3; ++j) {
+            lms[j] /= catd65[j];
+        }
+
+        // Weighted vector length norm        
+        float n = std::sqrt(SQR(lms[0] * vw[0]) + SQR(lms[1] * vw[1]) + SQR(lms[2] * vw[2])) / vwn;
+
+        // avoid division by zero
+        n = max(n, 1e-5f);
+
+        // apply the curve
+        float nt = n * 65535.f;
+        curves::setLutVal(lutToneCurve, curve, nt);
+        nt /= 65535.f;
+
+        float f = nt / n;
+
+        for (int j = 0; j < 3; ++j) {
+            lms[j] *= f;
+        }
+
+        // Chroma compression factor
+        float ccf = std::pow(sx / (n + sx), dch) * sat;
+
+        // Compress chroma: chromaticity-linear desaturation by ccf
+        for (int j = 0; j < 3; ++j) {
+            lms[j] = nt * (1.0f - ccf) + lms[j] * ccf;
+        }
+
+        // back to RGB
+        for (int j = 0; j < 3; ++j) {
+            lms[j] *= catd65[j];
+        }
+        rgb = dotProduct(state.lms_to_wp, lms);
+
+        rc[i] = rgb[0] * 65535.f;
+        gc[i] = rgb[1] * 65535.f;
+        bc[i] = rgb[2] * 65535.f;
+    }
+}
+
+
+} // namespace rtengine

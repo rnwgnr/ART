@@ -1558,9 +1558,9 @@ bool ToneCurveParams::hasWhitePoint() const
             if (c.empty() || c[0] == DCT_Empty || c[0] == DCT_Linear) {
                 return true;
             }
-            return c[0] == DCT_Parametric && m != TcMode::SATANDVALBLENDING && m != TcMode::PERCEPTUAL;
+            return m != TcMode::SATANDVALBLENDING && m != TcMode::PERCEPTUAL;
         };
-    return !contrastLegacyMode && !histmatching && good(curve, curveMode) && good(curve2, curveMode2);
+    return !contrastLegacyMode && good(curve, curveMode) && good(curve2, curveMode2);
 }
 
 
@@ -3399,7 +3399,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 {ToneCurveParams::TcMode::SATANDVALBLENDING, "SatAndValueBlending"},
                 {ToneCurveParams::TcMode::WEIGHTEDSTD, "WeightedStd"},
                 {ToneCurveParams::TcMode::LUMINANCE, "Luminance"},
-                {ToneCurveParams::TcMode::PERCEPTUAL, "Perceptual"}
+                {ToneCurveParams::TcMode::PERCEPTUAL, "Perceptual"},
+                {ToneCurveParams::TcMode::ODT, "OpenDisplayTransform"}
             };
 
             saveToKeyfile("ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode, keyFile);
@@ -4174,7 +4175,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             {"SatAndValueBlending", ToneCurveParams::TcMode::SATANDVALBLENDING},
             {"WeightedStd", ToneCurveParams::TcMode::WEIGHTEDSTD},
             {"Luminance", ToneCurveParams::TcMode::LUMINANCE},
-            {"Perceptual", ToneCurveParams::TcMode::PERCEPTUAL}
+            {"Perceptual", ToneCurveParams::TcMode::PERCEPTUAL},
+            {"OpenDisplayTransform", ToneCurveParams::TcMode::ODT}
         };
 
         if (ppVersion < 350) {

@@ -80,6 +80,7 @@ ToneCurve::ToneCurve():
     toneCurveMode->append (M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
     toneCurveMode->append (M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     toneCurveMode->append (M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
+    toneCurveMode->append (M("TP_EXPOSURE_TCMODE_ODT"));
     toneCurveMode->set_active (0);
     toneCurveMode->set_tooltip_text(M("TP_EXPOSURE_TCMODE_LABEL1"));
 
@@ -120,6 +121,7 @@ ToneCurve::ToneCurve():
     toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
     toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
+    toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_ODT"));
     toneCurveMode2->set_active (0);
     toneCurveMode2->set_tooltip_text(M("TP_EXPOSURE_TCMODE_LABEL2"));
 
@@ -165,7 +167,7 @@ ToneCurve::ToneCurve():
     }
     contrast_legacy_box_->show_all();
 
-    whitePoint = Gtk::manage(new Adjuster(M("TP_TONECURVE_WHITEPOINT"), 1, 100.0, 0.1, 1.0));
+    whitePoint = Gtk::manage(new Adjuster(M("TP_TONECURVE_WHITEPOINT"), 1, 40.0, 0.1, 1.0));
     whitePoint->setAdjusterListener(this);
     whitePoint->setLogScale(10, 1);
     pack_start(*whitePoint);
@@ -177,6 +179,7 @@ ToneCurve::ToneCurve():
     mode_->append(M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
     mode_->append(M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     mode_->append(M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_ODT"));
     mode_->set_active(0);
     mode_->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::modeChanged), true);
     
@@ -308,6 +311,8 @@ void ToneCurve::write(ProcParams* pp)
         pp->toneCurve.curveMode = ToneCurveParams::TcMode::LUMINANCE;
     } else if (tcMode == 5) {
         pp->toneCurve.curveMode = ToneCurveParams::TcMode::PERCEPTUAL;
+    } else if (tcMode == 6) {
+        pp->toneCurve.curveMode = ToneCurveParams::TcMode::ODT;
     }
 
     if (legacy_curve_mode) {
@@ -326,6 +331,8 @@ void ToneCurve::write(ProcParams* pp)
         pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::LUMINANCE;
     } else if (tcMode == 5) {
         pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::PERCEPTUAL;
+    } else if (tcMode == 6) {
+        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::ODT;
     }
 
     pp->toneCurve.histmatching = histmatching->get_active();
