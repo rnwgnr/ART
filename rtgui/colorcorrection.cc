@@ -256,6 +256,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
 
     hueshift = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_HUESHIFT"), -180, 180, 0.1, 0));
     box->pack_start(*hueshift, Gtk::PACK_SHRINK, 4);
+    hueshift->setLogScale(90, 0, true);
     hueshift->setAdjusterListener(this);
     
     box_combined = Gtk::manage(new Gtk::VBox());
