@@ -1408,7 +1408,7 @@ void OpenDisplayTransformToneCurve::BatchApply(const size_t start, const size_t 
         }
 
         // Weighted vector length norm        
-        float n = std::sqrt(SQR(lms[0] * vw[0]) + SQR(lms[1] * vw[1]) + SQR(lms[2] * vw[2])) / vwn;
+        float n = xsqrt(SQR(lms[0] * vw[0]) + SQR(lms[1] * vw[1]) + SQR(lms[2] * vw[2])) / vwn;
 
         // avoid division by zero
         n = max(n, 1e-5f);
@@ -1425,7 +1425,7 @@ void OpenDisplayTransformToneCurve::BatchApply(const size_t start, const size_t 
         }
 
         // Chroma compression factor
-        float ccf = std::pow(sx / (n + sx), dch) * sat;
+        float ccf = pow_F(sx / (n + sx), dch) * sat;
 
         // Compress chroma: chromaticity-linear desaturation by ccf
         for (int j = 0; j < 3; ++j) {
