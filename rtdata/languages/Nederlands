@@ -725,7 +725,7 @@ INSPECTOR_PREVIEW;Ingebed voorbeeld.\nSneltoets: <b>j</b>.
 INSPECTOR_RAW_CLIP;Raw afgekapte pixels.\nSneltoets: <b>w</b>.
 INSPECTOR_RAW_FILM;Snelle raw-rendering met filmachtige tooncurve.\nSneltoets: <b>f</b>.
 INSPECTOR_RAW_LINEAR;Snelle raw-rendering met lineaire tooncurve.\nSneltoets: <b>r</b>.
-INSPECTOR_RAW_SHADOW;Snelle raw-rendering met tooncurve die de schaduwen versterkt.\nSneltoets: <b>s</b>.
+INSPECTOR_RAW_SHADOW;Snelle raw-rendering met tooncurve die de schaduwen opheldert.\nSneltoets: <b>s</b>.
 INSPECTOR_SPLIT;Splits weergave.\nSneltoets: <b>y</b>.
 INSPECTOR_ZOOM_11;Zoom tot 100%.\nSneltoets: <b>z</b>.
 INSPECTOR_ZOOM_FIT;Pas in venster.\nSneltoets: <b>x</b>.
