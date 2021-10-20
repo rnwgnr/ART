@@ -324,11 +324,13 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 const float hueshift = rhs[region];
 
                 if (hueshift != 0.f) {
-                    float h, s;
+                    float h, s, uk, vk;
                     for (int k = 0; k < 4; ++k) {
                         Color::yuv2hsl(u[k], v[k], h, s);
                         h += hueshift;
-                        Color::hsl2yuv(h, s, u[k], v[k]);
+                        Color::hsl2yuv(h, s, uk, vk);
+                        u[k] = uk;
+                        v[k] = vk;
                     }
                 }
                 
