@@ -550,7 +550,7 @@ void CropHandler::update ()
     }
 }
 
-void CropHandler::setEnabled (bool e)
+void CropHandler::setEnabled(bool e, bool do_update)
 {
 
     enabled = e;
@@ -565,8 +565,8 @@ void CropHandler::setEnabled (bool e)
         cropimgtrue.clear();
         cropPixbuf.clear();
         cimg.unlock();
-    } else {
-        update ();
+    } else if (do_update) {
+        update();
     }
 }
 

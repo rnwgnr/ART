@@ -2417,7 +2417,7 @@ void EditorPanel::beforeAfterToggled ()
             cw->setFitZoomEnabled(true);
             cw->addCropWindowListener(beforeIarea->imageArea);
             cw->setPosition(0, 0);
-            cw->enable();
+            cw->enable(false);
             cw->cropHandler.cropParams = iareapanel->imageArea->mainCropWindow->cropHandler.cropParams;
             beforeIarea->imageArea->mainCropWindow = cw;
         }

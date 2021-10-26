@@ -132,9 +132,9 @@ void CropWindow::initZoomSteps()
     zoomSteps.push_back(ZoomStep("1600%", 16, 16000, true));
 }
 
-void CropWindow::enable()
+void CropWindow::enable(bool do_update)
 {
-    cropHandler.setEnabled (true);
+    cropHandler.setEnabled(true, do_update);
 }
 
 void CropWindow::setPosition (int x, int y)
