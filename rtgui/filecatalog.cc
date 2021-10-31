@@ -36,6 +36,7 @@
 #include "batchqueue.h"
 #include "placesbrowser.h"
 #include "fastexport.h"
+#include "../rtengine/imagedata.h"
 
 using namespace std;
 
@@ -101,6 +102,7 @@ private:
 FileCatalog::FileCatalog(FilePanel* filepanel) :
     filepanel(filepanel),
     selectedDirectoryId(1),
+    refresh_counter_(1),
     actionNextPrevious(NAV_NONE),
     listener(nullptr),
     fslistener(nullptr),
@@ -109,7 +111,8 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     filterPanel(nullptr),
     previewsToLoad(0),
     previewsLoaded(0),
-    modifierKey(0)
+    modifierKey(0),
+    bqueue_(nullptr)
 {
     inTabMode = false;
 
@@ -473,29 +476,6 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     buttonBar->pack_start (*zoomBox, Gtk::PACK_SHRINK);
     buttonBar->pack_start (*Gtk::manage(new Gtk::VSeparator), Gtk::PACK_SHRINK);
 
-    // thumbOrder = Gtk::manage(new PopUpButton());
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_FILENAME"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_DATE"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_DATE_REV"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_MODTIME"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_MODTIME_REV"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_PROCTIME"));
-    // thumbOrder->addEntry("az-sort.png", M("THUMBNAIL_ORDER_PROCTIME_REV"));
-    // thumbOrder->setSelected(int(options.thumbnailOrder));
-    // thumbOrder->signal_changed().connect(
-    //     static_cast<sigc::slot<void, int>>(
-    //         [&](int sel) -> void
-    //         {
-    //             options.thumbnailOrder = Options::ThumbnailOrder(sel);
-    //             //reparseDirectory();
-    //             fileBrowser->sortThumbnails();
-    //         })
-    //     );
-    // setExpandAlignProperties(thumbOrder->buttonGroup, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
-    // thumbOrder->setRelief(Gtk::RELIEF_NONE);
-    // thumbOrder->show();
-    // buttonBar->pack_start(*thumbOrder->buttonGroup, Gtk::PACK_SHRINK);
-
     {
         thumbOrder = Gtk::manage(new Gtk::MenuButton());
         thumbOrder->set_image(*Gtk::manage(new RTImage("az-sort.png")));
@@ -505,10 +485,16 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
         const auto on_activate =
             [&]() -> void
             {
+                for (size_t i = 0; i < thumbOrderItems.size(); ++i) {
+                    auto l = static_cast<Gtk::Label *>(thumbOrderItems[i]->get_children()[0]);
+                    l->set_markup(thumbOrderLabels[i]);
+                }
                 int sel = thumbOrder->get_menu()->property_active();
                 auto mi = thumbOrder->get_menu()->get_active();
                 if (mi) {
-                    thumbOrder->set_tooltip_text(M("FILEBROWSER_SORT_LABEL") + ": " + mi->get_label());
+                    thumbOrder->set_tooltip_text(M("FILEBROWSER_SORT_LABEL") + ": " + thumbOrderLabels[sel]);
+                    auto l = static_cast<Gtk::Label *>(mi->get_children()[0]);
+                    l->set_markup("<b>" + thumbOrderLabels[sel] + "</b>");
                 }
                 options.thumbnailOrder = Options::ThumbnailOrder(sel);
                 fileBrowser->sortThumbnails();
@@ -519,6 +505,8 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
             {
                 Gtk::MenuItem *mi = Gtk::manage(new Gtk::MenuItem(lbl));
                 menu->append(*mi);
+                thumbOrderItems.push_back(mi);
+                thumbOrderLabels.push_back(lbl);
                 mi->signal_activate().connect(sigc::slot<void>(on_activate));
             };
         addItem(M("FILEBROWSER_SORT_FILENAME"));
@@ -658,6 +646,7 @@ void FileCatalog::closeDir ()
 
     // ignore old requests
     ++selectedDirectoryId;
+    refresh_counter_ = 1;
 
     // terminate thumbnail preview loading
     previewLoader->removeAllJobs ();
@@ -677,6 +666,109 @@ void FileCatalog::closeDir ()
     hasValidCurrentEFS = false;
     redrawAll ();
 }
+
+
+namespace {
+
+class FileSorter {
+public:
+    FileSorter(Options::ThumbnailOrder order): order_(order) {}
+
+    bool operator()(const Glib::ustring &a, const Glib::ustring &b) const
+    {
+        switch (order_) {
+        case Options::ThumbnailOrder::DATE:
+        case Options::ThumbnailOrder::DATE_REV:
+            return lt_date(a, b, order_ == Options::ThumbnailOrder::DATE_REV);
+            break;
+        case Options::ThumbnailOrder::MODTIME:
+        case Options::ThumbnailOrder::MODTIME_REV:
+            return lt_modtime(a, b, order_ == Options::ThumbnailOrder::MODTIME_REV);
+            break;
+        case Options::ThumbnailOrder::PROCTIME:
+        case Options::ThumbnailOrder::PROCTIME_REV:
+            return lt_proctime(a, b, order_ == Options::ThumbnailOrder::PROCTIME_REV);
+            break;
+        case Options::ThumbnailOrder::FILENAME:
+        default:
+            return a < b;
+        }
+    }
+
+private:
+    bool lt_date(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
+    {
+        try {
+            // rtengine::FramesData ma(a);
+            // rtengine::FramesData mb(b);
+            // auto ta = ma.getDateTimeAsTS();
+            // auto tb = mb.getDateTimeAsTS();
+            auto ta = get_date(a);
+            auto tb = get_date(b);
+            if (ta == tb) {
+                return a < b;
+            }
+            return (ta < tb) == !reverse;
+        } catch (std::exception &) {
+            return a < b;
+        }
+    }
+
+    bool lt_modtime(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
+    {
+        auto ia = Gio::File::create_for_path(a)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+        auto ib = Gio::File::create_for_path(b)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+        auto ta = ia->modification_time();
+        auto tb = ib->modification_time();
+        if (ta == tb) {
+            return a < b;
+        }
+        return (ta < tb) == !reverse;
+    }
+
+    bool lt_proctime(const Glib::ustring &a, const Glib::ustring &b, bool reverse) const
+    {
+        auto fa = options.getParamFile(a);
+        auto fb = options.getParamFile(b);
+
+        bool has_a = Glib::file_test(fa, Glib::FILE_TEST_EXISTS);
+        bool has_b = Glib::file_test(fb, Glib::FILE_TEST_EXISTS);
+
+        if (has_a != has_b) {
+            return reverse ? has_a : has_b;
+        } else if (has_a) {
+            auto ia = Gio::File::create_for_path(fa)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+            auto ib = Gio::File::create_for_path(fb)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+            auto ta = ia->modification_time();
+            auto tb = ib->modification_time();
+            if (ta == tb) {
+                return a < b;
+            }
+            return (ta < tb) == !reverse;
+        } else {
+            return a < b;
+        }
+    }
+
+    time_t get_date(const Glib::ustring &us) const
+    {
+        CacheImageData d;
+        if (cacheMgr->getImageData(us, d)) {
+            if (!d.supported) {
+                return time_t(-1);
+            } else {
+                return d.getDateTimeAsTS();
+            }
+        } else {
+            return time_t(-1);
+        }
+    }
+
+    Options::ThumbnailOrder order_;
+};
+
+
+} // namespace
 
 std::vector<Glib::ustring> FileCatalog::getFileList()
 {
@@ -733,6 +825,7 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
 
     }
 
+    std::sort(names.begin(), names.end(), FileSorter(options.thumbnailOrder));
     return names;
 }
 
@@ -820,19 +913,28 @@ void FileCatalog::_refreshProgressBar ()
         Gtk::Grid* grid = Gtk::manage(new Gtk::Grid());
         Gtk::Label *label = nullptr;
 
-        if (!previewsToLoad) {
-            grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
-            int filteredCount = min(fileBrowser->getNumFiltered(), previewsLoaded);
+        int tot = previewsToLoad ? previewsToLoad : previewsLoaded;
+        grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
+        int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : min(fileBrowser->getNumFiltered(), tot);
 
-            label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
-                                               (filteredCount != previewsLoaded ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
-                                               + Glib::ustring::format(previewsLoaded) +
-                                               (filteredCount != previewsLoaded ? "]" : ")")));
-        } else {
-            grid->attach_next_to(*Gtk::manage(new RTImage("magnifier.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
-            label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") + " [" + Glib::ustring::format(std::fixed, std::setprecision(0), std::setw(3), (double)previewsLoaded / previewsToLoad * 100 ) + "%]" ));
-            filepanel->loadingThumbs("", (double)previewsLoaded / previewsToLoad);
-        }
+        label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
+                                           (filteredCount != tot ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
+                                               + Glib::ustring::format(tot) +
+                                               (filteredCount != tot ? "]" : ")")));
+
+        // if (!previewsToLoad) {
+        //     grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
+        //     int filteredCount = min(fileBrowser->getNumFiltered(), previewsLoaded);
+
+        //     label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
+        //                                        (filteredCount != previewsLoaded ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
+        //                                        + Glib::ustring::format(previewsLoaded) +
+        //                                        (filteredCount != previewsLoaded ? "]" : ")")));
+        // } else {
+        //     grid->attach_next_to(*Gtk::manage(new RTImage("magnifier.png")), options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
+        //     label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") + " [" + Glib::ustring::format(std::fixed, std::setprecision(0), std::setw(3), (double)previewsLoaded / previewsToLoad * 100 ) + "%]" ));
+        //     filepanel->loadingThumbs("", (double)previewsLoaded / previewsToLoad);
+        // }
 
         if (options.mainNBVertical) {
             label->set_angle(90);
@@ -858,6 +960,11 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
 
     // put it into the "full directory" browser
     fileBrowser->addEntry (fdn);
+    if (!options.thumb_delay_update) {
+        if (++refresh_counter_ % 20 == 0) {
+            fileBrowser->enableThumbRefresh();
+        }
+    }
 
     // update exif filter settings (minimal & maximal values of exif tags, cameras, lenses, etc...)
     const CacheImageData* cfs = fdn->thumbnail->getCacheImageData();
@@ -928,7 +1035,8 @@ void FileCatalog::previewsFinishedUI ()
 
     {
         GThreadLock lock; // All GUI access from idle_add callbacks or separate thread HAVE to be protected
-        redrawAll ();
+        fileBrowser->enableThumbRefresh();
+        //redrawAll ();
         previewsToLoad = 0;
 
         if (filterPanel) {
@@ -1083,6 +1191,8 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
     }
 
     if (msd.run() == Gtk::RESPONSE_YES) {
+        removeFromBatchQueue(tbe);
+        
         for (unsigned int i = 0; i < tbe.size(); i++) {
             const auto fname = tbe[i]->filename;
             // remove from browser
@@ -1145,6 +1255,10 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
     //!!! TODO prevent dialog closing on "enter" key press
 
     if( fc.run() == Gtk::RESPONSE_OK ) {
+        if (moveRequested) {
+            removeFromBatchQueue(tbe);
+        }
+        
         options.lastCopyMovePath = fc.get_current_folder();
 
         // iterate through selected files
@@ -2381,7 +2495,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
     if (!ctrl || (alt && !options.tabbedUI)) {
         switch(event->keyval) {
         case GDK_KEY_i:
-        case GDK_KEY_I:
+        //case GDK_KEY_I:
             exifInfo->set_active (!exifInfo->get_active());
             return true;
 
@@ -2557,4 +2671,28 @@ void FileCatalog::setupSidePanels()
     filepanel->placespaned->set_visible(options.browserDirPanelOpened);
     enableInspector();
     disableInspector();
+}
+
+
+void FileCatalog::removeFromBatchQueue(const std::vector<FileBrowserEntry*> &tbe)
+{
+    if (!bqueue_) {
+        return;
+    }
+
+    std::set<Glib::ustring> tbset;
+    for (auto entry : tbe) {
+        if (entry->thumbnail && entry->thumbnail->isEnqueued()) {
+            tbset.insert(entry->thumbnail->getFileName());
+        }
+    }
+
+    std::vector<ThumbBrowserEntryBase *> tocancel;
+    for (auto entry : bqueue_->getEntries()) {
+        if (entry->thumbnail && tbset.find(entry->thumbnail->getFileName()) != tbset.end()) {
+            tocancel.push_back(entry);
+        }
+    }
+
+    bqueue_->cancelItems(tocancel, true);
 }

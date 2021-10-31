@@ -310,7 +310,29 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     Gtk::Frame *owf = Gtk::manage(new Gtk::Frame(M("PREFERENCES_BATCH_PROCESSING")));
     chOverwriteOutputFile = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_OVERWRITEOUTPUTFILE")));
     owf->add(*chOverwriteOutputFile);
-    vbImageProcessing->pack_start(*owf, Gtk::PACK_SHRINK, 4);
+
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*owf, Gtk::PACK_EXPAND_WIDGET);
+    hb->pack_start(*Gtk::manage(new Gtk::Label("  ")), Gtk::PACK_SHRINK);
+
+    owf = Gtk::manage(new Gtk::Frame(M("PREFERENCES_AUTOSAVE")));
+    autosaveInterval = Gtk::manage(new Gtk::SpinButton());
+    autosaveInterval->set_digits(0);
+    autosaveInterval->set_max_length(2);
+    autosaveInterval->set_range(0, 60);
+    autosaveInterval->set_increments(1, 1);
+    {
+        Gtk::HBox *hb2 = Gtk::manage(new Gtk::HBox());
+        auto lbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_AUTOSAVE_INTERVAL")));
+        hb2->pack_start(*lbl, Gtk::PACK_EXPAND_WIDGET, 4);
+        setExpandAlignProperties(lbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+        hb2->pack_start(*autosaveInterval, Gtk::PACK_SHRINK);
+        hb2->pack_start(*Gtk::manage(new Gtk::Label(" (" + M("PREFERENCES_APPLNEXTSTARTUP") + ")")), Gtk::PACK_SHRINK, 4);
+        owf->add(*hb2);
+    }
+    hb->pack_start(*owf, Gtk::PACK_EXPAND_WIDGET);
+    
+    vbImageProcessing->pack_start(*hb, Gtk::PACK_SHRINK, 4);
 
     swImageProcessing->add(*vbImageProcessing);
 
@@ -418,9 +440,33 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     threadsHBox->pack_end (*threadsSpinBtn, Gtk::PACK_SHRINK, 2);
 
     threadsVBox->pack_start (*threadsHBox, Gtk::PACK_SHRINK);
+
+    threadsHBox = Gtk::manage(new Gtk::HBox(Gtk::PACK_SHRINK, 4));
+    threadsLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE") + " (" + M ("PREFERENCES_APPLNEXTSTARTUP") + ")" + ":", Gtk::ALIGN_START));
+    thumbUpdateThreadLimit = Gtk::manage(new Gtk::SpinButton());
+    thumbUpdateThreadLimit->set_digits(0);
+    thumbUpdateThreadLimit->set_increments(1, 5);
+    thumbUpdateThreadLimit->set_max_length(2); // Will this be sufficient? :)
+    thumbUpdateThreadLimit->set_range(0, maxThreadNumber);
+    threadsHBox->pack_start(*threadsLbl, Gtk::PACK_SHRINK, 2);
+    threadsHBox->pack_end(*thumbUpdateThreadLimit, Gtk::PACK_SHRINK, 2);
+    threadsVBox->pack_start(*threadsHBox, Gtk::PACK_SHRINK);
+    
     threadsFrame->add (*threadsVBox);
 
     vbPerformance->pack_start (*threadsFrame, Gtk::PACK_SHRINK, 4);
+
+    Gtk::Frame *thumbFrame = Gtk::manage(new Gtk::Frame(M("MAIN_FRAME_FILEBROWSER")));
+    thumbDelayUpdate = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_DELAY_UPDATE")));
+    thumbLazyCaching = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_LAZY_CACHING")));
+    {
+        Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+        vb->pack_start(*thumbDelayUpdate);
+        vb->pack_start(*thumbLazyCaching);
+        thumbFrame->add(*vb);
+    }
+    vbPerformance->pack_start(*thumbFrame, Gtk::PACK_SHRINK, 4);    
+    
     swPerformance->add(*vbPerformance);
 
     return swPerformance;
@@ -1611,12 +1657,16 @@ void Preferences::storePreferences ()
     moptions.hideTPVScrollbar = ckbHideTPVScrollbar->get_active();
     moptions.overwriteOutputFile = chOverwriteOutputFile->get_active ();
     moptions.adjuster_force_linear = adjuster_force_linear->get_active();
+    moptions.sidecar_autosave_interval = autosaveInterval->get_value();
 
     moptions.autoSaveTpOpen = ckbAutoSaveTpOpen->get_active();
 
     moptions.rgbDenoiseThreadLimit = threadsSpinBtn->get_value_as_int();
     moptions.clutCacheSize = clutCacheSizeSB->get_value_as_int();
     moptions.maxInspectorBuffers = maxInspectorBuffersSB->get_value_as_int();
+    moptions.thumb_update_thread_limit = thumbUpdateThreadLimit->get_value_as_int();
+    moptions.thumb_delay_update = thumbDelayUpdate->get_active();
+    moptions.thumb_lazy_caching = thumbLazyCaching->get_active();
 
 // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
@@ -1851,6 +1901,9 @@ void Preferences::fillPreferences ()
     threadsSpinBtn->set_value (moptions.rgbDenoiseThreadLimit);
     clutCacheSizeSB->set_value (moptions.clutCacheSize);
     maxInspectorBuffersSB->set_value (moptions.maxInspectorBuffers);
+    thumbUpdateThreadLimit->set_value(moptions.thumb_update_thread_limit);
+    thumbDelayUpdate->set_active(moptions.thumb_delay_update);
+    thumbLazyCaching->set_active(moptions.thumb_lazy_caching);
 
     darkFrameDir->set_current_folder ( moptions.rtSettings.darkFramesPath );
     darkFrameChanged ();
@@ -1876,6 +1929,7 @@ void Preferences::fillPreferences ()
     bpconn.block (false);
 
     chOverwriteOutputFile->set_active (moptions.overwriteOutputFile);
+    autosaveInterval->set_value(moptions.sidecar_autosave_interval);
 
     // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
@@ -1916,11 +1970,6 @@ void Preferences::autoMonProfileToggled ()
     monProfile->set_sensitive (!cbAutoMonProfile->get_active());
 }
 
-/*
-void Preferences::autocielabToggled () {
-//  cbAutocielab->set_sensitive(cbAutocielab->get_active());
-}
-*/
 
 void Preferences::sndEnableToggled ()
 {

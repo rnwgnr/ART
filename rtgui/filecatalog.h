@@ -36,6 +36,7 @@
 //#include "popupbutton.h"
 
 class FilePanel;
+class BatchQueue;
 /*
  * Class:
  *   - handling the list of file (add/remove them)
@@ -56,6 +57,7 @@ private:
     Gtk::HBox* hBox;
     Glib::ustring selectedDirectory;
     int selectedDirectoryId;
+    int refresh_counter_;
     bool enabled;
     bool inTabMode;  // Tab mode has e.g. different progress bar handling
     Glib::ustring imageToSelect_fname;
@@ -96,6 +98,8 @@ private:
     Gtk::ToggleButton* exifInfo;
     //PopUpButton *thumbOrder;
     Gtk::MenuButton *thumbOrder;
+    std::vector<Gtk::MenuItem *> thumbOrderItems;
+    std::vector<Glib::ustring> thumbOrderLabels;
     sigc::connection bCateg[20];
     Gtk::Image* iFilterClear, *igFilterClear;
     Gtk::Image* iranked[5], *igranked[5], *iUnRanked, *igUnRanked;
@@ -144,6 +148,8 @@ private:
 
     IdleRegister idle_register;
 
+    BatchQueue *bqueue_;    
+
     void addAndOpenFile (const Glib::ustring& fname);
     void addFile (const Glib::ustring& fName);
     std::vector<Glib::ustring> getFileList ();
@@ -153,6 +159,8 @@ private:
     void onBrowsePathChanged();
     Glib::ustring getBrowsePath();
 
+    void removeFromBatchQueue(const std::vector<FileBrowserEntry*>& tbe);
+    
 public:
     // thumbnail browsers
     FileBrowser* fileBrowser;
@@ -272,6 +280,7 @@ public:
 
     void on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal);
 
+    void setBatchQueue(BatchQueue *bq) { bqueue_ = bq; }
 };
 
 inline void FileCatalog::setDirSelector (const FileCatalog::DirSelectionSlot& selectDir)

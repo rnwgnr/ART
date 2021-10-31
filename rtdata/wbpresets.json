@@ -21,12 +21,25 @@
 // updated on Wed Jan 27 21:32:44 2021:
 // CANON EOS R5
 // CANON EOS R6
-
 // updated on Wed Feb  3 09:05:45 2021:
 // FUJIFILM X-PRO3
 // FUJIFILM X100V
 // NIKON Z 7_2
 // OLYMPUS E-M10 MARK IV
+// updated on Sat May 22 13:56:52 2021:
+// SAMSUNG GX20
+// CANON EOS M50
+// CANON EOS R
+// CANON EOS R5
+// CANON EOS RP
+
+// updated on Mon Oct 11 14:29:55 2021:
+// FUJIFILM GFX100S
+// FUJIFILM X-E4
+// NIKON D780
+// PANASONIC DC-FZ10002
+// PANASONIC DMC-G8
+// RICOH GR III
 
 [
   {
@@ -5460,12 +5473,13 @@
   {
     "make_model" : "CANON EOS M50",
     "presets" : [
-      { "name" : "daylight", "multipliers" : [ 1.5654296875, 1, 1.2802734375 ] },
-      { "name" : "shade", "multipliers" : [ 1.8125, 1, 1.1123046875 ] },
-      { "name" : "cloudy", "multipliers" : [ 1.6865234375, 1, 1.1953125 ] },
-      { "name" : "tungsten", "multipliers" : [ 1.123046875, 1, 1.85546875 ] },
-      { "name" : "cool white fluorescent", "multipliers" : [ 1.3212890625, 1, 1.75 ] },
-      { "name" : "flash", "multipliers" : [ 1.71484375, 1, 1.18359375 ] }
+      { "name" : "daylight", "multipliers" : [ 1.5127, 1, 1.29102 ] },
+      { "name" : "shade", "multipliers" : [ 1.75391, 1, 1.12109 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.63086, 1, 1.20508 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.0752, 1, 1.8623 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.27051, 1, 1.75684 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.27051, 1, 1.75684 ] },
+      { "name" : "flash", "multipliers" : [ 1.65723, 1, 1.19336 ] }
     ]
   },
   {
@@ -5482,12 +5496,13 @@
   {
     "make_model" : "CANON EOS RP",
     "presets" : [
-      { "name" : "daylight", "multipliers" : [ 2.0771484375, 1, 1.6728515625 ] },
-      { "name" : "shade", "multipliers" : [ 2.4150390625, 1, 1.4296875 ] },
-      { "name" : "cloudy", "multipliers" : [ 2.2509765625, 1, 1.544921875 ] },
-      { "name" : "tungsten", "multipliers" : [ 1.4501953125, 1, 2.4501953125 ] },
-      { "name" : "cool white fluorescent", "multipliers" : [ 1.720703125, 1, 2.31640625 ] },
-      { "name" : "flash", "multipliers" : [ 2.2802734375, 1, 1.51953125 ] }
+      { "name" : "daylight", "multipliers" : [ 2.00391, 1, 1.6543 ] },
+      { "name" : "shade", "multipliers" : [ 2.32715, 1, 1.41406 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.16992, 1, 1.52637 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.40039, 1, 2.42676 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.65918, 1, 2.27539 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.65918, 1, 2.27539 ] },
+      { "name" : "flash", "multipliers" : [ 2.19238, 1, 1.49902 ] }
     ]
   },
   {
@@ -5504,12 +5519,13 @@
   {
     "make_model" : "CANON EOS R",
     "presets" : [
-      { "name" : "daylight", "multipliers" : [ 1.99609375, 1, 1.4501953125 ] },
-      { "name" : "shade", "multipliers" : [ 2.2802734375, 1, 1.2529296875 ] },
-      { "name" : "cloudy", "multipliers" : [ 2.1337890625, 1, 1.345703125 ] },
-      { "name" : "tungsten", "multipliers" : [ 1.421875, 1, 2.064453125 ] },
-      { "name" : "cool white fluorescent", "multipliers" : [ 1.6923828125, 1, 1.9921875 ] },
-      { "name" : "flash", "multipliers" : [ 2.1376953125, 1, 1.330078125 ] }
+      { "name" : "daylight", "multipliers" : [ 2.02344, 1, 1.42383 ] },
+      { "name" : "shade", "multipliers" : [ 2.31152, 1, 1.22754 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.16504, 1, 1.31934 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.44434, 1, 2.03223 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.71484, 1, 1.96875 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.71484, 1, 1.96875 ] },
+      { "name" : "flash", "multipliers" : [ 2.21191, 1, 1.31836 ] }
     ]
   },
   {
@@ -5617,12 +5633,13 @@
   {
     "make_model" : "CANON EOS R5",
     "presets" : [
-      { "name" : "daylight", "multipliers" : [ 1.8994140625, 1, 1.8720703125 ] },
-      { "name" : "shade", "multipliers" : [ 2.2216796875, 1, 1.60546875 ] },
-      { "name" : "cloudy", "multipliers" : [ 2.0517578125, 1, 1.7412109375 ] },
-      { "name" : "tungsten", "multipliers" : [ 1.3095703125, 1, 2.892578125 ] },
-      { "name" : "cool white fluorescent", "multipliers" : [ 1.6201171875, 1, 2.7451171875 ] },
-      { "name" : "flash", "multipliers" : [ 2.1337890625, 1, 1.6728515625 ] }
+      { "name" : "daylight", "multipliers" : [ 1.94336, 1, 1.83203 ] },
+      { "name" : "shade", "multipliers" : [ 2.27539, 1, 1.56543 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.10254, 1, 1.70117 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.33691, 1, 2.85254 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.65137, 1, 2.72363 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.65137, 1, 2.72363 ] },
+      { "name" : "flash", "multipliers" : [ 2.17871, 1, 1.63281 ] }
     ]
   },
   {
@@ -5697,6 +5714,98 @@
       { "name" : "5300K", "multipliers" : [ 2.03906, 1, 1.82031 ] },
       { "name" : "6000K", "multipliers" : [ 2.1875, 1, 1.63281 ] },
       { "name" : "6600K", "multipliers" : [ 2.29688, 1, 1.8125 ] }
+    ]
+  },
+  {
+    "make_model" : "SAMSUNG GX20",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.57874, 1, 1.26343 ] },
+      { "name" : "shade", "multipliers" : [ 1.80029, 1, 0.961304 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.67371, 1, 1.11694 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.08911, 1, 1.19019 ] },
+      { "name" : "neutral fluorescent", "multipliers" : [ 1.77258, 1, 1.35498 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.65393, 1, 1.68457 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.01294, 1, 2.34375 ] },
+      { "name" : "flash", "multipliers" : [ 1.67371, 1, 1.19019 ] }
+    ]
+  },
+  {
+    "make_model" : "FUJIFILM GFX100S",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.69205, 1, 1.87086 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.85099, 1, 1.59272 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.12583, 1, 2.93046 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.85762, 1, 1.92053 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.19205, 1, 1.58278 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.77483, 1, 2.49669 ] },
+      { "name" : "underwater", "multipliers" : [ 1.68874, 1, 1.88079 ] }
+    ]
+  },
+  {
+    "make_model" : "FUJIFILM X-E4",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.91722, 1, 1.84768 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.09272, 1, 1.57616 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.30132, 1, 2.81788 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 2.0894, 1, 1.96026 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.4702, 1, 1.57285 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.98344, 1, 2.49669 ] },
+      { "name" : "underwater", "multipliers" : [ 1.91722, 1, 1.84768 ] }
+    ]
+  },
+  {
+    "make_model" : "NIKON D780",
+    "presets" : [
+      { "name" : "direct sunlight", "multipliers" : [ 1.72656, 1, 1.33594 ] },
+      { "name" : "shade", "multipliers" : [ 2.09766, 1, 1.08984 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.83984, 1, 1.21289 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.13867, 1, 2.08398 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 1.13086, 1, 1.875 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.62305, 1, 1.95312 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.62109, 1, 1.3418 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 1.83789, 1, 1.08789 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.33398, 1, 2.22266 ] },
+      { "name" : "high temp. mercury-vapor fluorescent", "multipliers" : [ 2.14258, 1, 1.30859 ] },
+      { "name" : "sodium-vapor fluorescent", "multipliers" : [ 1.07617, 1, 2.33984 ] },
+      { "name" : "flash", "multipliers" : [ 1.91602, 1, 1.16406 ] }
+    ]
+  },
+  {
+    "make_model" : "PANASONIC DC-FZ10002",
+    "presets" : [
+      { "name" : "direct sunlight", "multipliers" : [ 2.51953, 1, 1.98047 ] },
+      { "name" : "daylight", "multipliers" : [ 2.51953, 1, 1.98047 ] },
+      { "name" : "D55", "multipliers" : [ 2.31641, 1, 2.12109 ] },
+      { "name" : "shade", "multipliers" : [ 2.92969, 1, 1.67578 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.72266, 1, 1.82422 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.73828, 1, 2.99609 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.73828, 1, 2.99609 ] },
+      { "name" : "flash", "multipliers" : [ 2.58594, 1, 1.91016 ] }
+    ]
+  },
+  {
+    "make_model" : "PANASONIC DMC-G8",
+    "presets" : [
+      { "name" : "Daylight", "multipliers" : [ 2.32812, 1, 1.59766 ] },
+      { "name" : "Cloudy", "multipliers" : [ 2.5, 1, 1.49219 ] },
+      { "name" : "Shade", "multipliers" : [ 2.67188, 1, 1.42578 ] },
+      { "name" : "Incandescent", "multipliers" : [ 1.60938, 1, 2.26562 ] },
+      { "name" : "Flash", "multipliers" : [ 2.94531, 1, 1.46484 ] },
+      { "name" : "5000K", "multipliers" : [ 2.19531, 1, 1.67969 ] },
+      { "name" : "5500K", "multipliers" : [ 2.32812, 1, 1.59766 ] }
+    ]
+  },
+  {
+    "make_model" : "RICOH GR III",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 2.64188, 1, 1.73777 ] },
+      { "name" : "shade", "multipliers" : [ 3.17025, 1, 1.30333 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.88845, 1, 1.50685 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.65949, 1, 3.02153 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 1.93738, 1, 2.97456 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 2.54795, 1, 1.96086 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.99413, 1, 1.72994 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 2.28963, 1, 2.3953 ] }
     ]
   }
 ]

@@ -25,8 +25,7 @@
 
 FilePanel::FilePanel () :
     parent(nullptr), error(0),
-    pane_pos_(-1),
-    ignore_position_(true)
+    pane_pos_(-1)
 {
 
     // Contains everything except for the batch Tool Panel and tabs (Fast Export, Inspect, etc)
@@ -173,44 +172,18 @@ void FilePanel::on_realize ()
 
 void FilePanel::setAspect ()
 {
-    ignore_position_ = true;
-    int winW, winH;
     fileCatalog->setupSidePanels();
-    parent->get_size(winW, winH);
+    int winW = get_allocated_width();
     placespaned->set_position(options.dirBrowserHeight);
     dirpaned->set_position(options.dirBrowserWidth);
-    // tpcPaned->set_position(options.browserToolPanelHeight);
     set_position(winW - options.browserToolPanelWidth);
 
     rightNotebook->set_current_page(0);
-    // if (!options.browserDirPanelOpened) {
-    //     fileCatalog->toggleLeftPanel();
-    // }
-
-    // if (!options.browserToolPanelOpened) {
-    //     fileCatalog->toggleRightPanel();
-    // }
-
-    property_position().signal_changed().connect(sigc::mem_fun(*this, &FilePanel::on_position_changed));
-
-    //ignore_position_ = false;
-}
-
-
-void FilePanel::on_position_changed()
-{
-    if (!ignore_position_) {
-        int winW, winH;
-        parent->get_size(winW, winH);
-        options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
-    }
-    ignore_position_ = true;
 }
 
 
 void FilePanel::init ()
 {
-
     dirBrowser->fillDirTree ();
     placesBrowser->refreshPlacesList ();
 
@@ -257,8 +230,6 @@ bool FilePanel::isInspectorVisible() const
 
 void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
 {
-    ignore_position_ = true;
-    
     if (page_num == 1) {
         // switching the inspector "on"
         fileCatalog->enableInspector();
@@ -279,8 +250,6 @@ void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
         set_position(pane_pos_);
         queue_draw();
     }
-
-    //ignore_position_ = false;
 }
 
 
@@ -308,6 +277,9 @@ bool FilePanel::fileSelected (Thumbnail* thm)
     pl->pc = nullptr;
     pl->thm = thm;
     pendingLoads.push_back(pl);
+    if (!options.tabbedUI) {
+        parent->epanel->close();
+    }
     pendingLoadMutex.unlock();
 
     ProgressConnector<rtengine::InitialImage*> *ld = new ProgressConnector<rtengine::InitialImage*>();
@@ -408,8 +380,9 @@ MAXGDIHANDLESREACHED:
 void FilePanel::saveOptions ()
 {
 
-    int winW, winH;
-    parent->get_size(winW, winH);
+    // int winW, winH;
+    // parent->get_size(winW, winH);
+    //int winW = get_allocated_width();
     options.dirBrowserWidth = dirpaned->get_position ();
     options.dirBrowserHeight = placespaned->get_position ();
     //options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
@@ -489,12 +462,16 @@ void FilePanel::showRightBox(bool yes)
 }
 
 
-bool FilePanel::on_button_press_event(GdkEventButton *event)
+bool FilePanel::on_button_release_event(GdkEventButton *event)
 {
     if (event->window == get_handle_window()->gobj()) {
-        ignore_position_ = false;
-    } else {
-        ignore_position_ = true;
+        idle_register.add(
+            [this]() -> bool
+            {
+                int winW = get_allocated_width();
+                options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
+                return false;
+            });        
     }
     return Gtk::HPaned::on_button_press_event(event);
 }

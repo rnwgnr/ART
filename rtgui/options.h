@@ -100,11 +100,9 @@ enum PPLoadLocation {PLL_Cache = 0, PLL_Input = 1};
 enum CPBKeyType {CPBKT_TID = 0, CPBKT_NAME = 1, CPBKT_TID_NAME = 2};
 enum prevdemo_t {PD_Sidecar = 1, PD_Fast = 0};
 
-class Options
-{
+class Options {
 public:
-    class Error: public std::exception
-    {
+    class Error: public std::exception {
     public:
         explicit Error (const Glib::ustring &msg): msg_ (msg) {}
         const char *what() const throw() override
@@ -347,6 +345,9 @@ public:
     int maxInspectorBuffers;   // maximum number of buffers (i.e. images) for the Inspector feature
     int inspectorDelay;
     int clutCacheSize;
+    int thumb_update_thread_limit;
+    bool thumb_delay_update;
+    bool thumb_lazy_caching;
     bool filledProfile;  // Used as reminder for the ProfilePanel "mode"
     prevdemo_t prevdemo; // Demosaicing method used for the <100% preview
     bool serializeTiffRead;
@@ -456,6 +457,8 @@ public:
     // taken from
     // https://www.premiumbeat.com/blog/how-to-use-false-color-nail-skin-tone-exposure/
     std::map<int, std::string> falseColorsMap;
+    std::string clipped_highlights_color;
+    std::string clipped_shadows_color;
 
     struct RenameOptions {
         Glib::ustring pattern;
@@ -469,6 +472,11 @@ public:
         RenameOptions();
     };
     RenameOptions renaming;
+
+    int sidecar_autosave_interval; // in seconds
+
+    int editor_keyboard_scroll_step; // in pixels
+    int adjuster_shortcut_scrollwheel_factor; // to control the adjustment step when using tool shortcuts with the mouse wheel
 
     Options();
 

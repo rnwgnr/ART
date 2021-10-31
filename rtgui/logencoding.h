@@ -27,7 +27,7 @@ class LogEncoding: public ToolParamBlock, public AdjusterListener, public rtengi
 {
 protected:
     Gtk::ToggleButton *autocompute;
-    Adjuster *sourceGray;
+    Adjuster *gain;
     Adjuster *targetGray;
     Adjuster *blackEv;
     Adjuster *whiteEv;
@@ -35,11 +35,11 @@ protected:
 
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvAuto;
-    rtengine::ProcEvent EvAutoGrayOn;
-    rtengine::ProcEvent EvAutoGrayOff;
+    rtengine::ProcEvent EvAutoGainOn;
+    rtengine::ProcEvent EvAutoGainOff;
     rtengine::ProcEvent EvAutoBatch;
-    rtengine::ProcEvent EvSourceGray;
-    rtengine::ProcEvent EvSourceGrayAuto;
+    rtengine::ProcEvent EvGain;
+    rtengine::ProcEvent EvGainAuto;
     rtengine::ProcEvent EvTargetGray;
     rtengine::ProcEvent EvBlackEv;
     rtengine::ProcEvent EvWhiteEv;
@@ -64,5 +64,6 @@ public:
     void autocomputeToggled();
 
     void toolReset(bool to_initial) override;
+    void registerShortcuts(ToolShortcutManager *mgr) override;
 };
 

@@ -76,7 +76,7 @@ Examples:
         "raw_crop" : [
            { "frame" : [4100, 3050], "crop": [10, 20, 4050, 3020] },
            { "frame" : [0, 0], "crop": [10, 20, 4000, 3000] }
-        ]
+        ],
 
         // Almost same as MaskedAreas DNG tag, used for black level measuring. Here up to two areas can be defined
         // by tetrads of numbers:
@@ -447,6 +447,7 @@ Camera constants:
 
     { // Quality B, some intermediate ISO samples missing, LENR samples missing so White Levels not properly indicated, some aperture scaling missing
         "make_model": "Canon EOS 5D Mark IV",
+        "global_green_equilibration" : true,
         "dcraw_matrix": [ 6446,-366,-864,-4436,12204,2513,-952,2496,6348 ], // DNG_V9.7 D65
         "raw_crop": [ 136, 42, 6740, 4500 ], // full size 6880x4544, official crop 148,54,6867,4533
         "masked_areas": [ 54, 4, 4534, 132 ],
@@ -883,7 +884,7 @@ Camera constants:
     },
 
     { // Quality A, only one scaling factor missing and guessed safely, EOS 700D not tested but available samples look same as 650D
-        "make_model": [ "Canon EOS 650D", "Canon EOS Rebel T4i", "Canon EOS Kiss X6i", "Canon EOS 700D", "Canon EOS Rebel T5i", "Canon EOS Kiss X7i" ],
+        "make_model": [ "Canon EOS 650D", "Canon EOS Rebel T4i", "Canon EOS Kiss X6i", "Canon EOS 700D", "Canon EOS Rebel T5i", "Canon EOS Kiss X7i", "Canon EOS 100D", "Canon EOS Rebel SL1", "Canon EOS Kiss X7" ],
         "dcraw_matrix": [ 6602,-841,-939,-4472,12458,2247,-975,2039,6148 ],
         "ranges": {
             "white": [
@@ -1030,7 +1031,15 @@ Camera constants:
             ]
         }
     },
-
+   
+    { // Quality C, samples provided by falket #5495
+        "make_model": [ "Canon EOS 2000D", "Canon EOS Rebel T7", "Canon EOS Kiss X90" ],
+        // raw_crop is handled by dcraw
+        // "dcraw_matrix": [ 8532, -701, -1167, -4095, 11879, 2508, -797, 2424, 7010 ], // Adobe DNG v.10.3
+        "dcraw_matrix": [ 8300, -2110, -1120, -4917, 12694, 2482, -938, 2141, 5666 ], // Adobe DNG v.10.3 (v2)
+        "ranges": { "white": 15300 } // typical value, very non-linear behavior near clipping
+    },
+    
 // Canon MILC (mirrorless interchangeable-lens camera)
 
     { // Quality B, missing scaling factors are guessed safely from 650D relative data
@@ -1165,7 +1174,8 @@ Camera constants:
     { // Quality C, only raw crop and masked area
         "make_model": [ "Canon EOS R" ],
         "raw_crop": [ 144, 46, 6744, 4500 ],
-        "masked_areas": [ 50, 40, 4540, 140 ]
+        "masked_areas": [ 50, 40, 4540, 140 ],
+        "ranges" : { "white" : 16367 } // Typically 16383 without LENR, with LENR safest value is 15800 for ISO 25600
     },
 
     { // Quality C, only raw crop and masked area
@@ -1178,7 +1188,7 @@ Camera constants:
         "make_model": "Canon EOS R5",
         "raw_crop" : [ 132, 100, 8200, 5472 ],
         "masked_areas" : [ 94, 20, 5578, 122 ],
-        "ranges" : { "white" : 16383 } 
+        "ranges" : { "white" : 16382 } 
     },
 
     { // Quality C
@@ -1191,14 +1201,14 @@ Camera constants:
             { "frame": [5568, 3708], "areas": [ 40, 10, 5534, 70 ] },
             { "frame": [3584, 2386], "areas": [ 40, 10, 2374, 110 ] }
         ],
-        "ranges" : { "white" : 16383 }
+        "ranges" : { "white" : 16382 }
     },
 
     { // Quality C
         "make_model" : "CANON EOS-1D X MARK III",
         "raw_crop": [ 72, 38, 5496, 3670 ],
         "masked_areas" : [ 40, 10, 5534, 70 ],
-        "ranges" : { "white" : 16383 }
+        "ranges" : { "white" : 16382 }
     },
     
 // Canon Powershot
@@ -1315,9 +1325,14 @@ Camera constants:
         "make_model": "DJI FC6310",
         "ranges": { "white": 64886 }
     },
+    
+    { // Quality C
+        "make_model": "DJI FC3170",
+        "ranges": { "white": 65472 }
+    },
 
     { // Quality C
-        "make_model": "FUJIFILM GFX 100",
+        "make_model": [ "FUJIFILM GFX 100", "FUJIFILM GFX100S" ],
         "raw_crop": [
             // multi-aspect crop to account for 16-shot pixel shift images
             { "frame" : [11808, 8754], "crop" : [ 0, 2, 11664, 8734 ] },
@@ -1398,6 +1413,11 @@ Camera constants:
     },
 
     { // Quality C
+        "make_model": "FUJIFILM X-A20",
+        "ranges": { "white": 3838 }
+    },    
+
+    { // Quality C
         "make_model": "FUJIFILM X-S10",
         "raw_crop" : [56, 26, 6190, 4130]
     },
@@ -1443,7 +1463,12 @@ Camera constants:
         "raw_crop": [ 0, 5, 6032, 4026 ], // full raw 6160,4032, Usable 6032,4026 - for uncompressed and lossless compressed files (but reduces height by 6 pixels)
         "ranges": { "white": 16100 }
     },
-
+    
+    { // Quality C
+        "make_model": "FUJIFILM X-E4",
+        "raw_crop": [ 0, 5, 6252, 4126 ]
+    },
+    
     { // Quality B, samples provided by Daniel Catalina #5824
         "make_model": "FUJIFILM X-T2",
         "dcraw_matrix": [ 11434,-4948,-1210,-3746,12042,1903,-666,1479,5235 ], // DNG_v9.4 D65
@@ -1469,7 +1494,7 @@ Camera constants:
     },
     
     { // Quality B
-        "make_model": [ "FUJIFILM X-T30", "FUJIFILM X100V", "FUJIFILM X-T4" ],
+        "make_model": [ "FUJIFILM X-T30", "FUJIFILM X100V", "FUJIFILM X-T4", "FUJIFILM X-S10" ],
         "dcraw_matrix": [ 13426,-6334,-1177,-4244,12136,2371,-580,1303,5980 ], // DNG_v11, standard_v2 d65
         "raw_crop": [ 0, 5, 6252, 4176]
     },
@@ -1632,6 +1657,22 @@ Camera constants:
         // No aperture scaling reported
     },
 
+    { // Quality B, samples provided by arvindpgh (#6066)
+      // Sensor shows some non-uniformity, need other sample to verify
+      // There seems to be some aperture scaling, but insufficient data to accurately determine
+        "make_model": "Nikon COOLPIX P950",
+        "dcraw_matrix": [ 13307,-5641,-1290,-2048,10581,1689,-64,1222,5176 ], // ColorMatrix2 from Adobe DNG Converter 13.1
+        "ranges": {
+            "black": 200,
+            "white": [
+                { "iso": [ 100 ], "levels": [ 3994, 4093, 3963 ] }, // LENR can be quite aggressive at higher ISO
+                { "iso": [ 200 ], "levels": [ 3993, 4092, 3962 ] },
+                { "iso": [ 400 ], "levels": [ 3992, 4091, 3961 ] },
+                { "iso": [ 800, 1600, 3200, 6400 ], "levels": [ 3996, 4095, 3965 ] }
+            ]
+        }
+    },
+ 
     { // Quality B, no LENR samples
         "make_model": "Nikon D5",
         "dcraw_matrix": [ 9200,-3522,-992,-5755,13803,2117,-753,1486,6338 ], // adobe dng_v9.5 d65
@@ -2443,6 +2484,13 @@ Camera constants:
                 { "iso": [ 1600, 3200, 6400, 12800, 25600, 51200 ], "levels": 16300 } // 16383 - pentax dng tag is 15868-15350
             ]
         }
+    },
+
+    { // Quality C
+        "make_model": ["RICOH PENTAX K-3 MARK III", "PENTAX K-3 MARK III"],
+        "raw_crop" : [
+            { "frame" : [6304, 4224], "crop" : [22, 32, 6250, 4172] }
+        ]
     },
 
     { // Quality B, intermediate ISOs info missing

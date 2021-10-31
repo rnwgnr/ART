@@ -208,6 +208,8 @@ public:
     bool isSelected(const Glib::ustring &fname) const;
 
     void sortThumbnails();
+
+    void enableThumbRefresh();
 };
 
 #endif

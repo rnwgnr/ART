@@ -177,6 +177,11 @@ int processLineParams ( int argc, char **argv )
 
                     break;
 #endif
+                case 's':
+                    simpleEditor = true;
+                    remote = false;
+                    break;
+                
                 case '-':
                     if (currParam.substr(5) == "--gtk" || currParam == "--g-fatal-warnings") {
                         break;
@@ -373,7 +378,7 @@ int main (int argc, char **argv)
 
     simpleEditor = false;
     gimpPlugin = false;
-    remote = false;
+    remote = true;
     argv0 = "";
     argv1 = "";
     argv2 = "";
@@ -532,20 +537,20 @@ int main (int argc, char **argv)
             printf ("Error: -gimp requires two arguments\n");
             return 1;
         }
-    } else if (!remote && Glib::file_test(argv1, Glib::FILE_TEST_EXISTS) && !Glib::file_test(argv1, Glib::FILE_TEST_IS_DIR)) {
-        simpleEditor = true;
+    } else if (!remote && !(Glib::file_test(argv1, Glib::FILE_TEST_EXISTS) && !Glib::file_test(argv1, Glib::FILE_TEST_IS_DIR))) {
+        simpleEditor = false;
     }
 
     int ret = 0;
 
     if (options.pseudoHiDPISupport) {
-		// Reading/updating GDK_SCALE early if it exists
-		const gchar *gscale = g_getenv("GDK_SCALE");
-		if (gscale && gscale[0] == '2') {
-			initialGdkScale = 2;
-		}
-		// HOMBRE: On Windows, if resolution is set to 200%, Gtk internal variables are SCALE=2 and DPI=96
-		g_setenv("GDK_SCALE", "1", true);
+        // Reading/updating GDK_SCALE early if it exists
+        const gchar *gscale = g_getenv("GDK_SCALE");
+        if (gscale && gscale[0] == '2') {
+            initialGdkScale = 2;
+        }
+        // HOMBRE: On Windows, if resolution is set to 200%, Gtk internal variables are SCALE=2 and DPI=96
+        g_setenv("GDK_SCALE", "1", true);
     }
 
     gdk_threads_set_lock_functions (G_CALLBACK (myGdkLockEnter), (G_CALLBACK (myGdkLockLeave)));

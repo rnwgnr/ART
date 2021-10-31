@@ -54,7 +54,8 @@ class EditorPanel final :
     public ThumbnailListener,
     public HistoryBeforeAfterListener,
     public rtengine::HistogramListener,
-    public HistogramPanelListener
+    public HistogramPanelListener,
+    public rtengine::SizeListener
 {
 public:
     explicit EditorPanel (FilePanel* filePanel = nullptr);
@@ -66,10 +67,7 @@ public:
     void leftPaneButtonReleased (GdkEventButton *event);
     void rightPaneButtonReleased (GdkEventButton *event);
 
-    void setParent (RTWindow* p)
-    {
-        parent = p;
-    }
+    void setParent(RTWindow* p);
 
     void setParentWindow (Gtk::Window* p)
     {
@@ -144,6 +142,9 @@ public:
     // HistogramPanelListener
     void scopeTypeChanged(Options::ScopeType new_type) override;
 
+    // SizeListener
+    void sizeChanged(int w, int h, int ow, int oh) override;
+    
     // event handlers
     void info_toggled ();
     void hideHistoryActivated ();
@@ -168,6 +169,9 @@ public:
     Glib::ustring getShortName ();
     Glib::ustring getFileName ();
     bool handleShortcutKey (GdkEventKey* event);
+    bool keyPressedBefore(GdkEventKey *event);
+    bool keyReleased(GdkEventKey *event);
+    bool scrollPressed(GdkEventScroll *event);
 
     bool getIsProcessing() const
     {
@@ -184,9 +188,9 @@ public:
     Gtk::Paned* catalogPane;
 
     void cleanup();
-
-private:
     void close ();
+    
+private:
 
     BatchQueueEntry *createBatchQueueEntry(bool fast_export=false);
     bool idle_imageSaved(ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
@@ -197,6 +201,7 @@ private:
 
     void do_save_image(bool fast_export);
     void do_queue_image(bool fast_export);
+    bool autosave();
 
     Glib::ustring lastSaveAsFileName;
     bool realized;
@@ -282,5 +287,9 @@ private:
 
     rtengine::HistogramObservable* histogram_observable;
     Options::ScopeType histogram_scope_type;
+
+    sigc::connection autosave_conn_;
+
+    std::unique_ptr<ToolShortcutManager> shortcut_mgr_;
 };
 

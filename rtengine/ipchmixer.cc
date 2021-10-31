@@ -222,9 +222,9 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
                 vfloat gmix = (r * vGR + g * vGG + b * vGB);
                 vfloat bmix = (r * vBR + g * vBG + b * vBB);
 
-                STVF(img->r(y, x), rmix);
-                STVF(img->g(y, x), gmix);
-                STVF(img->b(y, x), bmix);
+                STVF(img->r(y, x), vmaxf(rmix, ZEROV));
+                STVF(img->g(y, x), vmaxf(gmix, ZEROV));
+                STVF(img->b(y, x), vmaxf(bmix, ZEROV));
             }
 #endif
             for (; x < img->getWidth(); ++x) {
@@ -236,9 +236,9 @@ void ImProcFunctions::channelMixer(Imagefloat *img)
                 float gmix = (r * GR + g * GG + b * GB);
                 float bmix = (r * BR + g * BG + b * BB);
 
-                img->r(y, x) = rmix;
-                img->g(y, x) = gmix;
-                img->b(y, x) = bmix;
+                img->r(y, x) = max(rmix, 0.f);
+                img->g(y, x) = max(gmix, 0.f);
+                img->b(y, x) = max(bmix, 0.f);
             }
         }
     }

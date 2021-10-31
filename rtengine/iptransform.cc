@@ -112,18 +112,18 @@ void encode(rtengine::Imagefloat *src, rtengine::Imagefloat *dest, bool multiThr
 {
     LUTf lut(65536);
     for (int i = 0; i < 65536; ++i) {
-        lut[i] = xcbrtf(float(i));
+        lut[i] = Color::gamma2(float(i) / 65535.f) * 65535.f;
     }
 
     const auto enc =
         [&](float f) -> float
         {
             if (f <= 0.f) {
-                return 0.f;
+                return f;
             } else if (f <= 65535.f) {
                 return lut[f];
             } else {
-                return xcbrtf(f);
+                return Color::gamma2(f / 65535.f) * 65535.f;
             }
         };
     
@@ -144,18 +144,18 @@ void decode(rtengine::Imagefloat *img, bool multiThread)
 {
     LUTf lut(65536);
     for (int i = 0; i < 65536; ++i) {
-        lut[i] = SQR(float(i)) * float(i);
+        lut[i] = Color::igamma2(float(i) / 65535.f) * 65535.f;
     }
 
     const auto dec =
         [&](float f) -> float
         {
             if (f <= 0.f) {
-                return 0.f;
+                return f;
             } else if (f <= 65535.f) {
                 return lut[f];
             } else {
-                return SQR(f) * f;
+                return Color::igamma2(f / 65535.f) * 65535.f;
             }
         };
     
@@ -331,10 +331,10 @@ void transform_perspective(const ProcParams *params, const FramesMetaData *metad
                     interpolateTransformCubic(orig, xc - 1, yc - 1, Dx, Dy, dest->r(y, x), dest->g(y, x), dest->b(y, x));
                 } else {
                     // edge pixels
-                    int y1 = LIM (yc, 0, H - 1);
-                    int y2 = LIM (yc + 1, 0, H - 1);
-                    int x1 = LIM (xc, 0, W - 1);
-                    int x2 = LIM (xc + 1, 0, W - 1);
+                    int y1 = LIM (yc, 0, orig_H - 1);
+                    int y2 = LIM (yc + 1, 0, orig_H - 1);
+                    int x1 = LIM (xc, 0, orig_W - 1);
+                    int x2 = LIM (xc + 1, 0, orig_W - 1);
 
                     dest->r(y, x) = (orig->r (y1, x1) * (1.0 - Dx) * (1.0 - Dy) + orig->r (y1, x2) * Dx * (1.0 - Dy) + orig->r (y2, x1) * (1.0 - Dx) * Dy + orig->r (y2, x2) * Dx * Dy);
                     dest->g (y, x) = (orig->g (y1, x1) * (1.0 - Dx) * (1.0 - Dy) + orig->g (y1, x2) * Dx * (1.0 - Dy) + orig->g (y2, x1) * (1.0 - Dx) * Dy + orig->g (y2, x2) * Dx * Dy);

@@ -57,6 +57,6 @@ enum class BlurType {
 };
 void detail_mask(const array2D<float> &src, array2D<float> &mask, float scaling, float threshold, float ceiling, float factor, BlurType blur, float blur_radius, bool multithread);
 
-void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool multithread);
+void NLMeans(array2D<float> &img, float normcoeff, int strength, int detail_thresh, float scale, bool multithread);
     
 }} // namespace rtengine::denoise

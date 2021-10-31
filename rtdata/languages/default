@@ -505,6 +505,7 @@ HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - region C mask
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - contrast threshold mask
 HISTORY_MSG_COLORCORRECTION_ENABLED;Color/Tone Correction
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - region H mask
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - hue shift
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - lightness
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - region L mask
 HISTORY_MSG_COLORCORRECTION_LIST;CC - regions
@@ -520,6 +521,7 @@ HISTORY_MSG_COLORCORRECTION_SLOPE;CC - highlights/gain
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - color similarity mask
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - brush mask
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametric mask
+HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - mask post-processing
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Color correction
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - auto chroma strength
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Fin. smooth. C
@@ -551,7 +553,9 @@ HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - contrast threshold mask
 HISTORY_MSG_EPD_DELTAEMASK;TB - color similarity mask
 HISTORY_MSG_EPD_DRAWNMASK;TB - brush mask
 HISTORY_MSG_EPD_PARAMETRICMASK;TB - parametric mask
+HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - mask post-processing
 HISTORY_MSG_EXPOSURE_BLACK;Exposure - Black point
+HISTORY_MSG_EXPOSURE_HRBLUR;Exposure - Color propagation smoothness
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Negative
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base color
 HISTORY_MSG_FILMNEGATIVE_VALUES;Film negative values
@@ -578,12 +582,13 @@ HISTORY_MSG_LOCALCONTRAST_RADIUS;Local Contrast - Radius
 HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Local Contrast - color similarity mask
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Local Contrast - brush mask
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Local Contrast - parametric mask
+HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;Local Contrast - mask post-processing
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
-HISTORY_MSG_LOGENC_AUTOGRAY;Log - Auto gray
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - Auto gain
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regularization
 HISTORY_MSG_LOGENC_ENABLED;Log Encoding
 HISTORY_MSG_LOGENC_BLACK_EV;Log - Black Ev
-HISTORY_MSG_LOGENC_SOURCE_GRAY;Log - Source gray point
+HISTORY_MSG_LOGENC_GAIN;Log - Gain
 HISTORY_MSG_LOGENC_WHITE_EV;Log - White Ev
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Target gray point
 HISTORY_MSG_METADATA_MODE;Metadata copy mode
@@ -628,6 +633,13 @@ HISTORY_MSG_SMOOTHING_AREAMASK;Smoothing - area mask
 HISTORY_MSG_SMOOTHING_DELTAEMASK;Smoothing - color similarity mask
 HISTORY_MSG_SMOOTHING_DRAWNMASK;Smoothing - brush mask
 HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Smoothing - parametric mask
+HISTORY_MSG_SMOOTHING_NLSTRENGTH;Smoothing - NLM strength
+HISTORY_MSG_SMOOTHING_NLDETAIL;Smoothing - NLM detail
+HISTORY_MSG_SMOOTHING_NUMBLADES;Smoothing - blades
+HISTORY_MSG_SMOOTHING_ANGLE;Smoothing - angle
+HISTORY_MSG_SMOOTHING_CURVATURE;Smoothing - curvature
+HISTORY_MSG_SMOOTHING_OFFSET;Smoothing - offset
+HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Smoothing - mask post-processing
 HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Soft light - Strength
 HISTORY_MSG_SPOT;Spot removal
@@ -639,6 +651,9 @@ HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tone equalizer - Regularization
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Tone equalizer - Tonal map
 HISTORY_MSG_TONECURVE_SATCURVE;Tone curve - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tone curve - Perceptual strength
+HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tone curve - Contrast legacy mode
+HISTORY_MSG_TONECURVE_MODE;Tone curve - Mode
+HISTORY_MSG_TONECURVE_WHITEPOINT;Tone curve - White point
 HISTORY_MSG_WBALANCE_MULT;WB - multipliers
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
@@ -689,7 +704,7 @@ ICCPROFCREATOR_TRC_PRESET;Tone response curve:
 INSPECTOR_ENABLE_CMS;Enable color management.
 INSPECTOR_FOCUS_MASK;Focus mask.\nShortcut: <b>Shift-f</b>.
 INSPECTOR_HISTOGRAM;Histogram.\nShortcut: <b>h</b>.
-INSPECTOR_INFO;Quick info.\nShortcut: <b>i</b>.
+INSPECTOR_INFO;Quick info.\nShortcut: <b>Shift-i</b>.
 INSPECTOR_PREVIEW;Embedded preview image.\nShortcut: <b>j</b>.
 INSPECTOR_RAW_LINEAR;Fast raw rendering with a linear tone curve.\nShortcut: <b>r</b>.
 INSPECTOR_RAW_FILM;Fast raw rendering with a film-like tone curve.\nShortcut: <b>f</b>.
@@ -764,6 +779,7 @@ MAIN_FRAME_QUEUE;Queue
 MAIN_FRAME_QUEUE_TOOLTIP;Processing queue.\nShortcut: <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Recent Folders
 MAIN_MSG_ALREADYEXISTS;File already exists.
+MAIN_MSG_AUTOSAVING;Auto saving...
 MAIN_MSG_CANNOTLOAD;Cannot load image
 MAIN_MSG_CANNOTSAVE;File saving error
 MAIN_MSG_CANNOTSTARTEDITOR;Cannot start editor.
@@ -809,22 +825,22 @@ MAIN_TOOLTIP_BACKCOLOR1;Background color of the preview: <b>black</b>\nShortcut:
 MAIN_TOOLTIP_BACKCOLOR2;Background color of the preview: <b>white</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\nUseful to evaluate the cumulative effect of multiple tools.\nAdditionally, comparisons can be made to any state in the History.\n\n<b>Unlock</b>: the <b>Before</b> view will follow the <b>After</b> view one step behind, showing the image before the effect of the currently used tool.
-MAIN_TOOLTIP_FALSECOLORS;Toggle exposure indication using false color.\nShortcut: <b>e</b>\n\nKey (IRE range):\n%1
+MAIN_TOOLTIP_FALSECOLORS;Toggle exposure indication using false color.\nShortcut: <b>Shift-e</b>\n\nKey (IRE range):\n%1
 MAIN_TOOLTIP_HIDEHP;Show/Hide the left panel (including the history).\nShortcut: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Clipped highlight indication.\nShortcut: <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Clipped shadow indication.\nShortcut: <b>&lt;</b>
-MAIN_TOOLTIP_PREVIEWB;Preview the <b>blue channel</b>.\nShortcut: <b>b</b>
+MAIN_TOOLTIP_PREVIEWB;Preview the <b>blue channel</b>.\nShortcut: <b>Shift-b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;Preview the <b>focus mask</b>.\nShortcut: <b>Shift-f</b>\n\nMore accurate on images with shallow depth of field, low noise and at higher zoom levels.\nZoom out to 10-30% to improve detection accuracy on noisy images.
-MAIN_TOOLTIP_PREVIEWG;Preview the <b>green channel</b>.\nShortcut: <b>g</b>
-MAIN_TOOLTIP_PREVIEWL;Preview the <b>luminosity</b>.\nShortcut: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
-MAIN_TOOLTIP_PREVIEWR;Preview the <b>red channel</b>.\nShortcut: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Preview the <b>sharpening contrast mask</b>.\nShortcut: <b>Shift-p</b>\n\nOnly works when sharpening is enabled, and it is accurate only when zoom >= 100%.
-MAIN_TOOLTIP_QINFO;Quick info on the image.\nShortcut: <b>i</b>
+MAIN_TOOLTIP_PREVIEWG;Preview the <b>green channel</b>.\nShortcut: <b>Shift-g</b>
+MAIN_TOOLTIP_PREVIEWL;Preview the <b>luminosity</b>.\nShortcut: <b>Shift-v</b>\n\n0.299*R + 0.587*G + 0.114*B
+MAIN_TOOLTIP_PREVIEWR;Preview the <b>red channel</b>.\nShortcut: <b>Shift-r</b>
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Preview the <b>sharpening contrast mask</b>.\nShortcut: <b>Shift-o</b>\n\nOnly works when sharpening is enabled, and it is accurate only when zoom >= 100%.
+MAIN_TOOLTIP_QINFO;Quick info on the image.\nShortcut: <b>Shift-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Show/Hide the left panel.\nShortcut: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Show/Hide the right panel.\nShortcut: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Show/Hide the top panel.\nShortcut: <b>Shift-l</b>
 MAIN_TOOLTIP_THRESHOLD;Threshold
-MAIN_TOOLTIP_TOGGLE;Toggle the <b>Before</b>/<b>After</b> view.\nShortcut: <b>Shift-b</b>
+MAIN_TOOLTIP_TOGGLE;Toggle the <b>Before</b>/<b>After</b> view.\nShortcut: <b>Shift-a</b>
 METADATA_LOAD_ERROR;Error loading metadata from %1: %2
 METADATA_SAVE_ERROR;Error saving metadata to %1: %2
 MONITOR_PROFILE_SYSTEM;System default
@@ -939,6 +955,8 @@ PREFERENCES_APPEARANCE_THEME;Theme
 PREFERENCES_APPLNEXTSTARTUP;restart required
 PREFERENCES_AUTOMONPROFILE;Use operating system's main monitor color profile
 PREFERENCES_AUTOSAVE_TP_OPEN;Save tool collapsed/expanded state on exit
+PREFERENCES_AUTOSAVE;Auto Saving
+PREFERENCES_AUTOSAVE_INTERVAL;ARP auto saving interval (in minutes, 0 to disable)
 PREFERENCES_BATCH_PROCESSING;Batch Processing
 PREFERENCES_CACHECLEAR;Clear
 PREFERENCES_CACHECLEAR_ALL;Clear all cached files:
@@ -1050,6 +1068,7 @@ PREFERENCES_PARSEDEXTDOWNHINT;Move selected extension down in the list.
 PREFERENCES_PARSEDEXTUPHINT;Move selected extension up in the list.
 PREFERENCES_PERFORMANCE_THREADS;Threads
 PREFERENCES_PERFORMANCE_THREADS_LABEL;Maximum number of threads for Noise Reduction and Wavelet Levels (0 = Automatic)
+PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE;Maximum number of threads for updating thumbnails (0 = Automatic)
 PREFERENCES_PREVDEMO;Preview Accuracy
 PREFERENCES_PREVDEMO_FAST;Fast
 PREFERENCES_PREVDEMO_LABEL;Demosaicing method used for the preview at <100% zoom:
@@ -1097,6 +1116,8 @@ PREFERENCES_TAB_GENERAL;General
 PREFERENCES_TAB_IMPROC;Image Processing
 PREFERENCES_TAB_PERFORMANCE;Performance
 PREFERENCES_TAB_SOUND;Sounds
+PREFERENCES_THUMBNAIL_DELAY_UPDATE;Delay update of thumbnail images while opening directories
+PREFERENCES_THUMBNAIL_LAZY_CACHING;Lazy caching of thumbnail images
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navigate and pan by hovering over thumbnails
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Embedded JPEG preview
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Image to show
@@ -1217,8 +1238,9 @@ SAVEDLG_SUBSAMP_TOOLTIP;Best compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma halved h
 SAVEDLG_TIFFUNCOMPRESSED;Uncompressed TIFF
 SAVEDLG_WARNFILENAME;File will be named
 SHCSELECTOR_TOOLTIP;Click right mouse button to reset the position of those 3 sliders.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the printer profile, if one is set and soft-proofing is enabled,\n- the output profile, if a printer profile is not set and soft-proofing is enabled,\n- the monitor profile, if soft-proofing is disabled.
-SOFTPROOF_TOOLTIP;Soft-proofing simulates the appearance of the image:\n- when printed, if a printer profile is set in Preferences > Color Management,\n- when viewed on a display that uses the current output profile, if a printer profile is not set.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to the output profile.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the printer profile, if one is set and soft-proofing is enabled,\n- the monitor profile, if soft-proofing is disabled.
+SOFTPROOF_TOOLTIP;Soft-proofing simulates the appearance of the image when printed, if a printer profile is set in Preferences > Color Management.
 THRESHOLDSELECTOR_B;Bottom
 THRESHOLDSELECTOR_BL;Bottom-left
 THRESHOLDSELECTOR_BR;Bottom-right
@@ -1226,12 +1248,13 @@ THRESHOLDSELECTOR_HINT;Hold the <b>Shift</b> key to move individual control poin
 THRESHOLDSELECTOR_T;Top
 THRESHOLDSELECTOR_TL;Top-left
 THRESHOLDSELECTOR_TR;Top-right
+TOOL_SHORTCUT_HELP_HEADER;Tool shortcuts:\n(hold the given key and adjust the slider with +/- or the scrollwheel)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Lockable Color Picker\n\nWhen the tool is active:\n- Add a picker: <b>left-click</b>.\n- Drag a picker: <b>left-click and drag</b>.\n- Delete a picker: <b>right-click</b>.\n- Delete all pickers: <b>Ctrl</b>+<b>Shift</b>+<b>right-click</b>.\n- Revert to hand tool: <b>right-click</b> outside any picker.
-TOOLBAR_TOOLTIP_CROP;<b>Crop</b> selection.\nShortcut: <b>c</b>\nMove the crop using <b>Shift</b>+<b>mouse drag</b>\nResize the crop using <b>Ctrl</b>+<b>mouse drag</b>.
+TOOLBAR_TOOLTIP_CROP;<b>Crop</b> selection.\nShortcut: <b>Shift-c</b>\nMove the crop using <b>mouse drag</b>\nResize the crop by moving the crop borders.
 TOOLBAR_TOOLTIP_HAND;Hand tool.\nShortcut: <b>h</b>
-TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Perspective Correction</b>.\nShortcut: <b>p</b>\n\nEdit control lines to correct perspective distortion. Click this button again to apply the correction.
-TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Straighten</b> / <b>fine rotation</b>.\nShortcut: <b>s</b>\n\nIndicate the vertical or horizontal by drawing a guide line over the image preview. Angle of rotation will be shown next to the guide line. Center of rotation is the geometrical center of the image.
-TOOLBAR_TOOLTIP_WB;Spot white balance.\nShortcut: <b>w</b>
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Perspective Correction</b>.\nShortcut: <b>Shift-p</b>\n\nEdit control lines to correct perspective distortion. Click this button again to apply the correction.
+TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Straighten</b> / <b>fine rotation</b>.\nShortcut: <b>Shift-s</b>\n\nIndicate the vertical or horizontal by drawing a guide line over the image preview. Angle of rotation will be shown next to the guide line. Center of rotation is the geometrical center of the image.
+TOOLBAR_TOOLTIP_WB;Spot white balance.\nShortcut: <b>Shift-w</b>
 TP_SATURATION_LABEL;Saturation/Vibrance
 TP_BRIGHTCONTRSAT_CONTRAST;Contrast
 TP_SATURATION_SATURATION;Saturation
@@ -1315,6 +1338,7 @@ TP_COLORCORRECTION_L;Lightness
 TP_COLORCORRECTION_H;Hue
 TP_COLORCORRECTION_S;Saturation
 TP_COLORCORRECTION_HUESAT;Hue/Saturation
+TP_COLORCORRECTION_HUESHIFT;Hue shift
 TP_CROP_FIXRATIO;Lock ratio
 TP_CROP_GTDIAGONALS;Rule of Diagonals
 TP_CROP_GTEPASSPORT;Biometric Passport
@@ -1410,11 +1434,13 @@ TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Please refer to the "Exposure > Tone Curves" Ra
 TP_EXPOSURE_EXPCOMP;Exposure compensation
 TP_EXPOSURE_HISTMATCHING;Auto-Matched Tone Curve
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;Automatically adjust sliders and curves (except exposure compensation) to match the look of the embedded JPEG thumbnail.
+TP_EXPOSURE_HRBLUR;Color propagation smoothness
 TP_EXPOSURE_LABEL;Exposure
 TP_EXPOSURE_TCMODE_FILMLIKE;Film-like
 TP_EXPOSURE_TCMODE_LABEL1;Curve mode 1
 TP_EXPOSURE_TCMODE_LABEL2;Curve mode 2
 TP_EXPOSURE_TCMODE_LUMINANCE;Luminance
+TP_EXPOSURE_TCMODE_ODT;Neutral
 TP_EXPOSURE_TCMODE_PERCEPTUAL;Perceptual
 TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Saturation and Value Blending
 TP_EXPOSURE_TCMODE_STANDARD;Standard
@@ -1535,6 +1561,7 @@ TP_LABMASKS_AREA_ROUNDNESS;Roundness
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;Copy the current mask to the clipboard
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;Edit the current rectangular area shape by drawing on the preview image
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;Add a rectangular area shape by drawing on the preview image
+TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;Add a gradient
 TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;Add a polygonal area shape by adding points on the preview image
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;Display the current area shape on the preview image
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;Paste a mask from the clipboard
@@ -1545,6 +1572,8 @@ TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;Subtract
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;Intersect
 TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 point(s)
 TP_LABMASKS_AREA_SHAPES;Area shapes
+TP_LABMASKS_AREA_STRENGTH_START;Start strength
+TP_LABMASKS_AREA_STRENGTH_END;End strength
 TP_LABMASKS_AREA_WIDTH;Width
 TP_LABMASKS_AREA_X;Center X
 TP_LABMASKS_AREA_Y;Center Y
@@ -1567,7 +1596,7 @@ TP_LABMASKS_DELTAE_PICK;Pick
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Weight in the ΔE computation
 TP_LABMASKS_DELTAE_TOOLTIP;Select regions of similar colour\n(according to the CIELAB ΔE* metric)
 TP_LABMASKS_DRAWNMASK;Brush Mask
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Toggle on-canvas painting with the brush.\n\n<i>When using a mouse:</i>\n- Hold <b>Shift</b> to temporarily toggle "Eraser mode";\n- Use <b>Ctrl+scroll wheel</b> to change the brush radius,\n- <b>Ctrl+Shift+scroll wheel</b> to change the brush hardness,\n- and <b>Ctrl+click</b> to begin a new strokes group without changing parameters\n(so that multiple strokes on the same area will add up);\n- Use the <b>third button</b> to turn off on-canvas painting.\n\n<i>When using a pressure-sensitive device:</i>\n- Use the <b>first button</b> to toggle "Eraser mode";\n- Use <b>Alt+first button</b> to increase the brush radius, and\n- <b>Alt+second button</b> to decrease it;\n- Use the <b>second button</b> to cycle through the available pressure sensitivity modes: off, hardness, radius (hold <b>Shift</b> to reverse the direction);\n- Use <b>Ctrl+second button</b> to turn off on-canvas painting.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Toggle on-canvas painting with the brush.\n\n<i>When using a mouse:</i>\n- Hold <b>Alt</b> to temporarily toggle "Eraser mode";\n- Hold <b>Shift</b> to draw a straight line;\n- Use <b>Ctrl+scroll wheel</b> to change the brush radius,\n- <b>Ctrl+Shift+scroll wheel</b> to change the brush hardness,\n- and <b>Ctrl+click</b> to begin a new strokes group without changing parameters\n(so that multiple strokes on the same area will add up);\n- Use the <b>third button</b> to turn off on-canvas painting.\n\n<i>When using a pressure-sensitive device:</i>\n- Use the <b>first button</b> to toggle "Eraser mode";\n- Hold <b>Shift</b> to draw a straight line;\n- Use <b>Alt+first button</b> to increase the brush radius, and\n- <b>Alt+second button</b> to decrease it;\n- Use the <b>second button</b> to cycle through the available pressure sensitivity modes: off, hardness, radius (hold <b>Shift</b> to reverse the direction);\n- Use <b>Ctrl+second button</b> to turn off on-canvas painting.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Brush settings
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Clear all strokes
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Remove the last group of strokes
@@ -1581,6 +1610,10 @@ TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Intersect the brush mask with the other 
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;Add the brush mask on top of the other masks
 TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Add the brush mask on top of the other masks, but only within the active area mask
 TP_LABMASKS_PARAMETRIC;Parametric mask
+TP_LABMASKS_POSTPROCESS;Mask post-processing
+TP_LABMASKS_POSTPROCESS_CURVE;Tone curve
+TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterization
+TP_LABMASKS_POSTPROCESS_SMOOTHING;Smoothing
 TP_LENSGEOM_AUTOCROP;Auto-Crop
 TP_LENSGEOM_FILL;Auto-fill
 TP_LENSGEOM_LABEL;Lens / Geometry
@@ -1599,11 +1632,11 @@ TP_LOCALCONTRAST_CONTRAST;Residual contrast
 TP_LOCALCONTRAST_CURVE;Local contrast curve
 TP_LOCALCONTRAST_LABEL;Local Contrast
 TP_LOGENC_AUTO;Automatic
-TP_LOGENC_BLACK_EV;Black Ev
-TP_LOGENC_EV_LEVELS;Relative exposure levels
-TP_LOGENC_SOURCE_GRAY;Source gray point
-TP_LOGENC_WHITE_EV;White Ev
-TP_LOGENC_TARGET_GRAY;Target gray point
+TP_LOGENC_ADVANCED;Advanced settings
+TP_LOGENC_BLACK_EV;Black relative exposure (Ev)
+TP_LOGENC_GAIN;Gain (Ev)
+TP_LOGENC_WHITE_EV;White relative exposure (Ev)
+TP_LOGENC_TARGET_GRAY;Target gray point (brightness)
 TP_LOGENC_LABEL;Log Tone Mapping
 TP_LOGENC_REGULARIZATION;Regularization
 TP_METADATA_EDIT;Apply modifications
@@ -1798,6 +1831,9 @@ TP_SMOOTHING_MODE;Mode
 TP_SMOOTHING_MODE_GUIDED;Guided
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussian
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Glow
+TP_SMOOTHING_MODE_NLMEANS;Non-local means
+TP_SMOOTHING_MODE_LENS;Lens blur
+TP_SMOOTHING_MODE_MOTION;Motion blur
 TP_SMOOTHING_CHANNEL;Channel
 TP_SMOOTHING_CHANNEL_L;Luminance
 TP_SMOOTHING_CHANNEL_C;Chrominance
@@ -1806,6 +1842,12 @@ TP_SMOOTHING_RADIUS;Radius
 TP_SMOOTHING_EPSILON;Detail
 TP_SMOOTHING_SIGMA;Radius
 TP_SMOOTHING_ITERATIONS;Iterations
+TP_SMOOTHING_NLSTRENGTH;Strength
+TP_SMOOTHING_NLDETAIL;Detail
+TP_SMOOTHING_NUMBLADES;Blades
+TP_SMOOTHING_ANGLE;Angle
+TP_SMOOTHING_CURVATURE;Curvature
+TP_SMOOTHING_OFFSET;Offset
 TP_SOFTLIGHT_LABEL;Soft Light
 TP_SOFTLIGHT_STRENGTH;Strength
 TP_SPOT_COUNTLABEL;%1 point(s)
@@ -1828,6 +1870,9 @@ TP_TM_FATTAL_SATCONTROL;Saturation control
 TP_TONECURVE_LABEL;Tone Curves
 TP_TONECURVE_SATCURVE;Saturation
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Perceptual curve strength
+TP_TONECURVE_MODE;Mode
+TP_TONECURVE_CONTRAST_LEGACY;Contrast legacy mode
+TP_TONECURVE_WHITEPOINT;White point
 TP_TONE_EQUALIZER_BAND_0;Blacks
 TP_TONE_EQUALIZER_BAND_1;Shadows
 TP_TONE_EQUALIZER_BAND_2;Midtones

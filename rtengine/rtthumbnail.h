@@ -90,6 +90,7 @@ public:
     static Thumbnail *loadQuickFromRaw(const Glib::ustring& fname, eSensorType &sensorType, int &w, int &h, int fixwh, bool rotate, bool forHistogramMatching = false);
     static Thumbnail *loadFromRaw(const Glib::ustring& fname, eSensorType &sensorType, int &w, int &h, int fixwh, double wbEq, bool rotate, bool forHistogramMatching=false);
     static Thumbnail *loadFromImage(const Glib::ustring& fname, int &w, int &h, int fixwh, double wbEq);
+    static Thumbnail *loadInfoFromRaw(const Glib::ustring &fname, eSensorType &sensorType, int &w, int &h, int fixwh);
 
     void getCamWB     (double& temp, double& green);
     void getAutoWB    (double& temp, double& green, double equal);

@@ -1000,9 +1000,6 @@ bool Inspector::handleShortcutKey(GdkEventKey *event)
 
     if (!ctrl && !shift && !alt && !altgr) {
         switch (event->keyval) {
-        case GDK_KEY_i:
-            toggleShowInfo(); 
-            return true;
         case GDK_KEY_h:
             toggleShowHistogram();
             return true;
@@ -1044,10 +1041,16 @@ bool Inspector::handleShortcutKey(GdkEventKey *event)
             break;
         }
     }
-    if (!ctrl && shift && !alt && !altgr && event->keyval == GDK_KEY_F) {
-        focusmask_->set_active(!focusmask_->get_active());
-        return true;
-    }    
+    if (!ctrl && shift && !alt && !altgr) {
+        switch (event->keyval) {
+        case GDK_KEY_F:
+            focusmask_->set_active(!focusmask_->get_active());
+            return true;
+        case GDK_KEY_I:
+            toggleShowInfo(); 
+            return true;
+        }
+    }
 
     return false;
 }

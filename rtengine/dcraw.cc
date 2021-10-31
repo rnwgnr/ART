@@ -9644,7 +9644,7 @@ void CLASS identify()
     apply_tiff();
     if (!strcmp(model, "X-T3")) {
         height = raw_height - 2;
-    } else if (!strcmp(model, "GFX 100")) {
+    } else if (!strcmp(model, "GFX 100") || !strcmp(model, "GFX100S")) {
         load_flags = 0;
     }
     if (!load_raw) {
@@ -10121,7 +10121,7 @@ canon_a5:
     } else if (!strncmp(model, "X-A3", 4) || !strncmp(model, "X-A5", 4)) {
         width = raw_width = 6016;
         height = raw_height = 4014;
-    } else if (!strcmp(model, "X-Pro3") || !strcmp(model, "X-T3") || !strcmp(model, "X-T30")) {
+    } else if (!strcmp(model, "X-Pro3") || !strcmp(model, "X-T3") || !strcmp(model, "X-T30") || !strcmp(model, "X-T4") || !strcmp(model, "X100V") || !strcmp(model, "X-S10")) {
         width = raw_width = 6384;
         height = raw_height = 4182;
     }

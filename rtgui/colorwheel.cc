@@ -588,7 +588,7 @@ bool ColorWheel::mouseOver(int modifierKey)
         double x = p->pipetteVal[0];
         double y = p->pipetteVal[2];
         double s = find_scale(x, y);
-        if (modifierKey & GDK_SHIFT_MASK) {
+        if (!(modifierKey & GDK_SHIFT_MASK)) {
             // invert
             rtengine::PolarCoord p(rtengine::CoordD(x, y));
             p.angle += 180;
@@ -609,7 +609,7 @@ bool ColorWheel::button1Pressed(int modifierKey)
         double x = p->pipetteVal[0];
         double y = p->pipetteVal[2];
         double s = find_scale(x, y);
-        if (modifierKey & GDK_SHIFT_MASK) {
+        if (!(modifierKey & GDK_SHIFT_MASK)) {
             // invert
             rtengine::PolarCoord p(rtengine::CoordD(x, y));
             p.angle += 180;

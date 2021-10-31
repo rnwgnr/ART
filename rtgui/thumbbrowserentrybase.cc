@@ -206,7 +206,7 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
 
     bbSelected = selected;
     bbFramed = framed;
-    bbPreview = &preview[0];
+    bbPreview = !preview.empty() ? &preview[0] : nullptr;
 
     Cairo::RefPtr<Cairo::Context> cc = Cairo::Context::create(surface);
 
@@ -615,7 +615,7 @@ void ThumbBrowserEntryBase::draw (Cairo::RefPtr<Cairo::Context> cc)
         bbHeight = backBuffer->getHeight();
     }
 
-    if (!backBuffer || selected != bbSelected || framed != bbFramed || &preview[0] != bbPreview
+    if (!backBuffer || selected != bbSelected || framed != bbFramed || (!preview.empty() ? &preview[0] != bbPreview : !bbPreview)
             || exp_width != bbWidth || exp_height != bbHeight || getIconsOnImageArea () != bbIcons
             || getSpecificityIconsOnImageArea() != bbSpecificityIcons || backBuffer->isDirty())
     {

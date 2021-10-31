@@ -192,11 +192,6 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
 
     ImageIO* img = imgSrc.getImageIO();
 
-    // agriggio -- hotfix for #3794, to be revised once a proper solution is implemented
-    // if (std::max(img->getWidth(), img->getHeight()) / std::min(img->getWidth(), img->getHeight()) >= 10) {
-    //     return nullptr;
-    // }
-    
     Thumbnail* tpp = new Thumbnail ();
 
     unsigned char* data;
@@ -1129,7 +1124,7 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     Image8 *readyImg = nullptr;
     if (forMonitor) {
         readyImg = new Image8 (fw, fh);
-        ipf.rgb2monitor(baseImg, readyImg);
+        ipf.rgb2monitor(baseImg, readyImg, true);
     } else {
         readyImg = ipf.rgb2out(baseImg, 0, 0, fw, fh, params.icm, false);
     }
@@ -1897,5 +1892,131 @@ unsigned char* Thumbnail::getImage8Data()
 
     return nullptr;
 }
+
+
+Thumbnail* Thumbnail::loadInfoFromRaw(const Glib::ustring &fname, eSensorType &sensorType, int &w, int &h, int fixwh)
+{
+    RawImage *ri = new RawImage(fname);
+    unsigned int tempImageNum = 0;
+
+    int r = ri->loadRaw(false, tempImageNum, false, nullptr, 1.0, false);
+
+    if (r) {
+        delete ri;
+        sensorType = ST_NONE;
+        return nullptr;
+    }
+
+    if (ri->getFrameCount() == 7) {
+        // special case for Hasselblad H6D-100cMS pixelshift files
+        // first frame is not bayer, load second frame
+        int r = ri->loadRaw(false, 1, false, nullptr, 1.0, false);
+
+        if (r) {
+            delete ri;
+            sensorType = ST_NONE;
+            return nullptr;
+        }
+    }
+    sensorType = ri->getSensorType();
+
+    int width = ri->get_width();
+    int height = ri->get_height();
+    rtengine::Thumbnail *tpp = new rtengine::Thumbnail;
+
+    tpp->isRaw = true;
+    tpp->sensorType = sensorType;
+    tpp->embProfile = nullptr;
+    tpp->embProfileData = nullptr;
+    tpp->embProfileLength = 0;
+
+    tpp->redMultiplier = ri->get_pre_mul (0);
+    tpp->greenMultiplier = ri->get_pre_mul (1);
+    tpp->blueMultiplier = ri->get_pre_mul (2);
+
+    tpp->camwbRed = 1.0;
+    tpp->camwbGreen = 1.0;
+    tpp->camwbBlue = 1.0;
+    tpp->defGain = 1.0;
+
+    float pre_mul[4], scale_mul[4], cblack[4];
+    ri->get_colorsCoeff (pre_mul, scale_mul, cblack, false);
+    tpp->defGain = max(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]) / min (scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]);
+    tpp->defGain *= std::pow(2, ri->getBaselineExposure());
+    
+    int skip = 1;
+    int firstgreen = 1;
+
+    if (ri->get_FujiWidth() != 0) {
+        if (fixwh == 1) { // fix height, scale width
+            skip = ((ri->get_height() - ri->get_FujiWidth()) / sqrt (0.5) - firstgreen - 1) / h;
+        } else {
+            skip = (ri->get_FujiWidth() / sqrt (0.5) - firstgreen - 1) / w;
+        }
+    } else {
+        if (fixwh == 1) { // fix height, scale width
+            skip = (ri->get_height() - firstgreen - 1) / h;
+        } else {
+            skip = (ri->get_width() - firstgreen - 1) / w;
+        }
+    }
+
+    if (skip % 2) {
+        skip--;
+    }
+
+    if (skip < 2) {
+        skip = 2;
+    }
+
+    int hskip = skip, vskip = skip;
+
+    if (!ri->get_model().compare ("D1X")) {
+        hskip *= 2;
+    }
+
+    int tmpw = (width - 2) / hskip;
+    int tmph = (height - 2) / vskip;
+
+
+    if (ri->get_FujiWidth() != 0) {
+        int fw = ri->get_FujiWidth() / hskip;
+        double step = sqrt (0.5);
+        int wide = fw / step;
+        int high = (tmph - fw) / step;
+        tmpw = wide;
+        tmph = high;
+    }
+
+    const bool rotate_90 =
+        true
+        && (
+            ri->get_rotateDegree() == 90
+            || ri->get_rotateDegree() == 270
+        );
+
+    if (rotate_90) {
+        std::swap (tmpw, tmph);
+    }
+
+    if (fixwh == 1) { // fix height, scale width
+        w = tmpw * h / tmph;
+    } else {
+        h = tmph * w / tmpw;
+    }
+
+
+    if (ri->get_FujiWidth() != 0) {
+        tpp->scale = (double) (height - ri->get_FujiWidth()) * 2.0 / (rotate_90 ? w : h);
+    } else {
+        tpp->scale = (double) height / (rotate_90 ? w : h);
+    }
+
+    RawImageSource::computeFullSize(ri, TR_NONE, tpp->full_width, tpp->full_height);
+    
+    delete ri;
+    return tpp;
+}
+
 
 } // namespace rtengine

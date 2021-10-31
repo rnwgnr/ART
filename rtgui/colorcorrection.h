@@ -91,6 +91,7 @@ private:
     rtengine::ProcEvent EvPivot;    
     rtengine::ProcEvent EvMode;
     rtengine::ProcEvent EvRgbLuminance;
+    rtengine::ProcEvent EvHueShift;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -103,6 +104,7 @@ private:
     rtengine::ProcEvent EvDeltaEMask;
     rtengine::ProcEvent EvContrastThresholdMask;
     rtengine::ProcEvent EvDrawnMask;
+    rtengine::ProcEvent EvMaskPostprocess;
 
     std::vector<rtengine::procparams::ColorCorrectionParams::Region> data;
 
@@ -120,6 +122,8 @@ private:
     ColorWheel *wheel;
     Adjuster *inSaturation;
     Adjuster *outSaturation;
+    Adjuster *hueshift;
+    
     Adjuster *slope;
     Adjuster *offset;
     Adjuster *power;

@@ -75,7 +75,7 @@ protected:
     Glib::ustring monitorProfile;
     RenderingIntent monitorIntent;
     bool softProof;
-    bool gamutCheck;
+    GamutCheck gamutCheck;
     bool sharpMask;
 
     int scale;
@@ -239,8 +239,7 @@ public:
     void setHighQualComputed() override;
     void setMonitorProfile (const Glib::ustring& profile, RenderingIntent intent) override;
     void getMonitorProfile (Glib::ustring& profile, RenderingIntent& intent) const override;
-    void setSoftProofing   (bool softProof, bool gamutCheck) override;
-    void getSoftProofing   (bool &softProof, bool &gamutCheck) override;
+    void setSoftProofing   (bool softProof, GamutCheck gamutCheck) override;
     void setSharpMask      (bool sharpMask) override;
     bool updateTryLock () override
     {

@@ -855,6 +855,8 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
 {
     Params params;
     if (get_params(getToplevelWindow(this), args, params)) {
+        removeFromBatchQueue(args);
+        
         std::vector<std::pair<Glib::ustring, Glib::ustring>> torename;
         for (auto e : args) {
             get_targets(params, e, torename);

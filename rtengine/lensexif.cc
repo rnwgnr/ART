@@ -437,7 +437,7 @@ void ExifLensCorrection::correctDistortion(double &x, double &y, int cx, int cy,
         const float dx2 = SQR(dx);
         const float dy2 = SQR(dy);
         const float r2 = dx2 + dy2;
-        const float f = dist_[0] + r2 * (dist_[1] + r2 * (dist_[2] * r2 * dist_[3]));
+        const float f = dist_[0] + r2 * (dist_[1] + r2 * (dist_[2] + r2 * dist_[3]));
         const float dx_r = f * dx;
         const float dy_r = f * dy;
         const float dxdy2 = 2 * dx * dy;

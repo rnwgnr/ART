@@ -47,7 +47,7 @@ Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageDat
     loadProcParams(false);
 
     // should be safe to use the unprotected version of loadThumbnail, since we are in the constructor
-    _loadThumbnail();
+    _loadThumbnail(true, options.thumb_lazy_caching);
     generateExifDateTimeStrings();
 
     loadRating();
@@ -65,16 +65,20 @@ Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::s
 
     cfs.md5 = md5;
     loadProcParams ();
-    _generateThumbnailImage ();
+    //initial_ = !pparamsValid;
+    _generateThumbnailImage(true, options.thumb_lazy_caching);
     cfs.recentlySaved = false;
 
     initial_ = false;
+    // if (cfs.thumbImgType == CacheImageData::QUICK_THUMBNAIL && pparamsValid) {
+    //     cfs.thumbImgType = CacheImageData::FULL_THUMBNAIL;
+    // }
 
     delete tpp;
     tpp = nullptr;
 }
 
-void Thumbnail::_generateThumbnailImage(bool save_in_cache)
+void Thumbnail::_generateThumbnailImage(bool save_in_cache, bool info_only)
 {
     //  delete everything loaded into memory
     delete tpp;
@@ -124,7 +128,12 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache)
 
         if ( tpp == nullptr ) {
             quick = false;
-            tpp = rtengine::Thumbnail::loadFromRaw (fname, sensorType, tw, th, 1, pparams.master.wb.equal, TRUE);
+            if (!info_only) {
+                tpp = rtengine::Thumbnail::loadFromRaw (fname, sensorType, tw, th, 1, pparams.master.wb.equal, TRUE);
+            } else {
+                tpp = rtengine::Thumbnail::loadInfoFromRaw(fname, sensorType, tw, th, 1);
+                save_in_cache = false;
+            }
         }
 
         cfs.sensortype = sensorType;
@@ -194,15 +203,15 @@ const ProcParams& Thumbnail::getProcParamsU ()
         pp->applyTo(pparams.master);
         //pparams = *(ProfileStore::getInstance()->getDefaultProcParams (getType() == FT_Raw));
 
-        if (pparams.master.wb.method == WBParams::CAMERA) {
-            double ct;
-            getCamWB (ct, pparams.master.wb.green);
-            pparams.master.wb.temperature = ct;
-        } else if (pparams.master.wb.method == WBParams::AUTO) {
-            double ct;
-            getAutoWB(ct, pparams.master.wb.green, pparams.master.wb.equal);
-            pparams.master.wb.temperature = ct;
-        }
+        // if (pparams.master.wb.method == WBParams::CAMERA) {
+        //     double ct;
+        //     getCamWB (ct, pparams.master.wb.green);
+        //     pparams.master.wb.temperature = ct;
+        // } else if (pparams.master.wb.method == WBParams::AUTO) {
+        //     double ct;
+        //     getAutoWB(ct, pparams.master.wb.green, pparams.master.wb.equal);
+        //     pparams.master.wb.temperature = ct;
+        // }
     }
 
     return pparams.master; // there is no valid pp to return, but we have to return something
@@ -662,6 +671,8 @@ rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::Pro
 
         if ( tpp == nullptr ) {
             return nullptr;
+        } else if (options.thumb_lazy_caching) {
+            _saveThumbnail();
         }
     }
 
@@ -767,16 +778,16 @@ const Glib::ustring& Thumbnail::getDateTimeString ()
     return dateTimeString;
 }
 
-void Thumbnail::getAutoWB (double& temp, double& green, double equal)
-{
-    if (cfs.redAWBMul != -1.0) {
-        rtengine::ColorTemp ct(cfs.redAWBMul, cfs.greenAWBMul, cfs.blueAWBMul, equal);
-        temp = ct.getTemp();
-        green = ct.getGreen();
-    } else {
-        temp = green = -1.0;
-    }
-}
+// void Thumbnail::getAutoWB (double& temp, double& green, double equal)
+// {
+//     if (cfs.redAWBMul != -1.0) {
+//         rtengine::ColorTemp ct(cfs.redAWBMul, cfs.greenAWBMul, cfs.blueAWBMul, equal);
+//         temp = ct.getTemp();
+//         green = ct.getGreen();
+//     } else {
+//         temp = green = -1.0;
+//     }
+// }
 
 
 ThFileType Thumbnail::getType ()
@@ -860,7 +871,7 @@ int Thumbnail::infoFromImage (const Glib::ustring& fname)
  *  - embedded profile (full thumbnail only)
  *  - LiveThumbData section of the data file
  */
-void Thumbnail::_loadThumbnail(bool firstTrial)
+void Thumbnail::_loadThumbnail(bool firstTrial, bool info_only)
 {
 
     needsReProcessing = true;
@@ -881,7 +892,7 @@ void Thumbnail::_loadThumbnail(bool firstTrial)
     succ = succ && tpp->readImage (getCacheFileName ("images", ""));
 
     if (!succ && firstTrial) {
-        _generateThumbnailImage(false);
+        _generateThumbnailImage(false, info_only);
         return;
 
         // if (cfs.supported && firstTrial) {

@@ -360,6 +360,8 @@ skip_block:
                         }
                     }
                     std::swap(cmul[2], cmul[3]);
+                } else {
+                    ok = false;
                 }
             } catch (std::exception &) {
                 ok = false;

@@ -45,6 +45,7 @@ FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
     : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
 {
     refresh_status_ = RefreshStatus::READY;
+    refresh_disabled_ = true;
     thumbnail = thm;
 
     feih = new FileBrowserEntryIdleHelper;
@@ -99,7 +100,10 @@ void FileBrowserEntry::refreshThumbnailImage ()
         return;
     }
 
-    refresh_status_ = RefreshStatus::FULL;
+    if (refresh_status_ != RefreshStatus::PENDING) {
+        refresh_status_ = RefreshStatus::FULL;
+        parent->redrawEntryNeeded(this);
+    }
     // thumbImageUpdater->add (this, &updatepriority, false, this);
 }
 
@@ -110,7 +114,10 @@ void FileBrowserEntry::refreshQuickThumbnailImage ()
         return;
     }
 
-    refresh_status_ = RefreshStatus::QUICK;
+    if (refresh_status_ != RefreshStatus::PENDING) {
+        refresh_status_ = RefreshStatus::QUICK;
+        parent->redrawEntryNeeded(this);
+    }
     // Only make a (slow) processed preview if the picture has been edited at all
     // bool upgrade_to_processed = (!options.internalThumbIfUntouched || thumbnail->isPParamsValid());
     // thumbImageUpdater->add(this, &updatepriority, upgrade_to_processed, this);
@@ -216,9 +223,9 @@ void FileBrowserEntry::procParamsChanged (Thumbnail* thm, int whoChangedIt)
         refreshThumbnailImage ();
     }
 
-    if (whoChangedIt == EDITOR) {
-        update_refresh_status();
-    }
+    // if (whoChangedIt == EDITOR) {
+    //     update_refresh_status();
+    // }
 }
 
 
@@ -520,18 +527,25 @@ bool FileBrowserEntry::releaseNotify (int button, int type, int bstate, int x, i
 // }
 
 
-void FileBrowserEntry::update_refresh_status()
+inline void FileBrowserEntry::update_refresh_status()
 {
+    if (refresh_disabled_) {
+        return;
+    }
+
+    const bool upgrade = (!options.internalThumbIfUntouched || thumbnail->isPParamsValid());
+    
     switch (refresh_status_) {
     case RefreshStatus::QUICK:
-        refresh_status_ = RefreshStatus::PENDING;
-        // Only make a (slow) processed preview if the picture has been edited at all
-        thumbImageUpdater->add(this, &updatepriority, (!options.internalThumbIfUntouched || thumbnail->isPParamsValid()), this);
-        break;
     case RefreshStatus::FULL:
         refresh_status_ = RefreshStatus::PENDING;
-        thumbImageUpdater->add (this, &updatepriority, false, this);
+        // Only make a (slow) processed preview if the picture has been edited at all
+        thumbImageUpdater->add(this, &updatepriority, upgrade, this);
         break;
+    // case RefreshStatus::FULL:
+    //     refresh_status_ = RefreshStatus::PENDING;
+    //     thumbImageUpdater->add (this, &updatepriority, false, this);
+    //     break;
     default:
         break;
     }
@@ -640,3 +654,7 @@ void FileBrowserEntry::drawStraightenGuide (Cairo::RefPtr<Cairo::Context> cr)
 }
 
 
+void FileBrowserEntry::enableThumbRefresh()
+{
+    refresh_disabled_ = false;
+}

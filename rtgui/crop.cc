@@ -1523,9 +1523,17 @@ void Crop::setDefaults(const ProcParams *def)
 
 void Crop::toolReset(bool to_initial)
 {
+    doresetCrop(false);
+    int saved_nw = nw, saved_nh = nh, saved_maxw = maxw, saved_maxh = maxh;
     ProcParams pp;
     if (to_initial) {
         pp.crop = initial_params;
     }
     pp.crop.enabled = getEnabled();
+    read(&pp);
+    nw = saved_nw;
+    nh = saved_nh;
+    maxw = saved_maxw;
+    maxh = saved_maxh;
+    refreshSpins(false);
 }

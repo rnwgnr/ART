@@ -298,7 +298,7 @@ namespace rtengine {
 
 extern const Settings *settings;
 
-void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm, float** red, float** green, float** blue)
+void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm, float bm, float** red, float** green, float** blue)
 {
     double progress = 0.0;
 
@@ -476,7 +476,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
             }
             HLRecovery_blend(rr, gg, bb, blurWidth, 65535.0, hlmax);
             for (int j = 0; j < blurWidth; ++j) {
-                luminance[i][j] = getlum(rr[j] / rm, gg[j] / gm, bb[j] / bm);
+                luminance[i][j] = getlum(rr[j] / rm, gg[j] / gm, bb[j] / bm) / 65535.f;
             }
         }
     }
@@ -971,6 +971,40 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
         hilite[c].free();
     }
 
+    const int W2 = blur > 0 ? blurWidth / 2.f + 0.5f : 0;
+    const int H2 = blur > 0 ? blurHeight / 2.f + 0.5f : 0;
+    array2D<float> mask(W2, H2, ARRAY2D_CLEAR_DATA);
+    array2D<float> rbuf(W2, H2);
+    array2D<float> gbuf(W2, H2);
+    array2D<float> bbuf(W2, H2);
+    array2D<float> guide(W2, H2);
+   
+    if (blur > 0) {
+        array2D<float> rbuffer(blurWidth, blurHeight, minx, miny, red, ARRAY2D_BYREFERENCE);
+        rescaleNearest(rbuffer, rbuf, true);
+        array2D<float> gbuffer(blurWidth, blurHeight, minx, miny, green, ARRAY2D_BYREFERENCE);
+        rescaleNearest(gbuffer, gbuf, true);
+        array2D<float> bbuffer(blurWidth, blurHeight, minx, miny, blue, ARRAY2D_BYREFERENCE);
+        rescaleNearest(bbuffer, bbuf, true);
+
+        LUTf gamma(65536);
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif
+        for (int i = 0; i < 65536; ++i) {
+            gamma[i] = pow_F(i / 65535.f, 2.2f);
+        }
+
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif
+        for (int y = 0; y < H2; ++y) {
+            for (int x = 0; x < W2; ++x) {
+                guide[y][x] = gamma[Color::rgbLuminance(rbuf[y][x], gbuf[y][x], bbuf[y][x], imatrices.xyz_cam)];
+            }
+        }
+    }
+
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // now reconstruct clipped channels using color ratios
 #ifdef _OPENMP
@@ -1124,6 +1158,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
 
             if (soft) clipped[i][j] = 1.f;
 
+            float maskval = 1.f;
             int yy = i + miny;
             int xx = j + minx;
 
@@ -1155,6 +1190,8 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                     blue[yy][xx]  = max(pixel[2], clipfix[2] * ((notclipped[0] * pixel[0] + notclipped[1] * pixel[1]) /
                                                    (notclipped[0] * clipfix[0] + notclipped[1] * clipfix[1] + epsilon)));
                 }
+
+                maskval = 1.f - (notclipped[0] + notclipped[1] + notclipped[2]) / 5.f;                
             }
 
             Y = 0.299f * red[yy][xx] + 0.587f * green[yy][xx] + 0.114f * blue[yy][xx];
@@ -1166,6 +1203,15 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 green[yy][xx] *= mult;
                 blue[yy][xx]  *= mult;
             }
+
+            if (blur > 0) {
+                const int ii = i / 2;
+                const int jj = j / 2;
+                rbuf[ii][jj] = red[yy][xx];
+                gbuf[ii][jj] = green[yy][xx];
+                bbuf[ii][jj] = blue[yy][xx];
+                mask[ii][jj] = maskval;
+            }            
         }
     }
 
@@ -1173,6 +1219,65 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
         progress += 0.05;
         plistener->setProgress(progress);
     }
+
+    if (blur > 0) {
+        if (plistener) {
+            progress += 0.05;
+            plistener->setProgress(progress);
+        }
+        blur = rtengine::LIM(blur - 1, 0, 3);
+
+        constexpr float vals[4][3] = {{4.0f, 0.3f, 0.3f},
+                                  //    {3.5f, 0.5f, 0.2f},
+                                      {3.0f, 1.0f, 0.1f},
+                                      {3.0f, 2.0f, 0.01f},
+                                      {2.0f, 3.0f, 0.001f}
+                                     };
+
+        const float rad1 = vals[blur][0];
+        const float rad2 = vals[blur][1];
+        const float th = vals[blur][2];
+
+        guidedFilter(guide, mask, mask, rad1, th, true, 1);
+        if (plistener) {
+            progress += 0.03;
+            plistener->setProgress(progress);
+        }
+        if (blur > 0) { //no use of 2nd guidedFilter if Blur = 0 (slider to 1)..speed-up and very small differences.
+            guidedFilter(guide, rbuf, rbuf, rad2, 0.01f * 65535.f, true, 1);
+            if (plistener) {
+                progress += 0.03;
+                plistener->setProgress(progress);
+            }
+            guidedFilter(guide, gbuf, gbuf, rad2, 0.01f * 65535.f, true, 1);
+            if (plistener) {
+                progress += 0.03;
+                plistener->setProgress(progress);
+            }
+            guidedFilter(guide, bbuf, bbuf, rad2, 0.01f * 65535.f, true, 1);
+            if (plistener) {
+                progress += 0.03;
+                plistener->setProgress(progress);
+            }
+        }
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
+        for (int y = 0; y < blurHeight; ++y) {
+            const float fy = y * 0.5f;
+            const int yy = y / 2;
+            for (int x = 0; x < blurWidth; ++x) {
+                const int xx = x / 2;
+                const float m = mask[yy][xx];
+                if (m > 0.f) {
+                    const float fx = x * 0.5f;
+                    red[y + miny][x + minx] = intp(m, getBilinearValue(rbuf, fx, fy), red[y + miny][x + minx]);
+                    green[y + miny][x + minx] = intp(m, getBilinearValue(gbuf, fx, fy), green[y + miny][x + minx]);
+                    blue[y + miny][x + minx] = intp(m, getBilinearValue(bbuf, fx, fy), blue[y + miny][x + minx]);
+                }
+            }
+        }
+    }    
     
     if (soft) {
         auto to_rec2020_m = dotProduct(FLT_M(rec2020_xyz), FLT_M(imatrices.xyz_cam));
@@ -1198,7 +1303,18 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 b = rgb[2]/bm;
             };
 
-        guidedFilter(luminance, clipped, clipped, 10, 0.01f, true);
+        guidedFilter(luminance, clipped, clipped, min(width, height) / 10, 0.05f, true);
+#if 0
+        {
+            Imagefloat tmp(clipped.width(), clipped.height());
+            for (int y = 0; y < clipped.height(); ++y) {
+                for (int x = 0; x < clipped.width(); ++x) {
+                    tmp.r(y, x) = tmp.g(y, x) = tmp.b(y, x) = clipped[y][x] * 65535.f;
+                }
+            }
+            tmp.saveTIFF("/tmp/clipped.tif", 16);
+        }
+#endif
         
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
@@ -1208,7 +1324,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 float &r = red[y + miny][x + minx];
                 float &g = green[y + miny][x + minx];
                 float &b = blue[y + miny][x + minx];
-                float l2 = luminance[y][x];
+                float l2 = luminance[y][x] * 65535.f;
                 float l = getlum(r, g, b);
                 if (l > 0.f) {
                     float f = l2 / l;
@@ -1218,11 +1334,16 @@ void RawImageSource::HLRecovery_inpaint(bool soft, float rm, float gm, float bm,
                 }
                 if (clipped[y][x] > 0.f) {
                     float f = 1.f - LIM01(min(r/max_f[0], b/max_f[2]));
+                    if ((r - b)/max(r, b) > 0.1f && f > 0.f) {
+                        f = pow_F(f, 0.3f);
+                    }
                     to_rec2020(r, g, b);
-                    float h, s, v;
-                    Color::rgb2hsl(r, g, b, h, s, v);
+                    float Y, u, v, h, s;
+                    Color::rgb2yuv(r, g, b, Y, u, v, xyz_rec2020);
+                    Color::yuv2hsl(u, v, h, s);
                     s = intp(clipped[y][x], s * f, s);
-                    Color::hsl2rgb(h, s, v, r, g, b);
+                    Color::hsl2yuv(h, s, u, v);
+                    Color::yuv2rgb(Y, u, v, r, g, b, xyz_rec2020);
                     to_cam(r, g, b);
                 }
             }

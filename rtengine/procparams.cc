@@ -147,6 +147,9 @@ std::vector<double> unpack_list(const std::string &data)
 
 std::string pack_list(const std::vector<double> &data)
 {
+    if (data.empty()) {
+        return "";
+    }
     std::vector<uint8_t> bytes(data.size() * sizeof(uint16_t));
     auto p = &(bytes[0]);
     size_t off = 0;
@@ -648,6 +651,17 @@ AreaMask::Rectangle::Rectangle():
 }
 
 
+AreaMask::Gradient::Gradient():
+    x(0.),
+    y(0.),
+    strengthStart(100.),
+    strengthEnd(0.),
+    angle(0.)
+{
+    feather = 25.;
+}
+
+
 std::unique_ptr<AreaMask::Shape> AreaMask::Rectangle::clone() const
 {
     return std::unique_ptr<Shape>(new Rectangle(*this));
@@ -673,6 +687,10 @@ std::unique_ptr<AreaMask::Shape> AreaMask::Polygon::clone() const
     return std::unique_ptr<Shape>(new Polygon(*this));
 }
 
+std::unique_ptr<AreaMask::Shape> AreaMask::Gradient::clone() const
+{
+    return std::unique_ptr<Shape>(new Gradient(*this));
+}
 
 bool AreaMask::Shape::operator==(const Shape &other) const
 {
@@ -785,6 +803,29 @@ bool AreaMask::Polygon::operator==(const Shape &other) const
 
 
 bool AreaMask::Polygon::operator!=(const Shape &other) const
+{
+    return !(*this == other);
+}
+
+
+bool AreaMask::Gradient::operator==(const Shape &other) const
+{
+    const Gradient *o = dynamic_cast<const Gradient *>(&other);
+    if (!o) {
+        return false;
+    }
+
+    return
+        x == o->x
+        && y == o->y
+        && strengthStart == o->strengthStart
+        && strengthEnd == o->strengthEnd
+        && angle == o->angle
+        && AreaMask::Shape::operator==(other);
+}
+
+
+bool AreaMask::Gradient::operator!=(const Shape &other) const
 {
     return !(*this == other);
 }
@@ -1072,7 +1113,10 @@ Mask::Mask():
     areaMask(),
     deltaEMask(),
     drawnMask(),
-    name("")
+    name(""),
+    curve{DCT_Linear},
+    posterization(0),
+    smoothing(0)
 {
 }
 
@@ -1085,7 +1129,10 @@ bool Mask::operator==(const Mask &other) const
         && areaMask == other.areaMask
         && deltaEMask == other.deltaEMask
         && drawnMask == other.drawnMask
-        && name == other.name;
+        && name == other.name
+        && curve == other.curve
+        && posterization == other.posterization
+        && smoothing == other.smoothing;
 }
 
 
@@ -1125,6 +1172,8 @@ AreaMask::Shape::Type str2type(const Glib::ustring &type)
 {
     if (type == "rectangle") {
         return AreaMask::Shape::RECTANGLE;
+    } else if (type == "gradient") {
+        return AreaMask::Shape::GRADIENT;
     } else {
         return AreaMask::Shape::POLYGON;
     }
@@ -1135,6 +1184,7 @@ Glib::ustring type2str(AreaMask::Shape::Type type)
 {
     switch (type) {
     case AreaMask::Shape::RECTANGLE: return "rectangle";
+    case AreaMask::Shape::GRADIENT: return "gradient";
     case AreaMask::Shape::POLYGON: return "polygon";
     default:
         assert(false);
@@ -1157,7 +1207,15 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
         ret |= assignFromKeyfile(keyfile, group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled);
     }
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "HueMask" + suffix, parametricMask.hue);
-    ret |= assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity);
+    if (assignFromKeyfile(keyfile, group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity)) {
+        if (ppVersion < 1023) {
+            for (size_t i = 1; i < parametricMask.chromaticity.size(); i += 4) {
+                auto &x = parametricMask.chromaticity[i];
+                x = lin2log(log2lin(x, 10.0), 50.0);
+            }
+        }
+        ret = true;
+    }
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMask" + suffix, parametricMask.lightness);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "LightnessMaskDetail" + suffix, parametricMask.lightnessDetail);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "ContrastThresholdMask" + suffix, parametricMask.contrastThreshold);
@@ -1219,6 +1277,18 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
                     shape.reset(poly);
                 } else {
                     delete poly;
+                }
+            } else if (str2type(type) == AreaMask::Shape::Type::GRADIENT) {
+                AreaMask::Gradient *gradient = new AreaMask::Gradient();
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "X" + suffix, gradient->x);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Y" + suffix, gradient->y);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "StrengthStart" + suffix, gradient->strengthStart);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "StrengthEnd" + suffix, gradient->strengthEnd);
+                found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Angle" + suffix, gradient->angle);
+                if (found) {
+                    shape.reset(gradient);
+                } else {
+                    delete gradient;
                 }
             }
             found &= assignFromKeyfile(keyfile, group_name, prefix + "AreaMask" + n + "Mode" + suffix, mode);
@@ -1297,6 +1367,9 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
             }
         }
     }
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskCurve" + suffix, curve);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskPosterization" + suffix, posterization);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "MaskSmoothing" + suffix, smoothing);
     
     return ret;
 }
@@ -1307,6 +1380,9 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "MaskEnabled" + suffix, enabled, keyfile);
     putToKeyfile(group_name, prefix + "MaskInverted" + suffix, inverted, keyfile);
     putToKeyfile(group_name, prefix + "MaskName" + suffix, name, keyfile);
+    putToKeyfile(group_name, prefix + "MaskCurve" + suffix, curve, keyfile);
+    putToKeyfile(group_name, prefix + "MaskPosterization" + suffix, posterization, keyfile);
+    putToKeyfile(group_name, prefix + "MaskSmoothing" + suffix, smoothing, keyfile);
     putToKeyfile(group_name, prefix + "ParametricMaskEnabled" + suffix, parametricMask.enabled, keyfile);
     putToKeyfile(group_name, prefix + "HueMask" + suffix, parametricMask.hue, keyfile);
     putToKeyfile(group_name, prefix + "ChromaticityMask" + suffix, parametricMask.chromaticity, keyfile);
@@ -1330,6 +1406,16 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
             std::vector<double> v;
             poly->knots_to_list(v);
             putToKeyfile(group_name, prefix + "AreaMask" + n + "Knots" + suffix, pack_list(v), keyfile);
+            break;
+        }
+        case AreaMask::Shape::Type::GRADIENT:
+        {
+            auto gradient = static_cast<AreaMask::Gradient*>(a.get());
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "X" + suffix, gradient->x, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Y" + suffix, gradient->y, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "StrengthStart" + suffix, gradient->strengthStart, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "StrengthEnd" + suffix, gradient->strengthEnd, keyfile);
+            putToKeyfile(group_name, prefix + "AreaMask" + n + "Angle" + suffix, gradient->angle, keyfile);
             break;
         }
         case AreaMask::Shape::Type::RECTANGLE:
@@ -1374,7 +1460,8 @@ ExposureParams::ExposureParams():
     enabled(true),
     hrmode(HR_OFF),
     expcomp(0),
-    black(0)
+    black(0),
+    hrblur(0)
 {
 }
 
@@ -1384,7 +1471,8 @@ bool ExposureParams::operator==(const ExposureParams &other) const
     return enabled == other.enabled
         && hrmode == other.hrmode
         && expcomp == other.expcomp
-        && black == other.black;
+        && black == other.black
+        && hrblur == other.hrblur;
 }
 
 
@@ -1432,7 +1520,9 @@ ToneCurveParams::ToneCurveParams():
     saturation{
         FCT_Linear
     },
-    perceptualStrength(100)
+    perceptualStrength(100),
+    contrastLegacyMode(false),
+    whitePoint(1.0)    
 {
 }
 
@@ -1448,13 +1538,29 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
         && histmatching == other.histmatching
         && fromHistMatching == other.fromHistMatching
         && saturation == other.saturation
-        && perceptualStrength == other.perceptualStrength;
+        && perceptualStrength == other.perceptualStrength
+        && contrastLegacyMode == other.contrastLegacyMode
+        && whitePoint == other.whitePoint;
 }
 
 
 bool ToneCurveParams::operator !=(const ToneCurveParams& other) const
 {
     return !(*this == other);
+}
+
+
+bool ToneCurveParams::hasWhitePoint() const
+{
+    const auto good =
+        [](const std::vector<double> &c, TcMode m) -> bool
+        {
+            if (c.empty() || c[0] == DCT_Empty || c[0] == DCT_Linear) {
+                return true;
+            }
+            return m != TcMode::SATANDVALBLENDING && m != TcMode::PERCEPTUAL;
+        };
+    return !contrastLegacyMode && good(curve, curveMode) && good(curve2, curveMode2);
 }
 
 
@@ -1555,7 +1661,8 @@ LocalContrastParams::LocalContrastParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -1822,17 +1929,7 @@ SpotParams::SpotParams() :
 
 bool SpotParams::operator ==(const SpotParams& other) const
 {
-    if (enabled != other.enabled || entries.size() != other.entries.size()) {
-        return false;
-    }
-
-    size_t i = 0;
-    for (auto entry : entries) {
-        if (entry != other.entries[i]) {
-            return false;
-        }
-    }
-    return true;
+    return enabled == other.enabled && entries == other.entries;    
 }
 
 bool SpotParams::operator !=(const SpotParams& other) const
@@ -1844,7 +1941,8 @@ TextureBoostParams::TextureBoostParams() :
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -1866,11 +1964,11 @@ bool TextureBoostParams::operator !=(const TextureBoostParams& other) const
 LogEncodingParams::LogEncodingParams():
     enabled(false),
     autocompute(false),
-    autogray(false),
-    sourceGray(18.0),
+    autogain(false),
+    gain(0.0),
     targetGray(18.0),
-    blackEv(-5.0),
-    whiteEv(3.0),
+    blackEv(-13.5),
+    whiteEv(2.5),
     regularization(60)
 {
 }
@@ -1880,8 +1978,8 @@ bool LogEncodingParams::operator ==(const LogEncodingParams& other) const
     return
         enabled == other.enabled
         && autocompute == other.autocompute
-        && autogray == other.autogray
-        && sourceGray == other.sourceGray
+        && autogain == other.autogain
+        && gain == other.gain
         && blackEv == other.blackEv
         && whiteEv == other.whiteEv
         && targetGray == other.targetGray
@@ -2570,7 +2668,13 @@ SmoothingParams::Region::Region():
     sigma(0),
     epsilon(0),
     iterations(1),
-    falloff(1)
+    falloff(1),
+    nldetail(50),
+    nlstrength(0),
+    numblades(9),
+    angle(0),
+    curvature(0),
+    offset(0)
 {
 }
 
@@ -2583,7 +2687,13 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && sigma == other.sigma
         && epsilon == other.epsilon
         && iterations == other.iterations
-        && falloff == other.falloff;
+        && falloff == other.falloff
+        && nlstrength == other.nlstrength
+        && nldetail == other.nldetail
+        && numblades == other.numblades
+        && angle == other.angle
+        && curvature == other.curvature
+        && offset == other.offset;
 }
 
 
@@ -2597,7 +2707,8 @@ SmoothingParams::SmoothingParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -2631,6 +2742,7 @@ ColorCorrectionParams::Region::Region():
     sat{0,0,0},
     factor{0,0,0},
     rgbluminance(false),
+    hueshift(0),
     mode(ColorCorrectionParams::Mode::YUV)
 {
 }
@@ -2651,6 +2763,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
         && sat == other.sat
         && factor == other.factor
         && rgbluminance == other.rgbluminance
+        && hueshift == other.hueshift
         && mode == other.mode;
 }
 
@@ -2665,7 +2778,8 @@ ColorCorrectionParams::ColorCorrectionParams():
     enabled(false),
     regions{Region()},
     labmasks{Mask()},
-    showMask(-1)
+    showMask(-1),
+    selectedRegion(0)
 {
 }
 
@@ -3262,6 +3376,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             case ExposureParams::HR_COLORSOFT: hr = "ColorBlend"; break;
             }
             saveToKeyfile("Exposure", "HLRecovery", hr, keyFile);
+            saveToKeyfile("Exposure", "HLRecoveryBlur", exposure.hrblur, keyFile);
         }
 
 // Brightness, Contrast, Saturation
@@ -3284,16 +3399,25 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 {ToneCurveParams::TcMode::SATANDVALBLENDING, "SatAndValueBlending"},
                 {ToneCurveParams::TcMode::WEIGHTEDSTD, "WeightedStd"},
                 {ToneCurveParams::TcMode::LUMINANCE, "Luminance"},
-                {ToneCurveParams::TcMode::PERCEPTUAL, "Perceptual"}
+                {ToneCurveParams::TcMode::PERCEPTUAL, "Perceptual"},
+                {ToneCurveParams::TcMode::ODT, "OpenDisplayTransform"}
             };
 
             saveToKeyfile("ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode, keyFile);
-            saveToKeyfile("ToneCurve", "CurveMode2", tc_mapping, toneCurve.curveMode2, keyFile);
+            if (!toneCurve.curve2.empty() && toneCurve.curve2[0] != DCT_Linear && toneCurve.curveMode != toneCurve.curveMode2) {
+                saveToKeyfile("ToneCurve", "CurveMode2", tc_mapping, toneCurve.curveMode2, keyFile);
+            }
 
             saveToKeyfile("ToneCurve", "Curve", toneCurve.curve, keyFile);
             saveToKeyfile("ToneCurve", "Curve2", toneCurve.curve2, keyFile);
             saveToKeyfile("ToneCurve", "Saturation", toneCurve.saturation, keyFile);
-            saveToKeyfile("ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength, keyFile);
+            if (toneCurve.perceptualStrength != 100) {
+                saveToKeyfile("ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength, keyFile);
+            }
+            if (toneCurve.contrastLegacyMode) {
+                saveToKeyfile("ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode, keyFile);
+            }
+            saveToKeyfile("ToneCurve", "WhitePoint", toneCurve.whitePoint, keyFile);
         }
 
 // Local contrast
@@ -3306,7 +3430,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Local Contrast", Glib::ustring("Curve") + n, r.curve, keyFile);
                 localContrast.labmasks[j].save(keyFile, "Local Contrast", "", n);
             }
-            saveToKeyfile("Local Contrast", "showMask", localContrast.showMask, keyFile);
+            saveToKeyfile("Local Contrast", "ShowMask", localContrast.showMask, keyFile);
+            saveToKeyfile("Local Contrast", "SelectedRegion", localContrast.selectedRegion, keyFile);
         }
 
 
@@ -3426,10 +3551,15 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(dehaze)) {
             saveToKeyfile("Dehaze", "Enabled", dehaze.enabled, keyFile);
             saveToKeyfile("Dehaze", "Strength", dehaze.strength, keyFile);        
-            saveToKeyfile("Dehaze", "ShowDepthMap", dehaze.showDepthMap, keyFile);        
-            saveToKeyfile("Dehaze", "Depth", dehaze.depth, keyFile);
-            saveToKeyfile("Dehaze", "Luminance", dehaze.luminance, keyFile);
             saveToKeyfile("Dehaze", "Blackpoint", dehaze.blackpoint, keyFile);
+            saveToKeyfile("Dehaze", "Luminance", dehaze.luminance, keyFile);
+            DehazeParams dp;
+            if (dehaze.depth != dp.depth) {
+                saveToKeyfile("Dehaze", "Depth", dehaze.depth, keyFile);
+            }
+            if (dehaze.showDepthMap != dp.showDepthMap) {
+                saveToKeyfile("Dehaze", "ShowDepthMap", dehaze.showDepthMap, keyFile);        
+            }
         }
 
 // Denoising
@@ -3463,7 +3593,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("TextureBoost", Glib::ustring("Iterations") + n, r.iterations, keyFile);
                 textureBoost.labmasks[j].save(keyFile, "TextureBoost", "", n);
             }
-            saveToKeyfile("TextureBoost", "showMask", textureBoost.showMask, keyFile);
+            saveToKeyfile("TextureBoost", "ShowMask", textureBoost.showMask, keyFile);
+            saveToKeyfile("TextureBoost", "SelectedRegion", textureBoost.selectedRegion, keyFile);
         }
 
 // Fattal
@@ -3478,8 +3609,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(logenc)) {
             saveToKeyfile("LogEncoding", "Enabled", logenc.enabled, keyFile);
             saveToKeyfile("LogEncoding", "Auto", logenc.autocompute, keyFile);
-            saveToKeyfile("LogEncoding", "AutoGray", logenc.autogray, keyFile);
-            saveToKeyfile("LogEncoding", "SourceGray", logenc.sourceGray, keyFile);
+            saveToKeyfile("LogEncoding", "AutoGain", logenc.autogain, keyFile);
+            saveToKeyfile("LogEncoding", "Gain", logenc.gain, keyFile);
             saveToKeyfile("LogEncoding", "TargetGray", logenc.targetGray, keyFile);
             saveToKeyfile("LogEncoding", "BlackEv", logenc.blackEv, keyFile);
             saveToKeyfile("LogEncoding", "WhiteEv", logenc.whiteEv, keyFile);
@@ -3706,9 +3837,16 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("Epsilon_") + n, r.epsilon, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Iterations_") + n, r.iterations, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Falloff_") + n, r.falloff, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NLStrength_") + n, r.nlstrength, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NLDetail_") + n, r.nldetail, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NumBlades_") + n, r.numblades, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Angle_") + n, r.angle, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Curvature_") + n, r.curvature, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("Offset_") + n, r.offset, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
+            saveToKeyfile("Smoothing", "SelectedRegion", smoothing.selectedRegion, keyFile);
         }
 
 // ColorCorrection
@@ -3753,10 +3891,12 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("Power_") + n, l.power[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Pivot_") + n, l.pivot[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("HueShift_") + n, l.hueshift, keyFile);
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
-            saveToKeyfile("ColorCorrection", "showMask", colorcorrection.showMask, keyFile);
+            saveToKeyfile("ColorCorrection", "ShowMask", colorcorrection.showMask, keyFile);
+            saveToKeyfile("ColorCorrection", "SelectedRegion", colorcorrection.selectedRegion, keyFile);
         }
         
 // Raw
@@ -4035,7 +4175,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             {"SatAndValueBlending", ToneCurveParams::TcMode::SATANDVALBLENDING},
             {"WeightedStd", ToneCurveParams::TcMode::WEIGHTEDSTD},
             {"Luminance", ToneCurveParams::TcMode::LUMINANCE},
-            {"Perceptual", ToneCurveParams::TcMode::PERCEPTUAL}
+            {"Perceptual", ToneCurveParams::TcMode::PERCEPTUAL},
+            {"OpenDisplayTransform", ToneCurveParams::TcMode::ODT}
         };
 
         if (ppVersion < 350) {
@@ -4115,6 +4256,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         exposure.hrmode = ExposureParams::HR_OFF;
                     }
                 }
+                assignFromKeyfile(keyFile, "Exposure", "HLRecoveryBlur", exposure.hrblur);                
             }
             if (keyFile.has_group("Saturation") && RELEVANT_(saturation)) {
                 assignFromKeyfile(keyFile, "Saturation", "Enabled", saturation.enabled);
@@ -4124,7 +4266,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (keyFile.has_group("ToneCurve") && RELEVANT_(toneCurve)) {
                 assignFromKeyfile(keyFile, "ToneCurve", "Enabled", toneCurve.enabled);
                 assignFromKeyfile(keyFile, "ToneCurve", "Contrast", toneCurve.contrast);
-                assignFromKeyfile(keyFile, "ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode);
+                if (assignFromKeyfile(keyFile, "ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode)) {
+                    toneCurve.curveMode2 = toneCurve.curveMode;
+                }
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveMode2", tc_mapping, toneCurve.curveMode2);
 
                 assignFromKeyfile(keyFile, "ToneCurve", "Curve", toneCurve.curve);
@@ -4132,7 +4276,13 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 assignFromKeyfile(keyFile, "ToneCurve", "HistogramMatching", toneCurve.histmatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveFromHistogramMatching", toneCurve.fromHistMatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "Saturation", toneCurve.saturation);
-                assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength);
+                if (!assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength) && ppVersion >= 1026) {
+                    toneCurve.perceptualStrength = 100;
+                }
+                if (!assignFromKeyfile(keyFile, "ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode)) {
+                    toneCurve.contrastLegacyMode = (ppVersion < 1026);
+                }
+                assignFromKeyfile(keyFile, "ToneCurve", "WhitePoint", toneCurve.whitePoint);
             }
         }
 
@@ -4246,6 +4396,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(localContrast.regions.size() == localContrast.labmasks.size());
             assignFromKeyfile(keyFile, "Local Contrast", "ShowMask", localContrast.showMask);
+            assignFromKeyfile(keyFile, "Local Contrast", "SelectedRegion", localContrast.selectedRegion);
         }
 
         if (keyFile.has_group("Luminance Curve") && RELEVANT_(labCurve)) {
@@ -4431,6 +4582,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(textureBoost.regions.size() == textureBoost.labmasks.size());
             assignFromKeyfile(keyFile, tbgroup, "ShowMask", textureBoost.showMask);
+            assignFromKeyfile(keyFile, tbgroup, "SelectedRegion", textureBoost.selectedRegion);
         }
 
         if (keyFile.has_group("FattalToneMapping") && RELEVANT_(fattal)) {
@@ -4447,11 +4599,19 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else {
                 logenc.autocompute = false;
             }
-            assignFromKeyfile(keyFile, "LogEncoding", "AutoGray", logenc.autogray);
+            assignFromKeyfile(keyFile, "LogEncoding", ppVersion < 1024 ? "AutoGray" : "AutoGain", logenc.autogain);
             if (ppVersion < 349) {
-                assignFromKeyfile(keyFile, "LogEncoding", "GrayPoint", logenc.sourceGray);
+                if (assignFromKeyfile(keyFile, "LogEncoding", "GrayPoint", logenc.gain) && logenc.gain > 0) {
+                    logenc.gain = std::log2(18.0/logenc.gain);
+                }
             } else {
-                assignFromKeyfile(keyFile, "LogEncoding", "SourceGray", logenc.sourceGray);
+                if (ppVersion < 1024) {
+                    if (assignFromKeyfile(keyFile, "LogEncoding", "SourceGray", logenc.gain) && logenc.gain > 0) {
+                        logenc.gain = std::log2(18.0/logenc.gain);
+                    }
+                } else {
+                    assignFromKeyfile(keyFile, "LogEncoding", "Gain", logenc.gain);
+                }
                 assignFromKeyfile(keyFile, "LogEncoding", "TargetGray", logenc.targetGray);
             }
             assignFromKeyfile(keyFile, "LogEncoding", "BlackEv", logenc.blackEv);
@@ -4460,6 +4620,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 assignFromKeyfile(keyFile, "LogEncoding", "Regularization", logenc.regularization);
             } else {
                 logenc.regularization = 0;
+            }
+            if (ppVersion < 1025) {
+                toneCurve.contrast *= 2;
             }
         }
 
@@ -4878,6 +5041,30 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     found = true;
                     done = false;
                 }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NLStrength_") + n, cur.nlstrength)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NLDetail_") + n, cur.nldetail)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NumBlades_") + n, cur.numblades)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Angle_") + n, cur.angle)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Curvature_") + n, cur.curvature)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("Offset_") + n, cur.offset)) {
+                    found = true;
+                    done = false;
+                }
                 if (curmask.load(ppVersion, keyFile, smoothing_group, "", Glib::ustring("_") + n)) {
                     found = true;
                     done = false;
@@ -4893,6 +5080,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(smoothing.regions.size() == smoothing.labmasks.size());
             assignFromKeyfile(keyFile, smoothing_group, "ShowMask", smoothing.showMask);
+            assignFromKeyfile(keyFile, smoothing_group, "SelectedRegion", smoothing.selectedRegion);
         }
 
         const char *ccgroup = "ColorCorrection";
@@ -5011,6 +5199,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     found = true;
                     done = false;
                 }
+                get("HueShift_", cur.hueshift);
                 if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
                     found = true;
                     done = false;
@@ -5026,6 +5215,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             assert(colorcorrection.regions.size() == colorcorrection.labmasks.size());
             assignFromKeyfile(keyFile, ccgroup, ppVersion < 348 ? "showMask" : "LabRegionsShowMask", colorcorrection.showMask);
+            assignFromKeyfile(keyFile, ccgroup, "SelectedRegion", colorcorrection.selectedRegion);
         }
 
         if (keyFile.has_group("RAW")) {

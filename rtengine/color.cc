@@ -224,28 +224,8 @@ void Color::init ()
         // we can put other as gamma g=2.6 slope=11, etc.
         // but noting to do with real gamma !!!: it's only for data Lab # data RGB
         // finally I opted for gamma55 and with options we can change
-
-        switch(settings->denoiselabgamma) {
-            case 0:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseGammaTab[i] = 65535.0 * gamma26_11 (i / 65535.0);
-                }
-
-                break;
-
-            case 1:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseGammaTab[i] = 65535.0 * gamma4 (i / 65535.0);
-                }
-
-                break;
-
-            default:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseGammaTab[i] = 65535.0 * gamma55 (i / 65535.0);
-                }
-
-                break;
+        for (int i = 0; i < maxindex; i++) {
+            denoiseGammaTab[i] = 65535.0 * gamma55 (i / 65535.0);
         }
 
 #ifdef _OPENMP
@@ -256,27 +236,8 @@ void Color::init ()
         // but noting to do with real gamma !!!: it's only for data Lab # data RGB
         // finally I opted for gamma55 and with options we can change
 
-        switch(settings->denoiselabgamma) {
-            case 0:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseIGammaTab[i] = 65535.0 * igamma26_11 (i / 65535.0);
-                }
-
-                break;
-
-            case 1:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseIGammaTab[i] = 65535.0 * igamma4 (i / 65535.0);
-                }
-
-                break;
-
-            default:
-                for (int i = 0; i < maxindex; i++) {
-                    denoiseIGammaTab[i] = 65535.0 * igamma55 (i / 65535.0);
-                }
-
-                break;
+        for (int i = 0; i < maxindex; i++) {
+            denoiseIGammaTab[i] = 65535.0 * igamma55 (i / 65535.0);
         }
 
 #ifdef _OPENMP
@@ -368,6 +329,8 @@ void Color::rgb2lab01 (const Glib::ustring &profile, const Glib::ustring &profil
     cmsHPROFILE oprof = nullptr;
     if (workingSpace) {
         oprof = ICCStore::getInstance()->workingSpace(profileW);
+    } else if (profile == procparams::ColorManagementParams::NoICMString) {
+        oprof = ICCStore::getInstance()->getsRGBProfile();
     } else {
         oprof = ICCStore::getInstance()->getProfile(profile);
     }
@@ -6822,10 +6785,10 @@ inline void filmlike_clip_rgb_tone(float *r, float *g, float *b, const float L)
 
 } // namespace
 
-void Color::filmlike_clip(float *r, float *g, float *b)
+void Color::filmlike_clip(float *r, float *g, float *b, float Lmax)
 {
     // This is Adobe's hue-stable film-like curve with a diagonal, ie only used for clipping. Can probably be further optimized.
-    const float L = 65535.0;
+    const float L = Lmax;//65535.0;
 
     if (*r >= *g) {
         if (*g > *b) {         // Case 1: r >= g >  b

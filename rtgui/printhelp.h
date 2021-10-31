@@ -35,6 +35,7 @@ inline void ART_print_help(std::ostream &out, const char *progname, bool gui)
 #ifndef __APPLE__
         out << "  -R Raise an already running instance (if available)\n";
 #endif
+        out << "  -s Simple editor mode\n";
         out << "  -h -? Display this help message\n";
     } else {        
         Glib::ustring pparamsExt = paramFileExtension.substr(1);

@@ -133,6 +133,7 @@ private:
     PopUpButton intentBox;
     Gtk::ToggleButton softProof;
     Gtk::ToggleButton spGamutCheck;
+    Gtk::ToggleButton spGamutCheckMonitor;
     sigc::connection profileConn, intentConn, softproofConn;
     Glib::ustring defprof;
 
@@ -203,6 +204,16 @@ private:
         spGamutCheck.set_active (false);
         spGamutCheck.set_sensitive (true);
         spGamutCheck.show ();
+
+        spGamutCheckImage = Gtk::manage(new RTImage("gamut-warning-monitor.png"));
+        spGamutCheckImage->set_padding(0, 0);
+        spGamutCheckMonitor.add(*spGamutCheckImage);
+        spGamutCheckMonitor.set_relief(Gtk::RELIEF_NONE);
+        spGamutCheckMonitor.set_tooltip_markup(M("SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP"));
+
+        spGamutCheckMonitor.set_active(false);
+        spGamutCheckMonitor.set_sensitive(true);
+        spGamutCheckMonitor.show();
     }
 
 #if !defined(__APPLE__)
@@ -224,7 +235,20 @@ private:
 
     void spGamutCheckToggled ()
     {
-        updateSoftProofParameters ();
+        if (spGamutCheck.get_active() && spGamutCheckMonitor.get_active()) {
+            spGamutCheckMonitor.set_active(false);
+        } else {
+            updateSoftProofParameters ();
+        }
+    }
+
+    void spGamutCheckMonitorToggled ()
+    {
+        if (spGamutCheck.get_active() && spGamutCheckMonitor.get_active()) {
+            spGamutCheck.set_active(false);
+        } else {
+            updateSoftProofParameters ();
+        }
     }
 
     void updateParameters (bool noEvent = false)
@@ -265,7 +289,8 @@ private:
             intentBox.set_sensitive (false);
             intentBox.setSelected (1);
             softProof.set_sensitive (false);
-            spGamutCheck.set_sensitive (false);
+            //spGamutCheck.set_sensitive (false);
+            spGamutCheckMonitor.set_sensitive (false);
 
             profileBox.set_tooltip_text ("");
 
@@ -281,19 +306,22 @@ private:
                 intentBox.setItemSensitivity (1, supportsRelativeColorimetric);
                 intentBox.setItemSensitivity (2, supportsAbsoluteColorimetric);
                 softProof.set_sensitive (true);
-                spGamutCheck.set_sensitive (true);
+                //spGamutCheck.set_sensitive (true);
             } else {
                 intentBox.setItemSensitivity (0, true);
                 intentBox.setItemSensitivity (1, true);
                 intentBox.setItemSensitivity (2, true);
                 intentBox.set_sensitive (false);
                 intentBox.setSelected (1);
-                softProof.set_sensitive (false);
-                spGamutCheck.set_sensitive (true);
+                //softProof.set_sensitive (false);
             }
+            spGamutCheck.set_sensitive(true);
+            spGamutCheckMonitor.set_sensitive(true);
 
             profileBox.set_tooltip_text (profileBox.get_active_text ());
+
         }
+        softProof.set_sensitive(softProof.get_sensitive() && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
 
 #endif
         rtengine::RenderingIntent intent;
@@ -322,7 +350,13 @@ private:
         }
 
         processor->setMonitorProfile (profile, intent);
-        processor->setSoftProofing (softProof.get_sensitive() && softProof.get_active(), spGamutCheck.get_sensitive() && spGamutCheck.get_active());
+        rtengine::GamutCheck gc = rtengine::GAMUT_CHECK_OFF;
+        if (spGamutCheck.get_sensitive() && spGamutCheck.get_active()) {
+            gc = rtengine::GAMUT_CHECK_OUTPUT;
+        } else if (spGamutCheckMonitor.get_sensitive() && spGamutCheckMonitor.get_active()) {
+            gc = rtengine::GAMUT_CHECK_MONITOR;
+        }
+        processor->setSoftProofing (softProof.get_sensitive() && softProof.get_active(), gc);
 
         if (!noEvent) {
             processor->endUpdateParams (rtengine::EvMonitorTransform);
@@ -332,7 +366,7 @@ private:
     void updateSoftProofParameters (bool noEvent = false)
     {
 #if !defined(__APPLE__) // monitor profile not supported on apple
-        softProof.set_sensitive (profileBox.get_active_row_number () > 0);
+        softProof.set_sensitive (profileBox.get_active_row_number () > 0 && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
         spGamutCheck.set_sensitive(profileBox.get_active_row_number () > 0);
 #endif
 
@@ -347,7 +381,13 @@ private:
                     processor->beginUpdateParams ();
                 }
 
-                processor->setSoftProofing (softProof.get_sensitive() && softProof.get_active(), spGamutCheck.get_active());
+                rtengine::GamutCheck gc = rtengine::GAMUT_CHECK_OFF;
+                if (spGamutCheck.get_sensitive() && spGamutCheck.get_active()) {
+                    gc = rtengine::GAMUT_CHECK_OUTPUT;
+                } else if (spGamutCheckMonitor.get_sensitive() && spGamutCheckMonitor.get_active()) {
+                    gc = rtengine::GAMUT_CHECK_MONITOR;
+                }
+                processor->setSoftProofing(softProof.get_sensitive() && softProof.get_active(), gc);
 
                 if (!noEvent) {
                     processor->endUpdateParams (rtengine::EvMonitorTransform);
@@ -375,6 +415,7 @@ public:
 
         softproofConn = softProof.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::softProofToggled));
         spGamutCheck.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckToggled));
+        spGamutCheckMonitor.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckMonitorToggled));
 #if !defined(__APPLE__) // monitor profile not supported on apple
         profileConn = profileBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::profileBoxChanged));
 #endif
@@ -389,6 +430,7 @@ public:
         grid->attach_next_to (*intentBox.buttonGroup, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to (softProof, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to (spGamutCheck, Gtk::POS_RIGHT, 1, 1);
+        grid->attach_next_to(spGamutCheckMonitor, Gtk::POS_RIGHT, 1, 1);
     }
 
     void updateProcessor()
@@ -451,6 +493,8 @@ public:
             setActiveTextOrIndex (profileBox, profile_name, 0);
 #endif
         }
+
+        softProof.set_sensitive(rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
     }
 
 };
@@ -848,12 +892,15 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     if (tbTopPanel_1) {
         tbTopPanel_1->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::tbTopPanel_1_toggled) );
     }
-
 }
 
 
 EditorPanel::~EditorPanel ()
 {
+    if (autosave_conn_.connected()) {
+        autosave_conn_.disconnect();
+    }
+    
     idle_register.destroy();
 
     history->setHistoryBeforeAfterListener (nullptr);
@@ -1045,6 +1092,7 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
     tpc->initImage (ipc, tmb->getType() == FT_Raw);
     ipc->setHistogramListener (this);
     iareapanel->imageArea->indClippedPanel->silentlyDisableSharpMask();
+    ipc->setSizeListener(this);
 
 //    iarea->fitZoom ();   // tell to the editorPanel that the next image has to be fitted to the screen
     iareapanel->imageArea->setPreviewHandler (previewHandler);
@@ -1091,6 +1139,10 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
     // When passing a photo as an argument to the RawTherapee executable, the user wants
     // this auto-loaded photo's thumbnail to be selected and visible in the Filmstrip.
     syncFileBrowser();
+
+    if (options.sidecar_autosave_interval > 0) {
+        autosave_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &EditorPanel::autosave), options.sidecar_autosave_interval * 60000);
+    }
 }
 
 void EditorPanel::close ()
@@ -1115,6 +1167,9 @@ void EditorPanel::close ()
         previewHandler = nullptr;
 
         if (iareapanel) {
+            if (iareapanel->imageArea->mainCropWindow) {
+                iareapanel->imageArea->mainCropWindow->cropHandler.newImage(nullptr, false);
+            }
             iareapanel->imageArea->setPreviewHandler (nullptr);
             iareapanel->imageArea->setImProcCoordinator (nullptr);
             iareapanel->imageArea->unsubscribe();
@@ -1130,6 +1185,7 @@ void EditorPanel::close ()
             openThm->decreaseRef ();
         }
     }
+    openThm = nullptr;
 }
 
 void EditorPanel::saveProfile ()
@@ -1138,6 +1194,10 @@ void EditorPanel::saveProfile ()
         return;
     }
 
+    if (autosave_conn_.connected()) {
+        autosave_conn_.disconnect();
+    }
+    
     // If the file was deleted, do not generate ghost entries
     if (Glib::file_test (fname, Glib::FILE_TEST_EXISTS)) {
         ProcParams params;
@@ -1145,6 +1205,10 @@ void EditorPanel::saveProfile ()
 
         // Will call updateCache, which will update both the cached and sidecar files if necessary
         openThm->setProcParams(FullPartialProfile(params), EDITOR);
+    }
+
+    if (options.sidecar_autosave_interval > 0) {
+        autosave_conn_ = Glib::signal_timeout().connect(sigc::mem_fun(*this, &EditorPanel::autosave), options.sidecar_autosave_interval * 60000);
     }
 }
 
@@ -1382,7 +1446,7 @@ void EditorPanel::info_toggled ()
                                               escapeHtmlChars (Glib::path_get_basename (openThm->getFileName()))  );
 
         int ww = -1, hh = -1;
-        idata->getDimensions(ww, hh);
+        //idata->getDimensions(ww, hh);
         if (ww <= 0) {
             ww = ipc->getFullWidth();
             hh = ipc->getFullHeight();
@@ -1512,6 +1576,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
     bool altgr = event->state & GDK_MOD5_MASK;
 #endif
 
+    if (shortcut_mgr_ && shortcut_mgr_->keyPressed(event)) {
+        return true;
+    }
+
     // Editor Layout
     switch (event->keyval) {
         case GDK_KEY_L:
@@ -1580,12 +1648,13 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     tpc->coarse->rotateLeft();
                     return true;
 
-                case GDK_KEY_i:
+                //case GDK_KEY_i:
                 case GDK_KEY_I:
                     info->set_active (!info->get_active());
                     return true;
 
-                case GDK_KEY_B:
+                //case GDK_KEY_B:
+                case GDK_KEY_A:
                     beforeAfter->set_active (!beforeAfter->get_active());
                     return true;
 
@@ -1612,23 +1681,23 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                                     return true;
                 #endif
                 */
-                case GDK_KEY_r: //preview mode Red
+                case GDK_KEY_R: //preview mode Red
                     iareapanel->imageArea->previewModePanel->toggleR();
                     return true;
 
-                case GDK_KEY_g: //preview mode Green
+                case GDK_KEY_G: //preview mode Green
                     iareapanel->imageArea->previewModePanel->toggleG();
                     return true;
 
-                case GDK_KEY_b: //preview mode Blue
+                case GDK_KEY_B: //preview mode Blue
                     iareapanel->imageArea->previewModePanel->toggleB();
                     return true;
 
-                case GDK_KEY_P: //preview mode Sharpening Contrast mask
+                case GDK_KEY_O: //preview mode Sharpening Contrast mask
                     iareapanel->imageArea->indClippedPanel->toggleSharpMask();
                     return true;
 
-                case GDK_KEY_v: //preview mode Luminosity
+                case GDK_KEY_V: //preview mode Luminosity
                     iareapanel->imageArea->previewModePanel->toggleL();
                     return true;
 
@@ -1636,7 +1705,7 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->indClippedPanel->toggleFocusMask();
                     return true;
 
-                case GDK_KEY_e: // preview mode false colors
+                case GDK_KEY_E: // preview mode false colors
                     iareapanel->imageArea->indClippedPanel->toggleFalseColors();
                     return true;
 
@@ -1766,6 +1835,58 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
 
     return false;
 }
+
+
+bool EditorPanel::keyPressedBefore(GdkEventKey *event)
+{
+    bool ctrl = event->state & GDK_CONTROL_MASK;
+    int dx = 0, dy = 0;
+    const int step = options.editor_keyboard_scroll_step;
+    switch (event->keyval) {
+    case GDK_KEY_KP_Up: case GDK_KEY_Up: dy = -step; break;
+    case GDK_KEY_KP_Down: case GDK_KEY_Down: dy = step; break;
+    case GDK_KEY_KP_Left: case GDK_KEY_Left: dx = -step; break;
+    case GDK_KEY_KP_Right: case GDK_KEY_Right: dx = step; break;
+    }
+    if (dx || dy) {
+        if (ctrl && iareapanel->imageArea->getMainCropWindow()) {
+            iareapanel->imageArea->getMainCropWindow()->remoteMove(dx, dy);
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool EditorPanel::keyReleased(GdkEventKey *event)
+{
+    if (shortcut_mgr_ && shortcut_mgr_->keyReleased(event)) {
+        return true;
+    }
+
+    switch (event->keyval) {
+    case GDK_KEY_KP_Up: case GDK_KEY_Up: 
+    case GDK_KEY_KP_Down: case GDK_KEY_Down:
+    case GDK_KEY_KP_Left: case GDK_KEY_Left:
+    case GDK_KEY_KP_Right: case GDK_KEY_Right:
+        if (iareapanel->imageArea->getMainCropWindow()) {
+            iareapanel->imageArea->getMainCropWindow()->remoteMoveReady();
+        }
+        break;
+    }
+    
+    return false;
+}
+
+
+bool EditorPanel::scrollPressed(GdkEventScroll *event)
+{
+    if (shortcut_mgr_ && shortcut_mgr_->scrollPressed(event)) {
+        return true;
+    }
+    return false;
+}
+
 
 void EditorPanel::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 {
@@ -2233,6 +2354,9 @@ void EditorPanel::beforeAfterToggled ()
         }
 
         beforeIarea = new ImageAreaPanel ();
+        if (shortcut_mgr_) {
+            beforeIarea->imageArea->setToolShortcutManager(shortcut_mgr_.get());
+        }
 
         int HeaderBoxHeight = 17;
 
@@ -2293,7 +2417,7 @@ void EditorPanel::beforeAfterToggled ()
             cw->setFitZoomEnabled(true);
             cw->addCropWindowListener(beforeIarea->imageArea);
             cw->setPosition(0, 0);
-            cw->enable();
+            cw->enable(false);
             cw->cropHandler.cropParams = iareapanel->imageArea->mainCropWindow->cropHandler.cropParams;
             beforeIarea->imageArea->mainCropWindow = cw;
         }
@@ -2546,3 +2670,44 @@ void EditorPanel::defaultMonitorProfileChanged (const Glib::ustring &profile_nam
     colorMgmtToolBar->defaultMonitorProfileChanged (profile_name, auto_monitor_profile);
 }
 
+
+bool EditorPanel::autosave()
+{
+    MyProgressBar* const pl = progressLabel;
+    auto prev = pl->get_text();
+    pl->set_text(M("MAIN_MSG_AUTOSAVING"));
+    const auto doit =
+        [pl, prev]() -> bool
+        {
+            pl->set_text(prev);
+            return false;
+        };
+    Glib::signal_timeout().connect(sigc::slot<bool>(doit), 1000);
+    saveProfile();
+    return false;
+}
+
+
+void EditorPanel::sizeChanged(int w, int h, int ow, int oh)
+{
+    if (ipc) {
+        idle_register.add(
+            [this]() -> bool
+            {
+                if (ipc) {
+                    info_toggled();
+                    navigator->setInvalid(ipc->getFullWidth(), ipc->getFullHeight());
+                }
+                return false;
+            });
+    }    
+}
+
+
+void EditorPanel::setParent(RTWindow *p)
+{
+    parent = p;
+    shortcut_mgr_.reset(new ToolShortcutManager(p));
+    tpc->setToolShortcutManager(shortcut_mgr_.get());
+    iareapanel->imageArea->setToolShortcutManager(shortcut_mgr_.get());
+}

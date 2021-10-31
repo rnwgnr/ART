@@ -440,9 +440,9 @@ public:
     {
         if (pressure_mode_ == PRESSURE_OFF) {
             bool ctrl = modifierKey & GDK_CONTROL_MASK;
-            bool shift = modifierKey & GDK_SHIFT_MASK;
-            if ((!ctrl && shift) != prev_erase_) {
-                prev_erase_ = (!ctrl && shift);
+            bool alt = modifierKey & GDK_MOD1_MASK;            
+            if ((!ctrl && alt) != prev_erase_) {
+                prev_erase_ = (!ctrl && alt);
                 erase_->set_active(!erase_->get_active());
             }
         }
@@ -461,13 +461,17 @@ public:
         undo_stack_.push_back(mask_->strokes.size());
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool shift = modifierKey & GDK_SHIFT_MASK;
+        bool alt = modifierKey & GDK_MOD1_MASK;
+        bool dragging = shift && !mask_->strokes.empty();
         if (ctrl && !shift) {
             mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
-        } else if ((!ctrl && shift) != prev_erase_) {
-            prev_erase_ = !ctrl && shift;
+            dragging = false;
+        } else if ((!ctrl && alt) != prev_erase_) {
+            prev_erase_ = !ctrl && alt;
             erase_->set_active(!erase_->get_active());
+            dragging = false;
         }
-        add_stroke(false);
+        add_stroke(dragging);
         return true;
     }
 
@@ -518,7 +522,7 @@ public:
             if (alt) {
                 update_brush(true, false, -3);
             } else {
-                update_pressure(PressureMode((int(cur_pressure_) + (shift ? -1 : 1)) % 3));
+                update_pressure(PressureMode((int(pressure_mode_) + (shift ? -1 : 1)) % 3));
             }
             EditSubscriber::action = ES_ACTION_PICKING;
         } else {
@@ -694,7 +698,7 @@ private:
         double y = double(p.y) / double(h);
         double radius = 0;
         if (pressure_mode_ == PRESSURE_RADIUS) {
-            radius = rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0);
+            radius = rtengine::SQR(rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0));
         } else {
             radius = radius_->getValue() / 100.0;
         }
@@ -751,7 +755,7 @@ private:
             pen_->center += provider->deltaImage;
         }
         if (pressure_mode_ == PRESSURE_RADIUS) {
-            pen_->radius = rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0) * std::min(w, h) * 0.25;
+            pen_->radius = rtengine::SQR(rtengine::LIM01(int(cur_pressure_ * 100.0) / 100.0)) * std::min(w, h) * 0.25;
         } else {
             pen_->radius = radius_->getValue() / 100.0 * std::min(w, h) * 0.25;
         }
@@ -914,7 +918,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaE_provider_(nullptr)
 {
     Gtk::Widget *child = cp_->getWidget();
-    cp_->getEvents(EvMaskList, EvParametricMask, EvHMask, EvCMask, EvLMask, EvMaskBlur, EvShowMask, EvAreaMask, EvDeltaEMask, EvContrastThresholdMask, EvDrawnMask);
+    cp_->getEvents(EvMaskList, EvParametricMask, EvHMask, EvCMask, EvLMask, EvMaskBlur, EvShowMask, EvAreaMask, EvDeltaEMask, EvContrastThresholdMask, EvDrawnMask, EvMaskPostprocess);
     EvAreaMaskVoid = ProcEventMapper::getInstance()->newEvent(M_VOID, EvAreaMask.get_message());
     EvDeltaEMaskVoid = ProcEventMapper::getInstance()->newEvent(M_VOID, EvDeltaEMask.get_message());
     EvMaskName = ProcEventMapper::getInstance()->newEvent(M_VOID, "HISTORY_MSG_LABMASKS_MASK_NAME");
@@ -964,6 +968,10 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         list->get_column(col-1)->set_expand(true);
     }
     list->set_activate_on_single_click(true);
+    list_provider_ = Gtk::CssProvider::create();
+    list_provider_->load_from_data("* { background-image: none; border-color: rgba(0,0,0,0); }");
+    list->get_style_context()->add_provider(list_provider_, GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
     selectionConn = list->get_selection()->signal_changed().connect(sigc::mem_fun(this, &LabMasksPanel::onSelectionChanged));
     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
     Gtk::ScrolledWindow *scroll = Gtk::manage(new Gtk::ScrolledWindow());
@@ -1094,7 +1102,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     const auto deltaAdj =
         [&](const Glib::ustring &lbl, double vmin, double vmax, double vdflt, unsigned int prec, int i) -> ThresholdAdjuster *
         {
-            ThresholdAdjuster *a = Gtk::manage(new ThresholdAdjuster(lbl, 0, 100, 100, M("TP_LABMASKS_DELTAE_CHAN_WEIGHT"), 0, vmin, vmax, vdflt, lbl, prec, nullptr));
+            ThresholdAdjuster *a = Gtk::manage(new ThresholdAdjuster(lbl, 0, 100, 100, M("TP_LABMASKS_DELTAE_CHAN_WEIGHT"), 0, vmin, vmax, vdflt, lbl, prec, nullptr, false, true));
             a->setBgColorProvider(this, i);
             a->setAdjusterListener(this);
             a->setUpdatePolicy(RTUP_DYNAMIC);
@@ -1103,20 +1111,22 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaEL = deltaAdj(M("TP_LABMASKS_DELTAE_L"), 0, 1, 0, 3, ID_HUE_MASK+2);
     deltaEC = deltaAdj(M("TP_LABMASKS_DELTAE_C"), 0, 1, 0, 3, ID_HUE_MASK+3);
     deltaEH = deltaAdj(M("TP_LABMASKS_DELTAE_H"), 0, 360, 0, 1, ID_HUE_MASK+4);
-    deltaERange = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_RANGE"), 1, 100, 0.1, 1));
+    deltaERange = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_RANGE"), 0.1, 100, 0.1, 1));
     deltaERange->setLogScale(10.f, 3.f, true);
     deltaERange->setAdjusterListener(this);
-    deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), -100, 100, 1, 0));
+    deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), 1, 100, 1, 1, nullptr, nullptr, nullptr, nullptr, false, false));//true));
     deltaEDecay->setLogScale(10.f, 10.f, true);
     deltaEDecay->setAdjusterListener(this);
+    deltaEInverted = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_INVERTED")));
     vb = Gtk::manage(new Gtk::VBox());
-    hb = Gtk::manage(new Gtk::HBox());
     vb->pack_start(*deltaERange);
     vb->pack_start(*deltaEDecay);
+    vb->pack_start(*deltaEInverted);
+    hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*vb);
     vb = Gtk::manage(new Gtk::VBox());
     deltaEPick = Gtk::manage(new Gtk::Button(M("TP_LABMASKS_DELTAE_PICK")));
-    vb->pack_start(*deltaEPick);
+    vb->pack_start(*deltaEPick, Gtk::PACK_SHRINK);
     vb->pack_start(*deltaEColor, Gtk::PACK_EXPAND_WIDGET, 4);
     hb->pack_start(*vb, Gtk::PACK_SHRINK, 4);
     tb = Gtk::manage(new ToolParamBlock());
@@ -1131,6 +1141,15 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     dE_area->setEditID(ede, BT_SINGLEPLANE_FLOAT);
     dE_area->signal_spot_requested().connect(sigc::mem_fun(*this, &LabMasksPanel::onDeltaESpotRequested));
     deltaEPick->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onDeltaEPickClicked));
+    deltaEInverted->signal_clicked().connect(
+        sigc::slot<void>(
+            [&]() -> void
+            {
+                auto l = getListener();
+                if (l) {
+                    l->panelChanged(deltaEMaskEvent(), M("GENERAL_CHANGED"));
+                }
+            }));
     //-------------------------------------------------------------------------
         
     areaMask = Gtk::manage(new MyExpander(true, M("TP_LABMASKS_AREA")));
@@ -1153,6 +1172,12 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
 
     hb->pack_start(*Gtk::manage(new Gtk::Label("")), Gtk::PACK_EXPAND_WIDGET);
 
+    areaMaskDrawGradientAdd= new Gtk::Button();
+    areaMaskDrawGradientAdd->add(*Gtk::manage(new RTImage("area-shape-gradient-add.png")));
+    areaMaskDrawGradientAdd->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP"));
+    areaMaskDrawGradientAdd->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onAreaMaskDrawGradientAddPressed));
+    add_button(areaMaskDrawGradientAdd, hb, 24);
+
     areaMaskDrawPolygonAdd= new Gtk::Button();
     areaMaskDrawPolygonAdd->add(*Gtk::manage(new RTImage("area-shape-polygon-add.png")));
     areaMaskDrawPolygonAdd->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP"));
@@ -1165,11 +1190,11 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     areaMaskDrawRectangleAdd->signal_clicked().connect(sigc::mem_fun(*this, &LabMasksPanel::onAreaMaskDrawRectangleAddPressed));
     add_button(areaMaskDrawRectangleAdd, hb, 24);
 
-    areaMaskDrawRectangle = new Gtk::ToggleButton();
-    areaMaskDrawRectangle->add(*Gtk::manage(new RTImage("area-shape-draw.png")));
-    areaMaskDrawRectangle->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP"));
-    areaMaskDrawConn = areaMaskDrawRectangle->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onRectangleAreaMaskDrawChanged));
-    add_button(areaMaskDrawRectangle, hb, 24);
+    // areaMaskDrawRectangle = new Gtk::ToggleButton();
+    // areaMaskDrawRectangle->add(*Gtk::manage(new RTImage("area-shape-draw.png")));
+    // areaMaskDrawRectangle->set_tooltip_text(M("TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP"));
+    // areaMaskDrawConn = areaMaskDrawRectangle->signal_toggled().connect(sigc::mem_fun(*this, &LabMasksPanel::onRectangleAreaMaskDrawChanged));
+    // add_button(areaMaskDrawRectangle, hb, 24);
     
     areaMaskToggle = new Gtk::ToggleButton();
     areaMaskToggle->add(*Gtk::manage(new RTImage("crosshair-adjust.png")));
@@ -1283,8 +1308,17 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     areaMaskHeight = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_HEIGHT"), 1, 200, 0.1, 100));
     areaMaskHeight->setLogScale(10, 1);
     add_adjuster(areaMaskHeight, vb);
-    areaMaskAngle = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_ANGLE"), 0, 180, 0.1, 0));
-    add_adjuster(areaMaskAngle, vb);
+    areaMaskStrengthStart = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_STRENGTH_START"), 0, 100, 0.1, 100));
+    add_adjuster(areaMaskStrengthStart, vb);
+    areaMaskStrengthEnd = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_STRENGTH_END"), 0, 100, 0.1, 0));
+    add_adjuster(areaMaskStrengthEnd, vb);
+    areaMaskAngle180 = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_ANGLE"), 0, 180, 0.1, 0));
+    add_adjuster(areaMaskAngle180, vb);
+    areaMaskAngle360 = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_ANGLE"), -180, 180, 0.1, 0));
+    add_adjuster(areaMaskAngle360, vb);
+    areaMaskGradFeather = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
+    add_adjuster(areaMaskGradFeather, vb);
+
     areaMaskShapeFeather = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
     add_adjuster(areaMaskShapeFeather, vb);
     areaMaskShapeFeather->setLogScale(100.0, 0.0);
@@ -1305,6 +1339,32 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     mask_box->pack_start(*drawnMask);
     static_cast<DrawnMaskPanel *>(drawnMask)->signal_draw_updated().connect(sigc::mem_fun(this, &LabMasksPanel::onDrawnMaskUpdated));
     
+
+    // -----------------------------------------------------------------------
+    MyExpander *ppMask = Gtk::manage(new MyExpander(false, M("TP_LABMASKS_POSTPROCESS")));
+    {
+        ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
+        ppMask->add(*tb, false);
+        ppMask->setLevel(1);
+
+        maskPosterization = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_POSTERIZATION"), 0, 6, 1, 0));
+        tb->pack_start(*maskPosterization);
+        maskPosterization->setAdjusterListener(this);
+
+        maskSmoothing = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_SMOOTHING"), 0, 100, 1, 0));
+        tb->pack_start(*maskSmoothing);
+        maskSmoothing->setAdjusterListener(this);
+        
+        CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_POSTPROCESS_CURVE")));
+        cg->setCurveListener(this);
+
+        maskCurve = static_cast<DiagonalCurveEditor *>(cg->addCurve(CT_Diagonal, ""));
+        cg->curveListComplete();
+        tb->pack_start(*cg, Gtk::PACK_SHRINK, 2);
+    }
+    mask_box->pack_start(*ppMask);
+    // -----------------------------------------------------------------------
+
     mask_box->set_border_width(4);
 
     MyExpander *mask_exp = nullptr;
@@ -1341,7 +1401,7 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         
     maskBlur->delay = options.adjusterMaxDelay;
 
-    mask_expanders_ = { parametricMask, areaMask, deltaEMask, drawnMask };
+    mask_expanders_ = { parametricMask, areaMask, deltaEMask, drawnMask, ppMask };
     for (auto e : mask_expanders_) {
         e->signal_button_release_event().connect_notify(sigc::bind(sigc::mem_fun(this, &LabMasksPanel::onMaskExpanded), e));
     }
@@ -1438,14 +1498,28 @@ void LabMasksPanel::maskGet(int idx)
     r.areaMask.contrast = areaMaskContrast->getCurve();
     if (area_shape_index_ < r.areaMask.shapes.size()) {
         auto &a = r.areaMask.shapes[area_shape_index_];
+        a->feather = areaMaskShapeFeather->getValue();
+        a->blur = areaMaskShapeBlur->getValue();
         switch (a->getType()) {
             case Shape::Type::POLYGON:
             {
                 auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.get());
                 poly->knots = getPolygon();
                 poly->mode = Shape::Mode(getAreaShapeMode());
+                break;
             }
-            break;
+            case Shape::Type::GRADIENT:
+            {
+                auto gradient = static_cast<rtengine::procparams::AreaMask::Gradient*>(a.get());
+                gradient->x = areaMaskX->getValue();
+                gradient->y = areaMaskY->getValue();
+                gradient->strengthStart = areaMaskStrengthStart->getValue();
+                gradient->strengthEnd = areaMaskStrengthEnd->getValue();
+                gradient->angle = areaMaskAngle360->getValue();
+                gradient->feather = areaMaskGradFeather->getValue();
+                gradient->mode = Shape::Mode(getAreaShapeMode());
+                break;
+            }
             case Shape::Type::RECTANGLE:
             default:
             {
@@ -1454,13 +1528,11 @@ void LabMasksPanel::maskGet(int idx)
                 rect->y = areaMaskY->getValue();
                 rect->width = areaMaskWidth->getValue();
                 rect->height = areaMaskHeight->getValue();
-                rect->angle = areaMaskAngle->getValue();
+                rect->angle = areaMaskAngle180->getValue();
                 rect->roundness = areaMaskRoundness->getValue();
                 rect->mode = Shape::Mode(getAreaShapeMode());
             }
         }
-        a->feather = areaMaskShapeFeather->getValue();
-        a->blur = areaMaskShapeBlur->getValue();
     }
     r.deltaEMask.enabled = deltaEMask->getEnabled();
     double b, t;
@@ -1474,8 +1546,12 @@ void LabMasksPanel::maskGet(int idx)
     r.deltaEMask.H = t;
     r.deltaEMask.weight_H = b;
     r.deltaEMask.range = deltaERange->getValue();
-    r.deltaEMask.decay = deltaEDecay->getValue();
+    int sgn = deltaEInverted->get_active() ? -1 : 1;
+    r.deltaEMask.decay = sgn * deltaEDecay->getValue();
     r.name = maskName->get_text();
+    r.curve = maskCurve->getCurve();
+    r.posterization = maskPosterization->getValue();
+    r.smoothing = maskSmoothing->getValue();
 }
 
 
@@ -1662,6 +1738,9 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         maskBlur->setValue(r.parametricMask.blur);
         maskInverted->set_active(r.inverted);
         maskName->set_text(r.name);
+        maskCurve->setCurve(r.curve);
+        maskPosterization->setValue(r.posterization);
+        maskSmoothing->setValue(r.smoothing);
 
         if (unsub && isCurrentSubscriber()) {
             if (areaMaskToggle->get_active()) {
@@ -1682,34 +1761,60 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         areaMaskContrast->setCurve(r.areaMask.contrast);
         if (area_shape_index_ < r.areaMask.shapes.size()) {
             auto &a = r.areaMask.shapes[area_shape_index_];
-            if (a->getType() == Shape::Type::RECTANGLE) {
+            areaMaskShapeFeather->setValue(a->feather);
+            areaMaskShapeBlur->setValue(a->blur);
+            switch (a->getType()) {
+            case Shape::Type::RECTANGLE: {
                 auto rect = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.get());
                 areaMaskX->setValue(rect->x);
                 areaMaskY->setValue(rect->y);
                 areaMaskWidth->setValue(rect->width);
                 areaMaskHeight->setValue(rect->height);
-                areaMaskAngle->setValue(rect->angle);
+                areaMaskAngle180->setValue(rect->angle);
                 areaMaskRoundness->setValue(rect->roundness);
-                setAdjustersVisibility(true);
-            }
-            else if (a->getType() == Shape::Type::POLYGON) {
+                setAdjustersVisibility(true, Shape::Type::RECTANGLE);
+                break;
+                }
+            case Shape::Type::GRADIENT: {
+                auto gradient = static_cast<rtengine::procparams::AreaMask::Gradient*>(a.get());
+                areaMaskX->setValue(gradient->x);
+                areaMaskY->setValue(gradient->y);
+                areaMaskStrengthStart->setValue(gradient->strengthStart);
+                areaMaskStrengthEnd->setValue(gradient->strengthEnd);
+                areaMaskAngle360->setValue(gradient->angle);
+                areaMaskGradFeather->setValue(gradient->feather);
+                setAdjustersVisibility(true, Shape::Type::GRADIENT);
+                break;
+                }
+            case Shape::Type::POLYGON: {
                 auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.get());
                 setPolygon(poly->knots);
-                setAdjustersVisibility(false);
+                setAdjustersVisibility(false, Shape::Type::POLYGON);
+                break;
+                }
+            default:
+                break;
             }
             toggleAreaShapeMode(int(a->mode));
 
-            if (a->getType() == Shape::Type::RECTANGLE) {
+            switch (a->getType()) {
+            case Shape::Type::RECTANGLE:
                 updateRectangleAreaMask(false);
-                setAdjustersVisibility(true);
-            } else if (a->getType() == Shape::Type::POLYGON) {
-                setAdjustersVisibility(false);
+                setAdjustersVisibility(true, Shape::Type::RECTANGLE);
+                break;
+            case Shape::Type::GRADIENT:
+                updateGradientAreaMask(false);
+                setAdjustersVisibility(true, Shape::Type::GRADIENT);
+                break;
+            case Shape::Type::POLYGON:
+                setAdjustersVisibility(false, Shape::Type::POLYGON);
+                break;
+            default:
+                break;
             }
-            areaMaskShapeFeather->setValue(a->feather);
-            areaMaskShapeBlur->setValue(a->blur);
         }
         else {
-            setAdjustersVisibility(false);
+            setAdjustersVisibility(false, Shape::Type::RECTANGLE);
         }
 
         deltaEMask->setEnabled(r.deltaEMask.enabled);
@@ -1717,7 +1822,8 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaEC->setValue(r.deltaEMask.weight_C, r.deltaEMask.C);
         deltaEH->setValue(r.deltaEMask.weight_H, r.deltaEMask.H);
         deltaERange->setValue(r.deltaEMask.range);
-        deltaEDecay->setValue(r.deltaEMask.decay);
+        deltaEDecay->setValue(std::abs(r.deltaEMask.decay));
+        deltaEInverted->set_active(r.deltaEMask.decay < 0);
         static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
     }
     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(&r.drawnMask,
@@ -1776,19 +1882,19 @@ void LabMasksPanel::setEditProvider(EditDataProvider *provider)
 void LabMasksPanel::onAreaMaskToggleChanged()
 {
     if (areaMaskToggle->get_active()) {
-        areaMaskDrawRectangle->set_active(false);
+        // areaMaskDrawRectangle->set_active(false);
         subscribe();
-        bool is_rectangle = false;
+        Shape::Type shape_type = Shape::Type::RECTANGLE;
         if (selected_ < masks_.size()) {
             auto &a = masks_[selected_].areaMask;
             if (area_shape_index_ < a.shapes.size()) {
-                is_rectangle = a.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE;
+                shape_type = a.shapes[area_shape_index_]->getType();
             }
         }
-        setAdjustersVisibility(is_rectangle);
+        setAdjustersVisibility(true, shape_type);
     } else {
         unsubscribe();
-        setAdjustersVisibility(false);
+        setAdjustersVisibility(false, Shape::Type::RECTANGLE /* ignored */);
     }
 }
 
@@ -1802,18 +1908,58 @@ void LabMasksPanel::onMaskInvertedChanged()
 }
 
 
-void LabMasksPanel::setAdjustersVisibility(bool rectangleAjusterVisible)
+void LabMasksPanel::setAdjustersVisibility(bool visible, Shape::Type shape_type)
 {
-    rectangleAjusterVisible &= areaMaskToggle->get_active();
-    areaMaskRoundness->set_visible(rectangleAjusterVisible);
-    areaMaskX->set_visible(rectangleAjusterVisible);
-    areaMaskY->set_visible(rectangleAjusterVisible);
-    areaMaskWidth->set_visible(rectangleAjusterVisible);
-    areaMaskHeight->set_visible(rectangleAjusterVisible);
-    areaMaskAngle->set_visible(rectangleAjusterVisible);
+    visible &= areaMaskToggle->get_active();
+    switch (shape_type) {
+    case Shape::Type::RECTANGLE:
+        areaMaskRoundness->set_visible(visible);
+        areaMaskX->set_visible(visible);
+        areaMaskY->set_visible(visible);
+        areaMaskWidth->set_visible(visible);
+        areaMaskHeight->set_visible(visible);
+        areaMaskStrengthStart->set_visible(false);
+        areaMaskStrengthEnd->set_visible(false);
+        areaMaskAngle180->set_visible(visible);
+        areaMaskAngle360->set_visible(false);
+        areaMaskGradFeather->set_visible(false);
 
-    areaMaskShapeFeather->set_visible(areaMaskToggle->get_active());
-    areaMaskShapeBlur->set_visible(areaMaskToggle->get_active());
+        areaMaskShapeFeather->set_visible(visible);
+        areaMaskShapeBlur->set_visible(visible);
+        break;
+    case Shape::Type::POLYGON:
+        areaMaskRoundness->set_visible(false);
+        areaMaskX->set_visible(false);
+        areaMaskY->set_visible(false);
+        areaMaskWidth->set_visible(false);
+        areaMaskHeight->set_visible(false);
+        areaMaskStrengthStart->set_visible(false);
+        areaMaskStrengthEnd->set_visible(false);
+        areaMaskAngle180->set_visible(false);
+        areaMaskAngle360->set_visible(false);
+        areaMaskGradFeather->set_visible(false);
+
+        areaMaskShapeFeather->set_visible(visible);
+        areaMaskShapeBlur->set_visible(visible);
+        break;
+    case Shape::Type::GRADIENT:
+        areaMaskRoundness->set_visible(false);
+        areaMaskX->set_visible(visible);
+        areaMaskY->set_visible(visible);
+        areaMaskWidth->set_visible(false);
+        areaMaskHeight->set_visible(false);
+        areaMaskStrengthStart->set_visible(visible);
+        areaMaskStrengthEnd->set_visible(visible);
+        areaMaskAngle180->set_visible(false);
+        areaMaskAngle360->set_visible(visible);
+        areaMaskGradFeather->set_visible(visible);
+
+        areaMaskShapeFeather->set_visible(false);
+        areaMaskShapeBlur->set_visible(false);
+        break;
+    default:
+        break;
+    }
 }
 
 
@@ -1825,13 +1971,36 @@ void LabMasksPanel::updateRectangleAreaMask(bool from_mask)
         areaMaskY->setValue(center_y_);
         areaMaskWidth->setValue(width_);
         areaMaskHeight->setValue(height_);
-        areaMaskAngle->setValue(angle_);
+        areaMaskAngle180->setValue(angle_);
     } else {
         center_x_ = areaMaskX->getValue();
         center_y_ = areaMaskY->getValue();
         width_ = areaMaskWidth->getValue();
         height_ = areaMaskHeight->getValue();
-        angle_ = areaMaskAngle->getValue();
+        angle_ = areaMaskAngle180->getValue();
+        updateGeometry();
+    }
+    enableListener();
+}
+
+
+void LabMasksPanel::updateGradientAreaMask(bool from_mask)
+{
+    disableListener();
+    if (from_mask) {
+        areaMaskX->setValue(center_x_);
+        areaMaskY->setValue(center_y_);
+        areaMaskStrengthStart->setValue(strength_start_);
+        areaMaskStrengthEnd->setValue(strength_end_);
+        areaMaskAngle360->setValue(angle_);
+        areaMaskGradFeather->setValue(feather_);
+    } else {
+        center_x_ = areaMaskX->getValue();
+        center_y_ = areaMaskY->getValue();
+        strength_start_ = areaMaskStrengthStart->getValue();
+        strength_end_ = areaMaskStrengthEnd->getValue();
+        angle_ = areaMaskAngle360->getValue();
+        feather_ = areaMaskGradFeather->getValue();
         updateGeometry();
     }
     enableListener();
@@ -1849,6 +2018,8 @@ bool LabMasksPanel::button1Released()
     if (last_object_ != -1) {
         if (getGeometryType() == Shape::Type::RECTANGLE) {
             updateRectangleAreaMask(true);
+        } else if (getGeometryType() == Shape::Type::GRADIENT) {
+            updateGradientAreaMask(true);
         }
         onAreaShapeSelectionChanged();
         populateShapeList(selected_, area_shape_index_);
@@ -1967,6 +2138,8 @@ void LabMasksPanel::curveChanged(CurveEditor* ce)
             l->panelChanged(EvCMask, M("HISTORY_CUSTOMCURVE"));
         } else if (ce == lightnessMask) {
             l->panelChanged(EvLMask, M("HISTORY_CUSTOMCURVE"));
+        } else if (ce == maskCurve) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_CURVE") + ": " + M("HISTORY_CUSTOMCURVE"));
         }
     }
 }
@@ -1998,6 +2171,14 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
         if (l) {
             l->panelChanged(EvLMask, a->getTextValue());
         }
+    } else if (a == maskPosterization) {
+        if (l) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_POSTERIZATION") + ": " + a->getTextValue());
+        }
+    } else if (a == maskSmoothing) {
+        if (l) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_SMOOTHING") + ": " + a->getTextValue());
+        }
     }
     maskShow(selected_, true);
 }
@@ -2028,18 +2209,19 @@ void LabMasksPanel::adjusterAutoToggled(Adjuster *a, bool newval)
 }
 
 
-void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int show_mask_idx)
+void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int selected_idx, bool show_mask)
 {
     disableListener();
     ConnectionBlocker b(selectionConn);
     
     masks_ = masks;
     selected_ = 0;
-    if (show_mask_idx >= 0) {
-        selected_ = show_mask_idx;
-        showMask->set_active(true);
-    } else {
-        showMask->set_active(false);
+    showMask->set_active(false);
+    if (selected_idx >= 0 && size_t(selected_idx) < masks.size()) {
+        selected_ = selected_idx;
+        if (show_mask) {
+            showMask->set_active(true);
+        }
     }
     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(nullptr);
     populateList();
@@ -2124,7 +2306,7 @@ void LabMasksPanel::colorForValue(double valX, double valY, enum ColorCaller::El
 float LabMasksPanel::blendPipetteValues(CurveEditor *ce, float chan1, float chan2, float chan3)
 {
     if (ce == chromaticityMask && chan1 > 0.f) {
-        return rtengine::lin2log(chan1, 10.f);
+        return rtengine::lin2log(chan1, 50.f);
     } else if (ce == hueMask && chan1 > 0.f) {
         float x = chan1 + 1.f/6.f;
         if (x > 1.f) {
@@ -2184,6 +2366,9 @@ void LabMasksPanel::onAreaShapeSelectionChanged()
         disableListener();
 
         auto &s = masks_[selected_].areaMask.shapes[area_shape_index_];
+        s->mode = Shape::Mode(getAreaShapeMode());
+        s->feather = areaMaskShapeFeather->getValue();
+        s->blur = areaMaskShapeBlur->getValue();
         switch (s->getType()) {
         case Shape::Type::RECTANGLE:
         {
@@ -2201,14 +2386,23 @@ void LabMasksPanel::onAreaShapeSelectionChanged()
         {
             auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(s.get());
             poly->knots = getPolygon();
-        }
             break;
+        }
+        case Shape::Type::GRADIENT:
+        {
+            auto gradient = static_cast<rtengine::procparams::AreaMask::Gradient*>(s.get());
+            updateGradientAreaMask(false);
+            gradient->x = center_x_;
+            gradient->y = center_y_;
+            gradient->strengthStart = strength_start_;
+            gradient->strengthEnd = strength_end_;
+            gradient->feather = feather_;
+            gradient->angle = angle_;
+            break;
+        }
         default:
             break;
         }
-        s->mode = Shape::Mode(getAreaShapeMode());
-        s->feather = areaMaskShapeFeather->getValue();
-        s->blur = areaMaskShapeBlur->getValue();
 
         auto sel = areaMaskShapes->get_selected();
         unsigned int newidx = sel.empty() ? area_shape_index_ : sel[0];
@@ -2259,7 +2453,8 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
         listEdited = true;
         auto &am = masks_[selected_].areaMask;
         am.shapes.emplace_back();
-        if (type == Shape::Type::RECTANGLE) {
+        switch (type) {
+        case Shape::Type::RECTANGLE:
             am.shapes.back().reset(new rtengine::procparams::AreaMask::Rectangle(defaultAreaShape));
             for (size_t j = am.shapes.size()-1; j > 0; --j) {
                 if (am.shapes[j-1]->getType() == Shape::Type::RECTANGLE) {
@@ -2269,8 +2464,15 @@ void LabMasksPanel::shapeAddPressed(Shape::Type type, bool list_only)
                     break;
                 }
             }
-        } else if (type == Shape::Type::POLYGON) {
+            break;
+        case Shape::Type::GRADIENT:
+            am.shapes.back().reset(new rtengine::procparams::AreaMask::Gradient());
+            break;
+        case Shape::Type::POLYGON:
             am.shapes.back().reset(new rtengine::procparams::AreaMask::Polygon());
+            break;
+        default:
+            break;
         }
         populateShapeList(selected_, -1);
         areaShapeSelect(am.shapes.size()-1, true);
@@ -2340,12 +2542,12 @@ void LabMasksPanel::toggleAreaShapeMode(int i)
 void LabMasksPanel::updateShapeButtonsSensitivity()
 {
     bool has_shape = false;
-    bool is_rectangle = false;
+    // bool is_rectangle = false;
     if (selected_ < masks_.size()) {
         auto &a = masks_[selected_].areaMask;
         if (area_shape_index_ < a.shapes.size()) {
             has_shape = true;
-            is_rectangle = a.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE;
+            // is_rectangle = a.shapes[area_shape_index_]->getType() == Shape::Type::RECTANGLE;
         }
     }
     if (!has_shape && areaMaskToggle->get_active()) {
@@ -2353,7 +2555,7 @@ void LabMasksPanel::updateShapeButtonsSensitivity()
     }
     areaMaskCopy->set_sensitive(has_shape);
     areaMaskToggle->set_sensitive(has_shape);
-    areaMaskDrawRectangle->set_sensitive(is_rectangle);
+    // areaMaskDrawRectangle->set_sensitive(is_rectangle);
     for (int i = 0; i < 3; i++) {
         areaMaskMode[i]->set_sensitive(has_shape);
     }
@@ -2418,14 +2620,19 @@ void LabMasksPanel::populateShapeList(int idx, int sel)
         case Shape::Type::POLYGON: {
             auto poly = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.get());
             label = Glib::ustring::compose(M("TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY") + "%2", poly->knots.size(), m(poly->mode));
+            label += Glib::ustring::compose(" | %1 %2", rd(a->feather), rd(a->blur));
+        } break;
+        case Shape::Type::GRADIENT: {
+            auto gradient = static_cast<rtengine::procparams::AreaMask::Gradient*>(a.get());
+            label = Glib::ustring::compose("%1 %2 %3 %4 %5 %6 %7", rd(gradient->x), rd(gradient->y), rd(gradient->strengthStart), rd(gradient->strengthEnd), rd(gradient->angle), rd(gradient->feather), m(gradient->mode));
         } break;
         case Shape::Type::RECTANGLE:
         default: {
             auto rect = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.get());
             label = Glib::ustring::compose("%1 %2 %3 %4 %5 %6 %7", rd(rect->x), rd(rect->y), rd(rect->width), rd(rect->height), rd(rect->angle), rd(rect->roundness), m(rect->mode));
+            label += Glib::ustring::compose(" | %1 %2", rd(a->feather), rd(a->blur));
         } break;
         }
-        label += Glib::ustring::compose(" | %1 %2", rd(a->feather), rd(a->blur));
         areaMaskShapes->set_text(j, 1, label);
     }
     if (sel >= 0 && size_t(sel) < r.areaMask.shapes.size()) {
@@ -2459,15 +2666,27 @@ void LabMasksPanel::onAreaMaskPastePressed()
             case Shape::Type::POLYGON:
             {
                 auto s = static_cast<rtengine::procparams::AreaMask::Polygon*>(a.shapes[area_shape_index_].get());
-                setAdjustersVisibility(false);
+                setAdjustersVisibility(false, Shape::Type::POLYGON);
                 setPolygon(s->knots);
+                break;
+            }
+            case Shape::Type::GRADIENT:
+            {
+                auto s = static_cast<rtengine::procparams::AreaMask::Gradient*>(a.shapes[area_shape_index_].get());
+                setAdjustersVisibility(false, Shape::Type::GRADIENT);
+                center_x_ = s->x;
+                center_y_ = s->y;
+                strength_start_ = s->strengthStart;
+                strength_end_ = s->strengthEnd;
+                feather_ = s->feather;
+                angle_ = s->angle;
                 break;
             }
             case Shape::Type::RECTANGLE:
             default:
             {
                 auto s = static_cast<rtengine::procparams::AreaMask::Rectangle*>(a.shapes[area_shape_index_].get());
-                setAdjustersVisibility(true);
+                setAdjustersVisibility(true, Shape::Type::RECTANGLE);
                 center_x_ = s->x;
                 center_y_ = s->y;
                 width_ = s->width;
@@ -2508,15 +2727,29 @@ void LabMasksPanel::areaShapeSelect(int sel, bool update_list)
         {
             auto s = static_cast<rtengine::procparams::AreaMask::Polygon*>(ns.get());
             setPolygon(s->knots);
-            setAdjustersVisibility(false);
+            setAdjustersVisibility(false, Shape::Type::POLYGON);
             setGeometryType(Shape::Type::POLYGON);
+            break;
+        }
+        case Shape::Type::GRADIENT:
+        {
+            auto s = static_cast<rtengine::procparams::AreaMask::Gradient*>(ns.get());
+            setAdjustersVisibility(true, Shape::Type::GRADIENT);
+            center_x_ = s->x;
+            center_y_ = s->y;
+            strength_start_ = s->strengthStart;
+            strength_end_ = s->strengthEnd;
+            feather_ = s->feather;
+            angle_ = s->angle;
+            setGeometryType(Shape::Type::GRADIENT);
+            updateGradientAreaMask(true);
             break;
         }
         case Shape::Type::RECTANGLE:
         default:
         {
             auto s = static_cast<rtengine::procparams::AreaMask::Rectangle*>(ns.get());
-            setAdjustersVisibility(true);
+            setAdjustersVisibility(true, Shape::Type::RECTANGLE);
             center_x_ = s->x;
             center_y_ = s->y;
             width_ = s->width;
@@ -2540,7 +2773,7 @@ void LabMasksPanel::areaShapeSelect(int sel, bool update_list)
     } else {
         updateGeometry();
         toggleAreaShapeMode(0);
-        setAdjustersVisibility(false);
+        setAdjustersVisibility(false, Shape::Type::RECTANGLE);
         update_list = false;
     }
 
@@ -2595,7 +2828,7 @@ void LabMasksPanel::updateRectangleArea(AreaDrawUpdater::Phase phase, int x1, in
         onAreaShapeSelectionChanged();
         populateShapeList(selected_, area_shape_index_);
         ConnectionBlocker blocker(areaMaskDrawConn);
-        areaMaskDrawRectangle->set_active(false);
+        // areaMaskDrawRectangle->set_active(false);
         areaMaskToggle->set_active(true);
 
         auto l = getListener();
@@ -2613,23 +2846,27 @@ void LabMasksPanel::cancelUpdateRectangleArea()
 }
 
 
-void LabMasksPanel::onRectangleAreaMaskDrawChanged()
-{
-    if (adl_) {
-        if (areaMaskDrawRectangle->get_active()) {
-            areaMaskToggle->set_active(false);
-            adl_->startRectangleDrawingArea(this);
-        } else {
-            adl_->stopRectangleDrawingArea();
-        }
-    }
-}
+// void LabMasksPanel::onRectangleAreaMaskDrawChanged()
+// {
+//     if (adl_) {
+//         if (areaMaskDrawRectangle->get_active()) {
+//             areaMaskToggle->set_active(false);
+//             adl_->startRectangleDrawingArea(this);
+//         } else {
+//             adl_->stopRectangleDrawingArea();
+//         }
+//     }
+// }
 
 
 void LabMasksPanel::onAreaMaskDrawRectangleAddPressed()
 {
     shapeAddPressed(Shape::Type::RECTANGLE, false);
-    areaMaskDrawRectangle->set_active(true);
+    // areaMaskDrawRectangle->set_active(true);
+//    areaMaskToggle->set_active(true);
+    if (adl_) {
+        adl_->startRectangleDrawingArea(this);
+    }
 }
 
 void LabMasksPanel::onAreaMaskDrawPolygonAddPressed()
@@ -2638,16 +2875,26 @@ void LabMasksPanel::onAreaMaskDrawPolygonAddPressed()
     areaMaskToggle->set_active(true);
 }
 
+void LabMasksPanel::onAreaMaskDrawGradientAddPressed()
+{
+    shapeAddPressed(Shape::Type::GRADIENT, false);
+    areaMaskToggle->set_active(true);
+}
+
+
 
 void LabMasksPanel::on_map()
 {
     Gtk::VBox::on_map();
     if (first_mask_exp_) {
-        parametricMask->set_expanded(false);
-        areaMask->set_expanded(false);
-        deltaEMask->set_expanded(false);
-        drawnMask->set_expanded(false);
-        mask_exp_->set_expanded(false);
+        // parametricMask->set_expanded(false);
+        // areaMask->set_expanded(false);
+        // deltaEMask->set_expanded(false);
+        // drawnMask->set_expanded(false);
+        // mask_exp_->set_expanded(false);
+        for (auto e : mask_expanders_) {
+            e->set_expanded(false);
+        }
         first_mask_exp_ = false;
     }
 }

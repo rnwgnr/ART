@@ -31,7 +31,9 @@
 #include "curves.h"
 #include "iccstore.h"
 #include "rt_algo.h"
+#include "rt_math.h"
 #include "opthelper.h"
+#include "rescale.h"
 #include "../rtgui/multilangmgr.h"
 
 namespace rtengine {
@@ -41,25 +43,6 @@ using procparams::Mask;
 using procparams::DrawnMask;
 
 namespace {
-
-#ifdef __SSE2__
-void fastlin2log(float *x, float factor, float base, int w)
-{
-    float baseLog = 1.f / xlogf(base);
-    vfloat baseLogv = F2V(baseLog);
-    factor = factor * (base - 1.f);
-    vfloat factorv = F2V(factor);
-    vfloat onev = F2V(1.f);
-    int i = 0;
-    for (; i < w - 3; i += 4) {
-        STVFU(x[i], xlogf(LVFU(x[i]) * factorv + onev) * baseLogv);
-    }
-    for (; i < w; ++i) {
-        x[i] = xlogf(x[i] * factor + 1.f) * baseLog;
-    }
-}
-#endif
-
 
 bool generate_area_mask(int ox, int oy, int width, int height, const array2D<float> &guide, const AreaMask &areaMask, float scale, bool multithread, array2D<float> &global_mask, ProgressListener *plistener)
 {
@@ -104,9 +87,12 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
             // allocated once, when needed
             shape_mask(global_mask.width(), global_mask.height());
         }
-        std::fill(shape_mask[0],
-                  shape_mask[0] + (shape_mask.width() * shape_mask.height()),
-                  area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+        if (area_->getType() != AreaMask::Shape::GRADIENT) {
+            // GRADIENT will update the whole image, no need to initialize it here
+            std::fill(shape_mask[0],
+                      shape_mask[0] + (shape_mask.width() * shape_mask.height()),
+                      area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+        }
         float color;
 
         switch (area_->mode) {
@@ -194,19 +180,66 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 
             break;
         }
+        case AreaMask::Shape::GRADIENT:
+        {
+            auto area = static_cast<AreaMask::Gradient*>(area_.get());
+
+            Coord center(w2 + area->x / 100.0 * w2, h2 + area->y / 100.0 * h2);
+            float color_start = fgcolor * (area_->mode == AreaMask::Shape::SUBTRACT ?
+                                          (100. - area->strengthStart) :
+                                          area->strengthStart) / 100.;
+            float color_end =   fgcolor * (area_->mode == AreaMask::Shape::SUBTRACT ?
+                                          (100. - area->strengthEnd) :
+                                          area->strengthEnd) / 100.;
+            float color_diff = color_end - color_start;
+            float half_feather = area->feather * rtengine::norm2<double> (width, height) / 200.0;
+            float feather = 2 * half_feather;
+            int w = global_mask.width();
+            int h = global_mask.height();
+
+#ifdef _OPENMP
+#       pragma omp parallel if (multithread)
+#endif
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    Coord m(x, y);
+                    m += origin;
+                    m -= center;
+                    PolarCoord p(m);
+                    double r, a;
+                    p.get(r, a);
+                    p.set(r, a + area->angle);
+                    Coord point(p);
+                    point.y += half_feather;
+
+                    if (point.y < 0) {
+                        shape_mask[y][x] = color_start;
+                    }
+                    else if (point.y > feather) {
+                        shape_mask[y][x] = color_end;
+                    }
+                    else {
+                        // in the feather range
+                        shape_mask[y][x] = (point.y / feather) * color_diff + color_start;
+                    }
+                }
+            }
+
+            break;
+        }
         default:
             break;
         }
 
         // feather the shape's mask
-        if (area_->feather != 0.) {
+        if (area_->getType() != AreaMask::Shape::GRADIENT && area_->feather != 0.) {
             guidedFilter(guide, shape_mask, shape_mask, radius, 1e-7, multithread);
         }
 
         // No contrast applied per shape
 
         // blur the shape's mask
-        if (area_->blur > 0.) {
+        if (area_->getType() != AreaMask::Shape::GRADIENT && area_->blur > 0.) {
 #ifdef _OPENMP
 #       pragma omp parallel if (multithread)
 #endif
@@ -528,7 +561,7 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
     if (drawnMask.feather > 0) {
         int radius = int(drawnMask.feather / 100.0 * std::min(width, height) * 0.1 + 0.5);
         if (radius > 0) {
-            guidedFilter(guide, mask, mask, radius, 1e-5, multithread);
+            guidedFilterLog(guide, 2, /*mask,*/ mask, radius, 1e-5, multithread);
         }
     }
 
@@ -654,6 +687,94 @@ private:
     std::vector<cmsCIELab> refs_;
 };
 
+
+bool contrast_threshold_mask(int width, int height, float scale, array2D<float> &guide, int threshold, double blur, bool multithread, array2D<float> &mask)
+{
+    if (threshold == 0) {
+        return false;
+    }
+    
+    int W = guide.width();
+    int H = guide.height();
+    mask(W, H);
+
+    int d = std::max(W, H);
+    float s = float(d) / 1920.f;
+    array2D<float> *src = &guide;
+    array2D<float> *dst = &mask;
+    array2D<float> tmpsrc;
+    array2D<float> tmpdst;
+    if (s > 1.f) {
+        scale *= s;
+        int ww = W / s;
+        int hh = H / s;
+        tmpsrc(ww, hh);
+        rescaleBilinear(guide, tmpsrc, multithread);
+        src = &tmpsrc;
+        tmpdst(ww, hh);
+        dst = &tmpdst;
+    }
+    float s_scale = std::sqrt(scale);
+    
+    float thresh = float(std::abs(threshold))/100.f * s_scale;
+    float bl = std::max(blur, 2.0) / s_scale;
+    //bool neg = threshold < 0;
+    buildBlendMask(*src, *dst, src->width(), src->height(), thresh, 1.f, false, bl, 32768.f);
+
+    if (dst != &mask) {
+        rescaleBilinear(*dst, mask, multithread);
+    }
+
+    return true;
+}
+
+
+bool mask_postprocess(int width, int height, float scale, const array2D<float> &guide, const std::vector<double> &curve, int posterization, int smoothing, bool multithread, array2D<float> &mask)
+{
+    DiagonalCurve ccurve(curve);
+    if (!posterization && ccurve.isIdentity()) {
+        return false;
+    }
+
+    int W = mask.width();
+    int H = mask.height();
+
+    if (posterization) {
+        constexpr float pp[] = { 30.f, 20.f, 10.f, 5.f, 3.f, 2.f };
+        const int idx = LIM(posterization, 0, 6)-1;
+        const float p = pp[idx];
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] = int(mask[y][x] * p) / p;
+            }
+        }
+    }
+
+    if (!ccurve.isIdentity()) {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] = ccurve.getVal(mask[y][x]);
+            }
+        }
+    }
+
+    if (posterization && smoothing) {
+        const float radius_coeff = 101.f - float(LIM(smoothing, 0, 100));
+        const float radius = (max(width, height) / radius_coeff);
+        const float epsilon = 0.015f;
+        rtengine::guidedFilter(guide, mask, mask, radius, epsilon, multithread);
+    }
+
+    return true;
+}
+
+
 } // namespace
 
 
@@ -678,6 +799,15 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     const int end_idx = (show_mask_idx < 0 ? n : show_mask_idx+1);
     bool has_mask = false;
 
+    const auto tweak =
+        [](std::vector<double> m) -> std::vector<double>
+        {
+            for (size_t i = 1; i < m.size(); i += 4) {
+                m[i] = xlog2lin(m[i], 50.f);
+            }
+            return m;
+        };
+
     for (int i = begin_idx; i < end_idx; ++i) {
         auto &r = masks[i];
         if (r.deltaEMask.enabled) {
@@ -688,7 +818,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             has_mask = true;
         }
         if (r.parametricMask.enabled && !r.parametricMask.chromaticity.empty() && r.parametricMask.chromaticity[0] != FCT_Linear && r.parametricMask.chromaticity != dflt.parametricMask.chromaticity) {
-            cmask[i].reset(new FlatCurve(r.parametricMask.chromaticity, false));
+            cmask[i].reset(new FlatCurve(tweak(r.parametricMask.chromaticity), false));
             has_mask = true;
         }
         if (r.parametricMask.enabled && !r.parametricMask.lightness.empty() && r.parametricMask.lightness[0] != FCT_Linear && r.parametricMask.lightness != dflt.parametricMask.lightness) {
@@ -788,7 +918,9 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
             if (has_mask) {
                 // vectorized precalculation
                 Color::Lab2Lch(aBuffer, bBuffer, cBuffer, hBuffer, W);
-                fastlin2log(cBuffer, c_factor, 10.f, W);
+                for (int x = 0; x < W; ++x) {
+                    cBuffer[x] *= c_factor;
+                }
             }
 #endif
             for (int x = 0; x < W; ++x) {
@@ -816,7 +948,8 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 #else
                     float c, h;
                     Color::Lab2Lch(a, b, c, h);
-                    c = xlin2log(c * c_factor, 10.f);
+                    //c = xlin2log(c * c_factor, 100.f);
+                    c *= c_factor;
 #endif
                         
                     h = Color::huelab_to_huehsv2(h);
@@ -954,14 +1087,10 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
         };
     
 
-    float s_scale = std::sqrt(scale);
     for (int i = begin_idx; i < end_idx; ++i) {
-        if (masks[i].parametricMask.enabled && masks[i].parametricMask.contrastThreshold != 0) {
-            amask(W, H);
-            float thresh = float(std::abs(masks[i].parametricMask.contrastThreshold))/100.f * s_scale;
-            float blur = std::max(masks[i].parametricMask.blur, 2.0) / s_scale;
+        if (masks[i].parametricMask.enabled && 
+            contrast_threshold_mask(full_width, full_height, scale, guide, masks[i].parametricMask.contrastThreshold, masks[i].parametricMask.blur, multithread, amask)) {
             bool neg = masks[i].parametricMask.contrastThreshold < 0;
-            buildBlendMask(guide, amask, W, H, thresh, 1.f, false, blur, 32768.f);
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
@@ -1000,35 +1129,18 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
     }
 
     apply_brush(false);
-//     for (int i = begin_idx; i < end_idx; ++i) {
-//         if (generate_drawn_mask(offset_x, offset_y, full_width, full_height, masks[i].drawnMask, guide, multithread, amask)) {
-//             const bool add = masks[i].drawnMask.addmode;
-//             const float alpha = 1.f - LIM01(masks[i].drawnMask.transparency);
-// #ifdef _OPENMP
-// #           pragma omp parallel for if (multithread)
-// #endif
-//             for (int y = 0; y < H; ++y) {
-//                 for (int x = 0; x < W; ++x) {
-//                     const float f = alpha * amask[y][x];
-//                     if (add) {
-//                         if (abmask) {
-//                             (*abmask)[i][y][x] = LIM01((*abmask)[i][y][x] + f);
-//                         }
-//                         if (Lmask) {
-//                             (*Lmask)[i][y][x] = LIM01((*Lmask)[i][y][x] + f);
-//                         }
-//                     } else {
-//                         if (abmask) {
-//                             (*abmask)[i][y][x] *= f;
-//                         }
-//                         if (Lmask) {
-//                             (*Lmask)[i][y][x] *= f;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
+
+    for (int i = begin_idx; i < end_idx; ++i) {
+        const auto &curve = masks[i].curve;
+        auto posterization = masks[i].posterization;
+        auto smoothing = masks[i].smoothing;
+        if (abmask) {
+            mask_postprocess(full_width, full_height, scale, guide, curve, posterization, smoothing, multithread, (*abmask)[i]);
+        }
+        if (Lmask) {
+            mask_postprocess(full_width, full_height, scale, guide, curve, posterization, smoothing, multithread, (*Lmask)[i]);
+        }
+    }
     
     for (int i = begin_idx; i < end_idx; ++i) {
         if (masks[i].inverted) {

@@ -75,8 +75,8 @@ public:
     void    getSize       (int& w, int& h);
     void    getFullImageSize (int& w, int& h);
 
-    void    setEnabled (bool e);
-    bool    getEnabled ();
+    void setEnabled(bool e, bool do_update=true);
+    bool getEnabled();
 
     void    colorPick (const rtengine::Coord &pickerPos, float &r, float &g, float &b, float &rpreview, float &gpreview, float &bpreview, LockableColorPicker::Size size);
 
@@ -124,7 +124,6 @@ private:
     std::vector<unsigned char> cropimg;
     std::vector<unsigned char> cropimgtrue;
     int cropimg_width, cropimg_height, cix, ciy, ciw, cih, cis;
-    bool isLowUpdatePriority;
 
     rtengine::StagedImageProcessor* ipc;
     rtengine::DetailedCrop* crop;
@@ -135,6 +134,9 @@ private:
     std::atomic<bool> initial;
 
     IdleRegister idle_register;
+
+    std::unique_ptr<Glib::ThreadPool> thread_pool_;
+    sigc::connection zoom_conn_;
 };
 
 #endif

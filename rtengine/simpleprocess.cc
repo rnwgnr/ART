@@ -383,7 +383,8 @@ private:
             if (!is_fast) {
                 int imw, imh;
                 double scale = ipf.resizeScale(&params, fw, fh, imw, imh);
-                if (scale < 1.0 || (scale > 1.0 && params.resize.allowUpscaling)) {
+                bool allow_upscaling = params.resize.allowUpscaling || params.resize.dataspec == 0;
+                if (scale < 1.0 || (scale > 1.0 && allow_upscaling)) {
                     Imagefloat *resized = new Imagefloat(imw, imh, img);
                     ipf.Lanczos(img, resized, scale);
                     delete img;
@@ -494,7 +495,8 @@ private:
         assert(params.resize.enabled);
 
         // resize image
-        if (params.resize.allowUpscaling || (imw <= fw && imh <= fh)) {
+        bool allow_upscaling = params.resize.allowUpscaling || params.resize.dataspec == 0;
+        if (allow_upscaling || (imw <= fw && imh <= fh)) {
             Imagefloat *resized = new Imagefloat(imw, imh, img);
             ipf.Lanczos(img, resized, scale_factor);
             delete img;

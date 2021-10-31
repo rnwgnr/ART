@@ -23,6 +23,8 @@
 #include "threadutils.h"
 #include <thread>
 #include <chrono>
+#include <deque>
+#include "options.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -73,10 +75,14 @@ public:
 
     typedef std::set<Job, JobCompare> JobSet;
 
-    Impl(): nConcurrentThreads(0)
+    Impl(): nConcurrentThreads(0), job_count_(0)
     {
 #ifdef _OPENMP
-        initial_thread_count_ = omp_get_num_procs();
+        if (options.thumb_update_thread_limit > 0) {
+            initial_thread_count_ = options.thumb_update_thread_limit;
+        } else {
+            initial_thread_count_ = omp_get_num_procs();
+        }
 #else
         initial_thread_count_ = 1;
 #endif
@@ -89,9 +95,11 @@ public:
     int initial_thread_count_;
     Glib::ThreadPool* threadPool_;
     MyMutex mutex_;
-    JobSet jobs_;
+    //JobSet jobs_;
+    std::deque<Job> jobs_;
     gint nConcurrentThreads;
     bool slowing_down_;
+    size_t job_count_;
 // Issue 2406   std::vector<OutputJob *> output_;
 
     void processNextJob()
@@ -108,8 +116,10 @@ public:
             }
 
             // copy and remove front job
-            j = *jobs_.begin();
-            jobs_.erase(jobs_.begin());
+            // j = *jobs_.begin();
+            // jobs_.erase(jobs_.begin());
+            j = jobs_.front();
+            jobs_.pop_front();
             DEBUG("processing %s", j.dir_entry_.c_str());
             DEBUG("%d job(s) remaining", jobs_.size());
             /* Issue 2406
@@ -141,9 +151,9 @@ public:
 // Issue 2406               fdn = new FileBrowserEntry(tmb,j.dir_entry_);
             }
 
-            if (slowing_down_) {
+            if (slowing_down_ || (++job_count_ % 20 == 0)) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
+            }                
 
         } catch (Glib::Error &e) {} catch(...) {}
 
@@ -175,9 +185,8 @@ public:
     void slowDown()
     {
         slowing_down_ = true;
-        if (initial_thread_count_ > 1) {
-            threadPool_->set_max_threads(initial_thread_count_-1);
-        }
+        threadPool_->set_max_threads(std::max(initial_thread_count_/2, 1));
+        //threadPool_->set_max_threads(1);
     }
 
     void speedUp()
@@ -211,7 +220,8 @@ void PreviewLoader::add(int dir_id, const Glib::ustring& dir_entry, PreviewLoade
 
             // create a new job and append to queue
             DEBUG("saving job %s", dir_entry.c_str());
-            impl_->jobs_.insert(Impl::Job(dir_id, dir_entry, l));
+            //impl_->jobs_.insert(Impl::Job(dir_id, dir_entry, l));
+            impl_->jobs_.push_back(Impl::Job(dir_id, dir_entry, l));
         }
 
         // queue a run request

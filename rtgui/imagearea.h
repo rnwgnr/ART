@@ -33,6 +33,8 @@
 #include "previewmodepanel.h"
 #include "edit.h"
 
+class ToolShortcutManager;
+
 class ImageAreaPanel;
 class ImageArea : public Gtk::DrawingArea, public CropWindowListener, public EditDataProvider, public LockablePickerToolListener
 {
@@ -58,6 +60,8 @@ protected:
     PointerMotionListener* pmlistener;
     PointerMotionListener* pmhlistener;
     ImageAreaToolListener* listener;
+
+    ToolShortcutManager *shortcut_mgr_;
 
     CropWindow* getCropWindow (int x, int y);
     Gtk::SizeRequestMode get_request_mode_vfunc () const override;
@@ -161,6 +165,8 @@ public:
     }
 
     void setAreaDrawListenerProvider(AreaDrawListenerProvider *ap);
+
+    void setToolShortcutManager(ToolShortcutManager *mgr);
 };
 
 

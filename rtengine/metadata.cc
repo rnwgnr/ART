@@ -277,9 +277,9 @@ void Exiv2Metadata::load() const
         CacheVal val;
         auto finfo = Gio::File::create_for_path(src_)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
         if (cache_ && cache_->get(src_, val) && val.second >= finfo->modification_time()) {
-            if (settings->verbose) {
-                std::cout << "Metadata for " << src_ << " found in cache" << std::endl;
-            }
+            // if (settings->verbose) {
+            //     std::cout << "Metadata for " << src_ << " found in cache" << std::endl;
+            // }
             image_ = val.first;
         } else {
             try {
@@ -639,6 +639,9 @@ void Exiv2Metadata::init(const Glib::ustring &base_dir, const Glib::ustring &use
     }
     Exiv2::XmpParser::initialize();
     Exiv2::XmpProperties::registerNs("us/pixls/ART/", "ART");
+#ifdef EXV_ENABLE_BMFF
+    Exiv2::enableBMFF(true);
+#endif
     exiftool_config_dir = user_dir;
 }
 
@@ -666,8 +669,16 @@ void Exiv2Metadata::embedProcParamsData(const Glib::ustring &fname, const std::s
 std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernotes(const Glib::ustring &fname)
 {
     JSONCacheVal val;
-    auto finfo = Gio::File::create_for_path(fname)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
-    if (jsoncache_  && jsoncache_->get(fname, val) && val.second >= finfo->modification_time()) {
+    Glib::RefPtr<Gio::FileInfo> finfo;
+    try {
+        finfo = Gio::File::create_for_path(fname)->query_info(G_FILE_ATTRIBUTE_TIME_MODIFIED);
+    } catch (Glib::Error &exc) {
+        if (settings->verbose) {
+            std::cout << "Error querying the modification time for " << fname
+                      << ": " << exc.what() << std::endl;
+        }
+    }
+    if (jsoncache_ && finfo && jsoncache_->get(fname, val) && val.second >= finfo->modification_time()) {
         return val.first;
     }
 
@@ -678,23 +689,57 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
             exiftool = e;
         }
     }
+
+    std::unordered_map<std::string, std::string> ret;
+    
+    std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-exiftool-json-%1-XXXXXX", Glib::path_get_basename(fname)));
+    int fd = Glib::mkstemp(templ);
+    if (fd < 0) {
+        return ret;
+    }
+    Glib::ustring outname = Glib::filename_to_utf8(templ);
+    
     std::vector<Glib::ustring> argv = {
         exiftool,
         "-json",
         "-MakerNotes:all",
         "-RAF:all",
         "-PanasonicRaw:all",
+        "-w+", "%0f" + outname,
         fname
     };
-    std::string out, err;
-    std::unordered_map<std::string, std::string> ret;
     try {
-        subprocess::exec_sync("", argv, true, &out, &err);
+        subprocess::exec_sync("", argv, true, nullptr, nullptr);
     } catch (subprocess::error &exc) {
+        if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
+            g_remove(outname.c_str());
+        }
         return ret;
     }
 
-    cJSON *root = cJSON_Parse(out.c_str());
+    cJSON *root = nullptr;
+    close(fd);
+
+    FILE *src = g_fopen(outname.c_str(), "rb");
+    if (src) {
+        std::ostringstream data;
+        int c;
+        while (true) {
+            c = fgetc(src);
+            if (c != EOF) {
+                data << static_cast<unsigned char>(c);
+            } else {
+                break;
+            }
+        }
+        fclose(src);
+        std::string s = data.str();
+        root = cJSON_Parse(s.c_str());
+    }
+    if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
+        g_remove(outname.c_str());
+    }
+    
     if (!root) {
         return ret;
     }
@@ -718,7 +763,7 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
 
     cJSON_Delete(root);
 
-    if (jsoncache_) {
+    if (jsoncache_ && finfo) {
         jsoncache_->set(fname, JSONCacheVal(ret, finfo->modification_time()));
     }
     

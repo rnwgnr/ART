@@ -42,7 +42,7 @@ public:
         return parent_->box;
     }
 
-    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask) override
+    void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask, rtengine::ProcEvent &mask_postprocess) override
     {
         mask_list = parent_->EvList;
         parametric_mask = parent_->EvParametricMask;
@@ -55,6 +55,7 @@ public:
         deltaE_mask = parent_->EvDeltaEMask;
         contrastThreshold_mask = parent_->EvContrastThresholdMask;
         drawn_mask = parent_->EvDrawnMask;
+        mask_postprocess = parent_->EvMaskPostprocess;
     }
 
     ToolPanelListener *listener() override
@@ -114,7 +115,6 @@ public:
     bool resetPressed(int idx) override
     {
         parent_->data[idx] = ColorCorrectionParams::Region();
-        //parent_->labMasks->setMasks({ Mask() }, -1);
         return true;
     }
 
@@ -146,14 +146,14 @@ public:
                 {
                     return Glib::ustring::compose("{s=%1,o=%2,p=%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("HSL S=%4 So=%5\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation);
+            return Glib::ustring::compose("HSL S=%4 So=%5 h=%6\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation, r.hueshift);
         }   break;
         default: {
             const auto round_ab = [](float v) -> float
                                   {
                                       return int(v * 1000) / 1000.f;
                                   };
-            return Glib::ustring::compose("x=%1 y=%2 S=%3 So=%8\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation);
+            return Glib::ustring::compose("x=%1 y=%2 S=%3 So=%8 h=%9\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation, r.hueshift);
         }   break;
         }
     }
@@ -174,6 +174,40 @@ private:
 // ColorCorrection
 //-----------------------------------------------------------------------------
 
+namespace {
+
+constexpr double SLOPE_LO = 0.01;
+constexpr double SLOPE_HI = 32.0;
+constexpr double SLOPE_MID = (SLOPE_HI - SLOPE_LO) / 2;
+constexpr double SLOPE_MMID = SLOPE_LO + SLOPE_MID;
+constexpr double SLOPE_PIVOT = 1.0;
+constexpr double SLOPE_BASE = 32.0;
+
+double slope_slider2val(double slider)
+{
+    if (slider >= SLOPE_MMID) {
+        double range = SLOPE_HI - SLOPE_MMID;
+        double x = (slider - SLOPE_MMID) / range;
+        return SLOPE_PIVOT + (std::pow(SLOPE_BASE, x) - 1.0) / (SLOPE_BASE - 1.0) * (SLOPE_HI - SLOPE_PIVOT);
+    } else {
+        double range = SLOPE_MMID - SLOPE_LO;
+        return SLOPE_LO + (slider - SLOPE_LO) / range;
+    }
+}
+
+double slope_val2slider(double val)
+{
+    if (val >= SLOPE_PIVOT) {
+        double range = SLOPE_HI - SLOPE_PIVOT;
+        double x = (val - SLOPE_PIVOT) / range;
+        return (SLOPE_LO + SLOPE_MID) + std::log(x * (SLOPE_BASE - 1.0) + 1.0) / std::log(SLOPE_BASE) * SLOPE_MID;
+    } else {
+        return SLOPE_LO + (val - SLOPE_LO) * SLOPE_MID;
+    }
+}
+
+} // namespace
+
 ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M("TP_COLORCORRECTION_LABEL"), false, true, true)
 {
     auto m = ProcEventMapper::getInstance();
@@ -189,6 +223,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvPivot = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PIVOT");
     EvMode = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_MODE");
     EvRgbLuminance = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE");
+    EvHueShift = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_HUESHIFT");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK");
@@ -201,6 +236,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvDeltaEMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_DELTAEMASK");
     EvContrastThresholdMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK");
     EvDrawnMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_DRAWNMASK");
+    EvMaskPostprocess = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS");
 
     EvToolReset.set_action(EVENT);
 
@@ -217,6 +253,11 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_COLORCORRECTION_MODE") + ": ")), Gtk::PACK_SHRINK);
     hb->pack_start(*mode);
     box->pack_start(*hb);
+
+    hueshift = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_HUESHIFT"), -180, 180, 0.1, 0));
+    box->pack_start(*hueshift, Gtk::PACK_SHRINK, 4);
+    hueshift->setLogScale(90, 0, true);
+    hueshift->setAdjusterListener(this);
     
     box_combined = Gtk::manage(new Gtk::VBox());
     box_rgb = Gtk::manage(new Gtk::VBox());
@@ -238,8 +279,11 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     satframe->add(*satbox);
     box->pack_start(*satframe);
 
-    slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1));
-    slope->setLogScale(10, 1, true);
+    double2double_fun slope_v2s = options.adjuster_force_linear ? nullptr : slope_val2slider;
+    double2double_fun slope_s2v = options.adjuster_force_linear ? nullptr : slope_slider2val;
+
+    slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 32.0, 0.001, 1, nullptr, nullptr, slope_s2v, slope_v2s));
+//    slope->setLogScale(32, 1, true);
     slope->setAdjusterListener(this);
     box_combined->pack_start(*slope);
     offset = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_OFFSET"), -0.1, 0.1, 0.001, 0));
@@ -281,8 +325,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         vb->set_spacing(2);
         vb->set_border_width(2);
     
-        slope_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1));
-        slope_rgb[c]->setLogScale(10, 1, true);
+        slope_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 10.0, 0.001, 1, nullptr, nullptr, slope_s2v, slope_v2s));
+        //slope_rgb[c]->setLogScale(10, 1, true);
         slope_rgb[c]->setAdjusterListener(this);
         vb->pack_start(*slope_rgb[c]);
         offset_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_OFFSET"), -0.1, 0.1, 0.001, 0));
@@ -334,7 +378,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
     box_hsl->pack_start(*box_hsl_h);
 
-        
+    hueshift->delay = options.adjusterMaxDelay;
     inSaturation->delay = options.adjusterMaxDelay;
     outSaturation->delay = options.adjusterMaxDelay;
     slope->delay = options.adjusterMaxDelay;
@@ -372,7 +416,7 @@ void ColorCorrection::read(const ProcParams *pp)
         data.emplace_back(rtengine::procparams::ColorCorrectionParams::Region());
         m.emplace_back(rtengine::procparams::Mask());
     }
-    labMasks->setMasks(m, pp->colorcorrection.showMask);
+    labMasks->setMasks(m, pp->colorcorrection.selectedRegion, pp->colorcorrection.showMask >= 0 && pp->colorcorrection.showMask == pp->colorcorrection.selectedRegion);
 
     modeChanged();
     enabledChanged();
@@ -389,6 +433,7 @@ void ColorCorrection::write(ProcParams *pp)
     pp->colorcorrection.regions = data;
 
     labMasks->getMasks(pp->colorcorrection.labmasks, pp->colorcorrection.showMask);
+    pp->colorcorrection.selectedRegion = labMasks->getSelected();
     assert(pp->colorcorrection.regions.size() == pp->colorcorrection.labmasks.size());
 
     labMasks->updateSelected();
@@ -397,6 +442,7 @@ void ColorCorrection::write(ProcParams *pp)
 
 void ColorCorrection::setDefaults(const ProcParams *defParams)
 {
+    hueshift->setDefault(defParams->colorcorrection.regions[0].hueshift);
     inSaturation->setDefault(defParams->colorcorrection.regions[0].inSaturation);
     outSaturation->setDefault(defParams->colorcorrection.regions[0].outSaturation);
     slope->setDefault(defParams->colorcorrection.regions[0].slope[0]);
@@ -430,6 +476,8 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
         evt = EvPower;
     } else if (a == pivot) {
         evt = EvPivot;
+    } else if (a == hueshift) {
+        evt = EvHueShift;
     } else {
         Adjuster **targets = nullptr;
         for (int c = 0; c < 3; ++c) {
@@ -554,6 +602,7 @@ void ColorCorrection::regionGet(int idx)
     }
     r.inSaturation = inSaturation->getValue();
     r.outSaturation = outSaturation->getValue();
+    r.hueshift = hueshift->getValue();
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         wheel->getParams(r.a, r.b, r.abscale);
         for (int c = 0; c < 3; ++c) {
@@ -601,6 +650,7 @@ void ColorCorrection::regionShow(int idx)
     }
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
+    hueshift->setValue(r.hueshift);
     if (wheel->isCurrentSubscriber()) {
         wheel->unsubscribe();
     }
@@ -639,6 +689,7 @@ void ColorCorrection::modeChanged()
     } else {
         box->pack_start(*box_hsl);
     }
+    hueshift->set_visible(mode->get_active_row_number() != 1);
     if (listener && getEnabled()) {
         labMasks->setEdited(true);        
         listener->panelChanged(EvMode, mode->get_active_text());

@@ -47,7 +47,7 @@ namespace denoise {
 // thanks to Ingo Weyrich <heckflosse67@gmx.de> for many speedup suggestions!
 //
 
-void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool multithread)
+void NLMeans(array2D<float> &img, float normcoeff, int strength, int detail_thresh, float scale, bool multithread)
 {
     if (!strength) {
         return;
@@ -61,13 +61,13 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     constexpr int max_patch_radius = 2;
     constexpr int max_search_radius = 5;
     
-    img->setMode(Imagefloat::Mode::YUV, multithread);
+//    img->setMode(Imagefloat::Mode::YUV, multithread);
     
     const int search_radius = int(std::ceil(float(max_search_radius) / scale));
     const int patch_radius = int(std::ceil(float(max_patch_radius) / scale));
 
-    const int W = img->getWidth();
-    const int H = img->getHeight();
+    const int W = img.width();//img->getWidth();
+    const int H = img.height();//img->getHeight();
 
     // the strength parameter controls the scaling of the weights
     // (called h^2 in the papers)
@@ -87,15 +87,17 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
     float amount = LIM(float(detail_thresh)/100.f, 0.f, 0.99f);
     array2D<float> mask(W, H, ARRAY2D_ALIGNED);
     {
-        array2D<float> LL(W, H, img->g.ptrs, ARRAY2D_BYREFERENCE);
-        detail_mask(LL, mask, 1.f, 1e-3f, 1.f, amount, BlurType::GAUSS, 2.f / scale, multithread);
+        array2D<float> &LL = img;//(W, H, img->g.ptrs, ARRAY2D_BYREFERENCE);
+        detail_mask(LL, mask, normcoeff/*1.f*/, 1e-3f, 1.f, amount, BlurType::GAUSS, 2.f / scale, multithread);
     }
 
-    Imagefloat *dst = img;
+    //Imagefloat *dst = img;
+    auto &dst = img;
     const int border = search_radius + patch_radius;
     const int WW = W + border * 2;
     const int HH = H + border * 2;
 
+    const float factor = normcoeff;
     array2D<float> src(WW, HH, ARRAY2D_ALIGNED);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
@@ -104,7 +106,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
         int yy = y <= border ? 0 : y >= H ? H-1 : y - border;
         for (int x = 0; x < WW; ++x) {
             int xx = x <= border ? 0 : x >= W ? W-1 : x - border;
-            float Y = img->g(yy, xx) / 65535.f;
+            //float Y = img->g(yy, xx) / 65535.f;
+            float Y = img[yy][xx] / factor;//65535.f;
             src[y][x] = Y;
         }
     }
@@ -114,7 +117,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            dst->g(y, x) = 0.f;
+            //dst->g(y, x) = 0.f;
+            dst[y][x] = 0.f;
         }
     }
 
@@ -145,7 +149,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 #ifdef __SSE2__
     const vfloat zerov = F2V(0.0);
     const vfloat v1e_5f = F2V(1e-5f);
-    const vfloat v65535f = F2V(65535.f);
+    const vfloat v65535f = F2V(factor);//65535.f);
 #endif
 
 #ifdef _OPENMP
@@ -222,7 +226,8 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                         vfloat weight = explut[d];
                         STVFU(SW[y-start_y][x-start_x], LVFU(SW[y-start_y][x-start_x]) + weight);
                         vfloat Y = weight * LVFU(src[sy][sx]);
-                        STVFU(dst->g(y, x), LVFU(dst->g(y, x)) + Y);
+                        //STVFU(dst->g(y, x), LVFU(dst->g(y, x)) + Y);
+                        STVFU(dst[y][x], LVFU(dst[y][x]) + Y);
                     }
 #endif
                     for (; xx < end_x-border; ++xx) {
@@ -239,10 +244,13 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
                         float weight = explut[d];
                         SW[y-start_y][x-start_x] += weight;
                         float Y = weight * src[sy][sx];
-                        dst->g(y, x) += Y;
+                        //dst->g(y, x) += Y;
+                        dst[y][x] += Y;
 
-                        assert(!xisinff(dst->g(y, x)));
-                        assert(!xisnanf(dst->g(y, x)));
+                        // assert(!xisinff(dst->g(y, x)));
+                        // assert(!xisnanf(dst->g(y, x)));
+                        assert(!xisinff(dst[y][x]));
+                        assert(!xisnanf(dst[y][x]));
                     }
                 }
             }
@@ -256,19 +264,24 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
             for (; xx < end_x-border-3; xx += 4) {
                 int x = xx - border;
             
-                const vfloat Y = LVFU(dst->g(y, x));
+                //const vfloat Y = LVFU(dst->g(y, x));
+                const vfloat Y = LVFU(dst[y][x]);
                 const vfloat f = (v1e_5f + LVFU(SW[y-start_y][x-start_x]));
-                STVFU(dst->g(y, x), (Y / f) * v65535f);
+                //STVFU(dst->g(y, x), (Y / f) * v65535f);
+                STVFU(dst[y][x], (Y / f) * v65535f);
             }
 #endif
             for (; xx < end_x-border; ++xx) {
                 int x = xx - border;
             
-                const float Y = dst->g(y, x);
+                //const float Y = dst->g(y, x);
+                const float Y = dst[y][x];
                 const float f = (1e-5f + SW[y-start_y][x-start_x]);
-                dst->g(y, x) = (Y / f) * 65535.f;
+                //dst->g(y, x) = (Y / f) * 65535.f;
+                dst[y][x] = (Y / f) * factor;//65535.f;
 
-                assert(!xisnanf(dst->g(y, x)));
+                //assert(!xisnanf(dst->g(y, x)));
+                assert(!xisnanf(dst[y][x]));
             }
         }
     }
@@ -278,7 +291,7 @@ void NLMeans(Imagefloat *img, int strength, int detail_thresh, float scale, bool
 #endif
     } // omp parallel
     
-    dst->setMode(Imagefloat::Mode::RGB, multithread);
+    //dst->setMode(Imagefloat::Mode::RGB, multithread);
 }
 
 

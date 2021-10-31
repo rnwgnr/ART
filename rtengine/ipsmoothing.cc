@@ -18,6 +18,9 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <complex.h>
+#include <fftw3.h>
+
 #include "improcfun.h"
 #include "guidedfilter.h"
 #include "rt_math.h"
@@ -27,12 +30,19 @@
 #include "sleef.h"
 #include "gauss.h"
 #include "alignedbuffer.h"
+#include "ipdenoise.h"
 #include <iostream>
 #include <queue>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 extern Options options;
 
 namespace rtengine {
+
+extern MyMutex *fftwMutex;
 
 namespace {
 
@@ -217,6 +227,278 @@ void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B,
     }
 }
 
+
+void nlmeans_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, const TMatrix &iws, Channel chan, int strength, int detail, int iterations, double scale, bool multithread)
+{
+    array2D<float> iY;
+    const int W = R.width(), H = R.height();
+
+    if (chan == Channel::L) {
+        iY(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            float u, v;
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
+            }
+        }
+        for (int i = 0; i < iterations; ++i) {
+            denoise::NLMeans(iY, 1.f, strength, detail, scale, multithread);
+        }
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            float Y, u, v;
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
+                Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
+            }
+        }
+    } else {
+        if (chan == Channel::C) {
+            iY(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                float u, v;
+                for (int x = 0; x < W; ++x) {
+                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
+                }
+            }
+        }
+        
+        for (int i = 0; i < iterations; ++i) {
+            denoise::NLMeans(R, 1.f, strength, detail, scale, multithread);
+            denoise::NLMeans(G, 1.f, strength, detail, scale, multithread);
+            denoise::NLMeans(B, 1.f, strength, detail, scale, multithread);
+        }
+        
+        if (chan == Channel::C) {
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                float Y, u, v;
+                for (int x = 0; x < W; ++x) {
+                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
+                    Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
+                }
+            }
+        }
+    }
+}
+
+
+// code adapted from darktable, src/iop/blurs.c
+/*
+    This file is part of darktable,
+    Copyright (C) 2021 darktable developers.
+
+    darktable is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    darktable is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with darktable.  If not, see <http://www.gnu.org/licenses/>.
+*/
+void blur_2D_Bspline(const array2D<float> &src, array2D<float> &dst)
+{
+    const int height = src.height();
+    const int width = src.width();
+    constexpr int FSIZE = 5;
+    constexpr float filter[FSIZE] = { 1.0f / 16.0f, 4.0f / 16.0f, 6.0f / 16.0f, 4.0f / 16.0f, 1.0f / 16.0f };
+    
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            float acc = 0.f;
+
+            for (int ii = 0; ii < FSIZE; ++ii) {
+                for (int jj = 0; jj < FSIZE; ++jj) {
+                    const int row = LIM(i + (ii - (FSIZE - 1) / 2), 0, height - 1);
+                    const int col = LIM(j + (jj - (FSIZE - 1) / 2), 0, width - 1);
+
+                    acc += filter[ii] * filter[jj] * src[row][col];
+                }
+            }
+
+            dst[j][i] = acc;
+        }
+    }
+}
+
+
+void create_lens_kernel(array2D<float> &buffer,
+                        const float n, const float m, const float k, const float rotation)
+{
+    const int width = buffer.width();
+    const int height = buffer.height();
+    
+    // n is number of diaphragm blades
+    // m is the concavity, aka the number of vertices on straight lines (?)
+    // k is the roundness vs. linearity factor
+    //   see https://math.stackexchange.com/a/4160104/498090
+    // buffer sizes need to be odd
+
+    // Spatial coordinates rounding error
+    const float eps = 1.f / (float)width;
+    const float radius = float(width / 2);
+
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            // get normalized kernel coordinates in [-1 ; 1]
+            const float x = (i - 1) / radius - 1;
+            const float y = (j - 1) / radius - 1;
+
+            // get current radial distance from kernel center
+            const float r = hypotf(x, y);
+
+            // get the radial distance at current angle of the shape envelope
+            const float M = cosf((2.f * asinf(k) + RT_PI_F * m) / (2.f * n))
+                / cosf((2.f * asinf(k * cosf(n * (atan2f(y, x) + rotation))) + RT_PI_F * m) / (2.f * n));
+
+            // write 1 if we are inside the envelope of the shape, else 0
+            buffer[i][j] = (M >= r + eps);
+        }
+    }
+}
+
+
+void create_motion_kernel(array2D<float> &buffer,
+                          const float angle, const float curvature, const float offset)
+{
+    const int width = buffer.width();
+    //const int height = buffer.height();
+
+    buffer.fill(0.f);
+    
+    // Compute the polynomial params from user params
+    const float A = curvature / 2.f;
+    const float B = 1.f;
+    const float C = -A * offset * offset + B * offset;
+    // Note : C ensures the polynomial arc always goes through the central pixel
+    // so we don't shift pixels. This is meant to allow seamless connection
+    // with unmasked areas when using masked blur.
+
+    // Spatial coordinates rounding error
+    const float eps = 1.f / (float)width;
+
+    const float radius = float(width / 2);
+    const float corr_angle = -RT_PI_F / 4.f - angle;
+
+    // Matrix of rotation
+    const float M[2][2] = { { cosf(corr_angle), -sinf(corr_angle) },
+                            { sinf(corr_angle), cosf(corr_angle) } };
+
+    for (int i = 0; i < 8 * width; ++i) {
+        // Note : for better smoothness of the polynomial discretization,
+        // we oversample 8 times, meaning we evaluate the polynomial
+        // every eighth of pixel
+
+        // get normalized kernel coordinates in [-1 ; 1]
+        const float x = (i / 8.f - 1) / radius - 1;
+        //const float y = (j - 1) / radius - 1; // not used here
+
+        // build the motion path : 2nd order polynomial
+        const float X = x - offset;
+        const float y = X * X * A + X * B + C;
+
+        // rotate the motion path around the kernel center
+        const float rot_x = x * M[0][0] + y * M[0][1];
+        const float rot_y = x * M[1][0] + y * M[1][1];
+
+        // convert back to kernel absolute coordinates ± eps
+        const int y_f[2] = { int(roundf((rot_y + 1) * radius - eps)),
+                             int(roundf((rot_y + 1) * radius + eps)) };
+        const int x_f[2] = { int(roundf((rot_x + 1) * radius - eps)),
+                             int(roundf((rot_x + 1) * radius + eps)) };
+
+        // write 1 if we are inside the envelope of the shape, else 0
+        // leave 1px padding on each border of the kernel for the anti-aliasing
+        for (int l = 0; l < 2; l++) {
+            for (int m = 0; m < 2; m++) {
+                if (x_f[l] > 0 && x_f[l] < width - 1 && y_f[m] > 0 && y_f[m] < width - 1) {
+                    buffer[y_f[m]][x_f[l]] = 1.f;
+                }
+            }
+        }
+    }
+}
+
+
+float compute_norm(array2D<float> &buffer)
+{
+    const int width = buffer.width();
+    const int height = buffer.height();
+    
+    float norm = 0.f;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            norm += buffer[y][x];
+        }
+    }
+    return norm;
+}
+
+
+void normalize(array2D<float> &buffer, const float norm)
+{
+    const int width = buffer.width();
+    const int height = buffer.height();
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            buffer[y][x] /= norm;
+        }
+    }
+}
+
+
+bool build_blur_kernel(array2D<float> &out, const SmoothingParams &params, int region, double scale)
+{
+    const auto &r = params.regions[region];
+    
+    int radius = std::round(r.radius / scale);
+    if (radius < 1) {
+        return false;
+    }
+    
+    int kersz = 2 * radius + 1;
+    array2D<float> buf(kersz, kersz);
+    out(kersz, kersz);
+    constexpr float torad = RT_PI_F / 180.f;
+
+    if (r.mode == SmoothingParams::Region::Mode::MOTION) {
+        create_motion_kernel(buf, (r.angle + 90) * torad, r.curvature, r.offset);
+    } else {
+        assert(r.mode == SmoothingParams::Region::Mode::LENS);
+        create_lens_kernel(buf, r.numblades, 1.f, 1.f, r.angle * torad + RT_PI_F);
+    }
+    blur_2D_Bspline(buf, out);
+    float norm = compute_norm(out);
+    normalize(out, norm);
+
+    return true;
+}
+
+
+void lens_motion_blur(ImProcData &im, Imagefloat *rgb, int region)
+{
+    array2D<float> kernel;
+    if (build_blur_kernel(kernel, im.params->smoothing, region, im.scale)) {
+        convolution(kernel, rgb, rgb, im.multiThread);
+    }
+}
+
 } // namespace
 
 
@@ -334,11 +616,13 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
 
             const bool glow = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_GLOW;
-            if (glow) {
-                rgb->setMode(Imagefloat::Mode::YUV, multiThread);
-            }
-            Channel ch = Channel(int(r.channel));
-            if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
+            Channel ch = glow ? Channel::LC : Channel(int(r.channel));
+            if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
+                nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
+            } else if (r.mode == SmoothingParams::Region::Mode::LENS || r.mode == SmoothingParams::Region::Mode::MOTION) {
+                ImProcData im(params, scale, multiThread);
+                lens_motion_blur(im, &working, i);
+            } else if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;
                 for (int i = 0; i < r.iterations; ++i) {
@@ -358,12 +642,9 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                                 float &r = R[yy][xx];
                                 float &g = G[yy][xx];
                                 float &b = B[yy][xx];
-                                float Y, u, v;
-                                Color::rgb2yuv(r, g, b, Y, u, v, ws);
-                                Y = (rgb->g(y, x) + Y / f) / f2;
-                                u = (rgb->b(y, x) + u) / 2.f;
-                                v = (rgb->r(y, x) + v) / 2.f;
-                                Color::yuv2rgb(Y, u, v, r, g, b, ws);
+                                r = (rgb->r(y, x) + r / f) / f2;
+                                g = (rgb->g(y, x) + g / f) / f2;
+                                b = (rgb->b(y, x) + b / f) / f2;
                             }
                         }
                     }
@@ -376,9 +657,6 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 }
             }
             
-            if (glow) {
-                rgb->setMode(Imagefloat::Mode::RGB, multiThread);
-            }
 #ifdef _OPENMP
 #           pragma omp parallel for if (multiThread)
 #endif

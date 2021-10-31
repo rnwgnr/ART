@@ -37,7 +37,7 @@ public:
     virtual ~LabMasksContentProvider() {}
 
     virtual Gtk::Widget *getWidget() = 0;
-    virtual void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask) = 0;
+    virtual void getEvents(rtengine::ProcEvent &mask_list, rtengine::ProcEvent &parametric_mask, rtengine::ProcEvent &h_mask, rtengine::ProcEvent &c_mask, rtengine::ProcEvent &l_mask, rtengine::ProcEvent &blur, rtengine::ProcEvent &show, rtengine::ProcEvent &area_mask, rtengine::ProcEvent &deltaE_mask, rtengine::ProcEvent &contrastThreshold_mask, rtengine::ProcEvent &drawn_mask, rtengine::ProcEvent &mask_postprocess) = 0;
 
     virtual ToolPanelListener *listener() = 0;
 
@@ -105,7 +105,7 @@ public:
     LabMasksPanel(LabMasksContentProvider *cp);
     ~LabMasksPanel();
 
-    void setMasks(const std::vector<rtengine::procparams::Mask> &masks, int show_mask_idx);
+    void setMasks(const std::vector<rtengine::procparams::Mask> &masks, int selected_idx, bool show_mask);
     void getMasks(std::vector<rtengine::procparams::Mask> &masks, int &show_mask_idx);
     int getSelected();
 
@@ -163,9 +163,10 @@ private:
     void onAreaMaskCopyPressed();
     void onAreaMaskPastePressed();
     void onAreaShapeModeChanged(int i);
-    void onRectangleAreaMaskDrawChanged();
+    // void onRectangleAreaMaskDrawChanged();
     void onAreaMaskDrawRectangleAddPressed();
     void onAreaMaskDrawPolygonAddPressed();
+    void onAreaMaskDrawGradientAddPressed();
     bool onKnotRoundnessUpdated();
     void onDeltaEMaskEnableToggled();
     void onParametricMaskEnableToggled();
@@ -173,8 +174,9 @@ private:
     void setListEnabled(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator &it);
     
     void shapeAddPressed(rtengine::procparams::AreaMask::Shape::Type type, bool list_only);
-    void setAdjustersVisibility(bool rectangleAjusterVisible);
+    void setAdjustersVisibility(bool visible, rtengine::procparams::AreaMask::Shape::Type shape_type);
     void updateRectangleAreaMask(bool from_mask);
+    void updateGradientAreaMask(bool from_mask);
     void maskGet(int idx);
     void maskShow(int idx, bool list_only=false, bool unsub=true);
     void populateShapeList(int idx, int sel);
@@ -220,6 +222,7 @@ private:
     rtengine::ProcEvent EvContrastThresholdMask;
     rtengine::ProcEvent EvDrawnMask;
     rtengine::ProcEvent EvMaskName;
+    rtengine::ProcEvent EvMaskPostprocess;
 
     class ListColumns: public Gtk::TreeModel::ColumnRecord {
     public:
@@ -248,6 +251,7 @@ private:
     std::unique_ptr<ListColumns> list_model_columns_;
     Glib::RefPtr<Gtk::ListStore> list_model_;
     Gtk::TreeView *list;
+    Glib::RefPtr<Gtk::CssProvider> list_provider_;
     
     Gtk::Button *reset;
     Gtk::Button *add;
@@ -278,9 +282,10 @@ private:
     Gtk::Button *areaMaskDown;
     unsigned int area_shape_index_;
     Gtk::ToggleButton *areaMaskToggle;
+    Gtk::Button *areaMaskDrawGradientAdd;
     Gtk::Button *areaMaskDrawPolygonAdd;
     Gtk::Button *areaMaskDrawRectangleAdd;
-    Gtk::ToggleButton *areaMaskDrawRectangle;
+    // Gtk::ToggleButton *areaMaskDrawRectangle;
     sigc::connection areaMaskDrawConn;
     Gtk::Button *areaMaskCopy;
     Gtk::Button *areaMaskPaste;
@@ -296,8 +301,12 @@ private:
     Adjuster *areaMaskY;
     Adjuster *areaMaskWidth;
     Adjuster *areaMaskHeight;
-    Adjuster *areaMaskAngle;
+    Adjuster *areaMaskAngle180;
     Adjuster *areaMaskRoundness;
+    Adjuster *areaMaskStrengthStart;
+    Adjuster *areaMaskStrengthEnd;
+    Adjuster *areaMaskAngle360;
+    Adjuster *areaMaskGradFeather;
     std::vector<Adjuster *> areaMaskAdjusters;
     std::vector<bool> listenerDisabled;
     rtengine::procparams::AreaMask::Rectangle defaultAreaShape;
@@ -312,6 +321,7 @@ private:
     ThresholdAdjuster *deltaEH;
     Adjuster *deltaERange;
     Adjuster *deltaEDecay;
+    Gtk::CheckButton *deltaEInverted;
     Gtk::Button *deltaEPick;
 
     Adjuster *contrastThreshold;
@@ -321,4 +331,7 @@ private:
     std::vector<MyExpander *> mask_expanders_;
 
     Gtk::Entry *maskName;
+    DiagonalCurveEditor *maskCurve;
+    Adjuster *maskPosterization;
+    Adjuster *maskSmoothing;
 };

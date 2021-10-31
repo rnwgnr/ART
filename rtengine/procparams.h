@@ -106,7 +106,8 @@ struct AreaMask {
         };
         enum Type {
             RECTANGLE,
-            POLYGON
+            POLYGON,
+            GRADIENT
         };
         Mode mode;
         double feather; // [0,100]
@@ -163,6 +164,21 @@ struct AreaMask {
         bool operator!=(const Shape &other) const override;
         std::unique_ptr<Shape> clone() const override;
     };
+
+    struct Gradient: public Shape {
+        double x;             // [-100; 100] Percentage of image's width
+        double y;             // [-100; 100] Percentage of image's height
+        double strengthStart; // [0; 100] Strenght of the mask at the transition's begin
+        double strengthEnd;   // [0; 100] Strenght of the mask at the transition's end
+        double angle;         // [0; 360[ Angle of the gradient
+
+        Gradient();
+        Type getType() const override { return Type::GRADIENT; };
+        bool operator==(const Shape &other) const override;
+        bool operator!=(const Shape &other) const override;
+        std::unique_ptr<Shape> clone() const override;
+    };
+
     bool enabled;
     double feather; // [0,100]
     double blur;
@@ -177,7 +193,6 @@ struct AreaMask {
     bool operator!=(const AreaMask &other) const;
     bool isTrivial() const;
 };
-
 
 class DeltaEMask {
 public:
@@ -256,6 +271,9 @@ public:
     DeltaEMask deltaEMask;
     DrawnMask drawnMask;
     Glib::ustring name;
+    std::vector<double> curve;
+    int posterization;
+    int smoothing;
 
     Mask();
     bool operator==(const Mask &other) const;
@@ -475,6 +493,7 @@ struct ExposureParams {
     HighlightReconstruction hrmode;
     double expcomp;
     double black;
+    int hrblur;
 
     ExposureParams();
 
@@ -506,7 +525,8 @@ struct ToneCurveParams {
         FILMLIKE,          // Film-like mode, as defined in Adobe's reference code
         SATANDVALBLENDING, // Modify the Saturation and Value channel
         LUMINANCE,         // Modify the Luminance channel with coefficients from Rec 709's
-        PERCEPTUAL         // Keep color appearance constant using perceptual modeling
+        PERCEPTUAL,        // Keep color appearance constant using perceptual modeling
+        ODT                // Open Display Transform from https://github.com/jedypod/open-display-transform
     };
 
     int contrast;
@@ -518,11 +538,15 @@ struct ToneCurveParams {
     bool fromHistMatching;
     std::vector<double> saturation;
     int perceptualStrength;
+    bool contrastLegacyMode;
+    double whitePoint;
 
     ToneCurveParams();
 
     bool operator==(const ToneCurveParams &other) const;
     bool operator!=(const ToneCurveParams &other) const;
+
+    bool hasWhitePoint() const;
 };
 
 
@@ -562,6 +586,7 @@ struct LocalContrastParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     LocalContrastParams();
 
@@ -720,6 +745,7 @@ struct TextureBoostParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     TextureBoostParams();
 
@@ -731,8 +757,8 @@ struct TextureBoostParams {
 struct LogEncodingParams {
     bool enabled;
     bool autocompute;
-    bool autogray;
-    double sourceGray;
+    bool autogain;
+    double gain;
     double targetGray;
     double blackEv;
     double whiteEv;
@@ -1203,7 +1229,10 @@ struct SmoothingParams {
         enum class Mode {
             GUIDED,
             GAUSSIAN,
-            GAUSSIAN_GLOW
+            GAUSSIAN_GLOW,
+            NLMEANS,
+            MOTION,
+            LENS
         };
         Mode mode;
         Channel channel;
@@ -1212,6 +1241,12 @@ struct SmoothingParams {
         int epsilon;
         int iterations;
         double falloff;
+        int nldetail;
+        int nlstrength;
+        int numblades;
+        double angle;
+        double curvature;
+        double offset;
 
         Region();
         bool operator==(const Region &other) const;
@@ -1221,6 +1256,7 @@ struct SmoothingParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     SmoothingParams();
 
@@ -1249,6 +1285,7 @@ struct ColorCorrectionParams {
         std::array<double, 3> sat;
         std::array<double, 3> factor;
         bool rgbluminance;
+        double hueshift;
         Mode mode;
 
         Region();
@@ -1260,6 +1297,7 @@ struct ColorCorrectionParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     ColorCorrectionParams();
     bool operator==(const ColorCorrectionParams &other) const;
