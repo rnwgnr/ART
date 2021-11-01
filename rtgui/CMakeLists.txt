@@ -250,6 +250,10 @@ endif()
 # Create config.h which defines where data are stored
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
+if(LIBRAW_FOUND)
+    link_directories(${LIBRAW_LIBRARY_DIRS})
+endif()
+
 # Create new executables targets
 add_executable(rth ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})
 add_executable(rth-cli ${EXTRA_SRC_CLI} ${CLISOURCEFILES})

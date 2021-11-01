@@ -16,25 +16,32 @@
 #include "camconst.h"
 #include "utils.h"
 #include "metadata.h"
+#include "image8.h"
 
 #ifdef ART_USE_LIBRAW
 # include <libraw/libraw.h>
+//# undef ART_USE_LIBRAW
 #endif
 
 
 namespace rtengine {
 
+
 extern const Settings* settings;
 
 RawImage::RawImage(  const Glib::ustring &name )
-    : data(nullptr)
+    : DCraw()
+    , data(nullptr)
     , prefilters(0)
     , filename(name)
     , rotate_deg(0)
     , profile_data(nullptr)
     , allocation(nullptr)
+    , thumb_data(nullptr)
 {
+    profile_length = 0;
     memset(maximum_c4, 0, sizeof(maximum_c4));
+    memset(white, 0, sizeof(white));
     RT_matrix_from_constant = ThreeValBool::X;
     RT_blacklevel_from_constant = ThreeValBool::X;
     RT_whitelevel_from_constant = ThreeValBool::X;
@@ -70,7 +77,18 @@ RawImage::~RawImage()
         delete [] profile_data;
         profile_data = nullptr;
     }
+
+    if (thumb_data) {
+        delete[] thumb_data;
+    }
 }
+
+
+void RawImage::pre_interpolate()
+{
+    DCraw::pre_interpolate();
+}
+
 
 eSensorType RawImage::getSensorType() const
 {
@@ -501,7 +519,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
 #else // ART_USE_LIBRAW
     LibRaw libraw;
     {
-        libraw.imgdata.params.shot_select = shot_select;
+        libraw.imgdata.params.use_camera_wb = 1;
+        //libraw.imgdata.params.shot_select = shot_select;
         
         int err = libraw.open_buffer(ifp->data, ifp->size);
         if (err) {
@@ -511,11 +530,13 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         is_raw = d.raw_count;
         strcpy(make, d.normalized_make);
         strcpy(model, d.normalized_model);
-        strcpy(software, d.software);
+        RT_software = d.software;
         dng_version = d.dng_version;
         filters = d.filters;
         is_foveon = d.is_foveon;
         colors = d.colors;
+        tiff_bps = 0;
+        
         for (int i = 0; i < 6; ++i) {
             for (int j = 0; j < 6; ++j) {
                 xtrans[i][j] = d.xtrans[i][j];
@@ -540,6 +561,65 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         focal_len = o.focal_len;
         timestamp = o.timestamp;
         shot_order = o.shot_order;
+
+        auto &io = libraw.imgdata.rawdata.ioparams;
+        shrink = io.shrink;
+        zero_is_bad = io.zero_is_bad;
+        fuji_width = io.fuji_width;
+        raw_color = io.raw_color;
+        mix_green = io.mix_green;
+
+        auto &cd = libraw.imgdata.color;
+        black = cd.black;
+        maximum = cd.maximum;
+        tiff_bps = cd.raw_bps;
+
+        for (size_t i = 0; i < sizeof(cblack)/sizeof(unsigned); ++i) {
+            cblack[i] = cd.cblack[i];
+        }
+        for (int i = 0; i < 4; ++i) {
+            cam_mul[i] = cd.cam_mul[i];
+            pre_mul[i] = cd.pre_mul[i];
+        }
+            
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                cmatrix[i][j] = cd.cmatrix[i][j];
+                rgb_cam[i][j] = cd.rgb_cam[i][j];
+            }
+        }
+
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                white[i][j] = cd.white[i][j];
+            }
+        }
+
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                mask[i][j] = s.mask[i][j];
+            }
+        }
+
+        auto &mkn = libraw.imgdata.makernotes;
+        
+        if (!strcmp(make, "Panasonic") && mkn.panasonic.BlackLevelDim > 0) {
+            memset(cblack, 0, sizeof(cblack));
+            if (mkn.panasonic.BlackLevelDim >= 4) {
+                for (size_t i = 0; i < 4; ++i) {
+                    cblack[i] = mkn.panasonic.BlackLevel[i];
+                }
+                black = 0;
+            } else {
+                black = mkn.panasonic.BlackLevel[0];
+            }
+        } else if (!strcmp(make, "Canon") && mkn.canon.AverageBlackLevel) {
+            memset(cblack, 0, sizeof(cblack));
+            for (size_t i = 0; i < 4; ++i) {
+                cblack[i] = mkn.canon.ChannelBlackLevel[i];
+            }
+            black = 0;
+        }
     }
 #endif
     
@@ -610,8 +690,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         (this->*load_raw)();
 #else // ART_USE_LIBRAW
         {
-            libraw.imgdata.params.use_camera_wb = 1;
-            libraw.imgdata.params.shot_select = shot_select;
+            //libraw.recycle();
+            libraw.imgdata.rawparams.shot_select = shot_select;
             
             int err = libraw.open_buffer(ifp->data, ifp->size);
             if (err) {
@@ -621,41 +701,28 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (err) {
                 return err;
             }
-            auto &cd = libraw.imgdata.color;
-            black = cd.black;
-            maximum = cd.maximum;
-            for (size_t i = 0; i < sizeof(cblack)/sizeof(unsigned); ++i) {
-                cblack[i] = cd.cblack[i];
-            }
-            for (int i = 0; i < 4; ++i) {
-                cam_mul[i] = cd.cam_mul[i];
-                pre_mul[i] = cd.pre_mul[i];
-            }
-            for (int i = 0; i < 3; ++i) {
-                for (int j = 0; j < 4; ++j) {
-                    cmatrix[i][j] = cd.cmatrix[i][j];
-                    rgb_cam[i][j] = cd.rgb_cam[i][j];
-                }
-            }
 
             auto &rd = libraw.imgdata.rawdata;
             raw_image = rd.raw_image;
-            err = libraw.raw2image();
-            if (err) {
-                return err;
-            }
-            image = libraw.imgdata.image;
-            libraw.imgdata.image = nullptr;
             if (rd.float_image) {
                 float_raw_image = new float[raw_width * raw_height];
                 for (int y = 0; y < raw_height; ++y) {
                     for (int x = 0; x < raw_width; ++x) {
-                        float_raw_image[y][x] = rd.float_image[y][x];
+                        size_t idx = y * raw_width + x;
+                        float_raw_image[idx] = rd.float_image[idx];
                     }
                 }
             } else {
                 float_raw_image = nullptr;
+                int err = libraw.raw2image();
+                if (err) {
+                    return err;
+                }
+                image = (ImageType)malloc(iwidth * iheight * sizeof(*image));
+                memcpy(image, libraw.imgdata.image, iwidth * iheight * sizeof(*image));
             }
+
+            adobe_coeff(make, model);
         }
 #endif // ART_USE_LIBRAW
 
@@ -678,7 +745,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             orig_raw_width = raw_width;
             orig_raw_height = raw_height;
             
-            if (cc && cc->has_rawCrop(raw_width, raw_height)) {
+            if (cc && cc->has_rawCrop(raw_width, raw_height)) { 
+#ifndef ART_USE_LIBRAW
                 raw_crop_cc = true;
                 int lm, tm, w, h;
                 cc->get_rawCrop(raw_width, raw_height, lm, tm, w, h);
@@ -718,6 +786,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 } else if (h > 0) {
                     iheight = height = min((int)height, h);
                 }
+#endif // ART_USE_LIBRAW
             }
 
             if (cc && cc->has_rawMask(orig_raw_width, orig_raw_height, 0) && !dng_version) {
@@ -862,6 +931,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         for (int c = 0; c < 4; c++) {
             if (static_cast<int>(cblack[c]) < black_c4[c]) {
                 cblack[c] = black_c4[c];
+                cblack[4] = cblack[5] = 0;
             }
         }
 
@@ -1102,6 +1172,66 @@ float RawImage::get_optical_black(int row, int col) const
     }
     int c = FC(row, col);
     return raw_optical_black_med_[row][c];
+}
+
+
+Image8 *RawImage::getThumbnail() const
+{
+#ifndef ART_USE_LIBRAW
+    if (!checkThumbOk()) {
+        return nullptr;
+    }
+
+    Image8 *img = new Image8();
+    img->setSampleFormat(IIOSF_UNSIGNED_CHAR);
+    img->setSampleArrangement(IIOSA_CHUNKY);
+
+    const char *data = reinterpret_cast<const char *>(fdata(get_thumbOffset(), get_file()));
+
+    int err = 1;
+    if ((unsigned char)data[1] == 0xd8) {
+        err = img->loadJPEGFromMemory(data, get_thumbLength());
+    } else if (is_ppmThumb()) {
+        err = img->loadPPMFromMemory(data, get_thumbWidth(), get_thumbHeight(), get_thumbSwap(), get_thumbBPS());
+    }
+
+    // did we succeed?
+    if (err) {
+        delete img;
+        img = nullptr;
+    }
+
+    return img;
+#else // ART_USE_LIBRAW
+    if (!ifp) {
+        return nullptr;
+    } else {
+        LibRaw libraw;
+        int err = libraw.open_buffer(ifp->data, ifp->size);
+        if (err) {
+            return nullptr;
+        }
+        err = libraw.unpack_thumb();
+        if (err) {
+            return nullptr;
+        }
+        auto &t = libraw.imgdata.thumbnail;
+        if (t.tformat == LIBRAW_THUMBNAIL_JPEG) {
+            Image8 *img = new Image8();
+            img->setSampleFormat(IIOSF_UNSIGNED_CHAR);
+            img->setSampleArrangement(IIOSA_CHUNKY);
+            err = img->loadJPEGFromMemory(t.thumb, t.tlength);
+            if (err) {
+                delete img;
+                return nullptr;
+            } else {
+                return img;
+            }
+        } else {
+            return nullptr;
+        }
+    }
+#endif // ART_USE_LIBRAW
 }
 
 } //namespace rtengine

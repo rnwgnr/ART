@@ -30,8 +30,10 @@
 
 namespace rtengine {
 
-class RawImage: protected DCraw
-{
+class Image8;
+
+
+class RawImage: protected DCraw {
 public:
 
     explicit RawImage( const Glib::ustring &name );
@@ -63,6 +65,8 @@ protected:
     char* profile_data; // Embedded ICC color profile
     float* allocation; // pointer to allocated memory
     int maximum_c4[4];
+    char *thumb_data;
+    
     bool isFoveon() const
     {
         return is_foveon;
@@ -271,10 +275,7 @@ public:
 
 public:
     // dcraw functions
-    void pre_interpolate()
-    {
-        DCraw::pre_interpolate();
-    }
+    void pre_interpolate();
 
 public:
     bool ISRED  (unsigned row, unsigned col) const
@@ -318,6 +319,8 @@ public:
 public:
     bool checkThumbOk() const;
     bool thumbNeedsRotation() const;
+
+    Image8 *getThumbnail() const;
 
     float get_optical_black(int row, int col) const;
 };
