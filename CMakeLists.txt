@@ -471,6 +471,89 @@ int main()
 endif()
 
 
+# check whether the used version of lensfun has lfDatabase::LoadDirectory
+set(_lf_libs ${LENSFUN_LIBRARIES})
+set(LENSFUN_LIBRARIES "")
+foreach(l ${_lf_libs})
+    set(_el "_el-NOTFOUND")
+    if(LENSFUN_LIBRARY_DIRS)
+        message(STATUS "searching for library ${l} in ${LENSFUN_LIBRARY_DIRS}")
+        find_library(_el ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
+    else()
+        message(STATUS "searching for library ${l}")
+        find_library(_el ${l})# PATHS ${LENSFUN_LIBRARY_DIRS})
+    endif()
+    message(STATUS "  result: ${_el}")
+    set(LENSFUN_LIBRARIES ${LENSFUN_LIBRARIES} ${_el})
+endforeach()
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_INCLUDES ${LENSFUN_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_LIBRARIES ${LENSFUN_LIBRARIES})
+# foreach(l ${LENSFUN_LIBRARIES})
+#     if(LENSFUN_LIBRARY_DIRS)
+#         # the NO_DEFAULT_PATH is to make sure we find the lensfun version we
+#         # want, and not the system's one (e.g. if we have a custom version
+#         # installed in a non-standard location)
+#         set(_l "_l-NOTFOUND")
+#         find_library(_l ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
+#     else()
+#         # LENSFUN_LIBRARY_DIRS can be empty if lensfun is installed in the
+#         # default path. In this case, adding NO_DEFAULT_PATH would make
+#         # find_library fail...
+#         set(_l "_l-NOTFOUND")
+#         find_library(_l ${l})
+#     endif()
+#     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${_l})
+# endforeach()
+check_cxx_source_compiles(
+    "#include <lensfun.h>
+int main()
+{
+    lfDatabase *db = 0;
+    bool b = db->LoadDirectory(0);
+    return 0;
+}" LENSFUN_HAS_LOAD_DIRECTORY)
+
+set(TCMALLOC_LIB_DIR)
+
+if(ENABLE_TCMALLOC)
+    if(TCMALLOC_LIB_DIR)
+        find_library(TCMALLOC_LIBRARIES tcmalloc PATHS ${TCMALLOC_LIB_DIR} NO_DEFAULT_PATH)
+    else()
+        find_library(TCMALLOC_LIBRARIES tcmalloc)
+    endif()
+    if(TCMALLOC_LIBRARIES)
+        set(MALLOC_LIBRARIES "${TCMALLOC_LIBRARIES}" CACHE INTERNAL "" FORCE)
+        message(STATUS "using tcmalloc library in ${TCMALLOC_LIBRARIES}")
+    else()
+        set(MALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
+        message(STATUS "tcmalloc not found")
+    endif()
+else()
+    set(MALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
+endif()
+
+if(ENABLE_MIMALLOC)
+    find_package(mimalloc 1.4)
+    if(mimalloc_FOUND)
+        message(STATUS "using mimalloc library ${mimalloc_VERSION}")
+        set(MALLOC_LIBRARIES mimalloc CACHE INTERNAL "" FORCE)
+    else()
+        message(STATUS "mimalloc not found")
+    endif()
+endif()
+
+if(ENABLE_LIBRAW)
+    pkg_check_modules(LIBRAW libraw_r>=0.20)
+    if(LIBRAW_FOUND)
+        message(STATUS "using libraw library ${LIBRAW_VERSION}")
+        add_definitions(-DART_USE_LIBRAW)
+    else()
+        message(STATUS "libraw not found")
+    endif()
+endif()
+
+
 # Find out whether we are building out of source:
 get_filename_component(ABS_SOURCE_DIR "${PROJECT_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ABS_BINARY_DIR "${CMAKE_BINARY_DIR}" ABSOLUTE)
@@ -554,6 +637,14 @@ else()
         -DCOMPILER_INFO:STRING=${COMPILER_INFO})
 endif()
 
+if(ENABLE_LIBRAW AND LIBRAW_FOUND)
+    list(APPEND ABOUT_COMMAND_WITH_ARGS
+        -DART_LIBRAW_VERSION_INFO:STRING="V${LIBRAW_VERSION}")
+else()
+    list(APPEND ABOUT_COMMAND_WITH_ARGS
+        -DART_LIBRAW_VERSION_INFO:STRING="N/A")
+endif()
+
 list(APPEND ABOUT_COMMAND_WITH_ARGS "-DBUILDINFO_OS:STRING=${CMAKE_HOST_SYSTEM_NAME}" -P "${PROJECT_SOURCE_DIR}/UpdateInfo.cmake")
 
 add_custom_target(UpdateInfo ALL
@@ -577,88 +668,6 @@ endif()
 
 if(WIN32)
     install(DIRECTORY "licenses" DESTINATION "${LICENCEDIR}")
-endif()
-
-# check whether the used version of lensfun has lfDatabase::LoadDirectory
-set(_lf_libs ${LENSFUN_LIBRARIES})
-set(LENSFUN_LIBRARIES "")
-foreach(l ${_lf_libs})
-    set(_el "_el-NOTFOUND")
-    if(LENSFUN_LIBRARY_DIRS)
-        message(STATUS "searching for library ${l} in ${LENSFUN_LIBRARY_DIRS}")
-        find_library(_el ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
-    else()
-        message(STATUS "searching for library ${l}")
-        find_library(_el ${l})# PATHS ${LENSFUN_LIBRARY_DIRS})
-    endif()
-    message(STATUS "  result: ${_el}")
-    set(LENSFUN_LIBRARIES ${LENSFUN_LIBRARIES} ${_el})
-endforeach()
-include(CheckCXXSourceCompiles)
-set(CMAKE_REQUIRED_INCLUDES ${LENSFUN_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_LIBRARIES ${LENSFUN_LIBRARIES})
-# foreach(l ${LENSFUN_LIBRARIES})
-#     if(LENSFUN_LIBRARY_DIRS)
-#         # the NO_DEFAULT_PATH is to make sure we find the lensfun version we
-#         # want, and not the system's one (e.g. if we have a custom version
-#         # installed in a non-standard location)
-#         set(_l "_l-NOTFOUND")
-#         find_library(_l ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
-#     else()
-#         # LENSFUN_LIBRARY_DIRS can be empty if lensfun is installed in the
-#         # default path. In this case, adding NO_DEFAULT_PATH would make
-#         # find_library fail...
-#         set(_l "_l-NOTFOUND")
-#         find_library(_l ${l})
-#     endif()
-#     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${_l})
-# endforeach()
-check_cxx_source_compiles(
-    "#include <lensfun.h>
-int main()
-{
-    lfDatabase *db = 0;
-    bool b = db->LoadDirectory(0);
-    return 0;
-}" LENSFUN_HAS_LOAD_DIRECTORY)
-
-set(TCMALLOC_LIB_DIR)
-
-if(ENABLE_TCMALLOC)
-    if(TCMALLOC_LIB_DIR)
-        find_library(TCMALLOC_LIBRARIES tcmalloc PATHS ${TCMALLOC_LIB_DIR} NO_DEFAULT_PATH)
-    else()
-        find_library(TCMALLOC_LIBRARIES tcmalloc)
-    endif()
-    if(TCMALLOC_LIBRARIES)
-        set(MALLOC_LIBRARIES "${TCMALLOC_LIBRARIES}" CACHE INTERNAL "" FORCE)
-        message(STATUS "using tcmalloc library in ${TCMALLOC_LIBRARIES}")
-    else()
-        set(MALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
-        message(STATUS "tcmalloc not found")
-    endif()
-else()
-    set(MALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
-endif()
-
-if(ENABLE_MIMALLOC)
-    find_package(mimalloc 1.4)
-    if(mimalloc_FOUND)
-        message(STATUS "using mimalloc library ${mimalloc_VERSION}")
-        set(MALLOC_LIBRARIES mimalloc CACHE INTERNAL "" FORCE)
-    else()
-        message(STATUS "mimalloc not found")
-    endif()
-endif()
-
-if(ENABLE_LIBRAW)
-    pkg_check_modules(LIBRAW libraw_r>=0.20)
-    if(LIBRAW_FOUND)
-        message(STATUS "using libraw library ${LIBRAW_VERSION}")
-        add_definitions(-DART_USE_LIBRAW)
-    else()
-        message(STATUS "libraw not found")
-    endif()
 endif()
 
 add_subdirectory(rtengine)
