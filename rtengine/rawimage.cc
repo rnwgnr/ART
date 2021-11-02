@@ -20,7 +20,7 @@
 
 #ifdef ART_USE_LIBRAW
 # include <libraw/libraw.h>
-#endif
+#endif // ART_USE_LIBRAW
 
 
 namespace rtengine {
@@ -44,6 +44,8 @@ RawImage::RawImage(const Glib::ustring &name)
     RT_matrix_from_constant = ThreeValBool::X;
     RT_blacklevel_from_constant = ThreeValBool::X;
     RT_whitelevel_from_constant = ThreeValBool::X;
+    memset(make, 0, sizeof(make));
+    memset(model, 0, sizeof(model));
 }
 
 RawImage::~RawImage()
@@ -513,114 +515,129 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
 
     shot_select = imageNum;
 
-#ifndef ART_USE_LIBRAW
-    identify();
-#else // ART_USE_LIBRAW
+    bool use_internal_decoder = true;
+
+#ifdef ART_USE_LIBRAW
     LibRaw libraw;
     {
+        use_internal_decoder = false;
         libraw.imgdata.params.use_camera_wb = 1;
-        //libraw.imgdata.params.shot_select = shot_select;
         
         int err = libraw.open_buffer(ifp->data, ifp->size);
-        if (err) {
+        if (err != LIBRAW_SUCCESS && err != LIBRAW_FILE_UNSUPPORTED) {
             return err;
-        }
-        auto &d = libraw.imgdata.idata;
-        is_raw = d.raw_count;
-        strcpy(make, d.normalized_make);
-        strcpy(model, d.normalized_model);
-        RT_software = d.software;
-        dng_version = d.dng_version;
-        filters = d.filters;
-        is_foveon = d.is_foveon;
-        colors = d.colors;
-        tiff_bps = 0;
+        } else if (err == LIBRAW_FILE_UNSUPPORTED && strcmp(libraw.imgdata.idata.normalized_make, "Fujifilm") == 0 && strncmp(libraw.imgdata.idata.normalized_model, "GFX", 3) == 0) {
+            // might be a GFX 100 "pseudo ARQ"
+            use_internal_decoder = true;
+        } else if (strncmp(libraw.unpack_function_name(), "sony_arq_load_raw", 17) == 0) {
+            use_internal_decoder = true;
+        } else {
+            auto &d = libraw.imgdata.idata;
+            is_raw = d.raw_count;
+            strncpy(make, d.normalized_make, sizeof(make)-1);
+            make[sizeof(make)-1] = 0;
+            strncpy(model, d.normalized_model, sizeof(model)-1);
+            model[sizeof(model)-1] = 0;
+            RT_software = d.software;
+            dng_version = d.dng_version;
+            filters = d.filters;
+            is_foveon = d.is_foveon;
+            colors = d.colors;
+            tiff_bps = 0;
         
-        for (int i = 0; i < 6; ++i) {
-            for (int j = 0; j < 6; ++j) {
-                xtrans[i][j] = d.xtrans[i][j];
-                xtrans_abs[i][j] = d.xtrans_abs[i][j];
+            for (int i = 0; i < 6; ++i) {
+                for (int j = 0; j < 6; ++j) {
+                    xtrans[i][j] = d.xtrans[i][j];
+                    xtrans_abs[i][j] = d.xtrans_abs[i][j];
+                }
             }
-        }
-        auto &s = libraw.imgdata.sizes;
-        raw_width = s.raw_width;
-        raw_height = s.raw_height;
-        width = s.width;
-        height = s.height;
-        top_margin = s.top_margin;
-        left_margin = s.left_margin;
-        iheight = s.iheight;
-        iwidth = s.iwidth;
-        flip = s.flip;
+            auto &s = libraw.imgdata.sizes;
+            raw_width = s.raw_width;
+            raw_height = s.raw_height;
+            width = s.width;
+            height = s.height;
+            top_margin = s.top_margin;
+            left_margin = s.left_margin;
+            iheight = s.iheight;
+            iwidth = s.iwidth;
+            flip = s.flip;
 
-        auto &o = libraw.imgdata.other;
-        iso_speed = o.iso_speed;
-        shutter = o.shutter;
-        aperture = o.aperture;
-        focal_len = o.focal_len;
-        timestamp = o.timestamp;
-        shot_order = o.shot_order;
+            auto &o = libraw.imgdata.other;
+            iso_speed = o.iso_speed;
+            shutter = o.shutter;
+            aperture = o.aperture;
+            focal_len = o.focal_len;
+            timestamp = o.timestamp;
+            shot_order = o.shot_order;
 
-        auto &io = libraw.imgdata.rawdata.ioparams;
-        shrink = io.shrink;
-        zero_is_bad = io.zero_is_bad;
-        fuji_width = io.fuji_width;
-        raw_color = io.raw_color;
-        mix_green = io.mix_green;
+            auto &io = libraw.imgdata.rawdata.ioparams;
+            shrink = io.shrink;
+            zero_is_bad = io.zero_is_bad;
+            fuji_width = io.fuji_width;
+            raw_color = io.raw_color;
+            mix_green = io.mix_green;
 
-        auto &cd = libraw.imgdata.color;
-        black = cd.black;
-        maximum = cd.maximum;
-        tiff_bps = cd.raw_bps;
+            auto &cd = libraw.imgdata.color;
+            black = cd.black;
+            maximum = cd.maximum;
+            tiff_bps = cd.raw_bps;
 
-        for (size_t i = 0; i < sizeof(cblack)/sizeof(unsigned); ++i) {
-            cblack[i] = cd.cblack[i];
-        }
-        for (int i = 0; i < 4; ++i) {
-            cam_mul[i] = cd.cam_mul[i];
-            pre_mul[i] = cd.pre_mul[i];
-        }
+            for (size_t i = 0; i < sizeof(cblack)/sizeof(unsigned); ++i) {
+                cblack[i] = cd.cblack[i];
+            }
+            for (int i = 0; i < 4; ++i) {
+                cam_mul[i] = cd.cam_mul[i];
+                pre_mul[i] = cd.pre_mul[i];
+            }
             
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                cmatrix[i][j] = cd.cmatrix[i][j];
-                rgb_cam[i][j] = cd.rgb_cam[i][j];
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 4; ++j) {
+                    cmatrix[i][j] = cd.cmatrix[i][j];
+                    rgb_cam[i][j] = cd.rgb_cam[i][j];
+                }
             }
-        }
 
-        for (int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 8; ++j) {
-                white[i][j] = cd.white[i][j];
+            for (int i = 0; i < 8; ++i) {
+                for (int j = 0; j < 8; ++j) {
+                    white[i][j] = cd.white[i][j];
+                }
             }
-        }
 
-        for (int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                mask[i][j] = s.mask[i][j];
+            for (int i = 0; i < 8; ++i) {
+                for (int j = 0; j < 4; ++j) {
+                    mask[i][j] = s.mask[i][j];
+                }
             }
-        }
 
-        auto &mkn = libraw.imgdata.makernotes;
+            auto &mkn = libraw.imgdata.makernotes;
         
-        if (!strcmp(make, "Panasonic") && mkn.panasonic.BlackLevelDim > 0) {
-            memset(cblack, 0, sizeof(cblack));
-            if (mkn.panasonic.BlackLevelDim >= 4) {
+            if (!strcmp(make, "Panasonic") && mkn.panasonic.BlackLevelDim > 0) {
+                memset(cblack, 0, sizeof(cblack));
+                if (mkn.panasonic.BlackLevelDim >= 4) {
+                    for (size_t i = 0; i < 4; ++i) {
+                        cblack[i] = mkn.panasonic.BlackLevel[i];
+                    }
+                    black = 0;
+                } else {
+                    black = mkn.panasonic.BlackLevel[0];
+                }
+            } else if (!strcmp(make, "Canon") && mkn.canon.AverageBlackLevel) {
+                memset(cblack, 0, sizeof(cblack));
                 for (size_t i = 0; i < 4; ++i) {
-                    cblack[i] = mkn.panasonic.BlackLevel[i];
+                    cblack[i] = mkn.canon.ChannelBlackLevel[i];
                 }
                 black = 0;
-            } else {
-                black = mkn.panasonic.BlackLevel[0];
             }
-        } else if (!strcmp(make, "Canon") && mkn.canon.AverageBlackLevel) {
-            memset(cblack, 0, sizeof(cblack));
-            for (size_t i = 0; i < 4; ++i) {
-                cblack[i] = mkn.canon.ChannelBlackLevel[i];
-            }
-            black = 0;
         }
     }
-#endif
+    if (use_internal_decoder) {
+        libraw.recycle();
+    }
+#endif // ART_USE_LIBRAW
+
+    if (use_internal_decoder) {
+        identify();
+    }
     
     // in case dcraw didn't handle the above mentioned case...
     shot_select = std::min(shot_select, std::max(is_raw, 1u) - 1);
@@ -636,15 +653,15 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         return 2;
     }
 
-#ifndef ART_USE_LIBRAW
-    if(!strcmp(make,"Fujifilm") && raw_height * raw_width * 2u != raw_size) {
-        if (raw_width * raw_height * 7u / 4u == raw_size) {
-            load_raw = &RawImage::fuji_14bit_load_raw;
-        } else {
-            parse_fuji_compressed_header();
+    if (use_internal_decoder) {
+        if (!strcmp(make,"Fujifilm") && raw_height * raw_width * 2u != raw_size) {
+            if (raw_width * raw_height * 7u / 4u == raw_size) {
+                load_raw = &RawImage::fuji_14bit_load_raw;
+            } else {
+                parse_fuji_compressed_header();
+            }
         }
     }
-#endif // ART_USE_LIBRAW
 
     if (flip == 5) {
         this->rotate_deg = 270;
@@ -670,31 +687,31 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         iheight = height;
         iwidth  = width;
 
-#ifndef ART_USE_LIBRAW
-        if (filters || colors == 1) {
-            raw_image = (ushort *) calloc ((static_cast<unsigned int>(raw_height) + 7u) * static_cast<unsigned int>(raw_width), 2);
-            merror (raw_image, "main()");
-        }
+        if (use_internal_decoder) {
+            if (filters || colors == 1) {
+                raw_image = (ushort *) calloc ((static_cast<unsigned int>(raw_height) + 7u) * static_cast<unsigned int>(raw_width), 2);
+                merror (raw_image, "main()");
+            }
 
-        // dcraw needs this global variable to hold pixel data
-        image = (ImageType)calloc (static_cast<unsigned int>(height) * static_cast<unsigned int>(width) * sizeof * image + meta_length, 1);
-        meta_data = (char *) (image + static_cast<unsigned int>(height) * static_cast<unsigned int>(width));
+            // dcraw needs this global variable to hold pixel data
+            image = (ImageType)calloc (static_cast<unsigned int>(height) * static_cast<unsigned int>(width) * sizeof * image + meta_length, 1);
+            meta_data = (char *) (image + static_cast<unsigned int>(height) * static_cast<unsigned int>(width));
 
-        if(!image) {
-            return 200;
-        }
+            if(!image) {
+                return 200;
+            }
 
-        // Load raw pixels data
-        fseek (ifp, data_offset, SEEK_SET);
-        (this->*load_raw)();
-#else // ART_USE_LIBRAW
-        {
+            // Load raw pixels data
+            fseek (ifp, data_offset, SEEK_SET);
+            (this->*load_raw)();
+        } else {
+#ifdef ART_USE_LIBRAW
             //libraw.recycle();
-#if LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 21)
+#  if LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 21)
             libraw.imgdata.rawparams.shot_select = shot_select;
-#else
+#  else
             libraw.imgdata.params.shot_select = shot_select;
-#endif
+#  endif
             
             int err = libraw.open_buffer(ifp->data, ifp->size);
             if (err) {
@@ -735,8 +752,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             }
 
             libraw.recycle();
-        }
 #endif // ART_USE_LIBRAW
+        }
 
         if (!float_raw_image) { // apply baseline exposure only for float DNGs
             RT_baseline_exposure = 0;
@@ -757,8 +774,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             orig_raw_width = raw_width;
             orig_raw_height = raw_height;
             
-            if (cc && cc->has_rawCrop(raw_width, raw_height)) { 
-#ifndef ART_USE_LIBRAW
+            if (cc && cc->has_rawCrop(raw_width, raw_height) && use_internal_decoder) { 
                 raw_crop_cc = true;
                 int lm, tm, w, h;
                 cc->get_rawCrop(raw_width, raw_height, lm, tm, w, h);
@@ -798,7 +814,6 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 } else if (h > 0) {
                     iheight = height = min((int)height, h);
                 }
-#endif // ART_USE_LIBRAW
             }
 
             if (cc && cc->has_rawMask(orig_raw_width, orig_raw_height, 0) && !dng_version) {
@@ -837,10 +852,10 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 }
             }
 
-#ifndef ART_USE_LIBRAW
-            crop_masked_pixels();
-            free (raw_image);
-#endif
+            if (use_internal_decoder) {
+                crop_masked_pixels();
+                free(raw_image);
+            }
             raw_image = nullptr;
         } else {
             if (get_maker() == "Sigma" && cc && cc->has_rawCrop(width, height)) { // foveon images
@@ -867,13 +882,13 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         }
 
         // Load embedded profile
-#ifndef ART_USE_LIBRAW
-        if (profile_length) {
-            profile_data = new char[profile_length];
-            fseek ( ifp, profile_offset, SEEK_SET);
-            fread ( profile_data, 1, profile_length, ifp);
+        if (use_internal_decoder) {
+            if (profile_length) {
+                profile_data = new char[profile_length];
+                fseek(ifp, profile_offset, SEEK_SET);
+                fread(profile_data, 1, profile_length, ifp);
+            }
         }
-#endif // ART_USE_LIBRAW
 
         /*
           Setting the black level, there are three sources:
@@ -971,7 +986,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         }
     }
 
-    if ( closeFile ) {
+    if (closeFile) {
         fclose(ifp);
         ifp = nullptr;
     }
@@ -986,7 +1001,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
 
 float** RawImage::compress_image(unsigned int frameNum, bool freeImage)
 {
-    if( !image ) {
+    if (!image) {
         return nullptr;
     }
 
