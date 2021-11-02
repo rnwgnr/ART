@@ -1222,19 +1222,23 @@ Image8 *RawImage::getThumbnail() const
             return nullptr;
         }
         auto &t = libraw.imgdata.thumbnail;
-        if (t.tformat == LIBRAW_THUMBNAIL_JPEG) {
+        if (t.tformat != LIBRAW_THUMBNAIL_JPEG && t.tformat != LIBRAW_THUMBNAIL_BITMAP) {
+            return nullptr;
+        } else {
             Image8 *img = new Image8();
             img->setSampleFormat(IIOSF_UNSIGNED_CHAR);
             img->setSampleArrangement(IIOSA_CHUNKY);
-            err = img->loadJPEGFromMemory(t.thumb, t.tlength);
+            if (t.tformat == LIBRAW_THUMBNAIL_JPEG) {
+                err = img->loadJPEGFromMemory(t.thumb, t.tlength);
+            } else {
+                err = img->loadPPMFromMemory(t.thumb, t.twidth, t.theight, false, 8);
+            }
             if (err) {
                 delete img;
                 return nullptr;
             } else {
                 return img;
             }
-        } else {
-            return nullptr;
         }
     }
 #endif // ART_USE_LIBRAW
