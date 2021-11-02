@@ -720,9 +720,18 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 }
                 image = (ImageType)malloc(iwidth * iheight * sizeof(*image));
                 memcpy(image, libraw.imgdata.image, iwidth * iheight * sizeof(*image));
+                libraw.free_image();
             }
 
             adobe_coeff(make, model);
+
+            if (libraw.imgdata.color.profile_length) {
+                profile_length = libraw.imgdata.color.profile_length;
+                profile_data = new char[profile_length];
+                memcpy(profile_data, libraw.imgdata.color.profile, profile_length);
+            }
+
+            libraw.recycle();
         }
 #endif // ART_USE_LIBRAW
 
@@ -860,12 +869,6 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             profile_data = new char[profile_length];
             fseek ( ifp, profile_offset, SEEK_SET);
             fread ( profile_data, 1, profile_length, ifp);
-        }
-#else // ART_USE_LIBRAW
-        if (libraw.imgdata.color.profile_length) {
-            profile_length = libraw.imgdata.color.profile_length;
-            profile_data = new char[profile_length];
-            memcpy(profile_data, libraw.imgdata.color.profile, profile_length);
         }
 #endif // ART_USE_LIBRAW
 
