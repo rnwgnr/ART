@@ -632,6 +632,11 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 }
                 black = 0;
             }
+
+            if (dng_version) {
+                RT_whitelevel_from_constant = ThreeValBool::F;
+                RT_blacklevel_from_constant = ThreeValBool::F;
+            }
         }
     }
     if (use_internal_decoder) {
