@@ -20,16 +20,15 @@
 
 #ifdef ART_USE_LIBRAW
 # include <libraw/libraw.h>
-//# undef ART_USE_LIBRAW
 #endif
 
 
 namespace rtengine {
 
 
-extern const Settings* settings;
+extern const Settings *settings;
 
-RawImage::RawImage(  const Glib::ustring &name )
+RawImage::RawImage(const Glib::ustring &name)
     : DCraw()
     , data(nullptr)
     , prefilters(0)
@@ -49,32 +48,32 @@ RawImage::RawImage(  const Glib::ustring &name )
 
 RawImage::~RawImage()
 {
-    if(ifp) {
+    if (ifp) {
         fclose(ifp);
         ifp = nullptr;
     }
 
-    if( image ) {
+    if (image) {
         free(image);
     }
 
-    if(allocation) {
-        delete [] allocation;
+    if (allocation) {
+        delete[] allocation;
         allocation = nullptr;
     }
 
-    if(float_raw_image) {
-        delete [] float_raw_image;
+    if (float_raw_image) {
+        delete[] float_raw_image;
         float_raw_image = nullptr;
     }
 
-    if(data) {
-        delete [] data;
+    if (data) {
+        delete[] data;
         data = nullptr;
     }
 
-    if(profile_data) {
-        delete [] profile_data;
+    if (profile_data) {
+        delete[] profile_data;
         profile_data = nullptr;
     }
 
