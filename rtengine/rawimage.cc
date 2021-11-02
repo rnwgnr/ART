@@ -526,9 +526,13 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         int err = libraw.open_buffer(ifp->data, ifp->size);
         if (err != LIBRAW_SUCCESS && err != LIBRAW_FILE_UNSUPPORTED) {
             return err;
-        } else if (err == LIBRAW_FILE_UNSUPPORTED && strcmp(libraw.imgdata.idata.normalized_make, "Fujifilm") == 0 && strncmp(libraw.imgdata.idata.normalized_model, "GFX", 3) == 0) {
-            // might be a GFX 100 "pseudo ARQ"
-            use_internal_decoder = true;
+        } else if (err == LIBRAW_FILE_UNSUPPORTED) {
+            if (strcmp(libraw.imgdata.idata.normalized_make, "Fujifilm") == 0 && strncmp(libraw.imgdata.idata.normalized_model, "GFX", 3) == 0) {
+                // might be a GFX 100 "pseudo ARQ"
+                use_internal_decoder = true;
+            } else {
+                return err;
+            }
         } else if (strncmp(libraw.unpack_function_name(), "sony_arq_load_raw", 17) == 0) {
             use_internal_decoder = true;
         } else {
