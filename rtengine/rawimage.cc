@@ -1233,17 +1233,14 @@ Image8 *RawImage::getThumbnail()
     if (!ifp) {
         return nullptr;
     } else {
-        // LibRaw libraw_;
-        // int err = libraw_->open_buffer(ifp->data, ifp->size);
-        // if (err) {
-        //     return nullptr;
-        // }
         int err = libraw_->unpack_thumb();
         if (err) {
             return nullptr;
         }
         auto &t = libraw_->imgdata.thumbnail;
-        if (t.tformat != LIBRAW_THUMBNAIL_JPEG && t.tformat != LIBRAW_THUMBNAIL_BITMAP) {
+        if (!t.thumb) {
+            return nullptr;
+        } else if (t.tformat != LIBRAW_THUMBNAIL_JPEG && t.tformat != LIBRAW_THUMBNAIL_BITMAP) {
             return nullptr;
         } else {
             Image8 *img = new Image8();
