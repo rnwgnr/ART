@@ -44,12 +44,6 @@
 
 namespace {
 
-bool checkRawImageThumb (const rtengine::RawImage& raw_image)
-{
-    return raw_image.checkThumbOk();
-}
-
-
 void scale_colors (rtengine::RawImage *ri, float scale_mul[4], float cblack[4], bool multiThread)
 {
     rtengine::RawImage::ImageType image = ri->get_image();
@@ -296,11 +290,11 @@ Thumbnail* Thumbnail::loadQuickFromRaw (const Glib::ustring& fname, eSensorType 
     tpp->colorMatrix[1][1] = 1.0;
     tpp->colorMatrix[2][2] = 1.0;
 
-    RawImage *ri = new RawImage (fname);
+    RawImage *ri = new RawImage(fname);
     unsigned int imageNum = 0;
-    int r = ri->loadRaw (false, imageNum, false);
+    int r = ri->loadRaw(false, imageNum, false);
 
-    if ( r ) {
+    if (r) {
         delete tpp;
         delete ri;
         sensorType = ST_NONE;
@@ -310,27 +304,9 @@ Thumbnail* Thumbnail::loadQuickFromRaw (const Glib::ustring& fname, eSensorType 
     sensorType = ri->getSensorType();
 
     Image8 *img = ri->getThumbnail();
-    // Image8* img = new Image8 ();
-    // // No sample format detection occurred earlier, so we set them here,
-    // // as they are mandatory for the setScanline method
-    // img->setSampleFormat (IIOSF_UNSIGNED_CHAR);
-    // img->setSampleArrangement (IIOSA_CHUNKY);
-
-    // int err = 1;
-
-    // // See if it is something we support
-    // if (checkRawImageThumb (*ri)) {
-    //     const char* data ((const char*)fdata (ri->get_thumbOffset(), ri->get_file()));
-
-    //     if ( (unsigned char)data[1] == 0xd8 ) {
-    //         err = img->loadJPEGFromMemory (data, ri->get_thumbLength());
-    //     } else if (ri->is_ppmThumb()) {
-    //         err = img->loadPPMFromMemory (data, ri->get_thumbWidth(), ri->get_thumbHeight(), ri->get_thumbSwap(), ri->get_thumbBPS());
-    //     }
-    // }
 
     // did we succeed?
-    if (!img) {// err ) {
+    if (!img) {
         if (options.rtSettings.verbose) {
             std::cout << "Could not extract thumb from " << fname.c_str() << std::endl;
         }
@@ -683,12 +659,8 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
         tpp->aeHistogram(65536 >> tpp->aeHistCompression);
         tpp->aeHistogram.clear();
 
-        const unsigned int add = filter ? 1 : 4 / ri->get_colors();
-
         double pixSum[3] = {0.0};
         unsigned int n[3] = {0};
-        const double compression = pow(2.0, tpp->aeHistCompression);
-        const double camWb[3] = {tpp->camwbRed / compression, tpp->camwbGreen / compression, tpp->camwbBlue / compression};
         const double clipval = 64000.0 / tpp->defGain;
 
         for (int i = 32; i < height - 32; i++) {
@@ -703,11 +675,7 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                 end = width - 32;
             }
 
-            if (ri->get_colors() == 1) {
-                // for (int j = start; j < end; j++) {
-                //     tpp->aeHistogram[image[i * width + j][0] >> tpp->aeHistCompression]++;
-                // }
-            } else if (ri->getSensorType() == ST_BAYER) {
+            if (ri->getSensorType() == ST_BAYER) {
                 int c0 = ri->FC(i, start);
                 int c1 = ri->FC(i, start + 1);
                 int j = start;
@@ -717,13 +685,11 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                 double pixSum1 = 0.0;
                 for (; j < end - 1; j+=2) {
                     double v0 = image[i * width + j][c0];
-                    // tpp->aeHistogram[(int)(camWb[c0] * v0)]++;
                     if (v0 <= clipval) {
                         pixSum0 += v0;
                         n0++;
                     }
                     double v1 = image[i * width + j + 1][c1];
-                    // tpp->aeHistogram[(int)(camWb[c1] * v1)]++;
                     if (v1 <= clipval) {
                         pixSum1 += v1;
                         n1++;
@@ -731,7 +697,6 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                 }
                 if (j < end) {
                     double v0 = image[i * width + j][c0];
-                    // tpp->aeHistogram[(int)(camWb[c0] * v0)]++;
                     if (v0 <= clipval) {
                         pixSum0 += v0;
                         n0++;
@@ -750,7 +715,6 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                 for (; j < end - 5; j += 6) {
                     for(int cc = 0; cc < 6; ++cc) {
                         double d = image[i * width + j + cc][c[cc]];
-                        // tpp->aeHistogram[(int)(camWb[c[cc]] * d)]++;
                         if (d <= clipval) {
                             pixSum[c[cc]] += d;
                             n[c[cc]]++;
@@ -760,21 +724,18 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                 for (; j < end; j++) {
                     if (ri->ISXTRANSGREEN (i, j)) {
                         double d = image[i * width + j][1];
-                        // tpp->aeHistogram[(int)(camWb[1] * d)]++;
                         if (d <= clipval) {
                             pixSum[1] += d;
                             n[1]++;
                         }
                     } else if (ri->ISXTRANSRED (i, j)) {
                         double d = image[i * width + j][0];
-                        // tpp->aeHistogram[(int)(camWb[0] * d)]++;
                         if (d <= clipval) {
                             pixSum[0] += d;
                             n[0]++;
                         }
                     } else if (ri->ISXTRANSBLUE (i, j)) {
                         double d = image[i * width + j][2];
-                        // tpp->aeHistogram[(int)(camWb[2] * d)]++;
                         if (d <= clipval) {
                             pixSum[2] += d;
                             n[2]++;
@@ -793,20 +754,14 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                         pixSum[1] += g;
                         n[1]++;
                     }
-                    // tpp->aeHistogram[((int)g) >> tpp->aeHistCompression] += add;
                     double b = image[i * width + j][2];
                     if (b <= clipval) {
                         pixSum[2] += b;
                         n[2]++;
                     }
-                    // tpp->aeHistogram[((int) (b * 0.5f)) >> tpp->aeHistCompression] += add;
                 }
             }
         }
-        // ProcParams paramsForAutoExp; // Dummy for constructor
-        // ImProcFunctions ipf (&paramsForAutoExp, false);
-        // ipf.getAutoExp (tpp->aeHistogram, tpp->aeHistCompression, 0.02, tpp->aeExposureCompensation, tpp->aeLightness, tpp->aeContrast, tpp->aeBlack, tpp->aeHighlightCompression, tpp->aeHighlightCompressionThreshold);
-        // tpp->aeValid = true;
 
         if (ri->get_colors() == 1) {
             pixSum[0] = pixSum[1] = pixSum[2] = 1.;

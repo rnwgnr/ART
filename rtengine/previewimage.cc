@@ -275,33 +275,6 @@ Image8 *PreviewImage::load_raw_preview(const Glib::ustring &fname, int w, int h)
         return nullptr;
     }
     
-    // int err = 1;
-
-    // // See if it is something we support
-    // if (!ri.checkThumbOk()) {
-    //     return nullptr;
-    // }
-
-    // Image8 *img = new Image8();
-    // // No sample format detection occurred earlier, so we set them here,
-    // // as they are mandatory for the setScanline method
-    // img->setSampleFormat(IIOSF_UNSIGNED_CHAR);
-    // img->setSampleArrangement(IIOSA_CHUNKY);
-
-    // const char *data ((const char*)fdata (ri.get_thumbOffset(), ri.get_file()));
-
-    // if ((unsigned char)data[1] == 0xd8) {
-    //     err = img->loadJPEGFromMemory(data, ri.get_thumbLength());
-    // } else if (ri.is_ppmThumb()) {
-    //     err = img->loadPPMFromMemory(data, ri.get_thumbWidth(), ri.get_thumbHeight(), ri.get_thumbSwap(), ri.get_thumbBPS());
-    // }
-
-    // // did we succeed?
-    // if (err) {
-    //     delete img;
-    //     return nullptr;
-    // }
-
     if (w > 0 && h > 0) {
         double fw = img->getWidth();
         double fh = img->getHeight();
