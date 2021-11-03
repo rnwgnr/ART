@@ -626,12 +626,22 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 } else {
                     black = mkn.panasonic.BlackLevel[0];
                 }
-            } else if (!strcmp(make, "Canon") && mkn.canon.AverageBlackLevel) {
-                memset(cblack, 0, sizeof(cblack));
-                for (size_t i = 0; i < 4; ++i) {
-                    cblack[i] = mkn.canon.ChannelBlackLevel[i];
+            } else if (!strcmp(make, "Canon")) {
+                if (mkn.canon.AverageBlackLevel) {
+                    memset(cblack, 0, sizeof(cblack));
+                    for (size_t i = 0; i < 4; ++i) {
+                        cblack[i] = mkn.canon.ChannelBlackLevel[i];
+                    }
+                    black = 0;
                 }
-                black = 0;
+                if (mkn.canon.SpecularWhiteLevel) {
+                    maximum = mkn.canon.SpecularWhiteLevel;
+                } else if (mkn.canon.NormalWhiteLevel) {
+                    maximum = mkn.canon.NormalWhiteLevel;
+                }
+            }
+            while (tiff_bps < 16 && (size_t(1) << size_t(tiff_bps)) < maximum) {
+                ++tiff_bps;
             }
 
             if (dng_version) {
