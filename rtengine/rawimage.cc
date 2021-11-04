@@ -725,11 +725,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             (this->*load_raw)();
         } else {
 #ifdef ART_USE_LIBRAW
-#  if LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 21)
             libraw_->imgdata.rawparams.shot_select = shot_select;
-#  else
-            libraw_->imgdata.params.shot_select = shot_select;
-#  endif
             
             int err = libraw_->open_buffer(ifp->data, ifp->size);
             if (err) {

@@ -544,7 +544,7 @@ if(ENABLE_MIMALLOC)
 endif()
 
 if(ENABLE_LIBRAW)
-    pkg_check_modules(LIBRAW libraw_r>=0.20)
+    pkg_check_modules(LIBRAW libraw_r>=0.21)
     if(LIBRAW_FOUND)
         message(STATUS "using libraw library ${LIBRAW_VERSION}")
         add_definitions(-DART_USE_LIBRAW)
