@@ -626,7 +626,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 } else {
                     black = mkn.panasonic.BlackLevel[0];
                 }
-            } else if (!strcmp(make, "Canon")) {
+            } else if (!strcmp(make, "Canon") && isBayer()) {
                 if (mkn.canon.AverageBlackLevel) {
                     memset(cblack, 0, sizeof(cblack));
                     for (size_t i = 0; i < 4; ++i) {
@@ -762,7 +762,17 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 image = libraw_->imgdata.image;
             }
 
+            // get our custom camera matrices, but don't mess with black/white levels yet
+            // (if we have custom levels in json files, we will get them later)
+            auto bl = RT_blacklevel_from_constant;
+            auto wl = RT_whitelevel_from_constant;
+            RT_blacklevel_from_constant = ThreeValBool::F;
+            RT_whitelevel_from_constant = ThreeValBool::F;
+            
             adobe_coeff(make, model);
+            
+            RT_blacklevel_from_constant = bl;
+            RT_whitelevel_from_constant = wl;
 
             if (libraw_->imgdata.color.profile_length) {
                 profile_length = libraw_->imgdata.color.profile_length;
