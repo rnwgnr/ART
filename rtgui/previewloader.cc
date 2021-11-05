@@ -81,14 +81,14 @@ public:
         if (options.thumb_update_thread_limit > 0) {
             initial_thread_count_ = options.thumb_update_thread_limit;
         } else {
-            initial_thread_count_ = omp_get_num_procs();
+            initial_thread_count_ = std::max(omp_get_num_procs(), 1);
         }
 #else
         initial_thread_count_ = 1;
 #endif
         //threadCount = 1;
 
-        threadPool_ = new Glib::ThreadPool(initial_thread_count_, 0);
+        threadPool_ = new Glib::ThreadPool(initial_thread_count_, false);
         slowing_down_ = false;
     }
 

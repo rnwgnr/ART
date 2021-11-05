@@ -124,7 +124,7 @@ CropHandler::CropHandler() :
 {
     int nthreads = 1;
 #ifdef _OPENMP
-    nthreads = omp_get_num_procs();
+    nthreads = std::max(omp_get_num_procs(), 1);
 #endif
     thread_pool_.reset(new Glib::ThreadPool(nthreads, false));
 }
