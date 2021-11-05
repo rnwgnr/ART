@@ -118,6 +118,10 @@ if(WIN32)
     # Add additional paths. Look in the MinGW path first, then in the Gtkmm path.
     # If you wish to build some dependent libraries, you have to install them in MinGW to use them:
     set(CMAKE_PREFIX_PATH $ENV{MINGW_BASEPATH} $ENV{GTKMM_BASEPATH} CACHE STRING "Additional search paths")
+
+    # increase the stack size
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--stack,4194304")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--stack,4194304")
 endif()
 
 if(APPLE)
