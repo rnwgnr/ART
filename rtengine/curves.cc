@@ -1386,7 +1386,7 @@ void OpenDisplayTransformToneCurve::BatchApply(const size_t start, const size_t 
     const float vwn = std::sqrt(SQR(vw[0]) + SQR(vw[1]) + SQR(vw[2]));
 
     // highlight dechroma     
-    constexpr float dch = 0.5;
+    constexpr float dch = 0.8; // original: 0.5
 
     const float Lw = state.whitepoint * 100.f;
     const float sx = 0.016f * std::pow(Lw, 0.87f) - 0.17f;
