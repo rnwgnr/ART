@@ -48,12 +48,6 @@ MyMutex *fftwMutex = nullptr;
 
 int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDir, bool loadAll)
 {
-#ifdef _OPENMP
-    if (Glib::getenv("OMP_THREAD_LIMIT").empty()) {
-        Glib::setenv("OMP_THREAD_LIMIT", std::to_string(omp_get_num_procs()));
-    }
-#endif
-    
     settings = s;
     ProcParams::init();
     PerceptualToneCurve::init();
