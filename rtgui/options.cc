@@ -444,7 +444,6 @@ void Options::setDefaults()
 #else
     clutCacheSize = 1;
 #endif
-    thumb_update_thread_limit = 0;
     thumb_delay_update = false;
     thumb_lazy_caching = true;
     filledProfile = false;
@@ -619,6 +618,7 @@ void Options::setDefaults()
 #ifdef WIN32
     rtSettings.exiftool_path += ".exe";
 #endif
+    rtSettings.thread_pool_size = 0;
 
     browser_width_for_inspector = 0;
 
@@ -1167,7 +1167,7 @@ void Options::readFromFile(Glib::ustring fname)
                 }
 
                 if (keyFile.has_key("Performance", "ThumbUpdateThreadLimit")) {
-                    thumb_update_thread_limit = keyFile.get_integer("Performance", "ThumbUpdateThreadLimit");
+                    rtSettings.thread_pool_size = keyFile.get_integer("Performance", "ThumbUpdateThreadLimit");
                 }
 
                 if (keyFile.has_key("Performance", "ThumbDelayUpdate")) {
@@ -2018,7 +2018,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("Performance", "PreviewDemosaicFromSidecar", prevdemo);
         keyFile.set_boolean("Performance", "SerializeTiffRead", serializeTiffRead);
         keyFile.set_boolean("Performance", "DenoiseZoomedOut", denoiseZoomedOut);
-        keyFile.set_integer("Performance", "ThumbUpdateThreadLimit", thumb_update_thread_limit);
+        keyFile.set_integer("Performance", "ThumbUpdateThreadLimit", rtSettings.thread_pool_size);
         keyFile.set_boolean("Performance", "ThumbDelayUpdate", thumb_delay_update);
         keyFile.set_boolean("Performance", "ThumbLazyCaching", thumb_lazy_caching);
         

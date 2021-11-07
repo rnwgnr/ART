@@ -98,6 +98,8 @@ public:
 
     Glib::ustring exiftool_path;
 
+    int thread_pool_size;
+
     /** Creates a new instance of Settings.
       * @return a pointer to the new Settings instance. */
     static Settings* create();

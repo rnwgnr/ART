@@ -67,7 +67,6 @@ Glib::ustring licensePath;
 Glib::ustring argv1;
 bool progress = false;
 //bool simpleEditor;
-//Glib::Threads::Thread* mainThread;
 
 namespace
 {
@@ -122,8 +121,6 @@ int main (int argc, char **argv)
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
     Gio::init ();
-
-    //mainThread = Glib::Threads::Thread::self();
 
 #ifdef BUILD_BUNDLE
     char exname[512] = {0};

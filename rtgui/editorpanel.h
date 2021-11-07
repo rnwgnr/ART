@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <memory>
 #include "imageareapanel.h"
 #include "toolpanelcoord.h"
 #include "profilepanel.h"
@@ -270,8 +271,8 @@ private:
     int selectedFrame;
 
     rtengine::InitialImage* isrc;
-    rtengine::StagedImageProcessor* ipc;
-    rtengine::StagedImageProcessor* beforeIpc;    // for the before-after view
+    std::shared_ptr<rtengine::StagedImageProcessor> ipc;
+    std::shared_ptr<rtengine::StagedImageProcessor> beforeIpc;    // for the before-after view
 
     EditorPanelIdleHelper* epih;
 

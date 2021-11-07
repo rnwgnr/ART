@@ -28,6 +28,8 @@
 #include "../rtengine/rt_math.h"
 #include "../rtengine/improcfun.h"
 
+#include "../rtengine/threadpool.h"
+
 #ifdef _OPENMP
 # include <omp.h>
 #endif
@@ -122,14 +124,10 @@ CropHandler::CropHandler() :
     redraw_needed(false),
     initial(false)
 {
-    int nthreads = 1;
-#ifdef _OPENMP
-    nthreads = std::max(omp_get_num_procs(), 1);
-#endif
-    thread_pool_.reset(new Glib::ThreadPool(nthreads, false));
 }
 
-CropHandler::~CropHandler ()
+
+CropHandler::~CropHandler()
 {
     idle_register.destroy();
 
@@ -151,9 +149,9 @@ void CropHandler::setEditSubscriber (EditSubscriber* newSubscriber)
     (static_cast<rtengine::Crop *>(crop))->setEditSubscriber(newSubscriber);
 }
 
-void CropHandler::newImage (StagedImageProcessor* ipc_, bool isDetailWindow)
-{
 
+void CropHandler::newImage(std::shared_ptr<StagedImageProcessor> ipc_, bool isDetailWindow)
+{
     ipc = ipc_;
     cx = 0;
     cy = 0;
@@ -199,7 +197,6 @@ double CropHandler::getFitCropZoom ()
 
 double CropHandler::getFitZoom ()
 {
-
     if (ipc) {
         double z1 = (double) wh / ipc->getFullHeight ();
         double z2 = (double) ww / ipc->getFullWidth ();
@@ -545,7 +542,15 @@ void CropHandler::update ()
 
         // To save threads, try to mark "needUpdate" without a thread first
         if (crop->tryUpdate()) {
-            thread_pool_->push(sigc::mem_fun(*crop, &DetailedCrop::fullUpdate));
+            auto i = ipc; // keep a reference around so that ipc doesn't get
+                          // destroyed
+            auto c = crop;
+            const auto upd =
+                [i, c]() -> void
+                {
+                    c->fullUpdate();
+                };
+            rtengine::ThreadPool::add_task(rtengine::ThreadPool::Priority::HIGH, upd);
         }
     }
 }

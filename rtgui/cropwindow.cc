@@ -99,7 +99,7 @@ CropWindow::CropWindow (ImageArea* parent, bool isLowUpdatePriority_, bool isDet
     minWidth = bsw + iw + 2 * sideBorderWidth;
 
     cropHandler.setDisplayHandler(this);
-    cropHandler.newImage (parent->getImProcCoordinator(), isDetailWindow);
+    cropHandler.newImage(parent->getImProcCoordinator(), isDetailWindow);
 }
 
 CropWindow::~CropWindow ()
@@ -1142,8 +1142,8 @@ void CropWindow::pointerMoved(int bstate, int x, int y, double pressure)
                 int gval = pix[1];
                 int bval = pix[2];
                 bool isRaw = false;
-                rtengine::StagedImageProcessor* ipc = iarea->getImProcCoordinator();
-                if(ipc) {
+                auto ipc = iarea->getImProcCoordinator();
+                if (ipc) {
                     procparams::ProcParams params;
                     ipc->getParams(&params);
                     isRaw = params.raw.bayersensor.method == RAWParams::BayerSensor::Method::NONE || params.raw.xtranssensor.method == RAWParams::XTransSensor::Method::NONE;

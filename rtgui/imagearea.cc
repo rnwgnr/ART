@@ -117,12 +117,12 @@ void ImageArea::on_resized (Gtk::Allocation& req)
     }
 }
 
-rtengine::StagedImageProcessor* ImageArea::getImProcCoordinator() const
+std::shared_ptr<rtengine::StagedImageProcessor> ImageArea::getImProcCoordinator() const
 {
     return ipc;
 }
 
-void ImageArea::setImProcCoordinator(rtengine::StagedImageProcessor* ipc_)
+void ImageArea::setImProcCoordinator(std::shared_ptr<rtengine::StagedImageProcessor> ipc_)
 {
     if( !ipc_ ) {
         focusGrabber = nullptr;

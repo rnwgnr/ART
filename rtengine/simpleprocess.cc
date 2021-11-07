@@ -31,10 +31,11 @@
 #include "mytime.h"
 #include "rescale.h"
 #include "metadata.h"
+#include "threadpool.h"
+
 #undef THREAD_PRIORITY_NORMAL
 
-namespace rtengine
-{
+namespace rtengine {
 extern const Settings* settings;
 
 namespace {
@@ -590,13 +591,13 @@ void batchProcessingThread (ProcessingJob* job, BatchProcessingListener* bpl)
     }
 }
 
-void startBatchProcessing (ProcessingJob* job, BatchProcessingListener* bpl)
-{
 
+void startBatchProcessing(ProcessingJob *job, BatchProcessingListener *bpl)
+{
     if (bpl) {
-        Glib::Thread::create (sigc::bind (sigc::ptr_fun (batchProcessingThread), job, bpl), 0, true, true, Glib::THREAD_PRIORITY_LOW);
+        ThreadPool::add_task(ThreadPool::Priority::NORMAL, sigc::bind(sigc::ptr_fun(batchProcessingThread), job, bpl));
     }
 
 }
 
-}
+} // namespace rtengine

@@ -663,9 +663,8 @@ bool Crop::tryUpdate()
         newUpdatePending = true;
         // no need for a new thread, the current one will do the job
         needsNewThread = false;
-    } else
+    } else {
         // the crop is now being updated ...well, when fullUpdate will be called
-    {
         updating = true;
     }
 
@@ -681,15 +680,16 @@ bool Crop::tryUpdate()
  */
 void Crop::fullUpdate()
 {
+    // parent->updaterThreadStart.lock();
 
-    parent->updaterThreadStart.lock();
-
-    if (parent->updaterRunning && parent->thread) {
-        // Do NOT reset changes here, since in a long chain of events it will lead to chroma_scale not being updated,
-        // causing Color::lab2rgb to return a black image on some opens
-        //parent->changeSinceLast = 0;
-        parent->thread->join();
-    }
+    // parent->wait_not_running();
+    parent->set_updater_running(true);
+    // if (parent->updaterRunning && parent->thread) {
+    //     // Do NOT reset changes here, since in a long chain of events it will lead to chroma_scale not being updated,
+    //     // causing Color::lab2rgb to return a black image on some opens
+    //     //parent->changeSinceLast = 0;
+    //     parent->thread->join();
+    // }
 
     if (parent->plistener) {
         parent->plistener->setProgressState(true);
@@ -717,7 +717,8 @@ void Crop::fullUpdate()
         parent->plistener->setProgressState(false);
     }
 
-    parent->updaterThreadStart.unlock();
+    parent->set_updater_running(false);
+    // parent->updaterThreadStart.unlock();
 }
 
 int Crop::get_skip()

@@ -773,9 +773,6 @@ void RTWindow::on_mainNB_switch_page (Gtk::Widget* widget, guint page_num)
 {
     if (!on_delete_has_run) {
         if (isEditorPanel (page_num)) {
-            previewLoader->slowDown();
-            thumbImageUpdater->slowDown();
-            
             if (isSingleTabMode() && epanel) {
                 MoveFileBrowserToEditor();
             }
@@ -793,9 +790,6 @@ void RTWindow::on_mainNB_switch_page (Gtk::Widget* widget, guint page_num)
                 }
             }
         } else {
-            previewLoader->speedUp();
-            thumbImageUpdater->speedUp();
-            
             // in single tab mode with command line filename epanel does not exist yet
             if (isSingleTabMode() && epanel) {
                 // Save profile on leaving the editor panel

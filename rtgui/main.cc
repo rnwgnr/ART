@@ -67,7 +67,6 @@ bool simpleEditor = false;
 bool gimpPlugin = false;
 bool remote = false;
 unsigned char initialGdkScale = 1;
-//Glib::Threads::Thread* mainThread;
 
 namespace
 {
@@ -98,15 +97,9 @@ static void myGdkLockEnter()
 {
     myGdkRecMutex.lock();
 }
+
 static void myGdkLockLeave()
 {
-    // Automatic gdk_flush for non main thread
-#if AUTO_GDK_FLUSH
-    //if (Glib::Thread::self() != mainThread) {
-    //    gdk_flush();
-    //}
-
-#endif
     myGdkRecMutex.unlock();
 }
 

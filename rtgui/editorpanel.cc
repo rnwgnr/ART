@@ -38,8 +38,7 @@
 using namespace rtengine::procparams;
 using ScopeType = Options::ScopeType;
 
-namespace
-{
+namespace {
 
 void setprogressStrUI(double val, const Glib::ustring str, MyProgressBar* pProgress)
 {
@@ -121,11 +120,10 @@ bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, G
     return false;
 }
 
+} // namespace
 
-}
 
-class EditorPanel::ColorManagementToolbar
-{
+class EditorPanel::ColorManagementToolbar {
 private:
 #if !defined(__APPLE__) // monitor profile not supported on apple
     MyComboBoxText profileBox;
@@ -137,7 +135,7 @@ private:
     sigc::connection profileConn, intentConn, softproofConn;
     Glib::ustring defprof;
 
-    rtengine::StagedImageProcessor* const& processor;
+    std::shared_ptr<rtengine::StagedImageProcessor> &processor;
 
 private:
 #if !defined(__APPLE__) // monitor profile not supported on apple
@@ -401,7 +399,7 @@ private:
     }
 
 public:
-    explicit ColorManagementToolbar (rtengine::StagedImageProcessor* const& ipc) :
+    explicit ColorManagementToolbar(std::shared_ptr<rtengine::StagedImageProcessor> &ipc) :
         intentBox (Glib::ustring (), true),
         processor (ipc)
     {
@@ -779,7 +777,7 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
 
 
     // Color management toolbar
-    colorMgmtToolBar.reset (new ColorManagementToolbar (ipc));
+    colorMgmtToolBar.reset(new ColorManagementToolbar(ipc));
     colorMgmtToolBar->pack_right_in (iops);
 
     if (!simpleEditor && !options.tabbedUI) {
@@ -924,11 +922,11 @@ EditorPanel::~EditorPanel ()
     delete beforePreviewHandler;
     beforePreviewHandler = nullptr;
 
-    if (beforeIpc) {
-        rtengine::StagedImageProcessor::destroy (beforeIpc);
-    }
-
-    beforeIpc = nullptr;
+    // if (beforeIpc) {
+    //     rtengine::StagedImageProcessor::destroy (beforeIpc);
+    // }
+    // beforeIpc = nullptr;
+    beforeIpc.reset();
 
     close ();
 
@@ -1067,9 +1065,6 @@ void EditorPanel::on_realize ()
 
 void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
 {
-    thumbImageUpdater->slowDown();
-    previewLoader->slowDown();
-
     close();
 
     isProcessing = true; // prevents closing-on-init
@@ -1084,12 +1079,12 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
     previewHandler = new PreviewHandler ();
 
     this->isrc = isrc;
-    ipc = rtengine::StagedImageProcessor::create (isrc);
+    ipc.reset(rtengine::StagedImageProcessor::create(isrc));
     ipc->setProgressListener (this);
     colorMgmtToolBar->updateProcessor();
     ipc->setPreviewImageListener (previewHandler);
     ipc->setPreviewScale (10);  // Important
-    tpc->initImage (ipc, tmb->getType() == FT_Raw);
+    tpc->initImage(ipc.get(), tmb->getType() == FT_Raw);
     ipc->setHistogramListener (this);
     iareapanel->imageArea->indClippedPanel->silentlyDisableSharpMask();
     ipc->setSizeListener(this);
@@ -1175,8 +1170,9 @@ void EditorPanel::close ()
             iareapanel->imageArea->unsubscribe();
         }
 
-        rtengine::StagedImageProcessor::destroy (ipc);
-        ipc = nullptr;
+        // rtengine::StagedImageProcessor::destroy (ipc);
+        // ipc = nullptr;
+        ipc.reset();
         navigator->previewWindow->setPreviewHandler (nullptr);
 
         // If the file was deleted somewhere, the openThm.descreaseRef delete the object, but we don't know here
@@ -2337,11 +2333,11 @@ void EditorPanel::beforeAfterToggled ()
         delete beforePreviewHandler;
         beforePreviewHandler = nullptr;
 
-        if (beforeIpc) {
-            rtengine::StagedImageProcessor::destroy (beforeIpc);
-        }
-
-        beforeIpc = nullptr;
+        // if (beforeIpc) {
+        //     rtengine::StagedImageProcessor::destroy (beforeIpc);
+        // }
+        // beforeIpc = nullptr;
+        beforeIpc.reset();
     }
 
     if (beforeAfter->get_active ()) {
@@ -2393,7 +2389,7 @@ void EditorPanel::beforeAfterToggled ()
 
         beforePreviewHandler = new PreviewHandler ();
 
-        beforeIpc = rtengine::StagedImageProcessor::create (beforeImg);
+        beforeIpc.reset(rtengine::StagedImageProcessor::create(beforeImg));
         beforeIpc->setPreviewScale (10);
         beforeIpc->setPreviewImageListener (beforePreviewHandler);
         Glib::ustring monitorProfile;

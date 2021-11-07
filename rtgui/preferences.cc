@@ -1664,7 +1664,7 @@ void Preferences::storePreferences ()
     moptions.rgbDenoiseThreadLimit = threadsSpinBtn->get_value_as_int();
     moptions.clutCacheSize = clutCacheSizeSB->get_value_as_int();
     moptions.maxInspectorBuffers = maxInspectorBuffersSB->get_value_as_int();
-    moptions.thumb_update_thread_limit = thumbUpdateThreadLimit->get_value_as_int();
+    moptions.rtSettings.thread_pool_size = thumbUpdateThreadLimit->get_value_as_int();
     moptions.thumb_delay_update = thumbDelayUpdate->get_active();
     moptions.thumb_lazy_caching = thumbLazyCaching->get_active();
 
@@ -1901,7 +1901,7 @@ void Preferences::fillPreferences ()
     threadsSpinBtn->set_value (moptions.rgbDenoiseThreadLimit);
     clutCacheSizeSB->set_value (moptions.clutCacheSize);
     maxInspectorBuffersSB->set_value (moptions.maxInspectorBuffers);
-    thumbUpdateThreadLimit->set_value(moptions.thumb_update_thread_limit);
+    thumbUpdateThreadLimit->set_value(moptions.rtSettings.thread_pool_size);
     thumbDelayUpdate->set_active(moptions.thumb_delay_update);
     thumbLazyCaching->set_active(moptions.thumb_lazy_caching);
 

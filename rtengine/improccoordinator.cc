@@ -30,6 +30,7 @@
 #include "color.h"
 #include "metadata.h"
 #include "perspectivecorrection.h"
+#include "threadpool.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -131,7 +132,7 @@ ImProcCoordinator::ImProcCoordinator():
     lastOutputProfile("BADFOOD"),
     lastOutputIntent(RI__COUNT),
     lastOutputBPC(false),
-    thread(nullptr),
+    //thread(nullptr),
     changeSinceLast(0),
     updaterRunning(false),
     destroying(false),
@@ -154,21 +155,19 @@ void ImProcCoordinator::assign(ImageSource* imgsrc)
 
 ImProcCoordinator::~ImProcCoordinator()
 {
-
     destroying = true;
-    updaterThreadStart.lock();
+    // updaterThreadStart.lock();
 
-    if (updaterRunning && thread) {
-        thread->join();
-    }
+    wait_not_running();
 
-    mProcessing.lock();
-    mProcessing.unlock();
-    freeAll();
+    {
+        MyMutex::MyLock lock(mProcessing);
+        freeAll();
 
-    if (drcomp_11_dcrop_cache) {
-        delete drcomp_11_dcrop_cache;
-        drcomp_11_dcrop_cache = nullptr;
+        if (drcomp_11_dcrop_cache) {
+            delete drcomp_11_dcrop_cache;
+            drcomp_11_dcrop_cache = nullptr;
+        }
     }
 
     std::vector<Crop*> toDel = crops;
@@ -189,7 +188,7 @@ ImProcCoordinator::~ImProcCoordinator()
         customTransformOut = nullptr;
     }
 
-    updaterThreadStart.unlock();
+    // updaterThreadStart.unlock();
 }
 
 DetailedCrop* ImProcCoordinator::createCrop(::EditDataProvider *editDataProvider, bool isDetailWindow)
@@ -1478,35 +1477,34 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
 void ImProcCoordinator::stopProcessing()
 {
 
-    updaterThreadStart.lock();
+    // updaterThreadStart.lock();
 
-    if (updaterRunning && thread) {
+    if (updaterRunning) {
         changeSinceLast = 0;
-        thread->join();
+        wait_not_running();
     }
+    // if (updaterRunning && thread) {
+    //     changeSinceLast = 0;
+    //     thread->join();
+    // }
 
-    updaterThreadStart.unlock();
+    // updaterThreadStart.unlock();
 }
+
 
 void ImProcCoordinator::startProcessing()
 {
-
-#undef THREAD_PRIORITY_NORMAL
-
     if (!destroying) {
         if (!updaterRunning) {
-            updaterThreadStart.lock();
-            thread = nullptr;
-            updaterRunning = true;
-            updaterThreadStart.unlock();
+            // updaterThreadStart.lock();
+            set_updater_running(true);
+            // updaterThreadStart.unlock();
 
-            //batchThread->yield(); //the running batch should wait other threads to avoid conflict
-
-            thread = Glib::Thread::create(sigc::mem_fun(*this, &ImProcCoordinator::process), 0, true, true, Glib::THREAD_PRIORITY_NORMAL);
-
+            rtengine::ThreadPool::add_task(rtengine::ThreadPool::Priority::HIGHEST, sigc::mem_fun(*this, &ImProcCoordinator::process));
         }
     }
 }
+
 
 void ImProcCoordinator::startProcessing(int changeCode)
 {
@@ -1558,7 +1556,8 @@ void ImProcCoordinator::process()
     }
 
     paramsUpdateMutex.unlock();
-    updaterRunning = false;
+
+    set_updater_running(false);
 
     if (plistener) {
         if (!changed) {
@@ -1624,9 +1623,10 @@ bool ImProcCoordinator::getDeltaELCH(EditUniqueID id, int x, int y, float &L, fl
     startProcessing(change);
 
     bool ret = false;
-    updaterThreadStart.lock();
-    if (updaterRunning && thread) {
-        thread->join();
+    // updaterThreadStart.lock();
+    if (updaterRunning) {// && thread) {
+        wait_not_running();
+        //thread->join();
         if (ipf.deltaE.ok) {
             ret = true;
             L = ipf.deltaE.L;
@@ -1635,7 +1635,7 @@ bool ImProcCoordinator::getDeltaELCH(EditUniqueID id, int x, int y, float &L, fl
         }
     }
     ipf.setDeltaEData(EUID_None, -1, -1);
-    updaterThreadStart.unlock();
+    // updaterThreadStart.unlock();
 
     return ret;
 }
@@ -1696,6 +1696,30 @@ void ImProcCoordinator::requestUpdateVectorscopeHS()
     bool updated = updateVectorscopeHS();
     if (updated) {
         notifyHistogramChanged();
+    }
+}
+
+
+void ImProcCoordinator::wait_not_running()
+{
+    std::unique_lock<std::mutex> lck(updater_mutex_);
+    while (updaterRunning) {
+        updater_cond_.wait(lck);
+    }
+}
+
+
+void ImProcCoordinator::set_updater_running(bool val)
+{
+    std::unique_lock<std::mutex> lck(updater_mutex_);
+    if (val) {
+        while (updaterRunning) {
+            updater_cond_.wait(lck);
+        }
+        updaterRunning = true;
+    } else {
+        updaterRunning = false;
+        updater_cond_.notify_all();
     }
 }
 

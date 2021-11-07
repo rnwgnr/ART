@@ -34,12 +34,16 @@
 #include "rtlensfun.h"
 #include "metadata.h"
 #include "imgiomanager.h"
+#include "threadpool.h"
 
 #ifdef _OPENMP
 # include <omp.h>
 #endif
 
 namespace rtengine {
+
+std::unique_ptr<ThreadPool> ThreadPool::instance_;
+
 
 const Settings* settings;
 
@@ -52,6 +56,15 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     ProcParams::init();
     PerceptualToneCurve::init();
     RawImageSource::init();
+
+    int num_threads = settings->thread_pool_size;
+    if (num_threads <= 0) {
+        num_threads = 1;
+#ifdef _OPENMP
+        num_threads = std::max(omp_get_num_procs()-1, num_threads);
+#endif
+    }
+    ThreadPool::init(num_threads);
 
 #ifdef _OPENMP
 #pragma omp parallel sections if (!settings->verbose)

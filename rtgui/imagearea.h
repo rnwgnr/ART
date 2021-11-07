@@ -52,7 +52,7 @@ protected:
 
     std::list<CropWindow*> cropWins;
     PreviewHandler* previewHandler;
-    rtengine::StagedImageProcessor* ipc;
+    std::shared_ptr<rtengine::StagedImageProcessor> ipc;
 
     bool        dirty;
     CropWindow* focusGrabber;
@@ -83,8 +83,8 @@ public:
     explicit ImageArea (ImageAreaPanel* p);
     ~ImageArea () override;
 
-    rtengine::StagedImageProcessor* getImProcCoordinator() const;
-    void setImProcCoordinator(rtengine::StagedImageProcessor* ipc_);
+    std::shared_ptr<rtengine::StagedImageProcessor> getImProcCoordinator() const;
+    void setImProcCoordinator(std::shared_ptr<rtengine::StagedImageProcessor> ipc_);
     void setPreviewModePanel(PreviewModePanel* previewModePanel_)
     {
         previewModePanel = previewModePanel_;
