@@ -2519,7 +2519,12 @@ bool Options::has_retained_extention(const Glib::ustring& fname)
 }
 
 // Pattern matches "5.1" from "5.1-23-g12345678", when comparing option.version to RTVERSION
-bool Options::is_new_version() {
+bool Options::is_new_version()
+{
+    if (versionString.find('.') == Glib::ustring::npos) {
+        return false;
+    }
+    
     const std::string vs[] = {versionString, version};
     std::vector<std::string> vMajor;
 
