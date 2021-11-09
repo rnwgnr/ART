@@ -645,7 +645,8 @@ struct WBParams {
         CAMERA,
         AUTO,
         CUSTOM_TEMP,
-        CUSTOM_MULT
+        CUSTOM_MULT,
+        CUSTOM_MULT_LEGACY
     };
     Type method;
     int temperature;

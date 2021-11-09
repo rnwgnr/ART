@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1026
+#define PPVERSION 1027
 
 /*
   Log of version changes
+  1027  2021-11-09
+        white balance multipliers stored in camera space
   1026  2021-07-06
         tone curve mode refactoring/simplification
   1025  2021-06-10

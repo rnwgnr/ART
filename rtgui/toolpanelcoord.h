@@ -300,6 +300,8 @@ public:
     }
 
     std::vector<WBPreset> getWBPresets() const override;
+    void convertWBCam2Mul(double &rm, double &gm, double &bm) override;
+    void convertWBMul2Cam(double &rm, double &gm, double &bm) override;
 
     //DFProvider interface
     rtengine::RawImage* getDF() override;

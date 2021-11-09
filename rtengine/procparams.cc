@@ -3520,8 +3520,11 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 method = "CustomTemp";
                 break;
             case WBParams::CUSTOM_MULT:
-            default:
                 method = "CustomMult";
+                break;
+            case WBParams::CUSTOM_MULT_LEGACY:
+                method = "CustomMultLegacy";
+            default:
                 break;
             }
             saveToKeyfile("White Balance", "Setting", method, keyFile);
@@ -4463,7 +4466,13 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else if (method == "Auto") {
                 wb.method = WBParams::AUTO;
             } else if (method == "CustomMult") {
-                wb.method = WBParams::CUSTOM_MULT;
+                if (ppVersion < 1027) {
+                    wb.method = WBParams::CUSTOM_MULT_LEGACY;
+                } else {
+                    wb.method = WBParams::CUSTOM_MULT;
+                }
+            } else if (method == "CustomMultLegacy") {
+                wb.method = WBParams::CUSTOM_MULT_LEGACY;
             } else {
                 wb.method = WBParams::CUSTOM_TEMP;
             }

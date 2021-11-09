@@ -654,9 +654,18 @@ void ImProcCoordinator::updateWB()
         case WBParams::CUSTOM_TEMP:
             currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
             break;
-        case WBParams::CUSTOM_MULT:
+        case WBParams::CUSTOM_MULT_LEGACY:
             currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);            
             break;
+        case WBParams::CUSTOM_MULT: {
+            double rm = params.wb.mult[0];
+            double gm = params.wb.mult[1];
+            double bm = params.wb.mult[2];
+            std::cout << "GOT MULTIPLIERS: " << rm << ", " << gm << ", " << bm;
+            imgsrc->wbCamera2Mul(rm, gm, bm);
+            std::cout << " --> " << rm << ", " << gm << ", " << bm << std::endl;
+            currWB = ColorTemp(rm, gm, bm, 1.0);            
+        } break;
         case WBParams::AUTO:
         default:
             currWB = ColorTemp();
@@ -1399,9 +1408,18 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
         case WBParams::CUSTOM_TEMP:
             currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
             break;
-        case WBParams::CUSTOM_MULT:
+        case WBParams::CUSTOM_MULT_LEGACY:
             currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);
             break;
+        case WBParams::CUSTOM_MULT: {
+            double rm = params.wb.mult[0];
+            double gm = params.wb.mult[1];
+            double bm = params.wb.mult[2];
+            std::cout << "GOT MULTIPLIERS: " << rm << ", " << gm << ", " << bm;
+            imgsrc->wbCamera2Mul(rm, gm, bm);
+            std::cout << " --> " << rm << ", " << gm << ", " << bm << std::endl;
+            currWB = ColorTemp(rm, gm, bm, 1.0);
+        } break;
         }            
     }
 

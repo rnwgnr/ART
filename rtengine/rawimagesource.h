@@ -310,6 +310,9 @@ protected:
 
 public:
     float get_pre_mul(int c) const { return ri ? ri->get_pre_mul(c) : 1.f; }
+
+    void wbMul2Camera(double &rm, double &gm, double &bm) override;
+    void wbCamera2Mul(double &rm, double &gm, double &bm) override;    
 };
 
 } // namespace rtengine

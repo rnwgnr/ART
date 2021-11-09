@@ -47,8 +47,7 @@
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
 
-namespace
-{
+namespace {
 
 void rotateLine (const float* const line, rtengine::PlanarPtr<float> &channel, const int tran, const int i, const int w, const int h)
 {
@@ -412,11 +411,10 @@ void transLineD1x (const float* const red, const float* const green, const float
     }
 }
 
-}
+} // namespace
 
 
-namespace rtengine
-{
+namespace rtengine {
 
 extern const Settings* settings;
 #undef ABS
@@ -4559,4 +4557,54 @@ void RawImageSource::cleanup ()
 }
 
 
-} /* namespace */
+void RawImageSource::wbMul2Camera(double &rm, double &gm, double &bm)
+{
+    double r = rm;
+    double g = gm;
+    double b = bm;
+
+    auto imatrices = getImageMatrices();
+
+    if (imatrices) {
+        double rr = imatrices->cam_rgb[0][0] * r + imatrices->cam_rgb[0][1] * g + imatrices->cam_rgb[0][2] * b;
+        double gg = imatrices->cam_rgb[1][0] * r + imatrices->cam_rgb[1][1] * g + imatrices->cam_rgb[1][2] * b;
+        double bb = imatrices->cam_rgb[2][0] * r + imatrices->cam_rgb[2][1] * g + imatrices->cam_rgb[2][2] * b;
+        r = rr;
+        g = gg;
+        b = bb;
+    }
+
+    rm = get_pre_mul(0) / r;
+    gm = get_pre_mul(1) / g;
+    bm = get_pre_mul(2) / b;
+
+    rm /= gm;
+    bm /= gm;
+    gm = 1.0;
+}
+
+
+void RawImageSource::wbCamera2Mul(double &rm, double &gm, double &bm)
+{
+    auto imatrices = getImageMatrices();
+
+    double r = get_pre_mul(0) / rm;
+    double g = get_pre_mul(1) / gm;
+    double b = get_pre_mul(2) / bm;
+    
+    if (imatrices) {
+        double rr = imatrices->rgb_cam[0][0] * r + imatrices->rgb_cam[0][1] * g + imatrices->rgb_cam[0][2] * b;
+        double gg = imatrices->rgb_cam[1][0] * r + imatrices->rgb_cam[1][1] * g + imatrices->rgb_cam[1][2] * b;
+        double bb = imatrices->rgb_cam[2][0] * r + imatrices->rgb_cam[2][1] * g + imatrices->rgb_cam[2][2] * b;
+        r = rr;
+        g = gg;
+        b = bb;
+    }
+
+    rm = r / g;
+    bm = b / g;
+    gm = 1.0;
+}
+
+
+} // namespace rtengine
