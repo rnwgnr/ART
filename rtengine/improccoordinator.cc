@@ -397,13 +397,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
             MyMutex::MyLock initLock(minit);  // Also used in crop window
     
-            //imgsrc->HLRecovery_Global(params.exposure);   // this handles Color HLRecovery
-    
-    
-            if (settings->verbose) {
-                printf("Applying white balance, color correction & sRBG conversion...\n");
-            }
-
             if (params.wb.method == WBParams::AUTO) {
                 if (lastAwbEqual != params.wb.equal) {
                     double rm, gm, bm;
