@@ -661,9 +661,7 @@ void ImProcCoordinator::updateWB()
             double rm = params.wb.mult[0];
             double gm = params.wb.mult[1];
             double bm = params.wb.mult[2];
-            std::cout << "GOT MULTIPLIERS: " << rm << ", " << gm << ", " << bm;
             imgsrc->wbCamera2Mul(rm, gm, bm);
-            std::cout << " --> " << rm << ", " << gm << ", " << bm << std::endl;
             currWB = ColorTemp(rm, gm, bm, 1.0);            
         } break;
         case WBParams::AUTO:
@@ -1415,9 +1413,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
             double rm = params.wb.mult[0];
             double gm = params.wb.mult[1];
             double bm = params.wb.mult[2];
-            std::cout << "GOT MULTIPLIERS: " << rm << ", " << gm << ", " << bm;
             imgsrc->wbCamera2Mul(rm, gm, bm);
-            std::cout << " --> " << rm << ", " << gm << ", " << bm << std::endl;
             currWB = ColorTemp(rm, gm, bm, 1.0);
         } break;
         }            
