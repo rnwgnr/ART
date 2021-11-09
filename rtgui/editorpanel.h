@@ -176,8 +176,10 @@ public:
 
     bool getIsProcessing() const
     {
-        return isProcessing;
+        return isProcessing || !can_open_now();
     }
+    void setIsProcessing() { isProcessing = true; }
+    
     void updateProfiles (const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC);
     void updateTPVScrollbar (bool hide);
     void updateHistogramPosition (int oldPosition, int newPosition);
@@ -204,6 +206,8 @@ private:
     void do_queue_image(bool fast_export);
     bool autosave();
 
+    bool can_open_now() const;
+    
     Glib::ustring lastSaveAsFileName;
     bool realized;
 

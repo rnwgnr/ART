@@ -34,6 +34,7 @@
 #include "placesbrowser.h"
 #include "fastexport.h"
 #include "../rtengine/imgiomanager.h"
+#include "../rtengine/improccoordinator.h"
 
 using namespace rtengine::procparams;
 using ScopeType = Options::ScopeType;
@@ -1063,7 +1064,17 @@ void EditorPanel::on_realize ()
     tpc->updateToolState();
 }
 
-void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
+
+bool EditorPanel::can_open_now() const
+{
+    if (!ipc) {
+        return true;
+    }
+    return !static_cast<const rtengine::ImProcCoordinator *>(ipc.get())->is_running();
+}
+
+
+void EditorPanel::open(Thumbnail* tmb, rtengine::InitialImage* isrc)
 {
     close();
 
@@ -1071,12 +1082,12 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
 
     // initialize everything
     openThm = tmb;
-    openThm->increaseRef ();
+    openThm->increaseRef();
 
     fname = openThm->getFileName();
     lastSaveAsFileName = removeExtension (Glib::path_get_basename (fname));
 
-    previewHandler = new PreviewHandler ();
+    previewHandler = new PreviewHandler();
 
     this->isrc = isrc;
     ipc.reset(rtengine::StagedImageProcessor::create(isrc));

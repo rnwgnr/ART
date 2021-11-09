@@ -74,12 +74,12 @@ Crop::~Crop()
     freeAll();
 }
 
-void Crop::destroy()
-{
-    MyMutex::MyLock lock(cropMutex);
-    MyMutex::MyLock processingLock(parent->mProcessing);
-    freeAll();
-}
+// void Crop::destroy()
+// {
+//     MyMutex::MyLock lock(cropMutex);
+//     MyMutex::MyLock processingLock(parent->mProcessing);
+//     freeAll();
+// }
 
 void Crop::setListener(DetailedCropListener* il)
 {
@@ -680,10 +680,11 @@ bool Crop::tryUpdate()
  */
 void Crop::fullUpdate()
 {
+    MyMutex::MyLock processingLock(parent->mProcessing);
     // parent->updaterThreadStart.lock();
 
     // parent->wait_not_running();
-    parent->set_updater_running(true);
+    // parent->set_updater_running(true);
     // if (parent->updaterRunning && parent->thread) {
     //     // Do NOT reset changes here, since in a long chain of events it will lead to chroma_scale not being updated,
     //     // causing Color::lab2rgb to return a black image on some opens
@@ -717,7 +718,7 @@ void Crop::fullUpdate()
         parent->plistener->setProgressState(false);
     }
 
-    parent->set_updater_running(false);
+    // parent->set_updater_running(false);
     // parent->updaterThreadStart.unlock();
 }
 

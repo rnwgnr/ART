@@ -259,7 +259,10 @@ public:
     void updateUnLock () override
     {
         //updaterThreadStart.unlock();
+        set_updater_running(false);
     }
+
+    bool is_running() const;
 
     void setProgressListener (ProgressListener* pl) override
     {

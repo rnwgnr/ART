@@ -253,25 +253,31 @@ void FilePanel::on_NB_switch_page(Gtk::Widget* page, guint page_num)
 }
 
 
-bool FilePanel::fileSelected (Thumbnail* thm)
+FileSelectionListener::Result FilePanel::fileSelected (Thumbnail* thm)
 {
     if (!parent) {
-        return false;
+        return FileSelectionListener::Result::FAIL;
     }
 
     // Check if it's already open BEFORE loading the file
     if (options.tabbedUI && parent->selectEditorPanel(thm->getFileName())) {
-        return true;
+        return FileSelectionListener::Result::OK;
+    }
+
+    if (!options.tabbedUI && parent->epanel->getIsProcessing()) {
+        return FileSelectionListener::Result::BUSY;
     }
 
     // try to open the file
     bool loading = thm->imageLoad( true );
 
     if( !loading ) {
-        return false;
+        return FileSelectionListener::Result::FAIL;
     }
 
     pendingLoadMutex.lock();
+    parent->epanel->setIsProcessing();
+    
     pendingLoad *pl = new pendingLoad();
     pl->complete = false;
     pl->pc = nullptr;
@@ -285,7 +291,7 @@ bool FilePanel::fileSelected (Thumbnail* thm)
     ProgressConnector<rtengine::InitialImage*> *ld = new ProgressConnector<rtengine::InitialImage*>();
     ld->startFunc (sigc::bind(sigc::ptr_fun(&rtengine::InitialImage::load), thm->getFileName (), thm->getType() == FT_Raw, &error, parent->getProgressListener()),
                    sigc::bind(sigc::mem_fun(*this, &FilePanel::imageLoaded), thm, ld) );
-    return true;
+    return FileSelectionListener::Result::OK;
 }
 
 bool FilePanel::addBatchQueueJobs(const std::vector<BatchQueueEntry*>& entries)

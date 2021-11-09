@@ -90,7 +90,7 @@ public:
     void fullUpdate  () override;  // called via thread
 
     void setListener    (DetailedCropListener* il) override;
-    void destroy        () override;
+    void destroy        () override {}
     int get_skip();
     int getLeftBorder();
     int getUpperBorder();

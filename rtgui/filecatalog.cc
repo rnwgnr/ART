@@ -1134,20 +1134,30 @@ void FileCatalog::refreshHeight ()
     set_size_request(0, newHeight + 2); // HOMBRE: yeah, +2, there's always 2 pixels missing... sorry for this dirty hack O:)
 }
 
-void FileCatalog::_openImage(const std::vector<Thumbnail*>& tmb)
+void FileCatalog::_openImage() //const std::vector<Thumbnail*>& tmb)
 {
     if (enabled && listener) {
+        auto &tmb = to_open_;
         bool continueToLoad = true;
 
+        size_t j = 0;
         for (size_t i = 0; i < tmb.size() && continueToLoad; i++) {
             // Open the image here, and stop if in Single Editor mode, or if an image couldn't
             // be opened, would it be because the file doesn't exist or because of lack of RAM
-            if( !(listener->fileSelected (tmb[i])) && !options.tabbedUI ) {
+            auto res = listener->fileSelected(tmb[i]);
+            if (res == FileSelectionListener::Result::BUSY) {
+                tmb[j++] = tmb[i];
+                continue;
+            }
+            
+            if (res == FileSelectionListener::Result::FAIL && !options.tabbedUI) {
                 continueToLoad = false;
             }
 
             tmb[i]->decreaseRef ();
         }
+
+        tmb.resize(j);
     }
 }
 
@@ -1164,15 +1174,16 @@ void FileCatalog::filterApplied()
 
 void FileCatalog::openRequested(const std::vector<Thumbnail*>& tmb)
 {
+    to_open_ = tmb;
     for (const auto thumb : tmb) {
         thumb->increaseRef();
     }
 
     idle_register.add(
-        [this, tmb]() -> bool
+        [this]() -> bool
         {
-            _openImage(tmb);
-            return false;
+            _openImage();
+            return !to_open_.empty();
         }
     );
 }
@@ -1881,11 +1892,12 @@ void FileCatalog::addAndOpenFile (const Glib::ustring& fname)
         previewReady(selectedDirectoryId, entry);
         // open the file
         tmb->increaseRef();
+        to_open_ = {tmb};
         idle_register.add(
             [this, tmb]() -> bool
             {
-                _openImage({tmb});
-                return false;
+                _openImage();
+                return !to_open_.empty();
             }
         );
 

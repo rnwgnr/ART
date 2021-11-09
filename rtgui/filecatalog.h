@@ -149,7 +149,8 @@ private:
     IdleRegister idle_register;
 
     BatchQueue *bqueue_;    
-
+    std::vector<Thumbnail *> to_open_;
+    
     void addAndOpenFile (const Glib::ustring& fname);
     void addFile (const Glib::ustring& fName);
     std::vector<Glib::ustring> getFileList ();
@@ -237,7 +238,7 @@ public:
 
     void on_realize() override;
     void reparseDirectory ();
-    void _openImage (const std::vector<Thumbnail*>& tmb);
+    void _openImage();
 
     void zoomIn ();
     void zoomOut ();

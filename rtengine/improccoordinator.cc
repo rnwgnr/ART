@@ -1730,4 +1730,18 @@ void ImProcCoordinator::set_updater_running(bool val)
     }
 }
 
+
+bool ImProcCoordinator::is_running() const
+{
+    if (updaterRunning) {
+        return true;
+    }
+    for (auto c : crops) {
+        if (c->updating) {
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace rtengine
