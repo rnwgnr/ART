@@ -276,7 +276,9 @@ FileSelectionListener::Result FilePanel::fileSelected (Thumbnail* thm)
     }
 
     pendingLoadMutex.lock();
-    parent->epanel->setIsProcessing();
+    if (parent->epanel) {
+        parent->epanel->setIsProcessing();
+    }
     
     pendingLoad *pl = new pendingLoad();
     pl->complete = false;
