@@ -275,7 +275,8 @@ set_target_properties(rth PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_N
 set_target_properties(rth-cli PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART-cli)
 
 # Add linked libraries dependencies to executables targets
-target_link_libraries(rth rtengine
+target_link_libraries(rth PUBLIC
+    rtengine
     ${CANBERRA-GTK_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${EXTRA_LIB_RTGUI}
@@ -295,11 +296,11 @@ target_link_libraries(rth rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${MALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
 
-target_link_libraries(rth-cli rtengine
+target_link_libraries(rth-cli PUBLIC
+    rtengine
     ${CAIROMM_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${EXTRA_LIB_RTGUI}
@@ -317,9 +318,13 @@ target_link_libraries(rth-cli rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${MALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
+
+if(HAS_MIMALLOC)
+    target_link_libraries(rth PUBLIC mimalloc)
+    target_link_libraries(rth-cli PUBLIC mimalloc)
+endif()
 
 # Install executables
 install(TARGETS rth DESTINATION ${BINDIR})

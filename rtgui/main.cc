@@ -52,6 +52,10 @@
 #include "conio.h"
 #endif
 
+#ifdef WITH_MIMALLOC
+#  include <mimalloc.h>
+#endif
+
 // Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
 #define ECLIPSE_ARGS 0
 
@@ -366,6 +370,10 @@ void show_gimp_plugin_info_dialog(Gtk::Window *parent)
 
 int main (int argc, char **argv)
 {
+#ifdef WITH_MIMALLOC
+    mi_version();
+#endif
+    
     setlocale (LC_ALL, "");
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 

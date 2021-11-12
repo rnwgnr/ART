@@ -15,5 +15,6 @@ Build type: ${BUILD_TYPE}
 Build flags: ${CXX_FLAGS}
 Link flags: ${LFLAGS}
 OpenMP support: ${OPTION_OMP}
+Mi-malloc: ${ART_MIMALLOC_VERSION_INFO}
 Build OS: ${BUILDINFO_OS}
 Build date: ${BUILDINFO_DATE}

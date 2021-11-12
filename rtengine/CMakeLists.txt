@@ -164,6 +164,7 @@ set(RTENGINESOURCEFILES
     imgiomanager.cc
     lensexif.cc
     nlmeans.cc
+    newdelete.cc
     )
 
 

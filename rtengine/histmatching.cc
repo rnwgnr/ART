@@ -28,7 +28,7 @@
 #include "improcfun.h"
 #include "array2D.h"
 //#define BENCHMARK
-#include "StopWatch.h"
+//#include "StopWatch.h"
 #include <iostream>
 
 
@@ -443,7 +443,7 @@ double get_expcomp(const FramesMetaData *md)
 
 void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, std::vector<double> &outCurve, std::vector<double> &outCurve2)
 {
-    BENCHFUN
+//    BENCHFUN
 
     if (settings->verbose) {
         std::cout << "performing histogram matching for " << getFileName() << " on the embedded thumbnail" << std::endl;
