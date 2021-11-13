@@ -771,7 +771,9 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            src[y][x] = buf[(y + K) * pW + x + K] / norm;
+            int idx = (y + K) * pW + x + K;
+            assert(idx < pH * pW);
+            src[y][x] = buf[idx] / norm;
         }
     }
 }
@@ -864,7 +866,7 @@ bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2
 
     const int K = kernel.width();
     const int W = src.width();
-    const int H = dst.width();
+    const int H = src.height();
     const int pW = find_fast_dim(W + K);
     const int pH = find_fast_dim(H + K);
 
