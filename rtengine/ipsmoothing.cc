@@ -46,6 +46,253 @@ extern MyMutex *fftwMutex;
 
 namespace {
 
+enum class Channel {
+    L,
+    C,
+    LC
+};
+
+
+template <bool use_blending>
+void guided_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, const TMatrix &iws, Channel chan, int radius, float epsilon, int strength, double scale, bool multithread)
+{
+    const auto rgb2yuv =
+        [&](float R, float G, float B, float &Y, float &u, float &v) -> void
+        {
+            Color::rgb2yuv(R, G, B, Y, u, v, ws);
+        };
+
+    const auto yuv2rgb =
+        [&](float Y, float u, float v, float &R, float &G, float &B) -> void
+        {
+            Color::yuv2rgb(Y, u, v, R, G, B, ws);
+        };
+        
+    int r = max(int(round(radius / scale)), 0);
+    if (r > 0 && strength > 0) {
+        const int W = R.width();
+        const int H = R.height();
+
+        array2D<float> iR(W, H, R, ARRAY2D_ALIGNED);
+        array2D<float> iG(W, H, G, ARRAY2D_ALIGNED);
+        array2D<float> iB(W, H, B, ARRAY2D_ALIGNED);
+
+        const float blend = LIM01(float(strength) / 100.f);
+        const bool rgb = (chan == Channel::LC);
+        const bool luminance = (chan == Channel::L);
+        const bool do_blend = use_blending && strength < 100;
+
+        if (rgb) {
+            rtengine::guidedFilterLog(10.f, R, r, epsilon, multithread);
+            rtengine::guidedFilterLog(10.f, G, r, epsilon, multithread);
+            rtengine::guidedFilterLog(10.f, B, r, epsilon, multithread);
+            if (!do_blend) {
+                return;
+            }
+        } else {
+            array2D<float> guide(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    float l = Color::rgbLuminance(R[y][x], G[y][x], B[y][x], ws);
+                    guide[y][x] = xlin2log(max(l, 0.f), 10.f);
+                }
+            }
+            rtengine::guidedFilterLog(guide, 10.f, R, r, epsilon, multithread);
+            rtengine::guidedFilterLog(guide, 10.f, G, r, epsilon, multithread);
+            rtengine::guidedFilterLog(guide, 10.f, B, r, epsilon, multithread);
+        }
+
+#ifdef _OPENMP
+        #pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float rr = R[y][x];
+                float gg = G[y][x];
+                float bb = B[y][x];
+                float ir = iR[y][x];
+                float ig = iG[y][x];
+                float ib = iB[y][x];
+                
+                const float bf = blend;
+                if (rgb) {
+                    R[y][x] = intp(bf, rr, ir);
+                    G[y][x] = intp(bf, gg, ig);
+                    B[y][x] = intp(bf, bb, ib);
+                } else {
+                    float iY, iu, iv;
+                    float oY, ou, ov;
+                    rgb2yuv(ir, ig, ib, iY, iu, iv);
+                    rgb2yuv(rr, gg, bb, oY, ou, ov);
+                    if (luminance) {
+                        if (do_blend) {
+                            oY = intp(bf, oY, iY);
+                        }
+                        ou = iu;
+                        ov = iv;
+                    } else {
+                        float bump = oY > 1e-5f ? iY / oY : 1.f;
+                        if (do_blend) {
+                            ou = intp(bf, ou, iu) * bump;
+                            ov = intp(bf, ov, iv) * bump;
+                        } else {
+                            ou *= bump;
+                            ov *= bump;
+                        }
+                        oY = iY;
+                    }
+                    yuv2rgb(oY, ou, ov, R[y][x], G[y][x], B[y][x]);
+                }
+            }
+        }
+    }
+}
+
+void find_region(const array2D<float> &mask, int &min_x, int &min_y, int &max_x, int &max_y)
+{
+    const int W = mask.width();
+    const int H = mask.height();
+    
+    min_x = W - 1;
+    min_y = H - 1;
+    max_x = 0;
+    max_y = 0;
+
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            if (mask[y][x] > 0.f) {
+                min_x = std::min(min_x, x);
+                max_x = std::max(max_x, x);
+                min_y = std::min(min_y, y);
+                max_y = std::max(max_y, y);
+            }
+        }
+    }
+
+    ++max_x;
+    ++max_y;
+}
+
+
+void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, float *buf, const TMatrix &ws, Channel chan, double sigma, double scale, bool multithread)
+{
+    double s = sigma / scale;
+    const int W = R.width();
+    const int H = R.height();
+
+    const auto blur =
+        [&](array2D<float> &a) -> void
+        {
+#ifdef _OPENMP
+#           pragma omp parallel if (multithread)
+#endif
+            {
+                gaussianBlur(a, a, W, H, s, buf);
+            }
+        };
+
+    if (chan == Channel::LC) {
+        blur(R);
+        blur(G);
+        blur(B);
+    } else {
+        const bool luminance = (chan == Channel::L);
+        array2D<float> iR(W, H, R, ARRAY2D_ALIGNED);
+        array2D<float> iG(W, H, G, ARRAY2D_ALIGNED);
+        array2D<float> iB(W, H, B, ARRAY2D_ALIGNED);
+
+        blur(R);
+        blur(G);
+        blur(B);
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float iY, iu, iv;
+                float oY, ou, ov;
+                Color::rgb2yuv(iR[y][x], iG[y][x], iB[y][x], iY, iu, iv, ws);
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], oY, ou, ov, ws);
+                if (luminance) {
+                    Color::yuv2rgb(oY, iu, iv, R[y][x], G[y][x], B[y][x], ws);
+                } else {
+                    Color::yuv2rgb(iY, ou, ov, R[y][x], G[y][x], B[y][x], ws);
+                }
+            }
+        }
+    }
+}
+
+
+void nlmeans_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, const TMatrix &iws, Channel chan, int strength, int detail, int iterations, double scale, bool multithread)
+{
+    array2D<float> iY;
+    const int W = R.width(), H = R.height();
+
+    if (chan == Channel::L) {
+        iY(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            float u, v;
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
+            }
+        }
+        for (int i = 0; i < iterations; ++i) {
+            denoise::NLMeans(iY, 1.f, strength, detail, scale, multithread);
+        }
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            float Y, u, v;
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
+                Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
+            }
+        }
+    } else {
+        if (chan == Channel::C) {
+            iY(W, H, ARRAY2D_ALIGNED);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                float u, v;
+                for (int x = 0; x < W; ++x) {
+                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
+                }
+            }
+        }
+        
+        for (int i = 0; i < iterations; ++i) {
+            denoise::NLMeans(R, 1.f, strength, detail, scale, multithread);
+            denoise::NLMeans(G, 1.f, strength, detail, scale, multithread);
+            denoise::NLMeans(B, 1.f, strength, detail, scale, multithread);
+        }
+        
+        if (chan == Channel::C) {
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                float Y, u, v;
+                for (int x = 0; x < W; ++x) {
+                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
+                    Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
+                }
+            }
+        }
+    }
+}
+
+
 // code adapted from darktable, src/iop/blurs.c
 /*
     This file is part of darktable,
@@ -220,7 +467,7 @@ bool build_blur_kernel(array2D<float> &out, const SmoothingParams &params, int r
 {
     const auto &r = params.regions[region];
     
-    int radius = std::ceil(r.radius / scale);
+    int radius = std::round(r.radius / scale);
     if (radius < 1) {
         return false;
     }
@@ -252,290 +499,6 @@ void lens_motion_blur(ImProcData &im, Imagefloat *rgb, int region)
     }
 }
 
-//-----------------------------------------------------------------------------
-
-enum class Channel {
-    L,
-    C,
-    LC
-};
-
-
-template <bool use_blending>
-void guided_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, const TMatrix &iws, Channel chan, int radius, float epsilon, int strength, double scale, bool multithread)
-{
-    const auto rgb2yuv =
-        [&](float R, float G, float B, float &Y, float &u, float &v) -> void
-        {
-            Color::rgb2yuv(R, G, B, Y, u, v, ws);
-        };
-
-    const auto yuv2rgb =
-        [&](float Y, float u, float v, float &R, float &G, float &B) -> void
-        {
-            Color::yuv2rgb(Y, u, v, R, G, B, ws);
-        };
-        
-    int r = max(int(round(radius / scale)), 0);
-    if (r > 0 && strength > 0) {
-        const int W = R.width();
-        const int H = R.height();
-
-        array2D<float> iR(W, H, R, ARRAY2D_ALIGNED);
-        array2D<float> iG(W, H, G, ARRAY2D_ALIGNED);
-        array2D<float> iB(W, H, B, ARRAY2D_ALIGNED);
-
-        const float blend = LIM01(float(strength) / 100.f);
-        const bool rgb = (chan == Channel::LC);
-        const bool luminance = (chan == Channel::L);
-        const bool do_blend = use_blending && strength < 100;
-
-        if (rgb) {
-            rtengine::guidedFilterLog(10.f, R, r, epsilon, multithread);
-            rtengine::guidedFilterLog(10.f, G, r, epsilon, multithread);
-            rtengine::guidedFilterLog(10.f, B, r, epsilon, multithread);
-            if (!do_blend) {
-                return;
-            }
-        } else {
-            array2D<float> guide(W, H, ARRAY2D_ALIGNED);
-#ifdef _OPENMP
-#           pragma omp parallel for if (multithread)
-#endif
-            for (int y = 0; y < H; ++y) {
-                for (int x = 0; x < W; ++x) {
-                    float l = Color::rgbLuminance(R[y][x], G[y][x], B[y][x], ws);
-                    guide[y][x] = xlin2log(max(l, 0.f), 10.f);
-                }
-            }
-            rtengine::guidedFilterLog(guide, 10.f, R, r, epsilon, multithread);
-            rtengine::guidedFilterLog(guide, 10.f, G, r, epsilon, multithread);
-            rtengine::guidedFilterLog(guide, 10.f, B, r, epsilon, multithread);
-        }
-
-#ifdef _OPENMP
-        #pragma omp parallel for if (multithread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                float rr = R[y][x];
-                float gg = G[y][x];
-                float bb = B[y][x];
-                float ir = iR[y][x];
-                float ig = iG[y][x];
-                float ib = iB[y][x];
-                
-                const float bf = blend;
-                if (rgb) {
-                    R[y][x] = intp(bf, rr, ir);
-                    G[y][x] = intp(bf, gg, ig);
-                    B[y][x] = intp(bf, bb, ib);
-                } else {
-                    float iY, iu, iv;
-                    float oY, ou, ov;
-                    rgb2yuv(ir, ig, ib, iY, iu, iv);
-                    rgb2yuv(rr, gg, bb, oY, ou, ov);
-                    if (luminance) {
-                        if (do_blend) {
-                            oY = intp(bf, oY, iY);
-                        }
-                        ou = iu;
-                        ov = iv;
-                    } else {
-                        float bump = oY > 1e-5f ? iY / oY : 1.f;
-                        if (do_blend) {
-                            ou = intp(bf, ou, iu) * bump;
-                            ov = intp(bf, ov, iv) * bump;
-                        } else {
-                            ou *= bump;
-                            ov *= bump;
-                        }
-                        oY = iY;
-                    }
-                    yuv2rgb(oY, ou, ov, R[y][x], G[y][x], B[y][x]);
-                }
-            }
-        }
-    }
-}
-
-void find_region(const array2D<float> &mask, int &min_x, int &min_y, int &max_x, int &max_y)
-{
-    const int W = mask.width();
-    const int H = mask.height();
-    
-    min_x = W - 1;
-    min_y = H - 1;
-    max_x = 0;
-    max_y = 0;
-
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            if (mask[y][x] > 0.f) {
-                min_x = std::min(min_x, x);
-                max_x = std::max(max_x, x);
-                min_y = std::min(min_y, y);
-                max_y = std::max(max_y, y);
-            }
-        }
-    }
-
-    ++max_x;
-    ++max_y;
-}
-
-
-void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, float *buf, const TMatrix &ws, Channel chan, double sigma, double scale, bool multithread)
-{
-    static constexpr double HIGH_PRECISION_THRESHOLD = 2.0;
-    
-    double s = sigma / scale;
-    const int W = R.width();
-    const int H = R.height();
-
-    array2D<float> kernel;
-    const bool high_precision = s > 0 && s < HIGH_PRECISION_THRESHOLD;
-    if (high_precision) {
-        const int SAMPLING_SIZE = std::max(int(100 / scale), 1);
-        int radius = int(std::ceil(3 * s));
-        int size = 2 * radius + 1;
-        kernel(size, size);
-        float s2sq = SQR(s) * 2.f;
-        float s2sqpi_inv = 1.f / (s2sq * RT_PI_F);
-
-        for (int y = -radius; y <= radius; ++y) {
-            for (int x = -radius; x <= radius; ++x) {
-                // float xx = x, yy = y;
-                float val = 0.f; //s2sqpi_inv * xexpf(-(SQR(xx) + SQR(yy))/s2sq);
-                for (int dy = 0; dy < SAMPLING_SIZE; ++dy) {
-                    float yy = y + float(dy)/float(SAMPLING_SIZE);
-                    for (int dx = 0; dx < SAMPLING_SIZE; ++dx) {
-                        float xx = x + float(dx)/float(SAMPLING_SIZE);
-                        float g = s2sqpi_inv * xexpf(-(SQR(xx) + SQR(yy))/s2sq);
-                        val += g;
-                    }
-                }
-                kernel[y+radius][x+radius] = val;
-            }
-        }
-
-        float norm = compute_norm(kernel);
-        normalize(kernel, norm);
-    }
-
-    const auto blur =
-        [&](array2D<float> &a) -> void
-        {
-            if (high_precision) {
-                convolution(kernel, a, a, multithread);
-            } else {
-#ifdef _OPENMP
-#               pragma omp parallel if (multithread)
-#endif
-                gaussianBlur(a, a, W, H, s, buf);
-            }
-        };
-
-    if (chan == Channel::LC) {
-        blur(R);
-        blur(G);
-        blur(B);
-    } else {
-        const bool luminance = (chan == Channel::L);
-        array2D<float> iR(W, H, R, ARRAY2D_ALIGNED);
-        array2D<float> iG(W, H, G, ARRAY2D_ALIGNED);
-        array2D<float> iB(W, H, B, ARRAY2D_ALIGNED);
-
-        blur(R);
-        blur(G);
-        blur(B);
-
-#ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                float iY, iu, iv;
-                float oY, ou, ov;
-                Color::rgb2yuv(iR[y][x], iG[y][x], iB[y][x], iY, iu, iv, ws);
-                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], oY, ou, ov, ws);
-                if (luminance) {
-                    Color::yuv2rgb(oY, iu, iv, R[y][x], G[y][x], B[y][x], ws);
-                } else {
-                    Color::yuv2rgb(iY, ou, ov, R[y][x], G[y][x], B[y][x], ws);
-                }
-            }
-        }
-    }
-}
-
-
-void nlmeans_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, const TMatrix &iws, Channel chan, int strength, int detail, int iterations, double scale, bool multithread)
-{
-    array2D<float> iY;
-    const int W = R.width(), H = R.height();
-
-    if (chan == Channel::L) {
-        iY(W, H, ARRAY2D_ALIGNED);
-#ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            float u, v;
-            for (int x = 0; x < W; ++x) {
-                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
-            }
-        }
-        for (int i = 0; i < iterations; ++i) {
-            denoise::NLMeans(iY, 1.f, strength, detail, scale, multithread);
-        }
-#ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            float Y, u, v;
-            for (int x = 0; x < W; ++x) {
-                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
-                Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
-            }
-        }
-    } else {
-        if (chan == Channel::C) {
-            iY(W, H, ARRAY2D_ALIGNED);
-#ifdef _OPENMP
-#           pragma omp parallel for if (multithread)
-#endif
-            for (int y = 0; y < H; ++y) {
-                float u, v;
-                for (int x = 0; x < W; ++x) {
-                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], iY[y][x], u, v, ws);
-                }
-            }
-        }
-        
-        for (int i = 0; i < iterations; ++i) {
-            denoise::NLMeans(R, 1.f, strength, detail, scale, multithread);
-            denoise::NLMeans(G, 1.f, strength, detail, scale, multithread);
-            denoise::NLMeans(B, 1.f, strength, detail, scale, multithread);
-        }
-        
-        if (chan == Channel::C) {
-#ifdef _OPENMP
-#           pragma omp parallel for if (multithread)
-#endif
-            for (int y = 0; y < H; ++y) {
-                float Y, u, v;
-                for (int x = 0; x < W; ++x) {
-                    Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y, u, v, ws);
-                    Color::yuv2rgb(iY[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
-                }
-            }
-        }
-    }
-}
-
-
-
 } // namespace
 
 
@@ -564,6 +527,7 @@ void denoiseGuidedSmoothing(ImProcData &im, Imagefloat *rgb)
     
     rgb->normalizeFloatTo65535(im.multiThread);
 }
+
 
 } // namespace denoise
 
