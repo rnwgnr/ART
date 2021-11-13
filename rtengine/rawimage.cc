@@ -528,12 +528,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         if (err != LIBRAW_SUCCESS && err != LIBRAW_FILE_UNSUPPORTED) {
             return err;
         } else if (err == LIBRAW_FILE_UNSUPPORTED) {
-            if (strcmp(libraw_->imgdata.idata.normalized_make, "Fujifilm") == 0 && strncmp(libraw_->imgdata.idata.normalized_model, "GFX", 3) == 0) {
-                // might be a GFX 100 "pseudo ARQ"
-                use_internal_decoder_ = true;
-            } else {
-                return err;
-            }
+            // fallback to the internal one
+            use_internal_decoder_ = true;
         } else if (strncmp(libraw_->unpack_function_name(), "sony_arq_load_raw", 17) == 0) {
             use_internal_decoder_ = true;
         } else {
@@ -648,6 +644,13 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 RT_whitelevel_from_constant = ThreeValBool::F;
                 RT_blacklevel_from_constant = ThreeValBool::F;
             }
+
+            if (is_foveon) {
+                raw_width = width;
+                raw_height = height;
+                top_margin = 0;
+                left_margin = 0;
+            }
         }
     }
     if (use_internal_decoder_) {
@@ -752,9 +755,6 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 if (err) {
                     return err;
                 }
-                // image = (ImageType)malloc(iwidth * iheight * sizeof(*image));
-                // memcpy(image, libraw_->imgdata.image, iwidth * iheight * sizeof(*image));
-                // libraw_->free_image();
                 image = libraw_->imgdata.image;
             }
 
@@ -881,7 +881,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             }
             raw_image = nullptr;
         } else {
-            if (get_maker() == "Sigma" && cc && cc->has_rawCrop(width, height)) { // foveon images
+            if (get_maker() == "Sigma" && cc && cc->has_rawCrop(width, height) && use_internal_decoder_) { // foveon images
                 raw_crop_cc = true;
                 int lm, tm, w, h;
                 cc->get_rawCrop(width, height, lm, tm, w, h);
@@ -954,16 +954,16 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         }
 
         if (black_c4[0] == -1) {
-            if(isXtrans())
+            if (isXtrans()) {
                 for (int c = 0; c < 4; c++) {
                     black_c4[c] = cblack[6];
                 }
-            else
-
+            } else {
                 // RT constants not set, bring in the DCRAW single channel black constant
                 for (int c = 0; c < 4; c++) {
                     black_c4[c] = black + cblack[c];
                 }
+            }
         } else {
             black_from_cc = true;
         }

@@ -359,6 +359,9 @@ bool FilePanel::imageLoaded( Thumbnail* thm, ProgressConnector<rtengine::Initial
                 parent->set_title_decorated(pl->thm->getFileName());
             }
         } else {
+            if (parent->epanel) {
+                parent->epanel->refreshProcessingState(false);
+            }
             Glib::ustring msg_ = Glib::ustring("<b>") + M("MAIN_MSG_CANNOTLOAD") + " \"" + thm->getFileName() + "\" .\n</b>";
             Gtk::MessageDialog msgd (*parent, msg_, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
             msgd.run ();
