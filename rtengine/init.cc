@@ -47,8 +47,9 @@ std::unique_ptr<ThreadPool> ThreadPool::instance_;
 
 const Settings* settings;
 
-MyMutex* lcmsMutex = nullptr;
+MyMutex *lcmsMutex = nullptr;
 MyMutex *fftwMutex = nullptr;
+MyMutex *librawMutex = nullptr;
 
 int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDir, bool loadAll)
 {
@@ -127,6 +128,9 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     delete lcmsMutex;
     lcmsMutex = new MyMutex;
     fftwMutex = new MyMutex;
+#ifdef ART_USE_LIBRAW
+    librawMutex = new MyMutex;
+#endif
 
     return 0;
 }

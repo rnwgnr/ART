@@ -25,8 +25,9 @@
 
 namespace rtengine {
 
-
 extern const Settings *settings;
+extern MyMutex *librawMutex;
+
 
 RawImage::RawImage(const Glib::ustring &name)
     : DCraw()
@@ -734,7 +735,12 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (err) {
                 return err;
             }
-            err = libraw_->unpack();
+            {
+#ifdef LIBRAW_USE_OPENMP
+                MyMutex::MyLock lock(*librawMutex);
+#endif
+                err = libraw_->unpack();
+            }
             if (err) {
                 return err;
             }
@@ -750,8 +756,11 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                     }
                 }
             } else {
+#ifdef LIBRAW_USE_OPENMP
+                MyMutex::MyLock lock(*librawMutex);
+#endif
                 float_raw_image = nullptr;
-                int err = libraw_->raw2image();
+                err = libraw_->raw2image();
                 if (err) {
                     return err;
                 }
