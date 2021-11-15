@@ -763,7 +763,7 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
 
-    const int K = 2 * kernel_radius + 1;
+    const int K = 2 * kernel_radius;// + 1;
     const float norm = pH * pW;
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
@@ -880,6 +880,46 @@ bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2
     fftwf_free(buf);
 
     return true;
+}
+
+
+void build_gaussian_kernel(float sigma, array2D<float> &res)
+{
+    static constexpr float threshold = 0.005f;
+    int sz = (int(std::floor(1 + 2 * std::sqrt(-2.f * SQR(sigma) * std::log(threshold)))) + 1) | 1;
+    const float two_sigma2 = 2.f * SQR(sigma);
+    const auto gauss =
+        [two_sigma2](float x) -> float
+        {
+            return std::exp(-SQR(x)/two_sigma2);
+        };
+    const auto gauss_integral =
+        [&](float a, float b) -> float
+        {
+            return ((b - a) / 6.f) * (gauss(a) + 4.f * gauss((a + b) / 2.f) + gauss(b));
+        };
+    std::vector<float> row(sz);
+    const float halfsz = float(sz / 2);
+    for (int i = 0; i < sz; ++i) {
+        float x = float(i) - halfsz;
+        float val = gauss_integral(x - 0.5f, x + 0.5f);
+        row[i] = val;
+    }
+    res(sz, sz);
+    double totd = 0.0;
+    for (int i = 0; i < sz; ++i) {
+        for (int j = 0; j < sz; ++j) {
+            float val = row[i] * row[j];
+            res[i][j] = val;
+            totd += val;
+        }
+    }
+    const float tot = totd;
+    for (int i = 0; i < sz; ++i) {
+        for (int j = 0; j < sz; ++j) {
+            res[i][j] /= tot;
+        }
+    }
 }
 
 } // namespace rtengine

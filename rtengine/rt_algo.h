@@ -47,4 +47,6 @@ float polyFill(float **buffer, int width, int height, const std::vector<CoordD> 
 bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat *dst, bool multithread);
 bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2D<float> &dst, bool multithread);
 
+void build_gaussian_kernel(float sigma, array2D<float> &res);
+
 } // namespace rtengine

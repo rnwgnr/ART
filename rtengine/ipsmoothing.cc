@@ -396,31 +396,7 @@ void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B,
     array2D<float> kernel;
     const bool high_precision = s > 0 && s < HIGH_PRECISION_THRESHOLD;
     if (high_precision) {
-        const int SAMPLING_SIZE = std::max(int(100 / scale), 1);
-        int radius = int(std::ceil(3 * s));
-        int size = 2 * radius + 1;
-        kernel(size, size);
-        float s2sq = SQR(s) * 2.f;
-        float s2sqpi_inv = 1.f / (s2sq * RT_PI_F);
-
-        for (int y = -radius; y <= radius; ++y) {
-            for (int x = -radius; x <= radius; ++x) {
-                // float xx = x, yy = y;
-                float val = 0.f; //s2sqpi_inv * xexpf(-(SQR(xx) + SQR(yy))/s2sq);
-                for (int dy = 0; dy < SAMPLING_SIZE; ++dy) {
-                    float yy = y + float(dy)/float(SAMPLING_SIZE);
-                    for (int dx = 0; dx < SAMPLING_SIZE; ++dx) {
-                        float xx = x + float(dx)/float(SAMPLING_SIZE);
-                        float g = s2sqpi_inv * xexpf(-(SQR(xx) + SQR(yy))/s2sq);
-                        val += g;
-                    }
-                }
-                kernel[y+radius][x+radius] = val;
-            }
-        }
-
-        float norm = compute_norm(kernel);
-        normalize(kernel, norm);
+        build_gaussian_kernel(s, kernel);
     }
 
     const auto blur =
