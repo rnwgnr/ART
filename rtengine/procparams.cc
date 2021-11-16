@@ -3863,6 +3863,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     mode = "RGB";
                 } else if (l.mode == ColorCorrectionParams::Mode::HSL) {
                     mode = "HSL";
+                } else if (l.mode == ColorCorrectionParams::Mode::JZAZBZ) {
+                    mode = "Jzazbz";
                 }
                 putToKeyfile("ColorCorrection", Glib::ustring("Mode_") + n, mode, keyFile);
                 {
@@ -5157,6 +5159,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             cur.mode = ColorCorrectionParams::Mode::RGB;
                         } else if (mode == "HSL") {
                             cur.mode = ColorCorrectionParams::Mode::HSL;
+                        } else if (mode == "Jzazbz") {
+                            cur.mode = ColorCorrectionParams::Mode::JZAZBZ;
                         }
                         found = true;
                         done = false;

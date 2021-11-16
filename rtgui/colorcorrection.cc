@@ -153,7 +153,15 @@ public:
                                   {
                                       return int(v * 1000) / 1000.f;
                                   };
-            return Glib::ustring::compose("x=%1 y=%2 S=%3 So=%8 h=%9\ns=%4 o=%5 p=%6 P=%7", round_ab(r.a), round_ab(r.b), r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation, r.hueshift);
+            Glib::ustring cx, cy;
+            if (r.mode == rtengine::procparams::ColorCorrectionParams::Mode::YUV) {
+                cx = Glib::ustring::compose("x=%1", round_ab(r.a));
+                cy = Glib::ustring::compose("y=%1", round_ab(r.b));
+            } else {
+                cx = Glib::ustring::compose("az=%1", round_ab(r.a));
+                cy = Glib::ustring::compose("bz=%1", round_ab(r.b));
+            }
+            return Glib::ustring::compose("%1 %2 S=%3 So=%8 h=%9\ns=%4 o=%5 p=%6 P=%7", cx, cy, r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation, r.hueshift);
         }   break;
         }
     }
@@ -247,6 +255,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     mode->append(M("TP_COLORCORRECTION_MODE_COMBINED"));
     mode->append(M("TP_COLORCORRECTION_MODE_RGBCHANNELS"));
     mode->append(M("TP_COLORCORRECTION_MODE_HSL"));
+    mode->append(M("TP_COLORCORRECTION_MODE_JZAZBZ"));
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &ColorCorrection::modeChanged));
     
@@ -597,6 +606,9 @@ void ColorCorrection::regionGet(int idx)
     case 2:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::HSL;
         break;
+    case 3:
+        r.mode = rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ;
+        break;
     default:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::YUV;
     }
@@ -645,6 +657,9 @@ void ColorCorrection::regionShow(int idx)
     case rtengine::procparams::ColorCorrectionParams::Mode::RGB:
         mode->set_active(1);
         break;
+    case rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ:
+        mode->set_active(3);
+        break;
     default:
         mode->set_active(0);
     }
@@ -682,9 +697,10 @@ void ColorCorrection::modeChanged()
     removeIfThere(box, box_combined);
     removeIfThere(box, box_rgb);
     removeIfThere(box, box_hsl);
-    if (mode->get_active_row_number() == 0) {
+    int row = mode->get_active_row_number();
+    if (row == 0 || row == 3) {
         box->pack_start(*box_combined);
-    } else if (mode->get_active_row_number() == 1) {
+    } else if (row == 1) {
         box->pack_start(*box_rgb);
     } else {
         box->pack_start(*box_hsl);
@@ -694,6 +710,7 @@ void ColorCorrection::modeChanged()
         labMasks->setEdited(true);        
         listener->panelChanged(EvMode, mode->get_active_text());
     }
+    wheel->setEditID(row == 3 ? EUID_ColorCorrection_Wheel_Jzazbz : EUID_ColorCorrection_Wheel, BT_IMAGEFLOAT);
 }
 
 

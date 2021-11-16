@@ -1270,7 +1270,8 @@ struct ColorCorrectionParams {
     enum class Mode {
         YUV,
         RGB,
-        HSL
+        HSL,
+        JZAZBZ
     };
     struct Region {
         double a;
