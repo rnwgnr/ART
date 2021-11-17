@@ -1181,7 +1181,7 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     hb0->pack_end (*moveExtUp, Gtk::PACK_SHRINK, 4);
     hb0->pack_end (*delExt, Gtk::PACK_SHRINK, 4);
     hb0->pack_end (*addExt, Gtk::PACK_SHRINK, 4);
-    extensions = Gtk::manage ( new Gtk::TreeView () );
+    extensions = Gtk::manage(new Gtk::TreeView());
     Gtk::ScrolledWindow* hscrollw = Gtk::manage ( new Gtk::ScrolledWindow () );
     hscrollw->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
     hscrollw->add (*extensions);
@@ -1190,6 +1190,7 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     extensions->append_column_editable ("Enabled", extensionColumns.enabled);
     extensions->append_column ("Extension", extensionColumns.ext);
     extensions->set_headers_visible (false);
+    setTreeViewCssProvider(extensions);
     vbre->pack_start (*hscrollw);
     vbre->pack_start (*hb0, Gtk::PACK_SHRINK, 4);
 

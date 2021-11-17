@@ -28,11 +28,8 @@
 #include "dynamicprofilepanel.h"
 #include "exportpanel.h"
 
-class Preferences : public Gtk::Dialog, public ProfileStoreListener
-{
-
-    class ExtensionColumns : public Gtk::TreeModel::ColumnRecord
-    {
+class Preferences : public Gtk::Dialog, public ProfileStoreListener {
+    class ExtensionColumns: public Gtk::TreeModel::ColumnRecord {
     public:
         Gtk::TreeModelColumn<bool>  enabled;
         Gtk::TreeModelColumn<Glib::ustring>  ext;
@@ -45,9 +42,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     ExtensionColumns extensionColumns;
     Glib::RefPtr<Gtk::ListStore> extensionModel;
 
-
-    class ThemeFilename
-    {
+    class ThemeFilename {
     public:
         Glib::ustring shortFName;
         Glib::ustring longFName;

@@ -1859,3 +1859,11 @@ void BackBuffer::copySurface(Cairo::RefPtr<Cairo::Context> crDest, Gdk::Rectangl
         crDest->fill();
     }
 }
+
+
+void setTreeViewCssProvider(Gtk::TreeView *tree)
+{
+    auto p = Gtk::CssProvider::create();
+    p->load_from_data("* { background-image: none; border-color: rgba(0,0,0,0); }");
+    tree->get_style_context()->add_provider(p, GTK_STYLE_PROVIDER_PRIORITY_USER);
+}

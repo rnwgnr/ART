@@ -147,9 +147,7 @@ ExifPanel::ExifPanel():
     exifTree->signal_row_expanded().connect(sigc::mem_fun(*this, &ExifPanel::onExifRowExpanded));
     exifTree->signal_row_collapsed().connect(sigc::mem_fun(*this, &ExifPanel::onExifRowCollapsed));
 
-    exif_tree_provider_ = Gtk::CssProvider::create();
-    exif_tree_provider_->load_from_data("* { background-image: none; border-color: rgba(0,0,0,0); }");
-    exifTree->get_style_context()->add_provider(exif_tree_provider_, GTK_STYLE_PROVIDER_PRIORITY_USER);
+    setTreeViewCssProvider(exifTree);
 
     show_all ();
 }
