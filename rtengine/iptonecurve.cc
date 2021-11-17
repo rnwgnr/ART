@@ -188,9 +188,8 @@ void satcurve_lut(const FlatCurve &curve, LUTf &sat, float whitept)
 {
     sat(65536, LUT_CLIP_BELOW);
     sat[0] = curve.getVal(0) * 2.f;
-    //const bool uselog = whitept > 1.f;
     for (int i = 1; i < 65536; ++i) {
-        float x = /*uselog ? LIM01(satcurve_logenc(float(i), whitept)) :*/ Color::gamma2curve[i] / 65535.f;
+        float x = Color::gamma2curve[i] / 65535.f;
         float v = curve.getVal(x);
         sat[i] = v * 2.f;
     }
@@ -202,23 +201,47 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
     LUTf sat;
     satcurve_lut(curve, sat, whitept);
 
-    //TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
 
-    rgb->setMode(Imagefloat::Mode::LAB, multithread);
+    if (whitept > 1.f) {
+        TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
+        float ws[3][3];
+        to_float(dws, ws);
+
+        TMatrix diws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
+        float iws[3][3];
+        to_float(diws, iws);
+
 #ifdef _OPENMP
-#   pragma omp parallel for if (multithread)
+#       pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < rgb->getHeight(); ++y) {
-        //Color::LabGamutMunsell(rgb->g(y), rgb->r(y), rgb->b(y), rgb->getWidth(), true, false, true, true, dws);
-        for (int x = 0; x < rgb->getWidth(); ++x) {
+        for (int y = 0; y < rgb->getHeight(); ++y) {
             float X, Y, Z;
-            Color::L2XYZ(rgb->g(y, x), X, Y, Z);
-            float s = sat[Y];
-            rgb->r(y, x) *= s;
-            rgb->b(y, x) *= s;
+            float Jz, az, bz;
+            for (int x = 0; x < rgb->getWidth(); ++x) {
+                Color::rgbxyz(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), X, Y, Z, ws);
+                Color::xyz2jzazbz(X, Y, Z, Jz, az, bz);
+                float s = sat[Y];
+                az *= s;
+                bz *= s;
+                Color::jzazbz2rgb(Jz, az, bz, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), iws);
+            }
         }
+    } else {
+        rgb->setMode(Imagefloat::Mode::LAB, multithread);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < rgb->getHeight(); ++y) {
+            for (int x = 0; x < rgb->getWidth(); ++x) {
+                float X, Y, Z;
+                Color::L2XYZ(rgb->g(y, x), X, Y, Z);
+                float s = sat[Y];
+                rgb->r(y, x) *= s;
+                rgb->b(y, x) *= s;
+            }
+        }
+        rgb->setMode(Imagefloat::Mode::RGB, multithread);
     }
-    rgb->setMode(Imagefloat::Mode::RGB, multithread);
 }
 
 

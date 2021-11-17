@@ -48,16 +48,13 @@ namespace rtengine {
 
 extern const Settings* settings;
 
-} // namespace rtengine
-
-
 namespace {
 
 // Not recursive
 void loadProfiles(
     const Glib::ustring& dirName,
     std::map<Glib::ustring, cmsHPROFILE>* profiles,
-    std::map<Glib::ustring, rtengine::ProfileContent>* profileContents,
+    std::map<Glib::ustring, ProfileContent>* profileContents,
     std::map<Glib::ustring, Glib::ustring>* profileNames,
     bool nameUpper
 )
@@ -76,7 +73,7 @@ void loadProfiles(
                 continue;
             }
 
-            const Glib::ustring extension = rtengine::getFileExtension(fileName);
+            const Glib::ustring extension = getFileExtension(fileName);
 
             if (extension != "icc" && extension != "icm") {
                 continue;
@@ -95,7 +92,7 @@ void loadProfiles(
             }
 
             if (profiles) {
-                const rtengine::ProfileContent content(filePath);
+                const ProfileContent content(filePath);
                 const cmsHPROFILE profile = content.toProfile();
 
                 if (profile) {
@@ -120,7 +117,7 @@ bool loadProfile(
     const Glib::ustring& profile,
     const Glib::ustring& dirName,
     std::map<Glib::ustring, cmsHPROFILE>* profiles,
-    std::map<Glib::ustring, rtengine::ProfileContent>* profileContents
+    std::map<Glib::ustring, ProfileContent>* profileContents
 )
 {
     if (dirName.empty() || profiles == nullptr) {
@@ -137,7 +134,7 @@ bool loadProfile(
                 continue;
             }
 
-            const Glib::ustring extension = rtengine::getFileExtension(fileName);
+            const Glib::ustring extension = getFileExtension(fileName);
 
             if (extension != "icc" && extension != "icm") {
                 continue;
@@ -152,7 +149,7 @@ bool loadProfile(
             const Glib::ustring name = fileName.substr(0, fileName.size() - 4);
 
             if (name == profile) {
-                const rtengine::ProfileContent content(filePath);
+                const ProfileContent content(filePath);
                 const cmsHPROFILE profile = content.toProfile();
 
                 if (profile) {
@@ -198,7 +195,7 @@ uint8_t getSupportedIntents(cmsHPROFILE profile, cmsUInt32Number direction)
 cmsHPROFILE createXYZProfile()
 {
     double mat[3][3] = { {1.0, 0, 0}, {0, 1.0, 0}, {0, 0, 1.0} };
-    return rtengine::ICCStore::createFromMatrix(mat, false, "XYZ");
+    return ICCStore::createFromMatrix(mat, false, "XYZ");
 }
 
 const double(*wprofiles[])[3]  = {xyz_sRGB, xyz_adobe, xyz_prophoto, xyz_widegamut, xyz_bruce, xyz_beta, xyz_best, xyz_rec2020, xyz_ACESp0, xyz_ACESp1};//
@@ -213,7 +210,7 @@ const char* wpnames[] = {"sRGB", "Adobe RGB", "ProPhoto", "WideGamut", "BruceRGB
 
 //-----------------------------------------------------------------------------
 // helper functions to fix V2 profiles TRCs, used in
-// rtengine::ProfileContent::toProfile()
+// ProfileContent::toProfile()
 // see https://github.com/Beep6581/RawTherapee/issues/5026
 // -----------------------------------------------------------------------------
 bool is_RTv2_profile(cmsHPROFILE profile)
@@ -297,9 +294,9 @@ Glib::ustring get_profile_description(cmsHPROFILE profile)
 } // namespace
 
 
-rtengine::ProfileContent::ProfileContent() = default;
+ProfileContent::ProfileContent() = default;
 
-rtengine::ProfileContent::ProfileContent(const Glib::ustring& fileName)
+ProfileContent::ProfileContent(const Glib::ustring& fileName)
 {
     FILE* const f = g_fopen(fileName.c_str(), "rb");
 
@@ -325,7 +322,7 @@ rtengine::ProfileContent::ProfileContent(const Glib::ustring& fileName)
 
 }
 
-rtengine::ProfileContent::ProfileContent(cmsHPROFILE hProfile)
+ProfileContent::ProfileContent(cmsHPROFILE hProfile)
 {
     if (hProfile != nullptr) {
         cmsUInt32Number bytesNeeded = 0;
@@ -340,7 +337,7 @@ rtengine::ProfileContent::ProfileContent(cmsHPROFILE hProfile)
     }
 }
 
-cmsHPROFILE rtengine::ProfileContent::toProfile() const
+cmsHPROFILE ProfileContent::toProfile() const
 {
     cmsHPROFILE profile = nullptr;
     if (!data.empty()) {
@@ -390,12 +387,12 @@ cmsHPROFILE rtengine::ProfileContent::toProfile() const
     return profile;
 }
 
-const std::string& rtengine::ProfileContent::getData() const
+const std::string& ProfileContent::getData() const
 {
     return data;
 }
 
-class rtengine::ICCStore::Implementation
+class ICCStore::Implementation
 {
     using ProfileMap = std::map<Glib::ustring, cmsHPROFILE>;
     using MatrixMap = std::map<Glib::ustring, TMatrix>;
@@ -999,7 +996,7 @@ private:
 
             CMatrix b = {};
 
-            if (!rtengine::invertMatrix(pMatrices.back()->toMatrix(), b)) {
+            if (!invertMatrix(pMatrices.back()->toMatrix(), b)) {
                 if (settings->verbose) {
                     std::cout << "Matrix for working space: " << name << " is not invertible, skipping" << std::endl;
                 }
@@ -1079,139 +1076,139 @@ parse_error:
     cmsHTRANSFORM thumb_monitor_xform_;
 };
 
-rtengine::ICCStore* rtengine::ICCStore::getInstance()
+ICCStore* ICCStore::getInstance()
 {
-    static rtengine::ICCStore instance;
+    static ICCStore instance;
     return &instance;
 }
 
-void rtengine::ICCStore::init(const Glib::ustring& usrICCDir, const Glib::ustring& stdICCDir, bool loadAll)
+void ICCStore::init(const Glib::ustring& usrICCDir, const Glib::ustring& stdICCDir, bool loadAll)
 {
     implementation->init(usrICCDir, stdICCDir, loadAll);
 }
 
-cmsHPROFILE rtengine::ICCStore::workingSpace(const Glib::ustring& name) const
+cmsHPROFILE ICCStore::workingSpace(const Glib::ustring& name) const
 {
     return implementation->workingSpace(name);
 }
 
-// cmsHPROFILE rtengine::ICCStore::workingSpaceGamma(const Glib::ustring& name) const
+// cmsHPROFILE ICCStore::workingSpaceGamma(const Glib::ustring& name) const
 // {
 //     return implementation->workingSpaceGamma(name);
 // }
 
-rtengine::TMatrix rtengine::ICCStore::workingSpaceMatrix(const Glib::ustring& name) const
+TMatrix ICCStore::workingSpaceMatrix(const Glib::ustring& name) const
 {
     return implementation->workingSpaceMatrix(name);
 }
 
-rtengine::TMatrix rtengine::ICCStore::workingSpaceInverseMatrix(const Glib::ustring& name) const
+TMatrix ICCStore::workingSpaceInverseMatrix(const Glib::ustring& name) const
 {
     return implementation->workingSpaceInverseMatrix(name);
 }
 
-bool rtengine::ICCStore::outputProfileExist(const Glib::ustring& name) const
+bool ICCStore::outputProfileExist(const Glib::ustring& name) const
 {
     return implementation->outputProfileExist(name);
 }
 
-cmsHPROFILE rtengine::ICCStore::getProfile(const Glib::ustring& name) const
+cmsHPROFILE ICCStore::getProfile(const Glib::ustring& name) const
 {
     return implementation->getProfile(name);
 }
 
-cmsHPROFILE rtengine::ICCStore::getStdProfile(const Glib::ustring& name) const
+cmsHPROFILE ICCStore::getStdProfile(const Glib::ustring& name) const
 {
     return implementation->getStdProfile(name);
 }
 
-rtengine::ProfileContent rtengine::ICCStore::getContent(const Glib::ustring& name) const
+ProfileContent ICCStore::getContent(const Glib::ustring& name) const
 {
     return implementation->getContent(name);
 }
 
 
-Glib::ustring rtengine::ICCStore::getDefaultMonitorProfileName() const
+Glib::ustring ICCStore::getDefaultMonitorProfileName() const
 {
     return implementation->getDefaultMonitorProfileName();
 }
 
 
-void rtengine::ICCStore::setDefaultMonitorProfileName(const Glib::ustring &name)
+void ICCStore::setDefaultMonitorProfileName(const Glib::ustring &name)
 {
     implementation->setDefaultMonitorProfileName(name);
 }
 
-cmsHPROFILE rtengine::ICCStore::getXYZProfile() const
+cmsHPROFILE ICCStore::getXYZProfile() const
 {
     return implementation->getXYZProfile();
 }
 
-cmsHPROFILE rtengine::ICCStore::getsRGBProfile() const
+cmsHPROFILE ICCStore::getsRGBProfile() const
 {
     return implementation->getsRGBProfile();
 }
 
-std::vector<Glib::ustring> rtengine::ICCStore::getProfiles(ProfileType type) const
+std::vector<Glib::ustring> ICCStore::getProfiles(ProfileType type) const
 {
     return implementation->getProfiles(type);
 }
 
-std::vector<Glib::ustring> rtengine::ICCStore::getProfilesFromDir(const Glib::ustring& dirName, ProfileType type) const
+std::vector<Glib::ustring> ICCStore::getProfilesFromDir(const Glib::ustring& dirName, ProfileType type) const
 {
     return implementation->getProfilesFromDir(dirName, type);
 }
 
-std::uint8_t rtengine::ICCStore::getInputIntents(cmsHPROFILE profile) const
+std::uint8_t ICCStore::getInputIntents(cmsHPROFILE profile) const
 {
     return implementation->getInputIntents(profile);
 }
 
-std::uint8_t rtengine::ICCStore::getOutputIntents(cmsHPROFILE profile) const
+std::uint8_t ICCStore::getOutputIntents(cmsHPROFILE profile) const
 {
     return implementation->getOutputIntents(profile);
 }
 
-std::uint8_t rtengine::ICCStore::getProofIntents(cmsHPROFILE profile) const
+std::uint8_t ICCStore::getProofIntents(cmsHPROFILE profile) const
 {
     return implementation->getProofIntents(profile);
 }
 
-std::uint8_t rtengine::ICCStore::getInputIntents(const Glib::ustring& name) const
+std::uint8_t ICCStore::getInputIntents(const Glib::ustring& name) const
 {
     return implementation->getInputIntents(name);
 }
 
-std::uint8_t rtengine::ICCStore::getOutputIntents(const Glib::ustring& name) const
+std::uint8_t ICCStore::getOutputIntents(const Glib::ustring& name) const
 {
     return implementation->getOutputIntents(name);
 }
 
-std::uint8_t rtengine::ICCStore::getProofIntents(const Glib::ustring& name) const
+std::uint8_t ICCStore::getProofIntents(const Glib::ustring& name) const
 {
     return implementation->getProofIntents(name);
 }
 
 
-cmsHTRANSFORM rtengine::ICCStore::getThumbnailMonitorTransform()
+cmsHTRANSFORM ICCStore::getThumbnailMonitorTransform()
 {
     return implementation->getThumbnailMonitorTransform();
 }
 
-rtengine::ICCStore::ICCStore() :
+ICCStore::ICCStore() :
     implementation(new Implementation)
 {
 }
 
-rtengine::ICCStore::~ICCStore() = default;
+ICCStore::~ICCStore() = default;
 
-std::vector<Glib::ustring> rtengine::ICCStore::getWorkingProfiles()
+std::vector<Glib::ustring> ICCStore::getWorkingProfiles()
 {
     return implementation->getWorkingProfiles();
 }
 
 // WARNING: the caller must lock lcmsMutex
-cmsHPROFILE rtengine::ICCStore::makeStdGammaProfile(cmsHPROFILE iprof)
+cmsHPROFILE ICCStore::makeStdGammaProfile(cmsHPROFILE iprof)
 {
     // forgive me for the messy code, quick hack to change gamma of an ICC profile to the RT standard gamma
     if (!iprof) {
@@ -1306,7 +1303,7 @@ cmsHPROFILE rtengine::ICCStore::makeStdGammaProfile(cmsHPROFILE iprof)
     return oprof;
 }
 
-cmsHPROFILE rtengine::ICCStore::createFromMatrix(const double matrix[3][3], bool gamma, const Glib::ustring& name)
+cmsHPROFILE ICCStore::createFromMatrix(const double matrix[3][3], bool gamma, const Glib::ustring& name)
 {
 
     static const unsigned phead[] = {
@@ -1400,3 +1397,5 @@ cmsHPROFILE rtengine::ICCStore::createFromMatrix(const double matrix[3][3], bool
     delete [] oprof;
     return p;
 }
+
+} // namespace rtengine
