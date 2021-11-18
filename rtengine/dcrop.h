@@ -41,6 +41,7 @@ protected:
     // --- permanently allocated in RAM and only renewed on size changes
     Imagefloat*  origCrop;   // "one chunk" allocation
     Imagefloat*  spotCrop;   // "one chunk" allocation
+    Imagefloat *denoiseCrop;
     Imagefloat *bufs_[3];
     std::array<bool, 4> pipeline_stop_;
     Image8*      cropImg;    // "one chunk" allocation ; displayed image in monitor color space, showing the output profile as well (soft-proofing enabled, which then correspond to workimg) or not
