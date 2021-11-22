@@ -470,20 +470,63 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
     array2D<float> kernel(kw, kw);
     rescale_kernel(*kernel_ptr, kernel);
 
+    array2D<float> lum(W, H);
+    array2D<float> tmp(W, H);
+    array2D<float> out(W, H);
+    
 #ifdef _OPENMP
 #       pragma omp parallel for if (data.multiThread)
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
             luminance[y][x] = std::max(luminance[y][x], 0.f);
+            lum[y][x] = luminance[y][x];
+            out[y][x] = RT_NAN;
         }
     }
 
-    array2D<float> lum(W, H, luminance);
-    array2D<float> tmp(W, H);
-
     Convolution conv(kernel, W, H, data.multiThread);
 
+    LUTf loglut(65536);
+    for (int i = 1; i < 65536; ++i) {
+        float x = float(i) / 65535.f;
+        loglut[i] = xlogf(x);
+    }
+    const auto get_log =
+        [&](float x) -> float
+        {
+            if (x > 1.f && x <= 65535.f) {
+                return loglut[x];
+            } else if (x > 1e-5f) {
+                return xlogf(x / 65535.f);
+            } else {
+                return -RT_INFINITY_F;
+            }
+        };
+
+    const auto get_output =
+        [&](int i, int j) -> float
+        {
+            if (UNLIKELY(std::isnan(lum[i][j]))) {
+                return luminance[i][j];
+            }
+            return intp(blend[i][j], std::max(lum[i][j], 0.0f), luminance[i][j]);
+        };
+
+    constexpr float delta_factor = 0.3f;
+    
+    const auto check_stop =
+        [&](int y, int x) -> void
+        {
+            if (LIKELY(std::isnan(out[y][x]))) {
+                float l = get_log(luminance[y][x]);
+                float l2 = get_log(lum[y][x]);
+                if (UNLIKELY(std::abs(l2 - l) > delta_factor)) {
+                    out[y][x] = get_output(y, x);
+                }
+            }
+        };
+    
     for (int i = 0; i < iterations; ++i) {
         conv(lum, tmp);
 
@@ -509,6 +552,8 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
                 lum[y][x] *= tmp[y][x];
                 assert(std::isfinite(tmp[y][x]));
                 assert(std::isfinite(lum[y][x]));
+
+                check_stop(y, x);
             }
         }
     }
@@ -518,7 +563,12 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            luminance[y][x] = intp(blend[y][x], lum[y][x], luminance[y][x]);
+            float l = out[y][x];
+            if (std::isnan(l)) {
+                l = get_output(y, x);
+            }
+            assert(std::isfinite(l));
+            luminance[y][x] = std::max(l, 0.f);
         }
     }
 }
@@ -565,6 +615,8 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
     }
     
     
+    const bool high_quality = (scale == 1 || cur_pipeline == Pipeline::OUTPUT);
+    
     if (sharpenParam.method == "rld") {
         double sigma = sharpenParam.deconvradius / scale;
         float amount = sharpenParam.deconvamount / 100.f;
@@ -603,7 +655,28 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
         }
     } else if (sharpenParam.method == "psf") {
         ImProcData data(params, scale, multiThread);
-        rl_deconvolution_psf(Y, blend, W, H, sharpenParam, data, plistener);
+        if (high_quality) {
+            if (plistener) {
+                plistener->setProgressStr(M("TP_SHARPENING_LABEL") + "...");
+                plistener->setProgress(0);
+            }
+            rgb->setMode(Imagefloat::Mode::RGB, multiThread);
+            rl_deconvolution_psf(rgb->r.ptrs, blend, W, H, sharpenParam, data, plistener);
+            if (plistener) {
+                plistener->setProgress(0.33);
+            }
+            rl_deconvolution_psf(rgb->g.ptrs, blend, W, H, sharpenParam, data, nullptr);
+            if (plistener) {
+                plistener->setProgress(0.66);
+            }
+            rl_deconvolution_psf(rgb->b.ptrs, blend, W, H, sharpenParam, data, nullptr);
+            if (plistener) {
+                plistener->setProgress(1);
+                plistener->setProgressStr(M("PROGRESSBAR_PROCESSING"));
+            }
+        } else {
+            rl_deconvolution_psf(Y, blend, W, H, sharpenParam, data, plistener);
+        }            
     } else {
         unsharp_mask(Y, blend, W, H, sharpenParam, scale, multiThread);
     }
