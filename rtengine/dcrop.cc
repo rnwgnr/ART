@@ -221,6 +221,8 @@ void Crop::update(int todo)
                 parent->adnListener->chromaChanged(params.denoise.chrominance, params.denoise.chrominanceRedGreen, params.denoise.chrominanceBlueYellow);
             }
         }
+    } else if (denoiseCrop) {
+        baseCrop = denoiseCrop;
     }
 
     // has to be called after setCropSizes! Tools prior to this point can't handle the Edit mechanism, but that shouldn't be a problem.
