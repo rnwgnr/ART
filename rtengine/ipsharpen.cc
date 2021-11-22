@@ -31,7 +31,9 @@
 #include "cache.h"
 #include "stdimagesource.h"
 #include "rescale.h"
+#include "cJSON.h"
 #include "../rtgui/multilangmgr.h"
+#include <sstream>
 
 using namespace std;
 
@@ -372,14 +374,65 @@ bool import_kernel(Img *img, array2D<float> &out)
             out[y][x] = v;
         }
     }
-    // for (int y = 0; y < w/2; ++y) {
-    //     for (int x = 0; x < w/2; ++x) {
-    //         if (out[y][x] != out[w-1-y][w-1-x]) {
-    //             return false;
-    //         }
-    //     }
-    // }
     return true;
+}
+
+
+bool import_kernel(cJSON *obj, array2D<float> &out)
+{
+    if (!cJSON_IsArray(obj)) {
+        return false;
+    }
+    int n2 = cJSON_GetArraySize(obj);
+    if (n2 <= 1) {
+        return false;
+    }
+    cJSON *item = cJSON_GetArrayItem(obj, 0);
+    if (cJSON_IsArray(item)) {
+        // matrix form
+        int kn = n2;
+        out(kn, kn);
+        cJSON *row;
+        int i = 0;
+        cJSON_ArrayForEach(row, obj) {
+            if (!cJSON_IsArray(row) || cJSON_GetArraySize(row) != kn) {
+                return false;
+            }
+            cJSON *elem;
+            int j = 0;
+            cJSON_ArrayForEach(elem, row) {
+                if (!cJSON_IsNumber(elem)) {
+                    return false;
+                }
+                out[i][j] = elem->valuedouble;
+                ++j;
+            }
+            ++i;
+        }
+        return true;
+    } else if (cJSON_IsNumber(item)) {
+        float n = std::sqrt(float(n2));
+        if (n != float(int(n))) {
+            return false;
+        }
+        int kn = int(n);
+        out(kn, kn);
+        int i = 0, j = 0;
+        cJSON *elem;
+        cJSON_ArrayForEach(elem, obj) {
+            if (!cJSON_IsNumber(elem)) {
+                return false;
+            }
+            out[i][j] = elem->valuedouble;
+            if (++j >= kn) {
+                ++i;
+                j = 0;
+            }
+        }
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
@@ -422,38 +475,57 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
     auto &key = psf_file;
     if (!rl_kernel_cache.get(key, kernel_ptr)) {
         StdImageSource src;
+        std::unique_ptr<cJSON, decltype(&cJSON_Delete)> jobj(nullptr, cJSON_Delete);
         int err = src.load(psf_file);
-        if (err != 0) {
+        
+        if (err) {
+            FILE *src = g_fopen(psf_file.c_str(), "rb");
+            if (src) {
+                std::ostringstream data;
+                int c;
+                while (true) {
+                    c = fgetc(src);
+                    if (c != EOF) {
+                        data << static_cast<unsigned char>(c);
+                    } else {
+                        break;
+                    }
+                }
+                fclose(src);
+                std::string s = data.str();
+                jobj.reset(cJSON_Parse(s.c_str()));
+            }
+            err = !jobj;
+        }
+
+        if (err) {
             if (plistener) {
                 plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), psf_file.empty() ? "(" + M("GENERAL_NONE") + ")" : psf_file));
             }
             return;
         }
-        int kw, kh;
-        src.getFullSize(kw, kh);
-        if (kw != kh) {
-            if (plistener) {
-                plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_INVALID_PSF_NOTSQUARE"), psf_file));
-            }
-            return;
-        }
-
+        
         kernel_ptr = std::make_shared<array2D<float>>();
-        ImageIO *img = src.getImageIO();
+
         bool ok = false;
-        if (Image8 *im8 = dynamic_cast<Image8 *>(img)) {
-            ok = import_kernel(im8, *kernel_ptr);
-        } else if (Image16 *im16 = dynamic_cast<Image16 *>(img)) {
-            ok = import_kernel(im16, *kernel_ptr);
-        } else if (Imagefloat *imf = dynamic_cast<Imagefloat *>(img)) {
-            ok = import_kernel(imf, *kernel_ptr);
+        if (jobj) {
+            ok = import_kernel(jobj.get(), *kernel_ptr);
         } else {
-            ok = false;
+            ImageIO *img = src.getImageIO();
+            if (Image8 *im8 = dynamic_cast<Image8 *>(img)) {
+                ok = import_kernel(im8, *kernel_ptr);
+            } else if (Image16 *im16 = dynamic_cast<Image16 *>(img)) {
+                ok = import_kernel(im16, *kernel_ptr);
+            } else if (Imagefloat *imf = dynamic_cast<Imagefloat *>(img)) {
+                ok = import_kernel(imf, *kernel_ptr);
+            } else {
+                ok = false;
+            }
         }
 
         if (!ok) {
             if (plistener) {
-                plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_INVALID_PSF_NOTODD"), psf_file));
+                plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_INVALID_PSF"), psf_file));
             }
             return;
         }
