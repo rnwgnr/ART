@@ -395,15 +395,18 @@ void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B,
 
     array2D<float> kernel;
     const bool high_precision = s > 0 && s < HIGH_PRECISION_THRESHOLD;
+    std::unique_ptr<Convolution> conv;
     if (high_precision) {
         build_gaussian_kernel(s, kernel);
+        conv.reset(new Convolution(kernel, W, H));
     }
 
     const auto blur =
         [&](array2D<float> &a) -> void
         {
             if (high_precision) {
-                convolution(kernel, a, a, multithread);
+                //convolution(kernel, a, a, multithread);
+                (*conv)(a, a, multithread);
             } else {
 #ifdef _OPENMP
 #               pragma omp parallel if (multithread)

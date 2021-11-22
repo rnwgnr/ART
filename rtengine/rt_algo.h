@@ -21,6 +21,7 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
 #include "array2D.h"
 #include "coord.h"
 
@@ -48,5 +49,18 @@ bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat
 bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2D<float> &dst, bool multithread);
 
 void build_gaussian_kernel(float sigma, array2D<float> &res);
+
+
+class Convolution {
+public:
+    explicit Convolution(const array2D<float> &kernel, int W, int H);
+    ~Convolution();
+
+    void operator()(float **src, float **dst, bool multiThread);
+    void operator()(const array2D<float> &src, array2D<float> &dst, bool multiThread);
+
+private:
+    void *data_;
+};
 
 } // namespace rtengine

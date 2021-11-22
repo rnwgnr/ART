@@ -1699,7 +1699,9 @@ SharpeningParams::SharpeningParams() :
     deconvradius(0.75),
     deconvAutoRadius(true),
     deconvCornerBoost(0.0),
-    deconvCornerLatitude(25)
+    deconvCornerLatitude(25),
+    psf_kernel(""),
+    psf_iterations(5)
 {
 }
 
@@ -1721,7 +1723,9 @@ bool SharpeningParams::operator ==(const SharpeningParams& other) const
         && deconvradius == other.deconvradius
         && deconvAutoRadius == other.deconvAutoRadius
         && deconvCornerBoost == other.deconvCornerBoost
-        && deconvCornerLatitude == other.deconvCornerLatitude;
+        && deconvCornerLatitude == other.deconvCornerLatitude
+        && psf_kernel == other.psf_kernel
+        && psf_iterations == other.psf_iterations;
 }
 
 bool SharpeningParams::operator !=(const SharpeningParams& other) const
@@ -3503,6 +3507,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Sharpening", "DeconvAutoRadius", sharpening.deconvAutoRadius, keyFile);
             saveToKeyfile("Sharpening", "DeconvCornerBoost", sharpening.deconvCornerBoost, keyFile);
             saveToKeyfile("Sharpening", "DeconvCornerLatitude", sharpening.deconvCornerLatitude, keyFile);
+            saveToKeyfile("Sharpening", "PSFKernel", sharpening.psf_kernel, keyFile);
+            saveToKeyfile("Sharpening", "PSFIterations", sharpening.psf_iterations, keyFile);
         }
 
 // WB
@@ -4448,6 +4454,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "Sharpening", "DeconvAutoRadius", sharpening.deconvAutoRadius);
             assignFromKeyfile(keyFile, "Sharpening", "DeconvCornerBoost", sharpening.deconvCornerBoost);
             assignFromKeyfile(keyFile, "Sharpening", "DeconvCornerLatitude", sharpening.deconvCornerLatitude);
+            assignFromKeyfile(keyFile, "Sharpening", "PSFKernel", sharpening.psf_kernel);
+            assignFromKeyfile(keyFile, "Sharpening", "PSFIterations", sharpening.psf_iterations);
         }
 
         if (keyFile.has_group("White Balance") && RELEVANT_(wb)) {

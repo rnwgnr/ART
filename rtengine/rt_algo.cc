@@ -742,7 +742,7 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
         }
     }
 
-    auto plan = fftwf_plan_dft_r2c_2d(pH, pW, buf, buf_fft, FFTW_ESTIMATE);
+    fftwf_plan plan = fftwf_plan_dft_r2c_2d(pH, pW, buf, buf_fft, FFTW_ESTIMATE);
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
 
@@ -772,7 +772,7 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
         for (int x = 0; x < W; ++x) {
             int idx = (y + K) * pW + x + K;
             assert(idx < pH * pW);
-            src[y][x] = buf[idx] / norm;
+            dst[y][x] = buf[idx] / norm;
         }
     }
 }
@@ -803,15 +803,69 @@ fftwf_complex *prepare_kernel(const array2D<float> &kernel, float *buf, int pW, 
     return kernel_fft;
 }
 
+
+struct ConvolutionData {
+    int K;
+    int W;
+    int H;
+    int pW;
+    int pH;
+    fftwf_complex *kernel_fft;
+    float *buf;
+    fftwf_complex *buf_fft;
+
+    ConvolutionData(const array2D<float> &kernel, int W, int H):
+        K(0),
+        kernel_fft(nullptr),
+        buf(nullptr),
+        buf_fft(nullptr)
+    {
+        K = kernel.width();
+        if (K == kernel.height()) {
+            this->W = W;
+            this->H = H;
+            pW = find_fast_dim(W + K);
+            pH = find_fast_dim(H + K);
+
+            buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
+            buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+            kernel_fft = prepare_kernel(kernel, buf, pW, pH, false);
+        }
+    }
+
+    ~ConvolutionData()
+    {
+        if (kernel_fft) {
+            fftwf_free(kernel_fft);
+        }
+        if (buf_fft) {
+            fftwf_free(buf_fft);
+        }
+        if (buf) {
+            fftwf_free(buf);
+        }
+    }
+};
+
 } // namespace
 
 
-bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat *dst, bool multithread)
+Convolution::Convolution(const array2D<float> &kernel, int W, int H):
+    data_(nullptr)
 {
-    if (kernel.width() != kernel.height() || src->getWidth() != dst->getWidth() || src->getHeight() != dst->getHeight()) {
-        return false;
-    }
-    
+    data_ = new ConvolutionData(kernel, W, H);
+}
+
+
+Convolution::~Convolution()
+{
+    delete static_cast<ConvolutionData *>(data_);
+}
+
+
+void Convolution::operator()(const array2D<float> &src, array2D<float> &dst, bool multithread)
+{
+    ConvolutionData *d = static_cast<ConvolutionData *>(data_);
     MyMutex::MyLock lock(*fftwMutex);
 
 #ifdef RT_FFTW3F_OMP
@@ -821,28 +875,63 @@ bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat
     }
 #endif
 
-    const int K = kernel.width();
-    const int W = src->getWidth();
-    const int H = src->getHeight();
-    const int pW = find_fast_dim(W + K);
-    const int pH = find_fast_dim(H + K);
+    do_convolution(d->kernel_fft, d->K/2, d->pH, d->pW, d->buf, d->buf_fft, src, dst, multithread);
+}
 
-    float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
-    fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
 
-    auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
+void Convolution::operator()(float **src, float **dst, bool multithread)
+{
+    ConvolutionData *d = static_cast<ConvolutionData *>(data_);
+    array2D<float> asrc(d->W, d->H, src, ARRAY2D_BYREFERENCE);
+    array2D<float> adst(d->W, d->H, dst, ARRAY2D_BYREFERENCE);
+    operator()(asrc, adst, multithread);
+}
 
+
+bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat *dst, bool multithread)
+{
+    if (kernel.width() != kernel.height() || src->getWidth() != dst->getWidth() || src->getHeight() != dst->getHeight()) {
+        return false;
+    }
+
+    Convolution conv(kernel, src->getWidth(), src->getHeight());
     for (int c = 0; c < 3; ++c) {
         auto s = (c == 0 ? src->r.ptrs : (c == 1 ? src->g.ptrs : src->b.ptrs));
         auto d = (c == 0 ? dst->r.ptrs : (c == 1 ? dst->g.ptrs : dst->b.ptrs));
-        array2D<float> asrc(W, H, s, ARRAY2D_BYREFERENCE);
-        array2D<float> adst(W, H, d, ARRAY2D_BYREFERENCE);
-        do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, asrc, adst, multithread);
+        conv(s, d, multithread);
     }
+    
+//     MyMutex::MyLock lock(*fftwMutex);
 
-    fftwf_free(kernel_fft);
-    fftwf_free(buf_fft);
-    fftwf_free(buf);
+// #ifdef RT_FFTW3F_OMP
+//     if (multithread) {
+//         fftwf_init_threads();
+//         fftwf_plan_with_nthreads(omp_get_max_threads());
+//     }
+// #endif
+
+//     const int K = kernel.width();
+//     const int W = src->getWidth();
+//     const int H = src->getHeight();
+//     const int pW = find_fast_dim(W + K);
+//     const int pH = find_fast_dim(H + K);
+
+//     float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
+//     fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+
+//     auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
+
+//     for (int c = 0; c < 3; ++c) {
+//         auto s = (c == 0 ? src->r.ptrs : (c == 1 ? src->g.ptrs : src->b.ptrs));
+//         auto d = (c == 0 ? dst->r.ptrs : (c == 1 ? dst->g.ptrs : dst->b.ptrs));
+//         array2D<float> asrc(W, H, s, ARRAY2D_BYREFERENCE);
+//         array2D<float> adst(W, H, d, ARRAY2D_BYREFERENCE);
+//         do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, asrc, adst, multithread);
+//     }
+
+//     fftwf_free(kernel_fft);
+//     fftwf_free(buf_fft);
+//     fftwf_free(buf);
 
     return true;
 }
@@ -854,30 +943,33 @@ bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2
         return false;
     }
 
-    MyMutex::MyLock lock(*fftwMutex);
+    Convolution conv(kernel, src.width(), src.height());
+    conv(src, dst, multithread);
 
-#ifdef RT_FFTW3F_OMP
-    if (multithread) {
-        fftwf_init_threads();
-        fftwf_plan_with_nthreads(omp_get_max_threads());
-    }
-#endif
+//     MyMutex::MyLock lock(*fftwMutex);
 
-    const int K = kernel.width();
-    const int W = src.width();
-    const int H = src.height();
-    const int pW = find_fast_dim(W + K);
-    const int pH = find_fast_dim(H + K);
+// #ifdef RT_FFTW3F_OMP
+//     if (multithread) {
+//         fftwf_init_threads();
+//         fftwf_plan_with_nthreads(omp_get_max_threads());
+//     }
+// #endif
 
-    float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
-    fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
+//     const int K = kernel.width();
+//     const int W = src.width();
+//     const int H = src.height();
+//     const int pW = find_fast_dim(W + K);
+//     const int pH = find_fast_dim(H + K);
 
-    auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
-    do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, src, dst, multithread);
+//     float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
+//     fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
 
-    fftwf_free(kernel_fft);
-    fftwf_free(buf_fft);
-    fftwf_free(buf);
+//     auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
+//     do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, src, dst, multithread);
+
+//     fftwf_free(kernel_fft);
+//     fftwf_free(buf_fft);
+//     fftwf_free(buf);
 
     return true;
 }

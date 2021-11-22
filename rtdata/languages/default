@@ -54,6 +54,8 @@ EDIT_PIPETTE_TOOLTIP;To add an adjustment point to the curve, hold the Ctrl key 
 ERROR_MSG_FILE_READ;Error reading file: %1
 ERROR_MSG_MAXERRORS;... (%1 previous error(s) not shown)
 ERROR_MSG_METADATA_VALUE;Metadata: error setting %1 to %2
+ERROR_MSG_INVALID_PSF_NOTSQUARE;Invalid PSF file (aspect ratio must be 1:1): %1
+ERROR_MSG_INVALID_PSF_NOTODD;Invalid PSF file (dimension must be odd): %1
 EXIFFILTER_APERTURE;Aperture
 EXIFFILTER_CAMERA;Camera
 EXIFFILTER_DATE;Date
@@ -613,6 +615,8 @@ HISTORY_MSG_SHARPENING_BLUR;Sharpening - Blur radius
 HISTORY_MSG_SHARPENING_CONTRAST;Sharpening - Contrast threshold
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Sharpening - RLD corner latitude
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Sharpening - RLD corner radius increase
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Sharpening - PSF file
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Sharpening - PSF iterations
 HISTORY_MSG_SH_COLORSPACE;S/H - Colorspace
 HISTORY_MSG_SMOOTHING_ENABLED;Smoothing
 HISTORY_MSG_SMOOTHING_FALLOFF;Smoothing - falloff
@@ -1825,6 +1829,9 @@ TP_SHARPENING_RLD_CORNERLATITUDE;Latitude
 TP_SHARPENING_RLD_CORNERRADIUS;Radius increase
 TP_SHARPENING_THRESHOLD;Threshold
 TP_SHARPENING_USM;Unsharp Mask
+TP_SHARPENING_PSF;Custom RL Deconvolution
+TP_SHARPENING_PSF_KERNEL;Point spread function (PSF)
+TP_SHARPENING_PSF_ITERATIONS;Iterations
 TP_SMOOTHING_LABEL;Smoothing
 TP_SMOOTHING_LIST_TITLE;Smoothing parameters
 TP_SMOOTHING_FALLOFF;Falloff

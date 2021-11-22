@@ -28,14 +28,21 @@
 #include "StopWatch.h"
 #include "rt_algo.h"
 #include "coord.h"
+#include "cache.h"
+#include "stdimagesource.h"
+#include "rescale.h"
+#include "../rtgui/multilangmgr.h"
 
 using namespace std;
 
 
-namespace rtengine { extern const Settings *settings; }
+namespace rtengine {
+
+extern const Settings *settings;
 
 
 namespace {
+
 
 template <bool reverse, bool usm>
 void apply_gamma(float **Y, int W, int H, float pivot, float gamma, bool multiThread)
@@ -344,9 +351,180 @@ private:
     float sigma_;
 };
 
+
+Cache<Glib::ustring, std::shared_ptr<array2D<float>>> rl_kernel_cache(10);
+
+
+template <class Img>
+bool import_kernel(Img *img, array2D<float> &out)
+{
+    int w = img->getWidth();
+    if (w != img->getHeight()) {
+        return false;
+    }
+    if (!(w & 1)) {
+        return false;
+    }
+    out(w, w);
+    for (int y = 0; y < w; ++y) {
+        for (int x = 0; x < w; ++x) {
+            auto v = img->g(y, x);
+            out[y][x] = v;
+        }
+    }
+    // for (int y = 0; y < w/2; ++y) {
+    //     for (int x = 0; x < w/2; ++x) {
+    //         if (out[y][x] != out[w-1-y][w-1-x]) {
+    //             return false;
+    //         }
+    //     }
+    // }
+    return true;
+}
+
+
+void rescale_kernel(const array2D<float> &src, array2D<float> &k)
+{
+    rescaleBilinear(src, k, false);
+    
+    const int w = k.width();
+    double sum = 0;
+    for (int y = 0; y < w; ++y) {
+        for (int x = 0; x < w; ++x) {
+            float v = k[y][x];
+            sum += v;
+        }
+    }
+    if (sum >= 1e-5f) {
+        for (int y = 0; y < w; ++y) {
+            for (int x = 0; x < w; ++x) {
+                k[y][x] /= sum;
+            }
+        }
+    } else {
+        for (int y = 0; y < w; ++y) {
+            for (int x = 0; x < w; ++x) {
+                k[y][x] = 0;
+            }
+        }
+        k[w/2][w/2] = 1;
+    }
+}
+
+
+void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const SharpeningParams &shparam, const ImProcData &data, ProgressListener *plistener)
+{
+    const Glib::ustring &psf_file = shparam.psf_kernel;
+    int iterations = shparam.psf_iterations;
+    
+    std::shared_ptr<array2D<float>> kernel_ptr;
+
+    auto &key = psf_file;
+    if (!rl_kernel_cache.get(key, kernel_ptr)) {
+        StdImageSource src;
+        int err = src.load(psf_file);
+        if (err != 0) {
+            if (plistener) {
+                plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), psf_file.empty() ? "(" + M("GENERAL_NONE") + ")" : psf_file));
+            }
+            return;
+        }
+        int kw, kh;
+        src.getFullSize(kw, kh);
+        if (kw != kh) {
+            if (plistener) {
+                plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_INVALID_PSF_NOTSQUARE"), psf_file));
+            }
+            return;
+        }
+
+        kernel_ptr = std::make_shared<array2D<float>>();
+        ImageIO *img = src.getImageIO();
+        bool ok = false;
+        if (Image8 *im8 = dynamic_cast<Image8 *>(img)) {
+            ok = import_kernel(im8, *kernel_ptr);
+        } else if (Image16 *im16 = dynamic_cast<Image16 *>(img)) {
+            ok = import_kernel(im16, *kernel_ptr);
+        } else if (Imagefloat *imf = dynamic_cast<Imagefloat *>(img)) {
+            ok = import_kernel(imf, *kernel_ptr);
+        } else {
+            ok = false;
+        }
+
+        if (!ok) {
+            if (plistener) {
+                plistener->error(Glib::ustring::compose(M("TP_SHARPENING_LABEL") + " - " + M("ERROR_MSG_INVALID_PSF_NOTODD"), psf_file));
+            }
+            return;
+        }
+
+        rl_kernel_cache.set(key, kernel_ptr);
+    }
+
+    float scale = data.scale;
+    int kw = int(kernel_ptr->width() / scale) | 1;
+    if (kw < 3) {
+        return;
+    }
+    
+    array2D<float> kernel(kw, kw);
+    rescale_kernel(*kernel_ptr, kernel);
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (data.multiThread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            luminance[y][x] = std::max(luminance[y][x], 0.f);
+        }
+    }
+
+    array2D<float> lum(W, H, luminance);
+    array2D<float> tmp(W, H);
+
+    Convolution conv(kernel, W, H);
+
+    for (int i = 0; i < iterations; ++i) {
+        conv(lum, tmp, data.multiThread);
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (data.multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                if (tmp[y][x] > 1e-5f) {
+                    tmp[y][x] = luminance[y][x] / tmp[y][x];
+                    assert(std::isfinite(tmp[y][x]));
+                }
+            }
+        }
+
+        conv(tmp, tmp, data.multiThread);
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (data.multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                lum[y][x] *= tmp[y][x];
+                assert(std::isfinite(tmp[y][x]));
+                assert(std::isfinite(lum[y][x]));
+            }
+        }
+    }
+
+#ifdef _OPENMP
+#   pragma omp parallel for if (data.multiThread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            luminance[y][x] = intp(blend[y][x], lum[y][x], luminance[y][x]);
+        }
+    }
+}
+
 } // namespace
 
-namespace rtengine {
 
 bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &sharpenParam, bool showMask)
 {
@@ -423,6 +601,9 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
         } else {
             deconvsharpening(Y, blend, *impulse, W, H, sigma, amount, multiThread);
         }
+    } else if (sharpenParam.method == "psf") {
+        ImProcData data(params, scale, multiThread);
+        rl_deconvolution_psf(Y, blend, W, H, sharpenParam, data, plistener);
     } else {
         unsharp_mask(Y, blend, W, H, sharpenParam, scale, multiThread);
     }
