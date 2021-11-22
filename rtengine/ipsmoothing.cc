@@ -248,7 +248,10 @@ void lens_motion_blur(ImProcData &im, Imagefloat *rgb, int region)
 {
     array2D<float> kernel;
     if (build_blur_kernel(kernel, im.params->smoothing, region, im.scale)) {
-        convolution(kernel, rgb, rgb, im.multiThread);
+        Convolution conv(kernel, rgb->getWidth(), rgb->getHeight(), im.multiThread);
+        conv(rgb->r.ptrs, rgb->r.ptrs);
+        conv(rgb->g.ptrs, rgb->g.ptrs);
+        conv(rgb->b.ptrs, rgb->b.ptrs);
     }
 }
 
@@ -398,15 +401,14 @@ void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B,
     std::unique_ptr<Convolution> conv;
     if (high_precision) {
         build_gaussian_kernel(s, kernel);
-        conv.reset(new Convolution(kernel, W, H));
+        conv.reset(new Convolution(kernel, W, H, multithread));
     }
 
     const auto blur =
         [&](array2D<float> &a) -> void
         {
             if (high_precision) {
-                //convolution(kernel, a, a, multithread);
-                (*conv)(a, a, multithread);
+                (*conv)(a, a);
             } else {
 #ifdef _OPENMP
 #               pragma omp parallel if (multithread)

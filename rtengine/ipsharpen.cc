@@ -482,10 +482,10 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
     array2D<float> lum(W, H, luminance);
     array2D<float> tmp(W, H);
 
-    Convolution conv(kernel, W, H);
+    Convolution conv(kernel, W, H, data.multiThread);
 
     for (int i = 0; i < iterations; ++i) {
-        conv(lum, tmp, data.multiThread);
+        conv(lum, tmp);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (data.multiThread)
@@ -499,7 +499,7 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
             }
         }
 
-        conv(tmp, tmp, data.multiThread);
+        conv(tmp, tmp);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (data.multiThread)

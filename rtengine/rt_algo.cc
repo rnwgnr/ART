@@ -726,11 +726,8 @@ inline int find_fast_dim(int dim)
 }
 
 
-void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW, float *buf, fftwf_complex *buf_fft, const array2D<float> &src, array2D<float> &dst, bool multithread)
+void do_convolution(fftwf_plan fwd_plan, fftwf_plan inv_plan, fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW, float *buf, fftwf_complex *buf_fft, int W, int H, float **const src, float **dst, bool multithread)
 {
-    const int W = src.width();
-    const int H = src.height();
-    
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
@@ -742,9 +739,7 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
         }
     }
 
-    fftwf_plan plan = fftwf_plan_dft_r2c_2d(pH, pW, buf, buf_fft, FFTW_ESTIMATE);
-    fftwf_execute(plan);
-    fftwf_destroy_plan(plan);
+    fftwf_execute(fwd_plan);
 
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
@@ -759,11 +754,9 @@ void do_convolution(fftwf_complex *kernel_fft, int kernel_radius, int pH, int pW
         }
     }
 
-    plan = fftwf_plan_dft_c2r_2d(pH, pW, buf_fft, buf, FFTW_ESTIMATE);
-    fftwf_execute(plan);
-    fftwf_destroy_plan(plan);
+    fftwf_execute(inv_plan);
 
-    const int K = 2 * kernel_radius;// + 1;
+    const int K = 2 * kernel_radius;
     const float norm = pH * pW;
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
@@ -813,15 +806,30 @@ struct ConvolutionData {
     fftwf_complex *kernel_fft;
     float *buf;
     fftwf_complex *buf_fft;
+    fftwf_plan fwd_plan;
+    fftwf_plan inv_plan;
+    bool multithread;
 
-    ConvolutionData(const array2D<float> &kernel, int W, int H):
+    ConvolutionData(const array2D<float> &kernel, int W, int H, bool multithread):
         K(0),
         kernel_fft(nullptr),
         buf(nullptr),
-        buf_fft(nullptr)
+        buf_fft(nullptr),
+        fwd_plan(nullptr),
+        inv_plan(nullptr),
+        multithread(multithread)
     {
         K = kernel.width();
         if (K == kernel.height()) {
+            MyMutex::MyLock lock(*fftwMutex);
+
+#ifdef RT_FFTW3F_OMP
+            if (multithread) {
+                fftwf_init_threads();
+                fftwf_plan_with_nthreads(omp_get_max_threads());
+            }
+#endif
+            
             this->W = W;
             this->H = H;
             pW = find_fast_dim(W + K);
@@ -830,11 +838,20 @@ struct ConvolutionData {
             buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
             buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
             kernel_fft = prepare_kernel(kernel, buf, pW, pH, false);
+
+            fwd_plan = fftwf_plan_dft_r2c_2d(pH, pW, buf, buf_fft, FFTW_ESTIMATE);
+            inv_plan = fftwf_plan_dft_c2r_2d(pH, pW, buf_fft, buf, FFTW_ESTIMATE);
         }
     }
 
     ~ConvolutionData()
     {
+        if (inv_plan) {
+            fftwf_destroy_plan(inv_plan);
+        }
+        if (fwd_plan) {
+            fftwf_destroy_plan(fwd_plan);
+        }
         if (kernel_fft) {
             fftwf_free(kernel_fft);
         }
@@ -850,10 +867,10 @@ struct ConvolutionData {
 } // namespace
 
 
-Convolution::Convolution(const array2D<float> &kernel, int W, int H):
+Convolution::Convolution(const array2D<float> &kernel, int W, int H, bool multithread):
     data_(nullptr)
 {
-    data_ = new ConvolutionData(kernel, W, H);
+    data_ = new ConvolutionData(kernel, W, H, multithread);
 }
 
 
@@ -863,115 +880,18 @@ Convolution::~Convolution()
 }
 
 
-void Convolution::operator()(const array2D<float> &src, array2D<float> &dst, bool multithread)
+void Convolution::operator()(float **src, float **dst)
 {
     ConvolutionData *d = static_cast<ConvolutionData *>(data_);
     MyMutex::MyLock lock(*fftwMutex);
 
-#ifdef RT_FFTW3F_OMP
-    if (multithread) {
-        fftwf_init_threads();
-        fftwf_plan_with_nthreads(omp_get_max_threads());
-    }
-#endif
-
-    do_convolution(d->kernel_fft, d->K/2, d->pH, d->pW, d->buf, d->buf_fft, src, dst, multithread);
+    do_convolution(d->fwd_plan, d->inv_plan, d->kernel_fft, d->K/2, d->pH, d->pW, d->buf, d->buf_fft, d->W, d->H, src, dst, d->multithread);
 }
 
 
-void Convolution::operator()(float **src, float **dst, bool multithread)
+void Convolution::operator()(const array2D<float> &src, array2D<float> &dst)
 {
-    ConvolutionData *d = static_cast<ConvolutionData *>(data_);
-    array2D<float> asrc(d->W, d->H, src, ARRAY2D_BYREFERENCE);
-    array2D<float> adst(d->W, d->H, dst, ARRAY2D_BYREFERENCE);
-    operator()(asrc, adst, multithread);
-}
-
-
-bool convolution(const array2D<float> &kernel, const Imagefloat *src, Imagefloat *dst, bool multithread)
-{
-    if (kernel.width() != kernel.height() || src->getWidth() != dst->getWidth() || src->getHeight() != dst->getHeight()) {
-        return false;
-    }
-
-    Convolution conv(kernel, src->getWidth(), src->getHeight());
-    for (int c = 0; c < 3; ++c) {
-        auto s = (c == 0 ? src->r.ptrs : (c == 1 ? src->g.ptrs : src->b.ptrs));
-        auto d = (c == 0 ? dst->r.ptrs : (c == 1 ? dst->g.ptrs : dst->b.ptrs));
-        conv(s, d, multithread);
-    }
-    
-//     MyMutex::MyLock lock(*fftwMutex);
-
-// #ifdef RT_FFTW3F_OMP
-//     if (multithread) {
-//         fftwf_init_threads();
-//         fftwf_plan_with_nthreads(omp_get_max_threads());
-//     }
-// #endif
-
-//     const int K = kernel.width();
-//     const int W = src->getWidth();
-//     const int H = src->getHeight();
-//     const int pW = find_fast_dim(W + K);
-//     const int pH = find_fast_dim(H + K);
-
-//     float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
-//     fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
-
-//     auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
-
-//     for (int c = 0; c < 3; ++c) {
-//         auto s = (c == 0 ? src->r.ptrs : (c == 1 ? src->g.ptrs : src->b.ptrs));
-//         auto d = (c == 0 ? dst->r.ptrs : (c == 1 ? dst->g.ptrs : dst->b.ptrs));
-//         array2D<float> asrc(W, H, s, ARRAY2D_BYREFERENCE);
-//         array2D<float> adst(W, H, d, ARRAY2D_BYREFERENCE);
-//         do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, asrc, adst, multithread);
-//     }
-
-//     fftwf_free(kernel_fft);
-//     fftwf_free(buf_fft);
-//     fftwf_free(buf);
-
-    return true;
-}
-
-
-bool convolution(const array2D<float> &kernel, const array2D<float> &src, array2D<float> &dst, bool multithread)
-{
-    if (kernel.width() != kernel.height() || src.width() != dst.width() || src.height() != dst.height()) {
-        return false;
-    }
-
-    Convolution conv(kernel, src.width(), src.height());
-    conv(src, dst, multithread);
-
-//     MyMutex::MyLock lock(*fftwMutex);
-
-// #ifdef RT_FFTW3F_OMP
-//     if (multithread) {
-//         fftwf_init_threads();
-//         fftwf_plan_with_nthreads(omp_get_max_threads());
-//     }
-// #endif
-
-//     const int K = kernel.width();
-//     const int W = src.width();
-//     const int H = src.height();
-//     const int pW = find_fast_dim(W + K);
-//     const int pH = find_fast_dim(H + K);
-
-//     float *buf = static_cast<float *>(fftwf_malloc(sizeof(float) * pH * pW));
-//     fftwf_complex *buf_fft = fftwf_alloc_complex(pH * (pW / 2 + 1));
-
-//     auto kernel_fft = prepare_kernel(kernel, buf, pW, pH, multithread);
-//     do_convolution(kernel_fft, K/2, pH, pW, buf, buf_fft, src, dst, multithread);
-
-//     fftwf_free(kernel_fft);
-//     fftwf_free(buf_fft);
-//     fftwf_free(buf);
-
-    return true;
+    operator()(static_cast<float **>(const_cast<array2D<float> &>(src)), static_cast<float **>(dst));
 }
 
 
