@@ -439,8 +439,12 @@ bool import_kernel(cJSON *obj, array2D<float> &out)
 void rescale_kernel(const array2D<float> &src, array2D<float> &k)
 {
     rescaleBilinear(src, k, false);
-    
+
+    const int sw = src.width();
     const int w = k.width();
+
+    k[w/2][w/2] = src[sw/2][sw/2];
+    
     double sum = 0;
     for (int y = 0; y < w; ++y) {
         for (int x = 0; x < w; ++x) {
