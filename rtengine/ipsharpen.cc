@@ -469,6 +469,32 @@ void rescale_kernel(const array2D<float> &src, array2D<float> &k)
 }
 
 
+bool flip_kernel(array2D<float> &kernel)
+{
+    const int k = kernel.width();
+    bool res = false;
+
+    float magnitude = std::abs(kernel[k/2][k/2]);
+    for (int y = 0; y < k; ++y) {
+        for (int x = 0; x < k; ++x) {
+            magnitude = std::max(magnitude, std::abs(kernel[y][x]));
+        }
+    }
+
+    for (int y = 0; y < k; ++y) {
+        for (int x = 0; x < k; ++x) {
+            float d = std::abs(kernel[y][x] - kernel[k-1-y][k-1-x]) / magnitude;
+            if (d > 1e-5f) {
+                res = true;
+                kernel[y][x] = kernel[k-1-y][k-1-x];
+            }
+        }
+    }
+
+    return res;
+}
+
+
 void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const SharpeningParams &shparam, const ImProcData &data, ProgressListener *plistener)
 {
     const Glib::ustring &psf_file = shparam.psf_kernel;
@@ -562,6 +588,12 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
     }
 
     Convolution conv(kernel, W, H, data.multiThread);
+    Convolution *flipconv = &conv;
+    std::unique_ptr<Convolution> flipconv_ptr;
+    if (flip_kernel(kernel)) {
+        flipconv_ptr.reset(new Convolution(kernel, W, H, data.multiThread));
+        flipconv = flipconv_ptr.get();
+    }
 
     LUTf loglut(65536);
     for (int i = 1; i < 65536; ++i) {
@@ -602,7 +634,7 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
                 }
             }
         };
-    
+
     for (int i = 0; i < iterations; ++i) {
         conv(lum, tmp);
 
@@ -618,7 +650,7 @@ void rl_deconvolution_psf(float **luminance, float **blend, int W, int H, const 
             }
         }
 
-        conv(tmp, tmp);
+        (*flipconv)(tmp, tmp);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (data.multiThread)
