@@ -129,7 +129,7 @@ Sharpening::Sharpening() : FoldableToolPanel(this, "sharpening", M("TP_SHARPENIN
 
     psf = new Gtk::VBox ();
     psf_kernel = Gtk::manage(new MyFileChooserButton(M("TP_SHARPENING_PSF_KERNEL")));
-    psf_iterations = Gtk::manage(new Adjuster(M("TP_SHARPENING_PSF_ITERATIONS"), 1, 100, 1, 1));
+    psf_iterations = Gtk::manage(new Adjuster(M("TP_SHARPENING_PSF_ITERATIONS"), 1, 100, 1, 10));
     hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_SHARPENING_PSF_KERNEL") + ": ")), Gtk::PACK_SHRINK);
     hb->pack_start(*psf_kernel, Gtk::PACK_EXPAND_WIDGET);

@@ -1701,7 +1701,7 @@ SharpeningParams::SharpeningParams() :
     deconvCornerBoost(0.0),
     deconvCornerLatitude(25),
     psf_kernel(""),
-    psf_iterations(5)
+    psf_iterations(10)
 {
 }
 
