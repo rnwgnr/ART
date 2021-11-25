@@ -60,4 +60,9 @@ private:
     void *data_;
 };
 
+
+void get_luminance(const Imagefloat *src, array2D<float> &out, const float ws[3][3], bool multithread);
+
+void multiply(Imagefloat *img, const array2D<float> &num, const array2D<float> &den, bool multithread);
+
 } // namespace rtengine

@@ -934,4 +934,41 @@ void build_gaussian_kernel(float sigma, array2D<float> &res)
     }
 }
 
+
+void get_luminance(const Imagefloat *src, array2D<float> &out, const float ws[3][3], bool multithread)
+{
+    const int W = src->getWidth();
+    const int H = src->getHeight();
+    out(W, H);
+    
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            out[y][x] = Color::rgbLuminance(src->r(y, x), src->g(y, x), src->b(y, x), ws);
+        }
+    }
+}
+
+void multiply(Imagefloat *img, const array2D<float> &num, const array2D<float> &den, bool multithread)
+{
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+    
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            if (den[y][x] > 0.f) {
+                const float f = num[y][x] / den[y][x];
+                img->r(y, x) *= f;
+                img->g(y, x) *= f;
+                img->b(y, x) *= f;
+            }
+        }
+    }
+}
+
 } // namespace rtengine

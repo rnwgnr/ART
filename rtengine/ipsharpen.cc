@@ -693,23 +693,28 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
         return false;
     }
 
-    rgb->setMode(Imagefloat::Mode::YUV, multiThread);
-    float **Y = rgb->g.ptrs;
+    rgb->setMode(Imagefloat::Mode::RGB, multiThread);
+    array2D<float> Y(ARRAY2D_ALIGNED);
+    TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(rgb->colorSpace());
+    float ws[3][3];
+    to_float(dws, ws);
+    get_luminance(rgb, Y, ws, multiThread);
+    
     float s_scale = std::sqrt(scale);
     float contrast = pow_F(sharpenParam.contrast / 100.f, 1.2f) * s_scale;
     JaggedArray<float> blend(W, H);
     buildBlendMask(Y, blend, W, H, contrast, 1.f, false, 2.f / s_scale);
     
     if (showMask) {
-        float **u = rgb->r.ptrs;
-        float **v = rgb->b.ptrs;
+        float **r = rgb->r.ptrs;
+        float **g = rgb->g.ptrs;
+        float **b = rgb->b.ptrs;
 #ifdef _OPENMP
 #       pragma omp parallel for if (multiThread)
 #endif
         for (int i = 0; i < H; ++i) {
             for (int j = 0; j < W; ++j) {
-                Y[i][j] = blend[i][j] * 65536.f;
-                u[i][j] = v[i][j] = 0.f;
+                r[i][j] = g[i][j] = b[i][j] = blend[i][j] * 65536.f;
             }
         }
 
@@ -722,72 +727,38 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
         markImpulse(W, H, Y, *impulse, 2.f);
     }
     
-    
-    const bool high_quality = (scale == 1 || cur_pipeline == Pipeline::OUTPUT);
+    array2D<float> YY(W, H, Y, ARRAY2D_ALIGNED);
     
     if (sharpenParam.method == "rld") {
         double sigma = sharpenParam.deconvradius / scale;
         float amount = sharpenParam.deconvamount / 100.f;
         float delta = sharpenParam.deconvCornerBoost / scale;
         if (delta > 0.01f) {
-            array2D<float> YY(W, H, Y, 0);
-            deconvsharpening(Y, blend, *impulse, W, H, sigma, amount, multiThread);
-            deconvsharpening(YY, blend, *impulse, W, H, sigma + delta, amount, multiThread);
+            array2D<float> YY2(W, H, Y, ARRAY2D_ALIGNED);
+            deconvsharpening(YY, blend, *impulse, W, H, sigma, amount, multiThread);
+            deconvsharpening(YY2, blend, *impulse, W, H, sigma + delta, amount, multiThread);
             int fw = full_width > 0 ? full_width : W;
             int fh = full_height > 0 ? full_height : H;
             CornerBoostMask mask(offset_x, offset_y, fw, fh, sharpenParam.deconvCornerLatitude);
-//             {
-//                 Imagefloat tmp(W, H);
-// #ifdef _OPENMP
-// #               pragma omp parallel for if (multiThread)
-// #endif
-//                 for (int y = 0; y < H; ++y) {
-//                     for (int x = 0; x < W; ++x) {
-//                         float b = mask(x, y);
-//                         tmp.r(y, x) = tmp.g(y, x) = tmp.b(y, x) = b * 65535.f;
-//                     }
-//                 }
-//                 tmp.saveTIFF("/tmp/mask.tif", 16);
-//             }
 #ifdef _OPENMP
 #           pragma omp parallel for if (multiThread)
 #endif
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
                     float blend = mask(x, y);
-                    Y[y][x] = intp(blend, YY[y][x], Y[y][x]);
+                    YY[y][x] = intp(blend, YY2[y][x], YY[y][x]);
                 }
             }
         } else {
-            deconvsharpening(Y, blend, *impulse, W, H, sigma, amount, multiThread);
+            deconvsharpening(YY, blend, *impulse, W, H, sigma, amount, multiThread);
         }
     } else if (sharpenParam.method == "psf") {
         ImProcData data(params, scale, multiThread);
-        if (high_quality) {
-            if (plistener) {
-                plistener->setProgressStr(M("TP_SHARPENING_LABEL") + "...");
-                plistener->setProgress(0);
-            }
-            rgb->setMode(Imagefloat::Mode::RGB, multiThread);
-            rl_deconvolution_psf(rgb->r.ptrs, blend, W, H, sharpenParam, data, plistener);
-            if (plistener) {
-                plistener->setProgress(0.33);
-            }
-            rl_deconvolution_psf(rgb->g.ptrs, blend, W, H, sharpenParam, data, nullptr);
-            if (plistener) {
-                plistener->setProgress(0.66);
-            }
-            rl_deconvolution_psf(rgb->b.ptrs, blend, W, H, sharpenParam, data, nullptr);
-            if (plistener) {
-                plistener->setProgress(1);
-                plistener->setProgressStr(M("PROGRESSBAR_PROCESSING"));
-            }
-        } else {
-            rl_deconvolution_psf(Y, blend, W, H, sharpenParam, data, plistener);
-        }            
+        rl_deconvolution_psf(YY, blend, W, H, sharpenParam, data, plistener);
     } else {
-        unsharp_mask(Y, blend, W, H, sharpenParam, scale, multiThread);
+        unsharp_mask(YY, blend, W, H, sharpenParam, scale, multiThread);
     }
+    multiply(rgb, YY, Y, multiThread);
 
 
     return false;
