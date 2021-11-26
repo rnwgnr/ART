@@ -653,6 +653,9 @@ void Options::setDefaults()
 
     editor_keyboard_scroll_step = 50;
     adjuster_shortcut_scrollwheel_factor = 4;
+
+    remember_exif_filter_settings = false;
+    last_exif_filter_settings = ExifFilterSettings();
 }
 
 Options* Options::copyFrom(Options* other)
@@ -1080,25 +1083,25 @@ void Options::readFromFile(Glib::ustring fname)
                     internalThumbIfUntouched = keyFile.get_boolean("File Browser", "InternalThumbIfUntouched");
                 }
 
-                if (keyFile.has_key("File Browser", "menuGroupRank")) {
-                    menuGroupRank = keyFile.get_boolean("File Browser", "menuGroupRank");
-                }
+                // if (keyFile.has_key("File Browser", "menuGroupRank")) {
+                //     menuGroupRank = keyFile.get_boolean("File Browser", "menuGroupRank");
+                // }
 
-                if (keyFile.has_key("File Browser", "menuGroupLabel")) {
-                    menuGroupLabel = keyFile.get_boolean("File Browser", "menuGroupLabel");
-                }
+                // if (keyFile.has_key("File Browser", "menuGroupLabel")) {
+                //     menuGroupLabel = keyFile.get_boolean("File Browser", "menuGroupLabel");
+                // }
 
-                if (keyFile.has_key("File Browser", "menuGroupFileOperations")) {
-                    menuGroupFileOperations = keyFile.get_boolean("File Browser", "menuGroupFileOperations");
-                }
+                // if (keyFile.has_key("File Browser", "menuGroupFileOperations")) {
+                //     menuGroupFileOperations = keyFile.get_boolean("File Browser", "menuGroupFileOperations");
+                // }
 
-                if (keyFile.has_key("File Browser", "menuGroupProfileOperations")) {
-                    menuGroupProfileOperations = keyFile.get_boolean("File Browser", "menuGroupProfileOperations");
-                }
+                // if (keyFile.has_key("File Browser", "menuGroupProfileOperations")) {
+                //     menuGroupProfileOperations = keyFile.get_boolean("File Browser", "menuGroupProfileOperations");
+                // }
 
-                if (keyFile.has_key("File Browser", "menuGroupExtProg")) {
-                    menuGroupExtProg = keyFile.get_boolean("File Browser", "menuGroupExtProg");
-                }
+                // if (keyFile.has_key("File Browser", "menuGroupExtProg")) {
+                //     menuGroupExtProg = keyFile.get_boolean("File Browser", "menuGroupExtProg");
+                // }
 
                 if (keyFile.has_key("File Browser", "MaxRecentFolders")) {
                     maxRecentFolders = keyFile.get_integer("File Browser", "MaxRecentFolders");
@@ -1869,6 +1872,14 @@ void Options::readFromFile(Glib::ustring fname)
                 }
             }
 
+            if (keyFile.has_group("ExifFilterSettings")) {
+                const char *g = "ExifFilterSettings";
+                if (keyFile.has_key(g, "Remember")) {
+                    remember_exif_filter_settings = keyFile.get_boolean(g, "Remember");
+                }
+                last_exif_filter_settings.load(keyFile, g);
+            }
+
 // --------------------------------------------------------------------------------------------------------
 
             filterOutParsedExtensions();
@@ -1984,11 +1995,11 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("File Browser", "ShowFileNames", showFileNames);
         keyFile.set_boolean("File Browser", "FilmStripShowFileNames", filmStripShowFileNames);
         keyFile.set_boolean("File Browser", "InternalThumbIfUntouched", internalThumbIfUntouched);
-        keyFile.set_boolean("File Browser", "menuGroupRank", menuGroupRank);
-        keyFile.set_boolean("File Browser", "menuGroupLabel", menuGroupLabel);
-        keyFile.set_boolean("File Browser", "menuGroupFileOperations", menuGroupFileOperations);
-        keyFile.set_boolean("File Browser", "menuGroupProfileOperations", menuGroupProfileOperations);
-        keyFile.set_boolean("File Browser", "menuGroupExtProg", menuGroupExtProg);
+        // keyFile.set_boolean("File Browser", "menuGroupRank", menuGroupRank);
+        // keyFile.set_boolean("File Browser", "menuGroupLabel", menuGroupLabel);
+        // keyFile.set_boolean("File Browser", "menuGroupFileOperations", menuGroupFileOperations);
+        // keyFile.set_boolean("File Browser", "menuGroupProfileOperations", menuGroupProfileOperations);
+        // keyFile.set_boolean("File Browser", "menuGroupExtProg", menuGroupExtProg);
         keyFile.set_integer("File Browser", "MaxRecentFolders", maxRecentFolders);
         {
             std::vector<Glib::ustring> temp;
@@ -2272,6 +2283,9 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Renaming", "AllowWhitespace", renaming.allow_whitespace);
         keyFile.set_integer("Renaming", "OnExisting", renaming.on_existing);
         keyFile.set_integer("Renaming", "ProgressiveNumber", renaming.progressive_number);
+
+        keyFile.set_boolean("ExifFilterSettings", "Remember", remember_exif_filter_settings);
+        last_exif_filter_settings.save(keyFile, "ExifFilterSettings");
 
         keyData = keyFile.to_data();
 

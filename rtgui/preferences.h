@@ -148,11 +148,11 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::CheckButton *thumbDelayUpdate;
     Gtk::CheckButton *thumbLazyCaching;
 
-    Gtk::CheckButton* ckbmenuGroupRank;
-    Gtk::CheckButton* ckbmenuGroupLabel;
-    Gtk::CheckButton* ckbmenuGroupFileOperations;
-    Gtk::CheckButton* ckbmenuGroupProfileOperations;
-    Gtk::CheckButton* ckbmenuGroupExtProg;
+    // Gtk::CheckButton* ckbmenuGroupRank;
+    // Gtk::CheckButton* ckbmenuGroupLabel;
+    // Gtk::CheckButton* ckbmenuGroupFileOperations;
+    // Gtk::CheckButton* ckbmenuGroupProfileOperations;
+    // Gtk::CheckButton* ckbmenuGroupExtProg;
 
     Gtk::CheckButton* chOverwriteOutputFile;
     Gtk::SpinButton *autosaveInterval;
@@ -193,6 +193,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::ComboBoxText *xmpSidecarCombo;
     Gtk::Entry *exiftoolPath;
     Gtk::ComboBoxText *wbpreview;
+    Gtk::CheckButton *remember_metadata_filters;
 
     Gtk::CheckButton *thumbnailInspectorHover;
     

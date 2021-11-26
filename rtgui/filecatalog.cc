@@ -562,6 +562,13 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     }
 
     selectedDirectory = "";
+
+    {
+        MyMutex::MyLock lock(dirEFSMutex);
+        if (options.remember_exif_filter_settings) {
+            dirEFS = options.last_exif_filter_settings;
+        }
+    }    
 }
 
 FileCatalog::~FileCatalog()
@@ -662,6 +669,9 @@ void FileCatalog::closeDir ()
     {
         MyMutex::MyLock lock(dirEFSMutex);
         dirEFS.clear ();
+        if (hasValidCurrentEFS && options.remember_exif_filter_settings && filterPanel) {
+            dirEFS = options.last_exif_filter_settings = filterPanel->getFilter(false);
+        }
     }
     hasValidCurrentEFS = false;
     redrawAll ();
@@ -1045,9 +1055,14 @@ void FileCatalog::previewsFinishedUI ()
             if ( !hasValidCurrentEFS ) {
                 MyMutex::MyLock lock(dirEFSMutex);
                 currentEFS = dirEFS;
-                filterPanel->setFilter ( dirEFS, true );
+                filterPanel->setFilter(dirEFS, false);
+                if (options.remember_exif_filter_settings) {
+                    hasValidCurrentEFS = true;
+                    currentEFS = options.last_exif_filter_settings;
+                    filterPanel->setFilter(currentEFS, true);
+                }
             } else {
-                filterPanel->setFilter ( currentEFS, false );
+                filterPanel->setFilter(currentEFS, true);
             }
         }
 

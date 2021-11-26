@@ -24,6 +24,7 @@
 #include <gtkmm.h>
 #include "../rtengine/rtengine.h"
 #include <exception>
+#include "exiffiltersettings.h"
 
 #define STARTUPDIR_CURRENT 0
 #define STARTUPDIR_HOME    1
@@ -476,6 +477,9 @@ public:
 
     int editor_keyboard_scroll_step; // in pixels
     int adjuster_shortcut_scrollwheel_factor; // to control the adjustment step when using tool shortcuts with the mouse wheel
+
+    bool remember_exif_filter_settings;
+    ExifFilterSettings last_exif_filter_settings;
 
     Options();
 

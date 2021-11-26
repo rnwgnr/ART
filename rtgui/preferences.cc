@@ -1096,11 +1096,12 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     sameThumbSize->set_tooltip_text (M ("PREFERENCES_FSTRIP_SAME_THUMB_HEIGHT_HINT"));
     ckbInternalThumbIfUntouched = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_INTERNALTHUMBIFUNTOUCHED")));
 
-    vbro->pack_start (*showDateTime, Gtk::PACK_SHRINK, 0);
+    //vbro->pack_start (*showDateTime, Gtk::PACK_SHRINK, 0);
     Gtk::Label* dflab = Gtk::manage ( new Gtk::Label (M ("PREFERENCES_DATEFORMAT") + ":", Gtk::ALIGN_START));
     dateformat = Gtk::manage ( new Gtk::Entry () );
     dateformat->set_tooltip_markup (M ("PREFERENCES_DATEFORMATHINT"));
     dflab->set_tooltip_markup (M ("PREFERENCES_DATEFORMATHINT"));
+    hbro0->pack_start(*showDateTime, Gtk::PACK_SHRINK, 4);
     hbro0->pack_start (*dflab, Gtk::PACK_SHRINK, 4);
     hbro0->pack_start (*dateformat, Gtk::PACK_SHRINK, 0);
 
@@ -1114,7 +1115,9 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     vbro->pack_start (*ckbInternalThumbIfUntouched, Gtk::PACK_SHRINK, 0);
 
     thumbRatingMode = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_RATING")));
+    remember_metadata_filters = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_REMEMBER_METADATA_FILTERS")));
     vbro->pack_start(*thumbRatingMode, Gtk::PACK_SHRINK, 0);
+    vbro->pack_start(*remember_metadata_filters, Gtk::PACK_SHRINK, 0);
 
     Gtk::HBox* hbrecent = Gtk::manage ( new Gtk::HBox () );
     Gtk::Label* labrecent = Gtk::manage ( new Gtk::Label (M ("PREFERENCES_MAXRECENTFOLDERS") + ":") );
@@ -1129,27 +1132,27 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     fro->add (*vbro);
 
 
-    Gtk::Frame* frmnu = Gtk::manage ( new Gtk::Frame (M ("PREFERENCES_MENUOPTIONS")) );
+    // Gtk::Frame* frmnu = Gtk::manage ( new Gtk::Frame (M ("PREFERENCES_MENUOPTIONS")) );
     
-    Gtk::Grid* menuGrid = Gtk::manage(new Gtk::Grid());
-    menuGrid->get_style_context()->add_class("grid-spacing");
-    setExpandAlignProperties(menuGrid, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    // Gtk::Grid* menuGrid = Gtk::manage(new Gtk::Grid());
+    // menuGrid->get_style_context()->add_class("grid-spacing");
+    // setExpandAlignProperties(menuGrid, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     
-    ckbmenuGroupRank = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPRANK")) );
-    setExpandAlignProperties(ckbmenuGroupRank, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-    ckbmenuGroupLabel = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPLABEL")) );
-    ckbmenuGroupFileOperations = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPFILEOPERATIONS")) );
-    setExpandAlignProperties(ckbmenuGroupFileOperations, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-    ckbmenuGroupProfileOperations = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPPROFILEOPERATIONS")) );
-    ckbmenuGroupExtProg = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPEXTPROGS")) );
+    // ckbmenuGroupRank = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPRANK")) );
+    // setExpandAlignProperties(ckbmenuGroupRank, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    // ckbmenuGroupLabel = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPLABEL")) );
+    // ckbmenuGroupFileOperations = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPFILEOPERATIONS")) );
+    // setExpandAlignProperties(ckbmenuGroupFileOperations, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    // ckbmenuGroupProfileOperations = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPPROFILEOPERATIONS")) );
+    // ckbmenuGroupExtProg = Gtk::manage ( new Gtk::CheckButton (M ("PREFERENCES_MENUGROUPEXTPROGS")) );
     
-    menuGrid->attach (*ckbmenuGroupRank, 0, 0, 1, 1);
-    menuGrid->attach (*ckbmenuGroupLabel, 1, 0, 1, 1);
-    menuGrid->attach (*ckbmenuGroupFileOperations, 0, 1, 1, 1);
-    menuGrid->attach (*ckbmenuGroupProfileOperations, 1, 1, 1, 1);
-    menuGrid->attach (*ckbmenuGroupExtProg, 0, 2, 2, 1);
+    // menuGrid->attach (*ckbmenuGroupRank, 0, 0, 1, 1);
+    // menuGrid->attach (*ckbmenuGroupLabel, 1, 0, 1, 1);
+    // menuGrid->attach (*ckbmenuGroupFileOperations, 0, 1, 1, 1);
+    // menuGrid->attach (*ckbmenuGroupProfileOperations, 1, 1, 1, 1);
+    // menuGrid->attach (*ckbmenuGroupExtProg, 0, 2, 2, 1);
 
-    frmnu->add (*menuGrid);
+    // frmnu->add (*menuGrid);
 
 
     Gtk::Frame* fre = Gtk::manage ( new Gtk::Frame (M ("PREFERENCES_PARSEDEXT")) );
@@ -1262,13 +1265,13 @@ Gtk::Widget* Preferences::getFileBrowserPanel ()
     Gtk::VBox* vb6 = Gtk::manage ( new Gtk::VBox () );
 
     vb6->pack_start (*fro);
-    vb6->pack_start (*frmnu);
+    // vb6->pack_start (*frmnu);
     vb6->pack_end (*frc);
     hb6->pack_start (*vb6);
     hb6->pack_start (*fre);
     hb6->set_spacing (4);
 
-    vbFileBrowser->pack_start (*hb6, Gtk::PACK_SHRINK, 4);
+    vbFileBrowser->pack_start (*hb6, Gtk::PACK_EXPAND_WIDGET, 4);
 
     addExt->signal_clicked().connect ( sigc::mem_fun (*this, &Preferences::addExtPressed) );
     delExt->signal_clicked().connect ( sigc::mem_fun (*this, &Preferences::delExtPressed) );
@@ -1467,11 +1470,11 @@ void Preferences::storePreferences ()
     moptions.fbShowDateTime = showDateTime->get_active ();
     moptions.fbShowBasicExif = showBasicExif->get_active ();
     moptions.fbShowExpComp = showExpComp->get_active ();
-    moptions.menuGroupRank = ckbmenuGroupRank->get_active();
-    moptions.menuGroupLabel = ckbmenuGroupLabel->get_active();
-    moptions.menuGroupFileOperations = ckbmenuGroupFileOperations->get_active();
-    moptions.menuGroupProfileOperations = ckbmenuGroupProfileOperations->get_active();
-    moptions.menuGroupExtProg = ckbmenuGroupExtProg->get_active();
+    // moptions.menuGroupRank = ckbmenuGroupRank->get_active();
+    // moptions.menuGroupLabel = ckbmenuGroupLabel->get_active();
+    // moptions.menuGroupFileOperations = ckbmenuGroupFileOperations->get_active();
+    // moptions.menuGroupProfileOperations = ckbmenuGroupProfileOperations->get_active();
+    // moptions.menuGroupExtProg = ckbmenuGroupExtProg->get_active();
     moptions.highlightThreshold = (int)hlThresh->get_value ();
     moptions.shadowThreshold = (int)shThresh->get_value ();
     moptions.language = languages->get_active_text ();
@@ -1684,6 +1687,8 @@ void Preferences::storePreferences ()
 
     moptions.toolpanels_disable = ckbTpDisable->get_active();
 
+    moptions.remember_exif_filter_settings = remember_metadata_filters->get_active();
+
     exportPanel->SaveSettings(moptions);
 }
 
@@ -1797,11 +1802,11 @@ void Preferences::fillPreferences ()
     showDateTime->set_active (moptions.fbShowDateTime);
     showBasicExif->set_active (moptions.fbShowBasicExif);
     showExpComp->set_active (moptions.fbShowExpComp);
-    ckbmenuGroupRank->set_active (moptions.menuGroupRank);
-    ckbmenuGroupLabel->set_active (moptions.menuGroupLabel);
-    ckbmenuGroupFileOperations->set_active (moptions.menuGroupFileOperations);
-    ckbmenuGroupProfileOperations->set_active (moptions.menuGroupProfileOperations);
-    ckbmenuGroupExtProg->set_active (moptions.menuGroupExtProg);
+    // ckbmenuGroupRank->set_active (moptions.menuGroupRank);
+    // ckbmenuGroupLabel->set_active (moptions.menuGroupLabel);
+    // ckbmenuGroupFileOperations->set_active (moptions.menuGroupFileOperations);
+    // ckbmenuGroupProfileOperations->set_active (moptions.menuGroupProfileOperations);
+    // ckbmenuGroupExtProg->set_active (moptions.menuGroupExtProg);
 
     hlThresh->set_value (moptions.highlightThreshold);
     shThresh->set_value (moptions.shadowThreshold);
@@ -1947,6 +1952,7 @@ void Preferences::fillPreferences ()
 
     ckbTpDisable->set_active(moptions.toolpanels_disable);
 
+    remember_metadata_filters->set_active(moptions.remember_exif_filter_settings);
 
     exportPanel->LoadSettings(moptions);
 }
