@@ -310,6 +310,33 @@ void fill_pipette(Imagefloat *img, Imagefloat *pipette, bool multithread)
     }
 }
 
+
+class DoubleCurve: public Curve {
+public:
+    DoubleCurve(const Curve &c1, const Curve &c2):
+        c1_(c1), c2_(c2) {}
+
+    double getVal(double t) const override
+    {
+        return c2_.getVal(c1_.getVal(t));
+    }
+    
+    void getVal(const std::vector<double>& t, std::vector<double>& res) const override
+    {
+        c1_.getVal(t, res);
+        c2_.getVal(res, res);
+    }
+
+    bool isIdentity() const override
+    {
+        return c1_.isIdentity() && c2_.isIdentity();
+    }
+    
+private:
+    const Curve &c1_;
+    const Curve &c2_;
+};
+
 } // namespace
 
 
@@ -338,27 +365,39 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         ImProcData im(params, scale, multiThread);
         apply_contrast(img, im, params->toneCurve.contrast, params->toneCurve.contrastLegacyMode, params->toneCurve.curveMode, params->icm.workingProfile, whitept);
 
-        if (editImgFloat && editID == EUID_ToneCurve1) {
-            fill_pipette(img, editImgFloat, multiThread);
-        }
-        
         ToneCurve tc;
-        const DiagonalCurve tcurve1(params->toneCurve.curve, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        DiagonalCurve tcurve1(params->toneCurve.curve, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        DiagonalCurve tcurve2(params->toneCurve.curve2, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        DoubleCurve dcurve(tcurve1, tcurve2);
 
-        if (!tcurve1.isIdentity()) {
-            tc.Set(tcurve1, Color::sRGBGammaCurve, 65535.f * whitept);
-            apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
-        }
+        const bool single_curve = params->toneCurve.curveMode == params->toneCurve.curveMode2;
 
-        if (editImgFloat && editID == EUID_ToneCurve2) {
-            fill_pipette(img, editImgFloat, multiThread);
-        }
+        if (single_curve) {
+            if (editImgFloat && (editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2)) {
+                fill_pipette(img, editImgFloat, multiThread);
+            }
+            if (!dcurve.isIdentity()) {
+                tc.Set(dcurve, Color::sRGBGammaCurve, 65535.f * whitept);
+                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+            }
+        } else {
+            if (editImgFloat && editID == EUID_ToneCurve1) {
+                fill_pipette(img, editImgFloat, multiThread);
+            }
+        
+            if (!tcurve1.isIdentity()) {
+                tc.Set(tcurve1, Color::sRGBGammaCurve, 65535.f * whitept);
+                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+            }
 
-        const DiagonalCurve tcurve2(params->toneCurve.curve2, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+            if (editImgFloat && editID == EUID_ToneCurve2) {
+                fill_pipette(img, editImgFloat, multiThread);
+            }
 
-        if (!tcurve2.isIdentity()) {
-            tc.Set(tcurve2, Color::sRGBGammaCurve, 65535.f * whitept);
-            apply_tc(img, tc, params->toneCurve.curveMode2, params->icm.workingProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+            if (!tcurve2.isIdentity()) {
+                tc.Set(tcurve2, Color::sRGBGammaCurve, 65535.f * whitept);
+                apply_tc(img, tc, params->toneCurve.curveMode2, params->icm.workingProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+            }
         }
 
         if (editWhatever) {
