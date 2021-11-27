@@ -93,11 +93,6 @@ FilePanel::FilePanel () :
     fileCatalog->setInspector(inspectorPanel);
     inspectorPanel->signal_ready().connect(sigc::mem_fun(*this, &FilePanel::on_inspector_ready));
 
-    // Gtk::ScrolledWindow* sExportPanel = Gtk::manage ( new Gtk::ScrolledWindow() );
-    // exportPanel = Gtk::manage ( new ExportPanel () );
-    // sExportPanel->add (*exportPanel);
-    // sExportPanel->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-
     fileCatalog->setFilterPanel (filterPanel);
 
     //------------------
@@ -128,7 +123,6 @@ FilePanel::FilePanel () :
     rightNotebook->append_page (*inspectorPanel, *inspectLab);
     // rightNotebook->append_page (*tpcPaned, *devLab);
     //rightNotebook->append_page (*taggingBox, *tagLab); commented out: currently the tab is empty ...
-    // rightNotebook->append_page (*sExportPanel, *exportLab);
     rightNotebook->set_name ("RightNotebook");
 
     rightBox->pack_start (*rightNotebook);

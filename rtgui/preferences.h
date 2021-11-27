@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __PREFERENCES_H__
-#define __PREFERENCES_H__
+#pragma once
 
 #include <gtkmm.h>
 #include "adjuster.h"
@@ -26,7 +25,6 @@
 #include <vector>
 #include "rtwindow.h"
 #include "dynamicprofilepanel.h"
-#include "exportpanel.h"
 
 class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     class ExtensionColumns: public Gtk::TreeModel::ColumnRecord {
@@ -196,6 +194,9 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::CheckButton *remember_metadata_filters;
 
     Gtk::CheckButton *thumbnailInspectorHover;
+
+    MySpinButton *fastexport_max_width;
+    MySpinButton *fastexport_max_height;
     
     Glib::ustring storedValueRaw;
     Glib::ustring storedValueImg;
@@ -238,7 +239,6 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::ScrolledWindow *swPerformance;
     Gtk::ScrolledWindow *swSounds;
     Gtk::ScrolledWindow *swFastExport;
-    ExportPanel *exportPanel;
 
     Gtk::Widget *getGeneralPanel();
     Gtk::Widget *getImageProcessingPanel();
@@ -246,7 +246,6 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::Widget *getFileBrowserPanel();
     Gtk::Widget *getColorManPanel();
     Gtk::Widget *getPerformancePanel();
-    Gtk::Widget *getFastExportPanel();
     Gtk::Widget *getSoundsPanel();
 
 public:
@@ -277,5 +276,3 @@ public:
     void updateProfileList() override;
     void restoreValue() override;
 };
-
-#endif

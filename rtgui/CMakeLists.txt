@@ -53,7 +53,6 @@ set(NONCLISOURCEFILES
     textureboost.cc
     exiffiltersettings.cc
     exifpanel.cc
-    exportpanel.cc
     extprog.cc
     filebrowser.cc
     filebrowserentry.cc

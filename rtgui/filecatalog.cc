@@ -643,10 +643,6 @@ void FileCatalog::closeDir ()
         filterPanel->set_sensitive (false);
     }
 
-    // if (exportPanel) {
-    //     exportPanel->set_sensitive (false);
-    // }
-
     if (dirMonitor) {
         dirMonitor->cancel ();
     }
@@ -1065,10 +1061,6 @@ void FileCatalog::previewsFinishedUI ()
                 filterPanel->setFilter(currentEFS, true);
             }
         }
-
-        // if (exportPanel) {
-        //     exportPanel->set_sensitive (true);
-        // }
 
         // restart anything that might have been loaded low quality
         fileBrowser->refreshQuickThumbImages();
@@ -1992,13 +1984,6 @@ void FileCatalog::setFilterPanel (FilterPanel* fpanel)
     filterPanel->setFilterPanelListener (this);
 }
 
-// void FileCatalog::setExportPanel(ExportPanel* expanel)
-// {
-//     exportPanel = expanel;
-//     exportPanel->set_sensitive (false);
-//     exportPanel->setExportPanelListener (this);
-//     fileBrowser->setExportPanel(expanel);
-// }
 
 void FileCatalog::trashChanged ()
 {

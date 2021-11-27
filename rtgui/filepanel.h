@@ -46,7 +46,6 @@ public:
 
     DirBrowser* dirBrowser;
     FilterPanel* filterPanel;
-    // ExportPanel* exportPanel;
     FileCatalog* fileCatalog;
     Gtk::Paned *ribbonPane;
 

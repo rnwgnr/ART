@@ -479,34 +479,8 @@ void Options::setDefaults()
     ICCPC_copyright = Options::getICCProfileCopyright();
     ICCPC_appendParamsToDesc = false;
 
-    fastexport_bypass_sharpening         = true;
-    fastexport_bypass_defringe           = true;
-    fastexport_bypass_dirpyrDenoise      = true;
-    fastexport_bypass_localContrast    = true;
-    fastexport_raw_bayer_method                  = "fast";
-    //fastexport_bypass_raw_bayer_all_enhance    = true;
-    fastexport_bypass_raw_bayer_dcb_iterations   = true;
-    fastexport_bypass_raw_bayer_dcb_enhance      = true;
-    fastexport_bypass_raw_bayer_lmmse_iterations = true;
-    fastexport_bypass_raw_bayer_linenoise        = true;
-    fastexport_bypass_raw_bayer_greenthresh      = true;
-    fastexport_raw_xtrans_method                 = "fast";
-    fastexport_bypass_raw_ccSteps        = true;
-    fastexport_bypass_raw_ca             = true;
-    fastexport_bypass_raw_df             = true;
-    fastexport_bypass_raw_ff             = true;
-    fastexport_icm_input_profile         = "(camera)";
-    fastexport_icm_working_profile       = "ProPhoto";
-    fastexport_icm_output_profile        = options.rtSettings.srgb;
-    fastexport_icm_outputIntent          = rtengine::RI_RELATIVE;
-    fastexport_icm_outputBPC             = true;
-    fastexport_resize_enabled            = true;
-    fastexport_resize_scale              = 1;
-    fastexport_resize_appliesTo          = "Cropped area";
-    fastexport_resize_dataspec           = 3;
-    fastexport_resize_width              = 900;
-    fastexport_resize_height             = 900;
-    fastexport_use_fast_pipeline         = true;
+    fastexport_resize_width              = 1920;
+    fastexport_resize_height             = 1920;
 
     clutsDir = "./cluts";
 
@@ -1638,138 +1612,17 @@ void Options::readFromFile(Glib::ustring fname)
             }
 
             if (keyFile.has_group("Fast Export")) {
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_sharpening")) {
-                    fastexport_bypass_sharpening = keyFile.get_boolean("Fast Export", "fastexport_bypass_sharpening");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_defringe")) {
-                    fastexport_bypass_defringe = keyFile.get_boolean("Fast Export", "fastexport_bypass_defringe");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_dirpyrDenoise")) {
-                    fastexport_bypass_dirpyrDenoise = keyFile.get_boolean("Fast Export", "fastexport_bypass_dirpyrDenoise");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_localContrast")) {
-                    fastexport_bypass_localContrast = keyFile.get_boolean("Fast Export", "fastexport_bypass_localContrast");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_raw_dmethod")) {
-                    fastexport_raw_bayer_method = keyFile.get_string("Fast Export", "fastexport_raw_dmethod");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_raw_bayer_method")) {
-                    fastexport_raw_bayer_method = keyFile.get_string("Fast Export", "fastexport_raw_bayer_method");
-                }
-
-//if (keyFile.has_key ("Fast Export", "fastexport_bypass_raw_bayer_all_enhance" )) fastexport_bypass_raw_bayer_all_enhance = keyFile.get_boolean ("Fast Export", "fastexport_bypass_raw_all_enhance" );
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_dcb_iterations")) {
-                    fastexport_bypass_raw_bayer_dcb_iterations = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_dcb_iterations");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_bayer_dcb_iterations")) {
-                    fastexport_bypass_raw_bayer_dcb_iterations = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_bayer_dcb_iterations");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_dcb_enhance")) {
-                    fastexport_bypass_raw_bayer_dcb_enhance = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_dcb_enhance");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_bayer_dcb_enhance")) {
-                    fastexport_bypass_raw_bayer_dcb_enhance = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_bayer_dcb_enhance");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_lmmse_iterations")) {
-                    fastexport_bypass_raw_bayer_lmmse_iterations = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_lmmse_iterations");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_bayer_lmmse_iterations")) {
-                    fastexport_bypass_raw_bayer_lmmse_iterations = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_bayer_lmmse_iterations");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_linenoise")) {
-                    fastexport_bypass_raw_bayer_linenoise = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_linenoise");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_bayer_linenoise")) {
-                    fastexport_bypass_raw_bayer_linenoise = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_bayer_linenoise");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_greenthresh")) {
-                    fastexport_bypass_raw_bayer_greenthresh = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_greenthresh");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_bayer_greenthresh")) {
-                    fastexport_bypass_raw_bayer_greenthresh = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_bayer_greenthresh");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_raw_xtrans_method")) {
-                    fastexport_raw_xtrans_method = keyFile.get_string("Fast Export", "fastexport_raw_xtrans_method");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_ccSteps")) {
-                    fastexport_bypass_raw_ccSteps = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_ccSteps");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_ca")) {
-                    fastexport_bypass_raw_ca = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_ca");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_df")) {
-                    fastexport_bypass_raw_df = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_df");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_bypass_raw_ff")) {
-                    fastexport_bypass_raw_ff = keyFile.get_boolean("Fast Export", "fastexport_bypass_raw_ff");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_icm_input")) {
-                    fastexport_icm_input_profile = keyFile.get_string("Fast Export", "fastexport_icm_input");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_icm_working")) {
-                    fastexport_icm_working_profile = keyFile.get_string("Fast Export", "fastexport_icm_working");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_icm_output")) {
-                    fastexport_icm_output_profile = keyFile.get_string("Fast Export", "fastexport_icm_output");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_icm_output_intent")) {
-                    fastexport_icm_outputIntent = static_cast<rtengine::RenderingIntent>(keyFile.get_integer("Fast Export", "fastexport_icm_output_intent"));
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_icm_output_bpc")) {
-                    fastexport_icm_outputBPC = keyFile.get_boolean("Fast Export", "fastexport_icm_output_bpc");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_resize_enabled")) {
-                    fastexport_resize_enabled = keyFile.get_boolean("Fast Export", "fastexport_resize_enabled");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_resize_scale")) {
-                    fastexport_resize_scale = keyFile.get_double("Fast Export", "fastexport_resize_scale");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_resize_appliesTo")) {
-                    fastexport_resize_appliesTo = keyFile.get_string("Fast Export", "fastexport_resize_appliesTo");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_resize_dataspec")) {
-                    fastexport_resize_dataspec = keyFile.get_integer("Fast Export", "fastexport_resize_dataspec");
-                }
-
                 if (keyFile.has_key("Fast Export", "fastexport_resize_width")) {
                     fastexport_resize_width = keyFile.get_integer("Fast Export", "fastexport_resize_width");
+                } else if (keyFile.has_key("Fast Export", "MaxWidth")) {
+                    fastexport_resize_width = keyFile.get_integer("Fast Export", "MaxWidth");
                 }
 
                 if (keyFile.has_key("Fast Export", "fastexport_resize_height")) {
                     fastexport_resize_height = keyFile.get_integer("Fast Export", "fastexport_resize_height");
-                }
-
-                if (keyFile.has_key("Fast Export", "fastexport_use_fast_pipeline")) {
-                    fastexport_use_fast_pipeline = keyFile.get_integer("Fast Export", "fastexport_use_fast_pipeline");
-                }
+                } else if (keyFile.has_key("Fast Export", "MaxHeight")) {
+                    fastexport_resize_height = keyFile.get_integer("Fast Export", "MaxHeight");
+                } 
             }
 
             if (keyFile.has_group("Dialogs")) {
@@ -2204,34 +2057,8 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("Sounds", "LngEditProcDone", sndLngEditProcDone);
         keyFile.set_double("Sounds", "LngEditProcDoneSecs", sndLngEditProcDoneSecs);
 
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_sharpening", fastexport_bypass_sharpening);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_defringe", fastexport_bypass_defringe);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_dirpyrDenoise", fastexport_bypass_dirpyrDenoise);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_localContrast", fastexport_bypass_localContrast);
-        keyFile.set_string("Fast Export", "fastexport_raw_bayer_method", fastexport_raw_bayer_method);
-        //keyFile.set_boolean ("Fast Export", "fastexport_bypass_bayer_raw_all_enhance" , fastexport_bypass_raw_bayer_all_enhance);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_dcb_iterations", fastexport_bypass_raw_bayer_dcb_iterations);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_dcb_enhance", fastexport_bypass_raw_bayer_dcb_enhance);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_lmmse_iterations", fastexport_bypass_raw_bayer_lmmse_iterations);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_linenoise", fastexport_bypass_raw_bayer_linenoise);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_greenthresh", fastexport_bypass_raw_bayer_greenthresh);
-        keyFile.set_string("Fast Export", "fastexport_raw_xtrans_method", fastexport_raw_xtrans_method);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_ccSteps", fastexport_bypass_raw_ccSteps);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_ca", fastexport_bypass_raw_ca);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_df", fastexport_bypass_raw_df);
-        keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_ff", fastexport_bypass_raw_ff);
-        keyFile.set_string("Fast Export", "fastexport_icm_input", fastexport_icm_input_profile);
-        keyFile.set_string("Fast Export", "fastexport_icm_working", fastexport_icm_working_profile);
-        keyFile.set_string("Fast Export", "fastexport_icm_output", fastexport_icm_output_profile);
-        keyFile.set_integer("Fast Export", "fastexport_icm_output_intent", fastexport_icm_outputIntent);
-        keyFile.set_boolean("Fast Export", "fastexport_icm_output_bpc", fastexport_icm_outputBPC);
-        keyFile.set_boolean("Fast Export", "fastexport_resize_enabled", fastexport_resize_enabled);
-        keyFile.set_double("Fast Export", "fastexport_resize_scale", fastexport_resize_scale);
-        keyFile.set_string("Fast Export", "fastexport_resize_appliesTo", fastexport_resize_appliesTo);
-        keyFile.set_integer("Fast Export", "fastexport_resize_dataspec", fastexport_resize_dataspec);
-        keyFile.set_integer("Fast Export", "fastexport_resize_width", fastexport_resize_width);
-        keyFile.set_integer("Fast Export", "fastexport_resize_height", fastexport_resize_height);
-        keyFile.set_integer("Fast Export", "fastexport_use_fast_pipeline", fastexport_use_fast_pipeline);
+        keyFile.set_integer("Fast Export", "MaxWidth", fastexport_resize_width);
+        keyFile.set_integer("Fast Export", "MaxHeight", fastexport_resize_height);
 
         keyFile.set_string("Dialogs", "LastIccDir", lastIccDir);
         keyFile.set_string("Dialogs", "LastDarkframeDir", lastDarkframeDir);

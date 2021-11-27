@@ -85,7 +85,6 @@ Preferences::Preferences (RTWindow *rtwindow)
     nb->append_page(*getFileBrowserPanel(), M("PREFERENCES_TAB_BROWSER"));
     nb->append_page(*getColorManPanel(), M("PREFERENCES_TAB_COLORMGR"));
     nb->append_page(*getPerformancePanel(), M("PREFERENCES_TAB_PERFORMANCE"));
-    nb->append_page(*getFastExportPanel(), M("PREFERENCES_TAB_FASTEXPORT"));
     // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
     nb->append_page(*getSoundsPanel(), M("PREFERENCES_TAB_SOUND"));
@@ -465,7 +464,32 @@ Gtk::Widget* Preferences::getPerformancePanel ()
         vb->pack_start(*thumbLazyCaching);
         thumbFrame->add(*vb);
     }
-    vbPerformance->pack_start(*thumbFrame, Gtk::PACK_SHRINK, 4);    
+    vbPerformance->pack_start(*thumbFrame, Gtk::PACK_SHRINK, 4);
+
+    Gtk::Frame *fe_frame = Gtk::manage(new Gtk::Frame(M("PREFERENCES_TAB_FASTEXPORT")));
+    {
+        Gtk::HBox* hbox = Gtk::manage(new Gtk::HBox());
+        fastexport_max_width = Gtk::manage(new MySpinButton());
+        fastexport_max_height = Gtk::manage(new MySpinButton());
+        hbox->pack_start(*Gtk::manage(new Gtk::Label(M("EXPORT_MAXWIDTH"))), Gtk::PACK_SHRINK, 4);
+        hbox->pack_start(*fastexport_max_width);
+        hbox->pack_start(*Gtk::manage(new Gtk::Label(M("EXPORT_MAXHEIGHT"))), Gtk::PACK_SHRINK, 4);
+        hbox->pack_start(*fastexport_max_height);
+        fe_frame->add(*hbox);
+
+        fastexport_max_width->set_digits(0);
+        fastexport_max_width->set_width_chars(5);
+        fastexport_max_width->set_max_width_chars(5);
+        fastexport_max_width->set_increments(1, 100);
+        fastexport_max_width->set_range(32, 10000);
+
+        fastexport_max_height->set_digits(0);
+        fastexport_max_height->set_width_chars(5);
+        fastexport_max_height->set_max_width_chars(5);
+        fastexport_max_height->set_increments(1, 100);
+        fastexport_max_height->set_range(32, 10000);
+    }
+    vbPerformance->pack_start(*fe_frame, Gtk::PACK_SHRINK, 4);
     
     swPerformance->add(*vbPerformance);
 
@@ -1343,16 +1367,6 @@ Gtk::Widget* Preferences::getSoundsPanel ()
 }
 
 
-Gtk::Widget *Preferences::getFastExportPanel()
-{
-    exportPanel = Gtk::manage(new ExportPanel());
-    swFastExport = Gtk::manage(new Gtk::ScrolledWindow());
-    swFastExport->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    swFastExport->add(*exportPanel);
-    return swFastExport;
-}
-
-
 void Preferences::parseDir (Glib::ustring dirname, std::vector<Glib::ustring>& items, Glib::ustring ext)
 {
 
@@ -1689,7 +1703,8 @@ void Preferences::storePreferences ()
 
     moptions.remember_exif_filter_settings = remember_metadata_filters->get_active();
 
-    exportPanel->SaveSettings(moptions);
+    moptions.fastexport_resize_width = fastexport_max_width->get_value();
+    moptions.fastexport_resize_height = fastexport_max_height->get_value();
 }
 
 
@@ -1954,23 +1969,10 @@ void Preferences::fillPreferences ()
 
     remember_metadata_filters->set_active(moptions.remember_exif_filter_settings);
 
-    exportPanel->LoadSettings(moptions);
+    fastexport_max_width->set_value(moptions.fastexport_resize_width);
+    fastexport_max_height->set_value(moptions.fastexport_resize_height);
 }
 
-/*
-void Preferences::loadPressed () {
-
-    moptions.copyFrom (&options);
-    fillPreferences ();
-}
-
-void Preferences::savePressed () {
-
-    storePreferences ();
-    options.copyFrom (&moptions);
-    Options::save ();
-}
-*/
 
 void Preferences::autoMonProfileToggled ()
 {

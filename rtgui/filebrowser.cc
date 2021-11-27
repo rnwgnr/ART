@@ -218,8 +218,7 @@ FileBrowser::FileBrowser () :
     clearFromCacheFull(nullptr),
     colorLabel_actionData(nullptr),
     tbl(nullptr),
-    numFiltered(-1)//,
-//    exportPanel(nullptr)
+    numFiltered(-1)
 {
     session_id_ = 0;
 
@@ -862,12 +861,6 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
     else if (m == develop) {
         tbl->developRequested (mselected, false);
     } else if (m == developfast) {
-        // if (exportPanel) {
-        //     // force saving export panel settings
-        //     exportPanel->setExportPanelListener(nullptr);
-        //     exportPanel->FastExportPressed();
-        //     exportPanel->setExportPanelListener(this);
-        // }
         tbl->developRequested (mselected, true);
     }
 
@@ -2044,20 +2037,6 @@ FileBrowser::type_trash_changed FileBrowser::trash_changed ()
     return m_trash_changed;
 }
 
-
-// // ExportPanel interface
-// void FileBrowser::exportRequested ()
-// {
-//     FileBrowser::menuItemActivated(developfast);
-// }
-
-// void FileBrowser::setExportPanel (ExportPanel* expanel)
-// {
-
-//     exportPanel = expanel;
-//     exportPanel->set_sensitive (false);
-//     exportPanel->setExportPanelListener (this);
-// }
 
 void FileBrowser::storeCurrentValue()
 {

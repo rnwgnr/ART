@@ -383,34 +383,8 @@ public:
     bool ICCPC_appendParamsToDesc;
 
     // fast export options
-    bool fastexport_bypass_sharpening;
-    bool fastexport_bypass_defringe;
-    bool fastexport_bypass_dirpyrDenoise;
-    bool fastexport_bypass_localContrast;
-    Glib::ustring fastexport_raw_bayer_method;
-    bool fastexport_bypass_raw_bayer_dcb_iterations;
-    bool fastexport_bypass_raw_bayer_dcb_enhance;
-    bool fastexport_bypass_raw_bayer_lmmse_iterations;
-    bool fastexport_bypass_raw_bayer_linenoise;
-    bool fastexport_bypass_raw_bayer_greenthresh;
-    Glib::ustring fastexport_raw_xtrans_method;
-    bool fastexport_bypass_raw_ccSteps;
-    bool fastexport_bypass_raw_ca;
-    bool fastexport_bypass_raw_df;
-    bool fastexport_bypass_raw_ff;
-    Glib::ustring fastexport_icm_input_profile;
-    Glib::ustring fastexport_icm_working_profile;
-    Glib::ustring fastexport_icm_output_profile;
-    rtengine::RenderingIntent fastexport_icm_outputIntent;
-    bool fastexport_icm_outputBPC;
-    Glib::ustring fastexport_icm_custom_output_profile;
-    bool fastexport_resize_enabled;
-    double fastexport_resize_scale;
-    Glib::ustring fastexport_resize_appliesTo;
-    int fastexport_resize_dataspec;
     int fastexport_resize_width;
     int fastexport_resize_height;
-    bool fastexport_use_fast_pipeline;
 
     std::vector<Glib::ustring> favorites;
     // Dialog settings
