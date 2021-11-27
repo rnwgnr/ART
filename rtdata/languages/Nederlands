@@ -88,7 +88,7 @@ EXIFFILTER_FOCALLEN;Brandpuntsafstand
 EXIFFILTER_IMAGETYPE;Type afbeelding
 EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Objectief
-EXIFFILTER_METADATAFILTER;Activeer metadatafilters
+EXIFFILTER_METADATAFILTER;Filter op metadata
 EXIFFILTER_SHUTTER;Sluitertijd
 EXIFPANEL_ACTIVATE_ALL_HINT;Selecteer alle labels
 EXIFPANEL_ACTIVATE_NONE_HINT;Deselecteer alle labels
@@ -1259,7 +1259,7 @@ THRESHOLDSELECTOR_TL;Bovenkant-links
 THRESHOLDSELECTOR_TR;Bovenkant-rechts
 TOOL_SHORTCUT_HELP_HEADER;Gereedschapssneltoetsen:\n(druk een zekere toets en pas de schuif aan met +/- of het muiswiel)\n
 TOOLBAR_TOOLTIP_COLORPICKER;Vergrendelbare kleurenkiezer\n\nIndien geactiveerd:\nVoeg kiezer toe: <b>linksklik</b>\nVerplaats kiezer:<b>linksklik en sleep</b>\nVerwijder kiezer: <b>rechtsklik</b>op een kiezer\nVerwijder alle kiezers:<b>Ctrl+Shift+rechtsklik</b> op een kiezer\nTerug naar handgereedschap: <b>rechtsklik</b> buiten een kiezer.
-TOOLBAR_TOOLTIP_CROP;<b>Snij selectie bij.\nSneltoets: <b>Shift+c</b>\nVerplaats uitsnede met <b>linkermuisklik</b>\nWijzig grootte uitsnede door de randen te verplaatsen.
+TOOLBAR_TOOLTIP_CROP;<b>Snij selectie bij.</b>\nSneltoets: <b>Shift+c</b>\nVerplaats uitsnede met <b>linkermuisklik</b>\nWijzig grootte uitsnede door de randen te verplaatsen.
 TOOLBAR_TOOLTIP_HAND;Handgereedschap.\nSneltoets: <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Perspectiefcorrectie</b>.\nSneltoets: <b>Shift+p</b>\n\nBewerk controlelijnen om perspectivische vervorming te corrigeren. Klik opnieuw op deze knop om de correctie toe te passen.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Rechtzetten</b> / <b>Kleine rotaties</b>.\nSneltoets: <b>Shift+s</b>\n\nBepaal de verticale of horizontale as door een hulplijn over de foto te trekken met de Ctrl-toets ingedrukt. De rotatiehoek wordt naast de hulplijn getoond. Het draaicentrum is het geometrische midden van de afbeelding.

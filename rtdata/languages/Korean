@@ -1,11 +1,12 @@
-#00 Korea - Korean
-#01 2021-10-2 Ohnishi, Yasuo, initial translation for 1.10.1
+A#00 Korea - Korean
+#01 2021-10-22 Ohnishi, Yasuo, initial translation for 1.10.1
+#02 2021-11-25 Ohnishi, Yasuo, some fixes and updated for New Keys
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
 ABOUT_TAB_RELEASENOTES;릴리스 노트
 ABOUT_TAB_SPLASH;Splash
-ADJUSTER_RESET_TO_DEFAULT;<b>클릭</b> - 초기 설정값으로 리셋함\n<b>Ctrl</b>+<b>클릭</b> - 마지막에 보존한 값으로 리셋함
+ADJUSTER_RESET_TO_DEFAULT;<b>클릭</b> - 초기 설정 값으로 리셋함\n<b>Ctrl</b>+<b>클릭</b> - 마지막에 보존한 값으로 리셋함
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
@@ -30,7 +31,7 @@ CURVEEDITOR_TOOLTIPLINEAR;선형으로 리셋
 CURVEEDITOR_TOOLTIPLOAD;파일에서 커브를 불러오기
 CURVEEDITOR_TOOLTIPPASTE;클립 보드에서 커브를 붙이기
 CURVEEDITOR_TOOLTIPSAVE;현제 커브를 보존
-CURVEEDITOR_TYPE;형상(Type):
+CURVEEDITOR_TYPE;형상 (Type):
 DIRBROWSER_FOLDERS;폴더
 DONT_SHOW_AGAIN;다음부터 이 미시지를 표시 안함.
 DYNPROFILEEDITOR_DELETE;삭제함
@@ -48,7 +49,7 @@ DYNPROFILEEDITOR_NEW_RULE;새로운 동직 프로파일 규정
 DYNPROFILEEDITOR_PROFILE;처리 프로파일
 EDITWINDOW_TITLE;화상편집
 EDIT_OBJECT_TOOLTIP;이 기능 사용시 편의로 미리보기화면에 가이드를 표시함.
-EDIT_PIPETTE_TOOLTIP;곡선상에 조정점을 추가할 때에는, Ctrl 키를 누르면서, 미리보기 화상상에 있는 목표점을 왼쪽 클릭합니다.\n추가된 그 점을 조정하려면, Ctrl 키를 누르면서 미리보기상의 그 점에 상당하는 부분을 왼쪽 클릭합니다. 그리고 Ctrl 키를 놓고(미묘한 조정을 할 때는 그대로) 왼쪽 버튼을 누르면서 마우스를 화면상에서 위아래로 이동하면, 그에 따라 톤 곡선이 조정됩니다.
+EDIT_PIPETTE_TOOLTIP;곡선상에 조정점을 추가할 때에는, Ctrl 키를 누르면서, 미리보기 화상상에 있는 목표점을 왼쪽 클릭합니다.\n추가된 그 점을 조정하려면, Ctrl 키를 누르면서 미리보기상의 그 점에 상당하는 부분을 왼쪽 클릭합니다. 그리고 Ctrl 키를 놓고 (미묘한 조정을 할 때는 그대로) 왼쪽 버튼을 누르면서 마우스를 화면상에서 위아래로 이동하면, 그에 따라 톤 곡선이 조정됩니다.
 ERROR_MSG_FILE_READ;파일 불러오기 착오: %1
 ERROR_MSG_MAXERRORS;... (%1 이전의 착오는 표시되지 않습니다.)
 ERROR_MSG_METADATA_VALUE;메타데이터: 착오 setting %1 to %2
@@ -78,7 +79,7 @@ EXIFPANEL_BASIC_GROUP;기본
 EXIFPANEL_VALUE_NOT_SHOWN;비표시
 EXPORT_BYPASS;피하는 기능
 EXPORT_BYPASS_ALL;모두 선택 / 모두 해제
-EXPORT_BYPASS_DEFRINGE;경계선을 깔끔하게 하기 피하기
+EXPORT_BYPASS_DEFRINGE;윤곽을 깔끔하게 하기 피하기
 EXPORT_BYPASS_DIRPYRDENOISE;노이즈 감소 피하기
 EXPORT_BYPASS_LOCALCONTRAST;부분 대비 피하기
 EXPORT_BYPASS_RAW_CA;[raw] 색수차보정 피하기
@@ -98,9 +99,9 @@ EXPORT_MAXWIDTH;최대 폭:
 EXPORT_PIPELINE;고속출력 방법
 EXPORT_PUTTOQUEUEFAST; 고속출력 큐에 추가
 EXPORT_RAW_DMETHOD;디모자이킹 방식
-EXPORT_USE_FAST_PIPELINE;처리속도 우선(크기 조정한 화상에 조정을 모두함)
+EXPORT_USE_FAST_PIPELINE;처리속도 우선 (크기 조정한 화상에 조정을 모두함)
 EXPORT_USE_FAST_PIPELINE_TIP;처리속도를 우선하면 처리는 빨라지만, 화질은 떨어집니다.보통 화상 크기 조정은 전체 현상 처리공정의 마지막으로 합니다만, 여기서는 처리공정의 초기단계에서 크기 조정을 합니다. 처리속도는 굉장히 올라가지만, 현상 처리  된 화상에 불자연한 효과가 생기든가, 전체적 질이 떨어지든가 합니다.
-EXPORT_USE_NORMAL_PIPELINE;표준(크기 조정처리는 마지막으로 하고 몇가지 처리는 생략됩니다)
+EXPORT_USE_NORMAL_PIPELINE;표준 (크기 조정처리는 마지막으로 하고 몇가지 처리는 생략됩니다)
 FILEBROWSER_APPLYPROFILE;프로파일 적용
 FILEBROWSER_APPLYPROFILE_PARTIAL;프로파일 적용 (일부)
 FILEBROWSER_AUTODARKFRAME;자동 장시간노출 노이즈 제거
@@ -238,16 +239,16 @@ GENERAL_OPEN;열기
 GENERAL_PORTRAIT;세로
 GENERAL_RESET;리셋
 GENERAL_SAVE;보존
-GENERAL_SAVE_AS;...(으)로 보존
+GENERAL_SAVE_AS;... (으) 로 보존
 GENERAL_SLIDER;슬라이더
 GENERAL_UNCHANGED;(변경 없음)
 GENERAL_WARNING;경고
-GENERAL_DEPRECATED_TOOLTIP;<b>"폐지예정(Deprecated)!"</b> 은 장래 버전에서 삭제됩니다.
+GENERAL_DEPRECATED_TOOLTIP;<b>"폐지예정 (Deprecated) !"</b> 은 장래 버전에서 삭제됩니다.
 GIMP_PLUGIN_INFO;ART GIMP 플러그인을 쓰시는 것을 환영합니다！\n화상편집이 끝난 후, 그냥 ART을 끝내면, 화상이 자동적으로 GIMP에 이송됩니다.
-HISTOGRAM_RAW_STATS_TOOLTIP;"min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9"
+HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;Blue・히스토그램 표시/비표시
-HISTOGRAM_TOOLTIP_BAR;RGB표시기 바(bar)의 표시/비표시\n미리보기 상에서 마우스의 오른쪽 클릭으로 고정/해방
-HISTOGRAM_TOOLTIP_CHRO;채도(Chroma) 히스토그램 표시/비표시
+HISTOGRAM_TOOLTIP_BAR;RGB표시기 바 (bar) 의 표시/비표시\n미리보기 상에서 마우스의 오른쪽 클릭으로 고정/해방
+HISTOGRAM_TOOLTIP_CHRO;채도 (Chroma) 히스토그램 표시/비표시
 HISTOGRAM_TOOLTIP_CROSSHAIR;표시/비표시 표시기 눈금
 HISTOGRAM_TOOLTIP_G;Green・히스토그램 표시/비표시
 HISTOGRAM_TOOLTIP_L;CIEL*a*b* 밝기 히스토그램 표시/비표시
@@ -262,9 +263,9 @@ HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Scope 밝기를 조정
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;히스토그램
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Raw 히스토그램
 HISTOGRAM_TOOLTIP_TYPE_PARADE;RGB Parade
-HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;파형(Waveform)
-HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;색상(Hue)-채도(Chroma) Vectorscope
-HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;색상(Hue)-채도(Saturation) Vectorscope
+HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;파형 (Waveform)
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;색상 (Hue) -채도 (Chroma) Vectorscope
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;색상 (Hue) -채도 (Saturation) Vectorscope
 HISTORY_CHANGED;변경되었습니다.
 HISTORY_CUSTOMCURVE;맞춤커브
 HISTORY_FROMCLIPBOARD;클립 보드에서
@@ -284,9 +285,9 @@ HISTORY_MSG_20;선명하게 하기
 HISTORY_MSG_21;선명하게 하기 반경
 HISTORY_MSG_22;선명하게 하기 적용량
 HISTORY_MSG_23;선명하게 하기 임계 값
-HISTORY_MSG_24;선명하게 하기 경계선만
-HISTORY_MSG_25;선명하게 하기 경계선검출 반경
-HISTORY_MSG_26;선명하게 하기 경계선 허용
+HISTORY_MSG_24;선명하게 하기 윤곽만
+HISTORY_MSG_25;선명하게 하기 윤곽검출 반경
+HISTORY_MSG_26;선명하게 하기 윤곽 허용
 HISTORY_MSG_27;선명하게 하기 하로 억제
 HISTORY_MSG_28;하로 억제 적용량
 HISTORY_MSG_29;선명하게 하기 방식
@@ -304,7 +305,7 @@ HISTORY_MSG_41;톤 곡선1의 방식
 HISTORY_MSG_42;톤 곡선 2
 HISTORY_MSG_43;톤 곡선2의 방식
 HISTORY_MSG_48;DCP톤 곡선 사용
-HISTORY_MSG_49;색상 노이즈 감소 경계선의 감도
+HISTORY_MSG_49;색상 노이즈 감소 윤곽의 감도
 HISTORY_MSG_57;90도 회전
 HISTORY_MSG_58;좌우반전
 HISTORY_MSG_59;상하반전
@@ -334,10 +335,10 @@ HISTORY_MSG_85;렌즈보정 프로파일
 HISTORY_MSG_87;임펄스 노이즈 감소
 HISTORY_MSG_88;임펄스 노이즈 감소 임계 값
 HISTORY_MSG_89;노이즈 감소
-HISTORY_MSG_90;휘도노이즈 감소
+HISTORY_MSG_90;광도 노이즈 감소
 HISTORY_MSG_91;색상 노이즈 감소
 HISTORY_MSG_92;노이즈 감소의 감마
-HISTORY_MSG_95;L*a*b* - 채도(Chroma)
+HISTORY_MSG_95;L*a*b* - 채도 (Chroma)
 HISTORY_MSG_96;L*a*b* - a* 커브
 HISTORY_MSG_97;L*a*b* - b* 커브
 HISTORY_MSG_98;디모자이킹 방식
@@ -347,11 +348,11 @@ HISTORY_MSG_101;색 이퀄라이저 - 색상
 HISTORY_MSG_102;색 이퀄라이저 - 채도
 HISTORY_MSG_103;색 이퀄라이저 - 밝기
 HISTORY_MSG_104;색 이퀄라이저
-HISTORY_MSG_105;경계선을 깔끔하게 하기
-HISTORY_MSG_106;경계선을 깔끔하게 하기 반경
-HISTORY_MSG_107;경계선을 깔끔하게 하기 임계 값
+HISTORY_MSG_105;윤곽을 깔끔하게 하기
+HISTORY_MSG_106;윤곽을 깔끔하게 하기 반경
+HISTORY_MSG_107;윤곽을 깔끔하게 하기 임계 값
 HISTORY_MSG_108;하이라이트압축 임계 값
-HISTORY_MSG_109;크기 조정 Bounding box
+HISTORY_MSG_109;크기 조정 표시최대영역
 HISTORY_MSG_110;크기 조정 적용영역
 HISTORY_MSG_115;거짓 색상 억제
 HISTORY_MSG_117;raw 색수차  빨간색
@@ -361,13 +362,13 @@ HISTORY_MSG_120;Green 균형화
 HISTORY_MSG_121;raw 색수차 자동
 HISTORY_MSG_122;장시간노출 노이즈 제거 자동
 HISTORY_MSG_123;장시간노출 노이즈 제거 파일
-HISTORY_MSG_124;증폭(Gain)/화이트 포인트보정
+HISTORY_MSG_124;증폭 (Gain) /화이트 포인트보정
 HISTORY_MSG_126;센서의 오점 그늘 제거용 파일
 HISTORY_MSG_127;센서의 오점 그늘 제거 - 자동선택
 HISTORY_MSG_128;센서의 오점 그늘 제거 - 흐림 반경
 HISTORY_MSG_129;센서의 오점 그늘 제거 - 흐림 형식
 HISTORY_MSG_130;자동왜곡수차보정
-HISTORY_MSG_131;노이즈 감소 휘도
+HISTORY_MSG_131;노이즈 감소 광도
 HISTORY_MSG_132;노이즈 감소 색깔
 HISTORY_MSG_133;감마
 HISTORY_MSG_137;불랙 레벨 Green 1
@@ -375,9 +376,9 @@ HISTORY_MSG_138;불랙 레벨 Red
 HISTORY_MSG_139;불랙 레벨 Blue
 HISTORY_MSG_140;불랙 레벨 Green 2
 HISTORY_MSG_141;불랙 레벨 Green 연동
-HISTORY_MSG_158;텍스처증폭 - 강도
-HISTORY_MSG_160;텍스처증폭 - 척도
-HISTORY_MSG_162;텍스처증폭
+HISTORY_MSG_158;텍스처 증폭 - 강도
+HISTORY_MSG_160;텍스처 증폭 - 척도
+HISTORY_MSG_162;텍스처 증폭
 HISTORY_MSG_163;RGB 곡선 - Red
 HISTORY_MSG_164;RGB 곡선 - Green
 HISTORY_MSG_165;RGB 곡선 - Blue
@@ -388,7 +389,7 @@ HISTORY_MSG_201;노이즈 감소 - 색 차이 Red／Green
 HISTORY_MSG_202;노이즈 감소 - 색 차이 Blue／Yellow
 HISTORY_MSG_203;노이즈 감소 - 방식
 HISTORY_MSG_204;LMMSE 확장처리
-HISTORY_MSG_207;경계선을 깔끔하게 하기 - 색상커브
+HISTORY_MSG_207;윤곽을 깔끔하게 하기 - 색상커브
 HISTORY_MSG_208;Blue／Red 이퀄라이저
 HISTORY_MSG_210;그라데이션 필터 - 각도
 HISTORY_MSG_211;그라데이션 필터
@@ -411,10 +412,10 @@ HISTORY_MSG_227;흑백 채널믹서 Purple
 HISTORY_MSG_230;흑백 방식
 HISTORY_MSG_235;흑백 채널믹서 자동
 HISTORY_MSG_237;흑백 채널믹서
-HISTORY_MSG_238;그라데이션 필터 경계선 흐림
+HISTORY_MSG_238;그라데이션 필터 윤곽 흐림
 HISTORY_MSG_239;그라데이션 필터 강도
 HISTORY_MSG_240;그라데이션 필터 중앙
-HISTORY_MSG_241;비네팅 필터 경계선 흐림
+HISTORY_MSG_241;비네팅 필터 윤곽 흐림
 HISTORY_MSG_242;비네팅 필터 형태
 HISTORY_MSG_243;반경
 HISTORY_MSG_244;비네팅 필터 강도
@@ -430,23 +431,23 @@ HISTORY_MSG_289;센서의 오점 그늘 제거 클리핑컨트롤 자동
 HISTORY_MSG_290;불랙 레벨 - Red
 HISTORY_MSG_291;불랙 레벨 - Green
 HISTORY_MSG_292;불랙 레벨 - Blue
-HISTORY_MSG_293;필름시뮬레이션
-HISTORY_MSG_294;필름시뮬레이션 － 강도
-HISTORY_MSG_295;필름시뮬레이션 － 필름
+HISTORY_MSG_293;필름 시뮬레이션
+HISTORY_MSG_294;필름 시뮬레이션 － 강도
+HISTORY_MSG_295;필름 시뮬레이션 － 필름
 HISTORY_MSG_297;노이즈 감소 － 품질
 HISTORY_MSG_298;데드 픽셀필터
 HISTORY_MSG_302;색상 노이즈 조정방법
 HISTORY_MSG_303;색상 노이즈 조정방법
 HISTORY_MSG_359;핫/데드 임계 값
-HISTORY_MSG_360;텍스처증폭 - 감마
+HISTORY_MSG_360;텍스처 증폭 - 감마
 HISTORY_MSG_371;출력 선명하게 하기
 HISTORY_MSG_372;출력 선명하게 하기 - 언샵마스크 - 반경
 HISTORY_MSG_373;출력 선명하게 하기 - 언샵마스크 - 적용량
 HISTORY_MSG_374;출력 선명하게 하기 - 언샵마스크 - 임계 값
-HISTORY_MSG_375;출력 선명하게 하기 - 언샵마스크 - 경계선만
+HISTORY_MSG_375;출력 선명하게 하기 - 언샵마스크 - 윤곽만
 HISTORY_MSG_376;출력 선명하게 하기 - 언샵마스크 - 반경
-HISTORY_MSG_377;출력 선명하게 하기 - 언샵마스크 - 경계선 허용
-HISTORY_MSG_378;출력 선명하게 하기 - 언샵마스크 - 하로(Halo) 억제
+HISTORY_MSG_377;출력 선명하게 하기 - 언샵마스크 - 윤곽 허용
+HISTORY_MSG_378;출력 선명하게 하기 - 언샵마스크 - 하로 (Halo) 억제
 HISTORY_MSG_379;출력 선명하게 하기 - 언샵마스크 - 적용량
 HISTORY_MSG_380;출력 선명하게 하기 - 방식
 HISTORY_MSG_381;출력 선명하게 하기 - RLD - 반경
@@ -483,8 +484,8 @@ HISTORY_MSG_490;DRC - 량
 HISTORY_MSG_491;화이트 밸런스
 HISTORY_MSG_492;RGB커브
 HISTORY_MSG_493;L*a*b* 조정
-HISTORY_MSG_BWMIX_COLORCAST;흑백 - 단색(Tint)
-HISTORY_MSG_SATURATION_VIBRANCE;채도/바이브런스 - 바이브런스(Vibrance)
+HISTORY_MSG_BWMIX_COLORCAST;흑백 - 단색 (Tint)
+HISTORY_MSG_SATURATION_VIBRANCE;채도/바이브런스 - 바이브런스 (Vibrance)
 HISTORY_MSG_LOCALCONTRAST_LIST;부분 대비 - 영역
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;부분 대비 - H 마스크
 HISTORY_MSG_LOCALCONTRAST_CHROMATICITYMASK;부분 대비 - C 마스크
@@ -496,35 +497,35 @@ HISTORY_MSG_CHMIXER_MODE;채널믹서 - 방식
 HISTORY_MSG_CHMIXER_RED_PRIMARY;채널믹서 - Red 원색
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;채널믹서 - Green 원색
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;채널믹서 - Blue 원색
-HISTORY_MSG_COLORCORRECTION_AB;CC - 채도(chrominance)
-HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - 영역영역마스크
+HISTORY_MSG_COLORCORRECTION_AB;CC - 색정보 (chrominance)
+HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - 영역 마스크
 HISTORY_MSG_COLORCORRECTION_MODE;CC - 방식
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - 영역 C 마스크
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - 대비 임계 값 마스크
 HISTORY_MSG_COLORCORRECTION_ENABLED;색/톤 보정
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - 영역 H 마스크
-HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - 색상(hue) 옮기기
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - 색상 (hue) 옮기기
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - 밝기
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - 영역 L 마스크
 HISTORY_MSG_COLORCORRECTION_LIST;CC - 영역
-HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - 영역마스크 흐림(Blur)
-HISTORY_MSG_COLORCORRECTION_OFFSET;CC - 어두움/인상(lift)
-HISTORY_MSG_COLORCORRECTION_PIVOT;CC - 피벗(pivot)
+HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - 영역 마스크 흐림 (Blur)
+HISTORY_MSG_COLORCORRECTION_OFFSET;CC - 어두움/인상 (lift)
+HISTORY_MSG_COLORCORRECTION_PIVOT;CC - 피벗 (pivot)
 HISTORY_MSG_COLORCORRECTION_POWER;CC - 중간 톤/감마
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - 휘도방식
-HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - 입력채도(saturation)
-HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - 출력 채도(saturation)
-HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - 영역마스크표시
-HISTORY_MSG_COLORCORRECTION_SLOPE;CC - 하이라이트/증폭(gain)
+HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - 입력채도 (saturation)
+HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - 출력 채도 (saturation)
+HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - 영역 마스크 표시
+HISTORY_MSG_COLORCORRECTION_SLOPE;CC - 하이라이트/증폭 (gain)
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - 유사색 마스크
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - 브러시마스크
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - 매개 변수 지정 마스크
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - 마스크추가처리
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - 색 보정
-HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - 자동 채도(Chroma) 높임
+HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - 자동 채도 (Chroma) 높임
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - 최종 매끄럽게 하기 C
 HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;NR - 디테일임계 값
-HISTORY_MSG_DENOISE_LUMINANCE_CURVE;NR - 휘도커브
+HISTORY_MSG_DENOISE_LUMINANCE_CURVE;NR - 광도 커브
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;NR - GF C 강도
 HISTORY_MSG_DENOISE_NL_DETAIL;NR - 최종 매끄럽게 하기 디테일
 HISTORY_MSG_DENOISE_NL_STRENGTH;NR - 최종 매끄럽게 하기 L
@@ -539,12 +540,12 @@ HISTORY_MSG_DISTORTION_AUTO;자동왜곡 보정
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;이중 디모자이킹 - 자동임계 값
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;AMaZE+VNG4 - 대비 임계 값
 HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - 디테일 임계 값
-HISTORY_MSG_EPD_ITERATIONS;TB - 반복(iterations)
+HISTORY_MSG_EPD_ITERATIONS;TB - 반복 (iterations)
 HISTORY_MSG_EPD_LIST;TB - 영역
 HISTORY_MSG_EPD_HUEMASK;TB - H 마스크
 HISTORY_MSG_EPD_CHROMATICITYMASK;TB - C 마스크
 HISTORY_MSG_EPD_LIGHTNESSMASK;TB - L 마스크
-HISTORY_MSG_EPD_MASKBLUR;TB - 마스크 흐림(Blur)
+HISTORY_MSG_EPD_MASKBLUR;TB - 마스크 흐림 (Blur)
 HISTORY_MSG_EPD_SHOWMASK;TB - 마스크표시
 HISTORY_MSG_EPD_AREAMASK;TB - 영역 마스크
 HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - 대비 임계 값 마스크
@@ -561,7 +562,7 @@ HISTORY_MSG_FLATFIELD_EMBEDDED;센서의 오점 그늘 제거- 메타데이터�
 HISTORY_MSG_GRAIN_ENABLED;필름 효과
 HISTORY_MSG_GRAIN_ISO;필름 효과 - ISO
 HISTORY_MSG_GRAIN_STRENGTH;필름 효과 - 강도
-HISTORY_MSG_GRAIN_SCALE;필름 효과 - 크기(Scale)
+HISTORY_MSG_GRAIN_SCALE;필름 효과 - 크기 (Scale)
 HISTORY_MSG_HISTMATCHING;톤 곡선 자동조정
 HISTORY_MSG_HSL_SMOOTHING;색 이퀄라이저 - 매끄럽게 하기
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;출력 - Primaries
@@ -569,8 +570,8 @@ HISTORY_MSG_ICM_OUTPUT_TEMP;출력 - ICC-v4 광원 D
 HISTORY_MSG_ICM_OUTPUT_TYPE;출력 - 현식
 HISTORY_MSG_LABMASKS_MASK_NAME;마스크 명
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;부분 대비 - 량
-HISTORY_MSG_LOCALCONTRAST_CONTRAST;부분 대비 - 잔여(Residual) 대비
-HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;부분 대비 - 대비임계 값마스크
+HISTORY_MSG_LOCALCONTRAST_CONTRAST;부분 대비 - 잔여 (Residual) 대비
+HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;부분 대비 - 대비 임계 값 마스크
 HISTORY_MSG_LOCALCONTRAST_CURVE;부분 대비 - 커브
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;부분 대비 - 어두운 양역
 HISTORY_MSG_LOCALCONTRAST_ENABLED;부분 대비
@@ -582,17 +583,17 @@ HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;부분 대비 - 브러시마스크
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;부분 대비 - 매개 변수 설정마스크
 HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;부분 대비 - 마스크추가처리
 HISTORY_MSG_LOGENC_AUTO;Log - 자동
-HISTORY_MSG_LOGENC_AUTOGAIN;Log - 자동증폭(gain)
-HISTORY_MSG_LOGENC_REGULARIZATION;Log - 톤 변화 매끄럽게 하기(Regularization)
-HISTORY_MSG_LOGENC_ENABLED;로그 화(Log Encoding)
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - 자동증폭 (gain)
+HISTORY_MSG_LOGENC_REGULARIZATION;Log - 톤 변화 매끄럽게 하기 (Regularization)
+HISTORY_MSG_LOGENC_ENABLED;로그 화 (Log Encoding)
 HISTORY_MSG_LOGENC_BLACK_EV;Log - 블랙 Ev
-HISTORY_MSG_LOGENC_GAIN;Log - 증폭 값(Gain)
+HISTORY_MSG_LOGENC_GAIN;Log - 증폭 값 (Gain)
 HISTORY_MSG_LOGENC_WHITE_EV;Log - 화이트 Ev
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - 대상 Gray 점
 HISTORY_MSG_METADATA_MODE;메타데이터 복사 방식
 HISTORY_MSG_MICROCONTRAST_CONTRAST;미세 대비 - 대비 임계 값
 HISTORY_MSG_PCVIGNETTE_CENTER;VF - 중심
-HISTORY_MSG_PERSPECTIVE_ENABLED;원근 뒤틀기보정
+HISTORY_MSG_PERSPECTIVE_ENABLED;원근 뒤틀기 보정
 HISTORY_MSG_PERSPECTIVE_CTRL_LINE;원근 뒤틀기 - 컨트롤 선
 HISTORY_MSG_PERSPECTIVE_LENS;원근 뒤틀기 - 렌즈 데이터
 HISTORY_MSG_PIXELSHIFT_DEMOSAIC;PS - 동체 (動體) 흐림에 대한 디모자이킹 방식
@@ -607,7 +608,7 @@ HISTORY_MSG_RESIZE_ALLOWUPSCALING;크기 조정 - 업스케일링을 가능하�
 HISTORY_MSG_RESIZE_PPI;크기 조정 - PPI
 HISTORY_MSG_RESIZE_UNIT;크기 조정 - 단위
 HISTORY_MSG_SHARPENING_AUTORADIUS;선명하게 하기 - 자동 RLD 반경
-HISTORY_MSG_SHARPENING_BLUR;선명하게 하기 - 흐림(Blur)의 반경
+HISTORY_MSG_SHARPENING_BLUR;선명하게 하기 - 흐림 (Blur) 의 반경
 HISTORY_MSG_SHARPENING_CONTRAST;선명하게 하기 - 대비 임계 값
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;선명하게 하기 - RLD 모서리의 관용도
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;선명하게 하기 - RLD 모서리의 반경 증가
@@ -620,21 +621,21 @@ HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;매끄럽게 하기 - 대비 임계 
 HISTORY_MSG_SMOOTHING_RADIUS;매끄럽게 하기 - 반경
 HISTORY_MSG_SMOOTHING_SIGMA;매끄럽게 하기 - 반경
 HISTORY_MSG_SMOOTHING_EPSILON;매끄럽게 하기 - 디테일
-HISTORY_MSG_SMOOTHING_ITERATIONS;매끄럽게 하기 - 반복(iterations)
+HISTORY_MSG_SMOOTHING_ITERATIONS;매끄럽게 하기 - 반복 (iterations)
 HISTORY_MSG_SMOOTHING_LIST;매끄럽게 하기 - 영역
 HISTORY_MSG_SMOOTHING_HUEMASK;매끄럽게 하기 - H 마스크
 HISTORY_MSG_SMOOTHING_CHROMATICITYMASK;매끄럽게 하기 - C 마스크
 HISTORY_MSG_SMOOTHING_LIGHTNESSMASK;매끄럽게 하기 - L 마스크
-HISTORY_MSG_SMOOTHING_MASKBLUR;매끄럽게 하기 - 마스크 흐림(Blur)
+HISTORY_MSG_SMOOTHING_MASKBLUR;매끄럽게 하기 - 마스크 흐림 (Blur)
 HISTORY_MSG_SMOOTHING_SHOWMASK;매끄럽게 하기 - 마스크표시
-HISTORY_MSG_SMOOTHING_AREAMASK;매끄럽게 하기 - 영역마스크
+HISTORY_MSG_SMOOTHING_AREAMASK;매끄럽게 하기 - 영역 마스크
 HISTORY_MSG_SMOOTHING_DELTAEMASK;매끄럽게 하기 - 유사색 마스크
 HISTORY_MSG_SMOOTHING_DRAWNMASK;매끄럽게 하기 - 브러시마스크
 HISTORY_MSG_SMOOTHING_PARAMETRICMASK;매끄럽게 하기 - 매개 변수 지정 마스크
 HISTORY_MSG_SMOOTHING_NLSTRENGTH;매끄럽게 하기 - NLM 강도
 HISTORY_MSG_SMOOTHING_NLDETAIL;매끄럽게 하기 - NLM 디테일
-HISTORY_MSG_SMOOTHING_NUMBLADES;매끄럽게 하기 - blades
-HISTORY_MSG_SMOOTHING_ANGLE;매끄럽게 하기 - 각도(angle)
+HISTORY_MSG_SMOOTHING_NUMBLADES;매끄럽게 하기 - 조리개 날(blades)
+HISTORY_MSG_SMOOTHING_ANGLE;매끄럽게 하기 - 각도 (angle)
 HISTORY_MSG_SMOOTHING_CURVATURE;매끄럽게 하기 - 곡률 (curvature)
 HISTORY_MSG_SMOOTHING_OFFSET;매끄럽게 하기 - Offset
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;매끄럽게 하기 - 마스크 추가 처리
@@ -642,14 +643,14 @@ HISTORY_MSG_SOFTLIGHT_ENABLED;소프트라이트
 HISTORY_MSG_SOFTLIGHT_STRENGTH;소프트라이트 - 강도
 HISTORY_MSG_SPOT;스팟 제거
 HISTORY_MSG_SPOT_ENTRY;스팟 제거 - Point modif.
-HISTORY_MSG_TM_FATTAL_SATCONTROL;DRC - 채도(Saturation)컨트롤
+HISTORY_MSG_TM_FATTAL_SATCONTROL;DRC - 채도 (Saturation) 컨트롤
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;톤 이퀄라이저
 HISTORY_MSG_TONE_EQUALIZER_BANDS;톤 이퀄라이저 - Bands
-HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;톤 이퀄라이저 - 톤 변화 매끄럽게 하기(Regularization)
+HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;톤 이퀄라이저 - 톤 변화 매끄럽게 하기 (Regularization)
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;톤 이퀄라이저 - 톤 맵
-HISTORY_MSG_TONECURVE_SATCURVE;톤 곡선 - 채도(Saturation)
-HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;톤 곡선 - 지각적 강도(strength)
-HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;톤 곡선 - 대비(재래 방식)
+HISTORY_MSG_TONECURVE_SATCURVE;톤 곡선 - 채도 (Saturation)
+HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;톤 곡선 - 지각적 강도 (strength)
+HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;톤 곡선 - 대비 (재래 방식)
 HISTORY_MSG_TONECURVE_MODE;톤 곡선 - 방식
 HISTORY_MSG_TONECURVE_WHITEPOINT;톤 곡선 - 화이트 포인트
 HISTORY_MSG_WBALANCE_MULT;화이트 밸런스 - RGB승수 조정
@@ -708,7 +709,7 @@ INSPECTOR_RAW_LINEAR;선형톤 곡선을 쓴 고속 Raw렌더링.\n단축키: <b
 INSPECTOR_RAW_FILM;필름양 톤 곡선을 쓴 고속 Raw렌더링.\n단축키: <b>f</b>.
 INSPECTOR_RAW_CLIP;클리핑 된 Raw픽셀.\n단축키: <b>w</b>.
 INSPECTOR_RAW_SHADOW;어더움 증폭 톤 곡선을 쓴 고속 Raw렌더링.\n단축키: <b>s</b>.
-INSPECTOR_SPLIT;분할 표시(Split view).\n단축키: <b>y</b>.
+INSPECTOR_SPLIT;분할 표시 (Split view).\n단축키: <b>y</b>.
 INSPECTOR_ZOOM_FIT;창에 맞추기.\n단축키: <b>x</b>.
 INSPECTOR_ZOOM_11;100%르 줌.\n단축키: <b>z</b>.
 IPTCPANEL_CATEGORY;범주
@@ -760,7 +761,7 @@ MAIN_BUTTON_NAVNEXT_TOOLTIP;편집소프트로 열고 있는 화상의 다음 �
 MAIN_BUTTON_NAVPREV_TOOLTIP;편집소프트로 열고 있는 화상에 앞 화상에 이동합니다.\n단축키: <b>Shift-F3</b>\n\n파일 브라우저로 선택한 썸네일에 앞 화상에 이동하려면\n단축키: <b>F3</b>
 MAIN_BUTTON_NAVSYNC_TOOLTIP;현재 열고 있는 화상의 썸네일을 명시하고 편집소프트와 파일 브라우저를 동기시켜 파일 브라우저에서의 필터를 해제합니다. \n단축키: <b>x</b>\n\n위와 같지만, 파일 브라우저에서의 필터를 해제 않습니다.\n단축키: <b>y</b>\n(필터로 제외되면, 열려도 파일 썸네일이 표시되지 않습니까 조심하세요.).
 MAIN_BUTTON_PREFERENCES;환경 설정
-MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;현재 화상을 큐처리에 추가 (Ctrl-click으로 즉시 출력)\n단축키: <b>Ctrl-s</b>(<b>Ctrl-Shift-b</b>로 즉시 출력)
+MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;현재 화상을 큐처리에 추가 (Ctrl-click으로 즉시 출력)\n단축키: <b>Ctrl-s</b> (<b>Ctrl-Shift-b</b>로 즉시 출력)
 MAIN_BUTTON_SAVE_TOOLTIP;현재 화상을 보존 (Ctrl-click으로 즉시 출력)\n단축키: <b>Ctrl-s</b> (<b>Ctrl-Shift-s</b>으로 즉시 출력)
 MAIN_BUTTON_SENDTOEDITOR;외부 편집소프트로 화상을 편집함
 MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;현재 화상을 외부 편집소프트로 편집함.\n단축키: <b>Ctrl-e</b>
@@ -790,7 +791,7 @@ MAIN_MSG_PATHDOESNTEXIST;패스\n\n<b>%1</b>\n\가 없습니다. 설정창에서
 MAIN_MSG_QOVERWRITE;덮어쓰기 할까요?
 MAIN_MSG_SETPATHFIRST;이 함수를 사용하려면, 먼저 환경 설정에서 대상 패스를  설정할 필요가 있습니다!
 MAIN_MSG_TOOMANYOPENEDITORS;편집화면이 너무 많습니다.\n작업을 계속하려면 어느 화면이든 닫으세요.
-MAIN_MSG_WRITEFAILED;파일 기록에 실폐했습니다.\n\n<b>""%1""</b>\n\n폴더가 있는지 기록권한이 있는 지 확인 하세요.
+MAIN_MSG_WRITEFAILED;파일 기록에 실폐했습니다.\n\n<b>"%1"</b>\n\n폴더가 있는지 기록권한이 있는 지 확인 하세요.
 MAIN_TAB_ADVANCED;고도 기능
 MAIN_TAB_ADVANCED_TOOLTIP;단축키: <b>Alt-w</b>
 MAIN_TAB_COLOR;색깔
@@ -823,12 +824,12 @@ MAIN_TOOLTIP_BACKCOLOR1;미리보기의 배경색을 지정합니다.: <b>검은
 MAIN_TOOLTIP_BACKCOLOR2;미리보기의 배경색을 지정합니다.: <b>하얀색</b>\n단축키: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;미리보기의 배경색을 지정합니다.: <b>중간 회색</b>\n단축키: <b>9</b>
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>고정</b> / <b>고정 해제</b> - <b>보정 전의 </b> 표시 설정\n\n<b>고정</b>: <b>보정 전 상태</b>를 그대로 표시하고 변경하지 않습니다.\n복수의 도구의 누적효과 평가에 도움이 됩니다.\n또, 비교는 이력상 어디에서도 할 수 있습니다.\n\n<b>고정 해제</b>: 현재 사용중 도구의  효과가 <b>보정 후</b>에  표시되고 그 전 단계 상태가  <b>보정 전 </b>에 표시 됩니다.
-MAIN_TOOLTIP_FALSECOLORS;노광량의 색깔 표시 표시/비표시.\n단축키: <b>Shift-e</b>\n\n범례 (IRE지수의 범위):\n%1
+MAIN_TOOLTIP_FALSECOLORS;노광량의 색깔 표시 표시/비표시.\n단축키: <b>Shift-e</b>\n\n범례 (IRE지수의 범위) :\n%1
 MAIN_TOOLTIP_HIDEHP;왼쪽패널 표시/비표시 (작업이력 포함)\n단축키:  <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;하이라이트 클리핑 영역の표시\n단축키: <b>&lt
 MAIN_TOOLTIP_INDCLIPPEDS;어더움 클리핑 영역의 표시\n단축키: <b>&gt
 MAIN_TOOLTIP_PREVIEWB;<b>Blue 채널</b>표시\n단축키: <b>Shift-b</b>
-MAIN_TOOLTIP_PREVIEWFOCUSMASK;<b>초점 마스크</b>표시\n단축키: <b>Shift-f</b>\n\n얕은피사체 심도, 저 노이즈, 고 확대율 줌(zoom) 화상에서 더 정확하게 표시 가능\n\n노이즈가 많은 화상은 검출정도 향상위해 10-30% 축소해 평가함\n\n초점 마스크를 유효화하면 표시시간이 걸림
+MAIN_TOOLTIP_PREVIEWFOCUSMASK;<b>초점 마스크</b>표시\n단축키: <b>Shift-f</b>\n\n얕은피사체 심도, 저 노이즈, 고 확대율 줌 (zoom) 화상에서 더 정확하게 표시 가능\n\n노이즈가 많은 화상은 검출정도 향상위해 10-30% 축소해 평가함\n\n초점 마스크를 유효화하면 표시시간이 걸림
 MAIN_TOOLTIP_PREVIEWG;<b>Green 채널</b>표시\n단축키: <b>Shift-g</b>
 MAIN_TOOLTIP_PREVIEWL;<b>밝기</b>표시\n단축키: <b>Shift-v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;<b>Red 채널</b>표시\n단축키: <b>Shift-r</b>
@@ -852,8 +853,8 @@ NAVIGATOR_LAB_B;b*:
 NAVIGATOR_LAB_L;L*:
 NAVIGATOR_NA; --
 NAVIGATOR_R;R:
-NAVIGATOR_XY_FULL;"폭 = %1, 높이 = %2"
-NAVIGATOR_XY_NA;"x: --, y: --"
+NAVIGATOR_XY_FULL;폭 = %1, 높이 = %2
+NAVIGATOR_XY_NA;x: --, y: --
 OPTIONS_BUNDLED_MISSING;ART의 프로파일 "<b>%1</b>"이 없습니다.\n\n설치된 프로파일이 손상될 수 도 있습니다.\n\n그 경우 초기 설정 값이 사용됩니다.
 OPTIONS_DEFIMG_MISSING;<b>비 raw 화상</b>의 초기 프로파일이 안 보이든가, 설정 되지 않습니다.\n\n프로파일 디렉토리를 확인하세요. 존재하지 않아 든가 파손될 수 도 있습니다.\n\n초기 설정 값이 사용됩니다.
 OPTIONS_DEFRAW_MISSING;<b>raw화상</b>의 초기 프로파일이 안 보이든가, 설정되지 않습니다.\n\n프로파일 디렉토리를 확인하세요.존재하지 않아 든가 파손될 수 도 있습니다.\n\n초기 설정 값이 사용됩니다.
@@ -875,23 +876,23 @@ PARTIALPASTE_COMPOSITIONGROUP;변형 설정
 PARTIALPASTE_CROP;잘라내기
 PARTIALPASTE_DARKFRAMEAUTOSELECT;장시간노출 노이즈 제거자동선택
 PARTIALPASTE_DARKFRAMEFILE;장시간노출 노이즈 제거・파일
-PARTIALPASTE_DEFRINGE;경계선을 깔끔하게 하기
+PARTIALPASTE_DEFRINGE;윤곽을 깔끔하게 하기
 PARTIALPASTE_DEHAZE;안개 제거
 PARTIALPASTE_DETAILGROUP;디테일 설정
 PARTIALPASTE_DIALOGLABEL;처리 프로파일의 부분 붙이기
 PARTIALPASTE_DIRPYRDENOISE;노이즈 감소
 PARTIALPASTE_DIRPYREQUALIZER;detail levels 대비 조정
 PARTIALPASTE_DISTORTION;왜곡보정
-PARTIALPASTE_TEXTUREBOOST;텍스처증폭
+PARTIALPASTE_TEXTUREBOOST;텍스처 증폭
 PARTIALPASTE_EQUALIZER;웨이블릿
 PARTIALPASTE_EVERYTHING;모두
 PARTIALPASTE_EXIFCHANGES;exif 데이터 변경
 PARTIALPASTE_EXPOSURE;노출량
 PARTIALPASTE_FILMNEGATIVE;네가필름
-PARTIALPASTE_FILMSIMULATION;필름시뮬레이션
+PARTIALPASTE_FILMSIMULATION;필름 시뮬레이션
 PARTIALPASTE_FLATFIELDAUTOSELECT;센서의 오점 그늘 제거 - 자동선택
-PARTIALPASTE_FLATFIELDBLURRADIUS;센서의 오점 그늘 제거 - 흐림(Blur)반경
-PARTIALPASTE_FLATFIELDBLURTYPE;센서의 오점 그늘 제거 - 흐림(Blur) 형식
+PARTIALPASTE_FLATFIELDBLURRADIUS;센서의 오점 그늘 제거 - 흐림 (Blur) 반경
+PARTIALPASTE_FLATFIELDBLURTYPE;센서의 오점 그늘 제거 - 흐림 (Blur) 형식
 PARTIALPASTE_FLATFIELDCLIPCONTROL;센서의 오점 그늘 제거 - 클리핑 컨트롤
 PARTIALPASTE_FLATFIELDFILE;센서의 오점 그늘 제거 - 파일
 PARTIALPASTE_GRADIENT;그라데이션 필터
@@ -929,7 +930,7 @@ PARTIALPASTE_RETINEX;Retinex
 PARTIALPASTE_RGBCURVES;RGB 곡선
 PARTIALPASTE_ROTATION;회전
 PARTIALPASTE_SHADOWSHIGHLIGHTS;어두움/하이라이트
-PARTIALPASTE_SHARPENEDGE;경계선
+PARTIALPASTE_SHARPENEDGE;윤곽
 PARTIALPASTE_SHARPENING;선명하게 하기
 PARTIALPASTE_SHARPENMICRO;미세 대비
 PARTIALPASTE_SMOOTHING;매끄럽게 하기
@@ -975,11 +976,11 @@ PREFERENCES_CURVEBBOXPOS_BELOW;아래
 PREFERENCES_CURVEBBOXPOS_LEFT;왼쪽
 PREFERENCES_CURVEBBOXPOS_RIGHT;오른쪽
 PREFERENCES_CUSTPROFBUILD;Custom Image Profile Builder
-PREFERENCES_CUSTPROFBUILDHINT;화상에서 신규 프로파일을 작성할 때 불리는 실행 파일 (또는 스크립트)\n\n*.ini 형식의 설정 파일(Key file)을 코만드라인(command line) 매개 변수로 기입할 수 있습니다. 이 파일은 규정 대로 된 프로파일을 만들기 위해 필요한 스크립트나 Exif 파일에 주는 다양한 매개 변수를 포함해야 합니\n\n<b>경고!</b>패스(Path) 에 공백이 포함될 경우 패스명을 "  "안에 기술 해야 합니다.
+PREFERENCES_CUSTPROFBUILDHINT;화상에서 신규 프로파일을 작성할 때 불리는 실행 파일 (또는 스크립트)\n\n*.ini 형식의 설정 파일 (Key file) 을 코만드라인 (command line) 매개 변수로 기입할 수 있습니다. 이 파일은 규정 대로 된 프로파일을 만들기 위해 필요한 스크립트나 Exif 파일에 주는 다양한 매개 변수를 포함해야 합니\n\n<b>경고!</b>패스 (Path) 에 공백이 포함될 경우 패스명을 "  "안에 기술 해야 합니다.
 PREFERENCES_CUSTPROFBUILDKEYFORMAT;키 형식
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_NAME;이름
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_TID;태그ID
-PREFERENCES_CUSTPROFBUILDPATH;실행파일의 패스(Path)
+PREFERENCES_CUSTPROFBUILDPATH;실행파일의 패스 (Path)
 PREFERENCES_DARKFRAMEFOUND;검출
 PREFERENCES_DARKFRAMESHOTS;셧
 PREFERENCES_DARKFRAMETEMPLATES;템플릿
@@ -994,7 +995,7 @@ PREFERENCES_DIRLAST;최금 참조한 디렉토리
 PREFERENCES_DIROTHER;他
 PREFERENCES_DIRSELECTDLG;기동시 화상디렉토리선택...
 PREFERENCES_DIRSOFTWARE;설치 디렉토리
-PREFERENCES_EDITORCMDLINE;사용자 설정 코만드라인(command line)
+PREFERENCES_EDITORCMDLINE;사용자 설정 코만드라인 (command line)
 PREFERENCES_EDITORLAYOUT;편집 레이아웃
 PREFERENCES_EXTERNALEDITOR;외부 편집 소프트웨어
 PREFERENCES_EXTEDITOR_DIR;출력 디렉토리
@@ -1003,10 +1004,10 @@ PREFERENCES_EXTEDITOR_DIR_CURRENT;입력화상과 같아
 PREFERENCES_EXTEDITOR_DIR_CUSTOM;맞춤
 PREFERENCES_EXTEDITOR_FLOAT32;32-bit부동소수점 TIFF 출력
 PREFERENCES_EXTEDITOR_BYPASS_OUTPUT_PROFILE;출력 프로파일 피하기
-PREFERENCES_EXIFTOOL_PATH;Exiftool 코만드(command)
+PREFERENCES_EXIFTOOL_PATH;Exiftool 코만드 (command)
 PREFERENCES_EXIFTOOL_PATH_TOOLTIP;Exiftool은 Exiv2가 대응하지 못하는 형식의 메타데이터를 해독 할 때 씁니다.
 PREFERENCES_FBROWSEROPTS;파일 브라우저/썸네일 옵션
-PREFERENCES_FILEBROWSERTOOLBARSINGLEROW;파일 브라우저의 도구 바(bar)를 압축함
+PREFERENCES_FILEBROWSERTOOLBARSINGLEROW;파일 브라우저의 도구 바 (bar) 를 압축함
 PREFERENCES_FLATFIELDFOUND;검출
 PREFERENCES_FLATFIELDSDIR;센서의 오점 그늘 제거용 피일 디렉토리
 PREFERENCES_FLATFIELDSHOTS;셧
@@ -1024,7 +1025,7 @@ PREFERENCES_MONITORICCDIR;모니터색 프로파일이 있는 디렉토리
 PREFERENCES_IMPROCPARAMS;화상처리 초기 설정 값
 PREFERENCES_INSPECT_LABEL;화상확인
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;캐시에 놓는 화상 최대수
-PREFERENCES_INSPECT_MAXBUFFERS_TOOLTIP;파일 브라우저 조작중에 캐시에 있을 수 있는 화상 최대수.RAM용량이 작은(2G이하) 경우, 설정 값을 1 혹은 2로 설정합니다.
+PREFERENCES_INSPECT_MAXBUFFERS_TOOLTIP;파일 브라우저 조작중에 캐시에 있을 수 있는 화상 최대수.RAM용량이 작은 (2G이하) 경우, 설정 값을 1 혹은 2로 설정합니다.
 PREFERENCES_INTENT_ABSOLUTE;절대적 색역을 유지
 PREFERENCES_INTENT_PERCEPTUAL;지각적
 PREFERENCES_INTENT_RELATIVE;상대적 색역을 유지
@@ -1033,7 +1034,7 @@ PREFERENCES_INTERNALTHUMBIFUNTOUCHED;raw파일이 미편집인 경우 JPE의 썸
 PREFERENCES_LANG;언어/ Language
 PREFERENCES_LANGAUTODETECT;OS의 언어 설정 사용/ Use system language
 PREFERENCES_MAXRECENTFOLDERS;최근 사용된 디렉토리 표시 최대수
-PREFERENCES_MENUGROUPEXTPROGS;"불러오기" 구릅
+PREFERENCES_MENUGROUPEXTPROGS;불러오기" 구릅
 PREFERENCES_MENUGROUPFILEOPERATIONS;파일 조작 구릅
 PREFERENCES_MENUGROUPLABEL;색 레이블 구릅
 PREFERENCES_MENUGROUPPROFILEOPERATIONS;처리 프로파일 조작 구릅
@@ -1057,7 +1058,7 @@ PREFERENCES_OVERWRITEOUTPUTFILE;기존 파일을 덮어쓰기 보존
 PREFERENCES_PANFACTORLABEL;Pan rate 증폭
 PREFERENCES_PARAMS_SIDECAR_STYLE;처리 프로파일파일 보존형식
 PREFERENCES_PARAMS_SIDECAR_FULL;확장자 .arp 를 파일명에 추가함 (FILENAME.ext 이면 FILENAME.ext.arp)
-PREFERENCES_PARAMS_SIDECAR_STRIP_EXT;원래 확장자를  .arp로 바꿔 놓기(FILENAME.ext 이면 FILENAME.arp)
+PREFERENCES_PARAMS_SIDECAR_STRIP_EXT;원래 확장자를  .arp로 바꿔 놓기 (FILENAME.ext 이면 FILENAME.arp)
 PREFERENCES_PARSEDEXT;확장자
 PREFERENCES_PARSEDEXTADD;확장자 추가
 PREFERENCES_PARSEDEXTADDHINT;확장자를 기입해 이 버튼으로 리스트에 추가합니다.
@@ -1065,10 +1066,10 @@ PREFERENCES_PARSEDEXTDELHINT;선택한 확장자를 리스트에서 삭제합니
 PREFERENCES_PARSEDEXTDOWNHINT;선택한 확장자를 리스트 아래에 이동
 PREFERENCES_PARSEDEXTUPHINT;선택한 확장자를 리스트 위에 이동
 PREFERENCES_PERFORMANCE_THREADS;스레드
-PREFERENCES_PERFORMANCE_THREADS_LABEL;노이즈 감소와 웨이블릿 수준에 관한 스레드의 최대수(0 = 자동)
+PREFERENCES_PERFORMANCE_THREADS_LABEL;노이즈 감소와 웨이블릿 수준에 관한 스레드의 최대수 (0 = 자동)
 PREFERENCES_PERFORMANCE_THREADS_THUMB_UPDATE;썸네일 갱신에 쓰는 스레드의 최대수 (0 = 자동)
 PREFERENCES_PREVDEMO;미리보기의 정확도
-PREFERENCES_PREVDEMO_FAST;고속(Fast)
+PREFERENCES_PREVDEMO_FAST;고속 (Fast)
 PREFERENCES_PREVDEMO_LABEL;미리보기 줌 레벨이 100％이하의 경우 사용하는 디모자이킹 알고리즘：
 PREFERENCES_PREVDEMO_SIDECAR;ARP 기술 대로
 PREFERENCES_PRINTER;인쇄기 (출력 사진 미리 보기)
@@ -1088,7 +1089,7 @@ PREFERENCES_PRTINTENT;목표로 삼은 렌더링 방식
 PREFERENCES_PRTPROFILE;색 프로파일
 PREFERENCES_PSPATH;Adobe Photoshop 설치 디렉토리
 PREFERENCES_REMEMBERZOOMPAN;줌 레벨과 팬 오프샛을 기억함
-PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;현재 화상의 줌 레벨과 팬(pan) 오프셋을 기억해 새로 열 화상에 적용\n\n이 옵션이 쓸 수 있는 경우는 편집화면이 "신글편집"이고 "미리보기 줌 레벨이 100%이하의 경우 사용하는 디모자이킹"이 "ARP대로"라고 설정된 경우만 입니다.
+PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;현재 화상의 줌 레벨과 팬 (pan) 오프셋을 기억해 새로 열 화상에 적용\n\n이 옵션이 쓸 수 있는 경우는 편집화면이 "신글편집"이고 "미리보기 줌 레벨이 100%이하의 경우 사용하는 디모자이킹"이 "ARP대로"라고 설정된 경우만 입니다.
 PREFERENCES_SAVE_TP_OPEN_NOW;기능 패널의 현재 개폐 상태를 보존함.
 PREFERENCES_SELECTLANG;언어 선택
 PREFERENCES_SERIALIZE_TIFF_READ;TIFF파일 불러오기 설정
@@ -1100,8 +1101,8 @@ PREFERENCES_SHOWEXPOSURECOMPENSATION;노출보정추가
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;화상 슬라이드에 도구 바를 표시함
 PREFERENCES_SHTHRESHOLD;어두운 클리핑 영역의 임계 값
 PREFERENCES_SINGLETAB;신글 탭 방식
-PREFERENCES_SINGLETABVERTAB;"신글편집 탭 방식, 수직 탭 "
-PREFERENCES_SND_HELP;파일패스 입력 혹은 공백(무음).\nWindows는 시스템 사운드인 "SystemDefault", "SystemAsterisk"등..\nLinux은 시스템 사운드인 "complete", "window-attention"등 을 사용합니다.
+PREFERENCES_SINGLETABVERTAB;신글편집 탭 방식, 수직 탭 
+PREFERENCES_SND_HELP;파일패스 입력 혹은 공백 (무음).\nWindows는 시스템 사운드인 "SystemDefault", "SystemAsterisk"등..\nLinux은 시스템 사운드인 "complete", "window-attention"등 을 사용합니다.
 PREFERENCES_SND_LNGEDITPROCDONE;편집처리 완료시
 PREFERENCES_SND_BATCHQUEUEDONE;큐 처리 완료시
 PREFERENCES_SND_THRESHOLDSECS;초후
@@ -1115,19 +1116,19 @@ PREFERENCES_TAB_IMPROC;화상처리
 PREFERENCES_TAB_PERFORMANCE;퍼포먼스
 PREFERENCES_TAB_SOUND;소리
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;디렉토리를 열 때, 썸네일 화상 갱신을 지연함
-PREFERENCES_THUMBNAIL_LAZY_CACHING;썸네일 화상의 거친 캐시를 만들기(Lazy caching)
-PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;썸네일 위에 커서를 놓고, 네비게이션이나 팬(pan)을 함.
+PREFERENCES_THUMBNAIL_LAZY_CACHING;썸네일 화상의 거친 캐시를 만들기 (Lazy caching)
+PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;썸네일 위에 커서를 놓고, 네비게이션이나 팬 (pan) 을 함.
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;포함된 JPEG의 미리보기
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;표시할 화상
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW;간이raw렌더링
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW_IF_NO_JPEG_FULLSIZE;포함된 JPEG이 Raw 보다 작은 경우, 간이 raw 렌더링으로 표시
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW_FILM_CURVE;Raw렌더링 시 표준적 필름곡선을 사용함
-PREFERENCES_THUMBNAIL_RATING;썸네일 평가 데이터(rating data)를 XMP파일에서 불러오기/보존
+PREFERENCES_THUMBNAIL_RATING;썸네일 평가 데이터 (rating data) 를 XMP파일에서 불러오기/보존
 PREFERENCES_TP_LABEL;도구 패널:
 PREFERENCES_TP_DISABLE;무효한 도구를 회색으로 표시
-PREFERENCES_TP_VSCROLLBAR;도구 패널의 세로 스크롤바(scroll bar) 비표시
+PREFERENCES_TP_VSCROLLBAR;도구 패널의 세로 스크롤바 (scroll bar) 비표시
 PREFERENCES_USEBUNDLEDPROFILES;ART의 프로파일을 사용
-PREFERENCES_WBPREVIEW_LABEL;미리보기 관로(pipeline)에있는 화이트 밸런스의 위치:
+PREFERENCES_WBPREVIEW_LABEL;미리보기 관로 (pipeline) 에있는 화이트 밸런스의 위치:
 PREFERENCES_WBPREVIEW_AFTER;디모자이킹 후 (고속)
 PREFERENCES_WBPREVIEW_BEFORE;디모자이킹 전 (더 정확)
 PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;줌100%미만에서는 디모자이킹 전, 그이외는 디모자이킹 후
@@ -1187,29 +1188,29 @@ QUEUE_DESTFILENAME;패스와 파일명
 QUEUE_FORMAT_TITLE;파일형식
 QUEUE_LOCATION_FOLDER;폴더에 보존
 QUEUE_LOCATION_TEMPLATE;템플릿 쓰기
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;다음 서식문자를 사용할 수 있습니다.:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ...<b>%r</b>\n\n이런 서식문자는 화상 패스명의 각부분 및 화상의 속성을 가리킵니다.\n\n예를 들면, 이하   패스명의 파일의 경우:\n\n<b><i>/home/tom/photos/2010-10-31/dsc0042.nef</i></b>\n서식문자가 가리키는 것은:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b>는 사진의 평가로 바뀝니다.평가가 없는 경우 ％r은 '0 '으로 치환됩니다.화상이 쓰레기통에 있는 경우 ％r은 'X'로 치환됩니다.\n\n원래 Raw화상과 같은 장소에 출력하고 싶은 경우에는 이렇게 씁니다.:\n<b>%p1/%f</b>\n\n처리 화상 디렉토리 밑에 "<i>converted</i>" 라는 이름의 디렉토리에 출력 화상을 보존하고 싶은 경우, 이렇게 씁니다.:\n<b>%p1/converted/%f</b>\n\n"<i>/home/tom/photos/converted/2010-10-31</i>" 라는 이름의 디렉토리에 출력 보존할 경우, 이렇게 씁니다.:\n<b>%p2/converted/%d1/%f</b>"
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;다음 서식문자를 사용할 수 있습니다.:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ...<b>%r</b>\n\n이런 서식문자는 화상 패스명의 각부분 및 화상의 속성을 가리킵니다.\n\n예를 들면, 이하   패스명의 파일의 경우:\n\n<b><i>/home/tom/photos/2010-10-31/dsc0042.nef</i></b>\n서식문자가 가리키는 것은:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b>는 사진의 평가로 바뀝니다.평가가 없는 경우 ％r은 '0 '으로 치환됩니다.화상이 쓰레기통에 있는 경우 ％r은 'X'로 치환됩니다.\n\n원래 Raw화상과 같은 장소에 출력하고 싶은 경우에는 이렇게 씁니다.:\n<b>%p1/%f</b>\n\n처리 화상 디렉토리 밑에 "<i>converted</i>" 라는 이름의 디렉토리에 출력 화상을 보존하고 싶은 경우, 이렇게 씁니다.:\n<b>%p1/converted/%f</b>\n\n"<i>/home/tom/photos/converted/2010-10-31</i>" 라는 이름의 디렉토리에 출력 보존할 경우, 이렇게 씁니다.:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;출력장소
 QUEUE_STARTSTOP_TOOLTIP;큐에 있는 화상의 현상 시작/ 중지\n\n단축키: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;기본 디렉토리
 RENAME_DIALOG_PATTERN;파일명의패턴
-RENAME_DIALOG_PATTERN_TIP;원래 사진이나 메타데이터명을 바탕으로 출력명을 지정하세요.\n\n형식을 지정하는 문자열의 뜻은 이하와 같습니다.:\n<b>%f</b>: 확장자가 없는 파일명\n<b>%e</b>: 확장자\n<b>%C</b>: 사진기명(회사명 및 머델)\n<b>%M</b>: 사진기브랜드\n<b>%N</b>: 사진기 머델\n<b>%Y</b>: 촬영 년(4자리)\n<b>%y</b>: 촬영 년(2자리)\n<b>%m</b>: 촬영 월(수자)\n<b>%b</b>: 촬영 월(영어 약칭)\n<b>%B</b>: 촬영 월(영어 fullname)\n<b>%d</b>: 촬영 날짜(수자)\n<b>%a</b>: 촬영 날짜(영어 약칭)\n<b>%A</b>: 촬영 날짜(영어  fullname)\n<b>%n1</b> to <b>%n9</b>: 증분치 자리수 지정 (예, <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO감도\n<b>%L</b>: 렌즈 모델명\n<b>%F</b>: 렌즈조 리개 값(F값)\n<b>%l</b>: 초점거리\n<b>%E</b>: 노출 보정량\n<b>%s</b>: 셔터속도\n<b>%r</b>: 사진의 평가\n<b>%T[<i>태그명</i>]</b>: 메타데이터태그 내용 <i>태그명</i> (무효 문자는  '_' 로 대체됨)\n<b>%%</b>: '%' 문자.
+RENAME_DIALOG_PATTERN_TIP;원래 사진이나 메타데이터명을 바탕으로 출력명을 지정하세요.\n\n형식을 지정하는 문자열의 뜻은 이하와 같습니다.:\n<b>%f</b>: 확장자가 없는 파일명\n<b>%e</b>: 확장자\n<b>%C</b>: 사진기명 (회사명 및 머델)\n<b>%M</b>: 사진기브랜드\n<b>%N</b>: 사진기 머델\n<b>%Y</b>: 촬영 년 (4자리)\n<b>%y</b>: 촬영 년 (2자리)\n<b>%m</b>: 촬영 월 (수자)\n<b>%b</b>: 촬영 월 (영어 약칭)\n<b>%B</b>: 촬영 월 (영어 fullname)\n<b>%d</b>: 촬영 날짜 (수자)\n<b>%a</b>: 촬영 날짜 (영어 약칭)\n<b>%A</b>: 촬영 날짜 (영어  fullname)\n<b>%n1</b> to <b>%n9</b>: 증분치 자리수 지정 (예, <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO감도\n<b>%L</b>: 렌즈 모델명\n<b>%F</b>: 렌즈조 리개 값 (F값)\n<b>%l</b>: 초점거리\n<b>%E</b>: 노출 보정량\n<b>%s</b>: 셔터속도\n<b>%r</b>: 사진의 평가\n<b>%T[<i>태그명</i>]</b>: 메타데이터태그 내용 <i>태그명</i> (무효 문자는  '_' 로 대체됨)\n<b>%%</b>: '%' 문자.
 RENAME_DIALOG_ALLOW_WHITESPACE;출력명에 공백을 허용함
-RENAME_DIALOG_NAME_NORMALIZATION;파일명 표준화(normalization)
+RENAME_DIALOG_NAME_NORMALIZATION;파일명 표준화 (normalization)
 RENAME_DIALOG_NORM_OFF;없음
 RENAME_DIALOG_NORM_UPPERCASE;대문자
 RENAME_DIALOG_NORM_LOWERCASE;소문자
-RENAME_DIALOG_EXT_NORMALIZATION;파일확장자의 표준화(normalization)
+RENAME_DIALOG_EXT_NORMALIZATION;파일확장자의 표준화 (normalization)
 RENAME_DIALOG_ON_EXISTING;대상이 존재할 경우에만 동작함.
-RENAME_DIALOG_SKIP;피하기(skip)
+RENAME_DIALOG_SKIP;피하기 (skip)
 RENAME_DIALOG_RENAME;고유명 생성
 RENAME_DIALOG_PROGRESSIVE;파일명에 부가되는 증분치
 RENAME_DIALOG_SIDECARS;사이드카 파일
-RENAME_DIALOG_SIDECARS_TIP;이름을 변경하는 사이드카(sidecar)파일의 확장자 리스트는 「；」로 구분합니다.확장자가 "+"로 시작하는 경우, 원래 확장자를 치환하지 않고 또 확장자를 부가합니다. 예: 원래 이름이<i>file.raw</i>이면, <i>ext1；+ext2</i>로 지정하면 사이드카 파일은 <i>file.ext1</i> 과 <i>file.raw.ext2</i>이 됩니다.
+RENAME_DIALOG_SIDECARS_TIP;이름을 변경하는 사이드카 (sidecar) 파일의 확장자 리스트는 「；」로 구분합니다.확장자가 "+"로 시작하는 경우, 원래 확장자를 치환하지 않고 또 확장자를 부가합니다. 예: 원래 이름이<i>file.raw</i>이면, <i>ext1；+ext2</i>로 지정하면 사이드카 파일은 <i>file.ext1</i> 과 <i>file.raw.ext2</i>이 됩니다.
 RENAME_DIALOG_FILENAMES;이름을 변경할 파일
 RENAME_DIALOG_PREVIEW;미리보기
 RENAME_DIALOG_INVALID_PATTERN;무효한 패턴
 RENAME_DIALOG_INVALID_SIDECARS;무효한 사이드카 파일 리스트
-RENAME_DIALOG_ERROR;%1 에서 %2 (으)로 이름변경 실패
+RENAME_DIALOG_ERROR;%1 에서 %2 (으) 로 이름변경 실패
 SAMPLEFORMAT_0;데이터형식 불명
 SAMPLEFORMAT_1;+/- 부호없는 8bit
 SAMPLEFORMAT_2;+/- 부호없는 16bit
@@ -1232,7 +1233,7 @@ SAVEDLG_SUBSAMP;Sub Sampling
 SAVEDLG_SUBSAMP_1;최적 압축
 SAVEDLG_SUBSAMP_2;균형
 SAVEDLG_SUBSAMP_3;최적 화질
-SAVEDLG_SUBSAMP_TOOLTIP;최고 압축률:\nJ:a:b 4:2:0\nh/v 2/2\n크로마(색차)는 수평방향, 수직방향으로 반이 됩니다.\n\n균형을 중시한 압축:\nJ:a:b 4:2:2\nh/v 2/1\n크로마는 수평방향으로 반이 됩니다.\n\n화질을 중시한 압축:\nJ:a:b 4:4:4\nh/v 1/1\n크로마 서브샘플링을 안 합니다.
+SAVEDLG_SUBSAMP_TOOLTIP;최고 압축률:\nJ:a:b 4:2:0\nh/v 2/2\n크로마 (색차) 는 수평방향, 수직방향으로 반이 됩니다.\n\n균형을 중시한 압축:\nJ:a:b 4:2:2\nh/v 2/1\n크로마는 수평방향으로 반이 됩니다.\n\n화질을 중시한 압축:\nJ:a:b 4:4:4\nh/v 1/1\n크로마 서브샘플링을 안 합니다.
 SAVEDLG_TIFFUNCOMPRESSED;비압축 TIFF
 SAVEDLG_WARNFILENAME;파일에 이름을 붙입니다.
 SHCSELECTOR_TOOLTIP;이 세개 슬라이더 위치를 리셋하려면 \n마우스의 오른쪽버튼을 클릭함
@@ -1248,18 +1249,18 @@ THRESHOLDSELECTOR_TL;위-왼쪽
 THRESHOLDSELECTOR_TR;위-오른쪽
 TOOL_SHORTCUT_HELP_HEADER;도구단축키:\n(소정의 키를 누르면서 슬라이더를 +/- 로 조절하든가, 마우스 휠로 조절함)\n
 TOOLBAR_TOOLTIP_COLORPICKER;고정식 컬러픽커\n\n유효화하면 :\n미리보기 상에서 마우스를 왼쪽 클릭을 하면 컬러픽커가 추가됩니다.\n왼쪽 버튼을 누르면서 마우스를 움직이면 컬러픽커 도 이동합니다.\n컬러픽커를 삭제할 때는 마우스를 오른쪽 버튼으로 클릭합니다.\n모두 컬러픽커를 삭제할 때는 Shift 버튼을 누르면서 마우스를 오른쪽 버튼으로 클릭합니다.\n컬러픽커가 있는 부분 이외에서 마우스를 오른쪽 클릭하면 핸드툴에 돌아갑니다.
-TOOLBAR_TOOLTIP_CROP;잘라내기 범위 선택\n단축키:  <b>Shift-c</b>\n잘라내기 범위의 이동은 <b>마우스로 드래그</b>함\n잘라내가 범위의 변경은 범위 경계선을 이동함
+TOOLBAR_TOOLTIP_CROP;잘라내기 범위 선택\n단축키:  <b>Shift-c</b>\n잘라내기 범위의 이동은 <b>마우스로 드래그</b>함\n잘라내가 범위의 변경은 범위 윤곽을 이동함
 TOOLBAR_TOOLTIP_HAND;핸드 툴\n단축키:  <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>원근 뒤틀기 보정</b>.\n단축키: <b>Shift-p</b>\n\n원근 뒤틀기를 보정할 컨트롤 선을 편집함.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>직선선택</b> / <b>각도보정</b>\n단축키: <b>Shift-s</b>\n미리보기 상에 가이드 선을 그리고, 수직 또한 수평방향을 지시합니다.회전 각도는 가이드선 옆에 표시됩니다.회전의 중심은 미리보기의 중심입니다.
 TOOLBAR_TOOLTIP_WB;스팟 화이트 밸런스\n단축키:  <b>Shift-w</b>
 TP_SATURATION_LABEL;채도/바이브런스
 TP_BRIGHTCONTRSAT_CONTRAST;대비
-TP_SATURATION_SATURATION;채도(Saturation)
-TP_SATURATION_VIBRANCE;바이브런스(Vibrance)
+TP_SATURATION_SATURATION;채도 (Saturation)
+TP_SATURATION_VIBRANCE;바이브런스 (Vibrance)
 TP_BWMIX_COLORCAST;단색 (Tint)
-TP_BWMIX_HUE;색상(Hue)
-TP_BWMIX_SATURATION;채도(Saturation)
+TP_BWMIX_HUE;색상 (Hue)
+TP_BWMIX_SATURATION;채도 (Saturation)
 TP_BWMIX_FILTER;색 필터
 TP_BWMIX_FILTER_BLUE;Blue
 TP_BWMIX_FILTER_BLUEGREEN;Blue/Green
@@ -1302,13 +1303,13 @@ TP_CHMIXER_GREEN;Green 채널
 TP_CHMIXER_LABEL;채널 믹서
 TP_CHMIXER_RED;Red 채널
 TP_CHMIXER_MODE;방식
-TP_CHMIXER_HUE;색상(Hue) 보정
-TP_CHMIXER_SAT;채도(Saturation) 보정
+TP_CHMIXER_HUE;색상 (Hue) 보정
+TP_CHMIXER_SAT;채도 (Saturation) 보정
 TP_CHMIXER_PRIMARY_R;Red 원색
 TP_CHMIXER_PRIMARY_G;Green 원색
 TP_CHMIXER_PRIMARY_B;Blue 원색
 TP_CHMIXER_MODE_RGB_MATRIX;RGB 행렬
-TP_CHMIXER_MODE_PRIMARIES_CHROMA;원색(Primaries)보정
+TP_CHMIXER_MODE_PRIMARIES_CHROMA;원색 (Primaries) 보정
 TP_COARSETRAF_TOOLTIP_HFLIP;좌우반전
 TP_COARSETRAF_TOOLTIP_ROTLEFT;90도 좌회전\n단축키: <b>[</b>\n\n신글 편집 탭 の단축키: <b>Alt-[</b>
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;90도 우회전\n단축키: <b>]</b>\n\n신글편 집 탭 の단축키: <b>Alt-]</b>
@@ -1320,26 +1321,27 @@ TP_COLORCORRECTION_MODE;방식
 TP_COLORCORRECTION_MODE_COMBINED;표준
 TP_COLORCORRECTION_MODE_RGBCHANNELS;RGB채널 분할
 TP_COLORCORRECTION_MODE_HSL;HSL계수
+TP_COLORCORRECTION_MODE_JZAZBZ;지각적
 TP_COLORCORRECTION_CHANNEL_B;Blue
 TP_COLORCORRECTION_CHANNEL_G;Green
 TP_COLORCORRECTION_CHANNEL_R;Red
 TP_COLORCORRECTION_LABEL;색/톤 보정
 TP_COLORCORRECTION_LIST_TITLE;보정
-TP_COLORCORRECTION_OFFSET;어두움 영역/인상(Lift)
-TP_COLORCORRECTION_PIVOT;피벗(Pivot)
+TP_COLORCORRECTION_OFFSET;어두움 영역/인상 (Lift)
+TP_COLORCORRECTION_PIVOT;피벗 (Pivot)
 TP_COLORCORRECTION_POWER;중간 톤 영역/감마
 TP_COLORCORRECTION_RGBLUMINANCE;휘도방식
-TP_COLORCORRECTION_SATURATION;채도(Saturation)
-TP_COLORCORRECTION_SLOPE;하이라이트 영역/증폭(Gain)
+TP_COLORCORRECTION_SATURATION;채도 (Saturation)
+TP_COLORCORRECTION_SLOPE;하이라이트 영역/증폭 (Gain)
 TP_COLORCORRECTION_SYNC_SLIDERS;색 채널 연결 슬라이더
-TP_COLORCORRECTION_L;갉기
-TP_COLORCORRECTION_H;색상(Hue)
-TP_COLORCORRECTION_S;채도(Saturation)
-TP_COLORCORRECTION_HUESAT;색상(Hue)/채도(Saturation)
-TP_COLORCORRECTION_HUESHIFT;색상(Hue) 옮기기(Shift)
+TP_COLORCORRECTION_L;밝기
+TP_COLORCORRECTION_H;색상 (Hue)
+TP_COLORCORRECTION_S;채도 (Saturation)
+TP_COLORCORRECTION_HUESAT;색상 (Hue) /채도 (Saturation)
+TP_COLORCORRECTION_HUESHIFT;색상 (Hue) 옮기기 (Shift)
 TP_CROP_FIXRATIO;가로세로비 고정
 TP_CROP_GTDIAGONALS; 대각선
-TP_CROP_GTEPASSPORT;Biometric Passport
+TP_CROP_GTEPASSPORT;얼굴인식 여권용
 TP_CROP_GTFRAME;프레임
 TP_CROP_GTGRID;격자
 TP_CROP_GTHARMMEANS;조화평균
@@ -1359,7 +1361,7 @@ TP_CROP_X;X
 TP_CROP_Y;Y
 TP_DARKFRAME_AUTOSELECT;자동선택
 TP_DARKFRAME_LABEL;장시간노출 노이즈 제거 (Darkframe)
-TP_DEFRINGE_LABEL;경계선을 깔끔하게 하기(Defringe)
+TP_DEFRINGE_LABEL;윤곽을 깔끔하게 하기 (Defringe)
 TP_DEFRINGE_RADIUS;반경
 TP_DEFRINGE_THRESHOLD;임계 값
 TP_DEHAZE_BLACKPOINT;블랙 포인트보정
@@ -1378,29 +1380,29 @@ TP_DENOISE_SMOOTHING_METHOD;방법
 TP_DENOISE_SMOOTHING_GUIDED;가이드있는 필터
 TP_DIRPYRDENOISE_CHROMINANCE_AUTO_FACTOR;자동감소의 강도
 TP_DIRPYRDENOISE_CHROMINANCE_AUTOGLOBAL;자동（분할 방식）
-TP_DIRPYRDENOISE_CHROMINANCE_BLUEYELLOW;색 차이 Blue/Yellow
-TP_DIRPYRDENOISE_CHROMINANCE_FRAME;색상 노이즈(Chrominance)
+TP_DIRPYRDENOISE_CHROMINANCE_BLUEYELLOW;색상 노이즈 Blue/Yellow
+TP_DIRPYRDENOISE_CHROMINANCE_FRAME;색상 노이즈 (Chrominance)
 TP_DIRPYRDENOISE_CHROMINANCE_MANUAL;수동
 TP_DIRPYRDENOISE_CHROMINANCE_MASTER;색상 노이즈 조정 - 주 조정량
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD;색상 노이즈의 조정법
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;수동\n화상 전체에 작용합니다.\n노이즈 감소 설정을 수동으로 합니다.\n\n자동（분할 방식）\n화상 전체에 작용합니다.\n화상을 9개에 분할해 거기서 전체 색상 노이즈 감소에 적한 설정을 자동적으로 합니다.\n\n자동（다분할 방식）\n미리보기에는 반영되지 않습니다 - 보존화상에 만 반영됩니다. 단, 타일 크기와 그 중심을 미리보기 크기 와 그 중심에 맞추는 〝미리보기”방식을 사용한면, 효과가 어느 정도인지 예측됩니다.\n화상을 타일 상으로 분할하고 （타일수는 화상크기에 따라, 10-70장으로 됩니다） 각 타일에 있던 색상 노이즈 감소의  설정을 자동으로 결정합니다.\n\n자동（미리보기방식）\n화상 전체에 작용합니다.\n미리보기에서 보이는 화상의 일부를 사용해서 전체 색상 노이즈 감소에 적한 설정을 자동으로 결정합니다.
-TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;채도(Chroma)이 Red/Green
+TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;색상 노이즈 Red/Green
 TP_DIRPYRDENOISE_MAIN_COLORSPACE;색 공간
 TP_DIRPYRDENOISE_MAIN_COLORSPACE_LAB;L*a*b*
 TP_DIRPYRDENOISE_MAIN_COLORSPACE_RGB;RGB
 TP_DIRPYRDENOISE_LABEL;노이즈 감소
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL;세부 복원
-TP_DIRPYRDENOISE_LUMINANCE_FRAME;휘도 노이즈(Luminance)
+TP_DIRPYRDENOISE_LUMINANCE_FRAME;광도 노이즈 (Luminance)
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL_THRESHOLD;디테일임계 값
-TP_DIRPYRDENOISE_LUMINANCE_SMOOTHING;휘도
+TP_DIRPYRDENOISE_LUMINANCE_SMOOTHING;광도
 TP_DIRPYRDENOISE_MAIN_GAMMA;감마
 TP_DIRPYRDENOISE_MAIN_GAMMA_TOOLTIP;감마는 톤 범위 전체에서 노이즈 감소 양을 변화시킵니다. 값이 클 수록 밝은 톤 에 효과를 파급시켜, 값이 작 수록 어두운 영역을 대상으로 효과를 파급시킵니다.
 TP_DIRPYRDENOISE_MAIN_MODE;방식
 TP_DIRPYRDENOISE_MAIN_MODE_AGGRESSIVE;적극적
 TP_DIRPYRDENOISE_MAIN_MODE_CONSERVATIVE;소극적
-TP_DIRPYRDENOISE_MAIN_MODE_TOOLTIP;"소극적" 은 저주파 채도(Chroma) 패턴을 유지하지만  "적극적"은 채도(Chroma) 패턴을 말소시킵니다.
+TP_DIRPYRDENOISE_MAIN_MODE_TOOLTIP;소극적" 은 저주파 채도 (Chroma) 패턴을 유지하지만  "적극적"은 채도 (Chroma) 패턴을 말소시킵니다.
 TP_DIRPYRDENOISE_MEDIAN_METHOD;방식
-TP_DIRPYRDENOISE_MEDIAN_METHOD_CHROMINANCE;색상 노이즈(Chroma)만
+TP_DIRPYRDENOISE_MEDIAN_METHOD_CHROMINANCE;색상 노이즈 (Chroma)만
 TP_DIRPYRDENOISE_MEDIAN_METHOD_LAB;L*a*b*
 TP_DIRPYRDENOISE_MEDIAN_METHOD_LUMINANCE;밝기만
 TP_DIRPYRDENOISE_MEDIAN_METHOD_RGB;RGB
@@ -1419,47 +1421,48 @@ TP_DIRPYRDENOISE_TYPE_9X9;9×9
 TP_DISTORTION_AMOUNT;적용량
 TP_DISTORTION_AUTO_TIP;raw파일의 왜곡수차를 포함된 JPEG 화상과 사진기의 자동왜곡수차보정을 합쳐서 자동적으로 보정합니다.
 TP_DISTORTION_LABEL;왜곡수차 보정
-TP_EPD_DETAIL_THRESHOLD;디테일의 척도(scale)
-TP_EPD_LABEL;텍스처증폭
+TP_EPD_DETAIL_THRESHOLD;디테일의 척도 (scale)
+TP_EPD_LABEL;텍스처 증폭
 TP_EPD_LIST_TITLE;매개 변수
 TP_EPD_SCALE;척도
-TP_EPD_ITERATIONS;반복(Iterations)
+TP_EPD_ITERATIONS;반복 (Iterations)
 TP_EPD_STRENGTH;강도
-TP_EXPOSURE_BLACK;블랙 포인트보정(compensation)
+TP_EXPOSURE_BLACK;블랙 포인트보정 (compensation)
 TP_EXPOSURE_CURVEEDITOR1;톤 곡선1
 TP_EXPOSURE_CURVEEDITOR2;톤 곡선2
 TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;두개의 톤 곡선으로 좋은 결과를 남기려면 RawPedia의“노출＞톤 곡선”를 참고하세요.
 TP_EXPOSURE_EXPCOMP;노출보정 (Exposure compensation)
 TP_EXPOSURE_HISTMATCHING;톤 곡선의 자동조정
-TP_EXPOSURE_HISTMATCHING_TOOLTIP;포함된 JPEG 썸네일에 가까은 보기로 표시하기 위해,슬라이더나 커브(단, 노출보정을 제외)를 자동적으로 조정합니다.
-TP_EXPOSURE_HRBLUR;색 파급(Color propagation)의 원활함
+TP_EXPOSURE_HISTMATCHING_TOOLTIP;포함된 JPEG 썸네일에 가까은 보기로 표시하기 위해,슬라이더나 커브 (단, 노출보정을 제외) 를 자동적으로 조정합니다.
+TP_EXPOSURE_HRBLUR;색 파급 (Color propagation) 의 원활함
 TP_EXPOSURE_LABEL;노출
 TP_EXPOSURE_TCMODE_FILMLIKE;필름조
 TP_EXPOSURE_TCMODE_LABEL1;커브 방식1
 TP_EXPOSURE_TCMODE_LABEL2;커브 방식2
 TP_EXPOSURE_TCMODE_LUMINANCE;밝기
+TP_EXPOSURE_TCMODE_ODT;Neutral
 TP_EXPOSURE_TCMODE_PERCEPTUAL;지각적
-TP_EXPOSURE_TCMODE_SATANDVALBLENDING;채도와 명도(밝기)의 혼합
+TP_EXPOSURE_TCMODE_SATANDVALBLENDING;채도와 명도 (밝기) 의 혼합
 TP_EXPOSURE_TCMODE_STANDARD;표준
 TP_EXPOSURE_TCMODE_WEIGHTEDSTD;가중평균
 TP_EXPOS_BLACKPOINT_LABEL;raw 블랙 포인트
-TP_EXPOS_WHITEPOINT_LABEL;raw 증폭(Gain)/화이트 포인트
+TP_EXPOS_WHITEPOINT_LABEL;raw 증폭 (Gain) /화이트 포인트
 TP_FILMNEGATIVE_BLUE;Blue 비율
-TP_FILMNEGATIVE_FILMBASE_PICK;필름기본색 취득
-TP_FILMNEGATIVE_FILMBASE_TOOLTIP;실제 필름 기본 색깔 값을 취득하기 위해,필름 미노광부분을 찾고(예: 프레임간의 경계) 현상 프로파일에 보존합니다.\n이 기능은 같은 필름롤에 있는 복수의 사진을 일괄 현상 처리를 할 때, 더 일관한 색깔 균형을 쉽게 얻을 수 있게 합니다.\n또한 반전하는 이미지가 극단적으로 어둡이거나 밝이거나, 색깔  균형이 잃었을 때 사용합니다.
-TP_FILMNEGATIVE_FILMBASE_VALUES;필름기본RGB:
-TP_FILMNEGATIVE_GREEN;기준지수(대비)
+TP_FILMNEGATIVE_FILMBASE_PICK;필름 기본색 취득
+TP_FILMNEGATIVE_FILMBASE_TOOLTIP;실제 필름 기본 색깔 값을 취득하기 위해,필름 미노광부분을 찾고 (예: 프레임간의 경계) 현상 프로파일에 보존합니다.\n이 기능은 같은 필름롤에 있는 복수의 사진을 일괄 현상 처리를 할 때, 더 일관한 색깔 균형을 쉽게 얻을 수 있게 합니다.\n또한 반전하는 이미지가 극단적으로 어둡이거나 밝이거나, 색깔  균형이 잃었을 때 사용합니다.
+TP_FILMNEGATIVE_FILMBASE_VALUES;필름 기본RGB:
+TP_FILMNEGATIVE_GREEN;기준지수 (대비)
 TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색상이 뉴트럴이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다. 그 후, 화이트 밸런스를  설정합니다.
 TP_FILMNEGATIVE_LABEL;네가필름
 TP_FILMNEGATIVE_PICK;뉴트럴 점 찾기
 TP_FILMNEGATIVE_RED;Red 비율
-TP_FILMSIMULATION_LABEL;필름시뮬레이션
-TP_FILMSIMULATION_SLOWPARSEDIR;ART는 필름시뮬레이션 기능에 사용하는 화상을 Hald CLUT 디렉토리 속에서 찾도록 있게 설계됩니다.（프로그램에 포함하려면 디렉토리가 너무 크기 때문에）。\n변경하려면 환경 설정 > 화상처리 > 필름시뮬레이션을 선택하고 \n어느 디렉토리가 사용되는 지 확인합니다. 이 기능을 사용할 경우 Hald CLUT 파일만 있는 디렉토리를 지정하고, 이 기능을 사용하지 않는 경우 그 디렉토리를 비웁니다.\n\n자세한 것은  RawPedia를 참조하세요.\n\n필름화상의 스캔을 정지합니까?
+TP_FILMSIMULATION_LABEL;필름 시뮬레이션
+TP_FILMSIMULATION_SLOWPARSEDIR;ART는 필름 시뮬레이션 기능에 사용하는 화상을 Hald CLUT 디렉토리 속에서 찾도록 있게 설계됩니다.（프로그램에 포함하려면 디렉토리가 너무 크기 때문에）。\n변경하려면 환경 설정 > 화상처리 > 필름 시뮬레이션을 선택하고 \n어느 디렉토리가 사용되는 지 확인합니다. 이 기능을 사용할 경우 Hald CLUT 파일만 있는 디렉토리를 지정하고, 이 기능을 사용하지 않는 경우 그 디렉토리를 비웁니다.\n\n자세한 것은  RawPedia를 참조하세요.\n\n필름화상의 스캔을 정지합니까?
 TP_FILMSIMULATION_STRENGTH;강도
 TP_FILMSIMULATION_ZEROCLUTSFOUND;HaldCLUT 디렉토리를 환경설정에서 지정하세요.
 TP_FLATFIELD_AUTOSELECT;자동선택
-TP_FLATFIELD_BLURRADIUS;흐림(Blur)크기
-TP_FLATFIELD_BLURTYPE;흐림(Blur)방식
+TP_FLATFIELD_BLURRADIUS;흐림 (Blur) 크기
+TP_FLATFIELD_BLURTYPE;흐림 (Blur) 방식
 TP_FLATFIELD_BT_AREA;영역
 TP_FLATFIELD_BT_HORIZONTAL;수평
 TP_FLATFIELD_BT_VERTHORIZ;수직 + 수평
@@ -1480,16 +1483,16 @@ TP_GRADIENT_DEGREE;각도
 TP_GRADIENT_DEGREE_TOOLTIP;화전각도 도수
 TP_GRADIENT_FEATHER;경계 흐림 (Feather)
 TP_GRADIENT_FEATHER_TOOLTIP;대각선에 대한 그라데이션 폭의 비율
-TP_GRADIENT_LABEL;그라데이션(gradient) 필터
+TP_GRADIENT_LABEL;그라데이션 (gradient) 필터
 TP_GRADIENT_STRENGTH;강도
 TP_GRADIENT_STRENGTH_TOOLTIP;중점위치에서의 필터 강도
 TP_GRAIN_ISO;거칠기 (ISO)
-TP_GRAIN_LABEL;필름효과
+TP_GRAIN_LABEL;필름 효과
 TP_GRAIN_SCALE;척도
 TP_GRAIN_STRENGTH;강도
 TP_HLREC_BLEND;흔합
-TP_HLREC_COLOR;색 파급(Color propagation)
-TP_HLREC_COLORBLEND;균형(Balanced)
+TP_HLREC_COLOR;색 파급 (Color propagation)
+TP_HLREC_COLORBLEND;균형 (Balanced)
 TP_HLREC_OFF;해제
 TP_HLREC_LABEL;하이라이트 복원
 TP_HSVEQUALIZER_CHANNEL;채널
@@ -1504,7 +1507,7 @@ TP_ICM_APPLYHUESATMAP;Base Table
 TP_ICM_APPLYHUESATMAP_TOOLTIP;DCP에 포함된 Base Table (색상채도 맵) 을 사용합니다.단, 적용하는 DCP에 이 태그가 있는 경우에 한정됩니다.
 TP_ICM_APPLYLOOKTABLE;Look Table
 TP_ICM_APPLYLOOKTABLE_TOOLTIP;DCP에 포함된 Look Table을 사용합니다. 단 적용하는 DCP에 이 태그가 있는 경우에 한정됩니다.
-TP_ICM_BPC;블랙 포인트보정
+TP_ICM_BPC;블랙 포인트 보정
 TP_ICM_DCPILLUMINANT;광원
 TP_ICM_DCPILLUMINANT_INTERPOLATED;보간
 TP_ICM_DCPILLUMINANT_TOOLTIP;포함되는 DCP의 광원의 어느 쪽을 사용하는 지 선택함.초기 설정에서는 화이트 밸런스를 바탕으로 두 광원의 중간으로 보간함.이 설정은 "보간 지원이 있는 두 DCP 광원"이 선택되는 경우에 유효함.
@@ -1519,13 +1522,13 @@ TP_ICM_INPUTEMBEDDED;포함된 데이터 사용
 TP_ICM_INPUTEMBEDDED_TOOLTIP;파일에 포함된 색 프로파일을 사용함. 사용 못합은 경우는 사진기표준프로파일적용
 TP_ICM_INPUTNONE;프로파일 없음
 TP_ICM_INPUTNONE_TOOLTIP;모두 색 프로파일을 사용하지 않음. (특수한 경우만)
-TP_ICM_INPUTPROFILE;입력프로파일
+TP_ICM_INPUTPROFILE;입력 프로파일
 TP_ICM_LABEL;색 관리
 TP_ICM_NOICM;No ICM: sRGB 출력
 TP_ICM_NOPROFILE;프로파일 없음
 TP_ICM_OUTPUTPROFILE;출력 프로파일
-TP_ICM_PROFILEINTENT;복표로 삼은 렌더링
-TP_ICM_SAVEREFERENCE;기본(reference) 화상을 보존
+TP_ICM_PROFILEINTENT;목표로 삼은 렌더링
+TP_ICM_SAVEREFERENCE;기본 (reference) 화상을 보존
 TP_ICM_SAVEREFERENCE_APPLYWB;화이트 밸런스를 적용함
 TP_ICM_SAVEREFERENCE_APPLYWB_TOOLTIP;일반적으로 ICC 프로파일을 작성하기 위하는 화상을 보존할 때 적용되는 화이트 밸런스입니다. DCP 프로파일을 작성할 때 는 적용되지않습니다.
 TP_ICM_SAVEREFERENCE_TOOLTIP;입력 프로파일이 적용되기 전의 선형TIFF화상을 보존합니다.캘리브레이션 목적이나 사진기프로파일 작성등으로 사용합니다.
@@ -1535,30 +1538,30 @@ TP_ICM_WORKINGPROFILE;작업 프로파일
 TP_IMPULSEDENOISE_LABEL;임펄스 노이즈 감소
 TP_IMPULSEDENOISE_THRESH;임계 값
 TP_LABCURVE_BRIGHTNESS;밝기
-TP_LABCURVE_CHROMATICITY;색도(Chromaticity)
-TP_LABCURVE_CHROMA_TOOLTIP;흑백 톤을 적용하려고 할 때는, 채도(Chroma)를 -100으로 설정합니다.
+TP_LABCURVE_CHROMATICITY;색도 (Chromaticity)
+TP_LABCURVE_CHROMA_TOOLTIP;흑백 톤을 적용하려고 할 때는, 채도 (Chroma) 를 -100으로 설정합니다.
 TP_LABCURVE_CONTRAST;대비
 TP_LABCURVE_CURVEEDITOR_A_RANGE1;Green 순색
-TP_LABCURVE_CURVEEDITOR_A_RANGE2;Green 명청(明淸)색
-TP_LABCURVE_CURVEEDITOR_A_RANGE3;Red 명청(明淸)색
+TP_LABCURVE_CURVEEDITOR_A_RANGE2;Green 명청 (明淸)색
+TP_LABCURVE_CURVEEDITOR_A_RANGE3;Red 명청 (明淸)색
 TP_LABCURVE_CURVEEDITOR_A_RANGE4;Red 순색
 TP_LABCURVE_CURVEEDITOR_B_RANGE1;Blue 순색
-TP_LABCURVE_CURVEEDITOR_B_RANGE2;Blue 명청(明淸)색
-TP_LABCURVE_CURVEEDITOR_B_RANGE3;Yellow 명청(明淸)색
+TP_LABCURVE_CURVEEDITOR_B_RANGE2;Blue 명청 (明淸)색
+TP_LABCURVE_CURVEEDITOR_B_RANGE3;Yellow 명청 (明淸)색
 TP_LABCURVE_CURVEEDITOR_B_RANGE4;Yellow 순색
-TP_LABCURVE_CURVEEDITOR_LL_TOOLTIP;L*a*b* L=f(L)에 대응한 밝기
+TP_LABCURVE_CURVEEDITOR_LL_TOOLTIP;L*a*b* L=f (L) 에 대응한 밝기
 TP_LABCURVE_LABEL;L*a*b* 조정
-TP_LABMASKS_AREA;영역마스크
+TP_LABMASKS_AREA;영역 마스크
 TP_LABMASKS_AREA_ANGLE;각도
-TP_LABMASKS_AREA_CONTRAST;대비커브
-TP_LABMASKS_AREA_FEATHER;경계 흐림(Feather)
+TP_LABMASKS_AREA_CONTRAST;대비 커브
+TP_LABMASKS_AREA_FEATHER;경계 흐림 (Feather)
 TP_LABMASKS_AREA_HEIGHT;높이
 TP_LABMASKS_INVERTED;반전
-TP_LABMASKS_AREA_ROUNDNESS;丸さ(Roundness)
+TP_LABMASKS_AREA_ROUNDNESS;丸さ (Roundness)
 TP_LABMASKS_AREA_MASK_COPY_TOOLTIP;현제 마스크를 클립 보드에 복사
 TP_LABMASKS_AREA_MASK_DRAW_TOOLTIP;미리보기를 보면서 네모영역을 편집함
 TP_LABMASKS_AREA_MASK_DRAW_ADD_TOOLTIP;미리보기에 네모영역을 그리기
-TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;그라데이션(gradient)을 추가
+TP_LABMASKS_AREA_MASK_DRAW_GRADIENT_ADD_TOOLTIP;그라데이션 (gradient) 을 추가
 TP_LABMASKS_AREA_MASK_DRAW_POLYGON_ADD_TOOLTIP;미리보기에 점을 놓고 폴리곤 (다각형) 영역을 추가함
 TP_LABMASKS_AREA_MASK_TOGGLE_TOOLTIP;현재 마스크 형태를 미리보기에 표시
 TP_LABMASKS_AREA_MASK_PASTE_TOOLTIP;클립 보드에서 마스크를 붙이기
@@ -1567,14 +1570,14 @@ TP_LABMASKS_AREA_SHAPE_MODE;방식
 TP_LABMASKS_AREA_SHAPE_MODE_ADD;추가 방식
 TP_LABMASKS_AREA_SHAPE_MODE_SUBTRACT;빼기 방식
 TP_LABMASKS_AREA_SHAPE_MODE_INTERSECT;중복 방식
-TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 point(s)
+TP_LABMASKS_AREA_SHAPE_POLY_NONEMPTY;%1 point (s)
 TP_LABMASKS_AREA_SHAPES;영역 형태
 TP_LABMASKS_AREA_STRENGTH_START;Start strength
 TP_LABMASKS_AREA_STRENGTH_END;End strength
 TP_LABMASKS_AREA_WIDTH;폭
 TP_LABMASKS_AREA_X;중심 X
 TP_LABMASKS_AREA_Y;중심 Y
-TP_LABMASKS_BLUR;흐림(Blur)
+TP_LABMASKS_BLUR;흐림 (Blur)
 TP_LABMASKS_CHROMATICITY;C
 TP_LABMASKS_HUE;H
 TP_LABMASKS_LIGHTNESS;L
@@ -1582,18 +1585,18 @@ TP_LABMASKS_LIGHTNESS_DETAIL;밝기 도마스크 세부 보호
 TP_LABMASKS_MASK;마스크
 TP_LABMASKS_MASK_UNNAMED;이름 미설정
 TP_LABMASKS_SHOW;마스크 표시
-TP_LABMASKS_CONTRASTTHRESHOLDMASK;대비임계 값마스크
+TP_LABMASKS_CONTRASTTHRESHOLDMASK;대비 임계 값 마스크
 TP_LABMASKS_DELTAE;유사 색 마스크
 TP_LABMASKS_DELTAE_L;L
 TP_LABMASKS_DELTAE_C;C
 TP_LABMASKS_DELTAE_H;H
-TP_LABMASKS_DELTAE_RANGE;범위(Range)
-TP_LABMASKS_DELTAE_DECAY;감쇠(Decay)
+TP_LABMASKS_DELTAE_RANGE;범위 (Range)
+TP_LABMASKS_DELTAE_DECAY;감쇠 (Decay)
 TP_LABMASKS_DELTAE_PICK;찾기
-TP_LABMASKS_DELTAE_CHAN_WEIGHT;delta E를  가중 계산함.
+TP_LABMASKS_DELTAE_CHAN_WEIGHT;delta E (색차) 를  가중 계산함.
 TP_LABMASKS_DELTAE_TOOLTIP;유사색 영역을 선택함\n(CIELAB delta E 척도에 준거)
 TP_LABMASKS_DRAWNMASK;브러시 마스크
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;화면상 브러시 묘화의 On/Off\n\n<i>마우스 사용시:</i>\n- <b>Alt 키를</b>계속 누르면 일시적으로  "지우개 방식"으로  됩니다.\n- 직선은 <b>Shift 키</b>를 누르면서 그립니다.\n- <b>Ctrl+마우스 휠</b>로 브러시의 굵기를 변경할 수 있습니다.\n- <b>Ctrl+Shift+마우스 휠</b>로 브러시의 경도(hardness)를 변경할 수 있습니다.\n- <b>Ctrl+클릭</b>으로 매개 변수를 변경하지 않고 새로 선묘 그릅을 시작합니다.\n(그리고 같은 영역에 복수의 선묘를 추가할 수 있습니다)\n- <b>제3 버튼</b>을 누르고 화면에서의 그리기를 정지합니다.\n\n<i>감압 디바이스를 사용하는 경우:</i>\n- <b>제1버튼</b>으로  "지우개 방식" On/Off를 조작합니다.\n- <b>Shift 키</b>를 누르면서 직선을 그립니다.\n- <b>Alt+제1버튼</b>으로 브러시의 굵기를 굵게 합니다. 그리고\n- <b>Alt+제2 버튼</b>으로 가늘게 합니다.\n- <b>제 2 버튼</b>으로 감압 감도 모드를 전환합니다.: 오프, 경도(hardness), 굵기 (<b>Shift</b>를 누르면 역순이 됩니다)\n- <b>Ctrl+제2 버튼</b>으로 화면상의 그리기를 정지합니다.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;화면상 브러시 묘화의 On/Off\n\n<i>마우스 사용시:</i>\n- <b>Alt 키를</b>계속 누르면 일시적으로  "지우개 방식"으로  됩니다.\n- 직선은 <b>Shift 키</b>를 누르면서 그립니다.\n- <b>Ctrl+마우스 휠</b>로 브러시의 굵기를 변경할 수 있습니다.\n- <b>Ctrl+Shift+마우스 휠</b>로 브러시의 경도 (hardness) 를 변경할 수 있습니다.\n- <b>Ctrl+클릭</b>으로 매개 변수를 변경하지 않고 새로 선묘 그릅을 시작합니다.\n(그리고 같은 영역에 복수의 선묘를 추가할 수 있습니다)\n- <b>제3 버튼</b>을 누르고 화면에서의 그리기를 정지합니다.\n\n<i>감압 디바이스를 사용하는 경우:</i>\n- <b>제1버튼</b>으로  "지우개 방식" On/Off를 조작합니다.\n- <b>Shift 키</b>를 누르면서 직선을 그립니다.\n- <b>Alt+제1버튼</b>으로 브러시의 굵기를 굵게 합니다. 그리고\n- <b>Alt+제2 버튼</b>으로 가늘게 합니다.\n- <b>제 2 버튼</b>으로 감압 감도 모드를 전환합니다.: 오프, 경도 (hardness), 굵기 (<b>Shift</b>를 누르면 역순이 됩니다)\n- <b>Ctrl+제2 버튼</b>으로 화면상의 그리기를 정지합니다.
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;브러시 설정
 TP_LABMASKS_DRAWNMASK_RESET_TIP;모둔궤적을 제거
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;마지막 궤적을 제거
@@ -1601,15 +1604,15 @@ TP_LABMASKS_DRAWNMASK_RADIUS;굵기
 TP_LABMASKS_DRAWNMASK_TRANSPARENCY;투명도
 TP_LABMASKS_DRAWNMASK_SMOOTHNESS;평활함
 TP_LABMASKS_DRAWNMASK_ERASE;치우개 방식
-TP_LABMASKS_DRAWNMASK_HARDNESS;경도(Hardness)
+TP_LABMASKS_DRAWNMASK_HARDNESS;경도 (Hardness)
 TP_LABMASKS_DRAWNMASK_INFO;%1 궤적
 TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;중복 방식: 타 마스크와 브러시마스크의 중복범위만 유효
 TP_LABMASKS_DRAWNMASK_ADD_TOOLTIP;추가방식 타 마스크에 브러시마스크를 추가함
-TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;지정된 영역 한정 추가방식: 타 마스크에 브러시마스크를 추가함. 단 지정된 영역마스크 내 한정
+TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;지정된 영역 한정 추가방식: 타 마스크에 브러시마스크를 추가함. 단 지정된 영역 마스크 내 한정
 TP_LABMASKS_PARAMETRIC;매개 변수 지정 마스크
-TP_LABMASKS_POSTPROCESS;마스크 후처리(Post Processing)
+TP_LABMASKS_POSTPROCESS;마스크 후처리 (Post Processing)
 TP_LABMASKS_POSTPROCESS_CURVE;톤 곡선
-TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterization
+TP_LABMASKS_POSTPROCESS_POSTERIZATION;포스터화
 TP_LABMASKS_POSTPROCESS_SMOOTHING;매끄럽게 하기
 TP_LENSGEOM_AUTOCROP;자동적으로 잘라내기선택
 TP_LENSGEOM_FILL;자동 적용
@@ -1622,55 +1625,55 @@ TP_LENSPROFILE_LABEL;렌즈보정 프로파일
 TP_LENSPROFILE_LENS_WARNING;주의：렌즈 프로파일에 사용되는 잘라내기 계수는 사진기의 잘라내기 계수 보다 커서 잘 못한 결과가 될 가능성이 있습니다.
 TP_LENSPROFILE_MODE_HEADER;렌즈프로파일:
 TP_LENSPROFILE_USE_CA;색수차
-TP_LENSPROFILE_USE_GEOMETRIC;기하학적 왜곡 교정(geometric)
+TP_LENSPROFILE_USE_GEOMETRIC;기하학적 왜곡 교정 (geometric)
 TP_LENSPROFILE_USE_HEADER;보정할 왜곡:
 TP_LENSPROFILE_USE_VIGNETTING;주변광량
 TP_LOCALCONTRAST_CONTRAST;잔여 대비
-TP_LOCALCONTRAST_CURVE;부분대비커브
-TP_LOCALCONTRAST_LABEL;부분대비
+TP_LOCALCONTRAST_CURVE;부분 대비 커브
+TP_LOCALCONTRAST_LABEL;부분 대비
 TP_LOGENC_AUTO;자동
 TP_LOGENC_ADVANCED;확장설정
 TP_LOGENC_BLACK_EV;블랙의 상대적 노출 (Ev)
-TP_LOGENC_GAIN;증폭도(Gain) (Ev)
+TP_LOGENC_GAIN;증폭도 (Gain) (Ev)
 TP_LOGENC_WHITE_EV;화이트의 상대적 노출 (Ev)
 TP_LOGENC_TARGET_GRAY;기준 중간 Gray 값 (밝기)
 TP_LOGENC_LABEL;로그 톤 매핑
-TP_LOGENC_REGULARIZATION;변화의 원활화(Regularization)
+TP_LOGENC_REGULARIZATION;변화의 원활화 (Regularization)
 TP_METADATA_EDIT;변경해 새 파일로 출력
 TP_METADATA_MODE;메타데이터 복사 방식
 TP_METADATA_STRIP;모둔 메타데이터 제거해 새 파일로 출력
 TP_METADATA_TUNNEL;변경 없이 새 파일로 출력
 TP_PCVIGNETTE_CENTER_X;중심 X
 TP_PCVIGNETTE_CENTER_Y;중심 Y
-TP_PCVIGNETTE_FEATHER;경계의 흐림(Feather)
-TP_PCVIGNETTE_FEATHER_TOOLTIP;경계의 흐림(Feather)： 0=모서리만, 50=중앙까지의  반, 100=중앙까지
+TP_PCVIGNETTE_FEATHER;경계의 흐림 (Feather)
+TP_PCVIGNETTE_FEATHER_TOOLTIP;경계의 흐림 (Feather) ： 0=모서리만, 50=중앙까지의  반, 100=중앙까지
 TP_PCVIGNETTE_LABEL;비네팅 필터
 TP_PCVIGNETTE_ROUNDNESS;필터형상
 TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;형상： 0=네모、50=타원형、100=원형
 TP_PCVIGNETTE_STRENGTH;강도
 TP_PCVIGNETTE_STRENGTH_TOOLTIP;중점위치에서의 필터의 강도 (모서리)
 TP_PERSPECTIVE_ANGLE;각도
-TP_PERSPECTIVE_ASPECT;가로세로비(Aspect)조정
+TP_PERSPECTIVE_ASPECT;가로세로비 (Aspect) 조정
 TP_PERSPECTIVE_AUTO;자동보정
 TP_PERSPECTIVE_AUTO_BOTH_TOOLTIP;수평 및 수직
 TP_PERSPECTIVE_AUTO_HORIZONTAL_TOOLTIP;수평
 TP_PERSPECTIVE_AUTO_VERTICAL_TOOLTIP;수직
 TP_PERSPECTIVE_CONTROL_LINES;컨트롤선
 TP_PERSPECTIVE_CONTROL_LINES_TOOLTIP;<b>Ctrl</b>+<b>드래그</b>: 새로운 선의 그리기\n<b>오른쪽 버튼으로 클릭</b>: 선의 삭제
-TP_PERSPECTIVE_CROPFACTOR;잘라내기 계수(factor)
-TP_PERSPECTIVE_FLENGTH;초점거리(Focal length)
+TP_PERSPECTIVE_CROPFACTOR;잘라내기 계수 (factor)
+TP_PERSPECTIVE_FLENGTH;초점거리 (Focal length)
 TP_PERSPECTIVE_HORIZONTAL;수평
-TP_PERSPECTIVE_LABEL;원근 뒤틀기보정
-TP_PERSPECTIVE_SHEAR;전단(剪斷 / Shear)
+TP_PERSPECTIVE_LABEL;원근 뒤틀기 보정
+TP_PERSPECTIVE_SHEAR;전단 (剪斷 / Shear)
 TP_PERSPECTIVE_VERTICAL;수직
 TP_PFCURVE_CURVEEDITOR_CH;색상
-TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;경계선을 깔끔하게 하기의 강도를 제어합니다.값이 높으면 효과가 강화되어 낮으면 약화 됩니다.
+TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;윤곽을 깔끔하게 하기의 강도를 제어합니다.값이 높으면 효과가 강화되어 낮으면 약화 됩니다.
 TP_PREPROCESS_DEADPIXFILT;데드 픽셀필터
 TP_PREPROCESS_DEADPIXFILT_TOOLTIP;데드 픽셀의 압축을 시도합니다.
-TP_PREPROCESS_DYNROWNOISEFILTER;동적수평(row)노이즈필터
+TP_PREPROCESS_DYNROWNOISEFILTER;동적수평 (row) 노이즈필터
 TP_PREPROCESS_GREENEQUIL;Green 균형화
-TP_PREPROCESS_HOTPIXFILT;핫픽셀・필터
-TP_PREPROCESS_HOTPIXFILT_TOOLTIP;핫픽셀 압축을 시도합니다.
+TP_PREPROCESS_HOTPIXFILT;핫 픽셀・필터
+TP_PREPROCESS_HOTPIXFILT_TOOLTIP;핫 픽셀 압축을 시도합니다.
 TP_PREPROCESS_LABEL;사전 처리
 TP_PREPROCESS_LINEDENOISE;선 노이즈 필터
 TP_PREPROCESS_LINEDENOISE_DIRECTION;방향
@@ -1684,7 +1687,7 @@ TP_PRSHARPENING_LABEL;출력 선명하게 하기
 TP_PRSHARPENING_TOOLTIP;크기 조정후 화상을 선명하게 합니다.
 TP_RAWCACORR_AUTO;자동보정
 TP_RAWCACORR_AUTOIT;반복
-TP_RAWCACORR_AUTOIT_TOOLTIP;"자동보정"이 유효할 때 이 설정이 가능합니다.\n자동보정 작용은 소극적이기 때문에, 일부 색수차 보정되지 않을 수 도 있습니다.\n남은 색수차를 보정하기 위해 자동 색수차 보정의 반복을 최대 다섯 번까지  합니다.\n반복 마다 직전의 반복으로 남은 색수차을 보정합니다만 그 대신 처리 시간은 늘어납니다.
+TP_RAWCACORR_AUTOIT_TOOLTIP;자동보정"이 유효할 때 이 설정이 가능합니다.\n자동보정 작용은 소극적이기 때문에, 일부 색수차 보정되지 않을 수 도 있습니다.\n남은 색수차를 보정하기 위해 자동 색수차 보정의 반복을 최대 다섯 번까지  합니다.\n반복 마다 직전의 반복으로 남은 색수차을 보정합니다만 그 대신 처리 시간은 늘어납니다.
 TP_RAWCACORR_AVOIDCOLORSHIFT;색상 변화 피하기
 TP_RAWCACORR_CABLUE;Blue
 TP_RAWCACORR_CARED;Red
@@ -1696,11 +1699,11 @@ TP_RAWEXPOS_BLACK_3;Green2
 TP_RAWEXPOS_BLACK_BLUE;Blue
 TP_RAWEXPOS_BLACK_GREEN;Green
 TP_RAWEXPOS_BLACK_RED;Red
-TP_RAWEXPOS_LINEAR;증폭(Gain)/화이트 포인트보정
-TP_RAWEXPOS_TWOGREEN;두가지 Green을 연동함
+TP_RAWEXPOS_LINEAR;증폭 (Gain) /화이트 포인트 보정
+TP_RAWEXPOS_TWOGREEN;두 가지 Green을 연동함
 TP_RAW_1PASSMEDIUM;1-패스 (Markesteijn)
 TP_RAW_2PASS;1-패스+fast
-TP_RAW_3PASSBEST;3-Pass (Markesteijn)
+TP_RAW_3PASSBEST;3-패스 (Markesteijn)
 TP_RAW_4PASS;3-패스+fast
 TP_RAW_AHD;AHD
 TP_RAW_AMAZE;AMaZE
@@ -1710,7 +1713,7 @@ TP_RAW_BILINEAR;Bilinear
 TP_RAW_BORDER;경계
 TP_RAW_DCB;DCB
 TP_RAW_DCBENHANCE;DCB 확장처리
-TP_RAW_DCBITERATIONS;DCB 반복수
+TP_RAW_DCBITERATIONS;DCB 반복 수
 TP_RAW_DCBVNG4;DCB+VNG4
 TP_RAW_DMETHOD;방식
 TP_RAW_DMETHOD_PROGRESSBAR;%1 디모자이킹 중...
@@ -1721,7 +1724,7 @@ TP_RAW_DUALDEMOSAICAUTOCONTRAST_TOOLTIP;체크박스를 유효화하면 (추천)
 TP_RAW_DUALDEMOSAICCONTRAST;대비의 임계 값
 TP_RAW_EAHD;EAHD
 TP_RAW_FALSECOLOR;거짓 색상 억제처리 회수
-TP_RAW_FAST;간이형상(Fast)
+TP_RAW_FAST;간이형상 (Fast)
 TP_RAW_HD;임계 값
 TP_RAW_HD_TOOLTIP; 설정 값을 낮으면, 핫/데드 픽셀을 더 적극적으로 검출합니다만 판정 오류때문에 불자연스러운 수정점이 늘어날 수 도 있습니다. 핫/데드 픽셀필터 사용으로 인해, 불자연스러운 수정점이 있는 경우, 문게가 해결될 때 까지 임계 값을 조금씩 올리세요.
 TP_RAW_HPHD;HPHD
@@ -1732,11 +1735,11 @@ TP_RAW_IMAGENUM_TOOLTIP;raw파일중에는 복수의 하위 영상으로 구성�
 TP_RAW_LABEL;디모자이킹
 TP_RAW_LMMSE;LMMSE
 TP_RAW_LMMSEITERATIONS;LMMSE 확장처리
-TP_RAW_LMMSE_TOOLTIP;감마 추가 (step 1) - 중앙 값 필터 추가 (step 2,3,4), 정제 처리(refine) 추가 (step 5,6) 부자연한 효과를 감소시켜 S/N비를 향상합니다.
+TP_RAW_LMMSE_TOOLTIP;감마 추가 (step 1) - 중앙 값 필터 추가 (step 2,3,4), 정제 처리 (refine) 추가 (step 5,6) 부자연한 효과를 감소시켜 S/N비를 향상합니다.
 TP_RAW_MONO;흑백
 TP_RAW_NONE;없음 (센소패턴을 표시함)
 TP_RAW_PIXELSHIFT;픽셀 시프트
-TP_RAW_PIXELSHIFTBLUR;흐림마스크의 흐림(Blur)
+TP_RAW_PIXELSHIFTBLUR;흐림마스크의 흐림 (Blur)
 TP_RAW_PIXELSHIFTDMETHOD;동체 (動體) 흐림에 대한 디모자이킹 방식
 TP_RAW_PIXELSHIFTEPERISO;ISO의 적합
 TP_RAW_PIXELSHIFTEPERISO_TOOLTIP;통상 ISO에 대해서는 초기 설정인 0으로 충분합니다.\n높은 ISO의 경우동체 (動體) 흐림 검지 향상 위해  설정 값을 올려야 합니다.\n조금씩 증가시켜 흐림 마스크의 변화를 지켜봐야 합니다
@@ -1779,7 +1782,7 @@ TP_RESET_SAVED;최종보존 값으로 리셋
 TP_RESIZE_ALLOW_UPSCALING;업스케일링을 허용함
 TP_RESIZE_APPLIESTO;적용영역:
 TP_RESIZE_CROPPEDAREA;자르는 영역
-TP_RESIZE_FITBOX;Bounding Box
+TP_RESIZE_FITBOX;표시최대영역
 TP_RESIZE_FULLIMAGE;모든 화상
 TP_RESIZE_H;높이:
 TP_RESIZE_HEIGHT;높이
@@ -1802,15 +1805,15 @@ TP_ROTATE_LABEL;회전
 TP_ROTATE_SELECTLINE;직선선택/각도보정도구
 TP_SAVEDIALOG_OK_TIP;단축키 <b>Ctrl-Enter</b>
 TP_SHARPENING_AMOUNT;적용량
-TP_SHARPENING_BLUR;흐림(Blur) 반경
+TP_SHARPENING_BLUR;흐림 (Blur) 반경
 TP_SHARPENING_CONTRAST;대비 임계 값
 TP_SHARPENING_EDRADIUS;반경
-TP_SHARPENING_EDTOLERANCE;경계선 허용
-TP_SHARPENING_HALOCONTROL;하로(Halo) 억제
+TP_SHARPENING_EDTOLERANCE;윤곽 허용
+TP_SHARPENING_HALOCONTROL;하로 (Halo) 억제
 TP_SHARPENING_HCAMOUNT;적용량
 TP_SHARPENING_LABEL;선명하게 하기
 TP_SHARPENING_METHOD;방식
-TP_SHARPENING_ONLYEDGES;경계선만 선명하게 하기
+TP_SHARPENING_ONLYEDGES;윤곽만 선명하게 하기
 TP_SHARPENING_RADIUS;반경
 TP_SHARPENING_RLD;RL 역 합성곱
 TP_SHARPENING_RLD_AMOUNT;적용량
@@ -1825,47 +1828,47 @@ TP_SMOOTHING_LIST_TITLE;매끄럽게 하기 매개 변수
 TP_SMOOTHING_FALLOFF;효과의 감소
 TP_SMOOTHING_MODE;방식
 TP_SMOOTHING_MODE_GUIDED;가이드 있음
-TP_SMOOTHING_MODE_GAUSSIAN;소프트 스무딩
-TP_SMOOTHING_MODE_GAUSSIAN_GLOW;광선효과(Glow)
-TP_SMOOTHING_MODE_NLMEANS;비국소평균(Non-local means)
+TP_SMOOTHING_MODE_GAUSSIAN;가우스 흐림
+TP_SMOOTHING_MODE_GAUSSIAN_GLOW;광선 효과 (Glow)
+TP_SMOOTHING_MODE_NLMEANS;비국소평균 (Non-local means)
 TP_SMOOTHING_MODE_LENS;렌즈 흐림 효과
 TP_SMOOTHING_MODE_MOTION;모션 블러 (Motion blur)
 TP_SMOOTHING_CHANNEL;채널
 TP_SMOOTHING_CHANNEL_L;밝기
-TP_SMOOTHING_CHANNEL_C;색정보(Chrominance)
+TP_SMOOTHING_CHANNEL_C;색신호 (Chrominance)
 TP_SMOOTHING_CHANNEL_RGB;RGB
 TP_SMOOTHING_RADIUS;반경
 TP_SMOOTHING_EPSILON;디테일
 TP_SMOOTHING_SIGMA;반경
-TP_SMOOTHING_ITERATIONS;반복(Iterations)
-TP_SMOOTHING_NLSTRENGTH;강도(Strength)
+TP_SMOOTHING_ITERATIONS;반복 (Iterations)
+TP_SMOOTHING_NLSTRENGTH;강도 (Strength)
 TP_SMOOTHING_NLDETAIL;디테일
-TP_SMOOTHING_NUMBLADES;Blades
+TP_SMOOTHING_NUMBLADES;조리개 날 매수(Blades)
 TP_SMOOTHING_ANGLE;흐림의 각도 (Angle)
 TP_SMOOTHING_CURVATURE;흐름의 곡률 (Curvature)
 TP_SMOOTHING_OFFSET;Offset
 TP_SOFTLIGHT_LABEL;소프트라이트
 TP_SOFTLIGHT_STRENGTH;강도
 TP_SPOT_COUNTLABEL;%1 점
-TP_SPOT_ENTRYCHANGED;Point changed
-TP_SPOT_HINT;"미리보기 영역을 조작하려면 이 버튼을 클릭합니다.\n\n스팟(오점)을 편집하려면 , 편집부분의 형태(editing geometry)가 보이도록 해서, 하양 십자 커서를 수정하고 싶은 부분 위에 놓습니다.\n\n수정할 스팟을  추가하려면 , Ctrl을 누르고 왼쪽 마우스 버튼을 클릭합니다. 그리고 그대로 드래그하고 , 편집부분을 메운 북사영역  장소의 커서를 이동시켜 (Ctrl키는 놓아도 됩니다) 마우스 버튼을 놓압니다.\n\n복사영역이나 수정부분을 이동하려면, 그 동그라미의 중심에 커서를 놓고 드래그합니다..\n\n수정부분의 안쪽 동그라미 (가앙 효과가 강한 부분)및 "경계 흐림(Feather)" (밖아쪽)동그라미는 그 위에 커서를 놓고(그러면 동그라미는 주황색으로 됩니다), 드래그하면(그러면 동그라미는 빨간색으로 됩니다), 크기를 변화시킬 수 있습니다.\n\n수정이 끝나면 , 어누 스팟의 밖아쪽을 오른쪽 버튼으로 클릭하고나 이 버튼을 다시 클릭해서  스팟 편집 작업을 끝냅니다.
-TP_SPOT_LABEL;스팟(오점) 제거
+TP_SPOT_ENTRYCHANGED;보수점 변경
+TP_SPOT_HINT;미리보기 영역을 조작하려면 이 버튼을 클릭합니다.\n\n스팟 (오점) 을 편집하려면 , 편집부분의 형태 (editing geometry) 가 보이도록 해서, 하양 십자 커서를 수정하고 싶은 부분 위에 놓습니다.\n\n수정할 스팟을  추가하려면 , Ctrl을 누르고 왼쪽 마우스 버튼을 클릭합니다. 그리고 그대로 드래그하고 , 편집부분을 메운 북사영역  장소의 커서를 이동시켜 (Ctrl키는 놓아도 됩니다) 마우스 버튼을 놓압니다.\n\n복사영역이나 수정부분을 이동하려면, 그 동그라미의 중심에 커서를 놓고 드래그합니다..\n\n수정부분의 안쪽 동그라미 (가앙 효과가 강한 부분) 및 "경계 흐림 (Feather) " (밖아쪽) 동그라미는 그 위에 커서를 놓고 (그러면 동그라미는 주황색으로 됩니다), 드래그하면 (그러면 동그라미는 빨간색으로 됩니다), 크기를 변화시킬 수 있습니다.\n\n수정이 끝나면 , 어누 스팟의 밖아쪽을 오른쪽 버튼으로 클릭하고나 이 버튼을 다시 클릭해서  스팟 편집 작업을 끝냅니다.
+TP_SPOT_LABEL;스팟 (오점) 제거
 TP_SPOT_CUR_SPOT_LABEL;현재의 스팟
 TP_SPOT_SOURCE_X;복사영역 X
 TP_SPOT_SOURCE_Y;복사영역 Y
 TP_SPOT_TARGET_X;보수대상 X
 TP_SPOT_TARGET_Y;보수대상 Y
 TP_SPOT_RADIUS;반경
-TP_SPOT_FEATHER;흐림(Feather)
+TP_SPOT_FEATHER;흐림 (Feather)
 TP_SPOT_OPACITY;불투명도
 TP_SPOT_DETAIL;세부보호
 TP_TM_FATTAL_AMOUNT;량
 TP_TM_FATTAL_LABEL;다이나믹 레인지지
 TP_TM_FATTAL_THRESHOLD;디테일
-TP_TM_FATTAL_SATCONTROL;채도(Saturation)조정
+TP_TM_FATTAL_SATCONTROL;채도 (Saturation) 조정
 TP_TONECURVE_LABEL;톤 곡선
-TP_TONECURVE_SATCURVE;채도(Saturation)
-TP_TONECURVE_PERCEPTUAL_STRENGTH;지각적 커브의 강도(Strength)
+TP_TONECURVE_SATCURVE;채도 (Saturation)
+TP_TONECURVE_PERCEPTUAL_STRENGTH;지각적 커브의 강도 (Strength)
 TP_TONECURVE_MODE;방식
 TP_TONECURVE_CONTRAST_LEGACY;대비 (재래 방식)
 TP_TONECURVE_WHITEPOINT;화이트 포인트
@@ -1874,7 +1877,7 @@ TP_TONE_EQUALIZER_BAND_1;어두움 영역
 TP_TONE_EQUALIZER_BAND_2;중간 톤 영역
 TP_TONE_EQUALIZER_BAND_3;하이라이트 영역
 TP_TONE_EQUALIZER_BAND_4;화이트 영역
-TP_TONE_EQUALIZER_DETAIL;영역간 변화의 원활화(Regularization)
+TP_TONE_EQUALIZER_DETAIL;영역간 변화의 원활화 (Regularization)
 TP_TONE_EQUALIZER_LABEL;톤 이퀄라이저
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;톤 영역을 색깔로 표시함
 TP_VIGNETTING_AMOUNT;적용량
@@ -1888,7 +1891,7 @@ TP_WBALANCE_CAMERA;사진기 촬영시 설정
 TP_WBALANCE_CUSTOM;색 온도 조정
 TP_WBALANCE_CUSTOM_MULT;RGB승수 조정
 TP_WBALANCE_EQBLUERED;Blue／Red 이퀄라이저
-TP_WBALANCE_EQBLUERED_TOOLTIP;BBlue와 Red를 조정함으로, 화이트 밸런스를 보통과 다른 것으로 설정합니다.\n이 것은 다음과 같은 촬영조건의 경우에  도우미 됩니다.：\na)광원이 표준적인 것과 크게 다른 경우（예、수중）\nb)캘리브레이션 범위에서 크게 일탈한 경우\nc)컬러 매트릭스나 ICC 프로파일이 부적절한 경우
+TP_WBALANCE_EQBLUERED_TOOLTIP;BBlue와 Red를 조정함으로, 화이트 밸런스를 보통과 다른 것으로 설정합니다.\n이 것은 다음과 같은 촬영조건의 경우에  도우미 됩니다.：\na) 광원이 표준적인 것과 크게 다른 경우（예、수중）\nb) 캘리브레이션 범위에서 크게 일탈한 경우\nc) 컬러 매트릭스나 ICC 프로파일이 부적절한 경우
 TP_WBALANCE_GREEN;색편차 (Tint)
 TP_WBALANCE_LABEL;화이트 밸런스
 TP_WBALANCE_METHOD;방식
