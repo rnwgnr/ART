@@ -9,6 +9,7 @@
 #08 2021-07-08 mrleemon, update for 1.9.3
 #09 2021-10-07 mrleemon, update for 1.10
 #10 2021-10-09 mrleemon, some fixes
+#11 2021-11-28 mrleemon, update for 1.10.1
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -62,6 +63,7 @@ EDIT_PIPETTE_TOOLTIP;Per afegir un punt d'ajust a la corba, mantingueu la tecla 
 ERROR_MSG_FILE_READ;Error de lectura del fitxer: %1
 ERROR_MSG_MAXERRORS;... (%1 error(s) anterior(s) no mostrat(s))
 ERROR_MSG_METADATA_VALUE;Metadades: error en establir %1 a %2
+ERROR_MSG_INVALID_PSF;Fitxer PSF no vàlid: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Càmera
 EXIFFILTER_DATE;Data
@@ -513,6 +515,7 @@ HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - màscara de regió C
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - màscara de llindar de contrast
 HISTORY_MSG_COLORCORRECTION_ENABLED;Correcció de color/to
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - màscara de regió T
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - alteració de to
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - lluminositat
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - màscara de regió L
 HISTORY_MSG_COLORCORRECTION_LIST;CC - regions
@@ -625,6 +628,8 @@ HISTORY_MSG_SHARPENING_BLUR;Enfocament - Radi de desenfocament
 HISTORY_MSG_SHARPENING_CONTRAST;Enfocament - Llindar de contrast
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfocament - Latitud de les cantonades RLD
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfocament - Augment del radi de les cantonades RLD
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Enfocament - Fitxer PSF
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Enfocament - Iteracions PSF
 HISTORY_MSG_SH_COLORSPACE;O/AL - Espai de color
 HISTORY_MSG_SMOOTHING_ENABLED;Suavitzat
 HISTORY_MSG_SMOOTHING_FALLOFF;Suavitzat - difuminat
@@ -1103,6 +1108,7 @@ PREFERENCES_PRTPROFILE;Perfil de color
 PREFERENCES_PSPATH;Carpeta d'instal·lació d'Adobe Photoshop
 PREFERENCES_REMEMBERZOOMPAN;Recorda el nivell de zoom i la posició
 PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Recorda el nivell de zoom i la posició de la imatge actual quan s'obre una nova imatge.\n\nAquesta opció només funciona al "Mode de pestanyes d'un sol editor" i quan el "Mètode d'interpolació utilitzat per a la vista prèvia amb un zoom <100%" està establert com a "Com en ARP".
+PREFERENCES_REMEMBER_METADATA_FILTERS;Recorda filtres de metadades
 PREFERENCES_SAVE_TP_OPEN_NOW;Desa l'estat tancat/obert de les eines ara
 PREFERENCES_SELECTLANG;Selecciona idioma
 PREFERENCES_SERIALIZE_TIFF_READ;Configuració de lectura TIFF
@@ -1334,6 +1340,7 @@ TP_COLORCORRECTION_MODE;Mode
 TP_COLORCORRECTION_MODE_COMBINED;Estàndard
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Canals RGB separats
 TP_COLORCORRECTION_MODE_HSL;Factors TSL
+TP_COLORCORRECTION_MODE_JZAZBZ;Perceptual
 TP_COLORCORRECTION_CHANNEL_B;Blau
 TP_COLORCORRECTION_CHANNEL_G;Verd
 TP_COLORCORRECTION_CHANNEL_R;Vermell
@@ -1350,6 +1357,7 @@ TP_COLORCORRECTION_L;Lluminositat
 TP_COLORCORRECTION_H;To
 TP_COLORCORRECTION_S;Saturació
 TP_COLORCORRECTION_HUESAT;To/Saturació
+TP_COLORCORRECTION_HUESHIFT;Alteració de to
 TP_CROP_FIXRATIO;Bloqueja l'aspecte
 TP_CROP_GTDIAGONALS;Regla de diagonals
 TP_CROP_GTEPASSPORT;Passaport biomètric
@@ -1451,6 +1459,7 @@ TP_EXPOSURE_TCMODE_FILMLIKE;Similar a pel·lícula
 TP_EXPOSURE_TCMODE_LABEL1;Mode de corba 1
 TP_EXPOSURE_TCMODE_LABEL2;Mode de corba 2
 TP_EXPOSURE_TCMODE_LUMINANCE;Luminància
+TP_EXPOSURE_TCMODE_ODT;Neutral
 TP_EXPOSURE_TCMODE_PERCEPTUAL;Perceptual
 TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Fusió de saturació i valor
 TP_EXPOSURE_TCMODE_STANDARD;Estàndard
@@ -1834,6 +1843,9 @@ TP_SHARPENING_RLD_CORNERLATITUDE;Latitud
 TP_SHARPENING_RLD_CORNERRADIUS;Increment del radi
 TP_SHARPENING_THRESHOLD;Llindar
 TP_SHARPENING_USM;Màscara d'enfocament
+TP_SHARPENING_PSF;Deconvolució RL personalitzada
+TP_SHARPENING_PSF_KERNEL;Funció de dispersió de punt (PSF)
+TP_SHARPENING_PSF_ITERATIONS;Iteracions
 TP_SMOOTHING_LABEL;Suavitzat
 TP_SMOOTHING_LIST_TITLE;Paràmetres de suavitzat
 TP_SMOOTHING_FALLOFF;Difuminat

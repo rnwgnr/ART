@@ -12,6 +12,7 @@
 #11 2021-07-08 mrleemon, update for 1.9.3
 #12 2021-10-06 mrleemon, update for 1.10
 #13 2021-10-09 mrleemon, some fixes
+#14 2021-11-28 mrleemon, update for 1.10.1
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -65,6 +66,7 @@ EDIT_PIPETTE_TOOLTIP;Para añadir un punto de ajuste en la curva, mantenga la te
 ERROR_MSG_FILE_READ;Error de lectura del archivo: %1
 ERROR_MSG_MAXERRORS;... (%1 error(es) anterior(es) no mostrado(s))
 ERROR_MSG_METADATA_VALUE;Metadatos: error al establecer %1 a %2
+ERROR_MSG_INVALID_PSF;Archivo PSF no válido: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Cámara
 EXIFFILTER_DATE;Fecha
@@ -516,6 +518,7 @@ HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - máscara de región C
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - máscara de umbral de contraste
 HISTORY_MSG_COLORCORRECTION_ENABLED;Corrección de color/tono
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - máscara de región T
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - alteración de tono
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - luminosidad
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - máscara de región L
 HISTORY_MSG_COLORCORRECTION_LIST;CC - regiones
@@ -628,6 +631,8 @@ HISTORY_MSG_SHARPENING_BLUR;Enfoque - Radio de desenfoque
 HISTORY_MSG_SHARPENING_CONTRAST;Enfoque - Umbral de contraste
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfoque - Latitud de las esquinas RLD
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfoque - Aumento del radio de las esquinas RLD
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Enfoque - archivo PSF
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Enfoque - iteraciones PSF
 HISTORY_MSG_SH_COLORSPACE;S/AL - Espacio de color
 HISTORY_MSG_SMOOTHING_ENABLED;Suavizado
 HISTORY_MSG_SMOOTHING_FALLOFF;Suavizado - difuminación
@@ -1106,6 +1111,7 @@ PREFERENCES_PRTPROFILE;Perfil de color
 PREFERENCES_PSPATH;Carpeta de instalación de Adobe Photoshop
 PREFERENCES_REMEMBERZOOMPAN;Recordar el nivel de zoom y la posición
 PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Recuerda el nivel de zoom y la posición de la imagen actual cuando se abre una nueva imagen.\n\nEsta opción solo funciona en el "Modo de pestañas de un solo editor" y cuando el "Método de interpolación usado para la vista previa con un zoom <100%" está establecido como "Como en ARP".
+PREFERENCES_REMEMBER_METADATA_FILTERS;Recordar filtros de metadatos
 PREFERENCES_SAVE_TP_OPEN_NOW;Guardar el estado contraído/expandido de las herramientas ahora
 PREFERENCES_SELECTLANG;Seleccionar idioma
 PREFERENCES_SERIALIZE_TIFF_READ;Ajustes de lectura TIFF
@@ -1337,6 +1343,7 @@ TP_COLORCORRECTION_MODE;Modo
 TP_COLORCORRECTION_MODE_COMBINED;Estándar
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Canales RGB separados
 TP_COLORCORRECTION_MODE_HSL;Factores TSL
+TP_COLORCORRECTION_MODE_JZAZBZ;Perceptual
 TP_COLORCORRECTION_CHANNEL_B;Azul
 TP_COLORCORRECTION_CHANNEL_G;Verde
 TP_COLORCORRECTION_CHANNEL_R;Rojo
@@ -1353,6 +1360,7 @@ TP_COLORCORRECTION_L;Luminosidad
 TP_COLORCORRECTION_H;Tono
 TP_COLORCORRECTION_S;Saturación
 TP_COLORCORRECTION_HUESAT;Tono/Saturación
+TP_COLORCORRECTION_HUESHIFT;Alteración de tono
 TP_CROP_FIXRATIO;Bloquear aspecto
 TP_CROP_GTDIAGONALS;Regla de diagonales
 TP_CROP_GTEPASSPORT;Pasaporte biométrico
@@ -1454,6 +1462,7 @@ TP_EXPOSURE_TCMODE_FILMLIKE;Similar a película
 TP_EXPOSURE_TCMODE_LABEL1;Modo de curva 1
 TP_EXPOSURE_TCMODE_LABEL2;Modo de curva 2
 TP_EXPOSURE_TCMODE_LUMINANCE;Luminancia
+TP_EXPOSURE_TCMODE_ODT;Neutral
 TP_EXPOSURE_TCMODE_PERCEPTUAL;Perceptual
 TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Fusión de saturación y valor
 TP_EXPOSURE_TCMODE_STANDARD;Estándar
@@ -1837,6 +1846,9 @@ TP_SHARPENING_RLD_CORNERLATITUDE;Latitud
 TP_SHARPENING_RLD_CORNERRADIUS;Incremento del radio
 TP_SHARPENING_THRESHOLD;Umbral
 TP_SHARPENING_USM;Máscara de enfoque
+TP_SHARPENING_PSF;Deconvolución RL personalizada
+TP_SHARPENING_PSF_KERNEL;Función de dispersión de punto (PSF)
+TP_SHARPENING_PSF_ITERATIONS;Iteraciones
 TP_SMOOTHING_LABEL;Suavizado
 TP_SMOOTHING_LIST_TITLE;Parámetros de suavizado
 TP_SMOOTHING_FALLOFF;Difuminación

@@ -54,7 +54,7 @@ EDIT_PIPETTE_TOOLTIP;Pour ajouter un point d'ajustement de la courbe, maintenez 
 ERROR_MSG_FILE_READ;Erreur de lecture du fichier : %1
 ERROR_MSG_MAXERRORS;... (%1 erreur(s) précédente(s) non montrée(s))
 ERROR_MSG_METADATA_VALUE;Metadata: réglage de l'erreur %1 à %2
-ERROR_MSG_INVALID_PSF;Fichier PFS invalide: %1
+ERROR_MSG_INVALID_PSF;Fichier PSF invalide: %1
 EXIFFILTER_APERTURE;Diaphragme
 EXIFFILTER_CAMERA;Appareil photo
 EXIFFILTER_DATE;Date
@@ -1094,6 +1094,7 @@ PREFERENCES_PRTPROFILE;Profil colorimétrique
 PREFERENCES_PSPATH;Dossier d'installation d'Adobe Photoshop
 PREFERENCES_REMEMBERZOOMPAN;Se souvenir du niveau de zoom et de la position de l'image
 PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;Retient le niveau de zoom et la position de l'image courante lors de l'ouverture d'une nouvelle image.\n\nCette option ne fonctionne que dans le mode "Onglet Éditeur Unique" et quand "Méthode de dématriçage utilisée pour l'aperçu à un zoom <100%" est fixé à "Comme dans profil ARP"
+PREFERENCES_REMEMBER_METADATA_FILTERS;Se souvenir des filtres des metadonnées
 PREFERENCES_SAVE_TP_OPEN_NOW;Sauver l'état replié/déplié maintenant
 PREFERENCES_SELECTLANG;Choix de la langue
 PREFERENCES_SERIALIZE_TIFF_READ;Réglages de lecture des images TIFF
