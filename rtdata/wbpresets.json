@@ -32,7 +32,6 @@
 // CANON EOS R
 // CANON EOS R5
 // CANON EOS RP
-
 // updated on Mon Oct 11 14:29:55 2021:
 // FUJIFILM GFX100S
 // FUJIFILM X-E4
@@ -40,6 +39,9 @@
 // PANASONIC DC-FZ10002
 // PANASONIC DMC-G8
 // RICOH GR III
+
+// updated on Tue Nov 30 09:54:05 2021:
+// RICOH GR II
 
 [
   {
@@ -5806,6 +5808,21 @@
       { "name" : "day white fluorescent", "multipliers" : [ 2.54795, 1, 1.96086 ] },
       { "name" : "daylight fluorescent", "multipliers" : [ 2.99413, 1, 1.72994 ] },
       { "name" : "white fluorescent", "multipliers" : [ 2.28963, 1, 2.3953 ] }
+    ]
+  },
+  {
+    "make_model" : "RICOH GR II",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 3.062, 1, 1.545 ] },
+      { "name" : "shade", "multipliers" : [ 3.319, 1, 1.385 ] },
+      { "name" : "cloudy", "multipliers" : [ 3.058, 1, 1.538 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.944, 1, 2.384 ] },
+      { "name" : "incandescent warm", "multipliers" : [ 2.276, 1, 2.052 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 3.062, 1, 1.545 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 2.837, 1, 1.698 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 2.642, 1, 2.125 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 2.354, 1, 2.027 ] },
+      { "name" : "5000K", "multipliers" : [ 2.867, 1, 1.662 ] }
     ]
   }
 ]
