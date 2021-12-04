@@ -196,17 +196,35 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         const float w2 = width * 0.5f;
         const float Y = 0.5f;
         const float radius = std::min(w2, h2);
-        const float factor = Y * scale * 1.4 / radius;
+        const float inner_radius = radius * 0.93f;
+        //const float factor = Y * scale * 1.4 / radius;
+        const float factor = scale / 1.5f;
         for (int j = 0; j < height; ++j) {
             float jj = j - h2;
-            float u = jj * factor;
+            //float u = jj * factor;
             for (int i = 0; i < width; ++i) {
                 float ii = i - w2;
                 float R, G, B;
-                if (std::sqrt(rtengine::SQR(ii) + rtengine::SQR(jj)) <= radius){
-                    float v = ii * factor;
-                    Color::yuv2rgb(Y, u, v, R, G, B, ws);
-                    cr->set_source_rgb(R, G, B);
+                float d = std::sqrt(rtengine::SQR(ii) + rtengine::SQR(jj));
+                if (d <= radius) {
+                    float s = d / radius;
+                    float h = atan2(jj, ii) / (2.f * rtengine::RT_PI_F);
+                    if (h < 0.f) {
+                        h += 1.f;
+                    } else if (h > 1.f) {
+                        h -= 1.f;
+                    }
+                    //Color::hsv2rgb01(h, s, 1.f, R, G, B);
+                    Color::hsl2rgb(h, s * factor, 0.5f, R, G, B);
+                    R /= 65535.f;
+                    G /= 65535.f;
+                    B /= 65535.f;
+                    
+                // if (std::sqrt(rtengine::SQR(ii) + rtengine::SQR(jj)) <= radius){
+                    // float v = ii * factor;
+                    // Color::yuv2rgb(Y, u, v, R, G, B, ws);
+                    float alpha = d <= inner_radius ? 0.15f : 1.f;
+                    cr->set_source_rgba(R, G, B, alpha);
                     cr->rectangle(i, j, 1, 1);
                     cr->fill();
                 }

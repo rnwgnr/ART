@@ -35,6 +35,7 @@
 #include "metadata.h"
 #include "halffloat.h"
 #include "base64.h"
+#include "iccstore.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -5111,6 +5112,38 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             bool found = false;
             bool done = false;
 
+            auto ws = ICCStore::getInstance()->workingSpaceMatrix(icm.workingProfile);
+            const auto translate_ab =
+                [&](double &a, double &b) -> void
+                {
+                    float u = SGN(b) * log2lin(std::abs(b), 4.0);
+                    float v = SGN(a) * log2lin(std::abs(a), 4.0);
+                    float os = std::sqrt(SQR(u) + SQR(v));
+                    float R, G, B;
+                    const float Y = 0.5f;
+                    Color::yuv2rgb(Y, u, v, R, G, B, ws);
+                    float h, s, l;
+                    Color::rgb2hsl(R * 65535.f, G * 65535.f, B * 65535.f, h, s, l);
+                    h = h * 2.f * RT_PI_F;
+                    Color::hsl2yuv(h, os, u, v);
+                    b = SGN(u) * lin2log(std::abs(u), 4.f);
+                    a = SGN(v) * lin2log(std::abs(v), 4.f);
+                };
+
+            const auto translate_hs =
+                [&](double &h, double &s) -> void
+                {
+                    float u, v;
+                    Color::hsl2yuv(h / 180.f * RT_PI_F, s, u, v);
+                    double a = v;
+                    double b = u;
+                    translate_ab(a, b);
+                    float fh, fs;
+                    Color::yuv2hsl(b, a, fh, fs);
+                    h = fh;
+                    s = fs;
+                };
+
             for (int i = 1; !done; ++i) {
                 ColorCorrectionParams::Region cur;
                 Mask curmask;
@@ -5132,6 +5165,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 
                 get("A_", cur.a);
                 get("B_", cur.b);
+                if (ppVersion < 1028) {
+                    translate_ab(cur.a, cur.b);
+                }
                 get("ABScale_", cur.abscale);
                 if (ppVersion < 1005) {
                     int c = -1;
@@ -5199,6 +5235,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             get(w + "H_", cur.hue[c]);
                             get(w + "S_", cur.sat[c]);
                             get(w + "L_", cur.factor[c]);
+                            if (ppVersion < 1028) {
+                                translate_hs(cur.hue[c], cur.sat[c]);
+                            }
                         }
                     }
                 }
