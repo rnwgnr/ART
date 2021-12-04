@@ -613,17 +613,18 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
 
             auto &mkn = libraw_->imgdata.makernotes;
         
-            if (!strcmp(make, "Panasonic") && mkn.panasonic.BlackLevelDim > 0) {
-                memset(cblack, 0, sizeof(cblack));
-                if (mkn.panasonic.BlackLevelDim >= 4) {
-                    for (size_t i = 0; i < 4; ++i) {
-                        cblack[i] = mkn.panasonic.BlackLevel[i];
-                    }
-                    black = 0;
-                } else {
-                    black = mkn.panasonic.BlackLevel[0];
-                }
-            } else if (!strcmp(make, "Canon") && isBayer()) {
+            // if (!strcmp(make, "Panasonic") && mkn.panasonic.BlackLevelDim > 0) {
+            //     memset(cblack, 0, sizeof(cblack));
+            //     if (mkn.panasonic.BlackLevelDim >= 4) {
+            //         for (size_t i = 0; i < 4; ++i) {
+            //             cblack[i] = mkn.panasonic.BlackLevel[i];
+            //         }
+            //         black = 0;
+            //     } else {
+            //         black = mkn.panasonic.BlackLevel[0];
+            //     }
+            // } else
+            if (!strcmp(make, "Canon") && isBayer()) {
                 if (mkn.canon.AverageBlackLevel) {
                     memset(cblack, 0, sizeof(cblack));
                     for (size_t i = 0; i < 4; ++i) {
