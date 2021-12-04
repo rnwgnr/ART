@@ -191,10 +191,10 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         // flip y:
         cr->translate(0, height);
         cr->scale(1., -1.);
-        auto ws = rtengine::ICCStore::getInstance()->workingSpaceMatrix("sRGB");
+        //auto ws = rtengine::ICCStore::getInstance()->workingSpaceMatrix("sRGB");
         const float h2 = height * 0.5f;
         const float w2 = width * 0.5f;
-        const float Y = 0.5f;
+        //const float Y = 0.5f;
         const float radius = std::min(w2, h2);
         const float inner_radius = radius * 0.93f;
         //const float factor = Y * scale * 1.4 / radius;
