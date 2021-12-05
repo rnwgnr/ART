@@ -189,11 +189,11 @@ void Crop::update(int todo)
         PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
         parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.exposure, params.raw);
         
-        if ((todo & M_SPOT) && params.spot.enabled && !params.spot.entries.empty()) {
-            spotsDone = true;
-            PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            parent->ipf.removeSpots(origCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, nullptr, tr);
-        }
+        // if ((todo & M_SPOT) && params.spot.enabled && !params.spot.entries.empty()) {
+        //     spotsDone = true;
+        //     PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
+        //     parent->ipf.removeSpots(origCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, nullptr, tr);
+        // }
 
         parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
     }
@@ -608,9 +608,8 @@ bool Crop::setCropSizes(int rcx, int rcy, int rcw, int rch, int skip, bool inter
         trafh = orH;
 
         if (!origCrop) {
-            origCrop = new Imagefloat;
+            origCrop = new Imagefloat();
         }
-
         origCrop->allocate(trafw, trafh);  // Resizing the buffer (optimization)
 
         // if transCrop doesn't exist yet, it'll be created where necessary
@@ -618,17 +617,20 @@ bool Crop::setCropSizes(int rcx, int rcy, int rcw, int rch, int skip, bool inter
             transCrop->allocate(cropw, croph);
         }
 
+        if (denoiseCrop) {
+            denoiseCrop->allocate(cropw, croph);
+        }
+
         for (int i = 0; i < 3; ++i) {
-            if (bufs_[i]) {
-                delete bufs_[i];
+            if (!bufs_[i]) {
+                bufs_[i] = new Imagefloat();
             }
-            bufs_[i] = new Imagefloat(cropw, croph);
+            bufs_[i]->allocate(cropw, croph);
         }
 
         if (!cropImg) {
-            cropImg = new Image8;
+            cropImg = new Image8();
         }
-
         cropImg->allocate(cropw, croph);  // Resizing the buffer (optimization)
 
         if (editType == ET_PIPETTE) {
@@ -645,6 +647,9 @@ bool Crop::setCropSizes(int rcx, int rcy, int rcw, int rch, int skip, bool inter
     origCrop->assignColorSpace(parent->params.icm.workingProfile);
     if (transCrop) {
         transCrop->assignColorSpace(parent->params.icm.workingProfile);
+    }
+    if (denoiseCrop) {
+        denoiseCrop->assignColorSpace(parent->params.icm.workingProfile);
     }
     for (int i = 0; i < 3; ++i) {
         bufs_[i]->assignColorSpace(parent->params.icm.workingProfile);
