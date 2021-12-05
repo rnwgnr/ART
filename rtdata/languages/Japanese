@@ -9,7 +9,7 @@
 #08 2021-10-07 Ohnishi, Yasuo, updated for 1.10
 #09 2021-10-11 Ohnishi, Yasuo, updated
 #10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
-#11 2021-11-25 Ohnishi, Yasuo, some fixes and updated for New Keys
+#11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -62,6 +62,7 @@ EDIT_PIPETTE_TOOLTIP;カーブ上に調整ポイントを追加するには Ctrl
 ERROR_MSG_FILE_READ;ファイル読込エラー: %1
 ERROR_MSG_MAXERRORS;... (%1 以前のエラーは表示されません)
 ERROR_MSG_METADATA_VALUE;メタデータ: エラー setting %1 to %2
+ERROR_MSG_INVALID_PSF;誤った PSFファイル: %1
 EXIFFILTER_APERTURE;絞り
 EXIFFILTER_CAMERA;カメラ
 EXIFFILTER_DATE;日時
@@ -621,6 +622,8 @@ HISTORY_MSG_SHARPENING_BLUR;シャープニング - ぼかし (Blur) の半径
 HISTORY_MSG_SHARPENING_CONTRAST;シャープニング - コントラストの閾値
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;シャープニング - RLD 角のラチチュード
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;シャープニング - RLD 角の半径を増加
+HISTORY_MSG_SHARPENING_PSF_KERNEL;シャープニング - PSFファイル
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;シャープニング - PSF反復
 HISTORY_MSG_SH_COLORSPACE;S/H - 色空間
 HISTORY_MSG_SMOOTHING_ENABLED;スムージング
 HISTORY_MSG_SMOOTHING_FALLOFF;スムージング - 効果減衰
@@ -1099,6 +1102,7 @@ PREFERENCES_PRTPROFILE;カラープロファイル
 PREFERENCES_PSPATH;Adobe Photoshop のインストール･ディレクトリ
 PREFERENCES_REMEMBERZOOMPAN;ズームレベルとパンオフセットを記憶する
 PREFERENCES_REMEMBERZOOMPAN_TOOLTIP;現在の画像のズームレベルとパンオフセットを記憶し 新しく開く画像に適用\n\nこのオプションが使えるのは 編集画面のモードが“シングル編集”で “プレビューのズームレベルが100%以下の場合に使うデモザイク”が“ARPに従う”と設定されている場合だけです.
+PREFERENCES_REMEMBER_METADATA_FILTERS;メタデータ フィルターを記憶する
 PREFERENCES_SAVE_TP_OPEN_NOW;機能パネルの今の開閉状態を保存する
 PREFERENCES_SELECTLANG;言語選択 / Language
 PREFERENCES_SERIALIZE_TIFF_READ;TIFFファイルの読み込み設定
@@ -1832,6 +1836,9 @@ TP_SHARPENING_RLD_CORNERLATITUDE;ラティテュード
 TP_SHARPENING_RLD_CORNERRADIUS;半径を増やす
 TP_SHARPENING_THRESHOLD;閾値
 TP_SHARPENING_USM;アンシャープマスク
+TP_SHARPENING_PSF;カスタム RL デコンボリューション
+TP_SHARPENING_PSF_KERNEL;点像分布関数 (PSF)
+TP_SHARPENING_PSF_ITERATIONS;反復
 TP_SMOOTHING_LABEL;スムージング
 TP_SMOOTHING_LIST_TITLE;スムージングのパラメーター
 TP_SMOOTHING_FALLOFF;効果の減衰
