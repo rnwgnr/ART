@@ -320,6 +320,7 @@ private:
     ThresholdAdjuster *deltaEH;
     Adjuster *deltaERange;
     Adjuster *deltaEDecay;
+    Adjuster *deltaEStrength;
     Gtk::CheckButton *deltaEInverted;
     Gtk::Button *deltaEPick;
 

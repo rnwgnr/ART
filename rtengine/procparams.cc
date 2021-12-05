@@ -900,6 +900,7 @@ DeltaEMask::DeltaEMask():
     H(0.0),
     range(1.0),
     decay(1),
+    strength(100),
     weight_L(50),
     weight_C(75),
     weight_H(100)
@@ -915,6 +916,7 @@ bool DeltaEMask::operator==(const DeltaEMask &other) const
         && H == other.H
         && range == other.range
         && decay == other.decay
+        && strength == other.strength
         && weight_L == other.weight_L
         && weight_C == other.weight_C
         && weight_H == other.weight_H;
@@ -1318,6 +1320,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskH" + suffix, deltaEMask.H);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskRange" + suffix, deltaEMask.range);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskDecay" + suffix, deltaEMask.decay);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskStrength" + suffix, deltaEMask.strength);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightL" + suffix, deltaEMask.weight_L);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightC" + suffix, deltaEMask.weight_C);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightH" + suffix, deltaEMask.weight_H);
@@ -1442,6 +1445,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "DeltaEMaskH" + suffix, deltaEMask.H, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskRange" + suffix, deltaEMask.range, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskDecay" + suffix, deltaEMask.decay, keyfile);
+    putToKeyfile(group_name, prefix + "DeltaEMaskStrength" + suffix, deltaEMask.strength, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightL" + suffix, deltaEMask.weight_L, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightC" + suffix, deltaEMask.weight_C, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightH" + suffix, deltaEMask.weight_H, keyfile);
