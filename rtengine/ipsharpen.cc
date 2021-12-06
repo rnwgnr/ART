@@ -30,7 +30,6 @@
 #include "coord.h"
 #include "cache.h"
 #include "stdimagesource.h"
-#include "rescale.h"
 #include "cJSON.h"
 #include "../rtgui/multilangmgr.h"
 #include <sstream>
@@ -438,20 +437,59 @@ bool import_kernel(cJSON *obj, array2D<float> &out)
 
 void rescale_kernel(const array2D<float> &src, array2D<float> &k)
 {
-    rescaleBilinear(src, k, false);
-
     const int sw = src.width();
     const int w = k.width();
 
-    k[w/2][w/2] = src[sw/2][sw/2];
-    
+    const int sh = sw/2;
+    const int h = w/2;
+
+    const auto get =
+        [&](float y, float x) -> float
+        {
+            bool nx = x < 0;
+            bool ny = y < 0;
+            x = std::abs(x);
+            y = std::abs(y);
+
+            int xi = x;
+            int yi = y;
+            float xf = x - xi;
+            float yf = y - yi;
+            int xi1 = std::min(xi + 1, sh);
+            int yi1 = std::min(yi + 1, sh);
+
+            if (nx) {
+                xi1 = -xi1;
+                xi = -xi;
+            }
+            if (ny) {
+                yi1 = -yi1;
+                yi = -yi;
+            }
+
+            float bl = src[yi+sh][xi+sh];
+            float br = src[yi+sh][xi1+sh];
+            float tl = src[yi1+sh][xi+sh];
+            float tr = src[yi1+sh][xi1+sh];
+
+            // interpolate
+            float b = xf * br + (1.f - xf) * bl;
+            float t = xf * tr + (1.f - xf) * tl;
+            float pxf = yf * t + (1.f - yf) * b;
+            return pxf;
+        };
+
+    float s = float(sw)/float(w);
+
     double sum = 0;
-    for (int y = 0; y < w; ++y) {
-        for (int x = 0; x < w; ++x) {
-            float v = k[y][x];
+    for (int y = -h; y <= h; ++y) {
+        for (int x = -h; x <= h; ++x) {
+            float v = get(y * s, x * s);
+            k[y+h][x+h] = v;
             sum += v;
         }
     }
+    
     if (sum >= 1e-5f) {
         for (int y = 0; y < w; ++y) {
             for (int x = 0; x < w; ++x) {
