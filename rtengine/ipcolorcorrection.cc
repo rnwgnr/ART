@@ -245,9 +245,10 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         if (r.mode == ColorCorrectionParams::Mode::HSL) {
             float R, G, B;
             float u, v;
+            float satcoeff[] = { 3.f, 2.5f, 2.2f };
             for (int c = 0; c < 3; ++c) {
                 float hue = (float(r.hue[c]) / 180.f) * RT_PI_F;
-                float sat = pow_F(float(r.sat[c]) / 100.f, 3.f);
+                float sat = std::pow(float(r.sat[c]) / 100.f, satcoeff[c]);
                 float f = (r.factor[c] / 100.f) + 1.f;
                 //Color::hsl2yuv(hue, sat, u, v);
                 hs2uv(hue / (2 * RT_PI_F), sat, u, v);

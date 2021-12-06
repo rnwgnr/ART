@@ -5135,8 +5135,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 };
 
             const auto translate_hs =
-                [&](double &h, double &s) -> void
+                [&](double &h, double &s, int c) -> void
                 {
+                    constexpr float p1[] = { 3.f, 3.f, 3.f };
+                    constexpr float p2[] = { 1.f/3.f, 2.5f/3.f, 2.2f/3.f };
+                    s = std::pow(s / 100.f, p1[c]);
                     float u, v;
                     Color::hsl2yuv(h / 180.f * RT_PI_F, s, u, v);
                     double a = v;
@@ -5145,7 +5148,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     float fh, fs;
                     Color::yuv2hsl(b, a, fh, fs);
                     h = fh;
-                    s = fs;
+                    s = std::pow(fs, p2[c]) * 100.f;
                 };
 
             for (int i = 1; !done; ++i) {
@@ -5240,7 +5243,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             get(w + "S_", cur.sat[c]);
                             get(w + "L_", cur.factor[c]);
                             if (ppVersion < 1028) {
-                                translate_hs(cur.hue[c], cur.sat[c]);
+                                translate_hs(cur.hue[c], cur.sat[c], c);
                             }
                         }
                     }
