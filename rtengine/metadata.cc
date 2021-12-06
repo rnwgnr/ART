@@ -711,6 +711,10 @@ void Exiv2Metadata::embedProcParamsData(const Glib::ustring &fname, const std::s
 
 std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernotes(const Glib::ustring &fname)
 {
+    if (fname.empty()) {
+        return {};
+    }
+    
     JSONCacheVal val;
     Glib::RefPtr<Gio::FileInfo> finfo;
     try {
