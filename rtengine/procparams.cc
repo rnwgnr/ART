@@ -5138,7 +5138,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 [&](double &h, double &s, int c) -> void
                 {
                     constexpr float p1[] = { 3.f, 3.f, 3.f };
-                    constexpr float p2[] = { 1.f/3.f, 2.5f/3.f, 2.2f/3.f };
+                    constexpr float p2[] = { 2.5f/3.f, 2.5f/3.f, 2.5f/3.f };
                     s = std::pow(s / 100.f, p1[c]);
                     float u, v;
                     Color::hsl2yuv(h / 180.f * RT_PI_F, s, u, v);
