@@ -285,7 +285,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 int j = rgbmode[i] ? c : 0;
                 rslope[i][c] = r.slope[j];
                 roffset[i][c] = r.offset[j];
-                rpower[i][c] = r.power[j];
+                rpower[i][c] = 1.0 / r.power[j];
                 rpivot[i][c] = r.pivot[j];
                 if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f) {
                     enabled[i] = true;

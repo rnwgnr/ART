@@ -5223,6 +5223,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         get("Offset_", cur.offset[0]);
                         cur.offset[1] = cur.offset[2] = cur.offset[0];
                         get("Power_", cur.power[0]);
+                        if (ppVersion < 1029) {
+                            cur.power[0] = 1.0 / cur.power[0];
+                        }
                         cur.power[1] = cur.power[2] = cur.power[0];
                         get("Pivot_", cur.pivot[0]);
                         cur.pivot[1] = cur.pivot[2] = cur.pivot[0];
@@ -5232,6 +5235,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             get(Glib::ustring("Slope") + chan[c] + "_", cur.slope[c]);
                             get(Glib::ustring("Offset") + chan[c] + "_", cur.offset[c]);
                             get(Glib::ustring("Power") + chan[c] + "_", cur.power[c]);
+                            if (ppVersion < 1029) {
+                                cur.power[c] = 1.0 / cur.power[c];
+                            }
                             get(Glib::ustring("Pivot") + chan[c] + "_", cur.pivot[c]);
                         }
                     }
