@@ -214,10 +214,27 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
                     R /= 65535.f;
                     G /= 65535.f;
                     B /= 65535.f;
-                    
-                    float alpha = d <= inner_radius ? (0.1f + 0.15f * d / inner_radius) : 1.f;
+
+                    float d1 = radius - d;
+                    float w = 1.f;
+                    float alpha = 1.f;
+                    float d2 = d - inner_radius;
+                    if (d1 < 1.f) {
+                        w = d1;
+                        cr->set_antialias(Cairo::ANTIALIAS_DEFAULT);
+                    } else {
+                        cr->set_antialias(Cairo::ANTIALIAS_NONE);
+                    }
+                    if (d2 <= 0) {
+                        alpha = 0.1f + 0.15f * d / inner_radius;
+                    } else if (d2 < 1.f) {
+                        w += d2;
+                        cr->set_antialias(Cairo::ANTIALIAS_DEFAULT);
+                    }
+                    float xoff = ii > 0 ? -w : 0.f;
+                    float yoff = jj > 0 ? -w : 0.f;
                     cr->set_source_rgba(R, G, B, alpha);
-                    cr->rectangle(i, j, 1, 1);
+                    cr->rectangle(i+xoff, j+yoff, w, w);
                     cr->fill();
                 }
             }
