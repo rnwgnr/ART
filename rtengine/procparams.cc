@@ -5117,11 +5117,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             bool done = false;
 
             auto ws = ICCStore::getInstance()->workingSpaceMatrix(icm.workingProfile);
-            const auto translate_ab =
-                [&](double &a, double &b) -> void
+            const auto translate_uv =
+                [&](float &u, float &v) -> void
                 {
-                    float u = SGN(b) * log2lin(std::abs(b), 4.0);
-                    float v = SGN(a) * log2lin(std::abs(a), 4.0);
                     float os = std::sqrt(SQR(u) + SQR(v));
                     float R, G, B;
                     const float Y = 0.5f;
@@ -5130,6 +5128,14 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     Color::rgb2hsl(R * 65535.f, G * 65535.f, B * 65535.f, h, s, l);
                     h = h * 2.f * RT_PI_F;
                     Color::hsl2yuv(h, os, u, v);
+                };
+            
+            const auto translate_ab =
+                [&](double &a, double &b) -> void
+                {
+                    float u = SGN(b) * log2lin(std::abs(b), 4.0);
+                    float v = SGN(a) * log2lin(std::abs(a), 4.0);
+                    translate_uv(u, v);
                     b = SGN(u) * lin2log(std::abs(u), 4.f);
                     a = SGN(v) * lin2log(std::abs(v), 4.f);
                 };
@@ -5138,17 +5144,15 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 [&](double &h, double &s, int c) -> void
                 {
                     constexpr float p1[] = { 3.f, 3.f, 3.f };
-                    constexpr float p2[] = { 2.5f/3.f, 2.5f/3.f, 2.5f/3.f };
-                    s = std::pow(s / 100.f, p1[c]);
+                    constexpr float p2[] = { 1.f/2.5f, 1.f/2.5f, 1.f/2.5f };
+                    s = std::pow(s / 100.0, p1[c]);
                     float u, v;
                     Color::hsl2yuv(h / 180.f * RT_PI_F, s, u, v);
-                    double a = v;
-                    double b = u;
-                    translate_ab(a, b);
+                    translate_uv(u, v);
                     float fh, fs;
-                    Color::yuv2hsl(b, a, fh, fs);
-                    h = fh;
-                    s = std::pow(fs, p2[c]) * 100.f;
+                    Color::yuv2hsl(u, v, fh, fs);
+                    h = fh * 180.0 / RT_PI;
+                    s = std::pow(fs, p2[c]) * 100.0;
                 };
 
             for (int i = 1; !done; ++i) {
