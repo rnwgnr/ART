@@ -194,12 +194,12 @@ uint8_t getSupportedIntents(cmsHPROFILE profile, cmsUInt32Number direction)
 
 cmsHPROFILE createXYZProfile()
 {
-    double mat[3][3] = { {1.0, 0, 0}, {0, 1.0, 0}, {0, 0, 1.0} };
+    float mat[3][3] = { {1.0, 0, 0}, {0, 1.0, 0}, {0, 0, 1.0} };
     return ICCStore::createFromMatrix(mat, false, "XYZ");
 }
 
-const double(*wprofiles[])[3]  = {xyz_sRGB, xyz_adobe, xyz_prophoto, xyz_widegamut, xyz_bruce, xyz_beta, xyz_best, xyz_rec2020, xyz_ACESp0, xyz_ACESp1};//
-const double(*iwprofiles[])[3] = {sRGB_xyz, adobe_xyz, prophoto_xyz, widegamut_xyz, bruce_xyz, beta_xyz, best_xyz, rec2020_xyz, ACESp0_xyz, ACESp1_xyz};//
+const float(*wprofiles[])[3]  = {xyz_sRGB, xyz_adobe, xyz_prophoto, xyz_widegamut, xyz_bruce, xyz_beta, xyz_best, xyz_rec2020, xyz_ACESp0, xyz_ACESp1};//
+const float(*iwprofiles[])[3] = {sRGB_xyz, adobe_xyz, prophoto_xyz, widegamut_xyz, bruce_xyz, beta_xyz, best_xyz, rec2020_xyz, ACESp0_xyz, ACESp1_xyz};//
 const char* wpnames[] = {"sRGB", "Adobe RGB", "ProPhoto", "WideGamut", "BruceRGB", "Beta RGB", "BestRGB", "Rec2020", "ACESp0", "ACESp1"};//
 //default = gamma inside profile
 //BT709 g=2.22 s=4.5  sRGB g=2.4 s=12.92310
@@ -791,10 +791,10 @@ private:
         return nullptr;
     }        
     
-    using CVector = std::array<double, 3>;
+    using CVector = std::array<float, 3>;
     using CMatrix = std::array<CVector, 3>;
     struct PMatrix {
-        double matrix[3][3];
+        float matrix[3][3];
         PMatrix(): matrix{} {}
         explicit PMatrix(const CMatrix &m)
         {
@@ -859,9 +859,9 @@ private:
         }
 
         CMatrix m = {
-            CVector({ red->X, green->X, blue->X }),
-            CVector({ red->Y, green->Y, blue->Y }),
-            CVector({ red->Z, green->Z, blue->Z })
+            CVector({ float(red->X), float(green->X), float(blue->X) }),
+            CVector({ float(red->Y), float(green->Y), float(blue->Y) }),
+            CVector({ float(red->Z), float(green->Z), float(blue->Z) })
         };
         m[1][0] = red->Y;
         m[1][1] = green->Y;
@@ -1303,7 +1303,7 @@ cmsHPROFILE ICCStore::makeStdGammaProfile(cmsHPROFILE iprof)
     return oprof;
 }
 
-cmsHPROFILE ICCStore::createFromMatrix(const double matrix[3][3], bool gamma, const Glib::ustring& name)
+cmsHPROFILE ICCStore::createFromMatrix(const float matrix[3][3], bool gamma, const Glib::ustring& name)
 {
 
     static const unsigned phead[] = {
@@ -1396,6 +1396,14 @@ cmsHPROFILE ICCStore::createFromMatrix(const double matrix[3][3], bool gamma, co
     cmsHPROFILE p = cmsOpenProfileFromMem(oprof, ntohl(oprof[0]));
     delete [] oprof;
     return p;
+}
+
+
+cmsHPROFILE ICCStore::createFromMatrix(const double matrix[3][3], bool gamma, const Glib::ustring& name)
+{
+    float fmatrix[3][3];
+    to_float_matrix(matrix, fmatrix);
+    return createFromMatrix(fmatrix, gamma, name);
 }
 
 } // namespace rtengine

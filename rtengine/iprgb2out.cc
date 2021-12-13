@@ -44,7 +44,7 @@ inline void copyAndClampLine(const float *src, unsigned char *dst, const int W)
 }
 
 
-inline void copyAndClamp(Imagefloat *src, unsigned char *dst, const double rgb_xyz[3][3], bool multiThread)
+inline void copyAndClamp(Imagefloat *src, unsigned char *dst, const float rgb_xyz[3][3], bool multiThread)
 {
     src->setMode(Imagefloat::Mode::XYZ, multiThread);
     

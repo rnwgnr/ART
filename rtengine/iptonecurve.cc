@@ -203,13 +203,8 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
 
 
     if (whitept > 1.f) {
-        TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
-        float ws[3][3];
-        to_float(dws, ws);
-
-        TMatrix diws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
-        float iws[3][3];
-        to_float(diws, iws);
+        TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
+        TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)

@@ -555,7 +555,7 @@ class LuminanceToneCurve : public ToneCurve
 {
 public:
     // void Apply(float& r, float& g, float& b) const;
-    void Apply(float& r, float& g, float& b, const double ws[3][3]) const;
+    void Apply(float& r, float& g, float& b, const float ws[3][3]) const;
 };
 
 class PerceptualToneCurveState
@@ -734,7 +734,7 @@ inline void AdobeToneCurve::RGBTone (float& r, float& g, float& b) const
 }
 
 // Modifying the Luminance channel only
-inline void LuminanceToneCurve::Apply(float &ir, float &ig, float &ib, const double ws[3][3]) const
+inline void LuminanceToneCurve::Apply(float &ir, float &ig, float &ib, const float ws[3][3]) const
 {
     assert (lutToneCurve);
 
