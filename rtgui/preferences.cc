@@ -620,7 +620,16 @@ Gtk::Widget* Preferences::getColorManPanel ()
     Gtk::Frame* fprinter = Gtk::manage ( new Gtk::Frame (M ("PREFERENCES_PRINTER")) );
     Gtk::Grid* gprinter = Gtk::manage ( new Gtk::Grid () );
     gprinter->set_column_spacing (4);
-    prtProfile = Gtk::manage (new Gtk::ComboBoxText ());
+    prtProfile = Gtk::manage(new MyFileChooserButton(M("PREFERENCES_PRTPROFILE"), Gtk::FILE_CHOOSER_ACTION_OPEN));
+    {
+        auto filter_icc = Gtk::FileFilter::create();
+        filter_icc->set_name(M("FILECHOOSER_FILTER_COLPROF"));
+        filter_icc->add_pattern("*.icc");
+        filter_icc->add_pattern("*.icm");
+        filter_icc->add_pattern("*.ICC");
+        filter_icc->add_pattern("*.ICM");
+        prtProfile->set_filter(filter_icc);
+    }
     setExpandAlignProperties (prtProfile, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
     Gtk::Label* pplabel = Gtk::manage (new Gtk::Label (M ("PREFERENCES_PRTPROFILE") + ":"));
     setExpandAlignProperties (pplabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
@@ -630,14 +639,14 @@ Gtk::Widget* Preferences::getColorManPanel ()
     Gtk::Label* pilabel = Gtk::manage (new Gtk::Label (M ("PREFERENCES_PRTINTENT") + ":"));
     setExpandAlignProperties (pilabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
-    prtProfile->append (M ("PREFERENCES_PROFILE_NONE"));
-    prtProfile->set_active (0);
+    // prtProfile->append (M ("PREFERENCES_PROFILE_NONE"));
+    // prtProfile->set_active (0);
 
-    const std::vector<Glib::ustring> prtprofiles = rtengine::ICCStore::getInstance ()->getProfiles (rtengine::ICCStore::ProfileType::PRINTER);
+    // const std::vector<Glib::ustring> prtprofiles = rtengine::ICCStore::getInstance ()->getProfiles (rtengine::ICCStore::ProfileType::PRINTER);
 
-    for (const auto &prtprofile : prtprofiles) {
-        prtProfile->append (prtprofile);
-    }
+    // for (const auto &prtprofile : prtprofiles) {
+    //     prtProfile->append (prtprofile);
+    // }
 
     // same order as the enum
     prtIntent->append (M ("PREFERENCES_INTENT_PERCEPTUAL"));
@@ -1564,11 +1573,18 @@ void Preferences::storePreferences ()
     moptions.CPBPath = txtCustProfBuilderPath->get_text();
     moptions.CPBKeys = CPBKeyType (custProfBuilderLabelType->get_active_row_number());
 
-    if (!prtProfile->get_active_row_number()) {
-        moptions.rtSettings.printerProfile = "";
-    } else {
-        moptions.rtSettings.printerProfile = prtProfile->get_active_text ();
+    {
+        auto &pp = moptions.rtSettings.printerProfile;
+        pp = prtProfile->get_filename();
+        if (!pp.empty()) {
+            pp = "file:" + pp;
+        }
     }
+    // if (!prtProfile->get_active_row_number()) {
+    //     moptions.rtSettings.printerProfile = "";
+    // } else {
+    //     moptions.rtSettings.printerProfile = prtProfile->get_active_text ();
+    // }
 
     switch (prtIntent->get_active_row_number ()) {
         default:
@@ -1734,7 +1750,16 @@ void Preferences::fillPreferences ()
     denoiseZoomedOut->set_active(moptions.denoiseZoomedOut);
     wbpreview->set_active(int(moptions.wb_preview_mode));
 
-    setActiveTextOrIndex (*prtProfile, moptions.rtSettings.printerProfile, 0);
+    //setActiveTextOrIndex (*prtProfile, moptions.rtSettings.printerProfile, 0);
+    {
+        auto pp = moptions.rtSettings.printerProfile;
+        if (pp.find("file:") == 0) {
+            pp = pp.substr(5);
+            if (Glib::file_test(pp, Glib::FILE_TEST_EXISTS)) {
+                prtProfile->set_filename(pp);
+            }
+        }
+    }
 
     switch (moptions.rtSettings.printerIntent) {
         default:

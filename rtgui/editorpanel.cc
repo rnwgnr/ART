@@ -137,6 +137,7 @@ private:
     Glib::ustring defprof;
 
     std::shared_ptr<rtengine::StagedImageProcessor> &processor;
+    EditorPanel *parent;
 
 private:
 #if !defined(__APPLE__) // monitor profile not supported on apple
@@ -232,6 +233,50 @@ private:
         updateSoftProofParameters ();
     }
 
+    bool softProofPressed(GdkEventButton *event)
+    {
+        bool active = softProof.get_active();
+        bool show_dialog = (event->state & GDK_CONTROL_MASK);
+        if (active && !show_dialog) {
+            return false;
+        } else {
+            if (show_dialog) {
+                Gtk::FileChooserDialog dialog(getToplevelWindow(parent), M("PREFERENCES_PRTPROFILE"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+                bindCurrentFolder(dialog, options.rtSettings.monitorIccDirectory);
+                auto filter_icc = Gtk::FileFilter::create();
+                filter_icc->set_name(M("FILECHOOSER_FILTER_COLPROF"));
+                filter_icc->add_pattern("*.icc");
+                filter_icc->add_pattern("*.icm");
+                filter_icc->add_pattern("*.ICC");
+                filter_icc->add_pattern("*.ICM");
+                dialog.add_filter(filter_icc);
+                dialog.add_button(M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
+                dialog.add_button(M("GENERAL_OPEN"), Gtk::RESPONSE_OK);
+                if (dialog.run() == Gtk::RESPONSE_OK) {
+                    auto fname = dialog.get_filename();
+                    options.rtSettings.printerProfile = "file:" + fname;
+                } else {
+                    return true;
+                }
+            }
+            auto iccs = rtengine::ICCStore::getInstance();
+            auto prof = iccs->getProfile(options.rtSettings.printerProfile);
+            if (!prof) {
+                auto name = options.rtSettings.printerProfile;
+                if (name.empty()) {
+                    name = "(" + M("PREFERENCES_PROFILE_NONE") + ")";
+                } else if (name.find("file:") == 0) {
+                    name = name.substr(5);
+                }
+                parent->error(Glib::ustring::compose(M("ERROR_MSG_INVALID_PROFILE"), name));
+                return true;
+            } else {
+                softProof.set_active(true);
+                return true;
+            }
+        }
+    }
+
     void spGamutCheckToggled ()
     {
         if (spGamutCheck.get_active() && spGamutCheckMonitor.get_active()) {
@@ -287,7 +332,7 @@ private:
 
             intentBox.set_sensitive (false);
             intentBox.setSelected (1);
-            softProof.set_sensitive (false);
+            //softProof.set_sensitive (false);
             //spGamutCheck.set_sensitive (false);
             spGamutCheckMonitor.set_sensitive (false);
 
@@ -304,7 +349,7 @@ private:
                 intentBox.setItemSensitivity (0, supportsPerceptual);
                 intentBox.setItemSensitivity (1, supportsRelativeColorimetric);
                 intentBox.setItemSensitivity (2, supportsAbsoluteColorimetric);
-                softProof.set_sensitive (true);
+                //softProof.set_sensitive (true);
                 //spGamutCheck.set_sensitive (true);
             } else {
                 intentBox.setItemSensitivity (0, true);
@@ -320,7 +365,7 @@ private:
             profileBox.set_tooltip_text (profileBox.get_active_text ());
 
         }
-        softProof.set_sensitive(softProof.get_sensitive() && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
+        //softProof.set_sensitive(softProof.get_sensitive() && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
 
 #endif
         rtengine::RenderingIntent intent;
@@ -365,7 +410,7 @@ private:
     void updateSoftProofParameters (bool noEvent = false)
     {
 #if !defined(__APPLE__) // monitor profile not supported on apple
-        softProof.set_sensitive (profileBox.get_active_row_number () > 0 && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
+        //softProof.set_sensitive (profileBox.get_active_row_number () > 0 && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
         spGamutCheck.set_sensitive(profileBox.get_active_row_number () > 0);
 #endif
 
@@ -400,9 +445,10 @@ private:
     }
 
 public:
-    explicit ColorManagementToolbar(std::shared_ptr<rtengine::StagedImageProcessor> &ipc) :
-        intentBox (Glib::ustring (), true),
-        processor (ipc)
+    explicit ColorManagementToolbar(EditorPanel *p, std::shared_ptr<rtengine::StagedImageProcessor> &ipc):
+        intentBox(Glib::ustring (), true),
+        processor(ipc),
+        parent(p)
     {
 #if !defined(__APPLE__) // monitor profile not supported on apple
         prepareProfileBox ();
@@ -412,7 +458,10 @@ public:
 
         reset ();
 
-        softproofConn = softProof.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::softProofToggled));
+        //softproofConn =
+        softProof.signal_toggled().connect(sigc::mem_fun (this, &ColorManagementToolbar::softProofToggled));
+        softproofConn = softProof.signal_button_release_event().connect(sigc::mem_fun(*this, &ColorManagementToolbar::softProofPressed), false);
+
         spGamutCheck.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckToggled));
         spGamutCheckMonitor.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckMonitorToggled));
 #if !defined(__APPLE__) // monitor profile not supported on apple
@@ -493,9 +542,8 @@ public:
 #endif
         }
 
-        softProof.set_sensitive(rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
+        //softProof.set_sensitive(rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
     }
-
 };
 
 EditorPanel::EditorPanel (FilePanel* filePanel)
@@ -778,7 +826,7 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
 
 
     // Color management toolbar
-    colorMgmtToolBar.reset(new ColorManagementToolbar(ipc));
+    colorMgmtToolBar.reset(new ColorManagementToolbar(this, ipc));
     colorMgmtToolBar->pack_right_in (iops);
 
     if (!simpleEditor && !options.tabbedUI) {
