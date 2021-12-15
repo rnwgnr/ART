@@ -69,7 +69,7 @@ void NLMeans(array2D<float> &img, float normcoeff, int strength, int detail_thre
 
     // the strength parameter controls the scaling of the weights
     // (called h^2 in the papers)
-    const float h2 = SQR(std::pow(float(strength) / 100.f, 0.9f) / 30.f / scale);
+    const float h2 = SQR(std::pow(float(strength) / 100.f, 0.9f) / 10.f/*30.f*/ / scale);
 
     // this is the main difference between our version and more conventional
     // nl-means implementations: instead of varying the patch size, we control
@@ -86,7 +86,7 @@ void NLMeans(array2D<float> &img, float normcoeff, int strength, int detail_thre
     array2D<float> mask(W, H, ARRAY2D_ALIGNED);
     {
         array2D<float> &LL = img;
-        detail_mask(LL, mask, normcoeff, 1e-3f, 1.f, amount, BlurType::GAUSS, 2.f / scale, multithread);
+        detail_mask(LL, mask, normcoeff, 1e-3f * normcoeff, normcoeff, amount, BlurType::GAUSS, 2.f / scale, multithread);
     }
 
     auto &dst = img;
