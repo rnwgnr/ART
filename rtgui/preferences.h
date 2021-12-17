@@ -90,7 +90,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
 
     MyFileChooserButton* iccDir;
     MyFileChooserButton* monitorIccDir;
-    Gtk::ComboBoxText* prtProfile;
+    MyFileChooserButton *prtProfile;
     Gtk::ComboBoxText* prtIntent;
     Gtk::CheckButton* prtBPC;
     Gtk::ComboBoxText* monProfile;

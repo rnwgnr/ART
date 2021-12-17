@@ -1,10 +1,14 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1027
+#define PPVERSION 1029
 
 /*
   Log of version changes
+  1029  2021-12-07
+        color correction power inversion
+  1028  2021-12-04
+        color correction wheel rescaling
   1027  2021-11-09
         white balance multipliers stored in camera space
   1026  2021-07-06

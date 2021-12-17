@@ -8,8 +8,7 @@
 #include <cstdint>
 #include <array>
 
-namespace rtengine
-{
+namespace rtengine {
 
 constexpr int MAXVAL = 0xffff;
 constexpr float MAXVALF = static_cast<float>(MAXVAL);  // float version of MAXVAL
@@ -146,9 +145,24 @@ constexpr std::uint8_t uint16ToUint8Rounded(std::uint16_t i)
     return ((i + 128) - ((i + 128) >> 8)) >> 8;
 }
 
+template <typename T> using Vec3 = std::array<T, 3>;
+template <typename T> using Mat33 = std::array<std::array<T, 3>, 3>;
 
 template <typename T>
-bool invertMatrix(const std::array<std::array<T, 3>, 3> &in, std::array<std::array<T, 3>, 3> &out)
+Vec3<T> vec3(const T *v)
+{
+    return Vec3<T>{v[0], v[1], v[2]};
+}
+
+template <typename T>
+Mat33<T> mat33(const T **m)
+{
+    return Mat33<T>{ vec3(m[0]), vec3(m[1]), vec3(m[2]) };
+}
+    
+
+template <typename T>
+bool invertMatrix(const Mat33<T> &in, Mat33<T> &out)
 {
     const T res00 = in[1][1] * in[2][2] - in[2][1] * in[1][2];
     const T res10 = in[2][0] * in[1][2] - in[1][0] * in[2][2];
@@ -175,9 +189,9 @@ bool invertMatrix(const std::array<std::array<T, 3>, 3> &in, std::array<std::arr
 
 
 template <typename T>
-std::array<std::array<T, 3>, 3> dotProduct(const std::array<std::array<T, 3>, 3> &a, const std::array<std::array<T, 3>, 3> &b)
+Mat33<T> dotProduct(const Mat33<T> &a, const Mat33<T> &b)
 {
-    std::array<std::array<T, 3>, 3> res;
+    Mat33<T> res;
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -194,9 +208,9 @@ std::array<std::array<T, 3>, 3> dotProduct(const std::array<std::array<T, 3>, 3>
 
 
 template <typename T>
-std::array<T, 3> dotProduct(const std::array<std::array<T, 3>, 3> &a, const std::array<T, 3> &b)
+Vec3<T> dotProduct(const Mat33<T> &a, const Vec3<T> &b)
 {
-    std::array<T, 3> res;
+    Vec3<T> res;
 
     for (int i = 0; i < 3; ++i) {
         res[i] = 0;
@@ -224,4 +238,5 @@ T log2lin(T x, T base)
     return (std::pow(base, x) - one) / (base - one);
 }
 
-}
+} // namespace rtengine
+

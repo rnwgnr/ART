@@ -1115,11 +1115,16 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), 1, 100, 1, 1, nullptr, nullptr, nullptr, nullptr, false, false));//true));
     deltaEDecay->setLogScale(10.f, 10.f, true);
     deltaEDecay->setAdjusterListener(this);
+    deltaEStrength = Gtk::manage(new Adjuster(M("TP_SOFTLIGHT_STRENGTH"), 0, 100, 1, 100));
+    deltaEStrength->setAdjusterListener(this);
     deltaEInverted = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_INVERTED")));
     vb = Gtk::manage(new Gtk::VBox());
     vb->pack_start(*deltaERange);
     vb->pack_start(*deltaEDecay);
-    vb->pack_start(*deltaEInverted);
+    hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*deltaEInverted);
+    hb->pack_start(*deltaEStrength);
+    vb->pack_start(*hb);
     hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*vb);
     vb = Gtk::manage(new Gtk::VBox());
@@ -1546,6 +1551,7 @@ void LabMasksPanel::maskGet(int idx)
     r.deltaEMask.range = deltaERange->getValue();
     int sgn = deltaEInverted->get_active() ? -1 : 1;
     r.deltaEMask.decay = sgn * deltaEDecay->getValue();
+    r.deltaEMask.strength = deltaEStrength->getValue();
     r.name = maskName->get_text();
     r.curve = maskCurve->getCurve();
     r.posterization = maskPosterization->getValue();
@@ -1821,6 +1827,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaEH->setValue(r.deltaEMask.weight_H, r.deltaEMask.H);
         deltaERange->setValue(r.deltaEMask.range);
         deltaEDecay->setValue(std::abs(r.deltaEMask.decay));
+        deltaEStrength->setValue(std::abs(r.deltaEMask.strength));
         deltaEInverted->set_active(r.deltaEMask.decay < 0);
         static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
     }
@@ -2157,7 +2164,7 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
         if (l) {
             l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
         }
-    } else if (a == deltaERange || a == deltaEDecay) {
+    } else if (a == deltaERange || a == deltaEDecay || a == deltaEStrength) {
         if (l) {
             l->panelChanged(deltaEMaskEvent(), M("GENERAL_CHANGED"));
         }

@@ -35,6 +35,7 @@
 #include "metadata.h"
 #include "halffloat.h"
 #include "base64.h"
+#include "iccstore.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -899,6 +900,7 @@ DeltaEMask::DeltaEMask():
     H(0.0),
     range(1.0),
     decay(1),
+    strength(100),
     weight_L(50),
     weight_C(75),
     weight_H(100)
@@ -914,6 +916,7 @@ bool DeltaEMask::operator==(const DeltaEMask &other) const
         && H == other.H
         && range == other.range
         && decay == other.decay
+        && strength == other.strength
         && weight_L == other.weight_L
         && weight_C == other.weight_C
         && weight_H == other.weight_H;
@@ -1317,6 +1320,7 @@ bool Mask::load(int ppVersion, const KeyFile &keyfile, const Glib::ustring &grou
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskH" + suffix, deltaEMask.H);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskRange" + suffix, deltaEMask.range);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskDecay" + suffix, deltaEMask.decay);
+    ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskStrength" + suffix, deltaEMask.strength);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightL" + suffix, deltaEMask.weight_L);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightC" + suffix, deltaEMask.weight_C);
     ret |= assignFromKeyfile(keyfile, group_name, prefix + "DeltaEMaskWeightH" + suffix, deltaEMask.weight_H);
@@ -1441,6 +1445,7 @@ void Mask::save(KeyFile &keyfile, const Glib::ustring &group_name, const Glib::u
     putToKeyfile(group_name, prefix + "DeltaEMaskH" + suffix, deltaEMask.H, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskRange" + suffix, deltaEMask.range, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskDecay" + suffix, deltaEMask.decay, keyfile);
+    putToKeyfile(group_name, prefix + "DeltaEMaskStrength" + suffix, deltaEMask.strength, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightL" + suffix, deltaEMask.weight_L, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightC" + suffix, deltaEMask.weight_C, keyfile);
     putToKeyfile(group_name, prefix + "DeltaEMaskWeightH" + suffix, deltaEMask.weight_H, keyfile);
@@ -5111,6 +5116,45 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             bool found = false;
             bool done = false;
 
+            auto ws = ICCStore::getInstance()->workingSpaceMatrix(icm.workingProfile);
+            const auto translate_uv =
+                [&](float &u, float &v) -> void
+                {
+                    float os = std::sqrt(SQR(u) + SQR(v));
+                    float R, G, B;
+                    const float Y = 0.5f;
+                    Color::yuv2rgb(Y, u, v, R, G, B, ws);
+                    float h, s, l;
+                    Color::rgb2hsl(R * 65535.f, G * 65535.f, B * 65535.f, h, s, l);
+                    h = h * 2.f * RT_PI_F;
+                    Color::hsl2yuv(h, os, u, v);
+                };
+            
+            const auto translate_ab =
+                [&](double &a, double &b) -> void
+                {
+                    float u = SGN(b) * log2lin(std::abs(b), 4.0);
+                    float v = SGN(a) * log2lin(std::abs(a), 4.0);
+                    translate_uv(u, v);
+                    b = SGN(u) * lin2log(std::abs(u), 4.f);
+                    a = SGN(v) * lin2log(std::abs(v), 4.f);
+                };
+
+            const auto translate_hs =
+                [&](double &h, double &s, int c) -> void
+                {
+                    constexpr float p1[] = { 3.f, 3.f, 3.f };
+                    constexpr float p2[] = { 1.f/2.5f, 1.f/2.5f, 1.f/2.5f };
+                    s = std::pow(s / 100.0, p1[c]);
+                    float u, v;
+                    Color::hsl2yuv(h / 180.f * RT_PI_F, s, u, v);
+                    translate_uv(u, v);
+                    float fh, fs;
+                    Color::yuv2hsl(u, v, fh, fs);
+                    h = fh * 180.0 / RT_PI;
+                    s = std::pow(fs, p2[c]) * 100.0;
+                };
+
             for (int i = 1; !done; ++i) {
                 ColorCorrectionParams::Region cur;
                 Mask curmask;
@@ -5132,6 +5176,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 
                 get("A_", cur.a);
                 get("B_", cur.b);
+                if (ppVersion < 1028) {
+                    translate_ab(cur.a, cur.b);
+                }
                 get("ABScale_", cur.abscale);
                 if (ppVersion < 1005) {
                     int c = -1;
@@ -5180,6 +5227,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         get("Offset_", cur.offset[0]);
                         cur.offset[1] = cur.offset[2] = cur.offset[0];
                         get("Power_", cur.power[0]);
+                        if (ppVersion < 1029) {
+                            cur.power[0] = 1.0 / cur.power[0];
+                        }
                         cur.power[1] = cur.power[2] = cur.power[0];
                         get("Pivot_", cur.pivot[0]);
                         cur.pivot[1] = cur.pivot[2] = cur.pivot[0];
@@ -5189,6 +5239,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             get(Glib::ustring("Slope") + chan[c] + "_", cur.slope[c]);
                             get(Glib::ustring("Offset") + chan[c] + "_", cur.offset[c]);
                             get(Glib::ustring("Power") + chan[c] + "_", cur.power[c]);
+                            if (ppVersion < 1029) {
+                                cur.power[c] = 1.0 / cur.power[c];
+                            }
                             get(Glib::ustring("Pivot") + chan[c] + "_", cur.pivot[c]);
                         }
                     }
@@ -5199,6 +5252,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             get(w + "H_", cur.hue[c]);
                             get(w + "S_", cur.sat[c]);
                             get(w + "L_", cur.factor[c]);
+                            if (ppVersion < 1028) {
+                                translate_hs(cur.hue[c], cur.sat[c], c);
+                            }
                         }
                     }
                 }

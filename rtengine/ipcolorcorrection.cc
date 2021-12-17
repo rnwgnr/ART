@@ -102,7 +102,40 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             iws[i][j] = diws[i][j];
         }
     }
+        
+    const auto hs2uv =
+        [&](float h, float s, float &u, float &v) -> void
+        {
+            if (h < 0.f) {
+                h += 1.f;
+            } else if (h > 1.f) {
+                h -= 1.f;
+            }
+            float R, G, B;
+            Color::hsl2rgb(h, s, 0.5f, R, G, B);
+            R /= 65535.f;
+            G /= 65535.f;
+            B /= 65535.f;
+            float Y;
+            Color::rgb2yuv(R, G, B, Y, u, v, ws);
+            float s2;
+            Color::yuv2hsl(u, v, h, s2);
+            Color::hsl2yuv(h, s, u, v);
+        };
     
+    const auto abcoord2 =
+        [&](float x, float y, float &a, float &b) -> void
+        {
+            x = abcoord(x);
+            y = abcoord(y);
+            float h = atan2(y, x) / (2.f * RT_PI_F);
+            float s = std::sqrt(SQR(x) + SQR(y));
+            float u, v;
+            hs2uv(h, s, u, v);
+            a = v;
+            b = u;
+        };
+
     const auto yuv2jzazbz =
         [&](float &Y, float &u, float &v) -> void
         {
@@ -120,6 +153,19 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         };    
     
     if (imgbuf) {
+        const auto translate_uv =
+            [&](float &u, float &v) -> void
+            {
+                float os = std::sqrt(SQR(u) + SQR(v));
+                float R, G, B;
+                const float Y = 0.5f;
+                Color::yuv2rgb(Y, u, v, R, G, B, ws);
+                float h, s, l;
+                Color::rgb2hsl(R * 65535.f, G * 65535.f, B * 65535.f, h, s, l);
+                h = h * 2.f * RT_PI_F;
+                Color::hsl2yuv(h, os, u, v);
+            };
+        
         const bool jzazbz = eid == EUID_ColorCorrection_Wheel_Jzazbz;
         rgb->setMode(Imagefloat::Mode::YUV, multiThread);
 #ifdef _OPENMP
@@ -144,6 +190,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     u = 0.f;
                     v = 0.f;
                 }
+                translate_uv(u, v);
                 imgbuf->r(y, x) = SGN(v) * xlin2log(std::abs(v), 4.f);
                 imgbuf->b(y, x) = SGN(u) * xlin2log(std::abs(u), 4.f);
             }
@@ -188,8 +235,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             jzazbz[i] = false;
         } else {
             jzazbz[i] = r.mode == ColorCorrectionParams::Mode::JZAZBZ;
-            abca[i] = abcoord(r.a);
-            abcb[i] = abcoord(r.b);
+            // abca[i] = abcoord(r.a);
+            // abcb[i] = abcoord(r.b);
+            abcoord2(r.a, r.b, abca[i], abcb[i]);
         }
         rs[i] = 1.f + r.inSaturation / 100.f;
         rsout[i] = 1.f + r.outSaturation / 100.f;
@@ -197,11 +245,13 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         if (r.mode == ColorCorrectionParams::Mode::HSL) {
             float R, G, B;
             float u, v;
+            float satcoeff[] = { 2.5f, 2.5f, 2.5f };
             for (int c = 0; c < 3; ++c) {
-                float hue = (float(r.hue[c]) / 180.f) * rtengine::RT_PI;
-                float sat = pow_F(float(r.sat[c]) / 100.f, 3.f);
+                float hue = (float(r.hue[c]) / 180.f) * RT_PI_F;
+                float sat = std::pow(float(r.sat[c]) / 100.f, satcoeff[c]);
                 float f = (r.factor[c] / 100.f) + 1.f;
-                Color::hsl2yuv(hue, sat, u, v);
+                //Color::hsl2yuv(hue, sat, u, v);
+                hs2uv(hue / (2 * RT_PI_F), sat, u, v);
                 Color::yuv2rgb(0.5f, u, v, R, G, B, ws);
                 R *= 2.f;
                 G *= 2.f;
@@ -235,7 +285,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 int j = rgbmode[i] ? c : 0;
                 rslope[i][c] = r.slope[j];
                 roffset[i][c] = r.offset[j];
-                rpower[i][c] = r.power[j];
+                rpower[i][c] = 1.0 / r.power[j];
                 rpivot[i][c] = r.pivot[j];
                 if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f) {
                     enabled[i] = true;

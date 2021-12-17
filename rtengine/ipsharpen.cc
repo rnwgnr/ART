@@ -733,9 +733,7 @@ bool ImProcFunctions::doSharpening(Imagefloat *rgb, const SharpeningParams &shar
 
     rgb->setMode(Imagefloat::Mode::RGB, multiThread);
     array2D<float> Y(ARRAY2D_ALIGNED);
-    TMatrix dws = ICCStore::getInstance()->workingSpaceMatrix(rgb->colorSpace());
-    float ws[3][3];
-    to_float(dws, ws);
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(rgb->colorSpace());
     get_luminance(rgb, Y, ws, multiThread);
     
     float s_scale = std::sqrt(scale);

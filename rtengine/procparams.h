@@ -202,6 +202,7 @@ public:
     double H;
     double range;
     double decay;
+    int strength;
     int weight_L;
     int weight_C;
     int weight_H;

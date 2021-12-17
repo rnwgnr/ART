@@ -664,6 +664,9 @@ public:
         float decay = std::abs(m.decay);
         bool invert = m.decay < 0.f;
         float ret = getval(m.range, 1.0 + LIM01(decay/100.0), d);
+        if (m.strength < 100) {
+            ret *= float(m.strength)/100.f;
+        }
         if (invert) {
             ret = 1.f - ret;
         }
