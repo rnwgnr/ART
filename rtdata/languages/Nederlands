@@ -27,6 +27,7 @@
 #26 2021-07-08 update to ART v1.9.3 by pm
 #27 2021-10-07 update to ART v1.10 by pm
 #28 2021-11-29 update to ART v1.10.1 by pm
+#29 2021-12-18 update to ART v1.12 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -1087,7 +1088,7 @@ PREFERENCES_PREVDEMO;Accuratesse voorbeeld
 PREFERENCES_PREVDEMO_FAST;Snel
 PREFERENCES_PREVDEMO_LABEL;Gebruikte demozaïekmethode voor het voorbeeld bij <100% zoom:
 PREFERENCES_PREVDEMO_SIDECAR;Gelijk aan arp
-PREFERENCES_PRINTER;Printer (afdruksimulatie)
+PREFERENCES_PRINTER;Afdruksimulatie
 PREFERENCES_PROFILEHANDLING;Verwerking profielen
 PREFERENCES_PROFILELOADPR;Laadprioriteit profielen
 PREFERENCES_PROFILE_NONE;Geen
@@ -1254,8 +1255,8 @@ SAVEDLG_TIFFUNCOMPRESSED;Geen TIFF-compressie
 SAVEDLG_WARNFILENAME;Bestandsnaam wordt
 SHCSELECTOR_TOOLTIP;Rechtsklik om de drie schuiven terug te zetten naar hun standaardpositie
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen met het gekozen uitvoerprofiel. 
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen bij het gekozen:\n- printerprofiel indien opgegeven en met soft-proofing ingeschakeld,\n- het monitorprofiel als soft-proofing is uitgeschakeld.
-SOFTPROOF_TOOLTIP;Soft-proofing simuleert hoe een foto wordt getoond als deze wordt afgedrukt, indien een printerprofiel is opgegeven in Voorkeuren > Kleurbeheer.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen bij het gekozen:\n- profiel voor afdruksimulatie indien opgegeven en met soft-proofing ingeschakeld,\n- het monitorprofiel als afdruksimulatie is uitgeschakeld.
+SOFTPROOF_TOOLTIP;Soft-proofing simuleert hoe een foto wordt getoond als deze wordt weergegeven op een beeldscherm of afgedrukt op een specifieke printer, als het overeenkomstige profiel is opgegeven in Voorkeuren > Kleurbeheer.\n(Met <b>Ctrl + linksklik</b> kan een ander profiel worden gekozen. 
 THRESHOLDSELECTOR_BL;Onderkant-links
 THRESHOLDSELECTOR_B;Onderkant
 THRESHOLDSELECTOR_BR;Onderkant-rechts

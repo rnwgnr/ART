@@ -1,6 +1,7 @@
 A#00 Korea - Korean
 #01 2021-10-22 Ohnishi, Yasuo, initial translation for 1.10.1
 #02 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
+#03 2021-12-19 Ohnishi, Yasuo, some refinements and updated for 1.12
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -265,8 +266,8 @@ HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;히스토그램
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Raw 히스토그램
 HISTOGRAM_TOOLTIP_TYPE_PARADE;RGB Parade
 HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;파형 (Waveform)
-HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;색상 (Hue) -채도 (Chroma) Vectorscope
-HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;색상 (Hue) -채도 (Saturation) Vectorscope
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;색조 (Hue) -채도 (Chroma) Vectorscope
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;색조 (Hue) -채도 (Saturation) Vectorscope
 HISTORY_CHANGED;변경되었습니다.
 HISTORY_CUSTOMCURVE;맞춤커브
 HISTORY_FROMCLIPBOARD;클립 보드에서
@@ -345,7 +346,7 @@ HISTORY_MSG_97;L*a*b* - b* 커브
 HISTORY_MSG_98;디모자이킹 방식
 HISTORY_MSG_99;핫픽셀필터
 HISTORY_MSG_100;채도/바이브런스 - 채도
-HISTORY_MSG_101;색 이퀄라이저 - 색상
+HISTORY_MSG_101;색 이퀄라이저 - 색조
 HISTORY_MSG_102;색 이퀄라이저 - 채도
 HISTORY_MSG_103;색 이퀄라이저 - 밝기
 HISTORY_MSG_104;색 이퀄라이저
@@ -390,7 +391,7 @@ HISTORY_MSG_201;노이즈 감소 - 색 차이 Red／Green
 HISTORY_MSG_202;노이즈 감소 - 색 차이 Blue／Yellow
 HISTORY_MSG_203;노이즈 감소 - 방식
 HISTORY_MSG_204;LMMSE 확장처리
-HISTORY_MSG_207;윤곽을 깔끔하게 하기 - 색상커브
+HISTORY_MSG_207;윤곽을 깔끔하게 하기 - 색조 커브
 HISTORY_MSG_208;Blue／Red 이퀄라이저
 HISTORY_MSG_210;그라데이션 필터 - 각도
 HISTORY_MSG_211;그라데이션 필터
@@ -505,7 +506,7 @@ HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - 영역 C 마스크
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - 대비 임계 값 마스크
 HISTORY_MSG_COLORCORRECTION_ENABLED;색/톤 보정
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - 영역 H 마스크
-HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - 색상 (hue) 옮기기
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - 색조 (Hue) 옮기기
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - 밝기
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - 영역 L 마스크
 HISTORY_MSG_COLORCORRECTION_LIST;CC - 영역
@@ -1075,7 +1076,7 @@ PREFERENCES_PREVDEMO;미리보기의 정확도
 PREFERENCES_PREVDEMO_FAST;고속 (Fast)
 PREFERENCES_PREVDEMO_LABEL;미리보기 줌 레벨이 100％이하의 경우 사용하는 디모자이킹 알고리즘：
 PREFERENCES_PREVDEMO_SIDECAR;ARP 기술 대로
-PREFERENCES_PRINTER;인쇄기 (출력 사진 미리 보기)
+PREFERENCES_PRINTER;출력 사진 미리 보기
 PREFERENCES_PROFILEHANDLING;처리 프로파일의 취급
 PREFERENCES_PROFILELOADPR;처리 프로파일 불러오기를 우선
 PREFERENCES_PROFILEPRCACHE;캐시에 있는 프로파일
@@ -1242,8 +1243,8 @@ SAVEDLG_TIFFUNCOMPRESSED;비압축 TIFF
 SAVEDLG_WARNFILENAME;파일에 이름을 붙입니다.
 SHCSELECTOR_TOOLTIP;이 세개 슬라이더 위치를 리셋하려면 \n마우스의 오른쪽버튼을 클릭함
 SOFTPROOF_GAMUTCHECK_TOOLTIP;유효화하면 출력 프로파일 색역외 색깔의  픽셀을 회색으로 표시합니다.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;이하 프로파일의 색공간외 픽셀을 하이라이트로 표시합니다.:\n- 출력 사진 미리 보기가 유효인 경우 인쇄기 프로파일,\n- 출력 사진 미리 보기가 무효인 경우, 모니터 프로파일.
-SOFTPROOF_TOOLTIP;출력 사진 미리 보기는 인쇄 이미지를 모방합니다.\n단, 환경 설정>색관리에서 인쇄기 프로파일을  설정할 필요가 있습니다.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;이하 프로파일의 색공간외 픽셀을 하이라이트로 표시합니다.:\n- 출력 사진 미리 보기가 유효인 경우 출력 사진 미리 보기 프로파일,\n- 출력 사진 미리 보기가 무효인 경우, 모니터 프로파일.
+SOFTPROOF_TOOLTIP;출력 사진 미리 보기는 특정의 인쇠기나 모니터 출력 이미지를 모방합니다.\n단, 환경 설정>색관리에서 적절한 프로파일을 설정할 필요가 있습니다.\n(출력 사진 미리 보기 프로파일을변경하려려면  <b>Ctrl</b> 을 누루면서 크릭하세요)
 THRESHOLDSELECTOR_B;아래
 THRESHOLDSELECTOR_BL;하래-왼쪽
 THRESHOLDSELECTOR_BR;하래-오른쪽
@@ -1263,7 +1264,7 @@ TP_BRIGHTCONTRSAT_CONTRAST;대비
 TP_SATURATION_SATURATION;채도 (Saturation)
 TP_SATURATION_VIBRANCE;바이브런스 (Vibrance)
 TP_BWMIX_COLORCAST;단색 (Tint)
-TP_BWMIX_HUE;색상 (Hue)
+TP_BWMIX_HUE;색조 (Hue)
 TP_BWMIX_SATURATION;채도 (Saturation)
 TP_BWMIX_FILTER;색 필터
 TP_BWMIX_FILTER_BLUE;Blue
@@ -1307,7 +1308,7 @@ TP_CHMIXER_GREEN;Green 채널
 TP_CHMIXER_LABEL;채널 믹서
 TP_CHMIXER_RED;Red 채널
 TP_CHMIXER_MODE;방식
-TP_CHMIXER_HUE;색상 (Hue) 보정
+TP_CHMIXER_HUE;색조 (Hue) 보정
 TP_CHMIXER_SAT;채도 (Saturation) 보정
 TP_CHMIXER_PRIMARY_R;Red 원색
 TP_CHMIXER_PRIMARY_G;Green 원색
@@ -1339,10 +1340,10 @@ TP_COLORCORRECTION_SATURATION;채도 (Saturation)
 TP_COLORCORRECTION_SLOPE;하이라이트 영역/증폭 (Gain)
 TP_COLORCORRECTION_SYNC_SLIDERS;색 채널 연결 슬라이더
 TP_COLORCORRECTION_L;밝기
-TP_COLORCORRECTION_H;색상 (Hue)
+TP_COLORCORRECTION_H;색조 (Hue)
 TP_COLORCORRECTION_S;채도 (Saturation)
-TP_COLORCORRECTION_HUESAT;색상 (Hue) /채도 (Saturation)
-TP_COLORCORRECTION_HUESHIFT;색상 (Hue) 옮기기 (Shift)
+TP_COLORCORRECTION_HUESAT;색조 (Hue) /채도 (Saturation)
+TP_COLORCORRECTION_HUESHIFT;색조 (Hue) 옮기기 (Shift)
 TP_CROP_FIXRATIO;가로세로비 고정
 TP_CROP_GTDIAGONALS; 대각선
 TP_CROP_GTEPASSPORT;얼굴인식 여권용
@@ -1456,7 +1457,7 @@ TP_FILMNEGATIVE_FILMBASE_PICK;필름 기본색 취득
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;실제 필름 기본 색깔 값을 취득하기 위해,필름 미노광부분을 찾고 (예: 프레임간의 경계) 현상 프로파일에 보존합니다.\n이 기능은 같은 필름롤에 있는 복수의 사진을 일괄 현상 처리를 할 때, 더 일관한 색깔 균형을 쉽게 얻을 수 있게 합니다.\n또한 반전하는 이미지가 극단적으로 어둡이거나 밝이거나, 색깔  균형이 잃었을 때 사용합니다.
 TP_FILMNEGATIVE_FILMBASE_VALUES;필름 기본RGB:
 TP_FILMNEGATIVE_GREEN;기준지수 (대비)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색상이 뉴트럴이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다. 그 후, 화이트 밸런스를  설정합니다.
+TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색조가 무채색이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다. 그 후, 화이트 밸런스를  설정합니다.
 TP_FILMNEGATIVE_LABEL;네가필름
 TP_FILMNEGATIVE_PICK;뉴트럴 점 찾기
 TP_FILMNEGATIVE_RED;Red 비율
@@ -1508,7 +1509,7 @@ TP_HSL_SMOOTHING;매끄럽게 하기
 TP_ICM_APPLYBASELINEEXPOSUREOFFSET;기본노출 오프셋
 TP_ICM_APPLYBASELINEEXPOSUREOFFSET_TOOLTIP;DCP에 포함된 기본노출 오프셋을 사용합니다.단, 적용하는 DCP에 이 태그가 있는 경우에 한정됩니다.
 TP_ICM_APPLYHUESATMAP;Base Table
-TP_ICM_APPLYHUESATMAP_TOOLTIP;DCP에 포함된 Base Table (색상채도 맵) 을 사용합니다.단, 적용하는 DCP에 이 태그가 있는 경우에 한정됩니다.
+TP_ICM_APPLYHUESATMAP_TOOLTIP;DCP에 포함된 Base Table (색조-채도 맵) 을 사용합니다.단, 적용하는 DCP에 이 태그가 있는 경우에 한정됩니다.
 TP_ICM_APPLYLOOKTABLE;Look Table
 TP_ICM_APPLYLOOKTABLE_TOOLTIP;DCP에 포함된 Look Table을 사용합니다. 단 적용하는 DCP에 이 태그가 있는 경우에 한정됩니다.
 TP_ICM_BPC;블랙 포인트 보정
@@ -1670,7 +1671,7 @@ TP_PERSPECTIVE_HORIZONTAL;수평
 TP_PERSPECTIVE_LABEL;원근 뒤틀기 보정
 TP_PERSPECTIVE_SHEAR;전단 (剪斷 / Shear)
 TP_PERSPECTIVE_VERTICAL;수직
-TP_PFCURVE_CURVEEDITOR_CH;색상
+TP_PFCURVE_CURVEEDITOR_CH;색조
 TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;윤곽을 깔끔하게 하기의 강도를 제어합니다.값이 높으면 효과가 강화되어 낮으면 약화 됩니다.
 TP_PREPROCESS_DEADPIXFILT;데드 픽셀필터
 TP_PREPROCESS_DEADPIXFILT_TOOLTIP;데드 픽셀의 압축을 시도합니다.

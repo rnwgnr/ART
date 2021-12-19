@@ -1076,7 +1076,7 @@ PREFERENCES_PREVDEMO;Précision de l'aperçu
 PREFERENCES_PREVDEMO_FAST;Rapide
 PREFERENCES_PREVDEMO_LABEL;Méthode de dématriçage utilisée pour l'aperçu à un zoom <100%:
 PREFERENCES_PREVDEMO_SIDECAR;Comme le profil ARP
-PREFERENCES_PRINTER;Imprimante (épreuve numérique)
+PREFERENCES_PRINTER;Épreuvage à l'écran
 PREFERENCES_PROFILEHANDLING;Gestion des profils de traitement
 PREFERENCES_PROFILELOADPR;Priorité de chargement des profils de traitement
 PREFERENCES_PROFILEPRCACHE;Profil en Cache
@@ -1243,8 +1243,8 @@ SAVEDLG_TIFFUNCOMPRESSED;TIFF non compressé
 SAVEDLG_WARNFILENAME;Le fichier sera nommé
 SHCSELECTOR_TOOLTIP;Cliquez le bouton droit de la souris\npour réinitialiser la position de ces 3 curseurs
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction du profil de sortie 
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction du :\n- du profil de l'imprimante si il y en a un de sélectionné et si "Epreuve numérique" est activé,\n- du profil de l'écran si "Epreuve numérique"  est désactivé.
-SOFTPROOF_TOOLTIP;L'épreuve numérique simule l'apparence de l'image à l'impression si un profil d'imprimante est sélectionné dans les Préférences > Gestions des couleurs.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction du :\n- du profil de Épreuvage à l'écran  si il y en a un de sélectionné et si "Épreuve numérique" est activé,\n- du profil de l'écran si "Épreuve numérique"  est désactivé.
+SOFTPROOF_TOOLTIP;L'épreuve numérique simule l'apparence de l'image quand elle est reproduite par une imprimante ou un moniteur spécifique si un profil adapté est sélectionné dans les préférences > Gestions des couleurs.\n(Maintenir <b>Ctrl</b> en cliquant pour modifier le profil d'épreuvage à l'écran.)
 THRESHOLDSELECTOR_B;Bas
 THRESHOLDSELECTOR_BL;Bas-gauche
 THRESHOLDSELECTOR_BR;Bas-droite

@@ -10,6 +10,7 @@
 #09 2021-10-11 Ohnishi, Yasuo, updated
 #10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
 #11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
+#12 2021-12-19 Ohnishi, Yasuo, updated for 1.12
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -340,7 +341,7 @@ HISTORY_MSG_79;リサイズ幅
 HISTORY_MSG_80;リサイズ 高さ
 HISTORY_MSG_81;リサイズの有効･無効
 HISTORY_MSG_82;プロファイル変更
-HISTORY_MSG_84;パースペクティブの補正
+HISTORY_MSG_84;遠近歪みの補正
 HISTORY_MSG_85;レンズ補正 プロファイル
 HISTORY_MSG_87;インパルスノイズ低減
 HISTORY_MSG_88;インパルスノイズ低減 閾値
@@ -603,9 +604,9 @@ HISTORY_MSG_LOGENC_TARGET_GRAY;Log - 対象グレーポイント
 HISTORY_MSG_METADATA_MODE;メタデータ コピーモード
 HISTORY_MSG_MICROCONTRAST_CONTRAST;マイクロコントラスト - コントラストの閾値
 HISTORY_MSG_PCVIGNETTE_CENTER;VF - 中心
-HISTORY_MSG_PERSPECTIVE_ENABLED;パースペクティブ補正
-HISTORY_MSG_PERSPECTIVE_CTRL_LINE;パースペクティブ - コントロールライン
-HISTORY_MSG_PERSPECTIVE_LENS;パースペクティブ - レンズデータ
+HISTORY_MSG_PERSPECTIVE_ENABLED;遠近歪み補正
+HISTORY_MSG_PERSPECTIVE_CTRL_LINE;遠近歪み - コントロールライン
+HISTORY_MSG_PERSPECTIVE_LENS;遠近歪み - レンズデータ
 HISTORY_MSG_PIXELSHIFT_DEMOSAIC;PS - ぶれに対するデモザイクの方式
 HISTORY_MSG_PREPROCESS_DYNROWNOISEFILTER;ダイナミック縦ノイズフィルター
 HISTORY_MSG_PREPROCESS_LINEDENOISE_DIRECTION;ラインノイズフィルタの方向
@@ -921,7 +922,7 @@ PARTIALPASTE_LOCALGROUP;ローカル編集設定
 PARTIALPASTE_METADATA;メタデータモード
 PARTIALPASTE_METAGROUP;メタデータ
 PARTIALPASTE_PCVIGNETTE;ビネットフィルター
-PARTIALPASTE_PERSPECTIVE;パースペクティブの補正
+PARTIALPASTE_PERSPECTIVE;遠近歪みの補正
 PARTIALPASTE_PREPROCESS_DEADPIXFILT;デッドピクセルフィルターを適用
 PARTIALPASTE_PREPROCESS_GREENEQUIL;グリーン 平衡化
 PARTIALPASTE_PREPROCESS_HOTPIXFILT;ホットピクセルフィルターを適用
@@ -1084,7 +1085,7 @@ PREFERENCES_PREVDEMO;プレビューの正確度
 PREFERENCES_PREVDEMO_FAST;高速 (Fast)
 PREFERENCES_PREVDEMO_LABEL;プレビューのズームレベルが100％以下の場合に使うデモザイクアルゴリズム:
 PREFERENCES_PREVDEMO_SIDECAR;ARPの記述通り
-PREFERENCES_PRINTER;プリンタ (ソフトプルーフィング)
+PREFERENCES_PRINTER;ソフトプルーフィング
 PREFERENCES_PROFILEHANDLING;処理プロファイルの取扱い
 PREFERENCES_PROFILELOADPR;処理プロファイル読み込みの優先
 PREFERENCES_PROFILEPRCACHE;cacheの中のプロファイル
@@ -1251,8 +1252,8 @@ SAVEDLG_TIFFUNCOMPRESSED;非圧縮 TIFF
 SAVEDLG_WARNFILENAME;ファイルに名前が付けられます
 SHCSELECTOR_TOOLTIP;この3つのスライダーの位置をリセットするには\nマウスの右ボタンをクリック
 SOFTPROOF_GAMUTCHECK_TOOLTIP;有効にすると 出力プロファイル色域外の色のピクセルをグレーで表示します
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;以下に関して色空間外のピクセルをハイライト表示します:\n- ソフトプルーフィングが有効な場合, プリンタープロファイル,\n- ソフトプルーフィングが無効な場合, モニタープロファイル
-SOFTPROOF_TOOLTIP;ソフトプルーフィングはプリントイメージをシミュレートします. \n但し 環境設定>カラーマネジメントでプリンタプロファイルを設定する必要があります.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;以下に関して色空間外のピクセルをハイライト表示します:\n- ソフトプルーフィングが有効な場合, ソフトプルーフィングプロファイル,\n- ソフトプルーフィングが無効な場合, モニタープロファイル
+SOFTPROOF_TOOLTIP;ソフトプルーフィングは特定のプリンターもしくはモニターでのイメージをシミュレートします. \n但し 環境設定>カラーマネジメントでそれらに合った適切なプロファイルを設定する必要があります.\n(ソフトプルーフィングプロファイルを変更するには <b>Ctrl</b> を押しながらクリックしてください)
 THRESHOLDSELECTOR_B;下
 THRESHOLDSELECTOR_BL;下-左
 THRESHOLDSELECTOR_BR;下-右
@@ -1264,7 +1265,7 @@ TOOL_SHORTCUT_HELP_HEADER;ツールショートカット:\n(所定のキーを�
 TOOLBAR_TOOLTIP_COLORPICKER;ロック式カラーピッカー\n\n有効にすると:\nプレビュー画像上でマウスを左クリックするとカラーピッカーが追加されます. \n左のボタンを押しながらマウスを動かすとカラーピッカーも移動します\nカラーピッカーを削除する時はマウスを右クリックします\nカラーピッカー全てを削除する場合は Shiftボタンを押しながらマウスを右クリックします\nカラーピッカーのマーク以外の部分でマウスを右クリックすれば ハンドツールに戻ります
 TOOLBAR_TOOLTIP_CROP;切り抜き範囲選択\nショートカット:  <b>Shift-c</b>\n切抜き範囲の移動は<b>マウスでドラッグ</b>する\n切抜き範囲の変更は範囲の境界線を動かす
 TOOLBAR_TOOLTIP_HAND;手の平ツール\nショートカット:  <b>h</b>
-TOOLBAR_TOOLTIP_PERSPECTIVE;<b>パース補正</b>.\nショートカット: <b>Shift-p</b>\n\nパースのゆがみを補正するコントロールラインを編集する.
+TOOLBAR_TOOLTIP_PERSPECTIVE;<b>遠近歪み補正</b>.\nショートカット: <b>Shift-p</b>\n\n遠近歪みを補正するコントロールラインを編集する.
 TOOLBAR_TOOLTIP_STRAIGHTEN;<b>直線選択</b> / <b>角度補正</b>\nショートカット: <b>Shift-s</b>\nプレビュー画像上にガイド線を描画し 垂直または水平方向を指示します. 回転角度は ガイド線の隣に表示されます. 回転の中心は プレビュー画像の中心です
 TOOLBAR_TOOLTIP_WB;スポット･ホワイトバランス\nショートカット:  <b>Shift-w</b>
 TP_SATURATION_LABEL;彩度/自然な彩度
@@ -1676,7 +1677,7 @@ TP_PERSPECTIVE_CONTROL_LINES_TOOLTIP;<b>Ctrl</b>+<b>ドラッグ</b>: 新しい�
 TP_PERSPECTIVE_CROPFACTOR;クロップ係数 (factor)
 TP_PERSPECTIVE_FLENGTH;焦点距離 (Focal length)
 TP_PERSPECTIVE_HORIZONTAL;水平
-TP_PERSPECTIVE_LABEL;パースペクティブ補正
+TP_PERSPECTIVE_LABEL;遠近歪み補正
 TP_PERSPECTIVE_SHEAR;剪断 (Shear)
 TP_PERSPECTIVE_VERTICAL;垂直
 TP_PFCURVE_CURVEEDITOR_CH;色相

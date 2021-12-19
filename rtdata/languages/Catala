@@ -10,6 +10,7 @@
 #09 2021-10-07 mrleemon, update for 1.10
 #10 2021-10-09 mrleemon, some fixes
 #11 2021-11-28 mrleemon, update for 1.10.1
+#12 2021-12-18 mrleemon, update for 1.12
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -1090,7 +1091,7 @@ PREFERENCES_PREVDEMO;Precisió de la vista prèvia
 PREFERENCES_PREVDEMO_FAST;Ràpid
 PREFERENCES_PREVDEMO_LABEL;Mètode d'interpolació utilitzat per a la vista prèvia al <100% de zoom:
 PREFERENCES_PREVDEMO_SIDECAR;Com en ARP
-PREFERENCES_PRINTER;Impressora (Prova digital)
+PREFERENCES_PRINTER;Prova en pantalla
 PREFERENCES_PROFILEHANDLING;Tractament dels perfils de processament
 PREFERENCES_PROFILELOADPR;Prioritat de càrrega dels perfils de processament
 PREFERENCES_PROFILEPRCACHE;Perfil a la memòria cau
@@ -1257,8 +1258,8 @@ SAVEDLG_TIFFUNCOMPRESSED;TIFF sense compressió
 SAVEDLG_WARNFILENAME;S'assignarà un nom al fitxer
 SHCSELECTOR_TOOLTIP;Cliqueu amb el botó dret del ratolí per restablir la posició d'aquests 3 controls lliscants.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa al perfil de sortida.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de la impressora, si està establert i la prova en pantalla està activada,\n- el perfil del monitor, si la prova en pantalla està desactivada.
-SOFTPROOF_TOOLTIP;La prova en pantalla simula l'aparença de la imatge quan s'imprimeix, si s'ha establert un perfil d'impressora a Preferències > Gestió de color.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de la prova en pantalla, si està establert i la prova en pantalla està activada,\n- el perfil del monitor, si la prova en pantalla està desactivada.
+SOFTPROOF_TOOLTIP;La prova en pantalla simula l'aparença de la imatge quan la reprodueix una impressora o monitor específic, si s'ha establert un perfil adequat a Preferències > Gestió de color.\n(Manteniu premuda la tecla <b>Ctrl</b> mentre feu clic per canviar el perfil de la prova en pantalla.)
 THRESHOLDSELECTOR_B;Inferior
 THRESHOLDSELECTOR_BL;Inferior esquerre
 THRESHOLDSELECTOR_BR;Inferior dret

@@ -13,6 +13,7 @@
 #12 2021-10-06 mrleemon, update for 1.10
 #13 2021-10-09 mrleemon, some fixes
 #14 2021-11-28 mrleemon, update for 1.10.1
+#15 2021-12-18 mrleemon, update for 1.12
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -62,7 +63,7 @@ DYNPROFILEEDITOR_NEW_RULE;Nueva regla de perfil dinámico
 DYNPROFILEEDITOR_PROFILE;Perfil de procesamiento
 EDITWINDOW_TITLE;Edición de imagen
 EDIT_OBJECT_TOOLTIP;Muestra un widget en la ventana de vista previa que le permitirá ajustar esta herramienta.
-EDIT_PIPETTE_TOOLTIP;Para añadir un punto de ajuste en la curva, mantenga la tecla Ctrl presionada mientras pulsa el botón izquierdo del ratón sobre el punto deseado en la vista previa de la imagen.\nPara ajustar el punto, mantenga la tecla Ctrl presionada mientras pulsa el botón izquierdo del ratón sobre el área correspondiente en la vista previa, entonces suelte la tecla Ctrl (a menos que desee un control más preciso) y mientras mantiene pulsado el botón izquierdo del ratón mueva el ratón hacia arriba o hacia abajo para mover ese punto hacia arriba o hacia abajo en la curva.
+EDIT_PIPETTE_TOOLTIP;Para añadir un punto de ajuste en la curva, mantenga la tecla Ctrl pulsada mientras pulsa el botón izquierdo del ratón sobre el punto deseado en la vista previa de la imagen.\nPara ajustar el punto, mantenga la tecla Ctrl pulsada mientras pulsa el botón izquierdo del ratón sobre el área correspondiente en la vista previa, entonces suelte la tecla Ctrl (a menos que desee un control más preciso) y mientras mantiene pulsado el botón izquierdo del ratón mueva el ratón hacia arriba o hacia abajo para mover ese punto hacia arriba o hacia abajo en la curva.
 ERROR_MSG_FILE_READ;Error de lectura del archivo: %1
 ERROR_MSG_MAXERRORS;... (%1 error(es) anterior(es) no mostrado(s))
 ERROR_MSG_METADATA_VALUE;Metadatos: error al establecer %1 a %2
@@ -1093,7 +1094,7 @@ PREFERENCES_PREVDEMO;Precisión de la vista previa
 PREFERENCES_PREVDEMO_FAST;Rápido
 PREFERENCES_PREVDEMO_LABEL;Método de interpolación usado para la vista previa al <100% de zoom:
 PREFERENCES_PREVDEMO_SIDECAR;Como en ARP
-PREFERENCES_PRINTER;Impresora (Prueba digital)
+PREFERENCES_PRINTER;Prueba en pantalla
 PREFERENCES_PROFILEHANDLING;Tratamiento de los perfiles de procesamiento
 PREFERENCES_PROFILELOADPR;Prioridad de carga de los perfiles de procesamiento
 PREFERENCES_PROFILEPRCACHE;Perfil en la caché
@@ -1260,12 +1261,12 @@ SAVEDLG_TIFFUNCOMPRESSED;TIFF sin compresión
 SAVEDLG_WARNFILENAME;Se asignará nombre al archivo
 SHCSELECTOR_TOOLTIP;Haga clic con el botón derecho del ratón para restablecer la posición de esos 3 controles deslizantes.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto al perfil de salida.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de la impresora, si se ha establecido uno y la prueba en pantalla está activada,\n- el perfil del monitor, si la prueba en pantalla está desactivada.
-SOFTPROOF_TOOLTIP;La prueba en pantalla simula la apariencia de la imagen cuando se imprime, si se ha establecido un perfil de impresora en Preferencias > Gestión de color.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de la prueba en pantalla, si se ha establecido uno y la prueba en pantalla está activada,\n- el perfil del monitor, si la prueba en pantalla está desactivada.
+SOFTPROOF_TOOLTIP;La prueba en pantalla simula la apariencia de la imagen cuando la reproduce una impresora o monitor específico, si se ha establecido un perfil adecuado en Preferencias > Gestión de color.\n(Mantenga pulsada la tecla <b>Ctrl</b> mientras hace clic para cambiar el perfil de prueba en pantalla).
 THRESHOLDSELECTOR_B;Inferior
 THRESHOLDSELECTOR_BL;Inferior izquierdo
 THRESHOLDSELECTOR_BR;Inferior derecho
-THRESHOLDSELECTOR_HINT;Mantenga la tecla <b>Mayús</b> presionada para mover puntos de control individuales.
+THRESHOLDSELECTOR_HINT;Mantenga la tecla <b>Mayús</b> pulsada para mover puntos de control individuales.
 THRESHOLDSELECTOR_T;Superior
 THRESHOLDSELECTOR_TL;Superior izquierdo
 THRESHOLDSELECTOR_TR;Superior derecho
