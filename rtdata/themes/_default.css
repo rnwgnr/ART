@@ -1520,6 +1520,7 @@ popover {
 checkbutton check, radiobutton radio {
     border-color: rgb(0,0,0);
     border-width: 0.05ex;
+    color: @ART-hl;
 }
 
 .app-notification {
