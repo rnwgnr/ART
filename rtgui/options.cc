@@ -375,7 +375,7 @@ void Options::setDefaults()
     languageAutoDetect = langMgr.isOSLanguageDetectSupported();
     lastSaveAsPath = "";
     overwriteOutputFile = false;        // if TRUE, existing output JPGs/PNGs are overwritten, instead of adding ..-1.jpg, -2.jpg etc.
-    theme = "RawTherapee";
+    theme = "Default";
     maxThumbnailHeight = 250;
     maxThumbnailWidth = 800;
     maxCacheEntries = 20000;

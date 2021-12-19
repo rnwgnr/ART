@@ -1,0 +1,6 @@
+@define-color ART-bg #484848;
+@define-color ART-fg #AAAAAA;
+@define-color ART-hl @ART-fg;
+
+@import "_size.css";
+@import "_default.css";

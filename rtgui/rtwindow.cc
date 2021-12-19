@@ -311,7 +311,7 @@ RTWindow::RTWindow():
         filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
 
         if (!match || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
-            options.theme = "RawTherapee-GTK";
+            options.theme = "Default-GTK";
 
             // We're not testing GTK_MAJOR_VERSION == 3 here, since this branch requires Gtk3 only
             if (GTK_MINOR_VERSION < 20) {
