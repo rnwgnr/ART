@@ -467,6 +467,9 @@ scale slider {
     border-radius: 1.166666666666666666em;
     border-width: 0.083333333333333333em;
     background-image: linear-gradient(@ART-bgDark025, @ART-bgDark045);
+    /*border-color: @ART-hl;
+    border-color: @ART-bgDark06;
+    background-image: radial-gradient(@ART-bgDark025 50%, @ART-hl 15%);*/
 }
 scale slider:hover {
     background-image: linear-gradient(shade(@ART-bgDark025,1.3), shade(@ART-bgDark045,1.3));
@@ -485,6 +488,12 @@ scale trough {
     border-radius: 0.333333333333333333em;
     background-color: @ART-bgDark045;
 }
+
+scale.vertical trough {
+    min-width: 0.2em;
+    padding: 0 0.08em;
+}
+
 scale:disabled trough {
     background-color: @ART-bg;
     border-color: @ART-bgDark045;
@@ -1431,7 +1440,7 @@ notebook > header.right tab:checked {
 }
 
 scale highlight {
-    background-color: @ART-hl;
+    background-color: mix(@ART-hl, @ART-bg, 0.3);
 }
 
 #IopsPanel {

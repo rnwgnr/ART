@@ -446,6 +446,7 @@ ColorWheel::ColorWheel(bool use_scale):
         scale->set_inverted(true);
         scale->set_value(1.0);
         scale->set_draw_value(false);
+        scale->set_has_origin(false);
         RTImage *icon = Gtk::manage(new RTImage("volume-small.png"));
         vb->pack_start(*icon, false, false);
         vb->pack_start(*scale, true, true);
