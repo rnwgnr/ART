@@ -55,6 +55,7 @@ ERROR_MSG_FILE_READ;Erreur de lecture du fichier : %1
 ERROR_MSG_MAXERRORS;... (%1 erreur(s) précédente(s) non montrée(s))
 ERROR_MSG_METADATA_VALUE;Metadata: réglage de l'erreur %1 à %2
 ERROR_MSG_INVALID_PSF;Fichier PSF invalide: %1
+ERROR_MSG_INVALID_PROFILE; Profile invalide: %1
 EXIFFILTER_APERTURE;Diaphragme
 EXIFFILTER_CAMERA;Appareil photo
 EXIFFILTER_DATE;Date
@@ -245,6 +246,7 @@ GENERAL_SAVE_AS;Enregistrer sous...
 GENERAL_SLIDER;Curseur
 GENERAL_UNCHANGED;(Inchangé)
 GENERAL_WARNING;Attention
+GENERAL_DEPRECATED;Obsolète
 GENERAL_DEPRECATED_TOOLTIP;<b>Obsolète !</b> sera éliminée dans une prochaine version.
 GIMP_PLUGIN_INFO;Bienvenue dans le plugin ART de GIMP !\nUne fois l'édition terminée, fermez simplement la fenêtre principale de ART et l'image sera importée automatiquement dans GIMP.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), pic: %5 (%6)\n    gamme: %7 EV, valeurs: %8, pixels: %9

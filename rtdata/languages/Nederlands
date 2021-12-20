@@ -81,6 +81,7 @@ EDITWINDOW_TITLE;Bewerk afbeelding
 ERROR_MSG_FILE_READ;Fout tijdens lezen bestand: %1
 ERROR_MSG_MAXERRORS;... (%1 vorige fout(en) niet getoond)
 ERROR_MSG_METADATA_VALUE;Metadata: fout veranderen %1 in %2
+ERROR_MSG_INVALID_PROFILE;Ongeldig profiel: %1
 ERROR_MSG_INVALID_PSF;Ongeldig PSF-bestand: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Camera
@@ -253,6 +254,7 @@ GENERAL_CHANGED;Veranderd
 GENERAL_CLOSE;Sluiten
 GENERAL_CURRENT;Huidig
 GENERAL_DELETE_ALL;Wis alles
+GENERAL_DEPRECATED;Verouderd
 GENERAL_DEPRECATED_TOOLTIP;<b>Verouderd!</b> Komt niet meer voor in een toekomstige versie.
 GENERAL_DISABLE;Deactiveer
 GENERAL_DISABLED;Gedeactiveerd

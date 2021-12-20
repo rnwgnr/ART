@@ -64,6 +64,7 @@ EDIT_PIPETTE_TOOLTIP;Per afegir un punt d'ajust a la corba, mantingueu la tecla 
 ERROR_MSG_FILE_READ;Error de lectura del fitxer: %1
 ERROR_MSG_MAXERRORS;... (%1 error(s) anterior(s) no mostrat(s))
 ERROR_MSG_METADATA_VALUE;Metadades: error en establir %1 a %2
+ERROR_MSG_INVALID_PROFILE;Perfil no vàlid: %1
 ERROR_MSG_INVALID_PSF;Fitxer PSF no vàlid: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Càmera
@@ -255,6 +256,7 @@ GENERAL_SAVE_AS;Desa com...
 GENERAL_SLIDER;Control lliscant
 GENERAL_UNCHANGED;(Sense canvis)
 GENERAL_WARNING;Advertiment
+GENERAL_DEPRECATED;Obsolet
 GENERAL_DEPRECATED_TOOLTIP;<b>¡Obsolet!</b> S'eliminarà en una versió futura.
 GIMP_PLUGIN_INFO;Benvingut a l'extensió GIMP d'ART!\nUna vegada que acabeu d'editar, simplement tanqueu la finestra principal d'ART i la imatge s'importarà a GIMP automàticament.
 HISTOGRAM_RAW_STATS_TOOLTIP;mín: %1 (%2), màx: %3 (%4), pic: %5 (%6)\n    rang: %7 EV, valors: %8, píxels: %9

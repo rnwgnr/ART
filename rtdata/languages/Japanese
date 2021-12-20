@@ -10,7 +10,7 @@
 #09 2021-10-11 Ohnishi, Yasuo, updated
 #10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
 #11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
-#12 2021-12-19 Ohnishi, Yasuo, updated for 1.12
+#12 2021-12-20 Ohnishi, Yasuo, updated for 1.12
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -63,7 +63,8 @@ EDIT_PIPETTE_TOOLTIP;カーブ上に調整ポイントを追加するには Ctrl
 ERROR_MSG_FILE_READ;ファイル読込エラー: %1
 ERROR_MSG_MAXERRORS;... (%1 以前のエラーは表示されません)
 ERROR_MSG_METADATA_VALUE;メタデータ: エラー setting %1 to %2
-ERROR_MSG_INVALID_PSF;誤った PSFファイル: %1
+ERROR_MSG_INVALID_PROFILE;不適切なプロファイルです: %1
+ERROR_MSG_INVALID_PSF;不適切な PSFファイル: %1
 EXIFFILTER_APERTURE;絞り
 EXIFFILTER_CAMERA;カメラ
 EXIFFILTER_DATE;日時
@@ -254,6 +255,7 @@ GENERAL_SAVE_AS;...で保存
 GENERAL_SLIDER;スライダー
 GENERAL_UNCHANGED;(変更なし)
 GENERAL_WARNING;警告
+GENERAL_DEPRECATED;廃止予定
 GENERAL_DEPRECATED_TOOLTIP;<b>廃止予定 (Deprecated) !</b> は 将来のバージョンで削除されます.
 GIMP_PLUGIN_INFO;ART GIMPプラグインにようこそ！\n画像編集終了後 単にARTのメインウィンドウを閉じるだけで 画像が自動的にGIMPに送られます.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9
@@ -508,7 +510,7 @@ HISTORY_MSG_CHMIXER_MODE;チャンネルミキサー - モード
 HISTORY_MSG_CHMIXER_RED_PRIMARY;チャンネルミキサー - 赤原色
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;チャンネルミキサー - 緑原色
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;チャンネルミキサー - 青原色
-HISTORY_MSG_COLORCORRECTION_AB;CC - 彩度 (chrominance)
+HISTORY_MSG_COLORCORRECTION_AB;CC - 色信号 (chrominance)
 HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - 領域エリアマスク
 HISTORY_MSG_COLORCORRECTION_MODE;CC - モード
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - 領域 色度マスク
@@ -1511,7 +1513,7 @@ TP_HLREC_OFF;オフ
 TP_HLREC_LABEL;ハイライト復元
 TP_HSVEQUALIZER_CHANNEL;チャンネル
 TP_HSVEQUALIZER_HUE;H
-TP_HSVEQUALIZER_LABEL;カラーイコライザ
+TP_HSVEQUALIZER_LABEL;カラーイコライザ (色相:H 彩度:S 明度:L)
 TP_HSVEQUALIZER_SAT;S
 TP_HSVEQUALIZER_VAL;L
 TP_HSL_SMOOTHING;スムージング

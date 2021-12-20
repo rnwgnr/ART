@@ -1,7 +1,7 @@
 A#00 Korea - Korean
 #01 2021-10-22 Ohnishi, Yasuo, initial translation for 1.10.1
 #02 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
-#03 2021-12-19 Ohnishi, Yasuo, some refinements and updated for 1.12
+#03 2021-12-20 Ohnishi, Yasuo, some refinements and updated for 1.12
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -54,6 +54,7 @@ EDIT_PIPETTE_TOOLTIP;곡선상에 조정점을 추가할 때에는, Ctrl 키를 
 ERROR_MSG_FILE_READ;파일 불러오기 착오: %1
 ERROR_MSG_MAXERRORS;... (%1 이전의 착오는 표시되지 않습니다.)
 ERROR_MSG_METADATA_VALUE;메타데이터: 착오 setting %1 to %2
+ERROR_MSG_INVALID_PROFILE;잘 못한 프로파일 입니다: %1
 ERROR_MSG_INVALID_PSF;잘 못한 PSF 파일: %1
 EXIFFILTER_APERTURE;조리개 값
 EXIFFILTER_CAMERA;사진기
@@ -245,6 +246,7 @@ GENERAL_SAVE_AS;... (으) 로 보존
 GENERAL_SLIDER;슬라이더
 GENERAL_UNCHANGED;(변경 없음)
 GENERAL_WARNING;경고
+GENERAL_DEPRECATED;폐지예정
 GENERAL_DEPRECATED_TOOLTIP;<b>"폐지예정 (Deprecated) !"</b> 은 장래 버전에서 삭제됩니다.
 GIMP_PLUGIN_INFO;ART GIMP 플러그인을 쓰시는 것을 환영합니다！\n화상편집이 끝난 후, 그냥 ART을 끝내면, 화상이 자동적으로 GIMP에 이송됩니다.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9
@@ -1502,7 +1504,7 @@ TP_HLREC_OFF;해제
 TP_HLREC_LABEL;하이라이트 복원
 TP_HSVEQUALIZER_CHANNEL;채널
 TP_HSVEQUALIZER_HUE;H
-TP_HSVEQUALIZER_LABEL;색 이퀄라이저
+TP_HSVEQUALIZER_LABEL;색 이퀄라이저 (색조:H 채도:S 밝기:L)
 TP_HSVEQUALIZER_SAT;S
 TP_HSVEQUALIZER_VAL;L
 TP_HSL_SMOOTHING;매끄럽게 하기

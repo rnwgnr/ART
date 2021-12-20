@@ -67,6 +67,7 @@ EDIT_PIPETTE_TOOLTIP;Para añadir un punto de ajuste en la curva, mantenga la te
 ERROR_MSG_FILE_READ;Error de lectura del archivo: %1
 ERROR_MSG_MAXERRORS;... (%1 error(es) anterior(es) no mostrado(s))
 ERROR_MSG_METADATA_VALUE;Metadatos: error al establecer %1 a %2
+ERROR_MSG_INVALID_PROFILE;Perfil no válido: %1
 ERROR_MSG_INVALID_PSF;Archivo PSF no válido: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Cámara
@@ -258,6 +259,7 @@ GENERAL_SAVE_AS;Guardar como...
 GENERAL_SLIDER;Control deslizante
 GENERAL_UNCHANGED;(Sin cambios)
 GENERAL_WARNING;Advertencia
+GENERAL_DEPRECATED;Obsoleto
 GENERAL_DEPRECATED_TOOLTIP;<b>¡Obsoleto!</b> Se eliminará en una versión futura.
 GIMP_PLUGIN_INFO;¡Bienvenido al plugin GIMP de ART!\nUna vez que termine de editar, simplemente cierre la ventana principal de ART y la imagen se importará a GIMP automáticamente.
 HISTOGRAM_RAW_STATS_TOOLTIP;mín: %1 (%2), máx: %3 (%4), pico: %5 (%6)\n    rango: %7 EV, valores: %8, píxels: %9
