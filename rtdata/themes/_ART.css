@@ -1953,7 +1953,10 @@ notebook tab {
 
 
 notebook tab:hover {
-    background-color: @ART-bg033;
+    background-color: @ART-bg;
+}
+notebook tab:hover * {
+    color: @ART-fgBright05;
 }
 
 notebook tab button {
@@ -2049,16 +2052,18 @@ fontchooser scrolledwindow,
     background-color: @ART-bgDark033;
 }
 #MainNotebook tab:hover {
-    /* OK */
     background-color: @ART-bg;
+}
+#MainNotebook tab:hover * {
+    color: @ART-fgBright05;
 }
 #MainNotebook tab:active {
     /* OK */
     border-color: @ART-hl;
 }
-#MainNotebook tab:checked {
+/*#MainNotebook tab:checked {
     background-color: @ART-bg;
-}
+}*/
 
 #RightNotebook > stack > :nth-child(1) checkbutton + scrolledwindow {
     min-height: calc(6em + 43px);
@@ -2100,7 +2105,9 @@ dialog frame > label:not(.dummy) {
 }
 #RightNotebook tab:hover {
     background-color: @ART-bg;
-    color: @ART-fg;
+}
+#RightNotebook tab:hover * {
+    color: @ART-fgBright05;
 }
 #RightNotebook tab:active {
     border-color: @ART-hl;
@@ -2132,6 +2139,11 @@ dialog frame > label:not(.dummy) {
     padding: 0.25em;
     margin: 0;
 }
+
+#ToolPanelNotebook > header tab:checked {
+    background-color: @ART-bg;
+}
+
 
 /* All tool panels have a frame except for Meta which unlike the rest is a notebook itself.
  * So we use CSS to make it look like a frame. */
@@ -2645,4 +2657,13 @@ entry selection {
 
 *:focus {
     box-shadow: none;
+}
+
+switch > :nth-child(2) {
+    background-color: @ART-hl;
+    color: @ART-bg;
+}
+switch > :nth-child(3) {
+    background-color: @ART-bgDark01;
+    color: @ART-hl;
 }
