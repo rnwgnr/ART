@@ -188,11 +188,11 @@ void FilePanel::init ()
         }
         dirBrowser->open(d);
     } else {
-        if (options.startupDir == STARTUPDIR_HOME) {
+        if (options.startupDir == Options::STARTUPDIR_HOME) {
             dirBrowser->open (PlacesBrowser::userPicturesDir ());
-        } else if (options.startupDir == STARTUPDIR_CURRENT) {
+        } else if (options.startupDir == Options::STARTUPDIR_CURRENT) {
             dirBrowser->open (argv0);
-        } else if (options.startupDir == STARTUPDIR_CUSTOM || options.startupDir == STARTUPDIR_LAST) {
+        } else if (options.startupDir == Options::STARTUPDIR_CUSTOM || options.startupDir == Options::STARTUPDIR_LAST) {
             if (options.startupPath.length() && Glib::file_test(options.startupPath, Glib::FILE_TEST_EXISTS) && Glib::file_test(options.startupPath, Glib::FILE_TEST_IS_DIR)) {
                 dirBrowser->open (options.startupPath);
             } else {
@@ -393,7 +393,7 @@ void FilePanel::saveOptions ()
     //options.browserToolPanelWidth = winW - (rightNotebook->get_current_page() == 0 ? get_position() : pane_pos_);
     // options.browserToolPanelHeight = tpcPaned->get_position ();
 
-    if (options.startupDir == STARTUPDIR_LAST && fileCatalog->lastSelectedDir () != "") {
+    if (options.startupDir == Options::STARTUPDIR_LAST && fileCatalog->lastSelectedDir () != "") {
         options.startupPath = fileCatalog->lastSelectedDir ();
     }
 

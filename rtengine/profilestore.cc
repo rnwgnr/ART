@@ -292,7 +292,7 @@ const ProfileStoreEntry* ProfileStore::findEntryFromFullPathU (Glib::ustring pat
         parseProfilesOnce();
     }
 
-    if (path == DEFPROFILE_INTERNAL || path == DEFPROFILE_DYNAMIC) {
+    if (path == Options::DEFPROFILE_INTERNAL || path == Options::DEFPROFILE_DYNAMIC) {
         return internalDefaultEntry;
     }
 

@@ -286,13 +286,14 @@ RTWindow::RTWindow():
         Gtk::Settings::get_for_screen (screen)->property_gtk_theme_name() = "Adwaita";
         Gtk::Settings::get_for_screen (screen)->property_gtk_application_prefer_dark_theme() = true;
 
-        Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create (THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
+        Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create(Options::THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
         Glib::ustring filename;
         Glib::MatchInfo mInfo;
         bool match = regex->match(options.theme + ".css", mInfo);
         if (match) {
             // save old theme (name + version)
             Glib::ustring initialTheme(options.theme);
+            bool deprecated = !(mInfo.fetch(4).empty());
 
             // update version
             auto pos = options.theme.find("-GTK3-");
@@ -303,8 +304,18 @@ RTWindow::RTWindow():
                 options.theme = themeRootName + "-GTK3-20_";
             }
             // check if this version exist
+            bool reset = false;
             if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
-                // set back old theme version if the actual one doesn't exist yet
+                if (!deprecated) {
+                    options.theme += "-DEPRECATED";
+                    if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                        reset = true;
+                    }
+                } else {
+                    reset = true;
+                }
+            }
+            if (reset) {
                 options.theme = initialTheme;
             }
         }
@@ -725,25 +736,25 @@ void RTWindow::showErrors()
 {
     // alerting users if the default raw and image profiles are missing
     if (options.is_defProfRawMissing()) {
-        options.defProfRaw = DEFPROFILE_RAW;
+        options.defProfRaw = Options::DEFPROFILE_RAW;
         Gtk::MessageDialog msgd (*this, Glib::ustring::compose (M ("OPTIONS_DEFRAW_MISSING"), options.defProfRaw), true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
         msgd.run ();
     }
     if (options.is_bundledDefProfRawMissing()) {
         Gtk::MessageDialog msgd (*this, Glib::ustring::compose (M ("OPTIONS_BUNDLED_MISSING"), options.defProfRaw), true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
         msgd.run ();
-        options.defProfRaw = DEFPROFILE_INTERNAL;
+        options.defProfRaw = Options::DEFPROFILE_INTERNAL;
     }
 
     if (options.is_defProfImgMissing()) {
-        options.defProfImg = DEFPROFILE_IMG;
+        options.defProfImg = Options::DEFPROFILE_IMG;
         Gtk::MessageDialog msgd (*this, Glib::ustring::compose (M ("OPTIONS_DEFIMG_MISSING"), options.defProfImg), true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
         msgd.run ();
     }
     if (options.is_bundledDefProfImgMissing()) {
         Gtk::MessageDialog msgd (*this, Glib::ustring::compose (M ("OPTIONS_BUNDLED_MISSING"), options.defProfImg), true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
         msgd.run ();
-        options.defProfImg = DEFPROFILE_INTERNAL;
+        options.defProfImg = Options::DEFPROFILE_INTERNAL;
     }
 }
 

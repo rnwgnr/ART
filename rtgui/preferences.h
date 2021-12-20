@@ -44,8 +44,10 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     public:
         Glib::ustring shortFName;
         Glib::ustring longFName;
+        bool deprecated;
 
-        ThemeFilename (Glib::ustring sfname, Glib::ustring lfname) : shortFName (sfname), longFName (lfname) {}
+        ThemeFilename(Glib::ustring sfname, Glib::ustring lfname, bool d):
+            shortFName(sfname), longFName(lfname), deprecated(d) {}
     };
 
     std::vector<ThemeFilename> themeFNames;

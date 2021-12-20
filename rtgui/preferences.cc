@@ -44,7 +44,7 @@ Preferences::Preferences (RTWindow *rtwindow)
     , newFont (false)
     , newCPFont (false)
 {
-    regex = Glib::Regex::create (THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
+    regex = Glib::Regex::create(Options::THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
 
     moptions.copyFrom (&options);
 
@@ -828,7 +828,11 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     themeCBT->set_active(0);
     parseThemeDir(Glib::build_filename(argv0, "themes"));
     for (size_t i = 0; i < themeFNames.size(); i++) {
-        themeCBT->append(themeFNames.at(i).shortFName);
+        auto name = themeFNames[i].shortFName;
+        if (themeFNames[i].deprecated) {
+            name += " (" + M("GENERAL_DEPRECATED") + ")";
+        }
+        themeCBT->append(name);
     }
 
     Gtk::Label* mainFontLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_MAINFONT")));
@@ -1432,6 +1436,7 @@ void Preferences::parseThemeDir (Glib::ustring dirname)
             Glib::ustring fname2 = matchInfo.fetch (1);
             Glib::ustring minMinor = matchInfo.fetch (2);
             Glib::ustring maxMinor = matchInfo.fetch (3);
+            bool deprecated = !(matchInfo.fetch(4).empty());
 
             if (!minMinor.empty()) {
                 guint64 minMinorVal = g_ascii_strtoll (minMinor.c_str(), 0, 0);
@@ -1454,14 +1459,18 @@ void Preferences::parseThemeDir (Glib::ustring dirname)
             }
 
             if (keepIt) {
-                themeFNames.push_back (ThemeFilename (matchInfo.fetch (1), sname.substr (0, sname.size() - 4)));
+                themeFNames.push_back(ThemeFilename(matchInfo.fetch(1), sname.substr(0, sname.size() - 4), deprecated));
             }
         }
     }
 
-    std::sort (themeFNames.begin(), themeFNames.end(), [] (const ThemeFilename & firstDir, const ThemeFilename & secondDir) {
-        return firstDir.longFName < secondDir.longFName;
-    });
+    std::sort(themeFNames.begin(), themeFNames.end(),
+              [] (const ThemeFilename &firstDir, const ThemeFilename &secondDir) {
+                  if (firstDir.deprecated != secondDir.deprecated) {
+                      return !firstDir.deprecated;
+                  }
+                  return firstDir.longFName < secondDir.longFName;
+              });
 
     delete dir;
 }
@@ -1469,19 +1478,19 @@ void Preferences::parseThemeDir (Glib::ustring dirname)
 void Preferences::storePreferences ()
 {
 
-    // With the new mechanism, we can't be sure of the availability of the DEFPROFILE_RAW & DEFPROFILE_IMG profiles,
-    // because useBundledProfiles may be false. We're now using DEFPROFILE_INTERNAL instead, which is always available.
+    // With the new mechanism, we can't be sure of the availability of the Options::DEFPROFILE_RAW & Options::DEFPROFILE_IMG profiles,
+    // because useBundledProfiles may be false. We're now using Options::DEFPROFILE_INTERNAL instead, which is always available.
 
     moptions.defProfRaw = rprofiles->getFullPathFromActiveRow();
 
     if (moptions.defProfRaw.empty()) {
-        moptions.defProfRaw = DEFPROFILE_INTERNAL;
+        moptions.defProfRaw = Options::DEFPROFILE_INTERNAL;
     }
 
     moptions.defProfImg = iprofiles->getFullPathFromActiveRow();
 
     if (moptions.defProfImg.empty()) {
-        moptions.defProfImg = DEFPROFILE_INTERNAL;
+        moptions.defProfImg = Options::DEFPROFILE_INTERNAL;
     }
 
     moptions.dateFormat = dateformat->get_text();
@@ -1639,13 +1648,13 @@ void Preferences::storePreferences ()
     moptions.wb_preview_mode = Options::WBPreviewMode(wbpreview->get_active_row_number());
 
     if (sdcurrent->get_active ()) {
-        moptions.startupDir = STARTUPDIR_CURRENT;
+        moptions.startupDir = Options::STARTUPDIR_CURRENT;
     } else if (sdhome->get_active ()) {
-        moptions.startupDir = STARTUPDIR_HOME;
+        moptions.startupDir = Options::STARTUPDIR_HOME;
     } else if (sdlast->get_active ()) {
-        moptions.startupDir = STARTUPDIR_LAST;
+        moptions.startupDir = Options::STARTUPDIR_LAST;
     } else if (sdother->get_active ()) {
-        moptions.startupDir = STARTUPDIR_CUSTOM;
+        moptions.startupDir = Options::STARTUPDIR_CUSTOM;
         moptions.startupPath = startupdir->get_text();
     }
 
@@ -1895,13 +1904,13 @@ void Preferences::fillPreferences ()
     custProfBuilderLabelType->set_active (moptions.CPBKeys);
 
 
-    if (moptions.startupDir == STARTUPDIR_CURRENT) {
+    if (moptions.startupDir == Options::STARTUPDIR_CURRENT) {
         sdcurrent->set_active ();
-    } else if (moptions.startupDir == STARTUPDIR_LAST) {
+    } else if (moptions.startupDir == Options::STARTUPDIR_LAST) {
         sdlast->set_active ();
-    } else if (moptions.startupDir == STARTUPDIR_HOME) {
+    } else if (moptions.startupDir == Options::STARTUPDIR_HOME) {
         sdhome->set_active ();
-    } else if (moptions.startupDir == STARTUPDIR_CUSTOM) {
+    } else if (moptions.startupDir == Options::STARTUPDIR_CUSTOM) {
         sdother->set_active ();
         startupdir->set_text (moptions.startupPath);
     }
@@ -2206,7 +2215,7 @@ void Preferences::updateProfileList()
 void Preferences::restoreValue()
 {
     if (!rprofiles->setActiveRowFromFullPath (storedValueRaw)) {
-        moptions.defProfRaw = DEFPROFILE_INTERNAL;
+        moptions.defProfRaw = Options::DEFPROFILE_INTERNAL;
         rpconn.block (true);
         rprofiles->setInternalEntry();
         rpconn.block (false);
@@ -2215,7 +2224,7 @@ void Preferences::restoreValue()
     currRawRow = rprofiles->get_active();
 
     if (!iprofiles->setActiveRowFromFullPath (storedValueImg)) {
-        moptions.defProfImg = DEFPROFILE_INTERNAL;
+        moptions.defProfImg = Options::DEFPROFILE_INTERNAL;
         ipconn.block (true);
         iprofiles->setInternalEntry();
         ipconn.block (false);

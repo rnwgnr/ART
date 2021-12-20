@@ -189,33 +189,33 @@ int main (int argc, char **argv)
     }
 
     if (options.is_defProfRawMissing()) {
-        options.defProfRaw = DEFPROFILE_RAW;
+        options.defProfRaw = Options::DEFPROFILE_RAW;
         std::cerr << std::endl
                   << "The default profile for raw photos could not be found or is not set." << std::endl
                   << "Please check your profiles' directory, it may be missing or damaged." << std::endl
-                  << "\"" << DEFPROFILE_RAW << "\" will be used instead." << std::endl << std::endl;
+                  << "\"" << Options::DEFPROFILE_RAW << "\" will be used instead." << std::endl << std::endl;
     }
     if (options.is_bundledDefProfRawMissing()) {
         std::cerr << std::endl
                   << "The bundled profile \"" << options.defProfRaw << "\" could not be found!" << std::endl
                   << "Your installation could be damaged." << std::endl
                   << "Default internal values will be used instead." << std::endl << std::endl;
-        options.defProfRaw = DEFPROFILE_INTERNAL;
+        options.defProfRaw = Options::DEFPROFILE_INTERNAL;
     }
 
     if (options.is_defProfImgMissing()) {
-        options.defProfImg = DEFPROFILE_IMG;
+        options.defProfImg = Options::DEFPROFILE_IMG;
         std::cerr << std::endl
                   << "The default profile for non-raw photos could not be found or is not set." << std::endl
                   << "Please check your profiles' directory, it may be missing or damaged." << std::endl
-                  << "\"" << DEFPROFILE_IMG << "\" will be used instead." << std::endl << std::endl;
+                  << "\"" << Options::DEFPROFILE_IMG << "\" will be used instead." << std::endl << std::endl;
     }
     if (options.is_bundledDefProfImgMissing()) {
         std::cerr << std::endl
                   << "The bundled profile " << options.defProfImg << " could not be found!" << std::endl
                   << "Your installation could be damaged." << std::endl
                   << "Default internal values will be used instead." << std::endl << std::endl;
-        options.defProfImg = DEFPROFILE_INTERNAL;
+        options.defProfImg = Options::DEFPROFILE_INTERNAL;
     }
 
     TIFFSetWarningHandler (nullptr);   // avoid annoying message boxes
@@ -670,28 +670,28 @@ int processLineParams ( int argc, char **argv )
     if (useDefault) {
         Glib::ustring profPath = options.findProfilePath(options.defProfRaw);
         Glib::ustring fname =
-            profPath == DEFPROFILE_INTERNAL ?
-            DEFPROFILE_INTERNAL :
+            profPath == Options::DEFPROFILE_INTERNAL ?
+            Options::DEFPROFILE_INTERNAL :
             Glib::build_filename(profPath,
                                  Glib::path_get_basename(options.defProfRaw) +
                                  paramFileExtension);
         rawParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
-        if (options.is_defProfRawMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
+        if (options.is_defProfRawMissing() || profPath.empty() || (profPath != Options::DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
             std::cerr << "Error: default raw processing profile not found." << std::endl;
             return -3;
         }
 
         profPath = options.findProfilePath(options.defProfImg);
         fname =
-            profPath == DEFPROFILE_INTERNAL ?
-            DEFPROFILE_INTERNAL :
+            profPath == Options::DEFPROFILE_INTERNAL ?
+            Options::DEFPROFILE_INTERNAL :
             Glib::build_filename(profPath,
                                  Glib::path_get_basename(options.defProfImg) +
                                  paramFileExtension);
         imgParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
-        if (options.is_defProfImgMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
+        if (options.is_defProfImgMissing() || profPath.empty() || (profPath != Options::DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
             std::cerr << "Error: default non-raw processing profile not found." << std::endl;
             return -3;
         }
@@ -783,14 +783,14 @@ int processLineParams ( int argc, char **argv )
 
         if (useDefault) {
             if (isRaw) {
-                if (options.defProfRaw == DEFPROFILE_DYNAMIC) {
+                if (options.defProfRaw == Options::DEFPROFILE_DYNAMIC) {
                     rawParams = ProfileStore::getInstance()->loadDynamicProfile (ii->getMetaData());
                 }
                 
                 cpl.info("Merging default raw processing profile.");
                 rawParams->applyTo(currentParams);
             } else {
-                if (options.defProfImg == DEFPROFILE_DYNAMIC) {
+                if (options.defProfImg == Options::DEFPROFILE_DYNAMIC) {
                     imgParams = ProfileStore::getInstance()->loadDynamicProfile (ii->getMetaData());
                 }
 

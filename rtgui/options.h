@@ -26,22 +26,6 @@
 #include <exception>
 #include "exiffiltersettings.h"
 
-#define STARTUPDIR_CURRENT 0
-#define STARTUPDIR_HOME    1
-#define STARTUPDIR_CUSTOM  2
-#define STARTUPDIR_LAST    3
-
-#define THEMEREGEXSTR      "^(.+)-GTK3-(\\d{1,2})?_(\\d{1,2})?\\.css$"
-
-// Profile name to use for internal values' profile
-#define DEFPROFILE_INTERNAL "Neutral"
-// Special name for the Dynamic profile
-#define DEFPROFILE_DYNAMIC  "Dynamic"
-// Default bundled profile name to use for Standard images
-#define DEFPROFILE_IMG DEFPROFILE_INTERNAL
-// Default bundled profile name to use for Raw images
-#define DEFPROFILE_RAW DEFPROFILE_DYNAMIC
-
 struct SaveFormat {
     SaveFormat(
         const Glib::ustring& _format,
@@ -103,6 +87,25 @@ enum prevdemo_t {PD_Sidecar = 1, PD_Fast = 0};
 
 class Options {
 public:
+    enum {
+        STARTUPDIR_CURRENT = 0,
+        STARTUPDIR_HOME = 1,
+        STARTUPDIR_CUSTOM = 2,
+        STARTUPDIR_LAST = 3
+    };
+
+    static constexpr const char *THEMEREGEXSTR = "^(.+)-GTK3-(\\d{1,2})?_(\\d{1,2})?(-DEPRECATED)?\\.css$";
+
+    // Profile name to use for internal values' profile
+    static constexpr const char *DEFPROFILE_INTERNAL = "Neutral";
+    // Special name for the Dynamic profile
+    static constexpr const char *DEFPROFILE_DYNAMIC = "Dynamic";
+    // Default bundled profile name to use for Standard images
+    static constexpr const char *DEFPROFILE_IMG = DEFPROFILE_INTERNAL;
+    // Default bundled profile name to use for Raw images
+    static constexpr const char *DEFPROFILE_RAW = DEFPROFILE_DYNAMIC;
+
+    
     class Error: public std::exception {
     public:
         explicit Error (const Glib::ustring &msg): msg_ (msg) {}
