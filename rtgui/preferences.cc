@@ -1469,7 +1469,7 @@ void Preferences::parseThemeDir (Glib::ustring dirname)
                   if (firstDir.deprecated != secondDir.deprecated) {
                       return !firstDir.deprecated;
                   }
-                  return firstDir.longFName < secondDir.longFName;
+                  return firstDir.shortFName < secondDir.shortFName;
               });
 
     delete dir;

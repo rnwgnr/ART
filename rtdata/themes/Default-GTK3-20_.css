@@ -2,5 +2,4 @@
 @define-color ART-fg #AAAAAA;
 @define-color ART-hl @ART-fg;
 
-@import "_size.css";
-@import "_default.css";
+@import "_ART.css";
