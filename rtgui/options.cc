@@ -630,7 +630,12 @@ void Options::setDefaults()
 
     remember_exif_filter_settings = false;
     last_exif_filter_settings = ExifFilterSettings();
+
+    theme_bg_color.assign({72, 72, 72});
+    theme_fg_color.assign({170, 170, 170});
+    theme_hl_color.assign({227, 146, 67});
 }
+
 
 Options* Options::copyFrom(Options* other)
 {
@@ -1388,13 +1393,13 @@ void Options::readFromFile(Glib::ustring fname)
                 }
 
                 //if (keyFile.has_key ("GUI", "CurvePanelsExpanded")) crvOpen = keyFile.get_integer_list ("GUI", "CurvePanelsExpanded");
-                if (keyFile.has_key("GUI", "CutOverlayBrush")) {
-                    cutOverlayBrush = keyFile.get_double_list("GUI", "CutOverlayBrush");
-                }
+                // if (keyFile.has_key("GUI", "CutOverlayBrush")) {
+                //     cutOverlayBrush = keyFile.get_double_list("GUI", "CutOverlayBrush");
+                // }
 
-                if (keyFile.has_key("GUI", "NavGuideBrush")) {
-                    navGuideBrush = keyFile.get_double_list("GUI", "NavGuideBrush");
-                }
+                // if (keyFile.has_key("GUI", "NavGuideBrush")) {
+                //     navGuideBrush = keyFile.get_double_list("GUI", "NavGuideBrush");
+                // }
 
                 if (keyFile.has_key("GUI", "HistogramPosition")) {
                     histogramPosition = keyFile.get_integer("GUI", "HistogramPosition");
@@ -1733,6 +1738,16 @@ void Options::readFromFile(Glib::ustring fname)
                 last_exif_filter_settings.load(keyFile, g);
             }
 
+            if (keyFile.has_group("Theme Colors")) {
+                auto group = "Theme Colors";
+                theme_bg_color = keyFile.get_integer_list(group, "Background");
+                theme_bg_color.resize(3);
+                theme_fg_color = keyFile.get_integer_list(group, "Foreground");
+                theme_fg_color.resize(3);
+                theme_hl_color = keyFile.get_integer_list(group, "Highlight");
+                theme_hl_color.resize(3);
+            }
+
 // --------------------------------------------------------------------------------------------------------
 
             filterOutParsedExtensions();
@@ -1991,8 +2006,8 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer_list ("GUI", "ToolPanelsExpanded", tpopen);
         keyFile.set_boolean ("GUI", "ToolPanelsExpandedAutoSave", autoSaveTpOpen);
         keyFile.set_integer ("GUI", "MultiDisplayMode", multiDisplayMode);
-        keyFile.set_double_list ("GUI", "CutOverlayBrush", cutOverlayBrush);
-        keyFile.set_double_list ("GUI", "NavGuideBrush", navGuideBrush);
+        // keyFile.set_double_list ("GUI", "CutOverlayBrush", cutOverlayBrush);
+        // keyFile.set_double_list ("GUI", "NavGuideBrush", navGuideBrush);
         keyFile.set_integer ("GUI", "HistogramPosition", histogramPosition);
         keyFile.set_boolean ("GUI", "HistogramRed", histogramRed);
         keyFile.set_boolean ("GUI", "HistogramGreen", histogramGreen);
@@ -2113,6 +2128,10 @@ void Options::saveToFile(Glib::ustring fname)
 
         keyFile.set_boolean("ExifFilterSettings", "Remember", remember_exif_filter_settings);
         last_exif_filter_settings.save(keyFile, "ExifFilterSettings");
+
+        keyFile.set_integer_list("Theme Colors", "Background", theme_bg_color);
+        keyFile.set_integer_list("Theme Colors", "Foreground", theme_fg_color);
+        keyFile.set_integer_list("Theme Colors", "Highlight", theme_hl_color);
 
         keyData = keyFile.to_data();
 

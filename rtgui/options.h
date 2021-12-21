@@ -105,6 +105,7 @@ public:
     // Default bundled profile name to use for Raw images
     static constexpr const char *DEFPROFILE_RAW = DEFPROFILE_DYNAMIC;
 
+    static constexpr const char *DEFAULT_THEME = "Default";
     
     class Error: public std::exception {
     public:
@@ -457,6 +458,10 @@ public:
 
     bool remember_exif_filter_settings;
     ExifFilterSettings last_exif_filter_settings;
+
+    std::vector<int> theme_bg_color; // RGB in 0-255
+    std::vector<int> theme_fg_color;
+    std::vector<int> theme_hl_color;
 
     Options();
 

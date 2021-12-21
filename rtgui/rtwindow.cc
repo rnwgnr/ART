@@ -32,7 +32,7 @@
 
 float fontScale = 1.f;
 Glib::RefPtr<Gtk::CssProvider> cssForced;
-Glib::RefPtr<Gtk::CssProvider> cssRT;
+// Glib::RefPtr<Gtk::CssProvider> cssRT;
 
 extern unsigned char initialGdkScale;
 
@@ -286,64 +286,67 @@ RTWindow::RTWindow():
         Gtk::Settings::get_for_screen (screen)->property_gtk_theme_name() = "Adwaita";
         Gtk::Settings::get_for_screen (screen)->property_gtk_application_prefer_dark_theme() = true;
 
-        Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create(Options::THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
-        Glib::ustring filename;
-        Glib::MatchInfo mInfo;
-        bool match = regex->match(options.theme + ".css", mInfo);
-        if (match) {
-            // save old theme (name + version)
-            Glib::ustring initialTheme(options.theme);
-            bool deprecated = !(mInfo.fetch(4).empty());
+        if (GTK_MINOR_VERSION < 20 || options.theme != Options::DEFAULT_THEME) {
+            Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create(Options::THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
+            Glib::ustring filename;
+            Glib::MatchInfo mInfo;
+            bool match = regex->match(options.theme + ".css", mInfo);
+            if (match) {
+                // save old theme (name + version)
+                Glib::ustring initialTheme(options.theme);
+                bool deprecated = !(mInfo.fetch(4).empty());
 
-            // update version
-            auto pos = options.theme.find("-GTK3-");
-            Glib::ustring themeRootName(options.theme.substr(0, pos));
-            if (GTK_MINOR_VERSION < 20) {
-                options.theme = themeRootName + "-GTK3-_19";
-            } else {
-                options.theme = themeRootName + "-GTK3-20_";
-            }
-            // check if this version exist
-            bool reset = false;
-            if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
-                if (!deprecated) {
-                    options.theme += "-DEPRECATED";
-                    if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                // update version
+                auto pos = options.theme.find("-GTK3-");
+                Glib::ustring themeRootName(options.theme.substr(0, pos));
+                if (GTK_MINOR_VERSION < 20) {
+                    options.theme = themeRootName + "-GTK3-_19";
+                } else {
+                    options.theme = themeRootName + "-GTK3-20_";
+                }
+                // check if this version exist
+                bool reset = false;
+                if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                    if (!deprecated) {
+                        options.theme += "-DEPRECATED";
+                        if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                            reset = true;
+                        }
+                    } else {
                         reset = true;
                     }
-                } else {
-                    reset = true;
+                }
+                if (reset) {
+                    options.theme = initialTheme;
                 }
             }
-            if (reset) {
-                options.theme = initialTheme;
+            filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
+
+            if (!match || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+                options.theme = "Default-GTK";
+
+                // We're not testing GTK_MAJOR_VERSION == 3 here, since this branch requires Gtk3 only
+                if (GTK_MINOR_VERSION < 20) {
+                    options.theme = options.theme + "3-_19";
+                } else {
+                    options.theme = options.theme + "3-20_";
+                }
+
+                // filename = Glib::build_filename (argv0, "themes", options.theme + ".css");
             }
         }
-        filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
 
-        if (!match || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
-            options.theme = "Default-GTK";
+        // cssRT = Gtk::CssProvider::create();
 
-            // We're not testing GTK_MAJOR_VERSION == 3 here, since this branch requires Gtk3 only
-            if (GTK_MINOR_VERSION < 20) {
-                options.theme = options.theme + "3-_19";
-            } else {
-                options.theme = options.theme + "3-20_";
-            }
-
-            filename = Glib::build_filename (argv0, "themes", options.theme + ".css");
-        }
-
-        cssRT = Gtk::CssProvider::create();
-
-        try {
-            cssRT->load_from_path (filename);
-            Gtk::StyleContext::add_provider_for_screen (screen, cssRT, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-        } catch (Glib::Error &err) {
-            printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
-        } catch (...) {
-            printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
-        }
+        // try {
+        //     cssRT->load_from_path (filename);
+        //     Gtk::StyleContext::add_provider_for_screen (screen, cssRT, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        // } catch (Glib::Error &err) {
+        //     printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
+        // } catch (...) {
+        //     printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
+        // }
+        Preferences::switchThemeTo(options.theme);
 
         // Set the font face and size
         Glib::ustring css;

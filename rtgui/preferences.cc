@@ -35,6 +35,24 @@ extern Glib::ustring argv0;
 Glib::RefPtr<Gtk::CssProvider> themecss;
 Glib::RefPtr<Gtk::CssProvider> fontcss;
 
+namespace {
+
+std::vector<int> get_theme_color(Gtk::ColorButton *c)
+{
+    const auto getcol =
+        [](double v) -> int { return rtengine::LIM(v * 255, 0., 255.); };
+
+    Gdk::RGBA col = c->get_rgba();
+    std::vector<int> ret(3);
+    ret[0] = getcol(col.get_red());
+    ret[1] = getcol(col.get_green());
+    ret[2] = getcol(col.get_blue());
+    return ret;
+}
+
+} // namespace
+
+
 Preferences::Preferences (RTWindow *rtwindow)
     : Gtk::Dialog (M ("MAIN_BUTTON_PREFERENCES"), *rtwindow, true)
     , splash (nullptr)
@@ -93,9 +111,8 @@ Preferences::Preferences (RTWindow *rtwindow)
 
     ProfileStore::getInstance()->addListener (this);
 
-    fillPreferences ();
-
     show_all_children ();
+    fillPreferences ();
 }
 
 
@@ -818,13 +835,18 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     Gtk::Grid* appearanceGrid = Gtk::manage(new Gtk::Grid());
     appearanceGrid->get_style_context()->add_class("grid-spacing");
     setExpandAlignProperties(appearanceGrid, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    //appearanceGrid->set_column_homogeneous(false);
 
     Gtk::Label* themeLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_THEME") + ":"));
     setExpandAlignProperties(themeLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     Gtk::Label* themeRestartLbl = Gtk::manage ( new Gtk::Label (Glib::ustring (" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")") );
     setExpandAlignProperties(themeRestartLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
-    themeCBT = Gtk::manage(new Gtk::ComboBoxText());
+    MyComboBoxText *mcb = Gtk::manage(new MyComboBoxText());
+    mcb->setPreferredWidth(150, 150);
+    themeCBT = mcb;
+    
+    //setExpandAlignProperties(themeCBT, true, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     themeCBT->set_active(0);
     parseThemeDir(Glib::build_filename(argv0, "themes"));
     for (size_t i = 0; i < themeFNames.size(); i++) {
@@ -839,6 +861,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     setExpandAlignProperties(mainFontLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
     mainFontFB = Gtk::manage(new Gtk::FontButton());
+    //setExpandAlignProperties(mainFontFB, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     mainFontFB->set_use_size(true);
     if (options.fontFamily == "default") {
         mainFontFB->set_font_name(Glib::ustring::compose("%1 %2", initialFontFamily, initialFontSize));
@@ -850,6 +873,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     setExpandAlignProperties(colorPickerFontLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
     colorPickerFontFB = Gtk::manage(new Gtk::FontButton());
+    //setExpandAlignProperties(colorPickerFontFB, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     colorPickerFontFB->set_use_size(true);
     if (options.fontFamily == "default") {
         colorPickerFontFB->set_font_name(Glib::ustring::compose("%1 %2", initialFontFamily, initialFontSize));
@@ -857,38 +881,83 @@ Gtk::Widget* Preferences::getGeneralPanel ()
         colorPickerFontFB->set_font_name(Glib::ustring::compose("%1 %2", options.CPFontFamily, options.CPFontSize));
     }
 
-    Gtk::Label* cropMaskColorLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_CROPMASKCOLOR") + ":"));
-    setExpandAlignProperties(cropMaskColorLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    // Gtk::Label* cropMaskColorLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_CROPMASKCOLOR") + ":"));
+    // setExpandAlignProperties(cropMaskColorLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
-    cropMaskColorCB = Gtk::manage(new Gtk::ColorButton());
-    cropMaskColorCB->set_use_alpha(true);
+    // cropMaskColorCB = Gtk::manage(new Gtk::ColorButton());
+    // cropMaskColorCB->set_use_alpha(true);
 
-    Gtk::Label* navGuideColorLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_NAVGUIDECOLOR") + ":"));
-    setExpandAlignProperties(navGuideColorLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    // Gtk::Label* navGuideColorLbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_NAVGUIDECOLOR") + ":"));
+    // setExpandAlignProperties(navGuideColorLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
-    navGuideColorCB = Gtk::manage(new Gtk::ColorButton());
-    navGuideColorCB->set_use_alpha(true);
+    // navGuideColorCB = Gtk::manage(new Gtk::ColorButton());
+    // navGuideColorCB->set_use_alpha(true);
+
+
+    theme_bg_lbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_THEME_BG_COLOR") + ":"));
+    setExpandAlignProperties(theme_bg_lbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    theme_bg_color = Gtk::manage(new Gtk::ColorButton());
+    theme_bg_color->set_use_alpha(false);
+
+    theme_fg_lbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_THEME_FG_COLOR") + ":"));
+    setExpandAlignProperties(theme_fg_lbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    theme_fg_color = Gtk::manage(new Gtk::ColorButton());
+    theme_fg_color->set_use_alpha(false);
+
+    theme_hl_lbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_APPEARANCE_THEME_HL_COLOR") + ":"));
+    setExpandAlignProperties(theme_hl_lbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    theme_hl_color = Gtk::manage(new Gtk::ColorButton());
+    theme_hl_color->set_use_alpha(false);
+
+    // theme_color_grid->attach(*theme_bg_lbl, 0, 0, 1, 1);
+    // theme_color_grid->attach(*theme_bg_color, 1, 0, 1, 1);
+    // theme_color_grid->attach(*theme_fg_lbl, 0, 1, 1, 1);
+    // theme_color_grid->attach(*theme_fg_color, 1, 1, 1, 1);
+    // theme_color_grid->attach(*theme_hl_lbl, 0, 2, 1, 1);
+    // theme_color_grid->attach(*theme_hl_color, 1, 2, 1, 1);
 
     pseudoHiDPI = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_APPEARANCE_PSEUDOHIDPI") + Glib::ustring (" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")"));
     setExpandAlignProperties(pseudoHiDPI, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
 
     Gtk::VSeparator *vSep = Gtk::manage(new Gtk::VSeparator());
 
-    appearanceGrid->attach(*themeLbl,           0, 0, 1, 1);
-    appearanceGrid->attach(*themeCBT,           1, 0, 1, 1);
-    appearanceGrid->attach(*themeRestartLbl,    2, 0, 2, 1);
-    appearanceGrid->attach(*vSep,               2, 1, 1, 2);
-    appearanceGrid->attach(*mainFontLbl,        0, 1, 1, 1);
-    appearanceGrid->attach(*mainFontFB,         1, 1, 1, 1);
-    appearanceGrid->attach(*cropMaskColorLbl,   3, 1, 1, 1);
-    appearanceGrid->attach(*cropMaskColorCB,    4, 1, 1, 1);
-    appearanceGrid->attach(*colorPickerFontLbl, 0, 2, 1, 1);
-    appearanceGrid->attach(*colorPickerFontFB,  1, 2, 1, 1);
-    appearanceGrid->attach(*navGuideColorLbl,   3, 2, 1, 1);
-    appearanceGrid->attach(*navGuideColorCB,    4, 2, 1, 1);
-    appearanceGrid->attach(*pseudoHiDPI,        0, 3, 5, 1);
+    {
+        // Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        Gtk::HBox *hb2 = Gtk::manage(new Gtk::HBox());
+        hb2->pack_start(*themeCBT, Gtk::PACK_EXPAND_WIDGET, 0);
+        hb2->pack_start(*themeRestartLbl, Gtk::PACK_SHRINK);
+        setExpandAlignProperties(hb2, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+    
+        appearanceGrid->attach(*themeLbl,           0, 0, 1, 1);
+        appearanceGrid->attach(*hb2,           1, 0, 1, 1);
+        // appearanceGrid->attach(*themeCBT,           1, 0, 1, 1);
+        // appearanceGrid->attach(*themeRestartLbl,    2, 0, 2, 1);
+        appearanceGrid->attach(*vSep,               2, 0, 1, 3);
+        appearanceGrid->attach(*mainFontLbl,        0, 1, 1, 1);
+        appearanceGrid->attach(*mainFontFB,         1, 1, 1, 1);
+        // appearanceGrid->attach(*cropMaskColorLbl,   3, 1, 1, 1);
+        // appearanceGrid->attach(*cropMaskColorCB,    4, 1, 1, 1);
+        appearanceGrid->attach(*colorPickerFontLbl, 0, 2, 1, 1);
+        appearanceGrid->attach(*colorPickerFontFB,  1, 2, 1, 1);
+        // appearanceGrid->attach(*navGuideColorLbl,   3, 2, 1, 1);
+        // appearanceGrid->attach(*navGuideColorCB,    4, 2, 1, 1);
+        appearanceGrid->attach(*pseudoHiDPI,        0, 3, 2, 1);
 
-    appearanceFrame->add(*appearanceGrid);
+        appearanceGrid->attach(*theme_bg_lbl, 3, 0, 1, 1);
+        appearanceGrid->attach(*theme_bg_color, 4, 0, 1, 1);
+        appearanceGrid->attach(*theme_fg_lbl, 3, 1, 1, 1);
+        appearanceGrid->attach(*theme_fg_color, 4, 1, 1, 1);
+        appearanceGrid->attach(*theme_hl_lbl, 3, 2, 1, 1);
+        appearanceGrid->attach(*theme_hl_color, 4, 2, 1, 1);
+
+        // appearanceGrid->attach(*theme_color_grid, 2, 0, 2, 3);
+
+        // hb->pack_start(*appearanceGrid, Gtk::PACK_SHRINK);//EXPAND_WIDGET);
+        // hb->pack_start(*theme_color_grid, Gtk::PACK_EXPAND_WIDGET);
+        appearanceFrame->add(*appearanceGrid);        
+    }
+
+    //appearanceFrame->add(*appearanceGrid);
     //vbGeneral->attach_next_to(*appearanceFrame, *flang, Gtk::POS_BOTTOM, 2, 1);
     abox->set_spacing(4);
     abox->pack_start(*appearanceFrame, Gtk::PACK_EXPAND_WIDGET);
@@ -1074,6 +1143,10 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     tconn = themeCBT->signal_changed().connect ( sigc::mem_fun (*this, &Preferences::themeChanged) );
     fconn = mainFontFB->signal_font_set().connect ( sigc::mem_fun (*this, &Preferences::fontChanged) );
     cpfconn = colorPickerFontFB->signal_font_set().connect ( sigc::mem_fun (*this, &Preferences::cpFontChanged) );
+
+    theme_bg_color->signal_color_set().connect(sigc::mem_fun(*this, &Preferences::themeChanged));
+    theme_fg_color->signal_color_set().connect(sigc::mem_fun(*this, &Preferences::themeChanged));
+    theme_hl_color->signal_color_set().connect(sigc::mem_fun(*this, &Preferences::themeChanged));
 
     swGeneral->add(*vbGeneral);
     return swGeneral;
@@ -1472,6 +1545,10 @@ void Preferences::parseThemeDir (Glib::ustring dirname)
                   return firstDir.shortFName < secondDir.shortFName;
               });
 
+    if (GTK_MINOR_VERSION >= 20) {
+        themeFNames.insert(themeFNames.begin(), ThemeFilename(M("PROFILEPANEL_PDEFAULT"), Options::DEFAULT_THEME, false));
+    }
+
     delete dir;
 }
 
@@ -1513,18 +1590,36 @@ void Preferences::storePreferences ()
     moptions.languageAutoDetect = ckbLangAutoDetect->get_active ();
     moptions.theme = themeFNames.at (themeCBT->get_active_row_number ()).longFName;
 
-    Gdk::RGBA cropCol = cropMaskColorCB->get_rgba();
-    moptions.cutOverlayBrush[0] = cropCol.get_red();
-    moptions.cutOverlayBrush[1] = cropCol.get_green();
-    moptions.cutOverlayBrush[2] = cropCol.get_blue();
-    moptions.cutOverlayBrush[3] = cropMaskColorCB->get_alpha() / 65535.0;
+    // Gdk::RGBA cropCol = cropMaskColorCB->get_rgba();
+    // moptions.cutOverlayBrush[0] = cropCol.get_red();
+    // moptions.cutOverlayBrush[1] = cropCol.get_green();
+    // moptions.cutOverlayBrush[2] = cropCol.get_blue();
+    // moptions.cutOverlayBrush[3] = cropMaskColorCB->get_alpha() / 65535.0;
 
-    Gdk::RGBA NavGuideCol = navGuideColorCB->get_rgba();
-    moptions.navGuideBrush[0] = NavGuideCol.get_red();
-    moptions.navGuideBrush[1] = NavGuideCol.get_green();
-    moptions.navGuideBrush[2] = NavGuideCol.get_blue();
-    moptions.navGuideBrush[3] = navGuideColorCB->get_alpha() / 65535.0;
+    // Gdk::RGBA NavGuideCol = navGuideColorCB->get_rgba();
+    // moptions.navGuideBrush[0] = NavGuideCol.get_red();
+    // moptions.navGuideBrush[1] = NavGuideCol.get_green();
+    // moptions.navGuideBrush[2] = NavGuideCol.get_blue();
+    // moptions.navGuideBrush[3] = navGuideColorCB->get_alpha() / 65535.0;
 
+    const auto getcol =
+        [](double v) -> int { return rtengine::LIM(v * 255, 0., 255.); };
+
+    Gdk::RGBA bg_col = theme_bg_color->get_rgba();
+    moptions.theme_bg_color[0] = getcol(bg_col.get_red());
+    moptions.theme_bg_color[1] = getcol(bg_col.get_green());
+    moptions.theme_bg_color[2] = getcol(bg_col.get_blue());
+
+    Gdk::RGBA fg_col = theme_fg_color->get_rgba();
+    moptions.theme_fg_color[0] = getcol(fg_col.get_red());
+    moptions.theme_fg_color[1] = getcol(fg_col.get_green());
+    moptions.theme_fg_color[2] = getcol(fg_col.get_blue());
+
+    Gdk::RGBA hl_col = theme_hl_color->get_rgba();
+    moptions.theme_hl_color[0] = getcol(hl_col.get_red());
+    moptions.theme_hl_color[1] = getcol(hl_col.get_green());
+    moptions.theme_hl_color[2] = getcol(hl_col.get_blue());
+    
     Pango::FontDescription fd (mainFontFB->get_font_name());
 
     if (newFont) {
@@ -1807,7 +1902,7 @@ void Preferences::fillPreferences ()
 
     monBPC->set_active (moptions.rtSettings.monitorBPC);
     cbAutoMonProfile->set_active (moptions.rtSettings.autoMonitorProfile);
-#endif
+#endif // __APPLE__
 
     if (Glib::file_test (moptions.rtSettings.iccDirectory, Glib::FILE_TEST_IS_DIR)) {
         iccDir->set_current_folder (moptions.rtSettings.iccDirectory);
@@ -1824,16 +1919,28 @@ void Preferences::fillPreferences ()
     int themeNbr = getThemeRowNumber (moptions.theme);
     themeCBT->set_active (themeNbr == -1 ? 0 : themeNbr);
 
-    Gdk::RGBA cropCol;
-    cropCol.set_rgba (moptions.cutOverlayBrush[0], moptions.cutOverlayBrush[1], moptions.cutOverlayBrush[2]);
-    cropMaskColorCB->set_rgba (cropCol);
-    cropMaskColorCB->set_alpha ( (unsigned short) (moptions.cutOverlayBrush[3] * 65535.0));
+    // Gdk::RGBA cropCol;
+    // cropCol.set_rgba (moptions.cutOverlayBrush[0], moptions.cutOverlayBrush[1], moptions.cutOverlayBrush[2]);
+    // cropMaskColorCB->set_rgba (cropCol);
+    // cropMaskColorCB->set_alpha ( (unsigned short) (moptions.cutOverlayBrush[3] * 65535.0));
 
-    Gdk::RGBA NavGuideCol;
-    NavGuideCol.set_rgba (moptions.navGuideBrush[0], moptions.navGuideBrush[1], moptions.navGuideBrush[2]);
-    navGuideColorCB->set_rgba (NavGuideCol);
-    navGuideColorCB->set_alpha ( (unsigned short) (moptions.navGuideBrush[3] * 65535.0));
+    // Gdk::RGBA NavGuideCol;
+    // NavGuideCol.set_rgba (moptions.navGuideBrush[0], moptions.navGuideBrush[1], moptions.navGuideBrush[2]);
+    // navGuideColorCB->set_rgba (NavGuideCol);
+    // navGuideColorCB->set_alpha ( (unsigned short) (moptions.navGuideBrush[3] * 65535.0));
 
+    Gdk::RGBA bg_col;
+    bg_col.set_rgba(moptions.theme_bg_color[0] / 255.0, moptions.theme_bg_color[1] / 255.0, moptions.theme_bg_color[2] / 255.0);
+    theme_bg_color->set_rgba(bg_col);
+
+    Gdk::RGBA fg_col;
+    fg_col.set_rgba(moptions.theme_fg_color[0] / 255.0, moptions.theme_fg_color[1] / 255.0, moptions.theme_fg_color[2] / 255.0);
+    theme_fg_color->set_rgba(fg_col);
+
+    Gdk::RGBA hl_col;
+    hl_col.set_rgba(moptions.theme_hl_color[0] / 255.0, moptions.theme_hl_color[1] / 255.0, moptions.theme_hl_color[2] / 255.0);
+    theme_hl_color->set_rgba(hl_col);
+   
     if (options.fontFamily == "default") {
         mainFontFB->set_font_name (Glib::ustring::compose ("%1 %2", initialFontFamily, initialFontSize));
     } else {
@@ -2005,6 +2112,15 @@ void Preferences::fillPreferences ()
 
     fastexport_max_width->set_value(moptions.fastexport_resize_width);
     fastexport_max_height->set_value(moptions.fastexport_resize_height);
+
+    //theme_color_grid->set_visible(GTK_MINOR_VERSION >= 20 && moptions.theme == Options::DEFAULT_THEME);
+    bool theme_colors_visible = (GTK_MINOR_VERSION >= 20 && moptions.theme == Options::DEFAULT_THEME);
+    theme_bg_lbl->set_visible(theme_colors_visible);
+    theme_fg_lbl->set_visible(theme_colors_visible);
+    theme_hl_lbl->set_visible(theme_colors_visible);
+    theme_bg_color->set_visible(theme_colors_visible);
+    theme_fg_color->set_visible(theme_colors_visible);
+    theme_hl_color->set_visible(theme_colors_visible);
 }
 
 
@@ -2048,9 +2164,9 @@ void Preferences::okPressed ()
 void Preferences::cancelPressed ()
 {
     // set the initial theme back
-    if (themeFNames.at (themeCBT->get_active_row_number ()).longFName != options.theme) {
+    if (themeFNames.at(themeCBT->get_active_row_number ()).longFName != options.theme || options.theme_bg_color != moptions.theme_bg_color || options.theme_fg_color != moptions.theme_fg_color || options.theme_hl_color != moptions.theme_hl_color) {
         RTImage::updateImages();
-        switchThemeTo (options.theme);
+        switchThemeTo(options.theme);
     }
 
     // set the initial font back
@@ -2104,10 +2220,23 @@ void Preferences::aboutPressed ()
 
 void Preferences::themeChanged ()
 {
+    moptions.theme = themeFNames.at(themeCBT->get_active_row_number ()).longFName;
+    moptions.theme_bg_color = get_theme_color(theme_bg_color);
+    moptions.theme_fg_color = get_theme_color(theme_fg_color);
+    moptions.theme_hl_color = get_theme_color(theme_hl_color);
 
-    moptions.theme = themeFNames.at (themeCBT->get_active_row_number ()).longFName;
+
+    bool theme_color_visible = (GTK_MINOR_VERSION >= 20 && moptions.theme == Options::DEFAULT_THEME);
+
+    theme_bg_lbl->set_visible(theme_color_visible);
+    theme_fg_lbl->set_visible(theme_color_visible);
+    theme_hl_lbl->set_visible(theme_color_visible);
+    theme_bg_color->set_visible(theme_color_visible);
+    theme_fg_color->set_visible(theme_color_visible);
+    theme_hl_color->set_visible(theme_color_visible);
+    
     RTImage::updateImages();
-    switchThemeTo (moptions.theme);
+    switchThemeTo(moptions.theme, &moptions);
 }
 
 void Preferences::forRAWComboChanged ()
@@ -2236,32 +2365,51 @@ void Preferences::restoreValue()
     storedValueImg = "";
 }
 
-void Preferences::switchThemeTo (Glib::ustring newTheme)
+
+void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *opts)
 {
-
-    Glib::ustring filename (Glib::build_filename (argv0, "themes", newTheme + ".css"));
-
     if (!themecss) {
         themecss = Gtk::CssProvider::create();
         Glib::RefPtr<Gdk::Screen> screen = Gdk::Screen::get_default();
-        Gtk::StyleContext::add_provider_for_screen (screen, themecss, GTK_STYLE_PROVIDER_PRIORITY_USER);
+        Gtk::StyleContext::add_provider_for_screen(screen, themecss, GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
 
-    try {
-        themecss->load_from_path (filename);
-    } catch (Glib::Error &err) {
-        printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
-    } catch (...) {
-        printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
+    if (GTK_MINOR_VERSION >= 20 && newTheme == Options::DEFAULT_THEME) {
+        if (!opts) {
+            opts = &options;
+        }
+        std::ostringstream buf;
+        std::string filename(Glib::build_filename(argv0, "themes", "_ART.css"));
+        buf << "@define-color ART-bg rgb(" << opts->theme_bg_color[0] << "," << opts->theme_bg_color[1] << "," << opts->theme_bg_color[2] << ");\n"
+            << "@define-color ART-fg rgb(" << opts->theme_fg_color[0] << "," << opts->theme_fg_color[1] << "," << opts->theme_fg_color[2] << ");\n"
+            << "@define-color ART-hl rgb(" << opts->theme_hl_color[0] << "," << opts->theme_hl_color[1] << "," << opts->theme_hl_color[2] << ");\n"
+            << "@import \"" << filename << "\";\n";
+        try {
+            themecss->load_from_data(buf.str());
+        } catch (Glib::Error &err) {
+            printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
+        } catch (...) {
+            printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
+        }
+    } else {
+        Glib::ustring filename(Glib::build_filename (argv0, "themes", newTheme + ".css"));
+
+        try {
+            themecss->load_from_path (filename);
+        } catch (Glib::Error &err) {
+            printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
+        } catch (...) {
+            printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
+        }
     }
 }
 
+
 void Preferences::fontChanged ()
 {
-
     newFont = true;
     Pango::FontDescription fd (mainFontFB->get_font_name());
-    switchFontTo (fd.get_family(), fd.get_size() / Pango::SCALE);
+    switchFontTo(fd.get_family(), fd.get_size() / Pango::SCALE);
 }
 
 void Preferences::cpFontChanged ()

@@ -123,10 +123,16 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::ComboBoxText* themeCBT;
     Gtk::FontButton* mainFontFB;
     Gtk::FontButton* colorPickerFontFB;
-    Gtk::ColorButton* cropMaskColorCB;
-    Gtk::ColorButton* navGuideColorCB;
+    // Gtk::ColorButton* cropMaskColorCB;
+    // Gtk::ColorButton* navGuideColorCB;
     Gtk::CheckButton* pseudoHiDPI;
 
+    Gtk::ColorButton *theme_bg_color;
+    Gtk::ColorButton *theme_fg_color;
+    Gtk::ColorButton *theme_hl_color;
+    Gtk::Label *theme_bg_lbl;
+    Gtk::Label *theme_fg_lbl;
+    Gtk::Label *theme_hl_lbl;
 
     Gtk::SpinButton*   maxRecentFolders;
     Gtk::SpinButton*   maxThumbHeightSB;
@@ -227,8 +233,6 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     void layoutComboChanged ();
     void bundledProfilesChanged ();
     void iccDirChanged ();
-    void switchThemeTo (Glib::ustring newTheme);
-    void switchFontTo  (const Glib::ustring &newFontFamily, const int newFontSize);
     bool splashClosed (GdkEventAny* event);
 
     int getThemeRowNumber (Glib::ustring& longThemeFName);
@@ -277,4 +281,7 @@ public:
     void storeCurrentValue() override;
     void updateProfileList() override;
     void restoreValue() override;
+
+    static void switchThemeTo(const Glib::ustring &newTheme, const Options *opts=nullptr);
+    static void switchFontTo(const Glib::ustring &newFontFamily, const int newFontSize);
 };
