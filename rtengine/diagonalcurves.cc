@@ -23,8 +23,11 @@
 #include <vector>
 #include "mytime.h"
 #include <cstring>
+#include "settings.h"
 
 namespace rtengine {
+
+extern const Settings *settings;
 
 namespace {
 
@@ -524,8 +527,10 @@ double DiagonalCurve::getVal (double t) const
         unsigned short int i = (unsigned short int)(t * hashSize);
 
         if (UNLIKELY(i > (hashSize + 1))) {
-            //printf("\nOVERFLOW: hash #%d is used while seeking for value %.8f, corresponding polygon's point #%d (out of %d point) x value: %.8f\n\n", i, t, hash.at(i), poly_x.size(), poly_x[hash.at(i)]);
-            printf("\nOVERFLOW: hash #%d is used while seeking for value %.8f\n\n", i, t);
+            if (settings->verbose) {
+                //printf("\nOVERFLOW: hash #%d is used while seeking for value %.8f, corresponding polygon's point #%d (out of %d point) x value: %.8f\n\n", i, t, hash.at(i), poly_x.size(), poly_x[hash.at(i)]);
+                printf("OVERFLOW: hash #%d is used while seeking for value %.8f\n", i, t);
+            }
             return t;
         }
 
