@@ -260,7 +260,7 @@ GENERAL_SLIDER;Control deslizante
 GENERAL_UNCHANGED;(Sin cambios)
 GENERAL_WARNING;Advertencia
 GENERAL_DEPRECATED;Obsoleto
-GENERAL_DEPRECATED_TOOLTIP;<b>¡Obsoleto!</b> Se eliminará en una versión futura.
+GENERAL_DEPRECATED_TOOLTIP;¡Obsoleto! Se eliminará en una versión futura.
 GIMP_PLUGIN_INFO;¡Bienvenido al plugin GIMP de ART!\nUna vez que termine de editar, simplemente cierre la ventana principal de ART y la imagen se importará a GIMP automáticamente.
 HISTOGRAM_RAW_STATS_TOOLTIP;mín: %1 (%2), máx: %3 (%4), pico: %5 (%6)\n    rango: %7 EV, valores: %8, píxels: %9
 HISTOGRAM_TOOLTIP_B;Mostrar/Ocultar histograma azul.

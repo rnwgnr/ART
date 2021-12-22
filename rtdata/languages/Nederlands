@@ -255,7 +255,7 @@ GENERAL_CLOSE;Sluiten
 GENERAL_CURRENT;Huidig
 GENERAL_DELETE_ALL;Wis alles
 GENERAL_DEPRECATED;Verouderd
-GENERAL_DEPRECATED_TOOLTIP;<b>Verouderd!</b> Komt niet meer voor in een toekomstige versie.
+GENERAL_DEPRECATED_TOOLTIP;Verouderd! Komt niet meer voor in een toekomstige versie.
 GENERAL_DISABLE;Deactiveer
 GENERAL_DISABLED;Gedeactiveerd
 GENERAL_EDIT;Bewerk

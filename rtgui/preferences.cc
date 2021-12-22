@@ -843,7 +843,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     setExpandAlignProperties(themeRestartLbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
     MyComboBoxText *mcb = Gtk::manage(new MyComboBoxText());
-    mcb->setPreferredWidth(150, 150);
+    mcb->setPreferredWidth(150, 250);
     themeCBT = mcb;
     
     //setExpandAlignProperties(themeCBT, true, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
@@ -951,6 +951,38 @@ Gtk::Widget* Preferences::getGeneralPanel ()
         appearanceGrid->attach(*theme_hl_color, 4, 2, 1, 1);
 
         // appearanceGrid->attach(*theme_color_grid, 2, 0, 2, 3);
+
+        Gtk::Button *reset = Gtk::manage(new Gtk::Button());
+        reset->set_tooltip_markup(M("ADJUSTER_RESET_TO_DEFAULT"));
+        reset->add(*Gtk::manage(new RTImage("undo-small.png")));
+        reset->signal_clicked().connect(
+            sigc::slot<void>([&]() -> void
+                             {
+                                 Options opts;
+                                 Gdk::RGBA c;
+                                 c.set_rgba(opts.theme_bg_color[0]/255.0,
+                                            opts.theme_bg_color[1]/255.0,
+                                            opts.theme_bg_color[2]/255.0);
+                                 theme_bg_color->set_rgba(c);
+
+                                 c.set_rgba(opts.theme_fg_color[0]/255.0,
+                                            opts.theme_fg_color[1]/255.0,
+                                            opts.theme_fg_color[2]/255.0);
+                                 theme_fg_color->set_rgba(c);
+
+                                 c.set_rgba(opts.theme_hl_color[0]/255.0,
+                                            opts.theme_hl_color[1]/255.0,
+                                            opts.theme_hl_color[2]/255.0);
+                                 theme_hl_color->set_rgba(c);
+
+                                 themeChanged();
+                             }));
+        setExpandAlignProperties(reset, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
+        reset->set_relief(Gtk::RELIEF_NONE);
+        reset->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
+        reset->set_can_focus(false);
+        reset->set_size_request(-1, 20);
+        appearanceGrid->attach(*reset, 5, 0, 1, 1);
 
         // hb->pack_start(*appearanceGrid, Gtk::PACK_SHRINK);//EXPAND_WIDGET);
         // hb->pack_start(*theme_color_grid, Gtk::PACK_EXPAND_WIDGET);

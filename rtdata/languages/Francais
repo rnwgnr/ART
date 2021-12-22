@@ -247,7 +247,7 @@ GENERAL_SLIDER;Curseur
 GENERAL_UNCHANGED;(Inchangé)
 GENERAL_WARNING;Attention
 GENERAL_DEPRECATED;Obsolète
-GENERAL_DEPRECATED_TOOLTIP;<b>Obsolète !</b> sera éliminée dans une prochaine version.
+GENERAL_DEPRECATED_TOOLTIP;Obsolète ! sera éliminée dans une prochaine version.
 GIMP_PLUGIN_INFO;Bienvenue dans le plugin ART de GIMP !\nUne fois l'édition terminée, fermez simplement la fenêtre principale de ART et l'image sera importée automatiquement dans GIMP.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), pic: %5 (%6)\n    gamme: %7 EV, valeurs: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;Montrer/Cacher l'histogramme du bleu.
@@ -957,6 +957,9 @@ PREFERENCES_APPEARANCE_MAINFONT;Police principale
 PREFERENCES_APPEARANCE_NAVGUIDECOLOR;Couleur du cadre du Navigateur
 PREFERENCES_APPEARANCE_PSEUDOHIDPI;Mode pseudo-HiDPI
 PREFERENCES_APPEARANCE_THEME;Thème
+PREFERENCES_APPEARANCE_THEME_BG_COLOR;Arrière plan
+PREFERENCES_APPEARANCE_THEME_FG_COLOR;Premier plan
+PREFERENCES_APPEARANCE_THEME_HL_COLOR;Surlignage
 PREFERENCES_APPLNEXTSTARTUP;Redémarrage requis
 PREFERENCES_AUTOMONPROFILE;Utiliser le profil d'écran réglé dans le système d'exploitation
 PREFERENCES_AUTOSAVE_TP_OPEN;Sauvegarder l'état ouvert/fermé des outils en quittant

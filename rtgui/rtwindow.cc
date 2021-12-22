@@ -312,6 +312,14 @@ RTWindow::RTWindow():
                         if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
                             reset = true;
                         }
+                        
+                        Glib::signal_timeout().connect(
+                            sigc::slot<bool>(
+                                [this,themeRootName]() -> bool
+                                {
+                                    error(Glib::ustring::compose("%1: %2 - %3: %4", M("GENERAL_WARNING"), M("PREFERENCES_APPEARANCE_THEME"), themeRootName, M("GENERAL_DEPRECATED_TOOLTIP")));
+                                    return false;
+                                }), options.error_message_duration);
                     } else {
                         reset = true;
                     }
@@ -323,41 +331,23 @@ RTWindow::RTWindow():
             filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
 
             if (!match || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
-                options.theme = "Default-GTK";
-
-                // We're not testing GTK_MAJOR_VERSION == 3 here, since this branch requires Gtk3 only
+                options.theme = "Default";
                 if (GTK_MINOR_VERSION < 20) {
-                    options.theme = options.theme + "3-_19";
-                } else {
-                    options.theme = options.theme + "3-20_";
+                    options.theme = options.theme + "-GTK3-_19";
                 }
-
-                // filename = Glib::build_filename (argv0, "themes", options.theme + ".css");
             }
         }
 
-        // cssRT = Gtk::CssProvider::create();
-
-        // try {
-        //     cssRT->load_from_path (filename);
-        //     Gtk::StyleContext::add_provider_for_screen (screen, cssRT, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-        // } catch (Glib::Error &err) {
-        //     printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
-        // } catch (...) {
-        //     printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
-        // }
         Preferences::switchThemeTo(options.theme);
 
         // Set the font face and size
         Glib::ustring css;
         if (options.fontFamily != "default") {
-            //GTK318
-            #if GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 20
+#if GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 20 //GTK318
             css = Glib::ustring::compose ("* { font-family: %1; font-size: %2px}", options.fontFamily, options.fontSize * (int)initialGdkScale);
-            #else
+#else
             css = Glib::ustring::compose ("* { font-family: %1; font-size: %2pt}", options.fontFamily, options.fontSize * (int)initialGdkScale);
-            #endif
-            //GTK318
+#endif //GTK318
             if (options.pseudoHiDPISupport) {
             	fontScale = options.fontSize / (float)RTScalable::baseFontSize;
             }

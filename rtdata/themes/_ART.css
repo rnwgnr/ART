@@ -1186,6 +1186,10 @@ tooltip {
     margin: 0;
 }
 
+tooltip * {
+    color: #aaaaaa;
+}
+
 treeview header button {
     background-image: linear-gradient(@ART-bgDark025, @ART-bgDark033);
 }

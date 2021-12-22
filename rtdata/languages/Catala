@@ -257,7 +257,7 @@ GENERAL_SLIDER;Control lliscant
 GENERAL_UNCHANGED;(Sense canvis)
 GENERAL_WARNING;Advertiment
 GENERAL_DEPRECATED;Obsolet
-GENERAL_DEPRECATED_TOOLTIP;<b>¡Obsolet!</b> S'eliminarà en una versió futura.
+GENERAL_DEPRECATED_TOOLTIP;¡Obsolet! S'eliminarà en una versió futura.
 GIMP_PLUGIN_INFO;Benvingut a l'extensió GIMP d'ART!\nUna vegada que acabeu d'editar, simplement tanqueu la finestra principal d'ART i la imatge s'importarà a GIMP automàticament.
 HISTOGRAM_RAW_STATS_TOOLTIP;mín: %1 (%2), màx: %3 (%4), pic: %5 (%6)\n    rang: %7 EV, valors: %8, píxels: %9
 HISTOGRAM_TOOLTIP_B;Mostra/Oculta histograma blau.
