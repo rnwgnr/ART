@@ -360,9 +360,30 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         ImProcData im(params, scale, multiThread);
         apply_contrast(img, im, params->toneCurve.contrast, params->toneCurve.contrastLegacyMode, params->toneCurve.curveMode, params->icm.workingProfile, whitept);
 
+        const auto adjust =
+            [whitept](std::vector<double> c) -> std::vector<double>
+            {
+                if (c.size() > 3) {
+                    DiagonalCurveType tp = DiagonalCurveType(c[0]);
+                    switch (tp) {
+                    case DCT_Spline:
+                    case DCT_CatmullRom: {
+                        double &x = c[c.size()-2];
+                        double &y = c[c.size()-1];
+                        if (x == 1 && y == 1) {
+                            x = whitept;
+                            y = whitept;
+                        }
+                    } default:
+                        break;
+                    }
+                }
+                return c;
+            };
+
         ToneCurve tc;
-        DiagonalCurve tcurve1(params->toneCurve.curve, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
-        DiagonalCurve tcurve2(params->toneCurve.curve2, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        DiagonalCurve tcurve1(adjust(params->toneCurve.curve), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        DiagonalCurve tcurve2(adjust(params->toneCurve.curve2), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         DoubleCurve dcurve(tcurve1, tcurve2);
 
         const bool single_curve = params->toneCurve.curveMode == params->toneCurve.curveMode2;
