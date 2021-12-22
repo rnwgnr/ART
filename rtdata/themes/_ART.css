@@ -2650,6 +2650,10 @@ menuitem:hover > label {
     color: @ART-bgDark045;
 }
 
+menuitem:hover > * > label {
+    color: @ART-bgDark045;
+}
+
 menuitem:hover > * > cellview {
     color: @ART-bgDark045;
 }
