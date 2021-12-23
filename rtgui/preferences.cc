@@ -2410,12 +2410,24 @@ void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *op
         if (!opts) {
             opts = &options;
         }
+        const auto pth =
+            [](std::string s) -> std::string
+            {
+#ifdef WIN32
+                for (auto &c : s) {
+                    if (c == '\\') {
+                        c = '/';
+                    }
+                }
+#endif // WIN32
+                return s;
+            };
         std::ostringstream buf;
         std::string filename(Glib::build_filename(argv0, "themes", "_ART.css"));
         buf << "@define-color ART-bg rgb(" << opts->theme_bg_color[0] << "," << opts->theme_bg_color[1] << "," << opts->theme_bg_color[2] << ");\n"
             << "@define-color ART-fg rgb(" << opts->theme_fg_color[0] << "," << opts->theme_fg_color[1] << "," << opts->theme_fg_color[2] << ");\n"
             << "@define-color ART-hl rgb(" << opts->theme_hl_color[0] << "," << opts->theme_hl_color[1] << "," << opts->theme_hl_color[2] << ");\n"
-            << "@import \"" << filename << "\";\n";
+            << "@import \"" << pth(filename) << "\";\n";
         try {
             themecss->load_from_data(buf.str());
         } catch (Glib::Error &err) {
@@ -2424,10 +2436,10 @@ void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *op
             printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
         }
     } else {
-        Glib::ustring filename(Glib::build_filename (argv0, "themes", newTheme + ".css"));
+        Glib::ustring filename(Glib::build_filename(argv0, "themes", newTheme + ".css"));
 
         try {
-            themecss->load_from_path (filename);
+            themecss->load_from_path(filename);
         } catch (Glib::Error &err) {
             printf ("Error: Can't load css file \"%s\"\nMessage: %s\n", filename.c_str(), err.what().c_str());
         } catch (...) {
