@@ -3409,7 +3409,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 {ToneCurveParams::TcMode::WEIGHTEDSTD, "WeightedStd"},
                 {ToneCurveParams::TcMode::LUMINANCE, "Luminance"},
                 {ToneCurveParams::TcMode::PERCEPTUAL, "Perceptual"},
-                {ToneCurveParams::TcMode::ODT, "OpenDisplayTransform"}
+                {ToneCurveParams::TcMode::NEUTRAL, "Neutral"}
             };
 
             saveToKeyfile("ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode, keyFile);
@@ -4192,7 +4192,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             {"WeightedStd", ToneCurveParams::TcMode::WEIGHTEDSTD},
             {"Luminance", ToneCurveParams::TcMode::LUMINANCE},
             {"Perceptual", ToneCurveParams::TcMode::PERCEPTUAL},
-            {"OpenDisplayTransform", ToneCurveParams::TcMode::ODT}
+            {"OpenDisplayTransform", ToneCurveParams::TcMode::NEUTRAL},
+            {"Neutral", ToneCurveParams::TcMode::NEUTRAL}
         };
 
         if (ppVersion < 350) {

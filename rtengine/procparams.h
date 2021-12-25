@@ -527,7 +527,7 @@ struct ToneCurveParams {
         SATANDVALBLENDING, // Modify the Saturation and Value channel
         LUMINANCE,         // Modify the Luminance channel with coefficients from Rec 709's
         PERCEPTUAL,        // Keep color appearance constant using perceptual modeling
-        ODT                // Open Display Transform from https://github.com/jedypod/open-display-transform
+        NEUTRAL            // Neutral mode: Standard with JzAzBz hue preservation and ACES-inspired desaturation "sweetener"
     };
 
     int contrast;

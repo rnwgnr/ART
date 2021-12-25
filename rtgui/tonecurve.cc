@@ -80,7 +80,7 @@ ToneCurve::ToneCurve():
     toneCurveMode->append (M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
     toneCurveMode->append (M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     toneCurveMode->append (M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
-    toneCurveMode->append (M("TP_EXPOSURE_TCMODE_ODT"));
+    toneCurveMode->append (M("TP_EXPOSURE_TCMODE_NEUTRAL"));
     toneCurveMode->set_active (0);
     toneCurveMode->set_tooltip_text(M("TP_EXPOSURE_TCMODE_LABEL1"));
 
@@ -121,7 +121,7 @@ ToneCurve::ToneCurve():
     toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
     toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
-    toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_ODT"));
+    toneCurveMode2->append (M("TP_EXPOSURE_TCMODE_NEUTRAL"));
     toneCurveMode2->set_active (0);
     toneCurveMode2->set_tooltip_text(M("TP_EXPOSURE_TCMODE_LABEL2"));
 
@@ -179,7 +179,7 @@ ToneCurve::ToneCurve():
     mode_->append(M("TP_EXPOSURE_TCMODE_SATANDVALBLENDING"));
     mode_->append(M("TP_EXPOSURE_TCMODE_LUMINANCE"));
     mode_->append(M("TP_EXPOSURE_TCMODE_PERCEPTUAL"));
-    mode_->append(M("TP_EXPOSURE_TCMODE_ODT"));
+    mode_->append(M("TP_EXPOSURE_TCMODE_NEUTRAL"));
     mode_->set_active(0);
     mode_->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::modeChanged), true);
     
@@ -312,7 +312,7 @@ void ToneCurve::write(ProcParams* pp)
     } else if (tcMode == 5) {
         pp->toneCurve.curveMode = ToneCurveParams::TcMode::PERCEPTUAL;
     } else if (tcMode == 6) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::ODT;
+        pp->toneCurve.curveMode = ToneCurveParams::TcMode::NEUTRAL;
     }
 
     if (legacy_curve_mode) {
@@ -332,7 +332,7 @@ void ToneCurve::write(ProcParams* pp)
     } else if (tcMode == 5) {
         pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::PERCEPTUAL;
     } else if (tcMode == 6) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::ODT;
+        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::NEUTRAL;
     }
 
     pp->toneCurve.histmatching = histmatching->get_active();

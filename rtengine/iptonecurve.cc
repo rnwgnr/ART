@@ -83,9 +83,9 @@ void apply_tc(Imagefloat *rgb, const ToneCurve &tc, ToneCurveParams::TcMode curv
                 c.Apply(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), ws);
             }
         }
-    } else if (curveMode == ToneCurveParams::TcMode::ODT) {
-        const OpenDisplayTransformToneCurve &c = static_cast<const OpenDisplayTransformToneCurve &>(tc);
-        OpenDisplayTransformToneCurve::ApplyState state(working_profile, whitept);
+    } else if (curveMode == ToneCurveParams::TcMode::NEUTRAL) {
+        const NeutralToneCurve &c = static_cast<const NeutralToneCurve &>(tc);
+        NeutralToneCurve::ApplyState state(working_profile, whitept);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
