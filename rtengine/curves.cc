@@ -459,7 +459,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
         const DiagonalCurve tcurve(curvePoints2, CURVES_MIN_POLY_POINTS / skip);
 
         if (!tcurve.isIdentity()) {
-            customToneCurve2.Set(tcurve, gamma_);
+            customToneCurve2.Set(tcurve);
         }
 
         if (outBeforeCCurveHistogram ) {
@@ -478,7 +478,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
         const DiagonalCurve tcurve(curvePoints, CURVES_MIN_POLY_POINTS / skip);
 
         if (!tcurve.isIdentity()) {
-            customToneCurve1.Set(tcurve, gamma_);
+            customToneCurve1.Set(tcurve);
         }
 
         if (outBeforeCCurveHistogram) {
@@ -524,6 +524,22 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
 }
 
 
+void CurveFactory::contrastCurve(double contr, LUTu &histogram, LUTf &outCurve,
+                                 int skip)
+{
+    LUTf curve1(65536);
+    LUTf curve2(65536);
+    LUTu dummy;
+    ToneCurve customToneCurve1, customToneCurve2;
+    
+    CurveFactory::complexCurve(0, 0, 0, 0, 0, 0, contr,
+                               { DCT_Linear }, { DCT_Linear },
+                               histogram, curve1, curve2, outCurve, dummy,
+                               customToneCurve1, customToneCurve2,
+                               skip);
+}
+
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void CurveFactory::RGBCurve (const std::vector<double>& curvePoints, LUTf & outCurve, int skip)
@@ -565,40 +581,15 @@ void ToneCurve::Reset()
 }
 
 // Fill a LUT with X/Y, ranged 0xffff
-void ToneCurve::Set(const Curve &pCurve, float gamma, float whitecoeff)
+void ToneCurve::Set(const Curve &pCurve, float whitecoeff)
 {
     this->whitecoeff = whitecoeff;
     this->curve = &pCurve;
     this->whitept = 65535.f * whitecoeff;
     lutToneCurve(65536);
 
-    if (gamma <= 0.0 || gamma == 1.) {
-        for (int i = 0; i < 65536; i++) {
-            lutToneCurve[i] = (float)pCurve.getVal(float(i) / 65535.f) * 65535.f;
-        }
-    } else if(gamma == (float)Color::sRGBGammaCurve) {
-        // for sRGB gamma we can use luts, which is much faster
-        for (int i = 0; i < 65536; i++) {
-            float val = Color::gammatab_srgb[i] / 65535.f;
-            val = pCurve.getVal(val);
-            val = Color::igammatab_srgb[val * 65535.f];
-            lutToneCurve[i] = val;
-        }
-
-    } else {
-        const float start = expf(gamma * logf( -0.055 / ((1.0 / gamma - 1.0) * 1.055 )));
-        const float slope = 1.055 * powf (start, 1.0 / gamma - 1) - 0.055 / start;
-        const float mul = 1.055;
-        const float add = 0.055;
-
-        // apply gamma, that is 'pCurve' is defined with the given gamma and here we convert it to a curve in linear space
-        for (int i = 0; i < 65536; i++) {
-            float val = float(i) / 65535.f;
-            val = CurveFactory::gamma (val, gamma, start, slope, mul, add);
-            val = pCurve.getVal(val);
-            val = CurveFactory::igamma (val, gamma, start, slope, mul, add);
-            lutToneCurve[i] = val * 65535.f;
-        }
+    for (int i = 0; i < 65536; i++) {
+        lutToneCurve[i] = (float)pCurve.getVal(float(i) / 65535.f) * 65535.f;
     }
 }
 

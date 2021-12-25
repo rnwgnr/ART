@@ -291,12 +291,13 @@ public:
         }
     }
 
-public:
     static void complexCurve (double ecomp, double black, double hlcompr, double hlcomprthresh, double shcompr, double br, double contr,
                               const std::vector<double>& curvePoints, const std::vector<double>& curvePoints2,
                               LUTu & histogram, LUTf & hlCurve, LUTf & shCurve, LUTf & outCurve, LUTu & outBeforeCCurveHistogram, ToneCurve & outToneCurve, ToneCurve & outToneCurve2,
 
                               int skip = 1);
+public:
+    static void contrastCurve(double contr, LUTu &histogram, LUTf &outCurve, int skip=1);
 
     static void RGBCurve (const std::vector<double>& curvePoints, LUTf & outCurve, int skip);
 
@@ -436,8 +437,7 @@ inline void setLutVal(const LUTf &lut, const Curve *curve, float &val)
 } // namespace curves
 
 
-class ToneCurve
-{
+class ToneCurve {
 public:
     LUTf lutToneCurve;  // 0xffff range
     float whitecoeff;
@@ -448,7 +448,7 @@ public:
     virtual ~ToneCurve() {};
 
     void Reset();
-    void Set(const Curve &pCurve, float gamma=0, float whitecoeff=1.f);
+    void Set(const Curve &pCurve, float whitecoeff=1.f);
     operator bool (void) const
     {
         return lutToneCurve;
