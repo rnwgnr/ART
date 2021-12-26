@@ -355,14 +355,20 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         const auto adjust =
             [whitept](std::vector<double> c) -> std::vector<double>
             {
+                if (c.size() <= 3) {
+                    return c;
+                }
+                
                 std::map<double, double> m;
                 bool set_white = false;
-                if (c.size() > 3) {
+                DiagonalCurveType tp = DiagonalCurveType(c[0]);
+                bool add_c = (tp == DCT_CatmullRom || tp == DCT_Spline);
+                {
                     double &x = c[c.size()-2];
                     double &y = c[c.size()-1];
                     if (x == 1 && y == 1) {
                         set_white = true;
-                    }                    
+                    }
                 }
                 DiagonalCurve curve(c);
                 for (int i = 0; i < 25; ++i) {
@@ -377,9 +383,18 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
                     double v = Color::gammatab_srgb[x * 65535.0] / 65535.0;
                     double y = curve.getVal(v);
                     y = Color::igammatab_srgb[y * 65535.0] / 65535.0;
-                    m[x] = y;                    
+                    m[x] = y;
                     i += j;
                     j *= 2;
+                }
+                if (add_c) {
+                    for (size_t i = 0; i < (c.size()-2)/2; ++i) {
+                        double x = c[2*i+1];
+                        double v = Color::gammatab_srgb[x * 65535.0] / 65535.0;
+                        double y = curve.getVal(v);
+                        y = Color::igammatab_srgb[y * 65535.0] / 65535.0;
+                        m[x] = y;                    
+                    }
                 }
                 if (set_white) {
                     m[whitept] = whitept;
