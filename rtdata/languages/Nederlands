@@ -730,7 +730,7 @@ INSPECTOR_FOCUS_MASK;Focusmasker.\nSneltoets: <b>Shift+f</b>.
 INSPECTOR_HISTOGRAM;Histogram.\nSneltoets: <b>h</b>.
 INSPECTOR_INFO;Snelle info.\nSneltoets: <b>Shift+i</b>
 INSPECTOR_PREVIEW;Ingebed voorbeeld.\nSneltoets: <b>j</b>.
-INSPECTOR_RAW_CLIP;Raw afgekapte pixels.\nSneltoets: <b>w</b>.
+INSPECTOR_RAW_CLIP;Raw: toon overbelichte pixels.\nSneltoets: <b>w</b>.
 INSPECTOR_RAW_FILM;Snelle raw-rendering met filmachtige tooncurve.\nSneltoets: <b>f</b>.
 INSPECTOR_RAW_LINEAR;Snelle raw-rendering met lineaire tooncurve.\nSneltoets: <b>r</b>.
 INSPECTOR_RAW_SHADOW;Snelle raw-rendering met tooncurve die de schaduwen opheldert.\nSneltoets: <b>s</b>.
@@ -970,7 +970,7 @@ PREFERENCES_APPEARANCE_PSEUDOHIDPI;Pseudo-HiDPI modus
 PREFERENCES_APPEARANCE_THEME;Thema
 PREFERENCES_APPEARANCE_THEME_BG_COLOR;Achtergrond
 PREFERENCES_APPEARANCE_THEME_FG_COLOR;Voorgrond
-PREFERENCES_APPEARANCE_THEME_HL_COLOR;Highlight
+PREFERENCES_APPEARANCE_THEME_HL_COLOR;Accenten
 PREFERENCES_APPEARANCE;Uiterlijk
 PREFERENCES_APPLNEXTSTARTUP;herstart vereist
 PREFERENCES_AUTOMONPROFILE;Gebruik standaard beeldschermprofiel van het besturingsysteem
@@ -1025,7 +1025,7 @@ PREFERENCES_EXTEDITOR_DIR_CURRENT;Zelfde als invoerafbeelding
 PREFERENCES_EXTEDITOR_DIR_CUSTOM;Handmatig
 PREFERENCES_EXTEDITOR_DIR_TEMP;Tijdelijke map
 PREFERENCES_EXTEDITOR_DIR;Uitvoermap
-PREFERENCES_EXTEDITOR_FLOAT32;32-bit drijvendekomma TIFF-uitvoer
+PREFERENCES_EXTEDITOR_FLOAT32;32-bit decimaal TIFF-uitvoer
 PREFERENCES_EXTERNALEDITOR;Externe fotobewerker
 PREFERENCES_FBROWSEROPTS;Opties bestandsnavigator/miniaturen
 PREFERENCES_FILEBROWSERTOOLBARSINGLEROW;Compacte gereedschapsbalken in bestandsnavigator
@@ -1234,16 +1234,16 @@ RENAME_DIALOG_SIDECARS;Extra zijspanbestanden
 RENAME_DIALOG_SIDECARS_TIP;Lijst met extensies van extra te hernoemen zijspanbestanden, gescheiden door een ';'-karakter. Als een extensie begint met een '+', wordt deze toegevoegd aan de originele naam in plaats van dat de extensie vervangen wordt.\nVoorbeeld, als de oorspronkelijke naam <i>bestand.raw</i> is, dan resulteert <i>ext1;+ext2</i> in de zijspanbestanden <i>bestand.ext1</i> en <i>bestand.raw.ext2</i>.
 RENAME_DIALOG_SKIP;Overslaan
 SAMPLEFORMAT_0;Onbekend dataformaat
-SAMPLEFORMAT_16;16-bit drijvendekomma
+SAMPLEFORMAT_16;16-bit decimaal
 SAMPLEFORMAT_1;8-bit unsigned
 SAMPLEFORMAT_2;16-bit unsigned
-SAMPLEFORMAT_32;24-bit drijvendekomma
+SAMPLEFORMAT_32;24-bit decimaal
 SAMPLEFORMAT_4;24-bit LogLuv
-SAMPLEFORMAT_64;32-bit drijvendekomma
+SAMPLEFORMAT_64;32-bit decimaal
 SAMPLEFORMAT_8;32-bit LogLuv
 SAVEDLG_AUTOSUFFIX;Voeg automatisch ophogend nummer (-1, -2..) toe als bestand al bestaat
 SAVEDLG_FILEFORMAT;Bestandstype
-SAVEDLG_FILEFORMAT_FLOAT; drijvendekomma
+SAVEDLG_FILEFORMAT_FLOAT; decimaal
 SAVEDLG_FORCEFORMATOPTS;Forceer opties voor opslaan
 SAVEDLG_JPEGQUAL;JPEG-kwaliteit
 SAVEDLG_PUTTOQUEUEHEAD;Plaats vooraan in verwerkingsrij
