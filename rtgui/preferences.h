@@ -133,6 +133,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::Label *theme_bg_lbl;
     Gtk::Label *theme_fg_lbl;
     Gtk::Label *theme_hl_lbl;
+    Gtk::Button *theme_colors_reset;
 
     Gtk::SpinButton*   maxRecentFolders;
     Gtk::SpinButton*   maxThumbHeightSB;

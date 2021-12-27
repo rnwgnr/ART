@@ -953,6 +953,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
         // appearanceGrid->attach(*theme_color_grid, 2, 0, 2, 3);
 
         Gtk::Button *reset = Gtk::manage(new Gtk::Button());
+        theme_colors_reset = reset;
         reset->set_tooltip_markup(M("ADJUSTER_RESET_TO_DEFAULT"));
         reset->add(*Gtk::manage(new RTImage("undo-small.png")));
         reset->signal_clicked().connect(
@@ -2145,7 +2146,6 @@ void Preferences::fillPreferences ()
     fastexport_max_width->set_value(moptions.fastexport_resize_width);
     fastexport_max_height->set_value(moptions.fastexport_resize_height);
 
-    //theme_color_grid->set_visible(GTK_MINOR_VERSION >= 20 && moptions.theme == Options::DEFAULT_THEME);
     bool theme_colors_visible = (GTK_MINOR_VERSION >= 20 && moptions.theme == Options::DEFAULT_THEME);
     theme_bg_lbl->set_visible(theme_colors_visible);
     theme_fg_lbl->set_visible(theme_colors_visible);
@@ -2153,6 +2153,7 @@ void Preferences::fillPreferences ()
     theme_bg_color->set_visible(theme_colors_visible);
     theme_fg_color->set_visible(theme_colors_visible);
     theme_hl_color->set_visible(theme_colors_visible);
+    theme_colors_reset->set_visible(theme_colors_visible);
 }
 
 
@@ -2266,6 +2267,7 @@ void Preferences::themeChanged ()
     theme_bg_color->set_visible(theme_color_visible);
     theme_fg_color->set_visible(theme_color_visible);
     theme_hl_color->set_visible(theme_color_visible);
+    theme_colors_reset->set_visible(theme_color_visible);
     
     RTImage::updateImages();
     switchThemeTo(moptions.theme, &moptions);
