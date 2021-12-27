@@ -545,7 +545,7 @@ public:
 
     bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override
     {
-        double delta = (abs(deltaX) > abs(deltaY)) ? deltaX : deltaY;
+        double delta = (fabs(deltaX) > fabs(deltaY)) ? deltaX : deltaY;
         bool isUp = direction == GDK_SCROLL_UP || (direction == GDK_SCROLL_SMOOTH && delta < 0.0);
         int incr = isUp ? 1 : -1;
 
