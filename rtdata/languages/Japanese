@@ -10,7 +10,7 @@
 #09 2021-10-11 Ohnishi, Yasuo, updated
 #10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
 #11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
-#12 2021-12-20 Ohnishi, Yasuo, updated for 1.12
+#12 2021-12-27 Ohnishi, Yasuo, updated for 1.12
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -255,7 +255,7 @@ GENERAL_SAVE_AS;...で保存
 GENERAL_SLIDER;スライダー
 GENERAL_UNCHANGED;(変更なし)
 GENERAL_WARNING;警告
-GENERAL_DEPRECATED;廃止予定
+GENERAL_DEPRECATED;Deprecated
 GENERAL_DEPRECATED_TOOLTIP;<b>廃止予定 (Deprecated) !</b> は 将来のバージョンで削除されます.
 GIMP_PLUGIN_INFO;ART GIMPプラグインにようこそ！\n画像編集終了後 単にARTのメインウィンドウを閉じるだけで 画像が自動的にGIMPに送られます.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9
@@ -1851,7 +1851,7 @@ TP_SMOOTHING_FALLOFF;効果の減衰
 TP_SMOOTHING_MODE;モード
 TP_SMOOTHING_MODE_GUIDED;ガイド付き
 TP_SMOOTHING_MODE_GAUSSIAN;ガウス
-TP_SMOOTHING_MODE_GAUSSIAN_GLOW;グロー効果 (Glow)
+TP_SMOOTHING_MODE_GAUSSIAN_GLOW;グロー(光線)効果
 TP_SMOOTHING_MODE_NLMEANS;非局所平均 (Non-local means)
 TP_SMOOTHING_MODE_LENS;レンズぼけ効果
 TP_SMOOTHING_MODE_MOTION;ぶれ効果 (Motion blur)
