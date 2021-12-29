@@ -254,6 +254,7 @@ void Crop::update(int todo)
 
     if (spotCrop) {
         baseCrop = spotCrop;
+        hdr_base_crop = spotCrop;
     }
 
     std::unique_ptr<Imagefloat> drCompCrop;
@@ -315,9 +316,8 @@ void Crop::update(int todo)
         stop = pipeline_stop_[0];
 
         // crop back to the size expected by the rest of the pipeline
+        baseCrop = hdr_base_crop;
         if (need_cropping) {
-            Imagefloat *c = hdr_base_crop;
-
             int oy = trafy / skip;
             int ox = trafx / skip;
 #ifdef _OPENMP
@@ -328,15 +328,13 @@ void Crop::update(int todo)
 
                 for (int x = 0; x < trafw; ++x) {
                     int cx = x + ox;
-                    c->r(y, x) = f->r(cy, cx);
-                    c->g(y, x) = f->g(cy, cx);
-                    c->b(y, x) = f->b(cy, cx);
+                    baseCrop->r(y, x) = f->r(cy, cx);
+                    baseCrop->g(y, x) = f->g(cy, cx);
+                    baseCrop->b(y, x) = f->b(cy, cx);
                 }
             }
-
-            baseCrop = c;
         } else {
-            baseCrop = f;
+            f->copyTo(baseCrop);
         }
     }
 
