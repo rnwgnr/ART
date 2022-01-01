@@ -454,7 +454,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         {
             return (0.299f * r + 0.587f * g + 0.114f * b);
         };
-    
+
     array2D<float> luminance;
     array2D<float> clipped;
     if (soft) {
@@ -1280,29 +1280,36 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
     }    
     
     if (soft) {
-        auto to_rec2020_m = dotProduct(FLT_M(rec2020_xyz), FLT_M(imatrices.xyz_cam));
-        auto to_cam_m = dotProduct(FLT_M(imatrices.cam_xyz), FLT_M(xyz_rec2020));
+        const auto to_xyz_m = FLT_M(imatrices.xyz_cam);
+        const auto to_cam_m = FLT_M(imatrices.cam_xyz);
 
-        const auto to_rec2020 =
-            [&](float &r, float &g, float &b) -> void
+        const float rs = rm / 65535.f;
+        const float gs = gm / 65535.f;
+        const float bs = bm / 65535.f;
+    
+        const auto to_jch =
+            [&](float r, float g, float b, float &J, float &c, float &h) -> void
             {
-                std::array<float, 3> rgb({r * rm, g * gm, b * bm});
-                rgb = dotProduct(to_rec2020_m, rgb);
-                r = rgb[0];
-                g = rgb[1];
-                b = rgb[2];
+                std::array<float, 3> v({r * rs, g * gs, b * bs});
+                v = dotProduct(to_xyz_m, v);
+                float az, bz;
+                Color::xyz2jzazbz(v[0], v[1], v[2], J, az, bz);
+                Color::jzazbz2jzch(az, bz, c, h);
             };
 
-        const auto to_cam =
-            [&](float &r, float &g, float &b) -> void
+        const auto to_rgb =
+            [&](float J, float c, float h, float &r, float &g, float &b) -> void
             {
-                std::array<float, 3> rgb({r, g, b});
-                rgb = dotProduct(to_cam_m, rgb);
-                r = rgb[0]/rm;
-                g = rgb[1]/gm;
-                b = rgb[2]/bm;
+                std::array<float, 3> v;
+                float az, bz;
+                Color::jzch2jzazbz(c, h, az, bz);
+                Color::jzazbz2xyz(J, az, bz, v[0], v[1], v[2]);
+                v = dotProduct(to_cam_m, v);
+                r = v[0] / rs;
+                g = v[1] / gs;
+                b = v[2] / bs;
             };
-
+    
         guidedFilter(luminance, clipped, clipped, min(width, height) / 10, 0.05f, true);
 #if 0
         {
@@ -1337,14 +1344,10 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
                     if ((r - b)/max(r, b) > 0.1f && f > 0.f) {
                         f = pow_F(f, 0.3f);
                     }
-                    to_rec2020(r, g, b);
-                    float Y, u, v, h, s;
-                    Color::rgb2yuv(r, g, b, Y, u, v, xyz_rec2020);
-                    Color::yuv2hsl(u, v, h, s);
-                    s = intp(clipped[y][x], s * f, s);
-                    Color::hsl2yuv(h, s, u, v);
-                    Color::yuv2rgb(Y, u, v, r, g, b, xyz_rec2020);
-                    to_cam(r, g, b);
+                    float J, c, h;
+                    to_jch(r, g, b, J, c, h);
+                    c = intp(clipped[y][x], c * f, c);
+                    to_rgb(J, c, h, r, g, b);
                 }
             }
         }
