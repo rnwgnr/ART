@@ -1333,7 +1333,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
                 float &b = blue[y + miny][x + minx];
                 float l2 = luminance[y][x] * 65535.f;
                 float l = getlum(r, g, b);
-                if (l > 0.f) {
+                if (l > 0.f && l2 > l) {
                     float f = l2 / l;
                     r *= f;
                     g *= f;
