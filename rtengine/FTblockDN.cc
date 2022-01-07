@@ -1411,49 +1411,53 @@ void detail_mask(const array2D<float> &src, array2D<float> &mask, float scaling,
     const int H = src.height();
     mask(W, H);
 
-    array2D<float> L2(W/4, H/4, ARRAY2D_ALIGNED);
-    array2D<float> m2(W/4, H/4, ARRAY2D_ALIGNED);
-    rescaleBilinear(src, L2, multithread);
+    if (W < 8 || H < 8) {
+        mask.fill(1.f);
+    } else {
+        array2D<float> L2(W/4, H/4, ARRAY2D_ALIGNED);
+        array2D<float> m2(W/4, H/4, ARRAY2D_ALIGNED);
+        rescaleBilinear(src, L2, multithread);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < H/4; ++y) {
-        for (int x = 0; x < W/4; ++x) {
-            L2[y][x] = xlin2log(L2[y][x]/scaling, 50.f);
+        for (int y = 0; y < H/4; ++y) {
+            for (int x = 0; x < W/4; ++x) {
+                L2[y][x] = xlin2log(L2[y][x]/scaling, 50.f);
+            }
         }
-    }
-    laplacian(L2, m2, threshold/scaling, ceiling/scaling, factor, multithread);
-    rescaleBilinear(m2, mask, multithread);
+        laplacian(L2, m2, threshold/scaling, ceiling/scaling, factor, multithread);
+        rescaleBilinear(m2, mask, multithread);
 
-    const auto scurve =
-        [](float x) -> float
-        {
-            constexpr float b = 101.f;
-            constexpr float a = 2.23f;
-            return xlin2log(pow_F(x, a), b);
-        };
+        const auto scurve =
+            [](float x) -> float
+            {
+                constexpr float b = 101.f;
+                constexpr float a = 2.23f;
+                return xlin2log(pow_F(x, a), b);
+            };
 
-    const float thr = 1.f - factor;
+        const float thr = 1.f - factor;
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            mask[y][x] = scurve(LIM01(mask[y][x] + thr));
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] = scurve(LIM01(mask[y][x] + thr));
+            }
         }
-    }
 
-    if (blur_type == BlurType::GAUSS) {
+        if (blur_type == BlurType::GAUSS) {
 #ifdef _OPENMP
 #       pragma omp parallel if (multithread)
 #endif
-        {
-            gaussianBlur(mask, mask, W, H, blur);
-        }
-    } else if (blur_type == BlurType::BOX) {
-        if (int(blur) > 0) {
-            for (int i = 0; i < 3; ++i) {
-                boxblur(mask, mask, blur, W, H, multithread);
+            {
+                gaussianBlur(mask, mask, W, H, blur);
+            }
+        } else if (blur_type == BlurType::BOX) {
+            if (int(blur) > 0) {
+                for (int i = 0; i < 3; ++i) {
+                    boxblur(mask, mask, blur, W, H, multithread);
+                }
             }
         }
     }
