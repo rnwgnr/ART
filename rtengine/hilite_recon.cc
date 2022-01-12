@@ -1287,22 +1287,18 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         const float gs = gm / 65535.f;
         const float bs = bm / 65535.f;
     
-        const auto to_jch =
-            [&](float r, float g, float b, float &J, float &c, float &h) -> void
+        const auto to_jzazbz =
+            [&](float r, float g, float b, float &J, float &az, float &bz) -> void
             {
                 std::array<float, 3> v({r * rs, g * gs, b * bs});
                 v = dotProduct(to_xyz_m, v);
-                float az, bz;
                 Color::xyz2jzazbz(v[0], v[1], v[2], J, az, bz);
-                Color::jzazbz2jzch(az, bz, c, h);
             };
 
         const auto to_rgb =
-            [&](float J, float c, float h, float &r, float &g, float &b) -> void
+            [&](float J, float az, float bz, float &r, float &g, float &b) -> void
             {
                 std::array<float, 3> v;
-                float az, bz;
-                Color::jzch2jzazbz(c, h, az, bz);
                 Color::jzazbz2xyz(J, az, bz, v[0], v[1], v[2]);
                 v = dotProduct(to_cam_m, v);
                 r = v[0] / rs;
@@ -1344,10 +1340,11 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
                     if ((r - b)/max(r, b) > 0.1f && f > 0.f) {
                         f = pow_F(f, 0.3f);
                     }
-                    float J, c, h;
-                    to_jch(r, g, b, J, c, h);
-                    c = intp(clipped[y][x], c * f, c);
-                    to_rgb(J, c, h, r, g, b);
+                    float J, az, bz;
+                    to_jzazbz(r, g, b, J, az, bz);
+                    az = intp(clipped[y][x], az * f, az);
+                    bz = intp(clipped[y][x], bz * f, bz);
+                    to_rgb(J, az, bz, r, g, b);
                 }
             }
         }
