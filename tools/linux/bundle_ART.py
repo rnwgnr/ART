@@ -141,6 +141,11 @@ def main():
                     os.path.join(opts.outdir, name + '.bin'))
     with open(os.path.join(opts.outdir, 'ART'), 'w') as out:
         out.write("""#!/bin/bash
+export ART_restore_GTK_CSD=$GTK_CSD
+export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
+export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
+export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
+export ART_restore_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export GTK_CSD=0
 d=$(dirname $(readlink -f "$0"))
 t=$(mktemp -d --suffix=-ART)
@@ -155,7 +160,8 @@ rm -rf "$t"
 """)
     with open(os.path.join(opts.outdir, 'ART-cli'), 'w') as out:
         out.write("""#!/bin/bash
-export GTK_CSD=0
+export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
+export ART_restore_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 d=$(dirname $(readlink -f "$0"))
 export GIO_MODULE_DIR="$d/lib/gio/modules"
 export LD_LIBRARY_PATH="$d/lib"
