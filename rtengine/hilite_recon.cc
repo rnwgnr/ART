@@ -1288,24 +1288,34 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         const float bs = bm / 65535.f;
     
         const auto to_jzazbz =
-            [&](float r, float g, float b, float &J, float &az, float &bz) -> void
+            [&](float r, float g, float b, float &J, float &az, float &bz) -> bool
             {
                 std::array<float, 3> v({r * rs, g * gs, b * bs});
                 v = dotProduct(to_xyz_m, v);
-                Color::xyz2jzazbz(v[0], v[1], v[2], J, az, bz);
+                if (UNLIKELY(min(v[0], v[1], v[2]) < 0.f)) {
+                    Color::rgb2yuv(r * rs, g * gs, b * bs, J, az, bz, imatrices.xyz_cam);
+                    return true;
+                } else {
+                    Color::xyz2jzazbz(v[0], v[1], v[2], J, az, bz);
+                    return false;
+                }
             };
 
         const auto to_rgb =
-            [&](float J, float az, float bz, float &r, float &g, float &b) -> void
+            [&](float J, float az, float bz, float &r, float &g, float &b, bool oog) -> void
             {
                 std::array<float, 3> v;
-                Color::jzazbz2xyz(J, az, bz, v[0], v[1], v[2]);
-                v = dotProduct(to_cam_m, v);
+                if (oog) {
+                    Color::yuv2rgb(J, az, bz, v[0], v[1], v[2], imatrices.xyz_cam);
+                } else {
+                    Color::jzazbz2xyz(J, az, bz, v[0], v[1], v[2]);
+                    v = dotProduct(to_cam_m, v);
+                }
                 r = v[0] / rs;
                 g = v[1] / gs;
                 b = v[2] / bs;
             };
-    
+
         guidedFilter(luminance, clipped, clipped, min(width, height) / 10, 0.05f, true);
 #if 0
         {
@@ -1318,7 +1328,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
             tmp.saveTIFF("/tmp/clipped.tif", 16);
         }
 #endif
-        
+
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif
@@ -1341,10 +1351,11 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
                         f = pow_F(f, 0.3f);
                     }
                     float J, az, bz;
-                    to_jzazbz(r, g, b, J, az, bz);
-                    az = intp(clipped[y][x], az * f, az);
-                    bz = intp(clipped[y][x], bz * f, bz);
-                    to_rgb(J, az, bz, r, g, b);
+                    bool oog = to_jzazbz(r, g, b, J, az, bz);
+                    f = intp(clipped[y][x], f, 1.f);
+                    // az = intp(clipped[y][x], az * f, az);
+                    // bz = intp(clipped[y][x], bz * f, bz);
+                    to_rgb(J, az * f, bz * f, r, g, b, oog);
                 }
             }
         }

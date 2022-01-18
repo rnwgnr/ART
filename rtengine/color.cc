@@ -67,9 +67,9 @@ void XYZ_D65_to_D50(float &X, float &Y, float &Z)
 
 float PQ(float X)
 {
-    X = std::max(X, 1e-5f);
-    const float XX = pow_F(X*1e-4f, 0.1593017578125f);
-    return pow_F(
+    X = std::max(X, 1e-10f);
+    const float XX = std::pow(X*1e-4f, 0.1593017578125f);
+    return std::pow(
         (0.8359375f + 18.8515625f*XX) / (1 + 18.6875f*XX),
         134.034375f);
 }
@@ -77,9 +77,9 @@ float PQ(float X)
 
 float PQ_inv(float X)
 {
-    X = std::max(X, 1e-5f);
-    const auto XX = pow_F(X, 7.460772656268214e-03f);
-    return 1e4f * pow_F(
+    X = std::max(X, 1e-10f);
+    const auto XX = std::pow(X, 7.460772656268214e-03f);
+    return 1e4f * std::pow(
         (0.8359375f - XX) / (18.6875f*XX - 18.8515625f),
         6.277394636015326f);
 }
