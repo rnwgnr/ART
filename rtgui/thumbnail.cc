@@ -334,7 +334,7 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
         // For the filename etc. do NOT use streams, since they are not UTF8 safe
         Glib::ustring cmdLine = options.CPBPath + Glib::ustring(" \"") + tmpFileName + Glib::ustring("\"");
 
-        if (options.rtSettings.verbose) {
+        if (options.rtSettings.verbose > 1) {
             printf("Custom profile builder's command line: %s\n", Glib::ustring(cmdLine).c_str());
         }
 
@@ -1281,7 +1281,7 @@ void Thumbnail::saveMetadata()
         meta.setExif(pparams.master.metadata.exif);
         meta.setIptc(pparams.master.metadata.iptc);
         meta.saveToXmp(fn);
-        if (options.rtSettings.verbose) {
+        if (options.rtSettings.verbose > 1) {
             std::cout << "saved edited metadata for " << fname << " to "
                       << fn << std::endl;
         }

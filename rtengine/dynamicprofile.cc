@@ -181,7 +181,7 @@ bool DynamicProfileRules::loadRules()
         return false;
     }
 
-    if (options.rtSettings.verbose) {
+    if (options.rtSettings.verbose > 1) {
         printf("loading dynamic profiles...\n");
     }
 
@@ -200,7 +200,7 @@ bool DynamicProfileRules::loadRules()
             return false;
         }
 
-        if (options.rtSettings.verbose) {
+        if (options.rtSettings.verbose > 1) {
             printf(" loading rule %d\n", serial);
         }
 
@@ -230,7 +230,7 @@ bool DynamicProfileRules::loadRules()
 
 bool DynamicProfileRules::storeRules()
 {
-    if (options.rtSettings.verbose) {
+    if (options.rtSettings.verbose > 1) {
         printf("saving dynamic profiles...\n");
     }
 

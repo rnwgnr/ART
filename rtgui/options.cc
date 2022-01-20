@@ -537,7 +537,7 @@ void Options::setDefaults()
     rtSettings.rec2020 = "RTv2_Rec2020";
     rtSettings.ACESp0 = "RTv2_ACES-AP0";
     rtSettings.ACESp1 = "RTv2_ACES-AP1";
-    rtSettings.verbose = false;
+    rtSettings.verbose = 0;
 
     rtSettings.HistogramWorking = false;
 
@@ -733,7 +733,11 @@ void Options::readFromFile(Glib::ustring fname)
                 }
 
                 if (keyFile.has_key("General", "Verbose")) {
-                    rtSettings.verbose = keyFile.get_boolean("General", "Verbose");
+                    try {
+                        rtSettings.verbose = keyFile.get_integer("General", "Verbose");
+                    } catch (Glib::Error &e) {
+                        rtSettings.verbose = keyFile.get_boolean("General", "Verbose");
+                    }
                 }
 
                 if (keyFile.has_key("General", "ErrorMessageDuration")) {
@@ -1821,7 +1825,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("General", "Version", RTVERSION);
         keyFile.set_string("General", "DarkFramesPath", rtSettings.darkFramesPath);
         keyFile.set_string("General", "FlatFieldsPath", rtSettings.flatFieldsPath);
-        keyFile.set_boolean("General", "Verbose", rtSettings.verbose);
+        keyFile.set_integer("General", "Verbose", rtSettings.verbose);
         keyFile.set_integer("General", "ErrorMessageDuration", error_message_duration);
         keyFile.set_integer("General", "MaxErrorMessages", max_error_messages);
         keyFile.set_integer("General", "EditorKeyboardScrollStep", editor_keyboard_scroll_step);

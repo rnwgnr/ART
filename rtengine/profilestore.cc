@@ -220,7 +220,7 @@ bool ProfileStore::parseDir (Glib::ustring& realPath, Glib::ustring& virtualPath
 
                 if (lastdot != Glib::ustring::npos && lastdot == currDir.length() - 4 && currDir.substr (lastdot).casefold() == paramFileExtension) {
                     // file found
-                    if ( options.rtSettings.verbose ) {
+                    if (options.rtSettings.verbose > 1) {
                         printf ("Processing file %s...", fname.c_str());
                     }
 
@@ -233,7 +233,7 @@ bool ProfileStore::parseDir (Glib::ustring& realPath, Glib::ustring& virtualPath
                     if (!res && pp.ppVersion >= 220) {
                         fileFound = true;
 
-                        if ( options.rtSettings.verbose ) {
+                        if (options.rtSettings.verbose > 1) {
                             printf ("OK\n");
                         }
 
@@ -243,7 +243,7 @@ bool ProfileStore::parseDir (Glib::ustring& realPath, Glib::ustring& virtualPath
 
                         // map the partial profile
                         partProfiles[filePSE] = FilePartialProfile(pl_, fname);
-                    } else if ( options.rtSettings.verbose ) {
+                    } else if (options.rtSettings.verbose > 1) {
                         printf ("failed!\n");
                     }
                 }

@@ -376,10 +376,10 @@ cmsHPROFILE ProfileContent::toProfile() const
                 cmsWriteTag(profile, cmsSigBlueTRCTag, GammaTRC);
                 cmsFreeToneCurve(GammaTRC);
 
-                if (settings->verbose) {
+                if (settings->verbose > 1) {
                     std::cout << "ICCStore: rebuilt TRC for RTv2 profile " << get_profile_description(profile) << ": gamma=" << gammatag << ", slope=" << slopetag << std::endl;
                 }
-            } else if (settings->verbose) {
+            } else if (settings->verbose > 1) {
                 std::cout << "ICCStore: no gamma/slope info found for RTv2 profile " << get_profile_description(profile) << std::endl;
             }
         }

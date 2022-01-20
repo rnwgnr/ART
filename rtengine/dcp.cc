@@ -434,7 +434,7 @@ std::map<std::string, std::string> getAliases(const Glib::ustring& profile_dir)
                 const cJSON* const alias = cJSON_GetArrayItem(camera, index);
                 if (cJSON_IsString(alias)) {
                     res[alias->valuestring] = camera->string;
-                    if (settings->verbose) {
+                    if (settings->verbose > 1) {
                         std::cout << "dcp - alias: " << alias->valuestring << " -> " << camera->string << std::endl;
                     }
                 }
@@ -2212,7 +2212,7 @@ DCPProfile* DCPStore::getProfile(const Glib::ustring& filename) const
     if (res->isValid()) {
         // Add profile
         profile_cache[filename] = res;
-        if (options.rtSettings.verbose) {
+        if (options.rtSettings.verbose > 1) {
             printf("DCP profile '%s' loaded from disk\n", filename.c_str());
         }
         return res;

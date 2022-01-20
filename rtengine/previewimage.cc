@@ -499,7 +499,7 @@ private:
                 return false;
             }
 
-            if (settings->verbose) {
+            if (settings->verbose > 1) {
                 std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
                           << " to " << (W/skip) << "x" << (H/skip) << std::endl;
             }
@@ -586,7 +586,7 @@ private:
                 return false;
             }
 
-            if (settings->verbose) {
+            if (settings->verbose > 1) {
                 std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
                           << " to " << (W/skip) << "x" << (H/skip) << std::endl;
             }

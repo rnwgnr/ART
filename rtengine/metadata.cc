@@ -128,7 +128,7 @@ std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const 
     }
     close(fd);
     g_remove(templ.c_str());
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         if (!out.empty()) {
             std::cout << "  exiftool stdout: " << out << std::flush;
         }

@@ -61,7 +61,7 @@ public:
     void stop()
     {
         stopTime.set();
-        if (settings->verbose) {
+        if (settings->verbose > 1) {
             if(!microseconds) {
                 long elapsedTime = stopTime.etime(startTime) / 1000;
                 std::cout << message << " took " << elapsedTime << " ms" << std::endl;

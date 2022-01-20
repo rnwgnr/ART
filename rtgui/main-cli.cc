@@ -117,7 +117,7 @@ bool check_partial_profile(const PartialProfile &pp)
  *  -3 if at least one required procparam file was not found */
 int processLineParams ( int argc, char **argv );
 
-std::pair<bool, bool> dontLoadCache(int argc, char **argv);
+std::pair<bool, int> dontLoadCache(int argc, char **argv);
 
 int main (int argc, char **argv)
 {
@@ -246,10 +246,10 @@ int main (int argc, char **argv)
 }
 
 
-std::pair<bool, bool> dontLoadCache(int argc, char **argv)
+std::pair<bool, int> dontLoadCache(int argc, char **argv)
 {
     bool quick = false;
-    bool verbose = false;
+    int verbose = 0;
     
     for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
@@ -269,7 +269,7 @@ std::pair<bool, bool> dontLoadCache(int argc, char **argv)
                 ART_print_help(argv[0], false);
                 exit(0);
             case 'V':
-                verbose = true;
+                ++verbose;
                 break;
             case '-':
                 if (currParam == "--progress") {
@@ -283,7 +283,7 @@ std::pair<bool, bool> dontLoadCache(int argc, char **argv)
     }
 
     if (progress) {
-        verbose = false;
+        verbose = 0;
     }
 
     return std::make_pair(quick, verbose);

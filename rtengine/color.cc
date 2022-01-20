@@ -2727,7 +2727,7 @@ void Color::LabGamutMunsell(float *labL, float *laba, float *labb, const int N, 
 #ifdef _DEBUG
     t2e.set();
 
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         printf("Color::LabGamutMunsell (correction performed in %d usec):\n", t2e.etime(t1e));
         printf("   Gamut              : G1negat=%iiter G165535=%iiter \n", negat, moreRGB);
 
@@ -6835,7 +6835,7 @@ void Color::initMunsell ()
 #ifdef _DEBUG
     t2e.set();
 
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         printf("Lutf Munsell  %d usec\n", t2e.etime(t1e));
     }
 

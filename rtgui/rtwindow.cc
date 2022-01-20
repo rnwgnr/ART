@@ -351,7 +351,7 @@ RTWindow::RTWindow():
             if (options.pseudoHiDPISupport) {
             	fontScale = options.fontSize / (float)RTScalable::baseFontSize;
             }
-            if (options.rtSettings.verbose) {
+            if (options.rtSettings.verbose > 1) {
                 printf("\"Non-Default\" font size(%d) * scale(%d) / fontScale(%.3f)\n", options.fontSize, (int)initialGdkScale, fontScale);
             }
         } else {
@@ -381,14 +381,14 @@ RTWindow::RTWindow():
                 }
                 if ((int)initialGdkScale > 1 || pt != RTScalable::baseFontSize) {
                     css = Glib::ustring::compose ("* { font-size: %1pt}", pt * (int)initialGdkScale);
-                    if (options.rtSettings.verbose) {
+                    if (options.rtSettings.verbose > 1) {
                         printf("\"Default\" font size(%d) * scale(%d) / fontScale(%.3f)\n", pt, (int)initialGdkScale, fontScale);
                     }
                 }
             }
         }
         if (!css.empty()) {
-            if (options.rtSettings.verbose) {
+            if (options.rtSettings.verbose > 1) {
                 printf("CSS:\n%s\n\n", css.c_str());
             }
             try {

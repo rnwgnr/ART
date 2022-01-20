@@ -271,7 +271,7 @@ void UserCommandStore::init(const Glib::ustring &dirname)
             
                 commands_.push_back(cmd);
 
-                if (options.rtSettings.verbose) {
+                if (options.rtSettings.verbose > 1) {
                     std::cout << "Found user command \"" << S(cmd.label)
                               << "\": " << S(cmd.command) << std::endl;
                 }

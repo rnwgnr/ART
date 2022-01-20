@@ -136,7 +136,7 @@ void ensure_not_clipping(std::vector<double> &curve)
         double y = c.getVal(mid);
         if (y <= 0) {
             curve[4] += (curve[3] - curve[4]) / 2;
-            if (settings->verbose) {
+            if (settings->verbose > 1) {
                 std::cout << "histogram matching: bumping up (" << curve[3]
                           << ", " << c.getVal(curve[3]) << ") to " << curve[4]
                           << " to avoid negative clipping at " << mid
@@ -154,7 +154,7 @@ void ensure_not_clipping(std::vector<double> &curve)
         double y = c.getVal(mid);
         if (y >= 1) {
             curve[8] += (curve[7] - curve[8]) * 0.1;
-            if (settings->verbose) {
+            if (settings->verbose > 1) {
                 std::cout << "histogram matching: bumping down (" << curve[7]
                           << ", " << c.getVal(curve[7]) << ") to " << curve[8]
                           << " to avoid positive clipping at " << mid
@@ -479,7 +479,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
     }
     int skip = 3;
 
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         std::cout << "histogram matching: full raw image size is " << fw << "x" << fh << std::endl;
     }
 
@@ -514,7 +514,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         skip = LIM(skip * fh / h, 6, 10); // adjust the skip factor -- the larger the thumbnail, the less we should skip to get a good match
         source.reset(thumb->quickProcessImage(neutral, fh / skip, TI_Nearest));
 
-        if (settings->verbose) {
+        if (settings->verbose > 1) {
             std::cout << "histogram matching: extracted embedded thumbnail" << std::endl;
         }
     }
@@ -545,7 +545,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         int sl = max_corner_luminance(*source);
         const int l_noise = 10;
         if (tl <= l_noise && sl > l_noise) {
-            if (settings->verbose) {
+            if (settings->verbose > 1) {
                 std::cout << "histogram matching: corners luminance is "
                           << tl << " for target, " << sl << " for source, "
                           << "trying to perform auto-distortion correction"
@@ -554,7 +554,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
             neutral.distortion.enabled = true;
             neutral.distortion.amount = ImProcFunctions::getAutoDistor(getFileName(), 300);
             if (neutral.distortion.amount != 0) {
-                if (settings->verbose) {
+                if (settings->verbose > 1) {
                     std::cout << "histogram matching: dark corners detected, reprocessing with auto-distortion correction" << std::endl;
                 }
                 target.reset(thumb->processImage(neutral, sensor_type, fh / skip, TI_Nearest, getMetaData(), scale, false, true));
@@ -576,7 +576,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
                 cx += cw / 2;
                 tw -= cw;
             }
-            if (settings->verbose) {
+            if (settings->verbose > 1) {
                 std::cout << "histogram matching: cropping target to get an aspect ratio of " << round(thumb_ratio * 100)/100.0 << ":1, new size is " << tw << "x" << th << std::endl;
             }
 
@@ -596,7 +596,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
             }
         }
 
-        if (settings->verbose) {
+        if (settings->verbose > 1) {
             std::cout << "histogram matching: generated neutral rendering" << std::endl;
         }
     }
@@ -640,7 +640,7 @@ void RawImageSource::getAutoMatchedToneCurve(const ColorManagementParams &cp, st
         if (i == 0) {
             score *= 0.9; // give more weight to the luminance curve
         }
-        if (settings->verbose) {
+        if (settings->verbose > 1) {
             std::cout << "histogram matching: candidate " << i
                       << " has score " << score << std::endl;
         }

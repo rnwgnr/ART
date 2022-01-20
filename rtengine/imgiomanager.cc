@@ -108,7 +108,7 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                     cmd = kf.get_string(group, "ReadCommand");
                     loaders_[ext] = cmd;
 
-                    if (settings->verbose) {
+                    if (settings->verbose > 1) {
                         std::cout << "Found loader for extension \"" << ext << "\": " << S(cmd) << std::endl;
                     }
                 }
@@ -125,7 +125,7 @@ void ImageIOManager::init(const Glib::ustring &dirname)
 
                     savelbls_[ext] = lbl;
                     
-                    if (settings->verbose) {
+                    if (settings->verbose > 1) {
                         std::cout << "Found saver for extension \"" << ext << "\": " << S(cmd) << std::endl;
                     }
                 }
@@ -211,7 +211,7 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     }
     close(fd);
     g_remove(templ.c_str());
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         if (!sout.empty()) {
             std::cout << "  stdout: " << sout << std::flush;
         }
@@ -355,7 +355,7 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
             }
             ok = false;
         }
-        if (settings->verbose) {
+        if (settings->verbose > 1) {
             if (!sout.empty()) {
                 std::cout << "  stdout: " << sout << std::flush;
             }

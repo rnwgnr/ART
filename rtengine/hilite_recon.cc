@@ -331,7 +331,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         {1.f, 0.f, 1.f}
     };
 
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         for (int c = 0; c < 3; ++c) {
             printf("chmax[%d] : %f\tclmax[%d] : %f\tratio[%d] : %f\n", c, chmax[c], c, clmax[c], c, chmax[c] / clmax[c]);
         }
@@ -374,7 +374,7 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         factor[0] = factor[1] = factor[2] = 1.f;
     }
 
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         for (int c = 0; c < 3; ++c) {
             printf("correction factor[%d] : %f\n", c, factor[c]);
         }
