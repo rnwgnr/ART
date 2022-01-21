@@ -178,7 +178,8 @@ int main (int argc, char **argv)
 #endif
 
     auto p = dontLoadCache(argc, argv);
-    bool quickstart = p.first, verbose = p.second;
+    bool quickstart = p.first;
+    int verbose = p.second;
 
     try {
         Options::load(quickstart, verbose);
