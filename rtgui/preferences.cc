@@ -2100,11 +2100,15 @@ void Preferences::fillPreferences ()
     thumbDelayUpdate->set_active(moptions.thumb_delay_update);
     thumbLazyCaching->set_active(moptions.thumb_lazy_caching);
 
-    darkFrameDir->set_current_folder ( moptions.rtSettings.darkFramesPath );
-    darkFrameChanged ();
+    if (!moptions.rtSettings.darkFramesPath.empty()) {
+        darkFrameDir->set_current_folder(moptions.rtSettings.darkFramesPath);
+        darkFrameChanged();
+    }
 
-    flatFieldDir->set_current_folder ( moptions.rtSettings.flatFieldsPath );
-    flatFieldChanged ();
+    if (!moptions.rtSettings.flatFieldsPath.empty()) {
+        flatFieldDir->set_current_folder(moptions.rtSettings.flatFieldsPath);
+        flatFieldChanged();
+    }
 
     clutsDir->set_current_folder ( moptions.clutsDir );
 
