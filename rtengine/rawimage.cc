@@ -645,6 +645,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (dng_version) {
                 RT_whitelevel_from_constant = ThreeValBool::F;
                 RT_blacklevel_from_constant = ThreeValBool::F;
+            } else if (strcmp(make, "Panasonic") != 0) {
+                RT_whitelevel_from_constant = ThreeValBool::T;
+                RT_blacklevel_from_constant = ThreeValBool::T;
             }
 
             if (is_foveon) {
@@ -1536,21 +1539,6 @@ DCraw::dcraw_coeff_overrides(const char make[], const char model[], const int is
         *white_level = maximum;
     }
     memset(trans, 0, sizeof(*trans) * 12);
-
-    // // indicate that DCRAW wants these from constants (rather than having loaded these from RAW file
-    // // note: this is simplified so far, in some cases dcraw calls this when it has say the black level
-    // // from file, but then we will not provide any black level in the tables. This case is mainly just
-    // // to avoid loading table values if we have loaded a DNG conversion of a raw file (which already
-    // // have constants stored in the file).
-    // if (RT_whitelevel_from_constant == ThreeValBool::X || is_pentax_dng) {
-    //     RT_whitelevel_from_constant = ThreeValBool::T;
-    // }
-    // if (RT_blacklevel_from_constant == ThreeValBool::X || is_pentax_dng) {
-    //     RT_blacklevel_from_constant = ThreeValBool::T;
-    // }
-    // if (RT_matrix_from_constant == ThreeValBool::X) {
-    //     RT_matrix_from_constant = ThreeValBool::T;
-    // }
 
     {
         // test if we have any information in the camera constants store, if so we take that.
