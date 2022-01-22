@@ -133,6 +133,8 @@ bool BatchQueueEntryUpdater::process_thread()
         }
     }
 
+    stopped_ = true;
+    
     return true;
 }
 
