@@ -342,8 +342,12 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
 
         const float whitept = params->toneCurve.hasWhitePoint() ? params->toneCurve.whitePoint : 1.f;
 
+        const bool single_curve = params->toneCurve.curveMode == params->toneCurve.curveMode2;
+        
         ImProcData im(params, scale, multiThread);
-        filmlike_clip(img, whitept, im.multiThread);
+        if (!(single_curve && !params->toneCurve.contrastLegacyMode && params->toneCurve.curveMode == ToneCurveParams::TcMode::NEUTRAL)) {
+            filmlike_clip(img, whitept, im.multiThread);
+        }
 
         std::unique_ptr<Curve> ccurve;
         if (params->toneCurve.contrastLegacyMode) {
@@ -419,8 +423,6 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             dccurve.reset(new DoubleCurve(*ccurve, dcurve));
             tcurve = dccurve.get();
         }
-
-        const bool single_curve = params->toneCurve.curveMode == params->toneCurve.curveMode2;
 
         if (single_curve) {
             if (editImgFloat && (editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2)) {

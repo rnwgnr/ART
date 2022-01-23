@@ -1319,9 +1319,9 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
     Vec3<float> jch;
 
     for (size_t i = start; i < end; ++i) {
-        rgb[0] = rc[i] / 65535.f;
-        rgb[1] = gc[i] / 65535.f;
-        rgb[2] = bc[i] / 65535.f;
+        rgb[0] = std::max(rc[i] / 65535.f, 0.f);
+        rgb[1] = std::max(gc[i] / 65535.f, 0.f);
+        rgb[2] = std::max(bc[i] / 65535.f, 0.f);
 
         Color::rgb2jzazbz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
         Color::jzazbz2jzch(jch[1], jch[2], jch[1], jch[2]);
@@ -1347,9 +1347,9 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         Color::jzch2jzazbz(sat, hue, jch[1], jch[2]);
         Color::jzazbz2rgb(jch[0], jch[1], jch[2], rgb[0], rgb[1], rgb[2], state.iws);
 
-        rc[i] = rgb[0] * 65535.f;
-        gc[i] = rgb[1] * 65535.f;
-        bc[i] = rgb[2] * 65535.f;
+        rc[i] = LIM(rgb[0] * 65535.f, 0.f, whitept);
+        gc[i] = LIM(rgb[1] * 65535.f, 0.f, whitept);
+        bc[i] = LIM(rgb[2] * 65535.f, 0.f, whitept);
     }
 }
 
