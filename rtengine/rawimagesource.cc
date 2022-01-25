@@ -621,16 +621,15 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     float rm, gm, bm;
 
     if (ctemp.getTemp() < 0) {
-        // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
-        rm = ri->get_pre_mul(0);
-        gm = ri->get_pre_mul(1);
-        bm = ri->get_pre_mul(2);
+        // no white balance, ie revert unity multipliers
+        r = g = b = 1;
+        wbCamera2Mul(r, g, b);
     } else {
         ctemp.getMultipliers (r, g, b);
-        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
-        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
-        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
     }
+    rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+    gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+    bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
 
     if (true) {
         double raw_expos = raw.enable_whitepoint ? raw.expos : 1.0;
@@ -2961,7 +2960,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
         return;
     }
 
-    if (dcpProf != nullptr) {
+    if (dcpProf != nullptr && wb.getTemp() > 0) {
         // DCP processing
         const DCPProfile::Triple pre_mul_row = {
             pre_mul[0],
