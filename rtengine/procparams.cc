@@ -4691,8 +4691,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
             if (assignFromKeyfile(keyFile, "Crop", "Ratio", crop.ratio)) {
                 //backwards compatibility for crop.ratio
-                if (crop.ratio == "DIN") {
-                    crop.ratio = "1.414 - DIN EN ISO 216";
+                if (crop.ratio == "DIN" || crop.ratio == "1.414 - DIN EN ISO 216") {
+                    crop.ratio = "1.414 - ISO 216 (A4 paper)";
                 }
 
                 if (crop.ratio == "8.5:11") {
