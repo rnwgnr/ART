@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1030
+#define PPVERSION 1031
 
 /*
   Log of version changes
+  1031  2022-01-27
+        added option to use CAT for standard matrix input profiles
   1030  2022-01-25
         changed balanced highlight recovery value from ColorBlend to Balanced
   1029  2021-12-07

@@ -1131,6 +1131,7 @@ struct ColorManagementParams {
     Glib::ustring outputProfile;
     RenderingIntent outputIntent;
     bool outputBPC;
+    bool inputProfileCAT;
 
     static const Glib::ustring NoICMString;
     static const Glib::ustring NoProfileString;

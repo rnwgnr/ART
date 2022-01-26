@@ -2547,7 +2547,8 @@ ColorManagementParams::ColorManagementParams() :
     workingProfile("ProPhoto"),
     outputProfile(options.rtSettings.srgb),
     outputIntent(RI_RELATIVE),
-    outputBPC(true)
+    outputBPC(true),
+    inputProfileCAT(true)
 {
 }
 
@@ -2563,7 +2564,8 @@ bool ColorManagementParams::operator ==(const ColorManagementParams& other) cons
         && workingProfile == other.workingProfile
         && outputProfile == other.outputProfile
         && outputIntent == other.outputIntent
-        && outputBPC == other.outputBPC;
+        && outputBPC == other.outputBPC
+        && inputProfileCAT == other.inputProfileCAT;
 }
 
 bool ColorManagementParams::operator !=(const ColorManagementParams& other) const
@@ -3804,6 +3806,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 keyFile
                 );
             saveToKeyfile("Color Management", "OutputBPC", icm.outputBPC, keyFile);
+            saveToKeyfile("Color Management", "InputProfileCAT", icm.inputProfileCAT, keyFile);
         }
 
 
@@ -4953,6 +4956,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             assignFromKeyfile(keyFile, "Color Management", "OutputBPC", icm.outputBPC);
+            if (!assignFromKeyfile(keyFile, "Color Management", "InputProfileCAT", icm.inputProfileCAT) && ppVersion < 1031) {
+                icm.inputProfileCAT = false;
+            }
         }
 
         if (keyFile.has_group("SoftLight") && RELEVANT_(softlight)) {

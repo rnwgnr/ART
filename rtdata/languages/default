@@ -569,6 +569,7 @@ HISTORY_MSG_GRAIN_STRENGTH;Film Grain - Strength
 HISTORY_MSG_GRAIN_SCALE;Film Grain - Scale
 HISTORY_MSG_HISTMATCHING;Auto-matched tone curve
 HISTORY_MSG_HSL_SMOOTHING;Color equalizer - Smoothing
+HISTORY_MSG_ICM_INPUT_CAT;Input profile - CAT
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Output - Primaries
 HISTORY_MSG_ICM_OUTPUT_TEMP;Output - ICC-v4 illuminant D
 HISTORY_MSG_ICM_OUTPUT_TYPE;Output - Type
@@ -1545,6 +1546,7 @@ TP_ICM_SAVEREFERENCE_TOOLTIP;Save the linear TIFF image before the input profile
 TP_ICM_TONECURVE;Tone curve
 TP_ICM_TONECURVE_TOOLTIP;Employ the embedded DCP tone curve. The setting is only available if the selected DCP has a tone curve.
 TP_ICM_WORKINGPROFILE;Working Profile
+TP_ICM_INPUT_CAT;Perform chromatic adaptation (CAT)
 TP_IMPULSEDENOISE_LABEL;Impulse Noise Reduction
 TP_IMPULSEDENOISE_THRESH;Threshold
 TP_LABCURVE_BRIGHTNESS;Lightness

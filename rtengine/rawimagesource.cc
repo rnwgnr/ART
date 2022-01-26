@@ -47,6 +47,8 @@
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
 
+namespace rtengine {
+
 namespace {
 
 void rotateLine (const float* const line, rtengine::PlanarPtr<float> &channel, const int tran, const int i, const int w, const int h)
@@ -411,10 +413,102 @@ void transLineD1x (const float* const red, const float* const green, const float
     }
 }
 
+
+void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
+{
+    auto imatrices = src->getImageMatrices();
+    if (!imatrices) {
+        return;
+    }
+
+    Mat33<float> cat = { // Bradford from http://brucelindbloom.com
+        Vec3<float>{  0.8951f,  0.2664f, -0.1614f },
+        Vec3<float>{ -0.7502f,  1.7135f,  0.0367f },
+        Vec3<float>{  0.0389f, -0.0685f,  1.0296f }
+    };
+    Mat33<float> xyz_cam;
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
+    TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
+    Mat33<float> m;
+    Mat33<float> mi;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            xyz_cam[i][j] = imatrices->xyz_cam[i][j];
+            m[i][j] = ws[i][j];
+            mi[i][j] = iws[i][j];
+        }
+    }
+    Mat33<float> cam2lms = dotProduct(cat, m);//xyz_cam);
+    Mat33<float> lms2cam;
+    if (!invertMatrix(cam2lms, lms2cam)) {
+        return;
+    }
+
+    Vec3<float> src_w, dst_w;
+
+    Mat33<float> cam2ws = dotProduct(mi, xyz_cam);
+    Mat33<float> ws2cam;
+    if (!invertMatrix(cam2ws, ws2cam)) {
+        return;
+    }
+
+    double r, g, b;
+    ctemp.getMultipliers(r, g, b);
+    src->wbMul2Camera(r, g, b);
+    src_w[0] = 1/r;
+    src_w[1] = 1/g;
+    src_w[2] = 1/b;
+    src_w[0] *= src->get_pre_mul(0);
+    src_w[1] *= src->get_pre_mul(1);
+    src_w[2] *= src->get_pre_mul(2);
+
+    auto mul = src_w;
+    //src_w = dotProduct(cam2lms, src_w);
+    src_w = dotProduct(cat, dotProduct(xyz_cam, src_w));
+
+    dst_w[0] = 1;
+    dst_w[1] = 1;
+    dst_w[2] = 1;
+    dst_w = dotProduct(cat, dotProduct(m, dst_w));
+
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+
+    Mat33<float> wbmul{
+        Vec3<float>{mul[0], 0, 0},
+        Vec3<float>{0, mul[1], 0},
+        Vec3<float>{0, 0, mul[2]}
+    };
+
+    Mat33<float> lmul{
+        Vec3<float>{dst_w[0]/src_w[0], 0, 0},
+        Vec3<float>{0, dst_w[1]/src_w[1], 0},
+        Vec3<float>{0, 0, dst_w[2]/src_w[2]}
+    };
+    lmul = dotProduct(lms2cam, dotProduct(lmul, cam2lms));
+    lmul = dotProduct(lmul, dotProduct(cam2ws, dotProduct(wbmul, ws2cam)));
+
+#ifdef _OPENMP
+#   pragma omp parallel for
+#endif
+    for (int y = 0; y < H; ++y) {
+        Vec3<float> rgb;
+        for (int x = 0; x < W; ++x) {
+            rgb[0] = img->r(y, x);
+            rgb[1] = img->g(y, x);
+            rgb[2] = img->b(y, x);
+
+            rgb = dotProduct(lmul, rgb);
+            
+            img->r(y, x) = rgb[0];
+            img->g(y, x) = rgb[1];
+            img->b(y, x) = rgb[2];
+        }
+    }
+}
+
 } // namespace
 
-
-namespace rtengine {
 
 extern const Settings* settings;
 #undef ABS
@@ -945,9 +1039,34 @@ DCPProfile *RawImageSource::getDCP(const ColorManagementParams &cmp, DCPProfile:
 
 void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb)
 {
-    double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
-    colorSpaceConversion (image, cmp, wb, pre_mul, embProfile, camProfile, imatrices.xyz_cam, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, plistener);
+    cmsHPROFILE in;
+    DCPProfile *dcpProf;
+
+    if (findInputProfile(cmp.inputProfile, embProfile, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, &dcpProf, in, plistener)) {
+        
+        // if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT) {
+        //     apply_cat(this, image, wb);
+        // }
+
+        double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
+        colorSpaceConversion_(image, cmp, wb, pre_mul, camProfile, imatrices.xyz_cam, in, dcpProf, plistener);
+
+        if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT) {
+            apply_cat(this, image, wb);
+        }        
+    }
 }
+
+
+void RawImageSource::colorSpaceConversion(Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double cam[3][3], const std::string &camName, const Glib::ustring &fileName, ProgressListener *plistener)
+{
+    cmsHPROFILE in;
+    DCPProfile *dcpProf;
+    if (findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in, plistener)) {
+        colorSpaceConversion_(im, cmp, wb, pre_mul, camprofile, cam, in, dcpProf, plistener);
+    }
+}
+
 
 void RawImageSource::getFullSize(int& w, int& h, int tr)
 {
@@ -2948,18 +3067,8 @@ lab2ProphotoRgbD50(float L, float A, float B, float& r, float& g, float& b)
 }
 
 // Converts raw image including ICC input profile to working space - floating point version
-void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double camMatrix[3][3], const std::string &camName, const Glib::ustring &fileName, ProgressListener *plistener)
+void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE camprofile, double camMatrix[3][3], cmsHPROFILE in, DCPProfile *dcpProf, ProgressListener *plistener)
 {
-
-//    MyTime t1, t2, t3;
-//    t1.set ();
-    cmsHPROFILE in;
-    DCPProfile *dcpProf;
-
-    if (!findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in, plistener)) {
-        return;
-    }
-
     if (dcpProf != nullptr && wb.getTemp() > 0) {
         // DCP processing
         const DCPProfile::Triple pre_mul_row = {
