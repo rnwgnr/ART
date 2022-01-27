@@ -477,7 +477,7 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
     const int W = img->getWidth();
     const int H = img->getHeight();
 
-    // lmul is our conversion matrix putting all the pieces together.
+    // conv is our conversion matrix putting all the pieces together.
     // From right to left:
     // - restore the native wb in camera space
     // - convert to LMS
