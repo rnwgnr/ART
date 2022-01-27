@@ -416,6 +416,13 @@ void transLineD1x (const float* const red, const float* const green, const float
 }
 
 
+//
+// white balancing via chromatic adaptation, as described e.g. in
+// 
+//   http://yuhaozhu.com/blog/chromatic-adaptation.html
+//
+// (also similar to what darktable does in color calibration)
+//
 void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
 {
     auto imatrices = src->getImageMatrices();
@@ -423,22 +430,17 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
         return;
     }
 
-    Mat33f cat( // Bradford from http://brucelindbloom.com
-        0.8951f,  0.2664f, -0.1614f,
-        -0.7502f,  1.7135f,  0.0367f,
-        0.0389f, -0.0685f,  1.0296f
+    static const Mat33f cat( // Bradford from http://brucelindbloom.com
+        0.8951f, 0.2664f, -0.1614f,
+        -0.7502f, 1.7135f, 0.0367f,
+        0.0389f, -0.0685f, 1.0296f
         );
-    Mat33f xyz_cam;
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            xyz_cam[i][j] = imatrices->xyz_cam[i][j];
-        }
-    }
+    Mat33f xyz_cam(imatrices->xyz_cam);
     auto ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
     auto iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
-    Mat33f cam2lms = dot_product(cat, ws);//xyz_cam);
-    auto lms2cam = inverse(cam2lms);
-    if (!lms2cam[1][1]) {
+    Mat33f ws2lms = dot_product(cat, ws);
+    auto lms2ws = inverse(ws2lms);
+    if (!lms2ws[1][1]) {
         return;
     }
 
@@ -448,25 +450,42 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
         return;
     }
 
+    // we start with img in the current working space, already white balanced
+    // via simple rgb scaling in camera space
+    //
+    // step 1: revert to the "native" white balance of the camera matrix (~D65)
     double r, g, b;
     ctemp.getMultipliers(r, g, b);
     src->wbMul2Camera(r, g, b);
+    // src_w is now the "native" white point in camera space
     Vec3f src_w(src->get_pre_mul(0)/r,
                 src->get_pre_mul(1)/g,
                 src->get_pre_mul(2)/b);
 
-    Mat33f wbmul = diagonal(src_w[0], src_w[1], src_w[2]);
+    // wbmul is used to restore the native wb, in camera space
+    Mat33f wbmul = dot_product(cam2ws, dot_product(diagonal(src_w[0], src_w[1], src_w[2]), ws2cam));
+
+    // src_w is our source white point in "sharpened LMS" space
+    // (via Bradford adaptation)
     src_w = dot_product(cat, dot_product(xyz_cam, src_w));
 
+    // our target white point is the one of the working space
+    // (also converted to LMS)
     Vec3f dst_w(1, 1, 1);
     dst_w = dot_product(cat, dot_product(ws, dst_w));
 
     const int W = img->getWidth();
     const int H = img->getHeight();
 
-    Mat33f lmul = diagonal(dst_w[0]/src_w[0], dst_w[1]/src_w[1], dst_w[2]/src_w[2]);
-    lmul = dot_product(lms2cam, dot_product(lmul, cam2lms));
-    lmul = dot_product(lmul, dot_product(cam2ws, dot_product(wbmul, ws2cam)));
+    // lmul is our conversion matrix putting all the pieces together.
+    // From right to left:
+    // - restore the native wb in camera space
+    // - convert to LMS
+    // - perform the adaptation to the white point of the working space
+    // - convert back to rgb
+    Mat33f conv = diagonal(dst_w[0]/src_w[0], dst_w[1]/src_w[1], dst_w[2]/src_w[2]);
+    conv = dot_product(lms2ws, dot_product(conv, ws2lms));
+    conv = dot_product(conv, wbmul);
 
 #ifdef _OPENMP
 #   pragma omp parallel for
@@ -478,7 +497,7 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
             rgb[1] = img->g(y, x);
             rgb[2] = img->b(y, x);
 
-            rgb = dot_product(lmul, rgb);
+            rgb = dot_product(conv, rgb);
             
             img->r(y, x) = rgb[0];
             img->g(y, x) = rgb[1];
