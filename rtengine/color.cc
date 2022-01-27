@@ -24,6 +24,7 @@
 #include "sleef.h"
 #include "opthelper.h"
 #include "iccstore.h"
+#include "linalgebra.h"
 
 using namespace std;
 
@@ -31,19 +32,19 @@ namespace rtengine {
 
 namespace {
 
-typedef std::array<float, 3> A3;
+typedef Vec3f A3;
 
 // D50 <-> D65 adapted from darktable
 
 void XYZ_D50_to_D65(float &X, float &Y, float &Z)
 {
     // Bradford adaptation matrix from http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-    constexpr std::array<A3, 3> M = {
-        A3({  0.9555766f, -0.0230393f,  0.0631636f }),
-        A3({ -0.0282895f,  1.0099416f,  0.0210077f }),
-        A3({  0.0122982f, -0.0204830f,  1.3299098f })
+    constexpr float M[3][3] = {
+        {  0.9555766f, -0.0230393f,  0.0631636f },
+        { -0.0282895f,  1.0099416f,  0.0210077f },
+        {  0.0122982f, -0.0204830f,  1.3299098f }
     };
-    A3 res = dotProduct(M, A3({X, Y, Z}));
+    A3 res = dot_product(M, A3(X, Y, Z));
     X = res[0];
     Y = res[1];
     Z = res[2];
@@ -53,12 +54,12 @@ void XYZ_D50_to_D65(float &X, float &Y, float &Z)
 void XYZ_D65_to_D50(float &X, float &Y, float &Z)
 {
     // Bradford adaptation matrix from http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-    constexpr std::array<A3, 3> M = {
-        A3({  1.0478112f,  0.0228866f, -0.0501270f }),
-        A3({  0.0295424f,  0.9904844f, -0.0170491f }),
-        A3({ -0.0092345f,  0.0150436f,  0.7521316f })
+    constexpr float M[3][3] = {
+        {  1.0478112f,  0.0228866f, -0.0501270f },
+        {  0.0295424f,  0.9904844f, -0.0170491f },
+        { -0.0092345f,  0.0150436f,  0.7521316f }
     };
-    A3 res = dotProduct(M, A3({X, Y, Z}));
+    A3 res = dot_product(M, A3(X, Y, Z));
     X = res[0];
     Y = res[1];
     Z = res[2];

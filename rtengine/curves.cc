@@ -37,6 +37,8 @@
 #include "ciecam02.h"
 #include "color.h"
 #include "iccstore.h"
+#include "linalgebra.h"
+
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
 
@@ -1315,8 +1317,8 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, floa
 
 void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *rc, float *gc, float *bc, const ApplyState &state) const
 {
-    Vec3<float> rgb;
-    Vec3<float> jch;
+    Vec3f rgb;
+    Vec3f jch;
 
     for (size_t i = start; i < end; ++i) {
         rgb[0] = std::max(rc[i] / 65535.f, 0.f);

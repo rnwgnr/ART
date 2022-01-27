@@ -35,6 +35,7 @@
 #include "settings.h"
 #include "rescale.h"
 #include "guidedfilter.h"
+#include "linalgebra.h"
 
 namespace {
 
@@ -286,11 +287,7 @@ void boxblur_resamp(const float* const* src, float** dst, float** temp, int H, i
 }
 
 
-#define FLT_M(m) std::array<std::array<float, 3>, 3>({                  \
-    std::array<float, 3>({float(m[0][0]), float(m[0][1]), float(m[0][2])}), \
-    std::array<float, 3>({float(m[1][0]), float(m[1][1]), float(m[1][2])}), \
-    std::array<float, 3>({float(m[2][0]), float(m[2][1]), float(m[2][2])}) \
-        })
+#define FLT_M(m) Mat33f(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2])
 
 } // namespace
 
@@ -1290,8 +1287,8 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         const auto to_jzazbz =
             [&](float r, float g, float b, float &J, float &az, float &bz) -> bool
             {
-                std::array<float, 3> v({r * rs, g * gs, b * bs});
-                v = dotProduct(to_xyz_m, v);
+                Vec3f v(r * rs, g * gs, b * bs);
+                v = dot_product(to_xyz_m, v);
                 if (UNLIKELY(min(v[0], v[1], v[2]) < 0.f)) {
                     Color::rgb2yuv(r * rs, g * gs, b * bs, J, az, bz, imatrices.xyz_cam);
                     return true;
@@ -1304,12 +1301,12 @@ void RawImageSource::HLRecovery_inpaint(bool soft, int blur, float rm, float gm,
         const auto to_rgb =
             [&](float J, float az, float bz, float &r, float &g, float &b, bool oog) -> void
             {
-                std::array<float, 3> v;
+                Vec3f v;
                 if (oog) {
                     Color::yuv2rgb(J, az, bz, v[0], v[1], v[2], imatrices.xyz_cam);
                 } else {
                     Color::jzazbz2xyz(J, az, bz, v[0], v[1], v[2]);
-                    v = dotProduct(to_cam_m, v);
+                    v = dot_product(to_cam_m, v);
                 }
                 r = v[0] / rs;
                 g = v[1] / gs;

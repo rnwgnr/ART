@@ -39,8 +39,8 @@
 #include "lcms2_plugin.h"
 
 #include "color.h"
-
 #include "cJSON.h"
+#include "linalgebra.h"
 
 #define inkc_constant 0x696E6B43
 
@@ -791,8 +791,8 @@ private:
         return nullptr;
     }        
     
-    using CVector = std::array<float, 3>;
-    using CMatrix = std::array<CVector, 3>;
+    using CVector = Vec3<float>;
+    using CMatrix = Mat33<float>;
     struct PMatrix {
         float matrix[3][3];
         PMatrix(): matrix{} {}
@@ -858,11 +858,11 @@ private:
             return false;
         }
 
-        CMatrix m = {
-            CVector({ float(red->X), float(green->X), float(blue->X) }),
-            CVector({ float(red->Y), float(green->Y), float(blue->Y) }),
-            CVector({ float(red->Z), float(green->Z), float(blue->Z) })
-        };
+        CMatrix m(
+            float(red->X), float(green->X), float(blue->X),
+            float(red->Y), float(green->Y), float(blue->Y),
+            float(red->Z), float(green->Z), float(blue->Z)
+            );
         m[1][0] = red->Y;
         m[1][1] = green->Y;
         m[1][2] = blue->Y;
@@ -994,9 +994,9 @@ private:
             pMatrices.emplace_back(std::move(m));
             TMatrix w = pMatrices.back()->matrix;
 
-            CMatrix b = {};
+            CMatrix b;
 
-            if (!invertMatrix(pMatrices.back()->toMatrix(), b)) {
+            if (!inverse(pMatrices.back()->toMatrix(), b)) {
                 if (settings->verbose) {
                     std::cout << "Matrix for working space: " << name << " is not invertible, skipping" << std::endl;
                 }

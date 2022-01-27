@@ -44,6 +44,8 @@
 #include <omp.h>
 #endif
 #include "opthelper.h"
+#include "linalgebra.h"
+
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
 
@@ -421,84 +423,62 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
         return;
     }
 
-    Mat33<float> cat = { // Bradford from http://brucelindbloom.com
-        Vec3<float>{  0.8951f,  0.2664f, -0.1614f },
-        Vec3<float>{ -0.7502f,  1.7135f,  0.0367f },
-        Vec3<float>{  0.0389f, -0.0685f,  1.0296f }
-    };
-    Mat33<float> xyz_cam;
-    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
-    TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
-    Mat33<float> m;
-    Mat33<float> mi;
+    Mat33f cat( // Bradford from http://brucelindbloom.com
+        0.8951f,  0.2664f, -0.1614f,
+        -0.7502f,  1.7135f,  0.0367f,
+        0.0389f, -0.0685f,  1.0296f
+        );
+    Mat33f xyz_cam;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             xyz_cam[i][j] = imatrices->xyz_cam[i][j];
-            m[i][j] = ws[i][j];
-            mi[i][j] = iws[i][j];
         }
     }
-    Mat33<float> cam2lms = dotProduct(cat, m);//xyz_cam);
-    Mat33<float> lms2cam;
-    if (!invertMatrix(cam2lms, lms2cam)) {
+    auto ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
+    auto iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
+    Mat33f cam2lms = dot_product(cat, ws);//xyz_cam);
+    auto lms2cam = inverse(cam2lms);
+    if (!lms2cam[1][1]) {
         return;
     }
 
-    Vec3<float> src_w, dst_w;
-
-    Mat33<float> cam2ws = dotProduct(mi, xyz_cam);
-    Mat33<float> ws2cam;
-    if (!invertMatrix(cam2ws, ws2cam)) {
+    auto cam2ws = dot_product(iws, xyz_cam);
+    auto ws2cam = inverse(cam2ws);
+    if (!ws2cam[1][1]) {
         return;
     }
 
     double r, g, b;
     ctemp.getMultipliers(r, g, b);
     src->wbMul2Camera(r, g, b);
-    src_w[0] = 1/r;
-    src_w[1] = 1/g;
-    src_w[2] = 1/b;
-    src_w[0] *= src->get_pre_mul(0);
-    src_w[1] *= src->get_pre_mul(1);
-    src_w[2] *= src->get_pre_mul(2);
+    Vec3f src_w(src->get_pre_mul(0)/r,
+                src->get_pre_mul(1)/g,
+                src->get_pre_mul(2)/b);
 
-    auto mul = src_w;
-    //src_w = dotProduct(cam2lms, src_w);
-    src_w = dotProduct(cat, dotProduct(xyz_cam, src_w));
+    Mat33f wbmul = diagonal(src_w[0], src_w[1], src_w[2]);
+    src_w = dot_product(cat, dot_product(xyz_cam, src_w));
 
-    dst_w[0] = 1;
-    dst_w[1] = 1;
-    dst_w[2] = 1;
-    dst_w = dotProduct(cat, dotProduct(m, dst_w));
+    Vec3f dst_w(1, 1, 1);
+    dst_w = dot_product(cat, dot_product(ws, dst_w));
 
     const int W = img->getWidth();
     const int H = img->getHeight();
 
-    Mat33<float> wbmul{
-        Vec3<float>{mul[0], 0, 0},
-        Vec3<float>{0, mul[1], 0},
-        Vec3<float>{0, 0, mul[2]}
-    };
-
-    Mat33<float> lmul{
-        Vec3<float>{dst_w[0]/src_w[0], 0, 0},
-        Vec3<float>{0, dst_w[1]/src_w[1], 0},
-        Vec3<float>{0, 0, dst_w[2]/src_w[2]}
-    };
-    lmul = dotProduct(lms2cam, dotProduct(lmul, cam2lms));
-    lmul = dotProduct(lmul, dotProduct(cam2ws, dotProduct(wbmul, ws2cam)));
+    Mat33f lmul = diagonal(dst_w[0]/src_w[0], dst_w[1]/src_w[1], dst_w[2]/src_w[2]);
+    lmul = dot_product(lms2cam, dot_product(lmul, cam2lms));
+    lmul = dot_product(lmul, dot_product(cam2ws, dot_product(wbmul, ws2cam)));
 
 #ifdef _OPENMP
 #   pragma omp parallel for
 #endif
     for (int y = 0; y < H; ++y) {
-        Vec3<float> rgb;
+        Vec3f rgb;
         for (int x = 0; x < W; ++x) {
             rgb[0] = img->r(y, x);
             rgb[1] = img->g(y, x);
             rgb[2] = img->b(y, x);
 
-            rgb = dotProduct(lmul, rgb);
+            rgb = dot_product(lmul, rgb);
             
             img->r(y, x) = rgb[0];
             img->g(y, x) = rgb[1];
@@ -1044,10 +1024,6 @@ void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementP
 
     if (findInputProfile(cmp.inputProfile, embProfile, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, &dcpProf, in, plistener)) {
         
-        // if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT) {
-        //     apply_cat(this, image, wb);
-        // }
-
         double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
         colorSpaceConversion_(image, cmp, wb, pre_mul, camProfile, imatrices.xyz_cam, in, dcpProf, plistener);
 
