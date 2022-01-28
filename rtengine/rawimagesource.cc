@@ -1046,7 +1046,7 @@ void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementP
         double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
         colorSpaceConversion_(image, cmp, wb, pre_mul, camProfile, imatrices.xyz_cam, in, dcpProf, plistener);
 
-        if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT) {
+        if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT && wb.getTemp() > 0) {
             apply_cat(this, image, wb);
         }        
     }
