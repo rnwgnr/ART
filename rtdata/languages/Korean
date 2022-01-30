@@ -568,6 +568,7 @@ HISTORY_MSG_GRAIN_STRENGTH;필름 효과 - 강도
 HISTORY_MSG_GRAIN_SCALE;필름 효과 - 크기 (Scale)
 HISTORY_MSG_HISTMATCHING;톤 곡선 자동조정
 HISTORY_MSG_HSL_SMOOTHING;색 이퀄라이저 - 매끄럽게 하기
+HISTORY_MSG_ICM_INPUT_CAT;프로파일 입력 - 색순응 (CAT)
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;출력 - Primaries
 HISTORY_MSG_ICM_OUTPUT_TEMP;출력 - ICC-v4 광원 D
 HISTORY_MSG_ICM_OUTPUT_TYPE;출력 - 현식
@@ -831,8 +832,8 @@ MAIN_TOOLTIP_BACKCOLOR3;미리보기의 배경색을 지정합니다.: <b>중간
 MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>고정</b> / <b>고정 해제</b> - <b>보정 전의 </b> 표시 설정\n\n<b>고정</b>: <b>보정 전 상태</b>를 그대로 표시하고 변경하지 않습니다.\n복수의 도구의 누적효과 평가에 도움이 됩니다.\n또, 비교는 이력상 어디에서도 할 수 있습니다.\n\n<b>고정 해제</b>: 현재 사용중 도구의  효과가 <b>보정 후</b>에  표시되고 그 전 단계 상태가  <b>보정 전 </b>에 표시 됩니다.
 MAIN_TOOLTIP_FALSECOLORS;노광량의 색깔 표시 표시/비표시.\n단축키: <b>Shift-e</b>\n\n범례 (IRE지수의 범위) :\n%1
 MAIN_TOOLTIP_HIDEHP;왼쪽패널 표시/비표시 (작업이력 포함)\n단축키:  <b>l</b>
-MAIN_TOOLTIP_INDCLIPPEDH;하이라이트 클리핑 영역の표시\n단축키: <b>&lt
-MAIN_TOOLTIP_INDCLIPPEDS;어더움 클리핑 영역의 표시\n단축키: <b>&gt
+MAIN_TOOLTIP_INDCLIPPEDH;하이라이트 클리핑 영역の표시\n단축키: <b>&gt;</b>
+MAIN_TOOLTIP_INDCLIPPEDS;어더움 클리핑 영역의 표시\n단축키: <b>&lt;</b>
 MAIN_TOOLTIP_PREVIEWB;<b>Blue 채널</b>표시\n단축키: <b>Shift-b</b>
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;<b>초점 마스크</b>표시\n단축키: <b>Shift-f</b>\n\n얕은피사체 심도, 저 노이즈, 고 확대율 줌 (zoom) 화상에서 더 정확하게 표시 가능\n\n노이즈가 많은 화상은 검출정도 향상위해 10-30% 축소해 평가함\n\n초점 마스크를 유효화하면 표시시간이 걸림
 MAIN_TOOLTIP_PREVIEWG;<b>Green 채널</b>표시\n단축키: <b>Shift-g</b>
@@ -1544,6 +1545,7 @@ TP_ICM_SAVEREFERENCE_TOOLTIP;입력 프로파일이 적용되기 전의 선형TI
 TP_ICM_TONECURVE;DCP톤 곡선 사용
 TP_ICM_TONECURVE_TOOLTIP;DCP 프로파일에 있는 톤 곡선를 사용할 수 있습니다.
 TP_ICM_WORKINGPROFILE;작업 프로파일
+TP_ICM_INPUT_CAT;색순응 (chromatic adaptation: CAT) 적용
 TP_IMPULSEDENOISE_LABEL;임펄스 노이즈 감소
 TP_IMPULSEDENOISE_THRESH;임계 값
 TP_LABCURVE_BRIGHTNESS;밝기

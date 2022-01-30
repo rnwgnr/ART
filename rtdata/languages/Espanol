@@ -14,6 +14,7 @@
 #13 2021-10-09 mrleemon, some fixes
 #14 2021-11-28 mrleemon, update for 1.10.1
 #15 2021-12-18 mrleemon, update for 1.12
+#16 2022-01-28 mrleemon, update for 1.12.1
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -587,6 +588,7 @@ HISTORY_MSG_GRAIN_STRENGTH;Grano de película - Intensidad
 HISTORY_MSG_GRAIN_SCALE;Grano de película - Escala
 HISTORY_MSG_HISTMATCHING;Curva tonal seleccionada automáticamente
 HISTORY_MSG_HSL_SMOOTHING;Ecualizador de color - Suavizado
+HISTORY_MSG_ICM_INPUT_CAT;Perfil de entrada - CAT
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Salida - Primarios
 HISTORY_MSG_ICM_OUTPUT_TEMP;Salida - Iluminante D ICC-v4
 HISTORY_MSG_ICM_OUTPUT_TYPE;Salida - Tipo
@@ -1563,6 +1565,7 @@ TP_ICM_SAVEREFERENCE_TOOLTIP;Guarda la imagen TIFF lineal antes de aplicar el pe
 TP_ICM_TONECURVE;Curva tonal
 TP_ICM_TONECURVE_TOOLTIP;Emplea la curva tonal DCP incrustada. El ajuste solo está disponible si el DCP seleccionado contiene una curva tonal.
 TP_ICM_WORKINGPROFILE;Perfil de trabajo
+TP_ICM_INPUT_CAT;Realizar adaptación cromática (CAT)
 TP_IMPULSEDENOISE_LABEL;Reducción de ruido impulsivo
 TP_IMPULSEDENOISE_THRESH;Umbral
 TP_LABCURVE_BRIGHTNESS;Luminosidad

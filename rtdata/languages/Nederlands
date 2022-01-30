@@ -28,6 +28,7 @@
 #27 2021-10-07 update to ART v1.10 by pm
 #28 2021-11-29 update to ART v1.10.1 by pm
 #29 2021-12-18 update to ART v1.12 by pm
+#30 2022-01-28 update to ART v1.12.1 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -587,6 +588,7 @@ HISTORY_MSG_GRAIN_SCALE;Filmkorrel - Schaal
 HISTORY_MSG_GRAIN_STRENGTH;Filmkorrel - Kracht
 HISTORY_MSG_HISTMATCHING;Auto-tooncurve
 HISTORY_MSG_HSL_SMOOTHING;Kleur-equalizer - Verzachten
+HISTORY_MSG_ICM_INPUT_CAT;Invoerprofiel - CAT
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Uitvoer - Primaries
 HISTORY_MSG_ICM_OUTPUT_TEMP;Uitvoer - ICC-v4 illuminant D
 HISTORY_MSG_ICM_OUTPUT_TYPE;Uitvoer - Type
@@ -1553,6 +1555,7 @@ TP_ICM_SAVEREFERENCE_TOOLTIP;Sla de lineaire TIFF-afbeelding op voordat het invo
 TP_ICM_TONECURVE;Tooncurve
 TP_ICM_TONECURVE_TOOLTIP;Gebruik de ingebedde DCP-tooncurve. De instelling is alleen beschikbaar als de geselecteerde DCP er een heeft.
 TP_ICM_WORKINGPROFILE;Werkprofiel
+TP_ICM_INPUT_CAT;Pas chromatische aanpassing (CAT) toe
 TP_IMPULSEDENOISE_LABEL;Spot-ruisonderdrukking
 TP_IMPULSEDENOISE_THRESH;Drempel
 TP_LABCURVE_BRIGHTNESS;Helderheid
