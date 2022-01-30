@@ -308,10 +308,7 @@ namespace ExtProg {
 bool spawnCommandAsync(const Glib::ustring &cmd)
 {
     try {
-
-        // const auto encodedCmd = Glib::filename_from_utf8(cmd);
-        // Glib::spawn_command_line_async(encodedCmd.c_str());
-        Glib::spawn_async("", Glib::shell_parse_argv(cmd), rtengine::subprocess::get_env());
+        Glib::spawn_async("", Glib::shell_parse_argv(cmd), rtengine::subprocess::get_env(), Glib::SPAWN_SEARCH_PATH_FROM_ENVP);
 
         return true;
 
@@ -332,10 +329,7 @@ bool spawnCommandSync(const Glib::ustring &cmd)
     auto exitStatus = -1;
 
     try {
-
-        //Glib::spawn_command_line_sync(cmd, nullptr, nullptr, &exitStatus);
-        Glib::spawn_sync("", Glib::shell_parse_argv(cmd), rtengine::subprocess::get_env(), Glib::SPAWN_DEFAULT, {}, nullptr, nullptr, &exitStatus);
-
+        Glib::spawn_sync("", Glib::shell_parse_argv(cmd), rtengine::subprocess::get_env(), Glib::SPAWN_SEARCH_PATH_FROM_ENVP, {}, nullptr, nullptr, &exitStatus);
     } catch (const Glib::Exception& exception) {
 
         if (options.rtSettings.verbose) {
