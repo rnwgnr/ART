@@ -369,14 +369,14 @@ void find_region(const array2D<float> &mask, int &min_x, int &min_y, int &max_x,
 
 void gaussian_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, float *buf, const TMatrix &ws, Channel chan, double sigma, double scale, bool multithread)
 {
-    static constexpr double HIGH_PRECISION_THRESHOLD = 2.0;
+    //static constexpr double HIGH_PRECISION_THRESHOLD = 2.0;
     
     double s = sigma / scale;
     const int W = R.width();
     const int H = R.height();
 
     array2D<float> kernel;
-    const bool high_precision = s > 0 && s < HIGH_PRECISION_THRESHOLD;
+    const bool high_precision = s > 0;// && s < HIGH_PRECISION_THRESHOLD;
     std::unique_ptr<Convolution> conv;
     if (high_precision) {
         build_gaussian_kernel(s, kernel);
