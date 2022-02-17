@@ -2685,7 +2685,9 @@ SmoothingParams::Region::Region():
     numblades(9),
     angle(0),
     curvature(0),
-    offset(0)
+    offset(0),
+    noise_strength(10),
+    noise_coarseness(30)
 {
 }
 
@@ -2704,7 +2706,9 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && numblades == other.numblades
         && angle == other.angle
         && curvature == other.curvature
-        && offset == other.offset;
+        && offset == other.offset
+        && noise_strength == other.noise_strength
+        && noise_coarseness == other.noise_coarseness;
 }
 
 
@@ -3860,6 +3864,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("Angle_") + n, r.angle, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Curvature_") + n, r.curvature, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("Offset_") + n, r.offset, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NoiseStrength_") + n, r.noise_strength, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("NoiseCoarseness_") + n, r.noise_coarseness, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
@@ -5097,6 +5103,14 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     done = false;
                 }
                 if (curmask.load(ppVersion, keyFile, smoothing_group, "", Glib::ustring("_") + n)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NoiseStrength_") + n, cur.noise_strength)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NoiseCoarseness_") + n, cur.noise_coarseness)) {
                     found = true;
                     done = false;
                 }

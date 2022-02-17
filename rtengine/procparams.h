@@ -1237,7 +1237,8 @@ struct SmoothingParams {
             GAUSSIAN_GLOW,
             NLMEANS,
             MOTION,
-            LENS
+            LENS,
+            NOISE
         };
         Mode mode;
         Channel channel;
@@ -1252,6 +1253,8 @@ struct SmoothingParams {
         double angle;
         double curvature;
         double offset;
+        int noise_strength;
+        int noise_coarseness;
 
         Region();
         bool operator==(const Region &other) const;

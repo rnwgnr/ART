@@ -31,8 +31,10 @@
 #include "gauss.h"
 #include "alignedbuffer.h"
 #include "ipdenoise.h"
+#include "rescale.h"
 #include <iostream>
 #include <queue>
+#include <random>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -495,6 +497,83 @@ void nlmeans_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, 
 }
 
 
+void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, int strength, int coarseness, double scale, Channel chan, bool multithread)
+{
+    const int W = R.width();
+    const int H = R.height();
+
+    const float s = LIM01(float(strength)/200.f) / scale;
+    std::default_random_engine rng(42);
+    std::normal_distribution<float> d(0.f, chan == Channel::L ? 0.5f : chan == Channel::C ? 2.f : 1.f);
+
+    const auto noise =
+        [&](array2D<float> &a) -> void
+        {
+            const float c = (1.f + 3.f * float(coarseness) / 100.f) / scale;
+            const int W2 = W / c;
+            const int H2 = H / c;
+            
+            array2D<float> nbuf(W2, H2);
+            for (int y = 0; y < H2; ++y) {
+                for (int x = 0; x < W2; ++x) {
+                    nbuf[y][x] = d(rng);
+                }
+            }
+
+            array2D<float> tmp(W, H);
+            rescaleBilinear(nbuf, tmp, multithread);
+
+#ifdef _OPENMP
+#           pragma omp parallel if (multithread)
+#endif
+            {
+                if (coarseness > 0) {
+                    gaussianBlur(tmp, tmp, W, H, (0.7f * float(coarseness)/100.f) / scale);
+                }
+#ifdef _OPENMP
+#               pragma omp for
+#endif
+                for (int y = 0; y < H; ++y) {
+                    for (int x = 0; x < W; ++x) {
+                        float n = tmp[y][x];
+                        a[y][x] = std::max(a[y][x] * (1.f + n * s), 0.f);
+                    }
+                }
+            }            
+        };
+
+    if (chan == Channel::LC) {
+        noise(R);
+        noise(G);
+        noise(B);
+    } else {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], G[y][x], R[y][x], B[y][x], ws);
+            }
+        }
+
+        if (chan == Channel::L) {
+            noise(G);
+        } else {
+            noise(R);
+            noise(B);
+        }
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                Color::yuv2rgb(G[y][x], R[y][x], B[y][x], R[y][x], G[y][x], B[y][x], ws);
+            }
+        }
+    }
+}
+
 
 } // namespace
 
@@ -613,7 +692,11 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
 
             const bool glow = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_GLOW;
             Channel ch = glow ? Channel::LC : Channel(int(r.channel));
-            if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
+            if (r.mode == SmoothingParams::Region::Mode::NOISE) {
+                if (cur_pipeline == Pipeline::OUTPUT || cur_pipeline == Pipeline::PREVIEW) {
+                    add_noise(R, G, B, ws, r.noise_strength, r.noise_coarseness, scale, ch, multiThread);
+                }
+            } else if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
                 nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
             } else if (r.mode == SmoothingParams::Region::Mode::LENS || r.mode == SmoothingParams::Region::Mode::MOTION) {
                 ImProcData im(params, scale, multiThread);
