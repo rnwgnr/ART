@@ -531,7 +531,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         } else if (err == LIBRAW_FILE_UNSUPPORTED) {
             // fallback to the internal one
             use_internal_decoder_ = true;
-        } else if (strncmp(libraw_->unpack_function_name(), "sony_arq_load_raw", 17) == 0) {
+        } else if (strncmp(libraw_->unpack_function_name(), "sony_arq_load_raw", 17) == 0 || strncmp(libraw_->imgdata.idata.software, "HDRMerge", 8) == 0) {
             use_internal_decoder_ = true;
         } else {
             auto &d = libraw_->imgdata.idata;
