@@ -624,7 +624,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             //         black = mkn.panasonic.BlackLevel[0];
             //     }
             // } else
-            if (!strcmp(make, "Canon") && isBayer()) {
+            if (!strcmp(make, "Canon") && isBayer() && !dng_version) {
                 if (mkn.canon.AverageBlackLevel) {
                     memset(cblack, 0, sizeof(cblack));
                     for (size_t i = 0; i < 4; ++i) {
