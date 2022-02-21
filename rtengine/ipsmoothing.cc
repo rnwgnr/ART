@@ -536,7 +536,7 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
                 for (int y = 0; y < H; ++y) {
                     for (int x = 0; x < W; ++x) {
                         float n = tmp[y][x];
-                        a[y][x] = std::max(a[y][x] * (1.f + n * s), 0.f);
+                        a[y][x] = a[y][x] * (1.f + n * s);
                     }
                 }
             }            
