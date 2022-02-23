@@ -2756,6 +2756,7 @@ ColorCorrectionParams::Region::Region():
     hue{0,0,0},
     sat{0,0,0},
     factor{0,0,0},
+    compression{0,0,0},
     rgbluminance(false),
     hueshift(0),
     mode(ColorCorrectionParams::Mode::YUV)
@@ -2777,6 +2778,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
         && hue == other.hue
         && sat == other.sat
         && factor == other.factor
+        && compression == other.compression
         && rgbluminance == other.rgbluminance
         && hueshift == other.hueshift
         && mode == other.mode;
@@ -3902,7 +3904,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                         putToKeyfile("ColorCorrection", Glib::ustring("Slope") + chan[c] + "_" + n, l.slope[c], keyFile);
                         putToKeyfile("ColorCorrection", Glib::ustring("Offset") + chan[c] + "_" + n, l.offset[c], keyFile);
                         putToKeyfile("ColorCorrection", Glib::ustring("Power") + chan[c] + "_" + n, l.power[c], keyFile);
-                        putToKeyfile("ColorCorrection", Glib::ustring("Pivot") + chan[c] + "_" + n, l.pivot[0], keyFile);
+                        putToKeyfile("ColorCorrection", Glib::ustring("Pivot") + chan[c] + "_" + n, l.pivot[c], keyFile);
+                        putToKeyfile("ColorCorrection", Glib::ustring("Compression") + chan[c] + "_" + n, l.compression[c], keyFile);
                     }
                 }
                 {
@@ -3915,6 +3918,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("Offset_") + n, l.offset[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Power_") + n, l.power[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("Pivot_") + n, l.pivot[0], keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("Compression_") + n, l.compression[0], keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("HueShift_") + n, l.hueshift, keyFile);
                 }
@@ -5254,6 +5258,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         cur.power[1] = cur.power[2] = cur.power[0];
                         get("Pivot_", cur.pivot[0]);
                         cur.pivot[1] = cur.pivot[2] = cur.pivot[0];
+                        get("Compression_", cur.compression[0]);
+                        cur.compression[1] = cur.compression[2] = cur.compression[0];
                     } else {
                         const char *chan[3] = { "R", "G", "B" };
                         for (int c = 0; c < 3; ++c) {
@@ -5264,6 +5270,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                                 cur.power[c] = 1.0 / cur.power[c];
                             }
                             get(Glib::ustring("Pivot") + chan[c] + "_", cur.pivot[c]);
+                            get(Glib::ustring("Compression") + chan[c] + "_", cur.compression[c]);
                         }
                     }
                     {

@@ -1293,6 +1293,7 @@ struct ColorCorrectionParams {
         std::array<double, 3> hue;
         std::array<double, 3> sat;
         std::array<double, 3> factor;
+        std::array<double, 3> compression;
         bool rgbluminance;
         double hueshift;
         Mode mode;

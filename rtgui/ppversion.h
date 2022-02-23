@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1032
+#define PPVERSION 1033
 
 /*
   Log of version changes
+  1033  2022-02-23
+        added compression sliders to the color correction tool
   1032  2022-02-17
         added noise option to the smoothing tool
   1031  2022-01-27

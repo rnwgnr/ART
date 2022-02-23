@@ -218,6 +218,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float roffset[n][3];
     float rpower[n][3];
     float rpivot[n][3];
+    float rcompression[n][3][2];
     char rgbmode[n];
     bool enabled[n];
     bool jzazbz[n];
@@ -287,7 +288,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 roffset[i][c] = r.offset[j];
                 rpower[i][c] = 1.0 / r.power[j];
                 rpivot[i][c] = r.pivot[j];
-                if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f) {
+                rcompression[i][c][0] = r.compression[j];
+                rcompression[i][c][1] = r.compression[j] > 0.f ? std::log(1.f + r.compression[j]) : 0.f;
+                if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f || rcompression[i][c][1] != 0.f) {
                     enabled[i] = true;
                 }
             }
@@ -314,6 +317,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             const float saturation = rs[region];
             const float hueshift = rhs[region];
             const float outsaturation = rsout[region];
+            const auto *compression = rcompression[region];
 
             if (hueshift != 0.f) {
                 float h, s;
@@ -383,6 +387,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                             v = pow_F(v / pivot[0], power[0]) * pivot[0];
                         } else {
                             v = pow_F(v, power[0]);
+                        }
+                        if (compression[0][0] != 0.f) {
+                            v = xlogf(v * compression[0][0] + 1.f) / compression[0][1];
                         }
                         v *= 65535.f;
                     } else {
@@ -473,6 +480,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             }
         };
 
+    vfloat v65535 = F2V(65535.f);
+    vfloat v1 = F2V(1.f);
+    
     const auto CDL_v =
         [&](int region, vfloat &Y, vfloat &u, vfloat &v) -> void
         {
@@ -483,6 +493,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             const float saturation = rs[region];
             const float hueshift = rhs[region];
             const float outsaturation = rsout[region];
+            const auto *compression = rcompression[region];
 
             if (hueshift != 0.f) {
                 float h, s, uk, vk;
@@ -509,7 +520,6 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 }
                 if (enabled[region]) {
                     vfloat rgb[3];
-                    vfloat v65535 = F2V(65535.f);
                     Color::yuv2rgb(Y, u, v, rgb[0], rgb[1], rgb[2], vws);
                     for (int i = 0; i < 3; ++i) {
                         vfloat vslope = F2V(slope[i]);
@@ -522,6 +532,12 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                             v = vself(vmaskf_gt(v, ZEROV), pow_F(v / vpivot, vpower) * vpivot, ZEROV);
                         } else {
                             v = vself(vmaskf_gt(v, ZEROV), pow_F(v, vpower), ZEROV);
+                        }
+                        if (compression[i][0] != 0.f) {
+                            vfloat vc0 = F2V(compression[i][0]);
+                            vfloat vc1 = F2V(compression[i][1]);
+                            v = vmaxf(v, ZEROV);
+                            v = xlogf(v * vc0 + v1) / vc1;
                         }
                         rgb[i] = v * v65535;
                     }
@@ -559,15 +575,20 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     vfloat voffset = F2V(offset[0] / 2.f);
                     vfloat vpower = F2V(power[0]);
                     vfloat vpivot = F2V(pivot[0]);
-                    vfloat v65535 = F2V(65535.f);
                     vfloat YY = (Y / v65535) * vslope + voffset;
                     if (pivot[0] != 1.f) {
                         YY = vself(vmaskf_gt(YY, ZEROV), pow_F(YY / vpivot, vpower) * vpivot, ZEROV);
                     } else {
                         YY = vself(vmaskf_gt(YY, ZEROV), pow_F(YY, vpower), ZEROV);
                     }
+                    if (compression[0][0] != 0.f) {
+                        vfloat vc0 = F2V(compression[0][0]);
+                        vfloat vc1 = F2V(compression[0][1]);
+                        YY = vmaxf(YY, ZEROV);
+                        YY = xlogf(YY * vc0 + v1) / vc1;
+                    }
                     YY *= v65535;
-                    vfloat f = vself(vmaskf_gt(Y, ZEROV), YY / Y, F2V(1.f));
+                    vfloat f = vself(vmaskf_gt(Y, ZEROV), YY / Y, v1);
                     Y = YY;
                     u *= f;
                     v *= f;

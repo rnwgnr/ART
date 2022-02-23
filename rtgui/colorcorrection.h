@@ -92,6 +92,7 @@ private:
     rtengine::ProcEvent EvMode;
     rtengine::ProcEvent EvRgbLuminance;
     rtengine::ProcEvent EvHueShift;
+    rtengine::ProcEvent EvCompression;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -128,11 +129,13 @@ private:
     Adjuster *offset;
     Adjuster *power;
     Adjuster *pivot;
+    Adjuster *compression;
 
     Adjuster *slope_rgb[3];
     Adjuster *offset_rgb[3];
     Adjuster *power_rgb[3];
     Adjuster *pivot_rgb[3];
+    Adjuster *compression_rgb[3];
     Gtk::CheckButton *rgbluminance;
     
     Gtk::CheckButton *sync_rgb_sliders;

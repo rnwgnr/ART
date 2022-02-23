@@ -138,7 +138,7 @@ public:
                 {
                     return Glib::ustring::compose("{%1,%2,%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("RGB S=%5 So=%6\ns=%1 o=%2\np=%3 P=%4", lbl(r.slope), lbl(r.offset), lbl(r.power), lbl(r.pivot), r.inSaturation, r.outSaturation);
+            return Glib::ustring::compose("RGB S=%5 So=%6\ns=%1 o=%2\np=%3 c=%7 P=%4", lbl(r.slope), lbl(r.offset), lbl(r.power), lbl(r.pivot), r.inSaturation, r.outSaturation, lbl(r.compression));
         }   break;
         case rtengine::procparams::ColorCorrectionParams::Mode::HSL: {
             const auto lbl =
@@ -161,7 +161,8 @@ public:
                 cx = Glib::ustring::compose("az=%1", round_ab(r.a));
                 cy = Glib::ustring::compose("bz=%1", round_ab(r.b));
             }
-            return Glib::ustring::compose("%1 %2 S=%3 So=%8 h=%9\ns=%4 o=%5 p=%6 P=%7", cx, cy, r.inSaturation, r.slope[0], r.offset[0], r.power[0], r.pivot[0], r.outSaturation, r.hueshift);
+            Glib::ustring sop = Glib::ustring::compose("s=%1 o=%2 p=%3 c=%4 P=%5", r.slope[0], r.offset[0], r.power[0], r.compression[0], r.pivot[0]);
+            return Glib::ustring::compose("%1 %2 S=%3 So=%4 h=%5\n%6", cx, cy, r.inSaturation, r.outSaturation, r.hueshift, sop);
         }   break;
         }
     }
@@ -232,6 +233,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvMode = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_MODE");
     EvRgbLuminance = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE");
     EvHueShift = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_HUESHIFT");
+    EvCompression = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_COMPRESSION");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK");
@@ -306,6 +308,9 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     pivot->setAdjusterListener(this);
     pivot->setLogScale(100, 0.18, true);
     box_combined->pack_start(*pivot);
+    compression = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_COMPRESSION"), 0, 10, 0.01, 0));
+    compression->setAdjusterListener(this);
+    box_combined->pack_start(*compression);
 
     sync_rgb_sliders = Gtk::manage(new Gtk::CheckButton(M("TP_COLORCORRECTION_SYNC_SLIDERS")));
     box_rgb->pack_start(*sync_rgb_sliders, Gtk::PACK_SHRINK, 4);
@@ -349,6 +354,9 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         pivot_rgb[c]->setAdjusterListener(this);
         pivot_rgb[c]->setLogScale(100, 0.18, true);
         vb->pack_start(*pivot_rgb[c]);
+        compression_rgb[c] = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_COMPRESSION"), 0, 10.0, 0.01, 0));
+        compression_rgb[c]->setAdjusterListener(this);
+        vb->pack_start(*compression_rgb[c]);
 
         f->add(*vb);
         box_rgb->pack_start(*f);
@@ -394,12 +402,14 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     offset->delay = options.adjusterMaxDelay;
     power->delay = options.adjusterMaxDelay;
     pivot->delay = options.adjusterMaxDelay;
+    compression->delay = options.adjusterMaxDelay;
     for (int c = 0; c < 3; ++c) {
         slope_rgb[c]->delay = options.adjusterMaxDelay;
         offset_rgb[c]->delay = options.adjusterMaxDelay;
         power_rgb[c]->delay = options.adjusterMaxDelay;
         pivot_rgb[c]->delay = options.adjusterMaxDelay;
         lfactor[c]->delay = options.adjusterMaxDelay;
+        compression_rgb[c]->delay = options.adjusterMaxDelay;
     }
 
     labMasksContentProvider.reset(new ColorCorrectionMasksContentProvider(this));
@@ -458,11 +468,13 @@ void ColorCorrection::setDefaults(const ProcParams *defParams)
     offset->setDefault(defParams->colorcorrection.regions[0].offset[0]);
     power->setDefault(defParams->colorcorrection.regions[0].power[0]);
     pivot->setDefault(defParams->colorcorrection.regions[0].pivot[0]);
+    compression->setDefault(defParams->colorcorrection.regions[0].compression[0]);
     for (int c = 0; c < 3; ++c) {
         slope_rgb[c]->setDefault(defParams->colorcorrection.regions[0].slope[c]);
         offset_rgb[c]->setDefault(defParams->colorcorrection.regions[0].offset[c]);
         power_rgb[c]->setDefault(defParams->colorcorrection.regions[0].power[c]);
         pivot_rgb[c]->setDefault(defParams->colorcorrection.regions[0].pivot[c]);
+        compression_rgb[c]->setDefault(defParams->colorcorrection.regions[0].compression[c]);
     }
 
     initial_params = defParams->colorcorrection;
@@ -487,6 +499,8 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
         evt = EvPivot;
     } else if (a == hueshift) {
         evt = EvHueShift;
+    } else if (a == compression) {
+        evt = EvCompression;
     } else {
         Adjuster **targets = nullptr;
         for (int c = 0; c < 3; ++c) {
@@ -505,6 +519,10 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
             } else if (a == pivot_rgb[c]) {
                 evt = EvPivot;
                 targets = pivot_rgb;
+                break;
+            } else if (a == compression_rgb[c]) {
+                evt = EvPivot;
+                targets = compression_rgb;
                 break;
             } else if (a == lfactor[c]) {
                 evt = c == 0 ? EvSlope : (c == 1 ? EvOffset : EvPower);
@@ -622,6 +640,7 @@ void ColorCorrection::regionGet(int idx)
             r.offset[c] = offset->getValue();
             r.power[c] = power->getValue();
             r.pivot[c] = pivot->getValue();
+            r.compression[c] = compression->getValue();
         }
     } else {
         r.a = r.b = 0.f;
@@ -630,6 +649,7 @@ void ColorCorrection::regionGet(int idx)
             r.offset[c] = offset_rgb[c]->getValue();
             r.power[c] = power_rgb[c]->getValue();
             r.pivot[c] = pivot_rgb[c]->getValue();
+            r.compression[c] = compression_rgb[c]->getValue();
         }
     }
     for (int c = 0; c < 3; ++c) {
@@ -674,11 +694,13 @@ void ColorCorrection::regionShow(int idx)
     offset->setValue(r.offset[0]);
     power->setValue(r.power[0]);
     pivot->setValue(r.pivot[0]);
+    compression->setValue(r.compression[0]);
     for (int c = 0; c < 3; ++c) {
         slope_rgb[c]->setValue(r.slope[c]);
         offset_rgb[c]->setValue(r.offset[c]);
         power_rgb[c]->setValue(r.power[c]);
         pivot_rgb[c]->setValue(r.pivot[c]);
+        compression_rgb[c]->setValue(r.compression[c]);
     }
     for (int c = 0; c < 3; ++c) {
         huesat[c]->setParams(r.hue[c], r.sat[c], false);
