@@ -50,7 +50,7 @@ LogEncoding::LogEncoding():
     gain->addAutoButton();
     targetGray = Gtk::manage(new Adjuster(M("TP_LOGENC_TARGET_GRAY"), 5.0, 80.0, 0.1, 18.0));
     blackEv = Gtk::manage(new Adjuster(M("TP_LOGENC_BLACK_EV"), -16.0, 0.0, 0.1, -13.5));
-    whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 1.0, 32.0, 0.1, 2.5));
+    whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 1.0, 32.0, 0.01, 2.5));
     regularization = Gtk::manage(new Adjuster(M("TP_LOGENC_REGULARIZATION"), 0, 100, 1, 65));
 
     gain->delay = options.adjusterMaxDelay;
