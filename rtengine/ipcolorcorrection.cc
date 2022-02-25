@@ -288,8 +288,8 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 roffset[i][c] = r.offset[j];
                 rpower[i][c] = 1.0 / r.power[j];
                 rpivot[i][c] = r.pivot[j];
-                rcompression[i][c][0] = r.compression[j];
-                rcompression[i][c][1] = r.compression[j] > 0.f ? std::log(1.f + r.compression[j]) : 0.f;
+                rcompression[i][c][0] = r.compression[j] / r.pivot[j];
+                rcompression[i][c][1] = r.compression[j] > 0.f ? std::log(1.f + r.compression[j]) / r.pivot[j] : 0.f;
                 if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f || rcompression[i][c][1] != 0.f) {
                     enabled[i] = true;
                 }
