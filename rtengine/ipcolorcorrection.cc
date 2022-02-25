@@ -218,7 +218,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float roffset[n][3];
     float rpower[n][3];
     float rpivot[n][3];
-    float rcompression[n][3][2];
+    float rcompression[n][3][2] = {{{0}}};
     char rgbmode[n];
     bool enabled[n];
     bool jzazbz[n];
