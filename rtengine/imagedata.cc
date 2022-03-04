@@ -27,6 +27,7 @@
 #include "imagesource.h"
 #include "rt_math.h"
 #include "metadata.h"
+#include "imgiomanager.h"
 #pragma GCC diagnostic warning "-Wextra"
 #define PRINT_HDR_PS_DETECTION 0
 
@@ -417,32 +418,69 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         sampleFormat = IIOSF_UNKNOWN;
 
-        if (sf == exif.end())
-            /*
-             * WARNING: This is a dirty hack!
-             * We assume that files which doesn't contain the TIFFTAG_SAMPLEFORMAT tag
-             * (which is the case with uncompressed TIFFs produced by RT!) are RGB files,
-             * but that may be not true.   --- Hombre
-             */
-        {
-            sampleformat = SAMPLEFORMAT_UINT;
-        } else {
-            sampleformat = sf->toLong();
+        bool is_external = false;
+        if (sf == exif.end()) {
+            auto fmt = ImageIOManager::getInstance()->getFormat(fname);
+            is_external = true;
+            switch (fmt) {
+            case ImageIOManager::FMT_UNKNOWN:
+                is_external = false;
+                break;
+            case ImageIOManager::FMT_JPG:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 8;
+                break;
+            case ImageIOManager::FMT_PNG:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 8;
+                break;
+            case ImageIOManager::FMT_PNG16:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 16;
+                break;
+            case ImageIOManager::FMT_TIFF:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 16;
+                break;
+            case ImageIOManager::FMT_TIFF_FLOAT:
+                sampleformat = SAMPLEFORMAT_IEEEFP;
+                bitspersample = 32;
+                break;
+            }
+            if (is_external) {
+                photometric = PHOTOMETRIC_RGB;
+                samplesperpixel = 3;
+            }
         }
 
-        if (bps == exif.end() || spp == exif.end() || pi == exif.end()) {
-            return;
-        }
-
-        bitspersample = bps->toLong();
-        samplesperpixel = spp->toLong();
-
-        photometric = pi->toLong();
-        if (photometric == PHOTOMETRIC_LOGLUV) {
-            if (c == exif.end()) {
-                compression = COMPRESSION_NONE;
+        if (!is_external) {
+            if (sf == exif.end())
+                /*
+                 * WARNING: This is a dirty hack!
+                 * We assume that files which doesn't contain the TIFFTAG_SAMPLEFORMAT tag
+                 * (which is the case with uncompressed TIFFs produced by RT!) are RGB files,
+                 * but that may be not true.   --- Hombre
+                 */
+            {
+                sampleformat = SAMPLEFORMAT_UINT;
             } else {
-                compression = c->toLong();
+                sampleformat = sf->toLong();
+            }
+
+            if (bps == exif.end() || spp == exif.end() || pi == exif.end()) {
+                return;
+            }
+
+            bitspersample = bps->toLong();
+            samplesperpixel = spp->toLong();
+
+            photometric = pi->toLong();
+            if (photometric == PHOTOMETRIC_LOGLUV) {
+                if (c == exif.end()) {
+                    compression = COMPRESSION_NONE;
+                } else {
+                    compression = c->toLong();
+                }
             }
         }
 

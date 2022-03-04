@@ -231,6 +231,9 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     bool err = false;
 
     switch (fmt) {
+    case FMT_UNKNOWN:
+        err = true;
+        break;
     case FMT_JPG:
         sFormat = IIOSF_UNSIGNED_CHAR;
         sArrangement = IIOSA_CHUNKY;
@@ -318,6 +321,9 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
     bool ok = false;
 
     switch (fmt) {
+    case FMT_UNKNOWN:
+        ok = false;
+        break;
     case FMT_JPG:
         ok = (img->saveAsJPEG(tmpname) == 0);
         break;
@@ -376,6 +382,18 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
     }
 
     return ok;
+}
+
+
+ImageIOManager::Format ImageIOManager::getFormat(const Glib::ustring &fname)
+{
+    auto ext = std::string(getFileExtension(fname).lowercase());
+    auto it = fmts_.find(ext);
+    if (it == fmts_.end()) {
+        return FMT_UNKNOWN;
+    } else {
+        return it->second;
+    }
 }
 
 
