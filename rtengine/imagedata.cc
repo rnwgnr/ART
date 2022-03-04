@@ -450,6 +450,7 @@ FramesData::FramesData(const Glib::ustring &fname):
             if (is_external) {
                 photometric = PHOTOMETRIC_RGB;
                 samplesperpixel = 3;
+                orientation = "";
             }
         }
 
