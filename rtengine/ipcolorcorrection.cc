@@ -218,7 +218,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float roffset[n][3];
     float rpower[n][3];
     float rpivot[n][3];
-    float rcompression[n][3][2] = {{{0}}};
+    float rcompression[n][3][2];
     char rgbmode[n];
     bool enabled[n];
     bool jzazbz[n];
@@ -227,6 +227,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         auto &r = params->colorcorrection.regions[i];
         rgbmode[i] = int(r.mode != ColorCorrectionParams::Mode::YUV &&
                          r.mode != ColorCorrectionParams::Mode::JZAZBZ);
+        for (int c = 0; c < 3; ++c) {
+            rcompression[i][c][0] = rcompression[i][c][1] = 0;
+        }
         if (rgbmode[i]) {
             if (r.rgbluminance) {
                 rgbmode[i] = 2;
