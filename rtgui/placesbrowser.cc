@@ -63,6 +63,7 @@ PlacesBrowser::PlacesBrowser ()
     placesModel = Gtk::ListStore::create (placesColumns);
     treeView->set_model (placesModel);
     treeView->set_headers_visible (true);
+    treeView->set_tooltip_column(2);
 
     Gtk::TreeView::Column *iviewcol = Gtk::manage (new Gtk::TreeView::Column (M("MAIN_FRAME_PLACES")));
     Gtk::CellRendererPixbuf *iconCR  = Gtk::manage (new Gtk::CellRendererPixbuf());
@@ -74,7 +75,7 @@ PlacesBrowser::PlacesBrowser ()
     iviewcol->add_attribute (*labelCR, "text", placesColumns.label);
     treeView->append_column (*iviewcol);
 
-    treeView->set_row_separator_func (sigc::mem_fun(*this, &PlacesBrowser::rowSeparatorFunc));
+    treeView->set_row_separator_func(sigc::mem_fun(*this, &PlacesBrowser::rowSeparatorFunc));
 
     vm = Gio::VolumeMonitor::get();
 
@@ -122,21 +123,44 @@ void PlacesBrowser::refreshPlacesList ()
     }
 
     // append pictures directory
-    hfile = Gio::File::create_for_path (userPicturesDir());
+    auto hfile2 = Gio::File::create_for_path(userPicturesDir());
 
-    if (hfile && hfile->query_exists()) {
+    if (hfile2 && hfile2->query_exists() && !hfile2->equal(hfile)) {
         try {
-            if (auto info = hfile->query_info ()) {
+            if (auto info = hfile2->query_info ()) {
                 Gtk::TreeModel::Row newrow = *(placesModel->append());
                 newrow[placesColumns.label] = info->get_display_name ();
                 newrow[placesColumns.icon]  = info->get_icon ();
-                newrow[placesColumns.root]  = hfile->get_parse_name ();
+                newrow[placesColumns.root]  = hfile2->get_parse_name ();
                 newrow[placesColumns.type]  = 4;
                 newrow[placesColumns.rowSeparator] = false;
             }
         } catch (Gio::Error&) {}
     }
 
+    // append favorites
+    if (!placesModel->children().empty()) {
+        Gtk::TreeModel::Row newrow = *(placesModel->append());
+        newrow[placesColumns.rowSeparator] = true;
+    }
+
+    for (size_t i = 0; i < options.favoriteDirs.size(); i++) {
+        Glib::RefPtr<Gio::File> hfile = Gio::File::create_for_path (options.favoriteDirs[i]);
+
+        if (hfile && hfile->query_exists()) {
+            try {
+                if (auto info = hfile->query_info ()) {
+                    Gtk::TreeModel::Row newrow = *(placesModel->append());
+                    newrow[placesColumns.label] = info->get_display_name ();
+                    newrow[placesColumns.icon]  = info->get_icon ();
+                    newrow[placesColumns.root]  = hfile->get_parse_name ();
+                    newrow[placesColumns.type]  = 5;
+                    newrow[placesColumns.rowSeparator] = false;
+                }
+            } catch(Gio::Error&) {}
+        }
+    }
+    
     if (!placesModel->children().empty()) {
         Gtk::TreeModel::Row newrow = *(placesModel->append());
         newrow[placesColumns.rowSeparator] = true;
@@ -220,29 +244,6 @@ void PlacesBrowser::refreshPlacesList ()
             newrow[placesColumns.root]  = mounts[i]->get_root ()->get_parse_name ();
             newrow[placesColumns.type]  = 1;
             newrow[placesColumns.rowSeparator] = false;
-        }
-    }
-
-    // append favorites
-    if (!placesModel->children().empty()) {
-        Gtk::TreeModel::Row newrow = *(placesModel->append());
-        newrow[placesColumns.rowSeparator] = true;
-    }
-
-    for (size_t i = 0; i < options.favoriteDirs.size(); i++) {
-        Glib::RefPtr<Gio::File> hfile = Gio::File::create_for_path (options.favoriteDirs[i]);
-
-        if (hfile && hfile->query_exists()) {
-            try {
-                if (auto info = hfile->query_info ()) {
-                    Gtk::TreeModel::Row newrow = *(placesModel->append());
-                    newrow[placesColumns.label] = info->get_display_name ();
-                    newrow[placesColumns.icon]  = info->get_icon ();
-                    newrow[placesColumns.root]  = hfile->get_parse_name ();
-                    newrow[placesColumns.type]  = 5;
-                    newrow[placesColumns.rowSeparator] = false;
-                }
-            } catch(Gio::Error&) {}
         }
     }
 }

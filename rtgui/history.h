@@ -92,10 +92,14 @@ protected:
     int bmnum;
 
     PParamsSnapshotListener *snapshotListener;
+    bool shapshot_update_;
 
     bool on_query_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip>& tooltip);
 
     std::vector<std::pair<Glib::ustring, rtengine::procparams::ProcParams>> getSnapshots();
+
+    bool onPressEvent(GdkEventButton *event);
+    bool confirmBookmarkUpdate();
 
 public:
 

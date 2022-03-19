@@ -462,7 +462,7 @@ template<typename T> void wavelet_level<T>::SynthesisFilterSubsampHorizontal (T 
     for (int k = 0; k < height; k++) {
         int i;
 
-        for(i = 0; i <= min(skip * taps, dstwidth); i++) {
+        for(i = 0; i < min(skip * taps + 1, dstwidth); i++) {
             float tot = 0.f;
             //TODO: this is correct only if skip=1; otherwise, want to work with cosets of length 'skip'
             int i_src = (i + shift) / 2;

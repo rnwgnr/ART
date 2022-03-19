@@ -57,19 +57,10 @@ protected:
     sigc::connection hsmconn;
     sigc::connection obpcconn;
 
+    rtengine::procparams::ColorManagementParams initial_params;
+
 private:
-    rtengine::ProcEvent EvICMprimariMethod;
-    rtengine::ProcEvent EvICMprofileMethod;
-    rtengine::ProcEvent EvICMtempMethod;
-    rtengine::ProcEvent EvICMpredx;
-    rtengine::ProcEvent EvICMpredy;
-    rtengine::ProcEvent EvICMpgrex;
-    rtengine::ProcEvent EvICMpgrey;
-    rtengine::ProcEvent EvICMpblux;
-    rtengine::ProcEvent EvICMpbluy;
-    rtengine::ProcEvent EvICMgamm;
-    rtengine::ProcEvent EvICMslop;
-    rtengine::ProcEvent EvICMtrcinMethod;
+    rtengine::ProcEvent EvUseCAT;
 
     Gtk::VBox* iVBox;
 
@@ -106,6 +97,9 @@ private:
     Glib::ustring lastRefFilename;
     Glib::ustring camName;
     Glib::ustring filename;
+
+    Gtk::CheckButton *use_CAT_;
+    
     void updateDCP(int dcpIlluminant, Glib::ustring dcp_name);
     void updateRenderingIntent(const Glib::ustring &profile);
 public:
@@ -137,6 +131,8 @@ public:
     {
         icmplistener = ipl;
     }
+
+    void toolReset(bool to_initial) override;
 };
 
 #endif

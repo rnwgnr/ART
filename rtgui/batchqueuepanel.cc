@@ -18,7 +18,7 @@
  */
 #include "batchqueuepanel.h"
 #include "options.h"
-#include "preferences.h"
+//#include "preferences.h"
 #include "multilangmgr.h"
 #include "rtwindow.h"
 #include "soundman.h"
@@ -75,6 +75,7 @@ BatchQueuePanel::BatchQueuePanel (FileCatalog* aFileCatalog) : parent(nullptr)
 
     // Output directory selection
     fdir = Gtk::manage (new Gtk::Frame (M("QUEUE_LOCATION_TITLE")));
+    fdir->set_label_align(0.01, 0.5);
     Gtk::VBox* odvb = Gtk::manage (new Gtk::VBox ());
     Gtk::HBox* hb2 = Gtk::manage (new Gtk::HBox ());
     useTemplate = Gtk::manage (new Gtk::RadioButton (M("QUEUE_LOCATION_TEMPLATE") + ":"));
@@ -285,8 +286,9 @@ void BatchQueuePanel::queueSizeChanged(int qsize, bool queueRunning, bool queueE
     }
 
     if (queueError) {
-        Gtk::MessageDialog msgd (queueErrorMessage, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
-        msgd.run ();
+        parent->error(queueErrorMessage);
+        // Gtk::MessageDialog msgd (queueErrorMessage, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        // msgd.run ();
     }
 }
 

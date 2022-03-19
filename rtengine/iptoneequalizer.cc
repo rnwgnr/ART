@@ -38,6 +38,7 @@
 */    
 
 #include <array>
+#include <vector>
 #include "improcfun.h"
 #include "gauss.h"
 #include "sleef.h"
@@ -50,11 +51,26 @@ namespace rtengine {
 
 namespace {
 
-void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const ToneEqualizerParams &pp, const Glib::ustring &workingProfile, double scale, bool multithread)
+const std::vector<std::array<float, 3>> colormap = {
+    {0.5f, 0.f, 0.5f},
+    {0.5f, 0.f, 0.5f},
+    {0.5f, 0.f, 0.5f},
+    {0.5f, 0.f, 0.5f},
+    {0.5f, 0.f, 0.5f},
+    {0.5f, 0.f, 0.5f}, // blacks
+    {0.f, 0.f, 1.f}, // shadows
+    {0.5f, 0.5f, 0.5f}, // midtones
+    {1.f, 1.f, 0.f}, // highlights
+    {1.f, 0.f, 0.f}, // whites
+    {1.f, 0.f, 0.f}, 
+    {1.f, 0.f, 0.f}
+};
+
+void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const ToneEqualizerParams &pp, const Glib::ustring &workingProfile, double scale, bool multithread, bool show_color_map, cmsHPROFILE monitor_prof)
 {
     const int W = R.width();
     const int H = R.height();
-    array2D<float> Y(W, H);
+    array2D<float> Y(W, H, ARRAY2D_ALIGNED);
 
     const auto log2 =
         [](float x) -> float
@@ -104,20 +120,20 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            Y[y][x] = Color::rgbLuminance(R[y][x], G[y][x], B[y][x], ws);
+            Y[y][x] = LIM(Color::rgbLuminance(R[y][x], G[y][x], B[y][x], ws), 1e-5f, 1024.f);
         }
     }
 
-    int detail = LIM(pp.regularization + 5, 0, 5);
+    const int detail = pp.regularization > 0 ? 5 : 0;//LIM(pp.regularization + 5, 0, 5);
     int radius = float(detail) / scale + 0.5f;
     float epsilon = 0.01f + 0.002f * max(detail - 3, 0);
     if (radius > 0) {
         rtengine::guidedFilterLog(10.f, Y, radius, epsilon, multithread);
     }
 
-    if (pp.regularization > 0) {
-        array2D<float> Y2(W, H);
-        constexpr float base_epsilon = 0.02f;
+    if (pp.regularization > 1) {
+        array2D<float> Y2(W, H, ARRAY2D_ALIGNED);
+        constexpr float base_epsilon = 0.004f;
         constexpr float base_posterization = 5.f;
         
 #ifdef _OPENMP
@@ -132,8 +148,13 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
             }
         }
         radius = 350.f / scale;
-        epsilon = base_epsilon / float(6 - std::min(pp.regularization, 5));
-        rtengine::guidedFilter(Y2, Y, Y, radius, epsilon, multithread);        
+        epsilon = base_epsilon;
+        rtengine::guidedFilter(Y2, Y, Y, radius, epsilon, multithread);
+
+        int reg = 5 - std::min(pp.regularization, 4);
+        if (reg > 1) {
+            rtengine::guidedFilter(Y2, Y, Y, radius * (reg - 1), epsilon / 100, multithread);
+        }
     }
     
     const auto gauss =
@@ -165,12 +186,48 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
             return correction;
         };
 
-    LUTf lut(65536);
-    for (int i = 0; i < 65536; ++i) {
-        float y = float(i)/65535.f;
-        float c = process_pixel(y);
-        lut[i] = c;
+    std::vector<std::array<float, 3>> cur_colormap;
+    if (show_color_map) {
+        lcmsMutex->lock();
+        cmsHPROFILE in = monitor_prof;
+        if (!in) {
+            in = ICCStore::getInstance()->getsRGBProfile();
+        }
+        cmsHPROFILE out = ICCStore::getInstance()->workingSpace(workingProfile);
+        cmsHTRANSFORM xform = cmsCreateTransform(in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+        lcmsMutex->unlock();
+
+        for (auto &c : colormap) {
+            cur_colormap.push_back(c);
+            auto &cc = cur_colormap.back();
+            cmsDoTransform(xform, &cc[0], &cc[0], 1);
+        }
+
+        cmsDeleteTransform(xform);
     }
+
+    const auto process_colormap =
+        [&](float y) -> std::array<float, 3>
+        {
+            std::array<float, 3> ret = { 0.f, 0.f, 0.f };
+            
+            // convert to log space
+            const float luma = max(log2(max(y, 0.f)), -18.0f);
+
+            // build the correction as the sum of the contribution of each
+            // luminance channel to current pixel
+            for (int c = 0; c < 12; ++c) {
+                float w = gauss(centers[c], luma);
+                for (int i = 0; i < 3; ++i) {
+                    ret[i] += w * cur_colormap[c][i];
+                }
+            }
+            for (int i = 0; i < 3; ++i) {
+                ret[i] = LIM01(ret[i] / w_sum);
+            }
+
+            return ret;
+        };
 
 #ifdef __SSE2__
     vfloat vfactors[12];
@@ -211,8 +268,43 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
     vfloat v1 = F2V(1.f);
     vfloat v65535 = F2V(65535.f);
 #endif // __SSE2__
-    
+
+
+    if (show_color_map) {
+        LUTf lut_r(65537), lut_g(65537), lut_b(65537);
+        for (int i = 0; i < 65536; ++i) {
+            float y = float(i)/65535.f;
+            auto rgb = process_colormap(y);
+            lut_r[i] = rgb[0];
+            lut_g[i] = rgb[1];
+            lut_b[i] = rgb[2];
+        }
+        lut_r[65536] = cur_colormap.back()[0];
+        lut_g[65536] = cur_colormap.back()[1];
+        lut_b[65536] = cur_colormap.back()[2];
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float cY = Y[y][x] * 65535.f;
+                R[y][x] = lut_r[cY];
+                G[y][x] = lut_g[cY];
+                B[y][x] = lut_b[cY];
+            }
+        }
+        return;
+    }
         
+
+    LUTf lut(65536);
+    for (int i = 0; i < 65536; ++i) {
+        float y = float(i)/65535.f;
+        float c = process_pixel(y);
+        lut[i] = c;
+    }
+
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
@@ -246,10 +338,10 @@ void tone_eq(array2D<float> &R, array2D<float> &G, array2D<float> &B, const Tone
 } // namespace
 
 
-void ImProcFunctions::toneEqualizer(Imagefloat *rgb)
+bool ImProcFunctions::toneEqualizer(Imagefloat *rgb)
 {
     if (!params->toneEqualizer.enabled) {
-        return;
+        return false;
     }
 
     BENCHFUN
@@ -263,9 +355,12 @@ void ImProcFunctions::toneEqualizer(Imagefloat *rgb)
     array2D<float> G(W, H, rgb->g.ptrs, ARRAY2D_BYREFERENCE);
     array2D<float> B(W, H, rgb->b.ptrs, ARRAY2D_BYREFERENCE);
 
-    tone_eq(R, G, B, params->toneEqualizer, params->icm.workingProfile, scale, multiThread);
+    bool show_color_map = params->toneEqualizer.show_colormap && cur_pipeline == Pipeline::PREVIEW;
+    tone_eq(R, G, B, params->toneEqualizer, params->icm.workingProfile, scale, multiThread, show_color_map, monitor);
     
     rgb->normalizeFloatTo65535(multiThread);
+
+    return show_color_map;
 }
 
 } // namespace rtengine

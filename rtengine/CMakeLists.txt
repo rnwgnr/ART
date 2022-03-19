@@ -26,14 +26,19 @@ link_directories(
     ${RSVG_LIBRARY_DIRS}
     )
 
+if(LIBRAW_FOUND)
+    include_directories(${LIBRAW_INCLUDE_DIRS})
+    link_directories(${LIBRAW_LIBRARY_DIRS})
+endif()
+
 set(CAMCONSTSFILE "camconst.json")
 
 set(RTENGINESOURCEFILES
     badpixels.cc
     CA_correct_RT.cc
-    EdgePreservingDecomposition.cc
     FTblockDN.cc
     PF_correct_RT.cc
+    alpha.cc
     ahd_demosaic_RT.cc
     amaze_demosaic_RT.cc
     cJSON.c
@@ -53,7 +58,6 @@ set(RTENGINESOURCEFILES
     demosaic_algos.cc
     dfmanager.cc
     diagonalcurves.cc
-    #dirpyr_equalizer.cc
     dual_demosaic_RT.cc
     dynamicprofile.cc
     eahd_demosaic.cc
@@ -77,12 +81,11 @@ set(RTENGINESOURCEFILES
     improcfun.cc
     impulse_denoise.cc
     init.cc
-    iplab2rgb.cc
+    iprgb2out.cc
     ipresize.cc
     ipsharpen.cc
     iptransform.cc
-    jdatasrc.cc
-    jpeg_ijg/jpeg_memsrc.cc
+    rtjpeg.cc
     klt/convolve.cc
     klt/error.cc
     klt/klt.cc
@@ -110,8 +113,10 @@ set(RTENGINESOURCEFILES
     rcd_demosaic.cc
     refreshmap.cc
     rt_algo.cc
+    rt_polygon.cc
     rtthumbnail.cc
     simpleprocess.cc
+    ipspot.cc
     slicer.cc
     stdimagesource.cc
     utils.cc
@@ -130,7 +135,7 @@ set(RTENGINESOURCEFILES
     ipdehaze.cc
     ipcolorcorrection.cc
     lj92.c
-    ipguidedfilter.cc
+    ipsmoothing.cc
     iplogenc.cc
     labmasks.cc
     ipgrain.cc
@@ -151,8 +156,17 @@ set(RTENGINESOURCEFILES
     filmnegativeproc.cc
     filmnegativethumb.cc
     canon_cr3_decoder.cc
-    pyramids.cc
+    rawimage_gainmap.cc
+    subprocess.cc
+    bayer_bilinear_demosaic.cc
+    gainmap.cc
+    base64.cc
+    imgiomanager.cc
+    lensexif.cc
+    nlmeans.cc
+    newdelete.cc
     )
+
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)
     set_source_files_properties(rtlensfun.cc PROPERTIES COMPILE_DEFINITIONS RT_LENSFUN_HAS_LOAD_DIRECTORY)
@@ -209,5 +223,11 @@ target_link_libraries(rtengine
     ${RSVG_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
+if(LCMS_FAST_FLOAT AND NOT LCMS_FAST_FLOAT_SYSTEM)
+    target_link_libraries(rtengine lcms2_fast_float)
+endif()
+if(LIBRAW_FOUND)
+    target_link_libraries(rtengine ${LIBRAW_LIBRARIES})
+endif()
 
 install(FILES ${CAMCONSTSFILE} DESTINATION "${DATADIR}" PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)

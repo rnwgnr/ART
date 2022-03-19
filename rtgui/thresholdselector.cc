@@ -467,6 +467,56 @@ bool ThresholdSelector::on_button_press_event (GdkEventButton* event)
         tmpX = event->x;
 
         queue_draw ();
+    } else if (event->button == 3 && separatedSliders) {
+        Gtk::Popover p(*this);
+        Gtk::HBox hb;
+        p.set_border_width(16);
+        p.add(hb);
+        Gtk::Label lbot(separatedLabelBottom);
+        Gtk::SpinButton bot;
+        bot.set_range(minValBottom, maxValBottom);
+        bot.set_digits(precisionBottom);
+        double xi = std::pow(10, -int(precisionBottom));
+        bot.set_increments(xi, xi*10);
+        Gtk::Label ltop(separatedLabelTop);
+        Gtk::SpinButton top;
+        top.set_range(minValTop, maxValTop);
+        top.set_digits(precisionTop);
+        double yi = std::pow(10, -int(precisionTop));
+        top.set_increments(yi, yi*10);
+
+        hb.pack_start(ltop);
+        hb.pack_start(top);
+        Gtk::Label spc("  ");
+        hb.pack_start(spc);
+        hb.pack_start(lbot);
+        hb.pack_start(bot);
+
+        double vb, vt;
+        getPositions(vb, vt);
+        bot.set_value(vb);
+        top.set_value(vt);
+    
+        bool done = false;
+
+        p.signal_closed().connect(
+            sigc::slot<void>(
+                [&]()
+                {
+                    done = true;
+                    if (bot.get_value() != vb || top.get_value() != vt) {
+                        setPositions(bot.get_value(), top.get_value());
+                    }
+                })
+            );
+
+        p.show_all_children();
+        p.set_modal(true);
+        p.show();
+
+        while (!done) {
+            gtk_main_iteration();
+        }
     }
 
     grab_focus();

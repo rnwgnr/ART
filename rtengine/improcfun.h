@@ -59,7 +59,8 @@ public:
     
     void setScale(double iscale);
 
-    void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, bool gamutCheck);
+    void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, GamutCheck gamutCheck);
+    void setMonitorTransform(cmsHTRANSFORM xform) { monitorTransform = xform; }
 
     void setDCPProfile(DCPProfile *dcp, const DCPProfile::ApplyState &as)
     {
@@ -108,7 +109,6 @@ public:
     bool prsharpening(Imagefloat *img);
     void transform(Imagefloat* original, Imagefloat* transformed, int cx, int cy, int sx, int sy, int oW, int oH, int fW, int fH, const FramesMetaData *metadata, int rawRotationDeg, bool highQuality);    
     void resize(Imagefloat* src, Imagefloat* dst, float dScale);
-    void Lanczos(const LabImage* src, LabImage* dst, float scale);
     void Lanczos(Imagefloat *src, Imagefloat *dst, float scale);
     void impulsedenoise(Imagefloat *rgb);   //Emil's impulse denoise
     bool textureBoost(Imagefloat *rgb);
@@ -128,11 +128,10 @@ public:
     void dehaze(Imagefloat *rgb);
     void dynamicRangeCompression(Imagefloat *rgb);
     bool localContrast(Imagefloat *rgb);
-    void toneEqualizer(Imagefloat *rgb);
+    bool toneEqualizer(Imagefloat *rgb);
     void softLight(Imagefloat *rgb);
     bool colorCorrection(Imagefloat *rgb);
     void logEncoding(Imagefloat *rgb);
-    // bool contrastByDetailLevels(Imagefloat *rgb);
     void filmGrain(Imagefloat *rgb);
     bool guidedSmoothing(Imagefloat *rgb);
     void hslEqualizer(Imagefloat *rgb);
@@ -149,11 +148,11 @@ public:
     //----------------------------------------------------------------------
     // Lab/RGB conversion
     //----------------------------------------------------------------------
-    void lab2monitorRgb(Imagefloat *img, Image8* image);
+    void rgb2monitor(Imagefloat *img, Image8* image, bool bypass_out=false);
     
-    Image8 *lab2rgb(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings = true);
+    Image8 *rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings = true);
 
-    Imagefloat *lab2rgbOut(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm);
+    Imagefloat *rgb2out(Imagefloat *img, const procparams::ColorManagementParams &icm);
 
     void rgb2lab(Imagefloat &src, LabImage &dst, const Glib::ustring &workingSpace);
     void rgb2lab(Imagefloat &src, LabImage &dst) { rgb2lab(src, dst, params->icm.workingProfile); }
@@ -196,7 +195,11 @@ public:
     DeltaEData deltaE;
     int setDeltaEData(EditUniqueID id, double x, double y);
 
+    // Spot Removal Tool
+    void removeSpots (rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
+
 private:
+    cmsHPROFILE monitor;
     cmsHTRANSFORM monitorTransform;
     std::unique_ptr<GamutWarning> gamutWarning;
 
@@ -233,6 +236,8 @@ private:
     void transformGeneral(bool highQuality, Imagefloat *original, Imagefloat *transformed, int cx, int cy, int sx, int sy, int oW, int oH, int fW, int fH, const LensCorrection *pLCPMap);
     void transformLCPCAOnly(Imagefloat *original, Imagefloat *transformed, int cx, int cy, const LensCorrection *pLCPMap);
 
+    void expcomp(Imagefloat *rgb, const procparams::ExposureParams *expparams);
+    
     bool needsCA();
     bool needsDistortion();
     bool needsRotation();

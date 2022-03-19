@@ -17,12 +17,15 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "rgbcurves.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-RGBCurves::RGBCurves () : FoldableToolPanel(this, "rgbcurves", M("TP_RGBCURVES_LABEL"), false, true)
+RGBCurves::RGBCurves () : FoldableToolPanel(this, "rgbcurves", M("TP_RGBCURVES_LABEL"), false, true, true)
 {
+    EvToolReset.set_action(RGBCURVE);
+    
     std::vector<GradientMilestone> milestones;
 
     curveEditorG = new CurveEditorGroup(options.lastRgbCurvesDir, "");//M("TP_RGBCURVES_CHANNEL"));
@@ -156,4 +159,21 @@ void RGBCurves::enabledChanged()
             listener->panelChanged(EvRGBEnabled, M("GENERAL_DISABLED"));
         }
     }
+}
+
+
+void RGBCurves::setDefaults(const ProcParams *def)
+{
+    initial_params = def->rgbCurves;
+}
+
+
+void RGBCurves::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.rgbCurves = initial_params;
+    }
+    pp.rgbCurves.enabled = getEnabled();
+    read(&pp);
 }

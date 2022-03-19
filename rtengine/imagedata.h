@@ -27,6 +27,8 @@
 #include <glibmm.h>
 #include "procparams.h"
 #include "rtengine.h"
+#include "metadata.h"
+#include "gainmap.h"
 
 namespace rtengine
 {
@@ -51,6 +53,10 @@ private:
     bool isPixelShift;
     bool isHDR;
     int rating_;
+    std::vector<GainMap> gain_maps_;
+    int w_;
+    int h_;
+    bool dng_;
     
 public:
     FramesData (const Glib::ustring& fname);
@@ -78,6 +84,19 @@ public:
     std::string getOrientation() const override;
     Glib::ustring getFileName() const override;
     int getRating() const override;
+    std::vector<GainMap> getGainMaps() const override { return gain_maps_; }
+    void getDimensions(int &w, int &h) const override;
+
+    void fillBasicTags(Exiv2::ExifData &exif) const;
+
+    void setGainMaps(const std::vector<GainMap> &m)
+    {
+        gain_maps_ = m;
+    }
+
+    void setDimensions(int w, int h);
+    void setDNG(bool yes) { dng_ = yes; }
+    bool isDNG() const override { return dng_; }
 };
 
 

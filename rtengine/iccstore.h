@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -28,20 +29,13 @@
 
 #include "color.h"
 
-namespace rtengine
-{
+namespace rtengine {
 
-namespace procparams
-{
+namespace procparams { struct ColorManagementParams; }
 
-    struct ColorManagementParams;
+typedef const float(*TMatrix)[3];
 
-}
-
-typedef const double(*TMatrix)[3];
-
-class ProfileContent
-{
+class ProfileContent {
 public:
     ProfileContent();
 
@@ -55,8 +49,7 @@ private:
     std::string data;
 };
 
-class ICCStore
-{
+class ICCStore {
 public:
     enum class ProfileType {
         MONITOR,
@@ -85,7 +78,7 @@ public:
     cmsHPROFILE      getsRGBProfile() const;
 
     std::vector<Glib::ustring> getProfiles(ProfileType type = ProfileType::MONITOR) const;
-    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName) const;
+    std::vector<Glib::ustring> getProfilesFromDir(const Glib::ustring& dirName, ProfileType type=ProfileType::MONITOR) const;
 
     std::uint8_t     getInputIntents(cmsHPROFILE profile) const;
     std::uint8_t     getOutputIntents(cmsHPROFILE profile) const;
@@ -98,7 +91,10 @@ public:
     /*static*/ std::vector<Glib::ustring> getWorkingProfiles();
 
     static cmsHPROFILE makeStdGammaProfile(cmsHPROFILE iprof);
-    static cmsHPROFILE createFromMatrix(const double matrix[3][3], bool gamma = false, const Glib::ustring& name = Glib::ustring());
+    static cmsHPROFILE createFromMatrix(const float matrix[3][3], bool gamma=false, const Glib::ustring &name=Glib::ustring());
+    static cmsHPROFILE createFromMatrix(const double matrix[3][3], bool gamma=false, const Glib::ustring &name=Glib::ustring());
+
+    cmsHTRANSFORM getThumbnailMonitorTransform();
 
 private:
     class Implementation;

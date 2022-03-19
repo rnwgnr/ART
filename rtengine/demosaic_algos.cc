@@ -520,7 +520,7 @@ void RawImageSource::igv_interpolate(int winw, int winh)
     chr[3] = vdif;
 
     if (plistener) {
-        plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::IGV)));
+        plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), M("TP_RAW_IGV")));
         plistener->setProgress (0.0);
     }
 

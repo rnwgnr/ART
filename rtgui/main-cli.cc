@@ -28,7 +28,6 @@
 #include <giomm.h>
 #include <iostream>
 #include <tiffio.h>
-#include "rtwindow.h"
 #include <cstring>
 #include <cstdlib>
 #include <locale.h>
@@ -38,6 +37,9 @@
 #include "version.h"
 #include "extprog.h"
 #include "printhelp.h"
+#include "pathutils.h"
+#include "../rtengine/profilestore.h"
+#include "fastexport.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -46,7 +48,15 @@
 #include <glibmm/threads.h>
 #else
 #include <glibmm/thread.h>
+#include <windows.h>
 #include "conio.h"
+#endif
+
+#include <thread>
+#include <chrono>
+
+#ifdef WITH_MIMALLOC
+#  include <mimalloc.h>
 #endif
 
 // Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
@@ -59,8 +69,8 @@ Glib::ustring argv0;
 Glib::ustring creditsPath;
 Glib::ustring licensePath;
 Glib::ustring argv1;
+bool progress = false;
 //bool simpleEditor;
-//Glib::Threads::Thread* mainThread;
 
 namespace
 {
@@ -107,16 +117,18 @@ bool check_partial_profile(const PartialProfile &pp)
  *  -3 if at least one required procparam file was not found */
 int processLineParams ( int argc, char **argv );
 
-bool dontLoadCache ( int argc, char **argv );
+std::pair<bool, int> dontLoadCache(int argc, char **argv);
 
 int main (int argc, char **argv)
 {
+#ifdef WITH_MIMALLOC
+    mi_version();
+#endif
+    
     setlocale (LC_ALL, "");
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
     Gio::init ();
-
-    //mainThread = Glib::Threads::Thread::self();
 
 #ifdef BUILD_BUNDLE
     char exname[512] = {0};
@@ -138,6 +150,8 @@ int main (int argc, char **argv)
     // set paths
     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
         argv0 = DATA_SEARCH_PATH;
+    } else if (strcmp(DATA_SEARCH_PATH, ".") == 0) {
+        argv0 = exePath;
     } else {
         argv0 = Glib::build_filename (exePath, DATA_SEARCH_PATH);
     }
@@ -163,45 +177,46 @@ int main (int argc, char **argv)
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
 #endif
 
-    bool quickstart = dontLoadCache (argc, argv);
+    auto p = dontLoadCache(argc, argv);
+    bool quickstart = p.first;
+    int verbose = p.second;
 
     try {
-        Options::load (quickstart);
+        Options::load(quickstart, verbose);
     } catch (Options::Error &e) {
         std::cerr << std::endl
-                  << "FATAL ERROR:" << std::endl
-                  << e.get_msg() << std::endl;
+                  << "Error:" << e.get_msg() << std::endl;
         return -2;
     }
 
     if (options.is_defProfRawMissing()) {
-        options.defProfRaw = DEFPROFILE_RAW;
+        options.defProfRaw = Options::DEFPROFILE_RAW;
         std::cerr << std::endl
                   << "The default profile for raw photos could not be found or is not set." << std::endl
                   << "Please check your profiles' directory, it may be missing or damaged." << std::endl
-                  << "\"" << DEFPROFILE_RAW << "\" will be used instead." << std::endl << std::endl;
+                  << "\"" << Options::DEFPROFILE_RAW << "\" will be used instead." << std::endl << std::endl;
     }
     if (options.is_bundledDefProfRawMissing()) {
         std::cerr << std::endl
                   << "The bundled profile \"" << options.defProfRaw << "\" could not be found!" << std::endl
                   << "Your installation could be damaged." << std::endl
                   << "Default internal values will be used instead." << std::endl << std::endl;
-        options.defProfRaw = DEFPROFILE_INTERNAL;
+        options.defProfRaw = Options::DEFPROFILE_INTERNAL;
     }
 
     if (options.is_defProfImgMissing()) {
-        options.defProfImg = DEFPROFILE_IMG;
+        options.defProfImg = Options::DEFPROFILE_IMG;
         std::cerr << std::endl
                   << "The default profile for non-raw photos could not be found or is not set." << std::endl
                   << "Please check your profiles' directory, it may be missing or damaged." << std::endl
-                  << "\"" << DEFPROFILE_IMG << "\" will be used instead." << std::endl << std::endl;
+                  << "\"" << Options::DEFPROFILE_IMG << "\" will be used instead." << std::endl << std::endl;
     }
     if (options.is_bundledDefProfImgMissing()) {
         std::cerr << std::endl
                   << "The bundled profile " << options.defProfImg << " could not be found!" << std::endl
                   << "Your installation could be damaged." << std::endl
                   << "Default internal values will be used instead." << std::endl << std::endl;
-        options.defProfImg = DEFPROFILE_INTERNAL;
+        options.defProfImg = Options::DEFPROFILE_INTERNAL;
     }
 
     TIFFSetWarningHandler (nullptr);   // avoid annoying message boxes
@@ -232,9 +247,11 @@ int main (int argc, char **argv)
 }
 
 
-bool dontLoadCache ( int argc, char **argv )
+std::pair<bool, int> dontLoadCache(int argc, char **argv)
 {
-    bool ret = false;
+    bool quick = false;
+    int verbose = 0;
+    
     for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
 #if ECLIPSE_ARGS
@@ -243,7 +260,7 @@ bool dontLoadCache ( int argc, char **argv )
         if (currParam.length() > 1 && currParam[0] == '-') {
             switch (currParam[1]) {
             case 'q':
-                ret = true;
+                quick = true;
                 break;
             case 'v':
                 std::cout << RTNAME << ", version " << RTVERSION << ", command line." << std::endl;
@@ -252,14 +269,82 @@ bool dontLoadCache ( int argc, char **argv )
             case 'h':
                 ART_print_help(argv[0], false);
                 exit(0);
+            case 'V':
+                ++verbose;
+                break;
+            case '-':
+                if (currParam == "--progress") {
+                    progress = true;
+                }
+                break;
             default:
                 break;
             }
         }
     }
 
-    return ret;
+    if (progress) {
+        verbose = 0;
+    }
+
+    return std::make_pair(quick, verbose);
 }
+
+
+class ConsoleProgressListener: public rtengine::ProgressListener {
+public:
+    ConsoleProgressListener(int num_steps):
+        num_steps_(num_steps), percent_(0) {}
+
+    void incr()
+    {
+        MyMutex::MyLock l(mutex_);
+        percent_ += 100.f / num_steps_;
+    }
+    
+    void setProgress(double p)
+    {
+        MyMutex::MyLock l(mutex_);
+        int pct = (p * 100) / num_steps_;
+        std::cout << "\n" << rtengine::LIM(percent_ + pct, 0, 99) << std::endl;
+    }
+    
+    void setProgressStr(const Glib::ustring &str) {}
+    void setProgressState(bool inProcessing) {}
+
+    void error(const Glib::ustring &msg)
+    {
+        MyMutex::MyLock l(mutex_);
+        std::cerr << "Error: " << msg << std::endl;
+    }
+
+    void info(const Glib::ustring &msg)
+    {
+        MyMutex::MyLock l(mutex_);
+        std::cout << "  " << msg << std::endl;
+    }        
+
+    void msg(const Glib::ustring &msg)
+    {
+        MyMutex::MyLock l(mutex_);
+        std::cout << "\n#" << msg << std::endl;
+    }
+
+    void ping()
+    {
+        MyMutex::MyLock l(mutex_);
+        std::cout.put(' ');
+        std::cout.flush();
+        if (!std::cout) {
+            _exit(0);
+        }
+    }
+    
+private:
+    MyMutex mutex_;
+    int num_steps_;
+    int percent_;
+};
 
 
 int processLineParams ( int argc, char **argv )
@@ -336,7 +421,7 @@ int processLineParams ( int argc, char **argv )
                             return -3;
                         }
 
-                        PartialProfile currentParams(new rtengine::procparams::FilePartialProfile(fname));
+                        PartialProfile currentParams(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
                         if (check_partial_profile(currentParams)) {
                             processingParams.push_back(std::move(currentParams));
@@ -361,6 +446,9 @@ int processLineParams ( int argc, char **argv )
                     break;
 
                 case 'q':
+                    break;
+
+                case 'V':
                     break;
 
                 case 'Y':
@@ -446,7 +534,7 @@ int processLineParams ( int argc, char **argv )
 #endif
 
                         if (!Glib::file_test (argument, Glib::FILE_TEST_EXISTS)) {
-                            std::cout << "\"" << argument << "\"  doesn't exist!" << std::endl;
+                            std::cerr << "\"" << argument << "\"  doesn't exist!" << std::endl;
                             continue;
                         }
 
@@ -502,7 +590,7 @@ int processLineParams ( int argc, char **argv )
 
                                     if (sideProcParams && skipIfNoSidecar) {
                                         // look for the sidecar proc params
-                                        if (!Glib::file_test (fileName + paramFileExtension, Glib::FILE_TEST_EXISTS)) {
+                                        if (!Glib::file_test(options.getParamFile(fileName), Glib::FILE_TEST_EXISTS)) {
                                             std::cout << "\"" << fileName << "\"  has no side-car file. Image skipped." << std::endl;
                                             continue;
                                         }
@@ -583,42 +671,62 @@ int processLineParams ( int argc, char **argv )
     if (useDefault) {
         Glib::ustring profPath = options.findProfilePath(options.defProfRaw);
         Glib::ustring fname =
-            profPath == DEFPROFILE_INTERNAL ?
-            DEFPROFILE_INTERNAL :
+            profPath == Options::DEFPROFILE_INTERNAL ?
+            Options::DEFPROFILE_INTERNAL :
             Glib::build_filename(profPath,
                                  Glib::path_get_basename(options.defProfRaw) +
                                  paramFileExtension);
-        rawParams.reset(new rtengine::procparams::FilePartialProfile(fname));
+        rawParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
-        if (options.is_defProfRawMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
+        if (options.is_defProfRawMissing() || profPath.empty() || (profPath != Options::DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
             std::cerr << "Error: default raw processing profile not found." << std::endl;
             return -3;
         }
 
         profPath = options.findProfilePath(options.defProfImg);
         fname =
-            profPath == DEFPROFILE_INTERNAL ?
-            DEFPROFILE_INTERNAL :
+            profPath == Options::DEFPROFILE_INTERNAL ?
+            Options::DEFPROFILE_INTERNAL :
             Glib::build_filename(profPath,
                                  Glib::path_get_basename(options.defProfImg) +
                                  paramFileExtension);
-        imgParams.reset(new rtengine::procparams::FilePartialProfile(fname));
+        imgParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
 
-        if (options.is_defProfImgMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
+        if (options.is_defProfImgMissing() || profPath.empty() || (profPath != Options::DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
             std::cerr << "Error: default non-raw processing profile not found." << std::endl;
             return -3;
         }
     }
 
+    ConsoleProgressListener cpl(inputFiles.size()+1);
+    rtengine::ProgressListener *pl = progress ? &cpl : nullptr;
+
+    if (progress) {
+        const auto monitor =
+            [&]() -> void
+            {
+                while (true) {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    cpl.ping();
+                }
+            };
+        std::thread(monitor).detach();
+    }
+
     for ( size_t iFile = 0; iFile < inputFiles.size(); iFile++) {
+        cpl.incr();
 
         // Has to be reinstanciated at each profile to have a ProcParams object with default values
         rtengine::procparams::ProcParams currentParams;
 
         Glib::ustring inputFile = inputFiles[iFile];
-        std::cout << "Output is " << bits << "-bit " << (isFloat ? "floating-point" : "integer") << "." << std::endl;
-        std::cout << "Processing: " << inputFile << std::endl;
-
+        cpl.info(Glib::ustring::compose("Output is %1-bit %2.", bits, (isFloat ? "floating-point" : "integer")));
+        if (progress) {
+            cpl.msg(Glib::ustring::compose("Processing: %1 (%2/%3)", inputFile, iFile+1, inputFiles.size()));
+        } else {
+            cpl.info(Glib::ustring::compose("Processing: %1", inputFile));
+        }
+        
         rtengine::InitialImage* ii = nullptr;
         rtengine::ProcessingJob* job = nullptr;
         int errorCode;
@@ -637,7 +745,7 @@ int processLineParams ( int argc, char **argv )
         } else if ( outputDirectory ) {
             Glib::ustring s = Glib::path_get_basename ( inputFile );
             Glib::ustring::size_type ext = s.find_last_of ('.');
-            outputFile = Glib::build_filename (outputPath, s.substr (0, ext) + "." + outputType);
+            outputFile = Glib::build_filename(outputPath, s.substr (0, ext) + "." + outputType);
         } else {
             if (leaveUntouched) {
                 outputFile = outputPath;
@@ -649,45 +757,45 @@ int processLineParams ( int argc, char **argv )
         }
 
         if ( inputFile == outputFile) {
-            std::cerr << "Cannot overwrite: " << inputFile << std::endl;
+            cpl.error(Glib::ustring::compose("cannot overwrite: %1", inputFile));
             continue;
         }
 
-        if ( !overwriteFiles && Glib::file_test ( outputFile, Glib::FILE_TEST_EXISTS ) ) {
-            std::cerr << outputFile  << " already exists: use -Y option to overwrite. This image has been skipped." << std::endl;
+        if (!overwriteFiles && Glib::file_test(outputFile, Glib::FILE_TEST_EXISTS ) ) {
+            cpl.error(Glib::ustring::compose("%1 already exists: use -Y option to overwrite. This image has been skipped.", outputFile));
             continue;
         }
 
         // Load the image
         isRaw = true;
-        Glib::ustring ext = getExtension (inputFile);
+        Glib::ustring ext = getExtension(inputFile);
 
         if (ext.lowercase() == "jpg" || ext.lowercase() == "jpeg" || ext.lowercase() == "tif" || ext.lowercase() == "tiff" || ext.lowercase() == "png") {
             isRaw = false;
         }
 
-        ii = rtengine::InitialImage::load ( inputFile, isRaw, &errorCode, nullptr );
+        ii = rtengine::InitialImage::load(inputFile, isRaw, &errorCode, nullptr);
 
         if (!ii) {
             errors++;
-            std::cerr << "Error loading file: " << inputFile << std::endl;
+            cpl.error(Glib::ustring::compose("impossible to load file: %1", inputFile));
             continue;
         }
 
         if (useDefault) {
             if (isRaw) {
-                if (options.defProfRaw == DEFPROFILE_DYNAMIC) {
+                if (options.defProfRaw == Options::DEFPROFILE_DYNAMIC) {
                     rawParams = ProfileStore::getInstance()->loadDynamicProfile (ii->getMetaData());
                 }
-
-                std::cout << "  Merging default raw processing profile." << std::endl;
+                
+                cpl.info("Merging default raw processing profile.");
                 rawParams->applyTo(currentParams);
             } else {
-                if (options.defProfImg == DEFPROFILE_DYNAMIC) {
+                if (options.defProfImg == Options::DEFPROFILE_DYNAMIC) {
                     imgParams = ProfileStore::getInstance()->loadDynamicProfile (ii->getMetaData());
                 }
 
-                std::cout << "  Merging default non-raw processing profile." << std::endl;
+                cpl.info("Merging default non-raw processing profile.");
                 imgParams->applyTo(currentParams);
             }
         }
@@ -699,74 +807,80 @@ int processLineParams ( int argc, char **argv )
         do {
             if (sideProcParams && i == sideCarFilePos) {
                 // using the sidecar file
-                Glib::ustring sideProcessingParams = inputFile + paramFileExtension;
+                Glib::ustring sideProcessingParams = options.getParamFile(inputFile);
 
                 // the "load" method don't reset the procparams values anymore, so values found in the procparam file override the one of currentParams
-                if ( !Glib::file_test ( sideProcessingParams, Glib::FILE_TEST_EXISTS ) || currentParams.load ( sideProcessingParams )) {
-                    std::cerr << "Warning: sidecar file requested but not found for: " << sideProcessingParams << std::endl;
+                if (!Glib::file_test(sideProcessingParams, Glib::FILE_TEST_EXISTS) || currentParams.load(nullptr, sideProcessingParams)) {
+                    cpl.info(Glib::ustring::compose("Warning: sidecar file requested but not found for: %1", sideProcessingParams));
                 } else {
                     sideCarFound = true;
-                    std::cout << "  Merging sidecar procparams." << std::endl;
+                    cpl.info("Merging sidecar procparams.");
                 }
             }
 
-            if ( processingParams.size() > i  ) {
-                std::cout << "  Merging procparams #" << i << std::endl;
+            if (processingParams.size() > i) {
+                cpl.info(Glib::ustring::compose("Merging procparams #%1", i));
                 processingParams[i]->applyTo(currentParams);
             }
 
             i++;
         } while (i < processingParams.size() + (sideProcParams ? 1 : 0));
 
-        if ( sideProcParams && !sideCarFound && skipIfNoSidecar ) {
+        if (sideProcParams && !sideCarFound && skipIfNoSidecar) {
             delete ii;
             errors++;
-            std::cerr << "Error: no sidecar procparams found for: " << inputFile << std::endl;
+            cpl.error(Glib::ustring::compose("no sidecar procparams found for: %1", inputFile));
             continue;
         }
 
-        job = rtengine::ProcessingJob::create (ii, currentParams, fast_export);
+        job = create_processing_job(ii, currentParams, fast_export);
 
-        if ( !job ) {
+        if (!job) {
             errors++;
-            std::cerr << "Error creating processing for: " << inputFile << std::endl;
+            cpl.error(Glib::ustring::compose("impossible to create processing job for: %1", inputFile));
             ii->decreaseRef();
             continue;
         }
 
         // Process image
-        rtengine::IImagefloat* resultImage = rtengine::processImage (job, errorCode, nullptr);
+        rtengine::IImagefloat *resultImage = rtengine::processImage(job, errorCode, pl);
 
-        if ( !resultImage ) {
+        if (!resultImage) {
             errors++;
-            std::cerr << "Error processing: " << inputFile << std::endl;
-            rtengine::ProcessingJob::destroy ( job );
+            cpl.error(Glib::ustring::compose("failure in processing: %1", inputFile));
+            rtengine::ProcessingJob::destroy(job);
             continue;
         }
 
         // save image to disk
-        if ( outputType == "jpg" ) {
-            errorCode = resultImage->saveAsJPEG ( outputFile, compression, subsampling );
-        } else if ( outputType == "tif" ) {
-            errorCode = resultImage->saveAsTIFF ( outputFile, bits, isFloat, compression == 0  );
-        } else if ( outputType == "png" ) {
-            errorCode = resultImage->saveAsPNG ( outputFile, bits );
+        if (outputType == "jpg") {
+            errorCode = resultImage->saveAsJPEG(outputFile, compression, subsampling);
+        } else if (outputType == "tif") {
+            errorCode = resultImage->saveAsTIFF(outputFile, bits, isFloat, compression == 0);
+        } else if (outputType == "png") {
+            errorCode = resultImage->saveAsPNG(outputFile, bits);
         } else {
-            errorCode = resultImage->saveToFile (outputFile);
+            errorCode = resultImage->saveToFile(outputFile);
         }
 
         if (errorCode) {
             errors++;
-            std::cerr << "Error saving to: " << outputFile << std::endl;
+            cpl.error(Glib::ustring::compose("failure in saving to: %1", outputFile));
         } else {
-            if ( copyParamsFile ) {
+            if (copyParamsFile) {
                 Glib::ustring outputProcessingParams = outputFile + paramFileExtension;
-                currentParams.save ( outputProcessingParams );
+                if (!options.params_out_embed || currentParams.saveEmbedded(pl, outputFile) != 0) {
+                    currentParams.save(pl, outputProcessingParams);
+                }
             }
         }
 
         ii->decreaseRef();
         resultImage->free();
+    }
+
+    if (progress) {
+        std::cout << "100" << std::endl;
     }
 
     return errors > 0 ? -2 : 0;

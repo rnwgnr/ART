@@ -51,6 +51,7 @@ std::vector<ToggleInfo> get_toggles(ParamsEdited &pedited)
         {"PARTIALPASTE_TM_FATTAL", &pedited.fattal, 0},
         {"PARTIALPASTE_TM_LOG", &pedited.logenc, 0},
 
+        {"PARTIALPASTE_SPOT", &pedited.spot, 1},
         {"PARTIALPASTE_SHARPENING", &pedited.sharpening, 1},
         {"PARTIALPASTE_DIRPYRDENOISE", &pedited.denoise, 1},
         {"PARTIALPASTE_IMPULSEDENOISE", &pedited.impulseDenoise, 1},
@@ -63,6 +64,7 @@ std::vector<ToggleInfo> get_toggles(ParamsEdited &pedited)
         {"PARTIALPASTE_GRADIENT", &pedited.gradient, 2},
         {"PARTIALPASTE_DEHAZE", &pedited.dehaze, 2},
         {"PARTIALPASTE_GRAIN", &pedited.grain, 2},
+        {"PARTIALPASTE_FILMNEGATIVE", &pedited.filmNegative, 2},
         
         {"PARTIALPASTE_WHITEBALANCE", &pedited.wb, 3},
         {"PARTIALPASTE_ICMSETTINGS", &pedited.icm, 3},
@@ -98,7 +100,6 @@ std::vector<ToggleInfo> get_toggles(ParamsEdited &pedited)
         {"PARTIALPASTE_HOT_DEAD_PIXEL_FILTER", &pedited.hotDeadPixelFilter, 7},
         {"PARTIALPASTE_DARKFRAME", &pedited.darkframe, 7},
         {"PARTIALPASTE_FLATFIELD", &pedited.flatfield, 7},
-        {"PARTIALPASTE_FILMNEGATIVE", &pedited.filmNegative, 7},
 
         {"PARTIALPASTE_METADATA", &pedited.metadata, 8},
         {"PARTIALPASTE_EXIFCHANGES", &pedited.exif, 8},

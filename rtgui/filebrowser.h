@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -16,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _FILEBROWSER_
-#define _FILEBROWSER_
+#pragma once
 
 #include <gtkmm.h>
 #include <map>
@@ -27,7 +27,6 @@
 #include "browserfilter.h"
 #include "pparamschangelistener.h"
 #include "partialpastedlg.h"
-#include "exportpanel.h"
 #include "extprog.h"
 #include "profilestorecombobox.h"
 
@@ -55,7 +54,6 @@ public:
  */
 class FileBrowser  : public ThumbBrowserBase,
     public LWButtonListener,
-    /* public ExportPanelListener, */
     public ProfileStoreListener
 {
 private:
@@ -83,10 +81,11 @@ protected:
     Gtk::MenuItem* menuLabel;
     Gtk::MenuItem* menuFileOperations;
     Gtk::MenuItem* menuProfileOperations;
-    Gtk::MenuItem* menuExtProg;
-    Gtk::MenuItem** amiExtProg;
-    Gtk::MenuItem* miOpenDefaultViewer;
-    std::map<Glib::ustring, const ExtProgAction*> mMenuExtProgs;  // key is menuitem label
+    // Gtk::MenuItem* menuExtProg;
+    // Gtk::MenuItem** amiExtProg;
+    Gtk::MenuItem *mi_usercommands_;
+    Gtk::SeparatorMenuItem *mi_usercommands_sep_;
+    std::vector<std::pair<std::unique_ptr<Gtk::MenuItem>, UserCommand>> usercommands_menu_;
 
     Gtk::MenuItem* menuDF;
     Gtk::MenuItem* selectDF;
@@ -129,9 +128,11 @@ protected:
     void requestColorLabel(int colorlabel);
     void notifySelectionListener ();
     void openRequested( std::vector<FileBrowserEntry*> mselected);
-    // ExportPanel* exportPanel;
 
     type_trash_changed m_trash_changed;
+
+    void build_menu();
+    void refresh_usercommands_menu();
 
 public:
     FileBrowser ();
@@ -190,10 +191,6 @@ public:
 
     void selectionChanged () override;
 
-    /* void setExportPanel (ExportPanel* expanel); */
-    // exportpanel interface
-    /* void exportRequested() override; */
-
     void storeCurrentValue() override;
     void updateProfileList() override;
     void restoreValue() override;
@@ -202,6 +199,8 @@ public:
 
     int getColumnWidth() const;
     bool isSelected(const Glib::ustring &fname) const;
-};
 
-#endif
+    void sortThumbnails();
+
+    void enableThumbRefresh();
+};

@@ -90,6 +90,41 @@ float find_gray(float source_gray, float target_gray)
 }
 
 
+// taken from darktable
+inline float power_norm(float r, float g, float b)
+{
+    r = std::abs(r);
+    g = std::abs(g);
+    b = std::abs(b);
+
+    float r2 = SQR(r);
+    float g2 = SQR(g);
+    float b2 = SQR(b);
+    float d = r2 + g2 + b2;
+    float n = r*r2 + g*g2 + b*b2;
+
+    return n / std::max(d, 1e-12f);
+}
+
+
+inline float norm(float r, float g, float b, TMatrix ws)
+{
+    return (power_norm(r, g, b) + Color::rgbLuminance(r, g, b, ws)) / 2.f;
+}
+
+
+inline float ev2gray(float ev)
+{
+    return std::pow(2.f, -ev + std::log2(0.18f));
+}
+
+
+inline float gray2ev(float gray)
+{
+    return std::log2(0.18f / gray);
+}
+
+
 // basic log encoding taken from ACESutil.Lin_to_Log2, from
 // https://github.com/ampas/aces-dev
 // (as seen on pixls.us)
@@ -99,9 +134,9 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
         return;
     }
 
-    const float gray = params->logenc.sourceGray / 100.f;
+    const float gray = ev2gray(params->logenc.gain);
     const float shadows_range = params->logenc.blackEv;
-    const float dynamic_range = params->logenc.whiteEv - params->logenc.blackEv;
+    const float dynamic_range = std::max(params->logenc.whiteEv - params->logenc.blackEv, 0.5);
     const float noise = pow_F(2.f, -16.f);
     const float log2 = xlogf(2.f);
     const float b = params->logenc.targetGray > 1 && params->logenc.targetGray < 100 && dynamic_range > 0 ? find_gray(std::abs(params->logenc.blackEv) / dynamic_range, params->logenc.targetGray / 100.f) : 0.f;
@@ -128,36 +163,6 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             }
         };
 
-    const auto norm =
-        [&](float r, float g, float b) -> float
-        {
-            return Color::rgbLuminance(r, g, b, ws);
-
-            // other possible alternatives (so far, luminance seems to work
-            // fine though). See also
-            // https://discuss.pixls.us/t/finding-a-norm-to-preserve-ratios-across-non-linear-operations
-            //
-            // MAX
-            //return max(r, g, b);
-            //
-            // Euclidean
-            //return std::sqrt(SQR(r) + SQR(g) + SQR(b));
-            
-            // weighted yellow power norm from https://youtu.be/Z0DS7cnAYPk
-            // float rr = 1.22f * r / 65535.f;
-            // float gg = 1.20f * g / 65535.f;
-            // float bb = 0.58f * b / 65535.f;
-            // float rr4 = SQR(rr) * SQR(rr);
-            // float gg4 = SQR(gg) * SQR(gg);
-            // float bb4 = SQR(bb) * SQR(bb);
-            // float den = (rr4 + gg4 + bb4);
-            // if (den > 0.f) {
-            //     return 0.8374319f * ((rr4 * rr + gg4 * gg + bb4 * bb) / den) * 65535.f;
-            // } else {
-            //     return 0.f;
-            // }
-        };
-
     const int W = rgb->getWidth(), H = rgb->getHeight();
     
     if (params->logenc.regularization == 0) {
@@ -169,7 +174,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
                 float r = rgb->r(y, x);
                 float g = rgb->g(y, x);
                 float b = rgb->b(y, x);
-                float m = norm(r, g, b);
+                float m = norm(r, g, b, ws);
                 if (m > noise) {
                     float mm = apply(m);
                     float f = mm / m;
@@ -188,18 +193,22 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             }
         }
     } else {
-        array2D<float> Y(W, H);
+        array2D<float> Y(W, H, ARRAY2D_ALIGNED);
         {
             constexpr float base_posterization = 20.f;
-            array2D<float> Y2(W, H);
+            array2D<float> Y2(W, H, ARRAY2D_ALIGNED);
+
+            constexpr float lo = 1e-5f;
+            constexpr float hi = 128.f;
         
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
 #endif
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
-                    Y2[y][x] = norm(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x)) / 65535.f;
-                    float l = xlogf(std::max(Y2[y][x], 1e-9f));
+                    Y2[y][x] = norm(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), ws) / 65535.f;
+                    Y2[y][x] = LIM(Y2[y][x], lo, hi);
+                    float l = xlogf(Y2[y][x]);
                     float ll = round(l * base_posterization) / base_posterization;
                     Y[y][x] = xexpf(ll);
                     assert(std::isfinite(Y[y][x]));
@@ -221,10 +230,9 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
                 float &b = rgb->b(y, x);
                 float t = Y[y][x];
                 float t2;
-                if (t > noise && (t2 = norm(r, g, b)) > noise) {
+                if (t > noise && (t2 = norm(r, g, b, ws)) > noise) {
                     float c = apply(t, false);
                     float f = c / t;
-                    //float t2 = norm(r, g, b);
                     float f2 = apply(t2) / t2;
                     f = intp(blend, f, f2);
                     assert(std::isfinite(f));
@@ -252,27 +260,35 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
     Imagefloat img(int(fw / SCALE + 0.5), int(fh / SCALE + 0.5));
     ProcParams neutral;
     neutral.exposure.enabled = true;
-    // neutral.exposure.clampOOG = false;
     imgsrc->getImage(imgsrc->getWB(), tr, &img, pp, neutral.exposure, neutral.raw);
     imgsrc->convertColorSpace(&img, params->icm, imgsrc->getWB());
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(params->icm.workingProfile);
 
     float vmin = RT_INFINITY;
     float vmax = -RT_INFINITY;
-    const float ec = params->exposure.enabled ? std::pow(2.f, params->exposure.expcomp) : 1.f;
 
     constexpr float noise = 1e-5;
+    const int w = img.getWidth();
+    const int h = img.getHeight();
 
-    for (int y = 0, h = fh / SCALE; y < h; ++y) {
-        for (int x = 0, w = fw / SCALE; x < w; ++x) {
+    array2D<float> Y(w, h, ARRAY2D_ALIGNED);
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
             float r = img.r(y, x), g = img.g(y, x), b = img.b(y, x);
-            float m = max(0.f, r, g, b) / 65535.f * ec;
-            if (m > noise) {
-                float l = min(r, g, b) / 65535.f * ec;
-                vmin = min(vmin, l > noise ? l : m);
-                vmax = max(vmax, m);
+            Y[y][x] = norm(r, g, b, ws) / 65535.f;
+        }
+    }
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            float l = Y[y][x];
+            if (l > noise) {
+                vmin = min(vmin, l);
+                vmax = max(vmax, l);
             }
         }
     }
+    vmin *= 0.5f;
+    vmax *= 1.5f;
 
     if (vmax > vmin) {
         const float log2 = xlogf(2.f);
@@ -282,7 +298,7 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                       << ", DR = " << dynamic_range << std::endl;
         }
 
-        if (lparams.autogray) {
+        if (lparams.autogain) {
             double tot = 0.f;
             int n = 0;
             float gmax = std::min(vmax / 2.f, 0.25f);
@@ -290,9 +306,9 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
             if (settings->verbose) {
                 std::cout << "         gray boundaries: " << gmin << ", " << gmax << std::endl;
             }
-            for (int y = 0, h = fh / SCALE; y < h; ++y) {
-                for (int x = 0, w = fw / SCALE; x < w; ++x) {
-                    float l = img.g(y, x) / 65535.f;
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    float l = Y[y][x];
                     if (l >= gmin && l <= gmax) {
                         tot += l;
                         ++n;
@@ -300,19 +316,22 @@ void ImProcFunctions::getAutoLog(ImageSource *imgsrc, LogEncodingParams &lparams
                 }
             }
             if (n > 0) {
-                lparams.sourceGray = tot / n * 100.f;
+                lparams.gain = gray2ev(tot / n);
                 if (settings->verbose) {
-                    std::cout << "         computed gray point from " << n << " samples: " << lparams.sourceGray << std::endl;
+                    std::cout << "         computed gain from " << n << " samples: " << lparams.gain << std::endl;
                 }
             } else if (settings->verbose) {
-                std::cout << "         no samples found in range, resorting to default gray point value" << std::endl;
-                lparams.sourceGray = LogEncodingParams().sourceGray;
+                std::cout << "         no samples found in range, resorting to default gain value" << std::endl;
+                lparams.gain = LogEncodingParams().gain;
             }
         }
+
+        constexpr double MIN_WHITE = 2.f;
+        constexpr double MAX_BLACK = -3.5f;
         
-        float gray = float(lparams.sourceGray) / 100.f;
-        lparams.whiteEv = xlogf(vmax / gray) / log2;
-        lparams.blackEv = lparams.whiteEv - dynamic_range;
+        float gray = ev2gray(lparams.gain);
+        lparams.whiteEv = std::max(double(xlogf(vmax / gray) / log2), MIN_WHITE);
+        lparams.blackEv = std::min(lparams.whiteEv - dynamic_range, MAX_BLACK);
     }
 }
 

@@ -35,13 +35,16 @@ private:
     class ExifColumns : public Gtk::TreeModelColumnRecord
     {
     public:
-        Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > icon;
-        Gtk::TreeModelColumn<Glib::ustring> key;
+        // Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> expander_icon;
+        Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> icon;
+        Gtk::TreeModelColumn<std::string> key;
         Gtk::TreeModelColumn<Glib::ustring> label;
         Gtk::TreeModelColumn<Glib::ustring> value;
         Gtk::TreeModelColumn<Glib::ustring> value_nopango;
         Gtk::TreeModelColumn<bool> editable;
         Gtk::TreeModelColumn<bool> edited;
+        Gtk::TreeModelColumn<bool> active;
+        Gtk::TreeModelColumn<bool> is_group;
 
         ExifColumns()
         {
@@ -52,10 +55,15 @@ private:
             add(edited);
             add(value_nopango);
             add(editable);
+            add(active);
+            add(is_group);
+            // add(expander_icon);
         }
     };
-    Glib::RefPtr<Gdk::Pixbuf> keepicon;
+    //Glib::RefPtr<Gdk::Pixbuf> keepicon;
     Glib::RefPtr<Gdk::Pixbuf> editicon;
+    Glib::RefPtr<Gdk::Pixbuf> open_icon_;
+    Glib::RefPtr<Gdk::Pixbuf> closed_icon_;
 
     ExifColumns exifColumns;
     Gtk::TreeView* exifTree;
@@ -65,16 +73,41 @@ private:
     Gtk::Button* add;
     Gtk::Button* reset;
     Gtk::Button* resetAll;
+    Gtk::Button *activate_all_;
+    Gtk::Button *activate_none_;
+
+    Gtk::CellRendererToggle exif_active_renderer_;
+    Gtk::TreeView::Column exif_active_column_;
 
     std::vector<std::pair<std::string, Glib::ustring>> editable_;
 
-    Gtk::TreeModel::Children addTag(const std::string &key, const Glib::ustring &label, const Glib::ustring &value, bool editable, bool edited);
+    std::unordered_set<std::string> initial_active_keys_;
+    std::unordered_set<std::string> cur_active_keys_;
+
+    rtengine::ProgressListener *pl_;
+
+    void addTag(const std::string &key, const std::pair<Glib::ustring, Glib::ustring> &label, const Glib::ustring &value, bool editable, bool edited);
     void refreshTags();
-    void resetIt (Gtk::TreeModel::iterator iter);
+    void resetIt(Gtk::TreeModel::iterator iter);
     void resetPressed();
     void resetAllPressed();
     void addPressed();
+    void activateAllPressed();
+    void activateNonePressed();
 
+    void setKeyActive(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator &it);
+    void onKeyActiveToggled(const Glib::ustring &path);
+
+    bool all_keys_active() const;
+    std::unordered_set<std::string> get_active_keys() const;
+
+    void onExifTreeClick(GdkEventButton *event);
+    void onExifRowExpanded(const Gtk::TreeModel::iterator &it, const Gtk::TreeModel::Path &path);
+    void onExifRowCollapsed(const Gtk::TreeModel::iterator &it, const Gtk::TreeModel::Path &path);
+
+    void setExifTagValue(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator &it);
+    void onEditExifTagValue(const Glib::ustring &path, const Glib::ustring &value);
+    
 public:
     ExifPanel();
     ~ExifPanel() override;
@@ -90,6 +123,7 @@ public:
 
     void notifyListener();
 
+    void setProgressListener(rtengine::ProgressListener *pl);
 };
 
 #endif

@@ -2,7 +2,7 @@ if(APPLE)
     cmake_minimum_required(VERSION 3.5)
     cmake_policy(SET CMP0025 NEW)
 else()
-    cmake_minimum_required(VERSION 2.8.8)
+    cmake_minimum_required(VERSION 3.0)
 endif()
 
 # Must stay before the project() command:
@@ -15,9 +15,9 @@ endif()
 
 project(ART)
 
-# The default target is Debug:
+# The default target is Release:
 if(CMAKE_BUILD_TYPE STREQUAL "")
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "One of: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "One of: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} UPPER_CMAKE_BUILD_TYPE)
@@ -28,6 +28,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
     message(FATAL_ERROR "Building ART requires using GCC version 4.9 or higher!")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "10.0" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.2") OR (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "11.0")))
+    message(STATUS "WARNING: gcc ${CMAKE_CXX_COMPILER_VERSION} is known to miscompile ART when using -ftree-loop-vectorize, forcing the option to be off")    
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-tree-loop-vectorize")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-tree-loop-vectorize")
 endif()
 
 # We might want to build using the old C++ ABI, even when using a new GCC version:
@@ -101,6 +107,10 @@ if(HAVE_X86_SSE_MATH)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -mfpmath=sse")
 endif()
 
+# Do net set math errno, as we never check its value.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-math-errno")
+
 # On i386 Linux we can fix unaligned SSE malloc (see GitHub issue #4432)
 include(FindUnalignedMalloc)
 
@@ -108,6 +118,10 @@ if(WIN32)
     # Add additional paths. Look in the MinGW path first, then in the Gtkmm path.
     # If you wish to build some dependent libraries, you have to install them in MinGW to use them:
     set(CMAKE_PREFIX_PATH $ENV{MINGW_BASEPATH} $ENV{GTKMM_BASEPATH} CACHE STRING "Additional search paths")
+
+    # increase the stack size
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--stack,4194304")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--stack,4194304")
 endif()
 
 if(APPLE)
@@ -122,21 +136,17 @@ if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -headerpad_max_install_names")
 endif()
 
-option(USE_EXPERIMENTAL_LANG_VERSIONS "Build with -std=c++0x" OFF)
 option(BUILD_SHARED "Build with shared libraries" OFF)
 option(WITH_BENCHMARK "Build with benchmark code" OFF)
-option(WITH_MYFILE_MMAP "Build using memory mapped file" ON)
 option(WITH_LTO "Build with link-time optimizations" OFF)
 option(WITH_SAN "Build with run-time sanitizer" OFF)
 option(WITH_PROF "Build with profiling instrumentation" OFF)
 option(WITH_SYSTEM_KLT "Build using system KLT library." OFF)
 option(OPTION_OMP "Build with OpenMP support" ON)
-option(STRICT_MUTEX "True (recommended): MyMutex will behave like POSIX Mutex; False: MyMutex will behave like POSIX RecMutex; Note: forced to ON for Debug builds" ON)
-option(TRACE_MYRWMUTEX "Trace custom R/W Mutex (Debug builds only); redirecting std::out to a file is strongly recommended!" OFF)
-option(AUTO_GDK_FLUSH "Use gdk_flush on all gdk_thread_leave other than the GUI thread; set it ON if you experience X Server warning/errors" OFF)
 
-option(ENABLE_TCMALLOC "Use the tcmalloc library if available" OFF)
-set(TCMALLOC_LIB_DIR "" CACHE PATH "Custom path for the tcmalloc library")
+option(ENABLE_MIMALLOC "Use the mimalloc library if available" OFF)
+
+option(ENABLE_LIBRAW "Use libraw for decoding" OFF)
 
 # Set installation directories:
 if(WIN32 OR APPLE)
@@ -279,26 +289,6 @@ if(NOT BUILD_BUNDLE)
     endforeach()
 endif()
 
-# MyMutex:
-if(STRICT_MUTEX OR UPPER_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-    add_definitions(-DSTRICT_MUTEX=1)
-else()
-    add_definitions(-DSTRICT_MUTEX=0)
-endif()
-
-# MyRWMutex:
-if(TRACE_MYRWMUTEX)
-    add_definitions(-DTRACE_MYRWMUTEX=1)
-else()
-    add_definitions(-DTRACE_MYRWMUTEX=0)
-endif()
-
-if(AUTO_GDK_FLUSH)
-    add_definitions(-DAUTO_GDK_FLUSH=1)
-else()
-    add_definitions(-DAUTO_GDK_FLUSH=0)
-endif()
-
 # Check for libraries:
 find_package(PkgConfig)
 if(WIN32)
@@ -340,10 +330,17 @@ set(EXIV2_LIBRARIES "")
 foreach(l ${_exiv2_libs})
     set(_el "_el-NOTFOUND")
     if(EXIV2_LIBRARY_DIRS)
+        message(STATUS "searching for library ${l} in ${EXIV2_LIBRARY_DIRS}")
         find_library(_el ${l} PATHS ${EXIV2_LIBRARY_DIRS} NO_DEFAULT_PATH)
+        if(NOT _el)
+            message(STATUS  "  NOT FOUND, searching again in default path")
+            find_library(_el ${l})
+        endif()
     else()
-        find_library(_el ${l} PATHS ${EXIV2_LIBRARY_DIRS})
+        message(STATUS "searching for library ${l}")
+        find_library(_el ${l})# PATHS ${EXIV2_LIBRARY_DIRS})
     endif()
+    message(STATUS "  result: ${_el}")
     set(EXIV2_LIBRARIES ${EXIV2_LIBRARIES} ${_el})
 endforeach()
 
@@ -374,10 +371,6 @@ endif()
 # Check for libcanberra-gtk3 (sound events on Linux):
 if(UNIX AND(NOT APPLE))
     pkg_check_modules(CANBERRA-GTK REQUIRED libcanberra-gtk3)
-endif()
-
-if(WITH_MYFILE_MMAP)
-    add_definitions(-DMYFILE_MMAP)
 endif()
 
 if(WITH_LTO)
@@ -451,6 +444,75 @@ int main()
 endif()
 
 
+# check whether the used version of lensfun has lfDatabase::LoadDirectory
+set(_lf_libs ${LENSFUN_LIBRARIES})
+set(LENSFUN_LIBRARIES "")
+foreach(l ${_lf_libs})
+    set(_el "_el-NOTFOUND")
+    if(LENSFUN_LIBRARY_DIRS)
+        message(STATUS "searching for library ${l} in ${LENSFUN_LIBRARY_DIRS}")
+        find_library(_el ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
+    else()
+        message(STATUS "searching for library ${l}")
+        find_library(_el ${l})# PATHS ${LENSFUN_LIBRARY_DIRS})
+    endif()
+    message(STATUS "  result: ${_el}")
+    set(LENSFUN_LIBRARIES ${LENSFUN_LIBRARIES} ${_el})
+endforeach()
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_INCLUDES ${LENSFUN_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_LIBRARIES ${LENSFUN_LIBRARIES})
+# foreach(l ${LENSFUN_LIBRARIES})
+#     if(LENSFUN_LIBRARY_DIRS)
+#         # the NO_DEFAULT_PATH is to make sure we find the lensfun version we
+#         # want, and not the system's one (e.g. if we have a custom version
+#         # installed in a non-standard location)
+#         set(_l "_l-NOTFOUND")
+#         find_library(_l ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
+#     else()
+#         # LENSFUN_LIBRARY_DIRS can be empty if lensfun is installed in the
+#         # default path. In this case, adding NO_DEFAULT_PATH would make
+#         # find_library fail...
+#         set(_l "_l-NOTFOUND")
+#         find_library(_l ${l})
+#     endif()
+#     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${_l})
+# endforeach()
+check_cxx_source_compiles(
+    "#include <lensfun.h>
+int main()
+{
+    lfDatabase *db = 0;
+    bool b = db->LoadDirectory(0);
+    return 0;
+}" LENSFUN_HAS_LOAD_DIRECTORY)
+
+
+set(HAS_MIMALLOC)
+set(ART_MIMALLOC_VERSION_INFO "N/A")
+if(ENABLE_MIMALLOC)
+    find_package(mimalloc 1.4)
+    if(mimalloc_FOUND)
+        message(STATUS "using mimalloc library ${mimalloc_VERSION}")
+        set(HAS_MIMALLOC 1)
+        add_definitions(-DWITH_MIMALLOC)
+        set(ART_MIMALLOC_VERSION_INFO "V${mimalloc_VERSION}")
+    else()
+        message(STATUS "mimalloc not found")
+    endif()
+endif()
+
+if(ENABLE_LIBRAW)
+    pkg_check_modules(LIBRAW libraw_r>=0.21)
+    if(LIBRAW_FOUND)
+        message(STATUS "using libraw library ${LIBRAW_VERSION}")
+        add_definitions(-DART_USE_LIBRAW)
+    else()
+        message(STATUS "libraw not found")
+    endif()
+endif()
+
+
 # Find out whether we are building out of source:
 get_filename_component(ABS_SOURCE_DIR "${PROJECT_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ABS_BINARY_DIR "${CMAKE_BINARY_DIR}" ABSOLUTE)
@@ -497,6 +559,7 @@ else()
     set(COMPILER_INFO "gcc ${GCC_VERSION}")
 endif()
 
+
 # Get C++ and linker flags for rtengine (the GUI's C++ flags may have fewer flags):
 set(CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${UPPER_CMAKE_BUILD_TYPE}} ${RTENGINE_CXX_FLAGS}")
 set(LFLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${UPPER_CMAKE_BUILD_TYPE}}")
@@ -509,9 +572,11 @@ set(ABOUT_COMMAND_WITH_ARGS ${CMAKE_COMMAND}
     -DBUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DGTKMM_VERSION:STRING=${GTKMM_VERSION}
     -DOPTION_OMP:STRING=${OPTION_OMP}
-    -DWITH_MYFILE_MMAP:STRING=${WITH_MYFILE_MMAP}
     -DLENSFUN_VERSION:STRING=${LENSFUN_VERSION}
-    -DEXIV2_VERSION:STRING=${EXIV2_VERSION})
+    -DEXIV2_VERSION:STRING=${EXIV2_VERSION}
+    -DLCMS_VERSION_INFO:STRING="${LCMS_VERSION}"
+    -DART_MIMALLOC_VERSION_INFO:STRING="${ART_MIMALLOC_VERSION_INFO}"
+    )
 
 if(WIN32)
     list(APPEND ABOUT_COMMAND_WITH_ARGS -DSYSTEM:STRING=Windows
@@ -530,6 +595,14 @@ else()
         -DCXX_FLAGS:STRING=${CXX_FLAGS}
         -DLFLAGS:STRING=${LFLAGS}
         -DCOMPILER_INFO:STRING=${COMPILER_INFO})
+endif()
+
+if(ENABLE_LIBRAW AND LIBRAW_FOUND)
+    list(APPEND ABOUT_COMMAND_WITH_ARGS
+        -DART_LIBRAW_VERSION_INFO:STRING="V${LIBRAW_VERSION}")
+else()
+    list(APPEND ABOUT_COMMAND_WITH_ARGS
+        -DART_LIBRAW_VERSION_INFO:STRING="N/A")
 endif()
 
 list(APPEND ABOUT_COMMAND_WITH_ARGS "-DBUILDINFO_OS:STRING=${CMAKE_HOST_SYSTEM_NAME}" -P "${PROJECT_SOURCE_DIR}/UpdateInfo.cmake")
@@ -555,63 +628,6 @@ endif()
 
 if(WIN32)
     install(DIRECTORY "licenses" DESTINATION "${LICENCEDIR}")
-endif()
-
-# check whether the used version of lensfun has lfDatabase::LoadDirectory
-set(_lf_libs ${LENSFUN_LIBRARIES})
-set(LENSFUN_LIBRARIES "")
-foreach(l ${_lf_libs})
-    set(_el "_el-NOTFOUND")
-    if(LENSFUN_LIBRARY_DIRS)
-        find_library(_el ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
-    else()
-        find_library(_el ${l} PATHS ${LENSFUN_LIBRARY_DIRS})
-    endif()
-    set(LENSFUN_LIBRARIES ${LENSFUN_LIBRARIES} ${_el})
-endforeach()
-include(CheckCXXSourceCompiles)
-set(CMAKE_REQUIRED_INCLUDES ${LENSFUN_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_LIBRARIES ${LENSFUN_LIBRARIES})
-# foreach(l ${LENSFUN_LIBRARIES})
-#     if(LENSFUN_LIBRARY_DIRS)
-#         # the NO_DEFAULT_PATH is to make sure we find the lensfun version we
-#         # want, and not the system's one (e.g. if we have a custom version
-#         # installed in a non-standard location)
-#         set(_l "_l-NOTFOUND")
-#         find_library(_l ${l} PATHS ${LENSFUN_LIBRARY_DIRS} NO_DEFAULT_PATH)
-#     else()
-#         # LENSFUN_LIBRARY_DIRS can be empty if lensfun is installed in the
-#         # default path. In this case, adding NO_DEFAULT_PATH would make
-#         # find_library fail...
-#         set(_l "_l-NOTFOUND")
-#         find_library(_l ${l})
-#     endif()
-#     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${_l})
-# endforeach()
-check_cxx_source_compiles(
-    "#include <lensfun.h>
-int main()
-{
-    lfDatabase *db = 0;
-    bool b = db->LoadDirectory(0);
-    return 0;
-}" LENSFUN_HAS_LOAD_DIRECTORY)
-
-set(TCMALLOC_LIB_DIR)
-if(ENABLE_TCMALLOC)
-    if(TCMALLOC_LIB_DIR)
-        find_library(TCMALLOC_LIBRARIES tcmalloc PATHS ${TCMALLOC_LIB_DIR} NO_DEFAULT_PATH)
-    else()
-        find_library(TCMALLOC_LIBRARIES tcmalloc)
-    endif()
-    if(TCMALLOC_LIBRARIES)
-        message(STATUS "using tcmalloc library in ${TCMALLOC_LIBRARIES}")
-    else()
-        set(TCMALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
-        message(STATUS "tcmalloc not found")
-    endif()
-else()
-    set(TCMALLOC_LIBRARIES "" CACHE INTERNAL "" FORCE)
 endif()
 
 add_subdirectory(rtengine)

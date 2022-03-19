@@ -7,6 +7,7 @@
 
 #include "options.h"
 #include "../rtengine/clutstore.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -59,9 +60,11 @@ bool notifySlowParseDir (const std::chrono::system_clock::time_point& startedAt)
 
 }
 
-FilmSimulation::FilmSimulation()
-    :   FoldableToolPanel( this, "filmsimulation", M("TP_FILMSIMULATION_LABEL"), false, true )
+FilmSimulation::FilmSimulation():
+    FoldableToolPanel(this, "filmsimulation", M("TP_FILMSIMULATION_LABEL"), false, true, true)
 {
+    EvToolEnabled.set_action(RGBCURVE);
+    
     m_clutComboBox = Gtk::manage( new ClutComboBox(options.clutsDir) );
     int foundClutsCount = m_clutComboBox->foundClutsCount();
 
@@ -83,12 +86,10 @@ void FilmSimulation::onClutSelected()
 {
     Glib::ustring currentClutFilename = m_clutComboBox->getSelectedClut();
 
-    if ( getEnabled() && !currentClutFilename.empty() && listener && currentClutFilename != m_oldClutFilename ) {
+    if (listener && getEnabled()) {
         Glib::ustring clutName, dummy;
         HaldCLUT::splitClutFilename( currentClutFilename, clutName, dummy, dummy );
         listener->panelChanged( EvFilmSimulationFilename, clutName );
-
-        m_oldClutFilename = currentClutFilename;
     }
 }
 
@@ -132,7 +133,6 @@ void FilmSimulation::read( const rtengine::procparams::ProcParams* pp)
                 ? Glib::ustring(Glib::build_filename(options.clutsDir, pp->filmSimulation.clutFilename))
                 : pp->filmSimulation.clutFilename
         );
-        m_oldClutFilename = m_clutComboBox->getSelectedClut();
     } else {
         m_clutComboBox->set_active(-1);
     }
@@ -407,4 +407,21 @@ Gtk::TreeIter ClutComboBox::findRowByClutFilename( Gtk::TreeModel::Children chil
     }
 
     return result;
+}
+
+
+void FilmSimulation::setDefaults(const ProcParams *defParams)
+{
+    initial_params = defParams->filmSimulation;
+}
+
+
+void FilmSimulation::toolReset(bool to_initial)
+{
+    ProcParams pp;
+    if (to_initial) {
+        pp.filmSimulation = initial_params;
+    }
+    pp.filmSimulation.enabled = getEnabled();
+    read(&pp);
 }

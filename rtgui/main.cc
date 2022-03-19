@@ -40,6 +40,7 @@
 #include "extprog.h"
 #include "../rtengine/dynamicprofile.h"
 #include "printhelp.h"
+#include "wbprovider.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -49,6 +50,10 @@
 #else
 #include <glibmm/thread.h>
 #include "conio.h"
+#endif
+
+#ifdef WITH_MIMALLOC
+#  include <mimalloc.h>
 #endif
 
 // Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
@@ -66,7 +71,6 @@ bool simpleEditor = false;
 bool gimpPlugin = false;
 bool remote = false;
 unsigned char initialGdkScale = 1;
-//Glib::Threads::Thread* mainThread;
 
 namespace
 {
@@ -97,15 +101,9 @@ static void myGdkLockEnter()
 {
     myGdkRecMutex.lock();
 }
+
 static void myGdkLockLeave()
 {
-    // Automatic gdk_flush for non main thread
-#if AUTO_GDK_FLUSH
-    //if (Glib::Thread::self() != mainThread) {
-    //    gdk_flush();
-    //}
-
-#endif
     myGdkRecMutex.unlock();
 }
 
@@ -176,6 +174,11 @@ int processLineParams ( int argc, char **argv )
 
                     break;
 #endif
+                case 's':
+                    simpleEditor = true;
+                    remote = false;
+                    break;
+                
                 case '-':
                     if (currParam.substr(5) == "--gtk" || currParam == "--g-fatal-warnings") {
                         break;
@@ -221,8 +224,9 @@ int processLineParams ( int argc, char **argv )
 
 bool init_rt()
 {
-    extProgStore->init();
+    UserCommandStore::getInstance()->init(Glib::build_filename(options.rtdir, "usercommands"));
     SoundManager::init();
+    wb_presets::init(argv0, options.rtdir);
 
     if ( !options.rtSettings.verbose ) {
         TIFFSetWarningHandler (nullptr);   // avoid annoying message boxes
@@ -366,12 +370,16 @@ void show_gimp_plugin_info_dialog(Gtk::Window *parent)
 
 int main (int argc, char **argv)
 {
+#ifdef WITH_MIMALLOC
+    mi_version();
+#endif
+    
     setlocale (LC_ALL, "");
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
     simpleEditor = false;
     gimpPlugin = false;
-    remote = false;
+    remote = true;
     argv0 = "";
     argv1 = "";
     argv2 = "";
@@ -408,6 +416,8 @@ int main (int argc, char **argv)
     // set paths
     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
         argv0 = DATA_SEARCH_PATH;
+    } else if (strcmp(DATA_SEARCH_PATH, ".") == 0) {
+        argv0 = exePath;
     } else {
         argv0 = Glib::build_filename (exePath, DATA_SEARCH_PATH);
     }
@@ -528,20 +538,20 @@ int main (int argc, char **argv)
             printf ("Error: -gimp requires two arguments\n");
             return 1;
         }
-    } else if (!remote && Glib::file_test(argv1, Glib::FILE_TEST_EXISTS) && !Glib::file_test(argv1, Glib::FILE_TEST_IS_DIR)) {
-        simpleEditor = true;
+    } else if (!remote && !(Glib::file_test(argv1, Glib::FILE_TEST_EXISTS) && !Glib::file_test(argv1, Glib::FILE_TEST_IS_DIR))) {
+        simpleEditor = false;
     }
 
     int ret = 0;
 
     if (options.pseudoHiDPISupport) {
-		// Reading/updating GDK_SCALE early if it exists
-		const gchar *gscale = g_getenv("GDK_SCALE");
-		if (gscale && gscale[0] == '2') {
-			initialGdkScale = 2;
-		}
-		// HOMBRE: On Windows, if resolution is set to 200%, Gtk internal variables are SCALE=2 and DPI=96
-		g_setenv("GDK_SCALE", "1", true);
+        // Reading/updating GDK_SCALE early if it exists
+        const gchar *gscale = g_getenv("GDK_SCALE");
+        if (gscale && gscale[0] == '2') {
+            initialGdkScale = 2;
+        }
+        // HOMBRE: On Windows, if resolution is set to 200%, Gtk internal variables are SCALE=2 and DPI=96
+        g_setenv("GDK_SCALE", "1", true);
     }
 
     gdk_threads_set_lock_functions (G_CALLBACK (myGdkLockEnter), (G_CALLBACK (myGdkLockLeave)));

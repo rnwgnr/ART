@@ -20,11 +20,14 @@
 #include <strings.h>
 #include <glib/gstdio.h>
 #include <tiff.h>
+#include <regex>
+#include <sstream>
 
 #include "imagedata.h"
 #include "imagesource.h"
 #include "rt_math.h"
 #include "metadata.h"
+#include "imgiomanager.h"
 #pragma GCC diagnostic warning "-Wextra"
 #define PRINT_HDR_PS_DETECTION 0
 
@@ -37,6 +40,19 @@ extern const Settings *settings;
 
 } // namespace rtengine
 
+
+namespace {
+
+std::string validateUtf8(const std::string &str, const std::string &on_error="???")
+{
+    if (Glib::ustring(str).validate()) {
+        return str;
+    }
+
+    return on_error;
+}
+
+} // namespace
 
 
 FramesMetaData* FramesMetaData::fromFile (const Glib::ustring& fname)
@@ -64,7 +80,10 @@ FramesData::FramesData(const Glib::ustring &fname):
     sampleFormat(IIOSF_UNKNOWN),
     isPixelShift(false),
     isHDR(false),
-    rating_(0)
+    rating_(0),
+    w_(-1),
+    h_(-1),
+    dng_(false)
 {
     memset(&time, 0, sizeof(time));
     timeStamp = 0;
@@ -127,11 +146,11 @@ FramesData::FramesData(const Glib::ustring &fname):
         /* List of tag names taken from exiv2's printSummary() in actions.cpp */
 
         if (find_tag(Exiv2::make)) {
-            make = pos->print(&exif);
+            make = validateUtf8(pos->print(&exif));
         }
         
         if (find_tag(Exiv2::model)) {
-            model = pos->print(&exif);
+            model = validateUtf8(pos->print(&exif));
         }
 
         if (make.size() > 0) {
@@ -266,11 +285,13 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         std::string datetime_taken;
         if (find_exif_tag("Exif.Image.DateTimeOriginal")) {
-            datetime_taken = pos->print(&exif);
+            datetime_taken = validateUtf8(pos->print(&exif));
         } else if (find_exif_tag("Exif.Photo.DateTimeOriginal")) {
-            datetime_taken = pos->print(&exif);
+            datetime_taken = validateUtf8(pos->print(&exif));
         } else if (find_exif_tag("Exif.Photo.DateTimeDigitized")) {
-            datetime_taken = pos->print(&exif);
+            datetime_taken = validateUtf8(pos->print(&exif));
+        } else if (find_exif_tag("Exif.Image.DateTime")) {
+            datetime_taken = validateUtf8(pos->print(&exif));
         }
         if (sscanf(datetime_taken.c_str(), "%d:%d:%d %d:%d:%d", &time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, &time.tm_min, &time.tm_sec) == 6) {
             time.tm_year -= 1900;
@@ -281,12 +302,59 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         if (find_exif_tag("Exif.Image.ExposureBiasValue")) {
             expcomp = pos->toFloat();
+        } else if (find_exif_tag("Exif.Photo.ExposureBiasValue")) {
+            expcomp = pos->toFloat();
         }
 
         if (find_exif_tag("Exif.Image.Rating")) {
             rating_ = pos->toLong();
+        } else {
+            auto it = meta.xmpData().findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
+            if (it != meta.xmpData().end() && it->size()) {
+                rating_ = it->toLong();
+            }
         }
 
+        // try getting some metadata from ImageDescription
+        if (!make.compare(0, 5, "KODAK") && !getISOSpeed() && !getFNumber() && !getFocalLen() && !getShutterSpeed() &&
+            find_exif_tag("Exif.Image.ImageDescription")) {
+            std::string s = pos->toString();
+            std::string line;
+            std::smatch m;
+            const auto d =
+                [&m]() -> double {
+                    std::string s = m[1];
+                    return atof(s.c_str());
+                };
+            while (true) {
+                auto p = s.find('\r');
+                if (p == std::string::npos) {
+                    break;
+                }
+                auto line = s.substr(0, p);
+                s = s.substr(p+1);
+
+                if (std::regex_match(line, m, std::regex("ISO: +([0-9]+) *"))) {
+                    iso_speed = d();
+                } else if (std::regex_match(line, m, std::regex("Aperture: +F([0-9.]+) *"))) {
+                    aperture = d();
+                } else if (std::regex_match(line, m, std::regex("Shutter: +([0-9.]+) *"))) {
+                    shutter = d();
+                    if (shutter) {
+                        shutter = 1.0/shutter;
+                    }
+                } else if (std::regex_match(line, m, std::regex("Lens \\(mm\\): +([0-9.]+) *"))) {
+                    focal_len = d();
+                } else if (std::regex_match(line, m, std::regex("Exp Comp: +([0-9.]+) *"))) {
+                    expcomp = d();
+                }
+            }
+        }
+
+        meta.getDimensions(w_, h_);
+
+        dng_ = find_exif_tag("Exif.Image.DNGVersion");
+        
         // -----------------------
         // Special file type detection (HDR, PixelShift)
         // ------------------------
@@ -306,8 +374,7 @@ FramesData::FramesData(const Glib::ustring &fname):
 //             } else
             if (find_exif_tag("Exif.Pentax.DriveMode")) {
                 std::string buf = pos->toString(3);
-                buf[3] = 0;
-                if (!strcmp(buf.c_str(), "HDR")) {
+                if (buf.substr(0, 3) == "HDR") {
                     isHDR = true;
 #if PRINT_HDR_PS_DETECTION
                     printf("HDR detected ! -> DriveMode = \"HDR\"\n");
@@ -325,34 +392,96 @@ FramesData::FramesData(const Glib::ustring &fname):
             }
         }
 
+        if (make == "SONY") {
+            if (find_exif_tag("Exif.SubImage1.BitsPerSample") && pos->toLong() == 14) {
+                if (find_exif_tag("Exif.SubImage1.SamplesPerPixel") && pos->toLong() == 4 &&
+                    find_exif_tag("Exif.SubImage1.PhotometricInterpretation") && pos->toLong() == 32892 &&
+                    find_exif_tag("Exif.SubImage1.Compression") && pos->toLong() == 1) {
+                    isPixelShift = true;
+                }
+            } else if (bps != exif.end() && bps->toLong() == 14 &&
+                       spp != exif.end() && spp->toLong() == 4 &&
+                       c != exif.end() && c->toLong() == 1 &&
+                       find_exif_tag("Exif.Image.Software") &&
+                       pos->toString() == "make_arq") {
+                isPixelShift = true;
+            }
+        } else if (make == "FUJIFILM") {
+            if (bps != exif.end() && bps->toLong() == 16 &&
+                spp != exif.end() && spp->toLong() == 4 &&
+                c != exif.end() && c->toLong() == 1 &&
+                find_exif_tag("Exif.Image.Software") &&
+                pos->toString() == "make_arq") {
+                isPixelShift = true;
+            }
+        }
+
         sampleFormat = IIOSF_UNKNOWN;
 
-        if (sf == exif.end())
-            /*
-             * WARNING: This is a dirty hack!
-             * We assume that files which doesn't contain the TIFFTAG_SAMPLEFORMAT tag
-             * (which is the case with uncompressed TIFFs produced by RT!) are RGB files,
-             * but that may be not true.   --- Hombre
-             */
-        {
-            sampleformat = SAMPLEFORMAT_UINT;
-        } else {
-            sampleformat = sf->toLong();
+        bool is_external = false;
+        if (sf == exif.end()) {
+            auto fmt = ImageIOManager::getInstance()->getFormat(fname);
+            is_external = true;
+            switch (fmt) {
+            case ImageIOManager::FMT_UNKNOWN:
+                is_external = false;
+                break;
+            case ImageIOManager::FMT_JPG:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 8;
+                break;
+            case ImageIOManager::FMT_PNG:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 8;
+                break;
+            case ImageIOManager::FMT_PNG16:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 16;
+                break;
+            case ImageIOManager::FMT_TIFF:
+                sampleformat = SAMPLEFORMAT_UINT;
+                bitspersample = 16;
+                break;
+            case ImageIOManager::FMT_TIFF_FLOAT:
+                sampleformat = SAMPLEFORMAT_IEEEFP;
+                bitspersample = 32;
+                break;
+            }
+            if (is_external) {
+                photometric = PHOTOMETRIC_RGB;
+                samplesperpixel = 3;
+                orientation = "";
+            }
         }
 
-        if (bps == exif.end() || spp == exif.end() || pi == exif.end()) {
-            return;
-        }
-
-        bitspersample = bps->toLong();
-        samplesperpixel = spp->toLong();
-
-        photometric = pi->toLong();
-        if (photometric == PHOTOMETRIC_LOGLUV) {
-            if (c == exif.end()) {
-                compression = COMPRESSION_NONE;
+        if (!is_external) {
+            if (sf == exif.end())
+                /*
+                 * WARNING: This is a dirty hack!
+                 * We assume that files which doesn't contain the TIFFTAG_SAMPLEFORMAT tag
+                 * (which is the case with uncompressed TIFFs produced by RT!) are RGB files,
+                 * but that may be not true.   --- Hombre
+                 */
+            {
+                sampleformat = SAMPLEFORMAT_UINT;
             } else {
-                compression = c->toLong();
+                sampleformat = sf->toLong();
+            }
+
+            if (bps == exif.end() || spp == exif.end() || pi == exif.end()) {
+                return;
+            }
+
+            bitspersample = bps->toLong();
+            samplesperpixel = spp->toLong();
+
+            photometric = pi->toLong();
+            if (photometric == PHOTOMETRIC_LOGLUV) {
+                if (c == exif.end()) {
+                    compression = COMPRESSION_NONE;
+                } else {
+                    compression = c->toLong();
+                }
             }
         }
 
@@ -609,13 +738,14 @@ std::string FramesMetaData::apertureToString(double aperture)
 
 std::string FramesMetaData::shutterToString(double shutter)
 {
-
     char buffer[256];
 
     if (shutter > 0.0 && shutter <= 0.5) {
-        sprintf (buffer, "1/%0.0f", 1.0 / shutter);
+        sprintf(buffer, "1/%0.0f", 1.0 / shutter);
+    } else if (int(shutter) == shutter) {
+        sprintf(buffer, "%d", int(shutter));
     } else {
-        sprintf (buffer, "%0.1f", shutter);
+        sprintf(buffer, "%0.1f", shutter);
     }
 
     return buffer;
@@ -656,3 +786,60 @@ double FramesMetaData::apertureFromString(std::string s)
     return atof(s.c_str());
 }
 
+
+namespace {
+
+template<class T>
+void set_exif(Exiv2::ExifData &exif, const std::string &key, T val)
+{
+    try {
+        exif[key] = val;
+    } catch (std::exception &exc) {
+        if (settings->verbose) {
+            std::cout << "Exif -- error setting " << key << " to " << val << ": " << exc.what() << std::endl;
+        }
+    }
+}
+
+} // namespace
+
+void FramesData::fillBasicTags(Exiv2::ExifData &exif) const
+{
+    if (!hasExif()) {
+        return;
+    }
+    set_exif(exif, "Exif.Photo.ISOSpeedRatings", getISOSpeed());
+    set_exif(exif, "Exif.Photo.FNumber", Exiv2::URationalValue(Exiv2::URational(round(getFNumber() * 10), 10)));
+    auto s = shutterToString(getShutterSpeed());
+    auto p = s.find('.');
+    if (p != std::string::npos) {
+        assert(p == s.length()-2);
+        s = s.substr(0, p) + s.substr(p+1) + "/10";
+    } else if (s.find('/') == std::string::npos) {
+        s += "/1";
+    }
+    set_exif(exif, "Exif.Photo.ExposureTime", s);
+    set_exif(exif, "Exif.Photo.FocalLength", Exiv2::URationalValue(Exiv2::URational(getFocalLen() * 10, 10)));
+    set_exif(exif, "Exif.Photo.ExposureBiasValue", Exiv2::RationalValue(Exiv2::Rational(round(getExpComp() * 100), 100)));
+    set_exif(exif, "Exif.Image.Make", getMake());
+    set_exif(exif, "Exif.Image.Model", getModel());
+    set_exif(exif, "Exif.Photo.LensModel", getLens());
+    char buf[256];
+    auto t = getDateTime();
+    strftime(buf, 256, "%Y:%m:%d %H:%M:%S", &t);
+    set_exif(exif, "Exif.Photo.DateTimeOriginal", buf);
+}
+
+
+void FramesData::getDimensions(int &w, int &h) const
+{
+    w = w_;
+    h = h_;
+}
+
+
+void FramesData::setDimensions(int w, int h)
+{
+    w_ = w;
+    h_ = h;
+}

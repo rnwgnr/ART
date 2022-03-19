@@ -341,18 +341,21 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
 
             lastFilename = Glib::path_get_basename (fname);
 
-            const PartialProfile* toSave;
-
-            if (isCustomSelected()) {
-                toSave = custom;
-            } else if (isLastSavedSelected()) {
+            const PartialProfile* toSave = custom;
+            if (!toSave && isLastSavedSelected()) {
                 toSave = lastsaved;
-            } else if (isDefaultSelected()) {
-                toSave = defprofile;
-            } else {
-                const ProfileStoreEntry* entry = profiles->getSelectedEntry();
-                toSave = entry ? ProfileStore::getInstance()->getProfile (profiles->getSelectedEntry()) : nullptr;
             }
+
+            // if (isCustomSelected()) {
+            //     toSave = custom;
+            // } else if (isLastSavedSelected()) {
+            //     toSave = lastsaved;
+            // } else if (isDefaultSelected()) {
+            //     toSave = defprofile;
+            // } else {
+            //     const ProfileStoreEntry* entry = profiles->getSelectedEntry();
+            //     toSave = entry ? ProfileStore::getInstance()->getProfile (profiles->getSelectedEntry()) : nullptr;
+            // }
 
             if (toSave) {
                 if (event->state & Gdk::CONTROL_MASK) {
@@ -376,10 +379,10 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
                     // ppTemp.deleteInstance();
                     ProcParams pparams;
                     toSave->applyTo(pparams);
-                    int retCode = pparams.save(fname, "", true, &pe);
+                    int retCode = pparams.save(dynamic_cast<rtengine::ProgressListener *>(parent), fname, "", &pe);
 
                     if (retCode) {
-                        writeFailed(dialog, fname);
+                        //writeFailed(dialog, fname);
                     } else {
                         done = true;
                         bool ccPrevState = changeconn.block(true);
@@ -390,10 +393,10 @@ void ProfilePanel::save_clicked (GdkEventButton* event)
                     // saving a full profile
                     ProcParams pparams;
                     toSave->applyTo(pparams);
-                    int retCode = pparams.save(fname);
+                    int retCode = pparams.save(dynamic_cast<rtengine::ProgressListener *>(parent), fname);
 
                     if (retCode) {
-                        writeFailed(dialog, fname);
+                        //writeFailed(dialog, fname);
                     } else {
                         done = true;
                         bool ccPrevState = changeconn.block(true);
@@ -422,18 +425,21 @@ void ProfilePanel::copy_clicked (GdkEventButton* event)
         return;
     }
 
-    const PartialProfile* toSave;
-
-    if (isCustomSelected()) {
-        toSave = custom;
-    } else if (isLastSavedSelected()) {
+    const PartialProfile* toSave = custom;
+    if (!toSave && isLastSavedSelected()) {
         toSave = lastsaved;
-    } else if (isDefaultSelected()) {
-        toSave = defprofile;
-    } else {
-        const ProfileStoreEntry* entry = profiles->getSelectedEntry();
-        toSave = entry ? ProfileStore::getInstance()->getProfile (entry) : nullptr;
     }
+    
+    // if (isCustomSelected()) {
+    //     toSave = custom;
+    // } else if (isLastSavedSelected()) {
+    //     toSave = lastsaved;
+    // } else if (isDefaultSelected()) {
+    //     toSave = defprofile;
+    // } else {
+    //     const ProfileStoreEntry* entry = profiles->getSelectedEntry();
+    //     toSave = entry ? ProfileStore::getInstance()->getProfile (entry) : nullptr;
+    // }
 
     // toSave has to be a complete procparams
     if (toSave) {
@@ -543,7 +549,7 @@ void ProfilePanel::load_clicked (GdkEventButton* event)
         ProcParams pp;
         // ParamsEdited pe;
         // int err = pp.load (fname, &pe);
-        int err = pp.load(fname);
+        int err = pp.load(dynamic_cast<rtengine::ProgressListener *>(parent), fname);
 
         if (!err) {
             // if (!customCreated && fillMode->get_active()) {
@@ -561,6 +567,7 @@ void ProfilePanel::load_clicked (GdkEventButton* event)
             // Now we have procparams initialized to default if fillMode is on
             // and paramsedited initialized to default in all cases
 
+            auto pl = dynamic_cast<rtengine::ProgressListener *>(parent);
             if (event->state & Gdk::CONTROL_MASK)
                 // custom.pparams = loadedFile.pparams filtered by ( loadedFile.pedited & partialPaste.pedited )
             {
@@ -568,9 +575,9 @@ void ProfilePanel::load_clicked (GdkEventButton* event)
                     partialProfileDlg = new PartialPasteDlg (Glib::ustring (), parent);
                 }
                 //partialProfileDlg->applyPaste (custom->pparams, !fillMode->get_active() ? custom->pedited : nullptr, &pp, &pe);
-                custom = new PEditedPartialProfile(fname, partialProfileDlg->getParamsEdited());
+                custom = new PEditedPartialProfile(pl, fname, partialProfileDlg->getParamsEdited());
             } else {
-                custom = new FilePartialProfile(fname, fillMode->get_active());
+                custom = new FilePartialProfile(pl, fname, fillMode->get_active());
                 // custom.pparams = loadedFile.pparams filtered by ( loadedFile.pedited )
                 // pe.combine(*custom->pparams, pp, true);
 
@@ -632,33 +639,11 @@ void ProfilePanel::paste_clicked (GdkEventButton* event)
     }
     
     ProcParams pp = clipboard.getProcParams();
-    // if (fillMode->get_active()) {
-    //     pp.setDefaults();
-    // }
-
-    const PartialProfile *selected = nullptr;
-    if (isLastSavedSelected()) {
-        selected = lastsaved;
-    } else if (isDefaultSelected()) {
-        selected = defprofile;
-    } else {
-        const ProfileStoreEntry *entry = profiles->getSelectedEntry();        
-        if (entry) {
-            const PartialProfile* partProfile = ProfileStore::getInstance()->getProfile (entry);
-            selected = partProfile;
-        }
-    }
 
     profiles->set_active (addCustomRow());
     currRow = profiles->get_active();
 
     changeconn.block(prevState);
-
-    // Now we have procparams initialized to default if fillMode is on
-    // and paramsedited initialized to default in all cases
-    if (selected) {
-        selected->applyTo(pp);
-    }
 
     if ((event->state & Gdk::CONTROL_MASK) && partialProfileDlg) {
         auto pe = partialProfileDlg->getParamsEdited();
@@ -731,7 +716,7 @@ void ProfilePanel::procParamsChanged(
 )
 {
     // to prevent recursion, filter out the events caused by the profilepanel
-    if (ev == EvProfileChanged || ev == EvPhotoLoaded) {
+    if ((!isCustomSelected() && ev == EvProfileChanged) || ev == EvPhotoLoaded) {
         return;
     }
 
@@ -791,7 +776,7 @@ void ProfilePanel::initProfile (const Glib::ustring& profileFullPath, ProcParams
         pse = ProfileStore::getInstance()->getInternalDefaultPSE();
     }
 
-    if (pse == ProfileStore::getInstance()->getInternalDefaultPSE() && profileFullPath == DEFPROFILE_DYNAMIC) {
+    if (pse == ProfileStore::getInstance()->getInternalDefaultPSE() && profileFullPath == Options::DEFPROFILE_DYNAMIC) {
         auto dyn = ProfileStore::getInstance()->loadDynamicProfile(metadata);
         defprofile = dyn.release();
     } else {

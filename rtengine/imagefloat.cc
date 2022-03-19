@@ -72,9 +72,9 @@ void Imagefloat::setScanline (int row, unsigned char* buffer, int bps, unsigned 
         uint16_t* sbuffer = (uint16_t*) buffer;
 
         for (int i = 0; i < width; i++) {
-            r(row, i) = 65535.f * DNG_HalfToFloat_f(sbuffer[ix++]);
-            g(row, i) = 65535.f * DNG_HalfToFloat_f(sbuffer[ix++]);
-            b(row, i) = 65535.f * DNG_HalfToFloat_f(sbuffer[ix++]);
+            r(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
+            g(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
+            b(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
         }
 
         break;
@@ -531,9 +531,10 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform)
 }
 
 // Parallelized transformation; create transform with cmsFLAGS_NOCACHE!
-void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *labImage, int cx, int cy)
+void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *src)
 {
     mode_ = Mode::RGB;
+    constexpr int cx = 0, cy = 0;
     
     // LittleCMS cannot parallelize planar Lab float images
     // so build temporary buffers to allow multi processor execution
@@ -541,7 +542,7 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *la
     #pragma omp parallel
 #endif
     {
-        AlignedBuffer<float> bufferLab(width * 3);
+        AlignedBuffer<float> bufferSrc(width * 3);
         AlignedBuffer<float> bufferRGB(width * 3);
 
 #ifdef _OPENMP
@@ -551,20 +552,20 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *la
         for (int y = cy; y < cy + height; y++)
         {
             float *pRGB, *pR, *pG, *pB;
-            float *pLab, *pL, *pa, *pb;
+            float *pSrc, *psR, *psG, *psB;
 
-            pLab= bufferLab.data;
-            pL = labImage->g(y) + cx;
-            pa = labImage->r(y) + cx;
-            pb = labImage->b(y) + cx;
+            pSrc = bufferSrc.data;
+            psR = src->r(y) + cx;
+            psG = src->g(y) + cx;
+            psB = src->b(y) + cx;
 
             for (int x = 0; x < width; x++) {
-                *(pLab++) = *(pL++)  / 327.68f;
-                *(pLab++) = *(pa++)  / 327.68f;
-                *(pLab++) = *(pb++)  / 327.68f;
+                *(pSrc++) = *(psR++) / 65535.f;
+                *(pSrc++) = *(psG++) / 65535.f;
+                *(pSrc++) = *(psB++) / 65535.f;
             }
 
-            cmsDoTransform (hTransform, bufferLab.data, bufferRGB.data, width);
+            cmsDoTransform(hTransform, bufferSrc.data, bufferRGB.data, width);
 
             pRGB = bufferRGB.data;
             pR = r(y - cy);

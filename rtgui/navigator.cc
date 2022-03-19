@@ -34,6 +34,7 @@ Navigator::Navigator () : currentRGBUnit(options.navRGBUnit), currentLCHUnit(opt
 {
 
     set_label (M("MAIN_MSG_NAVIGATOR"));
+    set_label_align(0.025, 0.5);
     Gtk::VBox* mbox = Gtk::manage (new Gtk::VBox ());
     mbox->set_name("Navigator");
     previewWindow = Gtk::manage (new PreviewWindow ());

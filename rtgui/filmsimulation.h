@@ -79,6 +79,9 @@ public:
     void write(rtengine::procparams::ProcParams* pp) override;
     void trimValues(rtengine::procparams::ProcParams* pp) override;
 
+    void setDefaults(const rtengine::procparams::ProcParams *pp) override;
+    void toolReset(bool to_initial) override;
+
 private:
     void onClutSelected();
     void enabledChanged() override;
@@ -87,9 +90,11 @@ private:
 
     ClutComboBox *m_clutComboBox;
     sigc::connection m_clutComboBoxConn;
-    Glib::ustring m_oldClutFilename;
+    //Glib::ustring m_oldClutFilename;
 
     Adjuster *m_strength;
+
+    rtengine::procparams::FilmSimulationParams initial_params;
 };
 
 #endif

@@ -8,6 +8,8 @@ set(CLISOURCEFILES
     paramsedited.cc
     pathutils.cc
     threadutils.cc
+    fastexport.cc
+    exiffiltersettings.cc
     )
 
 set(NONCLISOURCEFILES
@@ -43,7 +45,6 @@ set(NONCLISOURCEFILES
     diagonalcurveeditorsubgroup.cc
     dirbrowser.cc
     denoise.cc
-    #dirpyrequalizer.cc
     distortion.cc
     dynamicprofilepanel.cc
     edit.cc
@@ -52,7 +53,6 @@ set(NONCLISOURCEFILES
     textureboost.cc
     exiffiltersettings.cc
     exifpanel.cc
-    exportpanel.cc
     extprog.cc
     filebrowser.cc
     filebrowserentry.cc
@@ -110,7 +110,6 @@ set(NONCLISOURCEFILES
     rawcacorrection.cc
     rawexposure.cc
     recentbrowser.cc
-    renamedlg.cc
     resize.cc
     rgbcurves.cc
     rotate.cc
@@ -127,6 +126,7 @@ set(NONCLISOURCEFILES
     shcselector.cc
     soundman.cc
     splash.cc
+    spot.cc
     threadutils.cc
     thresholdadjuster.cc
     thresholdselector.cc
@@ -147,7 +147,7 @@ set(NONCLISOURCEFILES
     localcontrast.cc
     eventmapper.cc
     metadatapanel.cc
-    labgrid.cc
+    colorwheel.cc
     softlight.cc
     dehaze.cc
     logencoding.cc
@@ -161,6 +161,13 @@ set(NONCLISOURCEFILES
     saturation.cc
     hslequalizer.cc
     filmnegative.cc
+    dateentry.cc
+    wbpresets.cc
+    wbprovider.cc
+    controllines.cc
+    filecatalog_rename.cc
+    focusmask.cc
+    shortcutmanager.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
@@ -242,6 +249,10 @@ endif()
 # Create config.h which defines where data are stored
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
+if(LIBRAW_FOUND)
+    link_directories(${LIBRAW_LIBRARY_DIRS})
+endif()
+
 # Create new executables targets
 add_executable(rth ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})
 add_executable(rth-cli ${EXTRA_SRC_CLI} ${CLISOURCEFILES})
@@ -263,7 +274,8 @@ set_target_properties(rth PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_N
 set_target_properties(rth-cli PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART-cli)
 
 # Add linked libraries dependencies to executables targets
-target_link_libraries(rth rtengine
+target_link_libraries(rth PUBLIC
+    rtengine
     ${CANBERRA-GTK_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${EXTRA_LIB_RTGUI}
@@ -283,11 +295,11 @@ target_link_libraries(rth rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${TCMALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
 
-target_link_libraries(rth-cli rtengine
+target_link_libraries(rth-cli PUBLIC
+    rtengine
     ${CAIROMM_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${EXTRA_LIB_RTGUI}
@@ -305,9 +317,13 @@ target_link_libraries(rth-cli rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${TCMALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
+
+if(HAS_MIMALLOC)
+    target_link_libraries(rth PUBLIC mimalloc)
+    target_link_libraries(rth-cli PUBLIC mimalloc)
+endif()
 
 # Install executables
 install(TARGETS rth DESTINATION ${BINDIR})

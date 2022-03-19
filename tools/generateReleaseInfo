@@ -5,28 +5,38 @@
 
 rm -f ReleaseInfo.cmake
 
-# Get version description.
-# Depending on whether you checked out a branch (dev) or a tag (release),
-# "git describe" will return "5.0-gtk2-2-g12345678" or "5.0-gtk2", respectively.
-gitDescribe="$(git describe --tags --always)"
+if [ -d .git ]; then
+    # Get version description.
+    # Depending on whether you checked out a branch (dev) or a tag (release),
+    # "git describe" will return "5.0-gtk2-2-g12345678" or "5.0-gtk2", respectively.
+    gitDescribe="$(git describe --tags --always)"
 
-# Get branch name.
-# Will return empty if you checked out a commit or tag. Empty string handled later.
-gitBranch="$(git symbolic-ref --short -q HEAD)"
+    # Get branch name.
+    # Will return empty if you checked out a commit or tag. Empty string handled later.
+    gitBranch="$(git symbolic-ref --short -q HEAD)"
 
-# Get commit hash.
-gitCommit="$(git rev-parse --short --verify HEAD)"
+    # Get commit hash.
+    gitCommit="$(git rev-parse --short --verify HEAD)"
 
-# Get commit date, YYYY-MM-DD.
-gitCommitDate="$(git show -s --format=%cd --date=format:%Y-%m-%d)"
+    # Get commit date, YYYY-MM-DD.
+    gitCommitDate="$(git show -s --format=%cd --date=format:%Y-%m-%d)"
 
-# Get number of commits since tagging. This is what gitDescribe uses.
-# Works when checking out branch, tag or commit.
-gitCommitsSinceTag="$(git rev-list --count HEAD --not $(git tag --merged HEAD))"
+    # Get number of commits since tagging. This is what gitDescribe uses.
+    # Works when checking out branch, tag or commit.
+    gitCommitsSinceTag="$(git rev-list --count HEAD --not $(git tag --merged HEAD))"
 
-# Get number of commits since branching.
-# Works when checking out branch, tag or commit.
-gitCommitsSinceBranch="$(git rev-list --count HEAD --not --tags)"
+    # Get number of commits since branching.
+    # Works when checking out branch, tag or commit.
+    gitCommitsSinceBranch="$(git rev-list --count HEAD --not --tags)"
+elif [ -d .hg ]; then
+    gitDescribe="$(hg log -r . --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{sub('^.*/.*:', '', tag)}{ifeq(distance, 0, '', '-')}{ifeq(distance, 0, '', count(revset('ancestors(\".\") and descendants(last(tag(r\"re:^v?[0-9]+[.][0-9.]+(rc[0-9]+)?$\"), 1))'))-1)}{ifeq(distance, 0, '', '-g')}{ifeq(distance, 0, '', short(gitnode))}'}")"
+
+    gitBranch="$(hg log -r . --template "{activebookmark}")"
+    gitCommit="$(hg log -r . --template "{short(gitnode)}")"
+    gitCommitDate="$(hg log -r . --template "{date|shortdate}")"
+    gitCommitsSinceTag="$(hg log -r . --template "{count(revset('ancestors(\".\") and descendants(last(tag(r\"re:^v?[0-9]+[.][0-9.]+(rc[0-9]+)?$\"), 1))'))-1}")"
+    gitCommitsSinceBranch="$(hg log -r . --template "{count(revset('.::bookmark()'))-1}")"
+fi
 
 if [[ -z $gitDescribe ]]; then
     printf '%s\n' "Failed finding commit description, aborting."

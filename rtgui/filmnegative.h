@@ -24,34 +24,40 @@
 #include <gtkmm.h>
 
 #include "adjuster.h"
+#include "edit.h"
 #include "guiutils.h"
 #include "toolpanel.h"
-#include "wbprovider.h"
 
-class FilmNegProvider {
+class FilmNegProvider
+{
 public:
     virtual ~FilmNegProvider() = default;
 
     virtual bool getFilmNegativeExponents(rtengine::Coord spotA, rtengine::Coord spotB, std::array<float, 3>& newExps) = 0;
+    virtual bool getImageSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues) = 0;
 };
 
-
-class FilmNegative :
+class FilmNegative final :
     public ToolParamBlock,
     public AdjusterListener,
     public FoldableToolPanel,
-    public EditSubscriber
+    public EditSubscriber,
+    public rtengine::FilmNegListener
 {
 public:
     FilmNegative();
     ~FilmNegative() override;
 
-    void read(const rtengine::procparams::ProcParams *pp) override;
-    void write(rtengine::procparams::ProcParams *pp) override;
-    void setDefaults(const rtengine::procparams::ProcParams *defParams) override;
+    void read(const rtengine::procparams::ProcParams* pp) override;
+    void write(rtengine::procparams::ProcParams* pp) override;
+    void setDefaults(const rtengine::procparams::ProcParams* defParams) override;
 
     void adjusterChanged(Adjuster* a, double newval) override;
     void enabledChanged() override;
+
+    void toolReset(bool to_initial) override;
+    
+    void filmBaseValuesChanged(std::array<float, 3> rgb) override;
 
     void setFilmNegProvider(FilmNegProvider* provider);
 
@@ -66,11 +72,16 @@ public:
 
 private:
     void editToggled();
+    void baseSpotToggled();
+    void baseCheckToggled();
 
     const rtengine::ProcEvent evFilmNegativeExponents;
     const rtengine::ProcEvent evFilmNegativeEnabled;
+    const rtengine::ProcEvent evFilmBaseValues;
 
     std::vector<rtengine::Coord> refSpotCoords;
+
+    // std::array<float, 3> filmBaseValues;
 
     FilmNegProvider* fnp;
 
@@ -78,7 +89,16 @@ private:
     Adjuster* const redRatio;
     Adjuster* const blueRatio;
 
-    Gtk::Grid* const spotgrid;
+    //Gtk::Grid* const spotgrid;
     Gtk::ToggleButton* const spotbutton;
-    sigc::connection spotConn;
+
+    // Gtk::Label* const filmBaseLabel;
+    // Gtk::Label* const filmBaseValuesLabel;
+    Gtk::ToggleButton* const filmBaseSpotButton;
+
+    Gtk::CheckButton *filmBaseCheck;
+    std::array<Adjuster *, 3> filmBase;
+
+    rtengine::procparams::FilmNegativeParams initial_params;
+    bool legacy_mode_;
 };
