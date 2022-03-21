@@ -503,8 +503,8 @@ HISTORY_MSG_81;Schalen
 HISTORY_MSG_82;Profiel veranderd
 HISTORY_MSG_84;Perspectiefcorrectie
 HISTORY_MSG_85;Lenscorrectie - LCP-profiel
-HISTORY_MSG_87;Spot-ruisonderdrukking
-HISTORY_MSG_88;Spot-ruisond. drempel
+HISTORY_MSG_87;Impulse ruisonderdrukking
+HISTORY_MSG_88;Impulse ruisonderdr. drempel
 HISTORY_MSG_89;Ruisonderdrukking
 HISTORY_MSG_8;Belichtingscompensatie
 HISTORY_MSG_90;RV -Luminantie
@@ -683,9 +683,9 @@ HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Kleurenkaart
 HISTORY_MSG_WBALANCE_MULT;WB - versterkers
 HISTORY_NEWSNAPSHOT_TOOLTIP;Sneltoets: <b>Alt-s</b>
 HISTORY_NEWSNAPSHOT;Voeg toe
-HISTORY_SNAPSHOT_CONFIRM_UPDATE;Huidige momentopname overschrijven?
-HISTORY_SNAPSHOT;Momentopname
-HISTORY_SNAPSHOTS;Momentopnamen
+HISTORY_SNAPSHOT_CONFIRM_UPDATE;Huidig snapshot overschrijven?
+HISTORY_SNAPSHOT;Snapshot
+HISTORY_SNAPSHOTS;Snapshots
 ICCPROFCREATOR_COPYRIGHT;Copyright:
 ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Zet terug naar standaard copyright, verleend aan "RawTherapee, CC0"
 ICCPROFCREATOR_CUSTOM;Handmatig
@@ -922,7 +922,7 @@ PARTIALPASTE_GRAIN;Filmkorrel
 PARTIALPASTE_HOT_DEAD_PIXEL_FILTER;Hete/dodepixelsfilter
 PARTIALPASTE_HSLEQUALIZER;Kleur-equalizer
 PARTIALPASTE_ICMSETTINGS;Kleurbeheer
-PARTIALPASTE_IMPULSEDENOISE;Spotruisonderdrukking
+PARTIALPASTE_IMPULSEDENOISE;Impulse ruisonderdrukking
 PARTIALPASTE_IPTCINFO;IPTC
 PARTIALPASTE_LABCURVE;L*a*b*-aanpassingen
 PARTIALPASTE_LENSGROUP;Objectiefgerelateerde instellingen
@@ -1198,7 +1198,7 @@ PROGRESSBAR_SAVEJPEG;Opslaan JPEG-bestand...
 PROGRESSBAR_SAVEPNG;Opslaan PNG-bestand...
 PROGRESSBAR_SAVETIFF;Opslaan TIFF-bestand...
 PROGRESSBAR_SAVING;Opslaan bestand...
-PROGRESSBAR_SNAPSHOT_ADDED;Momentopname toegevoegd
+PROGRESSBAR_SNAPSHOT_ADDED;Snapshot toegevoegd
 PROGRESSDLG_PROFILECHANGEDINBROWSER;Profiel veranderd in bestandsnavigator
 QINFO_FRAMECOUNT;%2 frames
 QINFO_HDR;HDR / %2 frame(s)
@@ -1228,7 +1228,7 @@ RENAME_DIALOG_NORM_OFF;Ongewijzigd
 RENAME_DIALOG_NORM_UPPERCASE;Hoofdletters
 RENAME_DIALOG_ON_EXISTING;Wat te doen als bestemming bestaat
 RENAME_DIALOG_PATTERN;Patroon bestandsnaam
-RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextentie\n<b>%C</b>: naam camera (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> to <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: '%'-karakter.
+RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextensie\n<b>%C</b>: naam camera (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> to <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: '%'-karakter.
 RENAME_DIALOG_PREVIEW;Voorbeeld
 RENAME_DIALOG_PROGRESSIVE;Oplopend nummer
 RENAME_DIALOG_RENAME;Genereer een unieke naam
@@ -1556,7 +1556,7 @@ TP_ICM_TONECURVE;Tooncurve
 TP_ICM_TONECURVE_TOOLTIP;Gebruik de ingebedde DCP-tooncurve. De instelling is alleen beschikbaar als de geselecteerde DCP er een heeft.
 TP_ICM_WORKINGPROFILE;Werkprofiel
 TP_ICM_INPUT_CAT;Pas chromatische aanpassing (CAT) toe
-TP_IMPULSEDENOISE_LABEL;Spot-ruisonderdrukking
+TP_IMPULSEDENOISE_LABEL;Impulse ruisonderdrukking
 TP_IMPULSEDENOISE_THRESH;Drempel
 TP_LABCURVE_BRIGHTNESS;Helderheid
 TP_LABCURVE_CHROMATICITY;Chroma

@@ -17,7 +17,7 @@ CURVEEDITOR_CURVE;Courbe
 CURVEEDITOR_CURVES;Courbes
 CURVEEDITOR_CUSTOM;Standard
 CURVEEDITOR_DARKS;Ombres
-CURVEEDITOR_EDITPOINT_HINT;Activer l'édition des points de contrôle d'entrée/sortie.\n\nUn clic droit sur un point le sélectionne.\nUn clic droit dans un espace vide desélectionne le point.
+CURVEEDITOR_EDITPOINT_HINT;Activer l'édition des points de contrôle d'entrée/sortie.\n\nUn clic droit sur un point le sélectionne.\nUn clic droit dans un espace vide desélectionne le point
 CURVEEDITOR_HIGHLIGHTS;Hautes lumières
 CURVEEDITOR_LIGHTS;Zones claires
 CURVEEDITOR_LINEAR;Sans
@@ -34,11 +34,11 @@ CURVEEDITOR_TOOLTIPPASTE;Coller la courbe depuis le presse-papier
 CURVEEDITOR_TOOLTIPSAVE;Enregistrer la courbe actuelle
 CURVEEDITOR_TYPE;Type:
 DIRBROWSER_FOLDERS;Répertoires
-DONT_SHOW_AGAIN;Ne plus montrer ce message.
+DONT_SHOW_AGAIN;Ne plus montrer ce message
 DYNPROFILEEDITOR_DELETE;Supprimer
 DYNPROFILEEDITOR_EDIT;Modifier
 DYNPROFILEEDITOR_EDIT_RULE;Modifier une règle de Profil Dynamique
-DYNPROFILEEDITOR_ENTRY_TOOLTIP;La correspondance est insensible à la casse.\nUtilisez le préfixe "re:" pour entrer\nune expression régulière.
+DYNPROFILEEDITOR_ENTRY_TOOLTIP;La correspondance est insensible à la casse.\nUtilisez le préfixe "re:" pour entrer\nune expression régulière
 DYNPROFILEEDITOR_IMGTYPE_ANY;Tout
 DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
 DYNPROFILEEDITOR_IMGTYPE_PS;Pixel Shift
@@ -50,7 +50,7 @@ DYNPROFILEEDITOR_NEW_RULE;Nouvelle Règle de Profil Dynamique
 DYNPROFILEEDITOR_PROFILE;Profil de Traitement
 EDITWINDOW_TITLE;Édition d'image
 EDIT_OBJECT_TOOLTIP;Afficher des éléments dans la fenêtre de prévisualisation qui vous permettront d'ajuster cet outil.
-EDIT_PIPETTE_TOOLTIP;Pour ajouter un point d'ajustement de la courbe, maintenez la touche Ctrl pressée en cliquant sur l'image avec le bouton gauche.\nPour ajuster le point, pressez la touche Ctrl lors du clic-gauche sur la zone correspondante dans l'aperçu, puis relachez Ctrl (sauf si vous désirez un contrôle plus fin) et tout en gardant le bouton gauche appuyé, déplacez le curseur vers le haut ou le bas pour ajuster la position du point.
+EDIT_PIPETTE_TOOLTIP;Pour ajouter un point d'ajustement de la courbe, maintenez la touche Ctrl pressée en cliquant sur l'image avec le bouton gauche.\nPour ajuster le point, pressez la touche Ctrl lors du clic-gauche sur la zone correspondante dans l'aperçu, puis relachez Ctrl (sauf si vous désirez un contrôle plus fin) et tout en gardant le bouton gauche appuyé, déplacez le curseur vers le haut ou le bas pour ajuster la position du point
 ERROR_MSG_FILE_READ;Erreur de lecture du fichier : %1
 ERROR_MSG_MAXERRORS;... (%1 erreur(s) précédente(s) non montrée(s))
 ERROR_MSG_METADATA_VALUE;Metadata: réglage de l'erreur %1 à %2
@@ -123,7 +123,7 @@ FILEBROWSER_DELETEDIALOG_HEADER;Confirmation de la suppression de fichier
 FILEBROWSER_DELETEDIALOG_ALL;Êtes-vous sûr de vouloir effacer tous les <b>%1</b> fichiers de la corbeille ?
 FILEBROWSER_DELETEDIALOG_SELECTED;Êtes-vous sûr de voulor effacer les <b>%1</b> fichiers sélectionnés ?
 FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC;Êtes-vous sûr de vouloir effacer les fichiers <b>%1</b> sélectionnés <b>y-compris</b> une version en file de traitement ?
-FILEBROWSER_EMPTYTRASHHINT;Effacer définitivement les fichiers de la corbeille.
+FILEBROWSER_EMPTYTRASHHINT;Effacer définitivement les fichiers de la corbeille
 FILEBROWSER_EXTPROGMENU;Commandes utilisateur
 FILEBROWSER_FLATFIELD;Champ Uniforme
 FILEBROWSER_MOVETODARKFDIR;Déplacer vers le dossier d'images de Trame Noire
@@ -252,18 +252,18 @@ GIMP_PLUGIN_INFO;Bienvenue dans le plugin ART de GIMP !\nUne fois l'édition ter
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), pic: %5 (%6)\n    gamme: %7 EV, valeurs: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;Montrer/Cacher l'histogramme du bleu.
 HISTOGRAM_TOOLTIP_BAR;Montrer/Cacher la barre indicateur RVB.
-HISTOGRAM_TOOLTIP_CHRO;Montrer/Cacher l'histogramme de Chromaticité.
-HISTOGRAM_TOOLTIP_CROSSHAIR;Montrer/Cacher l'indicateur en croix.
+HISTOGRAM_TOOLTIP_CHRO;Montrer/Cacher l'histogramme de Chromaticité
+HISTOGRAM_TOOLTIP_CROSSHAIR;Montrer/Cacher l'indicateur en croix
 HISTOGRAM_TOOLTIP_G;Montrer/Cacher l'histogramme du vert.
 HISTOGRAM_TOOLTIP_L;Montrer/Cacher l'histogramme de luminance CIELab.
 HISTOGRAM_TOOLTIP_MODE;Basculer entre échelles linéaire, linéaire-log et log-log de l'histogramme.\n(Mode actuel : %1)
 HISTOGRAM_TOOLTIP_MODE_LINEAR;Linéaire
 HISTOGRAM_TOOLTIP_MODE_LOG_X;Log-linéaire
 HISTOGRAM_TOOLTIP_MODE_LOG_XY;log-log
-HISTOGRAM_TOOLTIP_R;Montrer/Cacher l'histogramme du rouge.
+HISTOGRAM_TOOLTIP_R;Montrer/Cacher l'histogramme du rouge
 HISTOGRAM_TOOLTIP_RAW;Montrer/Cacher l'histogramme des données raw.
-HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Bascule la visibilité des boutons d'option de l'histogramme.
-HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Ajuster la luminosité de l'histogramme.
+HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Bascule la visibilité des boutons d'option de l'histogramme
+HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Ajuster la luminosité de l'histogramme
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;Histogramme
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Histogramme raw
 HISTOGRAM_TOOLTIP_TYPE_PARADE;Affichage juxtaposé RVB
@@ -368,7 +368,7 @@ HISTORY_MSG_122;Trame Noire - Sélection auto.
 HISTORY_MSG_123;Trame Noire - Fichier
 HISTORY_MSG_124;Gain/Correction du point blanc
 HISTORY_MSG_126;Champ Uniforme - Fichier
-HISTORY_MSG_127;Champ Uniforme - Sélection auto.
+HISTORY_MSG_127;Champ Uniforme - Sélection auto
 HISTORY_MSG_128;Champ Uniforme - Rayon de floutage
 HISTORY_MSG_129;Champ Uniforme - Type de floutage
 HISTORY_MSG_130;Distorsion Auto.
@@ -516,6 +516,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - Masque flou
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - Ombres/Déboucher
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - Pivot
 HISTORY_MSG_COLORCORRECTION_POWER;CC - Tons moyens/Gamma
+HISTORY_MSG_COLORCORRECTION_COMPRESSION;CC - compression
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - mode luminance
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - Saturation en entrée
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - Saturation en sortie
@@ -645,7 +646,9 @@ HISTORY_MSG_SMOOTHING_NUMBLADES;Lissage - Diaphragme
 HISTORY_MSG_SMOOTHING_ANGLE;Lissage - angle
 HISTORY_MSG_SMOOTHING_CURVATURE;Lissage - courbure
 HISTORY_MSG_SMOOTHING_OFFSET;Lissage - décalage
+HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Lissage - Force du masque
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Lissage - Post-traitement du masque
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Lissage - dureté du bruit
 HISTORY_MSG_SOFTLIGHT_ENABLED;Lumière douce
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Lumière douce - Force
 HISTORY_MSG_SPOT;Retrait de taches
@@ -683,7 +686,7 @@ ICCPROFCREATOR_ILL_65;D65
 ICCPROFCREATOR_ILL_80;D80
 ICCPROFCREATOR_ILL_DEF;Valeur par défaut
 ICCPROFCREATOR_ILL_INC;StdA 2856K
-ICCPROFCREATOR_ILL_TOOLTIP;Vous ne pouvez régler l'Illuminant que pour les profils ICC v4.
+ICCPROFCREATOR_ILL_TOOLTIP;Vous ne pouvez régler l'Illuminant que pour les profils ICC v4
 ICCPROFCREATOR_PRIMARIES;Primaires :
 ICCPROFCREATOR_PRIM_ACESP0;ACES AP0
 ICCPROFCREATOR_PRIM_ACESP1;ACES AP1
@@ -719,54 +722,54 @@ INSPECTOR_RAW_SHADOW;Rendu raw rapide avec courbe tonale amplifiant les ombres.\
 INSPECTOR_SPLIT;Vue dissociée. \nRaccourci : <b>y</b>.
 INSPECTOR_ZOOM_FIT;Ajuster à la fenêtre.\nRaccourci : <b>x</b>.
 INSPECTOR_ZOOM_11;Zoomer à 100%.\nRaccourci : <b>z</b>.
-LABMASKS_AREA_MASK_EMPTY_WARNING;Attention: la combinaison actuelle des formes dans le masque de zone résulte en un masque vide.
+LABMASKS_AREA_MASK_EMPTY_WARNING;Attention: la combinaison actuelle des formes dans le masque de zone résulte en un masque vide
 IPTCPANEL_CATEGORY;Catégorie
-IPTCPANEL_CATEGORYHINT;Identifie le sujet de l'image selon l'opinion du fournisseur.
+IPTCPANEL_CATEGORYHINT;Identifie le sujet de l'image selon l'opinion du fournisseur
 IPTCPANEL_CITY;Ville
 IPTCPANEL_CITYHINT;Entrez le nom de la ville photographiée dans cette image
 IPTCPANEL_COPYHINT;Copiez les réglages IPTC dans le presse-papier.
 IPTCPANEL_COPYRIGHT;Note de Copyright
-IPTCPANEL_COPYRIGHTHINT;Entrez une note sur le détenteur actuelle du Copyright pour cette image (ex: ©2008 Jean Dupont).
+IPTCPANEL_COPYRIGHTHINT;Entrez une note sur le détenteur actuelle du Copyright pour cette image (ex: ©2008 Jean Dupont)
 IPTCPANEL_COUNTRY;Pays
-IPTCPANEL_COUNTRYHINT;Entrez le nom du pays photographié dans cette image.
+IPTCPANEL_COUNTRYHINT;Entrez le nom du pays photographié dans cette image
 IPTCPANEL_CREATOR;Créateur
-IPTCPANEL_CREATORHINT;Enterez le nom de la personne qui a créé cette image.
+IPTCPANEL_CREATORHINT;Enterez le nom de la personne qui a créé cette image
 IPTCPANEL_CREATORJOBTITLE;Métier du créateur
-IPTCPANEL_CREATORJOBTITLEHINT;Entrez le métier et/ou la fonction de la personne indiquée dans le champs Créateur.
+IPTCPANEL_CREATORJOBTITLEHINT;Entrez le métier et/ou la fonction de la personne indiquée dans le champs Créateur
 IPTCPANEL_CREDIT;Crédit
-IPTCPANEL_CREDITHINT;Identifiez la personne à créditer quand l'image est publiée.
+IPTCPANEL_CREDITHINT;Identifiez la personne à créditer quand l'image est publiée
 IPTCPANEL_DATECREATED;Date de création
-IPTCPANEL_DATECREATEDHINT;Entrez la date à laquelle la photo a été prise.
+IPTCPANEL_DATECREATEDHINT;Entrez la date à laquelle la photo a été prise
 IPTCPANEL_DESCRIPTION;Description
-IPTCPANEL_DESCRIPTIONHINT;Entrez une "légende" descrivant le qui, quoi et pourquoi de ce qui arrive dans cette image, cela peut inclure le nom des personnes, et/ou leur rôle dans l'action qui a lieu dans l'image.
+IPTCPANEL_DESCRIPTIONHINT;Entrez une "légende" descrivant le qui, quoi et pourquoi de ce qui arrive dans cette image, cela peut inclure le nom des personnes, et/ou leur rôle dans l'action qui a lieu dans l'image
 IPTCPANEL_DESCRIPTIONWRITER;Rédacteur de la description
-IPTCPANEL_DESCRIPTIONWRITERHINT;Entrez le nom de la personne impliquée dans la rédaction, édition ou correction de la description de cette image.
+IPTCPANEL_DESCRIPTIONWRITERHINT;Entrez le nom de la personne impliquée dans la rédaction, édition ou correction de la description de cette image
 IPTCPANEL_EMBEDDED;Incorporés
 IPTCPANEL_EMBEDDEDHINT;Réinitialisez vers les données IPTC intialement incorporées dans le fichier image
 IPTCPANEL_HEADLINE;Sous-titre
-IPTCPANEL_HEADLINEHINT;Entrez un bref synopsis publiable ou résumé du contenu de l'image.
+IPTCPANEL_HEADLINEHINT;Entrez un bref synopsis publiable ou résumé du contenu de l'image
 IPTCPANEL_INSTRUCTIONS;Instructions
-IPTCPANEL_INSTRUCTIONSHINT;Entrez les informations à propos des embargos, ou autres restrictions non couvertes par le champs Copyright.
+IPTCPANEL_INSTRUCTIONSHINT;Entrez les informations à propos des embargos, ou autres restrictions non couvertes par le champs Copyright
 IPTCPANEL_KEYWORDS;Mots clés
-IPTCPANEL_KEYWORDSHINT;Entrez un nombre quelconque de mots clés, termes ou phrases utilisés pour exprimer ce qu'est le sujet de l'image.
+IPTCPANEL_KEYWORDSHINT;Entrez un nombre quelconque de mots clés, termes ou phrases utilisés pour exprimer ce qu'est le sujet de l'image
 IPTCPANEL_PASTEHINT;Colle les réglages IPTC depuis le presse-papier
 IPTCPANEL_PROVINCE;Province ou État
-IPTCPANEL_PROVINCEHINT;Entrez le nom de la province ou de l'État photographié dans cette image.
+IPTCPANEL_PROVINCEHINT;Entrez le nom de la province ou de l'État photographié dans cette image
 IPTCPANEL_RESET;Réinitialiser
 IPTCPANEL_RESETHINT;Réinitialisez selon le profil par défaut
 IPTCPANEL_SOURCE;Source
-IPTCPANEL_SOURCEHINT;Entrez ou éditez le nom de la personne ou du tiers qui a un rôle dans la chaîne de transmission du contenu, comme une personne ou entité de qui vous avez reçu cette image.
+IPTCPANEL_SOURCEHINT;Entrez ou éditez le nom de la personne ou du tiers qui a un rôle dans la chaîne de transmission du contenu, comme une personne ou entité de qui vous avez reçu cette image
 IPTCPANEL_SUPPCATEGORIES;Catégories supplémentaires
-IPTCPANEL_SUPPCATEGORIESHINT;Affinez la description du sujet de l'image.
+IPTCPANEL_SUPPCATEGORIESHINT;Affinez la description du sujet de l'image
 IPTCPANEL_TITLE;Titre
-IPTCPANEL_TITLEHINT;Entrez un nom court et humainement lisible pour l'image, cela peut être le nom du fichier.
+IPTCPANEL_TITLEHINT;Entrez un nom court et humainement lisible pour l'image, cela peut être le nom du fichier
 IPTCPANEL_TRANSREFERENCE;Identifiant du travail
-IPTCPANEL_TRANSREFERENCEHINT;Entrez un nombre ou identifiant servant au contrôle du flux de travail ou au suivi.
+IPTCPANEL_TRANSREFERENCEHINT;Entrez un nombre ou identifiant servant au contrôle du flux de travail ou au suivi
 MAIN_BUTTON_FULLSCREEN;Plein écran
 MAIN_BUTTON_ICCPROFCREATOR;Créateur de Profil ICC
 MAIN_BUTTON_NAVNEXT_TOOLTIP;Naviguer à l'image Suivante relativement à l'image ouverte dans l'Éditeur.\nRaccourci : <b>Shift-F4</b>\n\nPour naviguer à l'image suivante relativement à la vignette sélectionnée dans le Navigateur de fichiers ou la Pellicule :\nRaccourci : <b>F4</b>
 MAIN_BUTTON_NAVPREV_TOOLTIP;Naviguer à l'image Précédente relativement à l'image ouverte dans l'Éditeur.\nRaccourci : <b>Shift-F3</b>\n\nPour naviguer à l'image précédente relativement à la vignette sélectionnée dans le Navigateur de fichiers ou la Pellicule :\nRaccourci : <b>F3</b>
-MAIN_BUTTON_NAVSYNC_TOOLTIP;Synchroniser le Navigateur de fichiers avec l'Éditeur pour révéler la vignette de l'image actuellement ouverte, et effacer les filtres dans le Navigateur de fichiers.\nRaccourci : <b>x</b>\n\nComme ci-dessus, mais sans effacer les filtres :\nRaccourci : <b>y</b>\n(Notez que la vignette ne sera pas visible si elle a été filtrée).
+MAIN_BUTTON_NAVSYNC_TOOLTIP;Synchroniser le Navigateur de fichiers avec l'Éditeur pour révéler la vignette de l'image actuellement ouverte, et effacer les filtres dans le Navigateur de fichiers.\nRaccourci : <b>x</b>\n\nComme ci-dessus, mais sans effacer les filtres :\nRaccourci : <b>y</b>\n(Notez que la vignette ne sera pas visible si elle a été filtrée)
 MAIN_BUTTON_PREFERENCES;Préférences
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Ajouter l'image courante à la file de traitement (Ctrl+clic pour Export Rapide).\nRaccourci : <b>Ctrl-b</b> (<b>Ctrl-Shift-b</b> pour Export Rapide)
 MAIN_BUTTON_SAVE_TOOLTIP;Enregistrer l'image courante (Ctrl+clic pour Export Rapide).\nRaccourci : <b>Ctrl-s</b> (<b>Ctrl-Shift-s</b> pour Export Rapide)
@@ -784,12 +787,12 @@ MAIN_FRAME_PLACES_DEL;Effacer
 MAIN_FRAME_QUEUE;File d'attente 
 MAIN_FRAME_QUEUE_TOOLTIP; File de traitement.\nRaccourci : <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Fichiers récents 
-MAIN_MSG_ALREADYEXISTS;Le fichier existe déjà.
+MAIN_MSG_ALREADYEXISTS;Le fichier existe déjà
 MAIN_MSG_AUTOSAVING;Sauvegarde automatique...
 MAIN_MSG_CANNOTLOAD;Impossible de charger l'image
 MAIN_MSG_CANNOTSAVE;Erreur d'enregistrement du fichier
-MAIN_MSG_CANNOTSTARTEDITOR;Impossible de lancer l'éditeur.
-MAIN_MSG_CANNOTSTARTEDITOR_SECONDARY;Veuillez saisir son chemin d'accès dans les "Préférences".
+MAIN_MSG_CANNOTSTARTEDITOR;Impossible de lancer l'éditeur
+MAIN_MSG_CANNOTSTARTEDITOR_SECONDARY;Veuillez saisir son chemin d'accès dans les "Préférences"
 MAIN_MSG_EMPTYFILENAME;Nom de fichier non spécifié !
 MAIN_MSG_IMAGEUNPROCESSED;Cette commande nécessite que toutes les images sélectionnées aient été préalablement traité.
 MAIN_MSG_NAVIGATOR;Navigateur
@@ -798,7 +801,7 @@ MAIN_MSG_PATHDOESNTEXIST;Le chemin \n\n<b>%1</b>\n\nn'existe pas. Indiquez un ch
 MAIN_MSG_QOVERWRITE;Voulez-vous l'écraser ?
 MAIN_MSG_SETPATHFIRST;Vous devez d'abord choisir un dossier cible dans Préférences\npour pouvoir utiliser cette fonction !
 MAIN_MSG_TOOMANYOPENEDITORS;Too many open editors.\nPlease close an editor to continue.
-MAIN_MSG_WRITEFAILED;Échec de l'enregistrement du fichier\n\n<b>"%1"</b>\n\nAssurez-vous que le dossier existe et que vous ayez permission d'y écrire.
+MAIN_MSG_WRITEFAILED;Échec de l'enregistrement du fichier\n\n<b>"%1"</b>\n\nAssurez-vous que le dossier existe et que vous ayez permission d'y écrire
 MAIN_TAB_ADVANCED;Avancé
 MAIN_TAB_ADVANCED_TOOLTIP;Raccourci : <b>Alt</b>-<b>a</b>
 MAIN_TAB_COLOR;Couleur
@@ -836,7 +839,7 @@ MAIN_TOOLTIP_HIDEHP;Montrer/Cacher le panneau gauche (incluant l'historique)\nRa
 MAIN_TOOLTIP_INDCLIPPEDH;Indication des zones Hautes Lumières écrêtées\nRaccourci : <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Indication des zones Ombres écrêtées\nRaccourci : <b>&lt;</b>
 MAIN_TOOLTIP_PREVIEWB;Affichage du <b>canal Bleu</b>\nRaccourci : <b>Shift-b</b>
-MAIN_TOOLTIP_PREVIEWFOCUSMASK;Affichage du <b>Masque du focus</b>\nRaccourci : <b>Shift-f</b>\n\nPlus précis sur les images avec une faible profondeur de champ, à faible bruit et à des niveaux de zoom élevés\n\nPour améliorer la précision de détection des images bruitées, évaluez les à un facteur de zoom de 10-30%\n\nLa prévisualisation met plus de temps à se calculer lorsque cet outil est actif.
+MAIN_TOOLTIP_PREVIEWFOCUSMASK;Affichage du <b>Masque du focus</b>\nRaccourci : <b>Shift-f</b>\n\nPlus précis sur les images avec une faible profondeur de champ, à faible bruit et à des niveaux de zoom élevés\n\nPour améliorer la précision de détection des images bruitées, évaluez les à un facteur de zoom de 10-30%\n\nLa prévisualisation met plus de temps à se calculer lorsque cet outil est actif
 MAIN_TOOLTIP_PREVIEWG;Affichage du <b>canal Vert</b>\nRaccourci : <b>Shift-g</b>
 MAIN_TOOLTIP_PREVIEWL;Affichage de la <b>Luminosité</b>\nRaccourci : <b>Shift-v</b>\n\n0.299*R + 0.587*V + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Affichage du <b>canal Rouge</b>\nRaccourci : <b>Shift-r</b>
@@ -863,8 +866,8 @@ NAVIGATOR_R;R :
 NAVIGATOR_XY_FULL;Largeur = %1, Hauteur = %2
 NAVIGATOR_XY_NA;x = --, y = --
 OPTIONS_BUNDLED_MISSING;Le profil fourni "<b>%1</b>" n'a pas été trouvé !\n\nVotre installation peut être endomagée.\n\nLes valeurs internes par défaut seront utilisées à la place.
-OPTIONS_DEFIMG_MISSING;Le profil par défaut pour les <b>images standards</b> n'a pas été trouvé ou n'a pas été indiqué.\n\nVérifiez le dossier de vos profils, il peut être manquant ou endommagé\n\n"<b>%1</b>" sera utilisé à la place.
-OPTIONS_DEFRAW_MISSING;Le profil par défaut pour les <b>images raw</b> n'a pas été trouvé ou n'a pas été indiqué.\n\nVérifiez le dossier de vos profils, il peut être manquant ou endommagé\n\n"<b>%1</b>" sera utilisé à la place.
+OPTIONS_DEFIMG_MISSING;Le profil par défaut pour les <b>images standards</b> n'a pas été trouvé ou n'a pas été indiqué.\n\nVérifiez le dossier de vos profils, il peut être manquant ou endommagé\n\n"<b>%1</b>" sera utilisé à la place
+OPTIONS_DEFRAW_MISSING;Le profil par défaut pour les <b>images raw</b> n'a pas été trouvé ou n'a pas été indiqué.\n\nVérifiez le dossier de vos profils, il peut être manquant ou endommagé\n\n"<b>%1</b>" sera utilisé à la place
 PARTIALPASTE_ADVANCEDGROUP;Réglages avancés
 PARTIALPASTE_EFFECTSGROUP;Paramètres des effets spéciaux
 PARTIALPASTE_EXPOSUREGROUP;Paramètres Exposition
@@ -986,7 +989,7 @@ PREFERENCES_CURVEBBOXPOS_BELOW;En-dessous
 PREFERENCES_CURVEBBOXPOS_LEFT;Gauche
 PREFERENCES_CURVEBBOXPOS_RIGHT;Droite
 PREFERENCES_CUSTPROFBUILD;Générateur de profil de traitement personnalisé
-PREFERENCES_CUSTPROFBUILDHINT;Fichier éxecutable (ou script) appelé lorsqu'un nouveau profil de traitement initial doit être généré pour une image.\n\nLe chemin du fichier de communication (style *.ini, aussi appelé "KeyFile") est ajouté en tant que paramètre de ligne de commande. Il contient divers paramètres nécessaires au script et aux métadonnées Exif de l'image pour permettre la génération d'un profil .arp basé sur des règles.\n\n<b>ATTENTION:</b> Il vous appartient d'utiliser ou non des guillemets doubles pour spécifier les chemins si ceux-ci contiennent des espaces.
+PREFERENCES_CUSTPROFBUILDHINT;Fichier éxecutable (ou script) appelé lorsqu'un nouveau profil de traitement initial doit être généré pour une image.\n\nLe chemin du fichier de communication (style *.ini, aussi appelé "KeyFile") est ajouté en tant que paramètre de ligne de commande. Il contient divers paramètres nécessaires au script et aux métadonnées Exif de l'image pour permettre la génération d'un profil .arp basé sur des règles.\n\n<b>ATTENTION:</b> Il vous appartient d'utiliser ou non des guillemets doubles pour spécifier les chemins si ceux-ci contiennent des espaces
 PREFERENCES_CUSTPROFBUILDKEYFORMAT;Format des clés
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_NAME;Nom
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_TID;TagID
@@ -1155,7 +1158,7 @@ PROFILEPANEL_GLOBALPROFILES;Profils de traitement fournis
 PROFILEPANEL_LABEL;Profils de traitement
 PROFILEPANEL_LOADDLGLABEL;Charger les paramètres de traitement...
 PROFILEPANEL_LOADPPASTE;Paramètres à charger
-PROFILEPANEL_MODE_TIP;Mode de remplissage des profils de traitement.\n\nBouton pressé : les profils partiels seront convertis en profils complets ; les valeurs manquantes seront remplacées par les valeurs programme par défaut\n\nBouton relevé : les profils seront appliqués tels quels, altérant uniquement les paramètres qu'ils contiennent.
+PROFILEPANEL_MODE_TIP;Mode de remplissage des profils de traitement.\n\nBouton pressé : les profils partiels seront convertis en profils complets ; les valeurs manquantes seront remplacées par les valeurs programme par défaut\n\nBouton relevé : les profils seront appliqués tels quels, altérant uniquement les paramètres qu'ils contiennent
 PROFILEPANEL_MYPROFILES;Mes profils
 PROFILEPANEL_PASTEPPASTE;Paramètres à coller
 PROFILEPANEL_PCUSTOM;Personnalisé
@@ -1254,13 +1257,13 @@ SOFTPROOF_TOOLTIP;L'épreuve numérique simule l'apparence de l'image quand elle
 THRESHOLDSELECTOR_B;Bas
 THRESHOLDSELECTOR_BL;Bas-gauche
 THRESHOLDSELECTOR_BR;Bas-droite
-THRESHOLDSELECTOR_HINT;Maintenez la touche <b>Shift</b> appuyée pour déplacer les points de contrôle individuellement.
+THRESHOLDSELECTOR_HINT;Maintenez la touche <b>Shift</b> appuyée pour déplacer les points de contrôle individuellement
 THRESHOLDSELECTOR_T;Haut
 THRESHOLDSELECTOR_TL;Haut-Gauche
 THRESHOLDSELECTOR_TR;Haut-droite
 TOOL_SHORTCUT_HELP_HEADER;Tool shortcuts:\n(hold the given key and adjust the slider with +/- or the scrollwheel)\n
-TOOLBAR_TOOLTIP_COLORPICKER;Ancre de Vérification Couleur\n\nSi activé:\n- Ajouter une ancre : <b>clic-gauche</b>.\n- Déplacer une ancre : <b>clic-gauche et glisser</b>.\n- Supprimer une ancre : <b>clic-droit</b>.\n- Supprimer toutes les ancres : <b>ctrl</b>+<b>shift</b>+<b>clic-droit</b>.\n- Revenir au mode Déplacement : <b>clic-droit</b> en dehors de toute ancre.
-TOOLBAR_TOOLTIP_CROP;Sélection du rognage\nRaccourci : <b>Shift-c</b>\nDéplacez le rognage en <b>utilisant la souris</b>\nRedimensionnez le rognage en déplaçant les bordures.
+TOOLBAR_TOOLTIP_COLORPICKER;Ancre de Vérification Couleur\n\nSi activé:\n- Ajouter une ancre : <b>clic-gauche</b>.\n- Déplacer une ancre : <b>clic-gauche et glisser</b>.\n- Supprimer une ancre : <b>clic-droit</b>.\n- Supprimer toutes les ancres : <b>ctrl</b>+<b>shift</b>+<b>clic-droit</b>.\n- Revenir au mode Déplacement : <b>clic-droit</b> en dehors de toute ancre
+TOOLBAR_TOOLTIP_CROP;Sélection du rognage\nRaccourci : <b>Shift-c</b>\nDéplacez le rognage en <b>utilisant la souris</b>\nRedimensionnez le rognage en déplaçant les bordures
 TOOLBAR_TOOLTIP_HAND;Outil de navigation\nRaccourci : <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correction de Perspective</b>.\nRaccourci : <b>Shift-p</b>\n\nEditer les lignes de contrôle pour corriger la distortion de perspective. Cliquez à nouveau sur le bouton pour appliquer les corrections.
 TOOLBAR_TOOLTIP_STRAIGHTEN;Réglage de l'horizon\nRaccourci : <b>Shift-s</b>\n\nIndiquez la verticale ou l'horizontale en dessinant une ligne à travers l'image. L'angle de rotation sera affiché près de la ligne guide. Le centre de rotation est le centre géométrique de l'image.
@@ -1289,9 +1292,9 @@ TP_BWMIX_LABEL;Noir & Blanc
 TP_BWMIX_NEUTRAL;Réinitialiser
 TP_BWMIX_RGBLABEL;R: %1%%   V: %2%%   B: %3%%   Total: %4%%
 TP_BWMIX_RGBLABEL_HINT;Coefficients RVB finaux tenant compte de toutes les options du mixeur.\n'Total' affiche la somme des valeurs RVB actuellement appliquées:\n- toujours 100% en mode relatif\n- supérieur (plus clair) ou inférieur (plus sombre) à 100% en mode absolu.
-TP_BWMIX_RGB_TOOLTIP;Mixer les canaux RVB. Utilisez les Préréglages pour vous guider.\nAttention aux valeurs négatives qui peuvent causer des artefacts ou un comportement erratique.
+TP_BWMIX_RGB_TOOLTIP;Mixer les canaux RVB. Utilisez les Préréglages pour vous guider.\nAttention aux valeurs négatives qui peuvent causer des artefacts ou un comportement erratique
 TP_BWMIX_SETTING;Préréglages
-TP_BWMIX_SETTING_TOOLTIP;Différents préréglages (film, paysage, ...) ou réglages manuel du mixeur de canaux.
+TP_BWMIX_SETTING_TOOLTIP;Différents préréglages (film, paysage, ...) ou réglages manuel du mixeur de canaux
 TP_BWMIX_SET_HIGHCONTAST;Contraste Élevé
 TP_BWMIX_SET_HIGHSENSIT;Haute Sensibilité
 TP_BWMIX_SET_HYPERPANCHRO;Hyper Panchromatique
@@ -1341,6 +1344,7 @@ TP_COLORCORRECTION_LIST_TITLE;Correction
 TP_COLORCORRECTION_OFFSET;Ombres/Déboucher
 TP_COLORCORRECTION_PIVOT;Pivot
 TP_COLORCORRECTION_POWER;Tons moyens/Gamma
+TP_COLORCORRECTION_COMPRESSION;Compression
 TP_COLORCORRECTION_RGBLUMINANCE;Mode luminance
 TP_COLORCORRECTION_SATURATION;Saturation
 TP_COLORCORRECTION_SLOPE;Hautes lumières/Gain
@@ -1396,7 +1400,7 @@ TP_DIRPYRDENOISE_CHROMINANCE_FRAME;Chrominance
 TP_DIRPYRDENOISE_CHROMINANCE_MANUAL;Manuel
 TP_DIRPYRDENOISE_CHROMINANCE_MASTER;Chrominance - Maître
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD;Méthode
-TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manuel\nAgit sur l'image entière.\nVous contrôlez manuellement les paramètres de réduction de bruit.\n\nGlobal automatique\nAgit sur l'image entière.\n9 zones sont utilisées pour calculer un réglage global de réduction de bruit de chrominance.\n\nAutomatique multi-zones\nPas d'aperçu - ne fonctionne qu'au moment de l'enregistrement, mais utilise la méthode "Aperçu" en faisant correspondre la taille et le centre de la tuile à la taille et au centre de l'aperçu, permet d'avoir une idée des résultats attendus.\nL'image est divisée en tuiles (entre 10 et 70 selon la taille de l'image) et chaque tuile reçoit son propre réglage de réduction de bruit de chrominance.\n\nAperçu\nAgit sur l'image entière.\nLa partie de l'image visible dans l'aperçu est utilisée pour calculer un réglage global de réduction de bruit de chrominance.
+TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manuel\nAgit sur l'image entière.\nVous contrôlez manuellement les paramètres de réduction de bruit.\n\nGlobal automatique\nAgit sur l'image entière.\n9 zones sont utilisées pour calculer un réglage global de réduction de bruit de chrominance.\n\nAutomatique multi-zones\nPas d'aperçu - ne fonctionne qu'au moment de l'enregistrement, mais utilise la méthode "Aperçu" en faisant correspondre la taille et le centre de la tuile à la taille et au centre de l'aperçu, permet d'avoir une idée des résultats attendus.\nL'image est divisée en tuiles (entre 10 et 70 selon la taille de l'image) et chaque tuile reçoit son propre réglage de réduction de bruit de chrominance.\n\nAperçu\nAgit sur l'image entière.\nLa partie de l'image visible dans l'aperçu est utilisée pour calculer un réglage global de réduction de bruit de chrominance
 TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Chrominance - Rouge-Vert
 TP_DIRPYRDENOISE_LABEL;Réduction de Bruit
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL;Niveau de détails de Luminance
@@ -1422,7 +1426,7 @@ TP_DIRPYRDENOISE_MEDIAN_METHOD_WEIGHTED;L* pondéré (faiblement) + a*b* (normal
 TP_DIRPYRDENOISE_MEDIAN_PASSES;Itérations médianes
 TP_DIRPYRDENOISE_MEDIAN_PASSES_TOOLTIP;Appliquer trois itérations avec une taille de fenêtre de 3×3 aboutit souvent à de meilleurs résultats qu'une seule itération avec une taille de fenêtre de 7×7.
 TP_DIRPYRDENOISE_MEDIAN_TYPE;Type de médiane
-TP_DIRPYRDENOISE_MEDIAN_TYPE_TOOLTIP;Applique un filtre médian de la taille de "fenêtre" désirée. Plus cette taille est grande, plus cela prendra de temps.\n\n3×3 doux: traite 5 pixels dans une fenêtre de 3×3 pixels.\n3×3: traite 9 pixels dans une fenêtre de 3×3 pixels.\n5×5 doux: traite 13 pixels dans une fenêtre de 5×5 pixels.\n5×5: traite 25 pixels dans une fenêtre de 5×5 pixels.\n7×7: traite 49 pixels dans une fenêtre de 7×7 pixels.\n9×9: traite 81 pixels dans une fenêtre 9×9 pixels.\n\nIl est parfois possible d'atteindre une meilleurs qualité en appliquant plusieurs itérations d'une petite fenêtre qu'une seule itération d'une grande.
+TP_DIRPYRDENOISE_MEDIAN_TYPE_TOOLTIP;Applique un filtre médian de la taille de "fenêtre" désirée. Plus cette taille est grande, plus cela prendra de temps.\n\n3×3 doux: traite 5 pixels dans une fenêtre de 3×3 pixels.\n3×3: traite 9 pixels dans une fenêtre de 3×3 pixels.\n5×5 doux: traite 13 pixels dans une fenêtre de 5×5 pixels.\n5×5: traite 25 pixels dans une fenêtre de 5×5 pixels.\n7×7: traite 49 pixels dans une fenêtre de 7×7 pixels.\n9×9: traite 81 pixels dans une fenêtre 9×9 pixels.\n\nIl est parfois possible d'atteindre une meilleurs qualité en appliquant plusieurs itérations d'une petite fenêtre qu'une seule itération d'une grande
 TP_DIRPYRDENOISE_TYPE_3X3;3×3
 TP_DIRPYRDENOISE_TYPE_3X3SOFT;3×3 doux
 TP_DIRPYRDENOISE_TYPE_5X5;5×5
@@ -1463,7 +1467,7 @@ TP_FILMNEGATIVE_FILMBASE_PICK;Choisissez la couleur de base du film.
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Choisissez un point du film non exposé (eg. la bordure entre les cadres), pour obtenir les valeurs actuelles des couleurs de base du film, et les sauver dans le profile de traitement.\nCeci permet d'obtenir facilement une valeur plus consitente de la balance des couleurs lors du traitement par lot de plusieurs images.\nUtilisez-le également lorsque l'image convertie est extrêmement sombre, lumineuse ou asymétrique.
 TP_FILMNEGATIVE_FILMBASE_VALUES;Film base RGB:
 TP_FILMNEGATIVE_GREEN;Exposant de référence (contraste)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Calculer l'exposition en collectant 2 points de référence neutre dans l'image ; un blanc (gris léger) et un noir (gris foncé). L'ordre n'a pas d'importance. L'exposition sera mise à jour aprés la collecte du second point.
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Calculer l'exposition en collectant 2 points de référence neutre dans l'image ; un blanc (gris léger) et un noir (gris foncé). L'ordre n'a pas d'importance. L'exposition sera mise à jour aprés la collecte du second point
 TP_FILMNEGATIVE_LABEL;Film Négatif
 TP_FILMNEGATIVE_PICK;Echantillonner les points Blanc et Noir
 TP_FILMNEGATIVE_RED;Ratio de Rouge
@@ -1485,7 +1489,7 @@ TP_FLATFIELD_LABEL;Champ Uniforme
 TP_GENERAL_11SCALE_TOOLTIP;Les effets de cet outil ne sont visibles ou fiables qu'à une échelle d'aperçu de 1:1.
 TP_GENERAL_RESET_DEFAULT;Réinitialiser les paramètres par défaut
 TP_GENERAL_RESET_SAVED;Réinitialiser les paramètres sauvegardés
-TP_GENERAL_TOOL_RESET_TOOLTIP;Réinitialiser tous les réglages.
+TP_GENERAL_TOOL_RESET_TOOLTIP;Réinitialiser tous les réglages
 TP_GRADIENT_CENTER_X;Centre X
 TP_GRADIENT_CENTER_X_TOOLTIP;Décaler le gradient vers la gauche (valeurs négatives) ou la droite (valeurs positives)
 TP_GRADIENT_CENTER_Y;Centre Y
@@ -1530,9 +1534,9 @@ TP_ICM_INPUTCUSTOM;Personnalisé
 TP_ICM_INPUTCUSTOM_TOOLTIP;Sélectionez votre propre profil DCP/ICC pour l'appareil photo
 TP_ICM_INPUTDLGLABEL;Choisir le profil DCP/ICC d'entrée...
 TP_ICM_INPUTEMBEDDED;Profil inclus
-TP_ICM_INPUTEMBEDDED_TOOLTIP;Utiliser le profil inclus dans les fichiers. \nSi non disponible utiliser celui de l'appareil photo.
+TP_ICM_INPUTEMBEDDED_TOOLTIP;Utiliser le profil inclus dans les fichiers. \nSi non disponible utiliser celui de l'appareil photo
 TP_ICM_INPUTNONE;Sans profil
-TP_ICM_INPUTNONE_TOOLTIP;N'utiliser aucun profil couleur d'entrée du tout. À n'utiliser que dans des cas spéciaux.
+TP_ICM_INPUTNONE_TOOLTIP;N'utiliser aucun profil couleur d'entrée du tout. À n'utiliser que dans des cas spéciaux
 TP_ICM_INPUTPROFILE;Profil d'entrée
 TP_ICM_LABEL;Gestion des couleurs (ICM)
 TP_ICM_NOICM;Pas d'ICM : sortie sRGB
@@ -1542,7 +1546,7 @@ TP_ICM_PROFILEINTENT;Intention de Rendu
 TP_ICM_SAVEREFERENCE;Enregistrer Image de Référence.
 TP_ICM_SAVEREFERENCE_APPLYWB;Appliquer la balance des blancs
 TP_ICM_SAVEREFERENCE_APPLYWB_TOOLTIP;Généralement, appliquer la balance des blancs lors de l'enregistrement d'images pour créer des profils ICC, et ne pas appliquer pas la balance des blancs pour créer des profils DCP.
-TP_ICM_SAVEREFERENCE_TOOLTIP;Sauvegarder une image TIFF linéaire avant que le profil d'entrée ne soit appliqué. Le résultat peut être utilisé à des fins de calibrage, pour générer un profil d'appareil photo.
+TP_ICM_SAVEREFERENCE_TOOLTIP;Sauvegarder une image TIFF linéaire avant que le profil d'entrée ne soit appliqué. Le résultat peut être utilisé à des fins de calibrage, pour générer un profil d'appareil photo
 TP_ICM_TONECURVE;Courbe tonale
 TP_ICM_TONECURVE_TOOLTIP;Utiliser la courbe tonale DCP incluse. Ce paramètre ne sera actif que si le profil DCP en contient une.
 TP_ICM_WORKINGPROFILE;Profil colorimétrique de Travail
@@ -1608,7 +1612,7 @@ TP_LABMASKS_DELTAE_PICK;Choisir
 TP_LABMASKS_DELTAE_CHAN_WEIGHT;Pondération dans le calcul du ΔE
 TP_LABMASKS_DELTAE_TOOLTIP;Sélectionne des régions de couleurs similaires\n(selon la définition de la métrique CIELAB ΔE*)
 TP_LABMASKS_DRAWNMASK;Masque au pinceau
-TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Basculer en mode tracé avec le pinceau.\n\n<i>Lors de l'utilisation de la souris :</i>\n- Maintenir <b>Alt</b> pour basculer temporairement en "mode effacement";\n- Maintenir <b>Shift</b> pour tracer une ligne droite;\n- Utiliser <b>Ctrl+molette</b> pour changer le rayon du pinceau,\n- <b>Ctrl+Shift+molette</b> pour changer la dureté du pinceau,\n- et <b>Ctrl+click</b> pour commencer de nouveaux tracés sans changer les paramètres \n(de sorte que des tracés multiples sur la même zone s'additionnent).\n\n<i>Lors de l'utilisation d'un outil sensible à la pression :</i>\n- Utiliser le <b>premier bouton</b> pour basculer en "mode effacement";\n- Maintenir <b>Alt</b> pour tracer une ligne droite;\n- Utiliser <b>Alt+premier bouton</b> pour augmenter le rayon du pinceau, et\n- <b>Alt+second bouton</b> pour le diminuer;\n- Utiliser le <b>second bouton</b> pour faire défiler les modes de sensibilité à la pression disponibles : inactif, dureté, rayon (maintenez <b>Shift</b> enfoncé pour inverser la direction);\n- Utiliser <b>Ctrl+second bouton</b> pour désactiver l'outil.
+TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Basculer en mode tracé avec le pinceau.\n\n<i>Lors de l'utilisation de la souris :</i>\n- Maintenir <b>Alt</b> pour basculer temporairement en "mode effacement";\n- Maintenir <b>Shift</b> pour tracer une ligne droite;\n- Utiliser <b>Ctrl+molette</b> pour changer le rayon du pinceau,\n- <b>Ctrl+Shift+molette</b> pour changer la dureté du pinceau,\n- et <b>Ctrl+click</b> pour commencer de nouveaux tracés sans changer les paramètres \n(de sorte que des tracés multiples sur la même zone s'additionnent).\n\n<i>Lors de l'utilisation d'un outil sensible à la pression :</i>\n- Utiliser le <b>premier bouton</b> pour basculer en "mode effacement";\n- Maintenir <b>Alt</b> pour tracer une ligne droite;\n- Utiliser <b>Alt+premier bouton</b> pour augmenter le rayon du pinceau, et\n- <b>Alt+second bouton</b> pour le diminuer;\n- Utiliser le <b>second bouton</b> pour faire défiler les modes de sensibilité à la pression disponibles : inactif, dureté, rayon (maintenez <b>Shift</b> enfoncé pour inverser la direction);\n- Utiliser <b>Ctrl+second bouton</b> pour désactiver l'outil
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Paramètres du pinceau
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Effacer tous les tracés
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Eliminer le dernier groupe de tracés
@@ -1658,12 +1662,12 @@ TP_METADATA_TUNNEL;Copier à l'identique
 TP_PCVIGNETTE_CENTER_X;Centrer X
 TP_PCVIGNETTE_CENTER_Y;Centrer Y
 TP_PCVIGNETTE_FEATHER;Dégradé
-TP_PCVIGNETTE_FEATHER_TOOLTIP;Dégradé :\n0 = bords uniquement,\n50 = à mi-chemin du centre,\n100 = jusqu'au centre.
+TP_PCVIGNETTE_FEATHER_TOOLTIP;Dégradé :\n0 = bords uniquement,\n50 = à mi-chemin du centre,\n100 = jusqu'au centre
 TP_PCVIGNETTE_LABEL;Filtre Vignette
 TP_PCVIGNETTE_ROUNDNESS;Circularité
-TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;Circularité :\n0 = rectangulaire,\n50 = elliptique,\n100 = circulaire.
+TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;Circularité :\n0 = rectangulaire,\n50 = elliptique,\n100 = circulaire
 TP_PCVIGNETTE_STRENGTH;Force
-TP_PCVIGNETTE_STRENGTH_TOOLTIP;Force du filtre en EV (valeur atteinte dans les coins).
+TP_PCVIGNETTE_STRENGTH_TOOLTIP;Force du filtre en EV (valeur atteinte dans les coins)
 TP_PERSPECTIVE_ANGLE;Angle
 TP_PERSPECTIVE_ASPECT;Ajustement de l'aspect
 TP_PERSPECTIVE_AUTO;Correction auto.
@@ -1679,13 +1683,13 @@ TP_PERSPECTIVE_LABEL;Correction de la perspective
 TP_PERSPECTIVE_SHEAR;Cisaillement
 TP_PERSPECTIVE_VERTICAL;Verticale
 TP_PFCURVE_CURVEEDITOR_CH;Teinte
-TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;Contrôle la force du défrangeage en fonction de la couleur.\nPlus grand = plus de correction, plus petit = moins de correction.
+TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;Contrôle la force du défrangeage en fonction de la couleur.\nPlus grand = plus de correction, plus petit = moins de correction
 TP_PREPROCESS_DEADPIXFILT;Filtrer pixels morts
-TP_PREPROCESS_DEADPIXFILT_TOOLTIP;Essaye de supprimer les pixels morts.
+TP_PREPROCESS_DEADPIXFILT_TOOLTIP;Essaye de supprimer les pixels morts
 TP_PREPROCESS_DYNROWNOISEFILTER;Filtre dynamique de bruit en lignes
 TP_PREPROCESS_GREENEQUIL;Équilibrage du vert
 TP_PREPROCESS_HOTPIXFILT;Filtrer pixels chauds
-TP_PREPROCESS_HOTPIXFILT_TOOLTIP;Essaie de supprimer les pixels chauds.
+TP_PREPROCESS_HOTPIXFILT_TOOLTIP;Essaie de supprimer les pixels chauds
 TP_PREPROCESS_LABEL;Prétraitement
 TP_PREPROCESS_LINEDENOISE;Filtre de bruit en lignes
 TP_PREPROCESS_LINEDENOISE_DIRECTION;Direction
@@ -1699,7 +1703,7 @@ TP_PRSHARPENING_LABEL;Netteté en sortie
 TP_PRSHARPENING_TOOLTIP;Augmente la netteté de l'image après le redimensionnement.
 TP_RAWCACORR_AUTO;Correction automatique
 TP_RAWCACORR_AUTOIT;Itérations
-TP_RAWCACORR_AUTOIT_TOOLTIP;Ce réglage est disponible si "Correction automatique" est activé.\nLa Correction automatique est conservative, signifiant qu'elle ne corrige souvent pas toute l'aberration chromatique.\nPour corriger l'aberration restante, vous pouvez uttiliser jusqu'à cinq itérations de de la correction automatique de l'aberration chromatique.\nChaque itération réduira l'aberration restante de l'itération précédente avec pour coût un temps de traitement plus long.
+TP_RAWCACORR_AUTOIT_TOOLTIP;Ce réglage est disponible si "Correction automatique" est activé.\nLa Correction automatique est conservative, signifiant qu'elle ne corrige souvent pas toute l'aberration chromatique.\nPour corriger l'aberration restante, vous pouvez uttiliser jusqu'à cinq itérations de de la correction automatique de l'aberration chromatique.\nChaque itération réduira l'aberration restante de l'itération précédente avec pour coût un temps de traitement plus long
 TP_RAWCACORR_AVOIDCOLORSHIFT;Éviter la dérive des couleurs
 TP_RAWCACORR_CABLUE;Bleu
 TP_RAWCACORR_CARED;Rouge
@@ -1732,7 +1736,7 @@ TP_RAW_DMETHOD_PROGRESSBAR;Dématriçage %1...
 TP_RAW_DMETHOD_PROGRESSBAR_REFINE;Affinage du dématriçage...
 TP_RAW_DMETHOD_TOOLTIP;Note: IGV et LMMSE sont dédiés aux images à ISO élevé
 TP_RAW_DUALDEMOSAICAUTOCONTRAST;Seuil auto.
-TP_RAW_DUALDEMOSAICAUTOCONTRAST_TOOLTIP;Si la case est cochée (recommandé), ART calcule une valeur optimum basée sur les régions uniformes de l'image.\nS'il n'y en a pas ou que l'image est trop bruitée, la valeur sera réglée à 0.\nPour régler la valeur manuellement, décochez la case d'abord (les valeurs raisonables dépendent de l'image).
+TP_RAW_DUALDEMOSAICAUTOCONTRAST_TOOLTIP;Si la case est cochée (recommandé), ART calcule une valeur optimum basée sur les régions uniformes de l'image.\nS'il n'y en a pas ou que l'image est trop bruitée, la valeur sera réglée à 0.\nPour régler la valeur manuellement, décochez la case d'abord (les valeurs raisonables dépendent de l'image)
 TP_RAW_DUALDEMOSAICCONTRAST;Seuil de contraste
 TP_RAW_EAHD;EAHD
 TP_RAW_FALSECOLOR;Itérations pour la suppression\ndes fausses couleurs
@@ -1743,7 +1747,7 @@ TP_RAW_HPHD;HPHD
 TP_RAW_IGV;IGV
 TP_RAW_IMAGENUM;Sous-image
 TP_RAW_IMAGENUM_SN;Mode SN
-TP_RAW_IMAGENUM_TOOLTIP;Certains fichiers raw consistent en plusieurs sous-images ("Pixel Shift" de Pentax/Sony, "HDR 3-en-1"  de Pentax, "Dual Pixel" de Canon, "EXR" de Fuji).\n\nLors de l'utilisation d'une méthode de dématriçage autre que Pixel Shift, ceci sélectionne quel sous-image est utilisée.\n\nLors de l'utilisation de la méthode de dématriçage Pixel Shift sur un fichier raw de type  Pixel Shift, toutes les sous-images sont utilisées, et ceci sélectionne quelle sous-image sera utilisée pour la détection de mouvement.
+TP_RAW_IMAGENUM_TOOLTIP;Certains fichiers raw consistent en plusieurs sous-images ("Pixel Shift" de Pentax/Sony, "HDR 3-en-1"  de Pentax, "Dual Pixel" de Canon, "EXR" de Fuji).\n\nLors de l'utilisation d'une méthode de dématriçage autre que Pixel Shift, ceci sélectionne quel sous-image est utilisée.\n\nLors de l'utilisation de la méthode de dématriçage Pixel Shift sur un fichier raw de type  Pixel Shift, toutes les sous-images sont utilisées, et ceci sélectionne quelle sous-image sera utilisée pour la détection de mouvement
 TP_RAW_LABEL;Dématriçage
 TP_RAW_LMMSE;LMMSE
 TP_RAW_LMMSEITERATIONS;Niveaux d'amélioration LMMSE
@@ -1765,7 +1769,7 @@ TP_RAW_PIXELSHIFTHOLEFILL_TOOLTIP;Remplir les trous dans le masque de mouvement
 TP_RAW_PIXELSHIFTLMMSE;Utiliser LMMSE pour les zones de mouvement
 TP_RAW_PIXELSHIFTLMMSE_TOOLTIP;Utiliser LMMSE au lieu de AMaZE pour les zones de mouvement .\nUtile pour les images à ISO élevé.
 TP_RAW_PIXELSHIFTMEDIAN;Utiliser la médiane pour les zones de mouvement.
-TP_RAW_PIXELSHIFTMEDIAN_TOOLTIP;Utiliser la médiane de toutes les sous-images au lieu de la sous-image sélectionnée pour les zones de mouvement.\nRetire les objets qui apparaissent à des endroits différents dans toutes les sous-images.\nDonne un effet de mouvement aux objets se déplaçant lentement (chevauchement).
+TP_RAW_PIXELSHIFTMEDIAN_TOOLTIP;Utiliser la médiane de toutes les sous-images au lieu de la sous-image sélectionnée pour les zones de mouvement.\nRetire les objets qui apparaissent à des endroits différents dans toutes les sous-images.\nDonne un effet de mouvement aux objets se déplaçant lentement (chevauchement)
 TP_RAW_PIXELSHIFTMM_AUTO;Automatique
 TP_RAW_PIXELSHIFTMM_CUSTOM;Manuel
 TP_RAW_PIXELSHIFTMM_OFF;Désactivé
@@ -1849,6 +1853,8 @@ TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Halo diffus
 TP_SMOOTHING_MODE_NLMEANS;Outils non-locaux
 TP_SMOOTHING_MODE_LENS;Flou d'objectif
 TP_SMOOTHING_MODE_MOTION;Flou de mouvement
+TP_SMOOTHING_MODE_NOISE;Ajouter du bruit
+TP_SMOOTHING_NOISE_COARSENESS;Dureté
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminance
 TP_SMOOTHING_CHANNEL_C;Chrominance
@@ -1867,7 +1873,7 @@ TP_SOFTLIGHT_LABEL;Lumière douce
 TP_SOFTLIGHT_STRENGTH;Force
 TP_SPOT_COUNTLABEL;%1 point(s)
 TP_SPOT_ENTRYCHANGED;Modification d'un point
-TP_SPOT_HINT;Cliquez sur ce bouton pour pouvoir opérer sur la zone de prévisualisation.\nPour ajouter un spot, pressez Ctrl et le bouton gauche de la souris, tirez le cercle (la touche Ctrl peut être relâchée) vers la position source, puis relâchez le bouton de la souris.\nPour éditer un spot, placez le curseur au-dessus de la marque blanche situant une zone éditée, faisant apparaître la géométrie d'édition.\nPour déplacer le spot source ou destination, placez le curseur en son centre et tirez le.\nLe cercle intérieur (zone d'effet maximum) et le cercle "d'adoucissement" peuvent être redimmensionné en plaçant le curseur dessus (le cercle devient orange) et en le tirant (le cercle devient rouge).\nQuand les changements sont terminés, un clic droit en dehors de tout spot termine le mode d'édition, ou cliquez à nouveau sur ce bouton.
+TP_SPOT_HINT;Cliquez sur ce bouton pour pouvoir opérer sur la zone de prévisualisation.\nPour ajouter un spot, pressez Ctrl et le bouton gauche de la souris, tirez le cercle (la touche Ctrl peut être relâchée) vers la position source, puis relâchez le bouton de la souris.\nPour éditer un spot, placez le curseur au-dessus de la marque blanche situant une zone éditée, faisant apparaître la géométrie d'édition.\nPour déplacer le spot source ou destination, placez le curseur en son centre et tirez le.\nLe cercle intérieur (zone d'effet maximum) et le cercle "d'adoucissement" peuvent être redimmensionné en plaçant le curseur dessus (le cercle devient orange) et en le tirant (le cercle devient rouge).\nQuand les changements sont terminés, un clic droit en dehors de tout spot termine le mode d'édition, ou cliquez à nouveau sur ce bouton
 TP_SPOT_LABEL;Retrait de taches
 TP_SPOT_CUR_SPOT_LABEL;Tache en cours
 TP_SPOT_SOURCE_X;Source X

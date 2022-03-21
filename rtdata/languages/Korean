@@ -2,6 +2,8 @@
 #01 2021-10-22 Ohnishi, Yasuo, initial translation for 1.10.1
 #02 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
 #03 2021-12-27 Ohnishi, Yasuo, some refinements and updated for 1.12
+#04 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
+#05 2022-03-20 Ohnishi, Yasuo, some fixes and updates
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -15,7 +17,7 @@ CURVEEDITOR_AXIS_RIGHT_TAN;RT:
 CURVEEDITOR_CATMULLROM;플렉시블
 CURVEEDITOR_CURVE;커브
 CURVEEDITOR_CURVES;커브
-CURVEEDITOR_CUSTOM;맞춤
+CURVEEDITOR_CUSTOM;스탠다드
 CURVEEDITOR_DARKS;다크
 CURVEEDITOR_EDITPOINT_HINT;버튼을 누르면 값으로 입출력을 편집할 수 있습니다.\n\n편집하고 싶은 곡선상의 점을 오른쪽 버튼으로 클릭합니다.\n편집을 무효로 할 경우 점이외 부분에서 오른쪽 버튼을 클릭합니다.
 CURVEEDITOR_HIGHLIGHTS;하이라이트
@@ -246,6 +248,7 @@ GENERAL_SAVE_AS;... (으) 로 보존
 GENERAL_SLIDER;슬라이더
 GENERAL_UNCHANGED;(변경 없음)
 GENERAL_WARNING;경고
+GENERAL_DEPRECATED;Deprecated
 GENERAL_DEPRECATED_TOOLTIP;<b>"폐지예정 (Deprecated) !"</b> 은 장래 버전에서 삭제됩니다.
 GIMP_PLUGIN_INFO;ART GIMP 플러그인을 쓰시는 것을 환영합니다！\n화상편집이 끝난 후, 그냥 ART을 끝내면, 화상이 자동적으로 GIMP에 이송됩니다.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9
@@ -270,7 +273,7 @@ HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;파형 (Waveform)
 HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;색조 (Hue) -채도 (Chroma) Vectorscope
 HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;색조 (Hue) -채도 (Saturation) Vectorscope
 HISTORY_CHANGED;변경되었습니다.
-HISTORY_CUSTOMCURVE;맞춤커브
+HISTORY_CUSTOMCURVE;스탠다드 커브
 HISTORY_FROMCLIPBOARD;클립 보드에서
 HISTORY_LABEL;이력
 HISTORY_MSG_1;사진을 불러왔습니다.
@@ -303,7 +306,7 @@ HISTORY_MSG_35;주변광양 보정
 HISTORY_MSG_36;색수차보정
 HISTORY_MSG_38;화이트 밸런스 방식
 HISTORY_MSG_39;색 온도
-HISTORY_MSG_40;색편차
+HISTORY_MSG_40;색조 (tint) 보정
 HISTORY_MSG_41;톤 곡선1의 방식
 HISTORY_MSG_42;톤 곡선 2
 HISTORY_MSG_43;톤 곡선2의 방식
@@ -487,7 +490,7 @@ HISTORY_MSG_490;DRC - 량
 HISTORY_MSG_491;화이트 밸런스
 HISTORY_MSG_492;RGB커브
 HISTORY_MSG_493;L*a*b* 조정
-HISTORY_MSG_BWMIX_COLORCAST;흑백 - 단색 (Tint)
+HISTORY_MSG_BWMIX_COLORCAST;흑백 - 착색의 색조 (Tint)
 HISTORY_MSG_SATURATION_VIBRANCE;채도/바이브런스 - 바이브런스 (Vibrance)
 HISTORY_MSG_LOCALCONTRAST_LIST;부분 대비 - 영역
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;부분 대비 - H 마스크
@@ -515,6 +518,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - 영역 마스크 흐림 (Blur)
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - 어두움/인상 (lift)
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - 피벗 (pivot)
 HISTORY_MSG_COLORCORRECTION_POWER;CC - 중간 톤/감마
+HISTORY_MSG_COLORCORRECTION_COMPRESSION;CC - 압축
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - 휘도방식
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - 입력채도 (saturation)
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - 출력 채도 (saturation)
@@ -568,7 +572,7 @@ HISTORY_MSG_GRAIN_STRENGTH;필름 효과 - 강도
 HISTORY_MSG_GRAIN_SCALE;필름 효과 - 크기 (Scale)
 HISTORY_MSG_HISTMATCHING;톤 곡선 자동조정
 HISTORY_MSG_HSL_SMOOTHING;색 이퀄라이저 - 매끄럽게 하기
-HISTORY_MSG_ICM_INPUT_CAT;프로파일 입력 - 색순응 (CAT)
+HISTORY_MSG_ICM_INPUT_CAT;프로파일 입력 - 색순응변환 (CAT)
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;출력 - Primaries
 HISTORY_MSG_ICM_OUTPUT_TEMP;출력 - ICC-v4 광원 D
 HISTORY_MSG_ICM_OUTPUT_TYPE;출력 - 현식
@@ -645,6 +649,8 @@ HISTORY_MSG_SMOOTHING_ANGLE;매끄럽게 하기 - 각도 (angle)
 HISTORY_MSG_SMOOTHING_CURVATURE;매끄럽게 하기 - 곡률 (curvature)
 HISTORY_MSG_SMOOTHING_OFFSET;매끄럽게 하기 - Offset
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;매끄럽게 하기 - 마스크 추가 처리
+HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;매끄럽게 하기 - 노이즈 강화
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;매끄럽게 하기 - 거칠기 가공
 HISTORY_MSG_SOFTLIGHT_ENABLED;소프트라이트
 HISTORY_MSG_SOFTLIGHT_STRENGTH;소프트라이트 - 강도
 HISTORY_MSG_SPOT;스팟 제거
@@ -1247,7 +1253,7 @@ SAVEDLG_SUBSAMP_TOOLTIP;최고 압축률:\nJ:a:b 4:2:0\nh/v 2/2\n크로마 (색�
 SAVEDLG_TIFFUNCOMPRESSED;비압축 TIFF
 SAVEDLG_WARNFILENAME;파일에 이름을 붙입니다.
 SHCSELECTOR_TOOLTIP;이 세개 슬라이더 위치를 리셋하려면 \n마우스의 오른쪽버튼을 클릭함
-SOFTPROOF_GAMUTCHECK_TOOLTIP;유효화하면 출력 프로파일 색역외 색깔의  픽셀을 회색으로 표시합니다.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;유효화하면 출력 프로파일 색역외 색깔의  픽셀을 하이라이트로 표시합니다.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;이하 프로파일의 색공간외 픽셀을 하이라이트로 표시합니다.:\n- 출력 사진 미리 보기가 유효인 경우 출력 사진 미리 보기 프로파일,\n- 출력 사진 미리 보기가 무효인 경우, 모니터 프로파일.
 SOFTPROOF_TOOLTIP;출력 사진 미리 보기는 특정의 인쇠기나 모니터 출력 이미지를 모방합니다.\n단, 환경 설정>색관리에서 적절한 프로파일을 설정할 필요가 있습니다.\n(출력 사진 미리 보기 프로파일을변경하려려면  <b>Ctrl</b> 을 누루면서 크릭하세요)
 THRESHOLDSELECTOR_B;아래
@@ -1268,7 +1274,7 @@ TP_SATURATION_LABEL;채도/바이브런스
 TP_BRIGHTCONTRSAT_CONTRAST;대비
 TP_SATURATION_SATURATION;채도 (Saturation)
 TP_SATURATION_VIBRANCE;바이브런스 (Vibrance)
-TP_BWMIX_COLORCAST;단색 (Tint)
+TP_BWMIX_COLORCAST;착색의 색조 (Tint)
 TP_BWMIX_HUE;색조 (Hue)
 TP_BWMIX_SATURATION;채도 (Saturation)
 TP_BWMIX_FILTER;색 필터
@@ -1340,6 +1346,7 @@ TP_COLORCORRECTION_LIST_TITLE;보정
 TP_COLORCORRECTION_OFFSET;어두움 영역/인상 (Lift)
 TP_COLORCORRECTION_PIVOT;피벗 (Pivot)
 TP_COLORCORRECTION_POWER;중간 톤 영역/감마
+TP_COLORCORRECTION_COMPRESSION;압축
 TP_COLORCORRECTION_RGBLUMINANCE;휘도방식
 TP_COLORCORRECTION_SATURATION;채도 (Saturation)
 TP_COLORCORRECTION_SLOPE;하이라이트 영역/증폭 (Gain)
@@ -1437,11 +1444,11 @@ TP_EPD_LIST_TITLE;매개 변수
 TP_EPD_SCALE;척도
 TP_EPD_ITERATIONS;반복 (Iterations)
 TP_EPD_STRENGTH;강도
-TP_EXPOSURE_BLACK;블랙 포인트보정 (compensation)
+TP_EXPOSURE_BLACK;블랙 포인트 보정
 TP_EXPOSURE_CURVEEDITOR1;톤 곡선1
 TP_EXPOSURE_CURVEEDITOR2;톤 곡선2
 TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;두개의 톤 곡선으로 좋은 결과를 남기려면 RawPedia의“노출＞톤 곡선”를 참고하세요.
-TP_EXPOSURE_EXPCOMP;노출보정 (Exposure compensation)
+TP_EXPOSURE_EXPCOMP;노출보정
 TP_EXPOSURE_HISTMATCHING;톤 곡선의 자동조정
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;포함된 JPEG 썸네일에 가까은 보기로 표시하기 위해,슬라이더나 커브 (단, 노출보정을 제외) 를 자동적으로 조정합니다.
 TP_EXPOSURE_HRBLUR;색 파급 (Color propagation) 의 원활함
@@ -1545,7 +1552,7 @@ TP_ICM_SAVEREFERENCE_TOOLTIP;입력 프로파일이 적용되기 전의 선형TI
 TP_ICM_TONECURVE;DCP톤 곡선 사용
 TP_ICM_TONECURVE_TOOLTIP;DCP 프로파일에 있는 톤 곡선를 사용할 수 있습니다.
 TP_ICM_WORKINGPROFILE;작업 프로파일
-TP_ICM_INPUT_CAT;색순응 (chromatic adaptation: CAT) 적용
+TP_ICM_INPUT_CAT;색순응변환 (CAT) 적용
 TP_IMPULSEDENOISE_LABEL;임펄스 노이즈 감소
 TP_IMPULSEDENOISE_THRESH;임계 값
 TP_LABCURVE_BRIGHTNESS;밝기
@@ -1664,7 +1671,7 @@ TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;형상： 0=네모、50=타원형、100=원형
 TP_PCVIGNETTE_STRENGTH;강도
 TP_PCVIGNETTE_STRENGTH_TOOLTIP;중점위치에서의 필터의 강도 (모서리)
 TP_PERSPECTIVE_ANGLE;각도
-TP_PERSPECTIVE_ASPECT;가로세로비 (Aspect) 조정
+TP_PERSPECTIVE_ASPECT;종횡비 조정
 TP_PERSPECTIVE_AUTO;자동보정
 TP_PERSPECTIVE_AUTO_BOTH_TOOLTIP;수평 및 수직
 TP_PERSPECTIVE_AUTO_HORIZONTAL_TOOLTIP;수평
@@ -1847,6 +1854,8 @@ TP_SMOOTHING_MODE_GAUSSIAN_GLOW;광선 효과 (Glow)
 TP_SMOOTHING_MODE_NLMEANS;비국소평균 (Non-local means)
 TP_SMOOTHING_MODE_LENS;렌즈 흐림 효과
 TP_SMOOTHING_MODE_MOTION;모션 블러 (Motion blur)
+TP_SMOOTHING_MODE_NOISE;노이즈 추가
+TP_SMOOTHING_NOISE_COARSENESS;거칠기 가공
 TP_SMOOTHING_CHANNEL;채널
 TP_SMOOTHING_CHANNEL_L;밝기
 TP_SMOOTHING_CHANNEL_C;색차 (Chrominance)
@@ -1906,7 +1915,7 @@ TP_WBALANCE_CUSTOM;색 온도 조정
 TP_WBALANCE_CUSTOM_MULT;RGB승수 조정
 TP_WBALANCE_EQBLUERED;Blue／Red 이퀄라이저
 TP_WBALANCE_EQBLUERED_TOOLTIP;BBlue와 Red를 조정함으로, 화이트 밸런스를 보통과 다른 것으로 설정합니다.\n이 것은 다음과 같은 촬영조건의 경우에  도우미 됩니다.：\na) 광원이 표준적인 것과 크게 다른 경우（예、수중）\nb) 캘리브레이션 범위에서 크게 일탈한 경우\nc) 컬러 매트릭스나 ICC 프로파일이 부적절한 경우
-TP_WBALANCE_GREEN;색편차 (Tint)
+TP_WBALANCE_GREEN;색조 (Tint) 보정
 TP_WBALANCE_LABEL;화이트 밸런스
 TP_WBALANCE_METHOD;방식
 TP_WBALANCE_PICKER;찾기

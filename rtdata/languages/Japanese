@@ -1,3 +1,18 @@
+#00 Japan - Japanese
+#01 2021-08-29 Ohnishi, Yasuo, initial translation for 1.9.3
+#02 2021-08-30 Ohnishi, Yasuo, some fixes
+#03 2021-08-31 Ohnishi, Yasuo, some fixes
+#04 2021-09-01 Ohnishi, Yasuo, some fixes
+#05 2021-09-05 Ohnishi, Yasuo, some fixes
+#06 2021-09-09 Ohnishi, Yasuo, some fixes
+#07 2021-10-06 Ohnishi, Yasuo, some fixes
+#08 2021-10-07 Ohnishi, Yasuo, updated for 1.10
+#09 2021-10-11 Ohnishi, Yasuo, updated
+#10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
+#11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
+#12 2021-12-23 Ohnishi, Yasuo, updated for 1.12
+#13 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
+#14 2022-03-20 Ohnishi, Yasuo, some fixes and updates
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -11,7 +26,7 @@ CURVEEDITOR_AXIS_RIGHT_TAN;RT:
 CURVEEDITOR_CATMULLROM;フレキシブル
 CURVEEDITOR_CURVE;カーブ
 CURVEEDITOR_CURVES;カーブ
-CURVEEDITOR_CUSTOM;カスタム
+CURVEEDITOR_CUSTOM;スタンダード
 CURVEEDITOR_DARKS;ダーク
 CURVEEDITOR_EDITPOINT_HINT;ボタンを押すと数値で入出力を編集出来ます\n\n編集したいカーブ上のポイントを右クリックします\n編集を無効にする場合はポイント以外の部分で右クリックします
 CURVEEDITOR_HIGHLIGHTS;ハイライト
@@ -267,7 +282,7 @@ HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;波形 (Waveform)
 HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;色相-彩度 (Chroma) ベクトルスコープ (Vectorscope)
 HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;色相-彩度 (Saturation) ベクトルスコープ (Vectorscope)
 HISTORY_CHANGED;変更されました
-HISTORY_CUSTOMCURVE;カスタムカーブ
+HISTORY_CUSTOMCURVE;スタンダードカーブ
 HISTORY_FROMCLIPBOARD;クリップボードから
 HISTORY_LABEL;履歴
 HISTORY_MSG_1;写真を読み込みました
@@ -300,7 +315,7 @@ HISTORY_MSG_35;周辺光量補正
 HISTORY_MSG_36;色収差補正
 HISTORY_MSG_38;ホワイトバランス モード
 HISTORY_MSG_39;色温度
-HISTORY_MSG_40;色偏差
+HISTORY_MSG_40;色合い補正
 HISTORY_MSG_41;トーンカーブ1のモード
 HISTORY_MSG_42;トーンカーブ 2
 HISTORY_MSG_43;トーンカーブ2のモード
@@ -484,7 +499,7 @@ HISTORY_MSG_490;DRC - 量
 HISTORY_MSG_491;ホワイトバランス
 HISTORY_MSG_492;RGBカーブ
 HISTORY_MSG_493;L*a*b*調整
-HISTORY_MSG_BWMIX_COLORCAST;白黒 - 単色カラー (Tint)
+HISTORY_MSG_BWMIX_COLORCAST;白黒 - 着色の色合い (Tint)
 HISTORY_MSG_SATURATION_VIBRANCE;彩度/自然な彩度 - 自然な彩度 (Vibrance)
 HISTORY_MSG_LOCALCONTRAST_LIST;ローカルコントラスト - 領域
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;ローカルコントラスト - 色相マスク
@@ -512,6 +527,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - 領域マスクぼかし (Blur)
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - シャドー/引上げ (lift)
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - ピボット (pivot)
 HISTORY_MSG_COLORCORRECTION_POWER;CC - ミッドトーン/ガンマ
+HISTORY_MSG_COLORCORRECTION_COMPRESSION;CC - 圧縮
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - 輝度モード
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - 入力彩度 (saturation)
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - 出力彩度 (saturation)
@@ -565,7 +581,7 @@ HISTORY_MSG_GRAIN_STRENGTH;フィルム粒状効果 - 強さ
 HISTORY_MSG_GRAIN_SCALE;フィルム粒状効果 - 大きさ (Scale)
 HISTORY_MSG_HISTMATCHING;トーンカーブの自動調節
 HISTORY_MSG_HSL_SMOOTHING;カラーイコライザ - スムージング
-HISTORY_MSG_ICM_INPUT_CAT;プロファイル入力 - 色順応 (CAT)
+HISTORY_MSG_ICM_INPUT_CAT;プロファイル入力 - 色順応変換 (CAT)
 HISTORY_MSG_ICM_OUTPUT_PRIMARIES;出力 - プライマリ
 HISTORY_MSG_ICM_OUTPUT_TEMP;出力 - ICC-v4 光源 D
 HISTORY_MSG_ICM_OUTPUT_TYPE;出力 - タイプ
@@ -642,6 +658,8 @@ HISTORY_MSG_SMOOTHING_ANGLE;スムージング - アングル (angle)
 HISTORY_MSG_SMOOTHING_CURVATURE;スムージング - 曲率 (curvature)
 HISTORY_MSG_SMOOTHING_OFFSET;スムージング - オフセット
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;スムージング - マスク追加処理
+HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;スムージング - ノイズ強化
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;スムージング - ノイズ ざらつき加工
 HISTORY_MSG_SOFTLIGHT_ENABLED;ソフトライト
 HISTORY_MSG_SOFTLIGHT_STRENGTH;ソフトライト - 強さ
 HISTORY_MSG_SPOT;スポット削除
@@ -1244,7 +1262,7 @@ SAVEDLG_SUBSAMP_TOOLTIP;圧縮率重視:\nJ:a:b 4:2:0\nh/v 2/2\n色差 (Chroma) 
 SAVEDLG_TIFFUNCOMPRESSED;非圧縮 TIFF
 SAVEDLG_WARNFILENAME;ファイルに名前が付けられます
 SHCSELECTOR_TOOLTIP;この3つのスライダーの位置をリセットするには\nマウスの右ボタンをクリック
-SOFTPROOF_GAMUTCHECK_TOOLTIP;有効にすると 出力プロファイル色域外の色のピクセルをグレーで表示します
+SOFTPROOF_GAMUTCHECK_TOOLTIP;有効にすると 出力プロファイル色域外の色のピクセルをハイライトで表示します
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;以下に関して色空間外のピクセルをハイライト表示します:\n- ソフトプルーフィングが有効な場合, ソフトプルーフィングプロファイル,\n- ソフトプルーフィングが無効な場合, モニタープロファイル
 SOFTPROOF_TOOLTIP;ソフトプルーフィングは特定のプリンターもしくはモニターでのイメージをシミュレートします. \n但し 環境設定>カラーマネジメントでそれらに合った適切なプロファイルを設定する必要があります.\n(ソフトプルーフィングプロファイルを変更するには <b>Ctrl</b> を押しながらクリックしてください)
 THRESHOLDSELECTOR_B;下
@@ -1265,7 +1283,7 @@ TP_SATURATION_LABEL;彩度/自然な彩度
 TP_BRIGHTCONTRSAT_CONTRAST;コントラスト
 TP_SATURATION_SATURATION;彩度 (Saturation)
 TP_SATURATION_VIBRANCE;自然な彩度 (Vibrance)
-TP_BWMIX_COLORCAST;単色カラー (Tint)
+TP_BWMIX_COLORCAST;着色の色合い (Tint)
 TP_BWMIX_HUE;色相
 TP_BWMIX_SATURATION;彩度 (Saturation)
 TP_BWMIX_FILTER;カラーフィルター
@@ -1337,6 +1355,7 @@ TP_COLORCORRECTION_LIST_TITLE;補正
 TP_COLORCORRECTION_OFFSET;シャドウ/引上げ (Lift)
 TP_COLORCORRECTION_PIVOT;ピボット (Pivot)
 TP_COLORCORRECTION_POWER;ミッドトーン/ガンマ
+TP_COLORCORRECTION_COMPRESSION;圧縮
 TP_COLORCORRECTION_RGBLUMINANCE;輝度モード
 TP_COLORCORRECTION_SATURATION;彩度 (Saturation)
 TP_COLORCORRECTION_SLOPE;ハイライト/増幅 (Gain)
@@ -1434,11 +1453,11 @@ TP_EPD_LIST_TITLE;パラメータ
 TP_EPD_SCALE;スケール
 TP_EPD_ITERATIONS;反復
 TP_EPD_STRENGTH;強さ
-TP_EXPOSURE_BLACK;ブラックポイント補正 (compensation)
+TP_EXPOSURE_BLACK;ブラックポイント補正
 TP_EXPOSURE_CURVEEDITOR1;トーンカーブ1
 TP_EXPOSURE_CURVEEDITOR2;トーンカーブ2
 TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;2つのトーンカーブで最良の結果を得るためには RawPediaの“露出＞トーンカーブ”を参照して下さい.
-TP_EXPOSURE_EXPCOMP;露出補正 (Exposure compensation)
+TP_EXPOSURE_EXPCOMP;露出補正
 TP_EXPOSURE_HISTMATCHING;トーンカーブの自動調節
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;埋め込まれているJPEGサムネイルに近い映りを表示するために スライダーやカーブ (但し露出補正を除く) を自動的に調整します.
 TP_EXPOSURE_HRBLUR;色の波及 (Color propagation) のスムーズさ
@@ -1542,7 +1561,7 @@ TP_ICM_SAVEREFERENCE_TOOLTIP;入力プロファイルが適用される前のリ
 TP_ICM_TONECURVE;DCPトーンカーブ使用
 TP_ICM_TONECURVE_TOOLTIP;DCPのプロファイルに含まれているトーンカーブを使用することができます
 TP_ICM_WORKINGPROFILE;作業プロファイル
-TP_ICM_INPUT_CAT;色順応 (chromatic adaptation: CAT) の適用
+TP_ICM_INPUT_CAT;色順応変換 (CAT) の適用
 TP_IMPULSEDENOISE_LABEL;インパルスノイズ低減
 TP_IMPULSEDENOISE_THRESH;閾値
 TP_LABCURVE_BRIGHTNESS;明度
@@ -1661,7 +1680,7 @@ TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;形状: 0=長方形 50=楕円形 100=円形
 TP_PCVIGNETTE_STRENGTH;強さ
 TP_PCVIGNETTE_STRENGTH_TOOLTIP;終点位置でのフィルターの強さ（四隅）
 TP_PERSPECTIVE_ANGLE;アングル
-TP_PERSPECTIVE_ASPECT;アスペクト (Aspect) 調整
+TP_PERSPECTIVE_ASPECT;縦横比調整
 TP_PERSPECTIVE_AUTO;自動補正
 TP_PERSPECTIVE_AUTO_BOTH_TOOLTIP;水平および垂直
 TP_PERSPECTIVE_AUTO_HORIZONTAL_TOOLTIP;水平
@@ -1844,6 +1863,8 @@ TP_SMOOTHING_MODE_GAUSSIAN_GLOW;グロー(光線)効果
 TP_SMOOTHING_MODE_NLMEANS;非局所平均 (Non-local means)
 TP_SMOOTHING_MODE_LENS;レンズぼけ効果
 TP_SMOOTHING_MODE_MOTION;ぶれ効果 (Motion blur)
+TP_SMOOTHING_MODE_NOISE;ノイズ追加
+TP_SMOOTHING_NOISE_COARSENESS;ざらつき加工
 TP_SMOOTHING_CHANNEL;チャンネル
 TP_SMOOTHING_CHANNEL_L;輝度
 TP_SMOOTHING_CHANNEL_C;色信号 (Chrominance)
@@ -1903,7 +1924,7 @@ TP_WBALANCE_CUSTOM;色温度調整
 TP_WBALANCE_CUSTOM_MULT;RGB乗数調整
 TP_WBALANCE_EQBLUERED;ブルー／レッド イコライザ
 TP_WBALANCE_EQBLUERED_TOOLTIP;ブルーとレッドを調整することで ホワイトバランスの作用を通常とは異なるものにします. \nこれは次のような撮影条件の場合に役立つでしょう:\na) 光源が標準的なものと大きく異なる場合（例: 水中）\nb) キャリブレーションの範囲から大きく外れている場合\nc) カラーマトリクスやICCプロファイルが不適当な場合
-TP_WBALANCE_GREEN;色偏差 (Tint)
+TP_WBALANCE_GREEN;色合い (色偏差/Tint)
 TP_WBALANCE_LABEL;ホワイトバランス
 TP_WBALANCE_METHOD;モード
 TP_WBALANCE_PICKER;ピックアップ
