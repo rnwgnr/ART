@@ -258,6 +258,10 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         if (find_tag(Exiv2::lensName)) {
             lens = pos->print(&exif);
+            if (pos->count() == 1 && lens == std::to_string(pos->toLong()) &&
+                find_exif_tag("Exif.Photo.LensModel")) {
+                lens = pos->print(&exif);
+            }
         } else if (find_exif_tag("Exif.Photo.LensSpecification") && pos->count() == 4) {
             const auto round =
                 [](float f) -> float
