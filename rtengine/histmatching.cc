@@ -351,7 +351,7 @@ public:
 
         for (int y = 0; y < img_.height(); ++y) {
             for (int x = 0; x < img_.width(); ++x) {
-                int l = c.getVal(img_[y][x]) * 255.f;
+                int l = LIM01(c.getVal(img_[y][x])) * 255.f;
                 ++hist[l];
             }
         }
