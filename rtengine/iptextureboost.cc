@@ -28,6 +28,7 @@
 #include "guidedfilter.h"
 #include "rescale.h"
 #include "gauss.h"
+#include "rt_algo.h"
 
 namespace rtengine {
 
@@ -126,14 +127,25 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     vfloat vminval = F2V(minval);
 #endif
 
+    std::unique_ptr<Convolution> gaussian_blur;
+    if (!isguided && scale == 1) {
+        array2D<float> kernel;
+        build_gaussian_kernel(fradius, kernel);
+        gaussian_blur.reset(new Convolution(kernel, W, H, multithread));
+    }
+
     for (int i = 0; i < pp.iterations; ++i) {
         if (isguided) {
             guidedFilter(mid, mid, mid, radius, epsilon, multithread);
         } else {
+            if (scale == 1) {
+                (*gaussian_blur)(mid, mid);
+            } else {
 #ifdef _OPENMP
-#           pragma omp parallel if (multithread)
+#               pragma omp parallel if (multithread)
 #endif
-            gaussianBlur(mid, mid, W, H, fradius);
+                gaussianBlur(mid, mid, W, H, fradius);
+            }
         }
         guidedFilter(mid, mid, base, radius * 4, epsilon / 10.f, multithread);
 
