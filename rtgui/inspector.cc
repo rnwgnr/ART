@@ -633,6 +633,7 @@ void Inspector::on_pressed(rtengine::Coord2D pos)
 void Inspector::on_released()
 {
     if (temp_zoom_11_) {
+        temp_zoom_11_ = false;
         ConnectionBlocker block1(zoomfitconn_);
         zoomfit_->set_active(true);
         do_toggle_zoom(zoomfit_);
