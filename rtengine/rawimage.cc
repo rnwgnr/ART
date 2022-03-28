@@ -645,7 +645,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (dng_version) {
                 RT_whitelevel_from_constant = ThreeValBool::F;
                 RT_blacklevel_from_constant = ThreeValBool::F;
-                if (!cam_mul[0]) {
+                if (!isBayer() && !isXtrans()) {
                     RT_matrix_from_constant = ThreeValBool::F;
                 }
             } else if (strcmp(make, "Panasonic") != 0) {
