@@ -34,9 +34,10 @@ namespace rtengine {
 
 namespace {
 
-void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostParams::Region &pp, double scale, bool multithread)
+void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostParams::Region &pp, double scale, bool multithread, bool high_detail)
 {
-    float fradius = pp.detailThreshold * 3.5f / scale;
+    float full_radius = pp.detailThreshold * 3.5f;
+    float fradius = full_radius / scale;
     int radius = std::max(int(fradius + 0.5f), 1);
     float delta = radius / fradius;
 
@@ -45,7 +46,8 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     float strength = s >= 0 ? 1.f + s : 1.f / (1.f - s);
     float strength2 = s >= 0 ? 1.f + s / 4.f: 1.f / (1.f - s / 2.f);
 
-    bool isguided = fradius >= 1.f;
+    //bool isguided = fradius >= 1.f;
+    bool isguided = full_radius >= 1.f;
 
     int W = Y.width();
     int H = Y.height();
@@ -63,35 +65,10 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     array2D<float> mid(W, H, ARRAY2D_ALIGNED);
     array2D<float> base(W, H, ARRAY2D_ALIGNED);
 
-    const auto scurve =
-        s >= 0 ? 
-        [](float x) -> float
-        {
-            return 1.f;
-            x = std::min(x / 0.05f, 1.f);
-            return x < 0.5f ? 2.f * SQR(x) : 1.f - 2.f * SQR(1.f - x);
-        }
-        :
-        [](float x) -> float
-        {
-            return 1.f;
-        };
-        
-
 #ifdef __SSE2__
     const vfloat v65535 = F2V(65535.f);
     const vfloat vstrength = F2V(strength);
     const vfloat vstrength2 = F2V(strength2);
-
-    const auto vscurve =
-        [&](float *x, vfloat &out) -> void
-        {
-            float ret[4];
-            for (int i = 0; i < 4; ++i) {
-                ret[i] = scurve(*(x+i));
-            }
-            out = LVFU(ret[0]);
-        };
 #endif
 
     float minval = RT_INFINITY;
@@ -128,7 +105,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
 #endif
 
     std::unique_ptr<Convolution> gaussian_blur;
-    if (!isguided && scale == 1) {
+    if (!isguided && high_detail) {
         array2D<float> kernel;
         build_gaussian_kernel(fradius, kernel);
         gaussian_blur.reset(new Convolution(kernel, W, H, multithread));
@@ -138,7 +115,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
         if (isguided) {
             guidedFilter(mid, mid, mid, radius, epsilon, multithread);
         } else {
-            if (scale == 1) {
+            if (high_detail) {
                 (*gaussian_blur)(mid, mid);
             } else {
 #ifdef _OPENMP
@@ -161,9 +138,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 vfloat vb = LVFU(base[y][x]);
                 vfloat d = (vy - vm) * vstrength;
                 vfloat d2 = (vm - vb) * vstrength2;
-                vfloat vblend;
-                vscurve((*src)[y] + x, vblend);
-                STVFU((*src)[y][x], intp(vblend, vmaxf(vb + d + d2, vminval), vy));
+                STVFU((*src)[y][x], vmaxf(vb + d + d2, vminval));
             }
 #endif
             for (; x < W; ++x) {
@@ -172,8 +147,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 d *= strength;
                 float d2 = mid[y][x] - base[y][x];
                 d2 *= strength2;
-                float blend = scurve(v);
-                (*src)[y][x] = intp(blend, std::max(base[y][x] + d + d2, minval), v);
+                (*src)[y][x] = std::max(base[y][x] + d + d2, minval);
             }
         }
     }
@@ -233,10 +207,11 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
             return true; // show mask is active, nothing more to do
         }
 
-        rgb->setMode(Imagefloat::Mode::YUV, multiThread);
-
         const int W = rgb->getWidth();
         const int H = rgb->getHeight();
+
+        rgb->setMode(Imagefloat::Mode::YUV, multiThread);
+
         array2D<float> Y(W, H, rgb->g.ptrs, ARRAY2D_ALIGNED);
 
         for (int i = 0; i < n; ++i) {
@@ -245,7 +220,7 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
             }
             
             auto &r = params->textureBoost.regions[i];
-            texture_boost(Y, r, scale, multiThread);
+            texture_boost(Y, r, scale, multiThread, scale == 1 || cur_pipeline == Pipeline::OUTPUT);
             const auto &blend = mask[i];
 
 #ifdef _OPENMP
