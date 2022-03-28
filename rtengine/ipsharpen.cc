@@ -45,7 +45,7 @@ extern const Settings *settings;
 namespace {
 
 
-template <bool reverse, bool usm>
+template <bool reverse>
 void apply_gamma(float **Y, int W, int H, float pivot, float gamma, bool multiThread)
 {
     BENCHFUN
@@ -59,9 +59,7 @@ void apply_gamma(float **Y, int W, int H, float pivot, float gamma, bool multiTh
     const float d = 65535.f * pivot;
     for (int i = 1; i < 65536; ++i) {
         glut[i] = pow_F(float(i)/d, gamma) * pivot;
-        if (reverse || usm) {
-            glut[i] *= 65535.f;
-        }
+        glut[i] *= 65535.f;
     }
         
 #ifdef _OPENMP
@@ -71,15 +69,10 @@ void apply_gamma(float **Y, int W, int H, float pivot, float gamma, bool multiTh
         for (int x = 0; x < W; ++x) {
             float l = Y[y][x];
             if (LIKELY(l >= 0.f && l < 65536.f)) {
-                if (reverse && !usm) {
-                    l *= 65535.f;
-                }
                 l = glut[l];
             } else {
                 l = pow_F(std::max(l / d, 1e-18f), gamma) * pivot;
-                if (reverse || usm) {
-                    l *= 65535.f;
-                }
+                l *= 65535.f;
             }
             Y[y][x] = l;
         }
@@ -157,7 +150,6 @@ void deconvsharpening(float **luminance, float **blend, char **impulse, int W, i
         return;
     }
 BENCHFUN
-    //apply_gamma<false, false>(luminance, W, H, 0.18f, 3.f, multiThread);
 
     const int maxiter = 20;
     const float delta_factor = 0.2f;
@@ -237,15 +229,13 @@ BENCHFUN
             }
         }
     }
-
-    //apply_gamma<true, false>(luminance, W, H, 0.18f, 3.f, multiThread);    
 }
 
 
 void unsharp_mask(float **Y, float **blend, int W, int H, const SharpeningParams &sharpenParam, double scale, bool multiThread)
 {
 BENCHFUN
-    apply_gamma<false, true>(Y, W, H, 1.f, 3.f, multiThread);
+    apply_gamma<false>(Y, W, H, 1.f, 3.f, multiThread);
 
     float** b3 = nullptr;
 
@@ -321,7 +311,7 @@ BENCHFUN
         delete [] b3;
     }
 
-    apply_gamma<true, true>(Y, W, H, 1.f, 3.f, multiThread);
+    apply_gamma<true>(Y, W, H, 1.f, 3.f, multiThread);
 }
 
 
