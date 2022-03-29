@@ -82,6 +82,7 @@ public:
     bool getPixelShift () const override { return f()->getPixelShift(); }
     bool getHDR() const override { return f()->getHDR(); }
     std::string getImageType() const override { return f()->getImageType(); }
+    std::string getSoftware() const override { return f()->getSoftware(); }
     rtengine::IIOSampleFormat getSampleFormat() const override { return f()->getSampleFormat(); }
     int getRating() const override { return f()->getRating(); }
     std::vector<rtengine::GainMap> getGainMaps() const override { return f()->getGainMaps(); }

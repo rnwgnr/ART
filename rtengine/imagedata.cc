@@ -77,6 +77,7 @@ FramesData::FramesData(const Glib::ustring &fname):
     model("Unknown"),
     orientation("Unknown"),
     lens("Unknown"),
+    software(""),
     sampleFormat(IIOSF_UNKNOWN),
     isPixelShift(false),
     isHDR(false),
@@ -186,6 +187,10 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         if (make.length() > 0 && model.find(make + " ") == 0) {
             model = model.substr(make.length() + 1);
+        }
+
+        if (find_exif_tag("Exif.Image.Software")) {
+            software = pos->print();
         }
 
         if (find_tag(Exiv2::exposureTime)) {
@@ -608,6 +613,12 @@ bool FramesData::getHDR() const
 std::string FramesData::getImageType() const
 {
     return isPixelShift ? "PS" : isHDR ? "HDR" : "STD";
+}
+
+
+std::string FramesData::getSoftware() const
+{
+    return software;
 }
 
 

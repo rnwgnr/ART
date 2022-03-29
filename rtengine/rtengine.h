@@ -109,6 +109,8 @@ public:
     /** @return the sample format based on MetaData */
     virtual IIOSampleFormat getSampleFormat() const = 0;
 
+    virtual std::string getSoftware() const = 0;
+
     /** Functions to convert between floating point and string representation of shutter and aperture */
     static std::string apertureToString (double aperture);
     /** Functions to convert between floating point and string representation of shutter and aperture */
