@@ -948,6 +948,9 @@ SAMSUNG GALAXY Z FOLD3 REAR MAIN CAMERA
 SAMSUNG GALAXY Z FOLD3 REAR TELEPHOTO CAMERA
 SAMSUNG GALAXY Z FOLD3 REAR ULTRAWIDE CAMERA
 SONY ILCE-7M4
+
+Updated on Fri Apr 01 Apr 13:26:00 2022 (with LibRaw)
+OLYMPUS OM-1
 */
 {"camera_constants": [
     {
@@ -3237,6 +3240,10 @@ SONY ILCE-7M4
     {
         "make_model" : "OLYMPUS E-PM2",
         "dcraw_matrix" : [8380, -2630, -639, -2887, 10725, 2496, -627, 1427, 5437]
+    },
+    {
+        "make_model" : "OLYMPUS OM-1",
+        "dcraw_matrix": [9488,	-3984, -714, -2887, 10945, 2229, -137, 960, 5786]
     },
     {
         "make_model" : "OLYMPUS PEN-F",
