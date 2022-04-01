@@ -67,6 +67,7 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Objectif
 EXIFFILTER_METADATAFILTER;Activer les filtres sur les métadonnées
 EXIFFILTER_SHUTTER;Vitesse d'obturation
+EXIFFILTER_SOFTWARE;Logiciel
 EXIFPANEL_ACTIVATE_ALL_HINT;Sélectionner toutes les étiquettes
 EXIFPANEL_ACTIVATE_NONE_HINT;Désélectionner toutes les étiquettes
 EXIFPANEL_ADDEDIT;Ajouter/Éditer
