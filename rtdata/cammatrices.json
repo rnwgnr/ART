@@ -3242,7 +3242,7 @@ OLYMPUS OM-1
         "dcraw_matrix" : [8380, -2630, -639, -2887, 10725, 2496, -627, 1427, 5437]
     },
     {
-        "make_model" : "OLYMPUS OM-1",
+        "make_model" : ["OLYMPUS OM-1", "OM DIGITAL SOLUTIONS OM-1"],
         "dcraw_matrix": [9488,	-3984, -714, -2887, 10945, 2229, -137, 960, 5786]
     },
     {
