@@ -14,7 +14,7 @@ def getdlls(opts):
 	## 'libX11.so.6',
 	## 'libXi.so.6',
 	## 'libXfixes.so.3',
-	## 'libfontconfig.so.1',
+	'libfontconfig.so.1',
 	## 'libXinerama.so.1',
 	## 'libXrandr.so.2',
 	## 'libXcursor.so.1',
@@ -30,7 +30,7 @@ def getdlls(opts):
 	## 'libfreetype.so.6',
 	## 'libXrender.so.1',
 	## 'libdbus-1.so.3',
-	'libselinux.so.1',
+	## 'libselinux.so.1',
 	## 'libmount.so.1',
 	## 'libXau.so.6',
 	## 'libXdmcp.so.6',
@@ -83,7 +83,7 @@ def extra_files(opts):
             D('/usr/share/glib-2.0/schemas/gschemas.compiled'),
         ]),
         ('share', [
-            (D('~/.local/share/lensfun/updates/version_2'), 'lensfun'),
+            (D('~/.local/share/lensfun/updates/version_1'), 'lensfun'),
         ]),
         ('lib', [
             D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so'),
