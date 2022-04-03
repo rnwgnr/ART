@@ -220,17 +220,19 @@ bool ImProcFunctions::textureBoost(Imagefloat *rgb)
             }
             
             auto &r = params->textureBoost.regions[i];
-            texture_boost(Y, r, scale, multiThread, scale == 1 || cur_pipeline == Pipeline::OUTPUT);
-            const auto &blend = mask[i];
+            if (r.strength != 0) {
+                texture_boost(Y, r, scale, multiThread, scale == 1 || cur_pipeline == Pipeline::OUTPUT);
+                const auto &blend = mask[i];
 
 #ifdef _OPENMP
-#           pragma omp parallel for if (multiThread)
+#               pragma omp parallel for if (multiThread)
 #endif
-            for (int y = 0; y < H; ++y) {
-                for (int x = 0; x < W; ++x) {
-                    float &YY = rgb->g(y, x);
-                    YY = intp(blend[y][x], Y[y][x], YY);
-                    Y[y][x] = YY;
+                for (int y = 0; y < H; ++y) {
+                    for (int x = 0; x < W; ++x) {
+                        float &YY = rgb->g(y, x);
+                        YY = intp(blend[y][x], Y[y][x], YY);
+                        Y[y][x] = YY;
+                    }
                 }
             }
         }
