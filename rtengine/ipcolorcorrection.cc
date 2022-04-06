@@ -384,27 +384,27 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 }
             } else {
                 if (enabled[region]) {
-                    float v = (Y / 65535.f) * slope[0] + offset[0]/2.f;
-                    if (v > 0.f) {
+                    float YY = (Y / 65535.f) * slope[0] + offset[0]/2.f;
+                    if (YY > 0.f) {
                         if (pivot[0] != 1.f) {
-                            v = pow_F(v / pivot[0], power[0]) * pivot[0];
+                            YY = pow_F(YY / pivot[0], power[0]) * pivot[0];
                         } else {
-                            v = pow_F(v, power[0]);
+                            YY = pow_F(YY, power[0]);
                         }
                         if (compression[0][0] != 0.f) {
-                            v = xlogf(v * compression[0][0] + 1.f) / compression[0][1];
+                            YY = xlogf(YY * compression[0][0] + 1.f) / compression[0][1];
                         }
-                        v *= 65535.f;
+                        YY *= 65535.f;
                     } else {
-                        v = 0.f;
+                        YY = 0.f;
                     }
                     if (Y > 0.f) {
-                        float f = v / Y;
-                        Y = v;
+                        float f = YY / Y;
+                        Y = YY;
                         u *= f;
                         v *= f;
                     } else {
-                        Y = v;
+                        Y = YY;
                     }
                 }
 
