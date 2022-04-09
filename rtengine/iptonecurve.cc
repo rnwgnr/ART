@@ -161,7 +161,8 @@ std::unique_ptr<Curve> get_contrast_curve(Imagefloat *rgb, const ImProcData &im,
     
     if (contrast) {
         const double pivot = (im.params->logenc.enabled ? im.params->logenc.targetGray / 100.0 : 0.18) / whitept;
-        const double b = contrast > 0 ? (1 + contrast * 0.125) : 1.0 / (1 - contrast * 0.125);
+        const double c = std::pow(std::abs(contrast) / 100.0, 1.5) * 16.0;
+        const double b = contrast > 0 ? (1 + c) : 1.0 / (1 + c);
         const double a = std::log((std::exp(std::log(b) * pivot) - 1) / (b - 1)) / std::log(pivot);
 
         ccurve.reset(new ContrastCurve(a, b, whitept));

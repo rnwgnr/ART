@@ -4295,7 +4295,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             if (keyFile.has_group("ToneCurve") && RELEVANT_(toneCurve)) {
                 assignFromKeyfile(keyFile, "ToneCurve", "Enabled", toneCurve.enabled);
-                assignFromKeyfile(keyFile, "ToneCurve", "Contrast", toneCurve.contrast);
+                if (assignFromKeyfile(keyFile, "ToneCurve", "Contrast", toneCurve.contrast) && ppVersion < 1034) {
+                    double c = std::pow(std::abs(toneCurve.contrast) * 0.125 / 16.0, 1.0/1.5) * 100;
+                    toneCurve.contrast = SGN(toneCurve.contrast) * int(c + 0.5);
+                }
                 if (assignFromKeyfile(keyFile, "ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode)) {
                     toneCurve.curveMode2 = toneCurve.curveMode;
                 }

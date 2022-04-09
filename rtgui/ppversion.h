@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1033
+#define PPVERSION 1034
 
 /*
   Log of version changes
+  1034  2022-04-09
+        changed behaviour of the tone curve contrast slider
   1033  2022-02-23
         added compression sliders to the color correction tool
   1032  2022-02-17
