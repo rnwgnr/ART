@@ -2548,7 +2548,7 @@ ColorManagementParams::ColorManagementParams() :
     outputProfile(options.rtSettings.srgb),
     outputIntent(RI_RELATIVE),
     outputBPC(true),
-    inputProfileCAT(true)
+    inputProfileCAT(false)
 {
 }
 
