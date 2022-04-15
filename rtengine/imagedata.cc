@@ -266,9 +266,12 @@ FramesData::FramesData(const Glib::ustring &fname):
             auto p = pos;
             if (find_exif_tag("Exif.CanonFi.RFLensType") && find_exif_tag("Exif.Canon.LensModel")) {
                 lens = pos->print(&exif);
-            } else if (p->count() == 1 && lens == std::to_string(p->toLong()) &&
-                find_exif_tag("Exif.Photo.LensModel")) {
-                lens = p->print(&exif);
+            } else if (p->count() == 1 && lens == std::to_string(p->toLong())) {
+                if (find_exif_tag("Exif.Canon.LensModel")) {
+                    lens = pos->print(&exif);
+                } else if (find_exif_tag("Exif.Photo.LensModel")) {
+                    lens = p->print(&exif);
+                }
             }
         } else if (find_exif_tag("Exif.Photo.LensSpecification") && pos->count() == 4) {
             const auto round =
