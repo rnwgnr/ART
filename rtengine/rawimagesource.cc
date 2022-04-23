@@ -441,12 +441,12 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
         -0.002079f, 0.048952f,  0.953127f
         );
 
-    constexpr double FULL_DEG_TEMP = 2856.0;
+    constexpr double FULL_DEG_TEMP = 3500.0;
     const bool full_adapt = FULL_DEG_TEMP <= ctemp.getTemp();
     const float deg = full_adapt ? 1.0 : (ctemp.getTemp() - MINTEMP) / (FULL_DEG_TEMP - MINTEMP);
 
     if (settings->verbose) {
-        std::cout << "CAT - Adaptation degree: " << deg << std::endl;
+        std::cout << "CAT - Basic adaptation degree: " << deg << std::endl;
     }
 
     const Mat33f &cat = full_adapt ? bradford : cat16;
@@ -501,17 +501,40 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
 
     // conv is our conversion matrix putting all the pieces together.
     Mat33f conv = dot_product(ws2lms, wbmul);
-    if (full_adapt) {
-        // in case of full adaptation, from right to left:
-        // - restore the native wb in camera space
-        // - convert to LMS
-        // - perform the adaptation to the white point of the working space
-        // - convert back to rgb
-        conv = dot_product(lms2ws, dot_product(diagonal(lm, mm, sm), conv));
-    }
+    // in case of full adaptation, from right to left:
+    // - restore the native wb in camera space
+    // - convert to LMS
+    // - perform the adaptation to the white point of the working space
+    // - convert back to rgb
+    Mat33f fullconv = dot_product(lms2ws, dot_product(diagonal(lm, mm, sm), conv));
     // in case of partial adaptation, we don't use a single matrix but blend
     // the adapted S value with the original one that was whitebalanced in
     // camera space
+
+    const auto hue =
+        [&](const Vec3f &rgb) -> float
+        {
+            float L, a, b;
+            Color::rgb2lab(rgb[0], rgb[1], rgb[2], L, a, b, ws);
+            
+            float l, c, h;
+            Color::lab2lch01(L/327.68f, a/480.f, b/480.f, l, c, h);
+            return h;
+        };
+
+    constexpr float hue_hi = 90.f / 360.f;
+    constexpr float hue_lo = 340.f / 360.f;
+
+    FlatCurve hcurve({FCT_MinMaxCPoints,
+                      0.05, 0,
+                      0.35, 0.35,
+                      0.15, 0,
+                      0.35, 0.35,
+                      0.25, 1,
+                      0.35, 0.35,
+                      0.94, 1,
+                      0.35, 0.35
+        });
 
 #ifdef _OPENMP
 #   pragma omp parallel for
@@ -526,15 +549,21 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
             float m = rgb[0] + rgb[1] + rgb[2];
 
             if (full_adapt) {
-                rgb = dot_product(conv, rgb);
+                rgb = dot_product(fullconv, rgb);
             } else {
-                lms = dot_product(conv, rgb);
-                float s = ws2lms[2][0] * rgb[0] + ws2lms[2][1] * rgb[1] + ws2lms[2][2] * rgb[2];
-                lms[0] *= lm;
-                lms[1] *= mm;
-                lms[2] = intp(deg, lms[2] * sm, s);
+                float h = hue(rgb);
+                if (!(h <= hue_hi || h >= hue_lo)) {
+                    rgb = dot_product(fullconv, rgb);
+                } else {
+                    float blend = deg * hcurve.getVal(h);
+                    lms = dot_product(conv, rgb);
+                    float s = ws2lms[2][0] * rgb[0] + ws2lms[2][1] * rgb[1] + ws2lms[2][2] * rgb[2];
+                    lms[0] *= lm;
+                    lms[1] *= mm;
+                    lms[2] = intp(blend, lms[2] * sm, s);
 
-                rgb = dot_product(lms2ws, lms);
+                    rgb = dot_product(lms2ws, lms);
+                }
             }
 
             // make sure we preserve the brightness
