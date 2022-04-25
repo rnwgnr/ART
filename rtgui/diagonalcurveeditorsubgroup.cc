@@ -1110,23 +1110,28 @@ void DiagonalCurveEditorSubGroup::restoreDisplayedHistogram()
 void DiagonalCurveEditorSubGroup::storeCurveValues (CurveEditor* ce, const std::vector<double>& p)
 {
     if (!p.empty()) {
+        auto e = static_cast<DiagonalCurveEditor *>(ce);
         DiagonalCurveType t = (DiagonalCurveType)p[0];
 
         switch (t) {
         case (DCT_Spline):
-            (static_cast<DiagonalCurveEditor*>(ce))->customCurveEd = p;
+            e->customCurveEd = p;
+            e->catmullRomCurveEd = p;
+            e->catmullRomCurveEd[0] = DCT_CatmullRom;
             break;
 
         case (DCT_Parametric):
-            (static_cast<DiagonalCurveEditor*>(ce))->paramCurveEd = p;
+            e->paramCurveEd = p;
             break;
 
         case (DCT_NURBS):
-            (static_cast<DiagonalCurveEditor*>(ce))->NURBSCurveEd = p;
+            e->NURBSCurveEd = p;
             break;
 
         case (DCT_CatmullRom):
-            (static_cast<DiagonalCurveEditor*>(ce))->catmullRomCurveEd = p;
+            e->catmullRomCurveEd = p;
+            e->customCurveEd = p;
+            e->customCurveEd[0] = DCT_Spline;
             break;
 
         default:
