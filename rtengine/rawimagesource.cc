@@ -526,9 +526,7 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
     constexpr float hue_lo = 340.f / 360.f;
 
     FlatCurve hcurve({FCT_MinMaxCPoints,
-                      0.05, 0,
-                      0.35, 0.35,
-                      0.15, 0,
+                      0.1, 0.1,
                       0.35, 0.35,
                       0.25, 1,
                       0.35, 0.35,
