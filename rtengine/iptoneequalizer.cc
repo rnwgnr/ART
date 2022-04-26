@@ -347,7 +347,7 @@ bool ImProcFunctions::toneEqualizer(Imagefloat *rgb)
     BENCHFUN
     rgb->setMode(Imagefloat::Mode::RGB, multiThread);
 
-    const float gain = 1.f / 65535.f * std::pow(2.f, params->toneEqualizer.pivot);
+    const float gain = 1.f / 65535.f * std::pow(2.f, -params->toneEqualizer.pivot);
     
     rgb->multiply(gain, multiThread);
 
