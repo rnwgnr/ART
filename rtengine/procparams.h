@@ -793,6 +793,7 @@ struct ToneEqualizerParams {
     std::array<int, 5> bands;
     int regularization;
     bool show_colormap;
+    double pivot;
 
     ToneEqualizerParams();
 

@@ -2028,7 +2028,8 @@ ToneEqualizerParams::ToneEqualizerParams():
     enabled(false),
     bands{0,0,0,0,0},
     regularization(4),
-    show_colormap(false)
+    show_colormap(false),
+    pivot(0)
 {
 }
 
@@ -2039,7 +2040,8 @@ bool ToneEqualizerParams::operator ==(const ToneEqualizerParams& other) const
         enabled == other.enabled
         && bands == other.bands
         && regularization == other.regularization
-        && show_colormap == other.show_colormap;
+        && show_colormap == other.show_colormap
+        && pivot == other.pivot;
 }
 
 
@@ -3646,6 +3648,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 saveToKeyfile("ToneEqualizer", "Band" + std::to_string(i), toneEqualizer.bands[i], keyFile);
             }
             saveToKeyfile("ToneEqualizer", "Regularization", toneEqualizer.regularization, keyFile);
+            saveToKeyfile("ToneEqualizer", "Pivot", toneEqualizer.pivot, keyFile);
         }
         
 // Crop
@@ -4688,6 +4691,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else {
                 assignFromKeyfile(keyFile, "ToneEqualizer", "Detail", toneEqualizer.regularization);
             }
+            assignFromKeyfile(keyFile, "ToneEqualizer", "Pivot", toneEqualizer.pivot);
         }
         
         if (keyFile.has_group("Crop") && RELEVANT_(crop)) {
