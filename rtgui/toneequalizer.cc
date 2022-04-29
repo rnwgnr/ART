@@ -30,7 +30,7 @@ ToneEqualizer::ToneEqualizer(): FoldableToolPanel(this, "toneequalizer", M("TP_T
     EvBands = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_BANDS");
     EvRegularization = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION");
     EvColormap = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP");
-    EvColormap = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_PIVOT");
+    EvPivot = m->newEvent(RGBCURVE, "HISTORY_MSG_TONE_EQUALIZER_PIVOT");
     EvToolReset.set_action(RGBCURVE);
 
     std::array<const char *, 5> images = {
