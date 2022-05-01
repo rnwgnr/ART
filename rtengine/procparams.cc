@@ -5265,7 +5265,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         cur.power[1] = cur.power[2] = cur.power[0];
                         get("Pivot_", cur.pivot[0]);
                         cur.pivot[1] = cur.pivot[2] = cur.pivot[0];
-                        get("Compression_", cur.compression[0]);
+                        if (get("Compression_", cur.compression[0])) {
+                            if (ppVersion < 1035) {
+                                cur.compression[0] /= 100.0;
+                            }
+                        }
                         cur.compression[1] = cur.compression[2] = cur.compression[0];
                     } else {
                         const char *chan[3] = { "R", "G", "B" };

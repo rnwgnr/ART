@@ -291,8 +291,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 roffset[i][c] = r.offset[j];
                 rpower[i][c] = 1.0 / r.power[j];
                 rpivot[i][c] = r.pivot[j];
-                rcompression[i][c][0] = r.compression[j] / r.pivot[j];
-                rcompression[i][c][1] = r.compression[j] > 0.f ? std::log(1.f + r.compression[j]) / r.pivot[j] : 0.f;
+                auto compr = r.compression[j] * 100.0;
+                if (compr > 0) {
+                    rcompression[i][c][0] = compr;
+                    double y0 = std::pow((rslope[i][c] + roffset[i][c])/rpivot[i][c], rpower[i][c]) * rpivot[i][c];
+                    rcompression[i][c][1] = std::log(1.0 + y0 * compr);
+                } else {
+                    rcompression[i][c][0] = rcompression[i][c][1] = 0;
+                }
                 if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f || rcompression[i][c][1] != 0.f) {
                     enabled[i] = true;
                 }
@@ -350,6 +356,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                                 v = pow_F(v / pivot[i], power[i]) * pivot[i];
                             } else {
                                 v = pow_F(v, power[i]);
+                            }
+                            if (compression[i][0] != 0.f) {
+                                v = xlogf(v * compression[i][0] + 1.f) / compression[i][1];
                             }
                         } else {
                             v = 0.f;

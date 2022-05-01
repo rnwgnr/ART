@@ -308,9 +308,9 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     pivot->setAdjusterListener(this);
     pivot->setLogScale(100, 0.18, true);
     box_combined->pack_start(*pivot);
-    compression = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_COMPRESSION"), 0, 100, 0.1, 0));
+    compression = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_COMPRESSION"), 0, 1, 0.001, 0));
     compression->setAdjusterListener(this);
-    compression->setLogScale(50, 0);
+    //compression->setLogScale(50, 0);
     box_combined->pack_start(*compression);
 
     sync_rgb_sliders = Gtk::manage(new Gtk::CheckButton(M("TP_COLORCORRECTION_SYNC_SLIDERS")));
