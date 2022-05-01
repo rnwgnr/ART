@@ -3886,10 +3886,10 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 Glib::ustring mode = "YUV";
                 if (l.mode == ColorCorrectionParams::Mode::RGB) {
                     mode = "RGB";
-                } else if (l.mode == ColorCorrectionParams::Mode::HSL) {
-                    mode = "HSL";
                 } else if (l.mode == ColorCorrectionParams::Mode::JZAZBZ) {
                     mode = "Jzazbz";
+                } else if (l.mode == ColorCorrectionParams::Mode::HSL) {
+                    mode = "HSL";
                 }
                 putToKeyfile("ColorCorrection", Glib::ustring("Mode_") + n, mode, keyFile);
                 {
@@ -5323,6 +5323,13 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 if (!done) {
                     lg.emplace_back(cur);
                     lm.emplace_back(curmask);
+                    if (ppVersion < 1036 && cur.mode == ColorCorrectionParams::Mode::HSL && cur.hueshift != 0) {
+                        lg.back().hueshift = 0;
+                        lm.emplace_back(curmask);
+                        lg.emplace_back();
+                        lg.back().hueshift = cur.hueshift;
+                        std::swap(lg.back(), lg[lg.size()-2]);
+                    }
                 }
             }
             if (found) {

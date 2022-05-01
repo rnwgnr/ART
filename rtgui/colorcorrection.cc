@@ -314,9 +314,9 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
     mode = Gtk::manage(new MyComboBoxText());
     mode->append(M("TP_COLORCORRECTION_MODE_COMBINED"));
+    mode->append(M("TP_COLORCORRECTION_MODE_JZAZBZ"));
     mode->append(M("TP_COLORCORRECTION_MODE_RGBCHANNELS"));
     mode->append(M("TP_COLORCORRECTION_MODE_HSL"));
-    mode->append(M("TP_COLORCORRECTION_MODE_JZAZBZ"));
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &ColorCorrection::modeChanged));
     
@@ -708,13 +708,13 @@ void ColorCorrection::regionGet(int idx)
     
     auto &r = data[idx];
     switch (mode->get_active_row_number()) {
-    case 1:
+    case 2:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::RGB;
         break;
-    case 2:
+    case 3:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::HSL;
         break;
-    case 3:
+    case 1:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ;
         break;
     default:
@@ -761,13 +761,13 @@ void ColorCorrection::regionShow(int idx)
     }
     auto &r = data[idx];
     switch (r.mode) {
-    case rtengine::procparams::ColorCorrectionParams::Mode::HSL:
+    case rtengine::procparams::ColorCorrectionParams::Mode::RGB:
         mode->set_active(2);
         break;
-    case rtengine::procparams::ColorCorrectionParams::Mode::RGB:
+    case rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ:
         mode->set_active(1);
         break;
-    case rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ:
+    case rtengine::procparams::ColorCorrectionParams::Mode::HSL:
         mode->set_active(3);
         break;
     default:
@@ -810,19 +810,20 @@ void ColorCorrection::modeChanged()
     removeIfThere(box, box_rgb);
     removeIfThere(box, box_hsl);
     int row = mode->get_active_row_number();
-    if (row == 0 || row == 3) {
+    if (row < 2) {
         box->pack_start(*box_combined);
-    } else if (row == 1) {
+    } else if (row == 2) {
         box->pack_start(*box_rgb);
     } else {
         box->pack_start(*box_hsl);
     }
-    hueshift->set_visible(mode->get_active_row_number() != 1);
+    hueshift->set_visible(mode->get_active_row_number() != 2);
     if (listener && getEnabled()) {
         labMasks->setEdited(true);        
         listener->panelChanged(EvMode, mode->get_active_text());
     }
-    wheel->setEditID(row == 3 ? EUID_ColorCorrection_Wheel_Jzazbz : EUID_ColorCorrection_Wheel, BT_IMAGEFLOAT);
+    auto eid = (row == 1) ? EUID_ColorCorrection_Wheel_Jzazbz : EUID_ColorCorrection_Wheel;
+    wheel->setEditID(eid, BT_IMAGEFLOAT);
 }
 
 

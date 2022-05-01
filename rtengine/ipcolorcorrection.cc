@@ -150,7 +150,30 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             float R, G, B;
             Color::jzazbz2rgb(Jz, az, bz, R, G, B, iws);
             Color::rgb2yuv(R * 65535.f, G * 65535.f, B * 65535.f, Jz, bz, az, ws);
-        };    
+        };
+
+    const auto yuv2hsl =
+        [&](float Y, float u, float v, float &h, float &s, float &l) -> void
+        {
+            float R, G, B;
+            Color::yuv2rgb(Y, u, v, R, G, B, ws);
+            Color::rgb2hsl(R, G, B, h, s, l);
+            h *= 2.f * RT_PI_F;
+        };
+
+    const auto hsl2yuv =
+        [&](float h, float s, float l, float &Y, float &u, float &v) -> void
+        {
+            h /= (2.f * RT_PI_F);
+            if (h < 0.f) {
+                h += 1.f;
+            } else if (h > 1.f) {
+                h -= 1.f;
+            }
+            float R, G, B;
+            Color::hsl2rgb(h, s, l, R, G, B);
+            Color::rgb2yuv(R, G, B, Y, u, v, ws);
+        };
     
     if (imgbuf) {
         const auto translate_uv =
@@ -222,6 +245,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     char rgbmode[n];
     bool enabled[n];
     bool jzazbz[n];
+    bool hsl[n];
     float rhs[n];
     for (int i = 0; i < n; ++i) {
         auto &r = params->colorcorrection.regions[i];
@@ -237,10 +261,10 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             abca[i] = 0.f;
             abcb[i] = 0.f;
             jzazbz[i] = false;
+            hsl[i] = r.mode == ColorCorrectionParams::Mode::HSL;
         } else {
             jzazbz[i] = r.mode == ColorCorrectionParams::Mode::JZAZBZ;
-            // abca[i] = abcoord(r.a);
-            // abcb[i] = abcoord(r.b);
+            hsl[i] = false;
             abcoord2(r.a, r.b, abca[i], abcb[i]);
         }
         rs[i] = 1.f + r.inSaturation / 100.f;
@@ -330,14 +354,21 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
             if (hueshift != 0.f) {
                 float h, s;
-                if (jzazbz[region]) {
-                    yuv2jzazbz(Y, u, v);
-                }
-                Color::yuv2hsl(u, v, h, s);
-                h += hueshift;
-                Color::hsl2yuv(h, s, u, v);
-                if (jzazbz[region]) {
-                    jzazbz2yuv(Y, u, v);
+                if (hsl[region]) {
+                    float l;
+                    yuv2hsl(Y, u, v, h, s, l);
+                    h += hueshift;
+                    hsl2yuv(h, s, l, Y, u, v);
+                } else {
+                    if (jzazbz[region]) {
+                        yuv2jzazbz(Y, u, v);
+                    }
+                    Color::yuv2hsl(u, v, h, s);
+                    h += hueshift;
+                    Color::hsl2yuv(h, s, u, v);
+                    if (jzazbz[region]) {
+                        jzazbz2yuv(Y, u, v);
+                    }
                 }
             }
                 
@@ -509,18 +540,30 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
             if (hueshift != 0.f) {
                 float h, s, uk, vk;
-                if (jzazbz[region]) {
-                    vyuv2jzazbz(Y, u, v);
-                }
-                for (int k = 0; k < 4; ++k) {
-                    Color::yuv2hsl(u[k], v[k], h, s);
-                    h += hueshift;
-                    Color::hsl2yuv(h, s, uk, vk);
-                    u[k] = uk;
-                    v[k] = vk;
-                }
-                if (jzazbz[region]) {
-                    vjzazbz2yuv(Y, u, v);
+                if (hsl[region]) {
+                    float l, Yk;
+                    for (int k = 0; k < 4; ++k) {
+                        yuv2hsl(Y[k], u[k], v[k], h, s, l);
+                        h += hueshift;
+                        hsl2yuv(h, s, l, Yk, uk, vk);
+                        Y[k] = Yk;
+                        u[k] = uk;
+                        v[k] = vk;
+                    }
+                } else {
+                    if (jzazbz[region]) {
+                        vyuv2jzazbz(Y, u, v);
+                    }
+                    for (int k = 0; k < 4; ++k) {
+                        Color::yuv2hsl(u[k], v[k], h, s);
+                        h += hueshift;
+                        Color::hsl2yuv(h, s, uk, vk);
+                        u[k] = uk;
+                        v[k] = vk;
+                    }
+                    if (jzazbz[region]) {
+                        vjzazbz2yuv(Y, u, v);
+                    }
                 }
             }
                 
