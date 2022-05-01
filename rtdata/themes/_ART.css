@@ -1793,7 +1793,7 @@ button.radio#histButton:hover {
 }
 
 /* Tool background */
-#ExpanderBox > box, #ExpanderBox > grid {
+#ExpanderBox > box, #ExpanderBox > grid, #ExpanderBox > stack > box {
     background-color: @ART-bgDark025;
     border-width: 0.0833333333333333em;
     border-style: solid;
@@ -2480,6 +2480,10 @@ notebook > header.left tab:checked {
 
 notebook > header.right tab:checked {
     box-shadow: 0.25em 0 @ART-hl inset;
+}
+
+notebook > header.bottom tab:checked {
+    box-shadow: 0 0.25em @ART-hl inset;
 }
 
 scale highlight {

@@ -71,6 +71,8 @@ public:
     void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller) override;
 
     void toolReset(bool to_initial) override;
+
+    void drawCurve(bool rgb, Cairo::RefPtr<Cairo::Context> cr, Glib::RefPtr<Gtk::StyleContext> style, int W, int H);
     
 private:
     void regionGet(int idx);
@@ -142,6 +144,9 @@ private:
     
     Adjuster *lfactor[3];
     HueSatColorWheel *huesat[3];
+
+    Gtk::DrawingArea *curve_lum;
+    Gtk::DrawingArea *curve_rgb;
 
     rtengine::procparams::ColorCorrectionParams initial_params;
 };

@@ -19,6 +19,7 @@
  */
 #include "colorcorrection.h"
 #include "eventmapper.h"
+#include "mycurve.h"
 #include <iomanip>
 #include <cmath>
 
@@ -215,6 +216,64 @@ double slope_val2slider(double val)
     }
 }
 
+
+class CurveDisplay: public Gtk::DrawingArea, public BackBuffer {
+public:
+    CurveDisplay(ColorCorrection *parent, bool rgb):
+        parent_(parent),
+        rgb_(rgb)
+    {
+        get_style_context()->add_class("drawingarea");
+    }
+
+    bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override
+    {
+        Gtk::Allocation allocation = get_allocation();
+        allocation.set_x(0);
+        allocation.set_y(0);
+        if (setDrawRectangle(Cairo::FORMAT_ARGB32, allocation)) {
+            setDirty(true);
+        }
+        if (isDirty() && surfaceCreated()) {
+            parent_->drawCurve(rgb_, getContext(), get_style_context(), allocation.get_width(), allocation.get_height());
+            setDirty(false);
+            queue_draw();
+        }
+        copySurface(cr);
+        return false;
+    }
+
+    Gtk::SizeRequestMode get_request_mode_vfunc() const
+    {
+        return Gtk::SIZE_REQUEST_HEIGHT_FOR_WIDTH;
+    }
+
+
+    void get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
+    {
+        Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
+        Gtk::Border padding = getPadding(style);  // already scaled
+        int s = RTScalable::getScale();
+        int p = padding.get_left() + padding.get_right();
+
+        minimum_width = 50 * s + p;
+        natural_width = 150 * s + p;  // same as GRAPH_SIZE from mycurve.h
+    }
+
+
+    void get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
+    {
+        Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
+        Gtk::Border padding = getPadding(style);  // already scaled
+
+        minimum_height = natural_height = width * 0.75 - padding.get_left() - padding.get_right() + padding.get_top() + padding.get_bottom();
+    }
+    
+private:
+    ColorCorrection *parent_;
+    bool rgb_;
+};
+
 } // namespace
 
 ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M("TP_COLORCORRECTION_LABEL"), false, true, true)
@@ -276,7 +335,14 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     wheel = Gtk::manage(new ColorWheel());
     wheel->setEditID(EUID_ColorCorrection_Wheel, BT_IMAGEFLOAT);
     wheel->signal_changed().connect(sigc::mem_fun(*this, &ColorCorrection::wheelChanged));
-    box_combined->pack_start(*wheel);
+    Gtk::Notebook *nb = Gtk::manage(new Gtk::Notebook());
+    nb->set_tab_pos(Gtk::POS_BOTTOM);
+    nb->set_name("ExpanderBox");
+    {
+        auto w = Gtk::manage(new RTImage("circle-dot-big.png"));
+        nb->append_page(*wheel, *w);
+    }    
+    box_combined->pack_start(*nb, Gtk::PACK_SHRINK, 4);//wheel);
 
     Gtk::Frame *satframe = Gtk::manage(new Gtk::Frame(M("TP_COLORCORRECTION_SATURATION")));
     Gtk::VBox *satbox = Gtk::manage(new Gtk::VBox());
@@ -292,6 +358,13 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
 
     double2double_fun slope_v2s = options.adjuster_force_linear ? nullptr : slope_val2slider;
     double2double_fun slope_s2v = options.adjuster_force_linear ? nullptr : slope_slider2val;
+
+    curve_lum = Gtk::manage(new CurveDisplay(this, false));
+    {
+        auto w = Gtk::manage(new RTImage("curve-spline.png"));
+        nb->append_page(*curve_lum, *w);
+    }
+    //box_combined->pack_start(*curve_lum, Gtk::PACK_SHRINK, 4);    
 
     slope = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_SLOPE"), 0.01, 32.0, 0.001, 1, nullptr, nullptr, slope_s2v, slope_v2s));
 //    slope->setLogScale(32, 1, true);
@@ -326,16 +399,23 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
                 }
             }));
     box_rgb->pack_start(*rgbluminance, Gtk::PACK_SHRINK, 4);
+
+    curve_rgb = Gtk::manage(new CurveDisplay(this, true));
+    box_rgb->pack_start(*curve_rgb, Gtk::PACK_SHRINK, 4);
+    
+    nb = Gtk::manage(new Gtk::Notebook());
+    nb->set_name("ExpanderBox");
+    box_rgb->pack_start(*nb);
     
     for (int c = 0; c < 3; ++c) {
         const char *chan = (c == 0 ? "R" : (c == 1 ? "G" : "B"));
         const char *img = (c == 0 ? "red" : (c == 1 ? "green" : "blue"));
-        Gtk::Frame *f = Gtk::manage(new Gtk::Frame(""));
+        //Gtk::Frame *f = Gtk::manage(new Gtk::Frame(""));
         Gtk::HBox *lbl = Gtk::manage(new Gtk::HBox());
         lbl->pack_start(*Gtk::manage(new RTImage(std::string("circle-") + img + "-small.png")), Gtk::PACK_SHRINK, 2);
         lbl->pack_start(*Gtk::manage(new Gtk::Label(M(std::string("TP_COLORCORRECTION_CHANNEL_") + chan))));
-        f->set_label_align(0.025, 0.5);
-        f->set_label_widget(*lbl);
+        //f->set_label_align(0.025, 0.5);
+        //f->set_label_widget(*lbl);
         Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
         vb->set_spacing(2);
         vb->set_border_width(2);
@@ -360,8 +440,10 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         compression_rgb[c]->setLogScale(50, 0);
         vb->pack_start(*compression_rgb[c]);
 
-        f->add(*vb);
-        box_rgb->pack_start(*f);
+        //f->add(*vb);
+        //box_rgb->pack_start(*f);
+        lbl->show_all();
+        nb->append_page(*vb, *lbl);
     }
 
     box_hsl = Gtk::manage(new Gtk::VBox());
@@ -560,7 +642,13 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
             }
         }
     }
-        
+
+    static_cast<CurveDisplay *>(curve_rgb)->setDirty(true);
+    curve_rgb->queue_draw();
+
+    static_cast<CurveDisplay *>(curve_lum)->setDirty(true);
+    curve_lum->queue_draw();
+    
     if (listener && getEnabled() && evt != 0) {
         listener->panelChanged(evt, msg);
     }
@@ -804,5 +892,143 @@ void ColorCorrection::hslWheelChanged(int c)
         huesat[c]->getParams(h, s);
         l = lfactor[c]->getValue();
         listener->panelChanged(c == 0 ? EvSlope : (c == 1 ? EvOffset : EvPower), Glib::ustring::compose("H=%1 S=%2 L=%3", round(h), round(s), l));
+    }
+}
+
+
+void ColorCorrection::drawCurve(bool rgb, Cairo::RefPtr<Cairo::Context> cr, Glib::RefPtr<Gtk::StyleContext> style, int W, int H)
+{
+    const double s = (double)RTScalable::getScale();
+
+    Gtk::StateFlags state = !is_sensitive() ? Gtk::STATE_FLAG_INSENSITIVE : Gtk::STATE_FLAG_NORMAL;
+
+    cr->set_line_cap(Cairo::LINE_CAP_SQUARE);
+
+    // clear background
+    cr->set_source_rgba(0., 0., 0., 0.);
+    cr->set_operator(Cairo::OPERATOR_CLEAR);
+    cr->paint();
+    cr->set_operator(Cairo::OPERATOR_OVER);
+
+    style->render_background(cr, 0, 0, W, H);
+
+    Gdk::RGBA c;
+
+    cr->set_line_width(1.0 * s);
+
+    // draw the grid lines:
+    cr->set_line_width (1.0 * s);
+    c = style->get_border_color(state);
+    cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
+    cr->set_antialias(Cairo::ANTIALIAS_NONE);
+
+    double dx = H / 10.0;
+    double dy = W / 10.0;
+    for (int i = 0; i <= 10; i++) {
+        // horizontal lines
+        cr->move_to(0, H - i * dx);
+        cr->line_to(W, H - i * dx);
+        // vertical lines
+        cr->move_to(i * dy, 0);
+        cr->line_to(i * dy, H);
+    }
+
+    cr->stroke();
+
+    // draw f(x)=x line
+    c = style->get_color(state);
+    cr->set_source_rgba(c.get_red(), c.get_green(), c.get_blue(), 0.4);
+
+    std::valarray<double> ds(1);
+    ds[0] = 4 * s;
+    cr->set_dash(ds, 0);
+    cr->move_to(0, H);
+    cr->line_to(W, 0);
+    cr->stroke();
+    cr->unset_dash();
+
+    cr->set_antialias(Cairo::ANTIALIAS_SUBPIXEL);
+    cr->set_line_width(1.0 * s);
+
+    c = style->get_color(state);
+
+    struct CurveEval {
+        CurveEval(int width, int height,
+                  double s, double o, double p, double v, double c, double y=0):
+            W(width),
+            H(height),
+            slope(s),
+            offset(o/2.0),
+            power(1.0/p),
+            pivot(v),
+            y0(y)
+        {
+            double compr = c * 100.0;
+            c0 = compr;
+            if (compr > 0) {
+                double y0 = std::pow((slope + offset)/pivot, power) * pivot;
+                c1 = std::log(1.0 + y0 * c0);
+            } else {
+                c1 = 0;
+            }
+        }
+
+        double operator()(double x)
+        {
+            double y = (x/W) * slope + offset;
+            if (y > 0) {
+                if (pivot != 1.0) {
+                    y = std::pow(y / pivot, power) * pivot;
+                } else {
+                    y = std::pow(y, power);
+                }
+                if (c0 != 0.f) {
+                    y = std::log(y * c0 + 1.0) / c1;
+                }
+            }
+            return (H - std::max(y, 0.0) * H) + y0;
+        }
+
+        int W;
+        int H;
+        double slope;
+        double offset;
+        double power;
+        double pivot;
+        double c0;
+        double c1;
+        double y0;
+    };
+            
+
+    // draw curve
+    if (!rgb) {
+        CurveEval getVal(W, H, slope->getValue(), offset->getValue(), power->getValue(), pivot->getValue(), compression->getValue());
+
+        cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
+        cr->move_to(0, getVal(0));
+
+        for (int i = 1; i < W; ++i) {
+            cr->line_to(i, getVal(i));
+        }
+        cr->stroke();
+    } else {
+        for (int j = 0; j < 3; ++j) {
+            CurveEval getVal(W, H, slope_rgb[j]->getValue(), offset_rgb[j]->getValue(), power_rgb[j]->getValue(), pivot_rgb[j]->getValue(), compression_rgb[j]->getValue(), j * s);
+
+            if (j == 0) {
+                cr->set_source_rgb(1.0, 0.0, 0.0);
+            } else if (j == 1) {
+                cr->set_source_rgb(0.0, 1.0, 0.0);
+            } else {
+                cr->set_source_rgb(0.0, 0.0, 1.0);
+            }
+            cr->move_to(0, getVal(0));
+
+            for (int i = 1; i < W; ++i) {
+                cr->line_to(i, getVal(i));
+            }
+            cr->stroke();            
+        }
     }
 }
