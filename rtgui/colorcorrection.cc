@@ -968,7 +968,7 @@ void ColorCorrection::drawCurve(bool rgb, Cairo::RefPtr<Cairo::Context> cr, Glib
             c0 = compr;
             if (compr > 0) {
                 double y0 = std::pow((slope + offset)/pivot, power) * pivot;
-                c1 = std::log(1.0 + y0 * c0);
+                c1 = std::log(1.0 + y0 * c0) / slope;
             } else {
                 c1 = 0;
             }

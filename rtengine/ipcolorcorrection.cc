@@ -319,7 +319,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 if (compr > 0) {
                     rcompression[i][c][0] = compr;
                     double y0 = std::pow((rslope[i][c] + roffset[i][c])/rpivot[i][c], rpower[i][c]) * rpivot[i][c];
-                    rcompression[i][c][1] = std::log(1.0 + y0 * compr);
+                    rcompression[i][c][1] = std::log(1.0 + y0 * compr) / rslope[i][c];
                 } else {
                     rcompression[i][c][0] = rcompression[i][c][1] = 0;
                 }
