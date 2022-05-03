@@ -824,6 +824,12 @@ void ColorCorrection::modeChanged()
     }
     auto eid = (row == 1) ? EUID_ColorCorrection_Wheel_Jzazbz : EUID_ColorCorrection_Wheel;
     wheel->setEditID(eid, BT_IMAGEFLOAT);
+
+    static_cast<CurveDisplay *>(curve_rgb)->setDirty(true);
+    curve_rgb->queue_draw();
+
+    static_cast<CurveDisplay *>(curve_lum)->setDirty(true);
+    curve_lum->queue_draw();    
 }
 
 
