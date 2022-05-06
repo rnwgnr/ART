@@ -768,10 +768,32 @@ bool mask_postprocess(int width, int height, float scale, const array2D<float> &
     }
 
     if (posterization && smoothing) {
-        const float radius_coeff = 101.f - float(LIM(smoothing, 0, 100));
+        const float radius_coeff = 10.f * (101.f - float(LIM(smoothing, 0, 100)));
         const float radius = (max(width, height) / radius_coeff);
         const float epsilon = 0.015f;
+        array2D<float> threshold(W, H);
+        constexpr float l = 0.0;
+        constexpr float h = 0.25;
+        float f = LIM01(float(smoothing)/100.f);
+        float f2 = std::max(f-l, 0.f) / (h-l);
+        const float fillval = LIM01((f < l ? 0.f : (f > h ? 1.f : (f2 < 0.5f ? 2.f * SQR(f2) : 1.f - 2.f * SQR(1.f - f2)))));
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                threshold[y][x] = mask[y][x] > 1e-4f ? 1.f : fillval;
+            }
+        }
         rtengine::guidedFilter(guide, mask, mask, radius, epsilon, multithread);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] *= threshold[y][x];
+            }
+        }
     }
 
     return true;
