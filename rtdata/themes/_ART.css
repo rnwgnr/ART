@@ -2120,7 +2120,7 @@ dialog frame > label:not(.dummy) {
 #LabelRightNotebook {
     padding: 0.4166666666666666em;
     margin: 0.1666666666666666em;
-    font-size: 1.25em;
+    /*font-size: 1.25em;*/
 }
 
 #ToolPanelNotebook {
