@@ -12,7 +12,8 @@
 #11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
 #12 2021-12-23 Ohnishi, Yasuo, updated for 1.12
 #13 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
-#14 2022-03-31 Ohnishi, Yasuo, some fixes and updates
+#14 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
+#15 2022-05-08 Ohnishi, Yasuo, updates for tone equaliser pivot slider
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -670,6 +671,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;トーンイコライザ
 HISTORY_MSG_TONE_EQUALIZER_BANDS;トーンイコライザ - Bands
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;トーンイコライザ - 遷移のスムーズ化 (Regularization)
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;トーンイコライザ - トーンマップ
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;トーンイコライザー - ピボット
 HISTORY_MSG_TONECURVE_SATCURVE;トーンカーブ - 彩度 (Saturation)
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;トーンカーブ - Perceptual strength
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;トーンカーブ - コントラスト (従来モード)
@@ -1381,7 +1383,7 @@ TP_CROP_H;高さ
 TP_CROP_LABEL;切り抜き
 TP_CROP_PPI;PPI=
 TP_CROP_RESETCROP;リセット
-TP_CROP_SELECTCROP;セレクト
+TP_CROP_SELECTCROP;範囲選択
 TP_CROP_DONE;終了
 TP_CROP_W;W 幅
 TP_CROP_X;X
@@ -1481,7 +1483,7 @@ TP_FILMNEGATIVE_FILMBASE_VALUES;フィルムベースRGB:
 TP_FILMNEGATIVE_GREEN;基準指数 (コントラスト)
 TP_FILMNEGATIVE_GUESS_TOOLTIP;原画像の中で, 色相がニュートラルで明るさが異なる2か所をピックアップすることでレッドとブルーの比率を自動で設定します. その後 ホワイトバランスを設定します.
 TP_FILMNEGATIVE_LABEL;ネガフィルム
-TP_FILMNEGATIVE_PICK;ニュートラルなポイントをピックアップ
+TP_FILMNEGATIVE_PICK;無彩色点をピックアップ
 TP_FILMNEGATIVE_RED;レッドの比率
 TP_FILMSIMULATION_LABEL;フィルムシミュレーション
 TP_FILMSIMULATION_SLOWPARSEDIR;ARTはフィルムシミュレーション機能に使う画像をHald CLUTフォルダーの中から探すよう設計されています（プログラムに組み込むにはフォルダーが大き過ぎるため）. \n変更するには 環境設定 > 画像処理 > フィルムシミュレーションと進み\nどのフォルダーが使われているか確認します. 機能を利用する場合は Hald CLUTだけが入っているフォルダーを指定するか  この機能を使わない場合はそのフォルダーを空にしておきます. \n\n詳しくはRawPediaを参照して下さい. \n\nフィルム画像のスキャンを止めますか？
@@ -1913,6 +1915,7 @@ TP_TONE_EQUALIZER_BAND_4;ホワイト領域
 TP_TONE_EQUALIZER_DETAIL;領域間変化の円滑化 (Regularization)
 TP_TONE_EQUALIZER_LABEL;トーンイコライザー
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;トーン領域を色で表示
+TP_TONE_EQUALIZER_PIVOT;ピボット (Ev)
 TP_VIGNETTING_AMOUNT;適用量
 TP_VIGNETTING_CENTER_X;中心 X軸
 TP_VIGNETTING_CENTER_Y;中心 Y軸

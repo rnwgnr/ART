@@ -3,7 +3,8 @@
 #02 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
 #03 2021-12-27 Ohnishi, Yasuo, some refinements and updated for 1.12
 #04 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
-#05 2022-03-31 Ohnishi, Yasuo, some fixes and updates
+#05 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
+#06 2022-05-08 Ohnishi, Yasuo, updates for tone equaliser pivot slider
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -661,6 +662,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;톤 이퀄라이저
 HISTORY_MSG_TONE_EQUALIZER_BANDS;톤 이퀄라이저 - Bands
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;톤 이퀄라이저 - 톤 변화 매끄럽게 하기 (Regularization)
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;톤 이퀄라이저 - 톤 맵
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;톤 이퀄라이저 - 피벗 (Pivot)
 HISTORY_MSG_TONECURVE_SATCURVE;톤 곡선 - 채도 (Saturation)
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;톤 곡선 - 지각적 강도 (strength)
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;톤 곡선 - 대비 (재래 방식)
@@ -1372,7 +1374,7 @@ TP_CROP_H;높이
 TP_CROP_LABEL;잘라내기
 TP_CROP_PPI;PPI=
 TP_CROP_RESETCROP;리셋
-TP_CROP_SELECTCROP;선택
+TP_CROP_SELECTCROP;범위선택
 TP_CROP_DONE;종료
 TP_CROP_W;W 폭
 TP_CROP_X;X
@@ -1472,7 +1474,7 @@ TP_FILMNEGATIVE_FILMBASE_VALUES;필름 기본RGB:
 TP_FILMNEGATIVE_GREEN;기준지수 (대비)
 TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색조가 무채색이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다. 그 후, 화이트 밸런스를  설정합니다.
 TP_FILMNEGATIVE_LABEL;네가필름
-TP_FILMNEGATIVE_PICK;뉴트럴 점 찾기
+TP_FILMNEGATIVE_PICK;무채색이 되어야 할 곳 찾기
 TP_FILMNEGATIVE_RED;Red 비율
 TP_FILMSIMULATION_LABEL;필름 시뮬레이션
 TP_FILMSIMULATION_SLOWPARSEDIR;ART는 필름 시뮬레이션 기능에 사용하는 화상을 Hald CLUT 디렉토리 속에서 찾도록 있게 설계됩니다.（프로그램에 포함하려면 디렉토리가 너무 크기 때문에）。\n변경하려면 환경 설정 > 화상처리 > 필름 시뮬레이션을 선택하고 \n어느 디렉토리가 사용되는 지 확인합니다. 이 기능을 사용할 경우 Hald CLUT 파일만 있는 디렉토리를 지정하고, 이 기능을 사용하지 않는 경우 그 디렉토리를 비웁니다.\n\n자세한 것은  RawPedia를 참조하세요.\n\n필름화상의 스캔을 정지합니까?
@@ -1904,6 +1906,7 @@ TP_TONE_EQUALIZER_BAND_4;화이트 영역
 TP_TONE_EQUALIZER_DETAIL;영역간 변화의 원활화 (Regularization)
 TP_TONE_EQUALIZER_LABEL;톤 이퀄라이저
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;톤 영역을 색깔로 표시함
+TP_TONE_EQUALIZER_PIVOT;피벗 (Ev)
 TP_VIGNETTING_AMOUNT;적용량
 TP_VIGNETTING_CENTER_X;중심 X축
 TP_VIGNETTING_CENTER_Y;중심 Y축
