@@ -79,7 +79,8 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     localContrast       = Gtk::manage(new LocalContrast());
     lcurve              = Gtk::manage (new LabCurve ());
     rgbcurves           = Gtk::manage (new RGBCurves ());
-    lensgeom            = Gtk::manage (new LensGeometry ());
+    geompanel            = Gtk::manage (new GeometryPanel());
+    lenspanel           = Gtk::manage(new LensPanel());
     lensProf            = Gtk::manage (new LensProfilePanel ());
     distortion          = Gtk::manage (new Distortion ());
     rotate              = Gtk::manage (new Rotate ());
@@ -177,13 +178,15 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     addfavoritePanel(transformPanel, resize);
     //addfavoritePanel(resize->getPackBox(), prsharpening, 2);
     addfavoritePanel(transformPanel, prsharpening, 2);
-    addfavoritePanel(transformPanel, lensgeom);
-    addfavoritePanel(lensgeom->getPackBox(), rotate, 2);
-    addfavoritePanel(lensgeom->getPackBox(), perspective, 2);
-    addfavoritePanel(lensgeom->getPackBox(), lensProf, 2);
-    addfavoritePanel(lensgeom->getPackBox(), distortion, 2);
-    addfavoritePanel(lensgeom->getPackBox(), cacorrection, 2);
-    addfavoritePanel(lensgeom->getPackBox(), vignetting, 2);
+    addfavoritePanel(transformPanel, geompanel);
+    addfavoritePanel(transformPanel, lenspanel);
+    toolPanels.pop_back();
+    addfavoritePanel(geompanel->getPackBox(), rotate, 2);
+    addfavoritePanel(geompanel->getPackBox(), perspective, 2);
+    addfavoritePanel(lenspanel->getPackBox(), lensProf, 2);
+    addfavoritePanel(lenspanel->getPackBox(), distortion, 2);
+    addfavoritePanel(lenspanel->getPackBox(), cacorrection, 2);
+    addfavoritePanel(lenspanel->getPackBox(), vignetting, 2);
 
     // raw
     addfavoritePanel(rawPanel, sensorbayer);
@@ -209,6 +212,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
 
     toolPanels.push_back (coarse);
     toolPanels.push_back(metadata);
+    toolPanels.push_back(lenspanel);
 
     toolPanelNotebook = new Gtk::Notebook ();
     toolPanelNotebook->set_name ("ToolPanelNotebook");
@@ -309,7 +313,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     whitebalance->setSpotWBListener (this);
     darkframe->setDFProvider (this);
     flatfield->setFFProvider (this);
-    lensgeom->setLensGeomListener (this);
+    geompanel->setLensGeomListener (this);
     rotate->setLensGeomListener (this);
     distortion->setLensGeomListener (this);
     perspective->setLensGeomListener(this);
@@ -344,14 +348,14 @@ void ToolPanelCoordinator::addPanel (Gtk::Box* where, FoldableToolPanel* panel, 
 
 void ToolPanelCoordinator::addfavoritePanel (Gtk::Box* where, FoldableToolPanel* panel, int level)
 {
-    auto name = panel->getToolName();
-    auto it = std::find(options.favorites.begin(), options.favorites.end(), name);
-    if (it != options.favorites.end()) {
-        int index = std::distance(options.favorites.begin(), it);
-        favorites[index] = panel;
-    } else {
+    // auto name = panel->getToolName();
+    // auto it = std::find(options.favorites.begin(), options.favorites.end(), name);
+    // if (it != options.favorites.end()) {
+    //     int index = std::distance(options.favorites.begin(), it);
+    //     favorites[index] = panel;
+    // } else {
         addPanel(where, panel, level);
-    }
+    // }
 }
 
 ToolPanelCoordinator::~ToolPanelCoordinator ()
@@ -1128,7 +1132,7 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
             break;
 
         case TMStraighten:
-            lensgeom->setExpanded (true);
+            geompanel->setExpanded (true);
             rotate->setExpanded (true);
             toolPanelNotebook->set_current_page (toolPanelNotebook->page_num (*transformPanelSW));
             break;
@@ -1136,7 +1140,7 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
         case TMPerspective:
             perspective->setControlLineEditMode(true);
             perspective->setExpanded(true);
-            lensgeom->setExpanded(true);
+            geompanel->setExpanded(true);
             toolPanelNotebook->set_current_page(toolPanelNotebook->page_num(*transformPanelSW));
             break;
         default:

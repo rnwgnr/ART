@@ -1200,9 +1200,9 @@ void Options::readFromFile(Glib::ustring fname)
             }
 
             if (keyFile.has_group("GUI")) {
-                if (keyFile.has_key("GUI", "Favorites")) {
-                    favorites = keyFile.get_string_list("GUI", "Favorites");
-                }
+                // if (keyFile.has_key("GUI", "Favorites")) {
+                //     favorites = keyFile.get_string_list("GUI", "Favorites");
+                // }
 
                 if (keyFile.has_key("GUI", "WindowWidth")) {
                     windowWidth = keyFile.get_integer("GUI", "WindowWidth");
@@ -1959,8 +1959,8 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("Profiles", "CustomProfileBuilderPath", CPBPath);
         keyFile.set_integer("Profiles", "CustomProfileBuilderKeys", CPBKeys);
 
-        Glib::ArrayHandle<Glib::ustring> ahfavorites = favorites;
-        keyFile.set_string_list("GUI", "Favorites", ahfavorites);
+        // Glib::ArrayHandle<Glib::ustring> ahfavorites = favorites;
+        // keyFile.set_string_list("GUI", "Favorites", ahfavorites);
         keyFile.set_integer("GUI", "WindowWidth", windowWidth);
         keyFile.set_integer("GUI", "WindowHeight", windowHeight);
         keyFile.set_integer("GUI", "WindowX", windowX);
