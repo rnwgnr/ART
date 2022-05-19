@@ -6,6 +6,7 @@
 #06 2022-01-30 - Italian language file taken from RawTherapee and adapted for Art 1.12.1 by paul.matthijsse/paulmatth. Original translator credits: see above. 
 #07 2022-03-28 - completed for 1.12.1 - alvaro
 #08 2022-04-20 alvaro
+#09 2022-05-18 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -669,6 +670,7 @@ HISTORY_MSG_TONECURVE_SATCURVE;Curva tonale - Saturazione
 HISTORY_MSG_TONECURVE_WHITEPOINT;Curva tonale - Punto del bianco
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Equalizzatore di tono - Bande
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Equalizzatore di tono
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Equalizzatore di tono - Pivot
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Equalizzatore di tono - Regolarizzazione
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Equalizzatore di tono - Mappa tonale
 HISTORY_MSG_WBALANCE_MULT;WB - moltiplicatori
@@ -779,10 +781,10 @@ MAIN_BUTTON_NAVNEXT_TOOLTIP;Passa all'immagine successiva a quella che si sta mo
 MAIN_BUTTON_NAVPREV_TOOLTIP;Passa all'immagine precedente quella che si sta modificando\nScorciatoia: <b>Shift-F3</b>\n\nPer passare all'immagine precedente alla miniatura selezionata nel Navigatore o nel Rullino:\nScorciatoia: <b>F3</b>
 MAIN_BUTTON_NAVSYNC_TOOLTIP;Sincronizza il Navigatore o il Rullino con la scheda di Modifica per trovare la miniatura dell'immagine attualmente aperta e rimuovere tutti i filtri di ricerca\nScorciatoia: <b>x</b>\n\nCome sopra, ma senza cancellare i filtri di ricerca\nScorciatoia: <b>y</b>\n(Nota che la miniatura del file aperto, se filtrato, non verrà mostrata).
 MAIN_BUTTON_PREFERENCES;Preferenze
-MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Aggiungi l'immagine corrente alla coda di sviluppo.\nScorciatoia: <b>Ctrl+B</b>
-MAIN_BUTTON_SAVE_TOOLTIP;Salva l'immagine corrente.\nSscorciatoia: <b>Ctrl+S</b>
+MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Aggiungi l'immagine corrente alla coda di sviluppo.\nScorciatoia: <b>Ctrl-b</b>
+MAIN_BUTTON_SAVE_TOOLTIP;Salva l'immagine corrente.\nSscorciatoia: <b>Ctrl-s</b>
 MAIN_BUTTON_SENDTOEDITOR;Modifica immagine nell'editor esterno
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Modifica l'immagine corrente con un programma di fotoritocco.\nScorciatoia: <b>Ctrl+E</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Modifica l'immagine corrente con un programma di fotoritocco.\nScorciatoia: <b>Ctrl-e</b>
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Mostra/Nascondi tutti i pannelli laterali.\nScorciatoia: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Esci da schermo intero
 MAIN_FRAME_EDITOR;Modifica
@@ -846,15 +848,15 @@ MAIN_TOOLTIP_FALSECOLORS;Imposta l'indicazione dell'esposizione usando falsi col
 MAIN_TOOLTIP_HIDEHP;Mostra/Nascondi il pannello sinistro (inclusa la cronologia)\nScorciatoia: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indicazione delle alte luci bruciate.\nScorciatoia: <b>&gt;</b>
 MAIN_TOOLTIP_INDCLIPPEDS;Indicazione delle ombre tagliate.\nScorciatoia: <b>&lt;</b>
-MAIN_TOOLTIP_PREVIEWB;Anteprima del <b>Canale Blu</b>.\nScorciatoia: <b>b</b>
-MAIN_TOOLTIP_PREVIEWFOCUSMASK;Anteprima della <b>Focus Mask</b>.\nScorciatoia: <b>Shift-F</b>\n\nPiù accurato su immagini con bassa profondità di campo, poco rumore e ad elevati livelli di zoom.\n\nPer aumentare l'accuratezza della rilevazione su immagini con molto rumore, riduci le dimensioni del 10-30%.
-MAIN_TOOLTIP_PREVIEWG;Anteprima del <b>Canale Verde</b>.\nScorciatoia: <b>g</b>
-MAIN_TOOLTIP_PREVIEWL;Anteprima della <b>Luminosità</b>.\nScorciatoia: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
-MAIN_TOOLTIP_PREVIEWR;Anteprima del <b>Canale Rosso</b>.\nScorciatoia: <b>r</b>
+MAIN_TOOLTIP_PREVIEWB;Anteprima del <b>Canale Blu</b>.\nScorciatoia: <b>Shift-b</b>
+MAIN_TOOLTIP_PREVIEWFOCUSMASK;Anteprima della <b>Focus Mask</b>.\nScorciatoia: <b>Shift-f</b>\n\nPiù accurato su immagini con bassa profondità di campo, poco rumore e ad elevati livelli di zoom.\n\nPer aumentare l'accuratezza della rilevazione su immagini con molto rumore, riduci le dimensioni del 10-30%.
+MAIN_TOOLTIP_PREVIEWG;Anteprima del <b>Canale Verde</b>.\nScorciatoia: <b>Shift-g</b>
+MAIN_TOOLTIP_PREVIEWL;Anteprima della <b>Luminosità</b>.\nScorciatoia: <b>Shift-v</b>\n\n0.299*R + 0.587*G + 0.114*B
+MAIN_TOOLTIP_PREVIEWR;Anteprima del <b>Canale Rosso</b>.\nScorciatoia: <b>Shift-r</b>
 MAIN_TOOLTIP_PREVIEWSHARPMASK;Anteprima della <b>maschera contrasto nitidezza</b>.\nScorciatoia: <b>Shift-o</b>\n\nFunziona solo quando Nitidezza è attivato, ed è accurato solo quando lo zoom >= 100%.
-MAIN_TOOLTIP_QINFO;Informazioni generali sullo scatto.\nScorciatoia: <b>i</b>
+MAIN_TOOLTIP_QINFO;Informazioni generali sullo scatto.\nScorciatoia: <b>Shift-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Mostra/Nascondi il pannello sinistro.\nScorciatoia: <b>l</b>
-MAIN_TOOLTIP_SHOWHIDERP1;Mostra/Nascondi il pannello destro.\nScorciatoia: <b>Alt-l</b>
+MAIN_TOOLTIP_SHOWHIDERP1;Mostra/Nascondi il pannello destro.\nScorciatoia: <b>Ctrl-l</b>
 MAIN_TOOLTIP_SHOWHIDETP1;Mostra/Nascondi il pannello superiore.\nScorciatoia: <b>Shift-l</b>
 MAIN_TOOLTIP_THRESHOLD;Soglia
 MAIN_TOOLTIP_TOGGLE;Vista <b>Prima</b>/<b>Dopo</b>.\nScorciatoia: <b>Shift-a</b>
@@ -1212,7 +1214,7 @@ QUEUE_LOCATION_FOLDER;Salva nella cartella
 QUEUE_LOCATION_TEMPLATE;Usa lo schema
 QUEUE_LOCATION_TEMPLATE_TOOLTIP;Puoi usare le seguenti stringhe di formattazione:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ...\n\nQueste stringhe di formattazione si riferiscono ai vari livelli del percorso in cui si trova la foto.\n\nPer esempio, se la foto sviluppata si trovasse nel seguente percorso:\n<b><i>/home/mario/foto/31-10-2010/dsc0042.nef</i></b>\nil significato delle stringhe di formattazione sarebbe:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>mario</i>\n<b>%d2</b> = <i>foto</i>\n<b>%d1</b> = <i>31-10-2010</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/mario/foto/31-10-2010/</i>\n<b>%p2</b> = <i>/home/mario/foto/</i>\n<b>%p3</b> = <i>/home/mario/</i>\n<b>%p4</b> = <i>/home/</i>\n\nPer salvare l'immagine finale nella stessa posizione dove si trova l'originale, scrivi:\n<b>%p1/%f</b>\n\nPer salvare l'immagine finale in una cartella chiamata "<i>sviluppate</i>" situata nella cartella degli originali, scrivi:\n<b>%p1/sviluppate/%f</b>\n\nPer salvare l'immagine finale in una cartella chiamata "<i>/home/mario/foto/sviluppate/31-10-2010</i>", scrivi:\n<b>%p2/sviluppate/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Destinazione
-QUEUE_STARTSTOP_TOOLTIP;Start o stop l'elaborazione delle immagini nella coda.\n\nCorciatoia: <b>Ctrl</b>+<b>s</b>
+QUEUE_STARTSTOP_TOOLTIP;Avvia o ferma l'elaborazione delle immagini nella coda.\n\nScorciatoia: <b>Ctrl-s</b>
 RENAME_DIALOG_ALLOW_WHITESPACE;Permette spazi nei nomi file destinazione
 RENAME_DIALOG_BASEDIR;Cartella base
 RENAME_DIALOG_ERROR;Errore nel rinominare %1 in %2
@@ -1270,11 +1272,11 @@ THRESHOLDSELECTOR_T;Alto
 THRESHOLDSELECTOR_TL;Alto-Sinistra
 THRESHOLDSELECTOR_TR;Alto-Destra
 TOOLBAR_TOOLTIP_COLORPICKER;Prelievo colore bloccabile\n\nQuando lo strumento è attivo:\n- Aggiungi un prelievo: <b>click sx</b>.\n- Sposta un prelievo: <b>click sx e trascina</b>.\n- Cancella un prelievo: <b>click dx</b>.\n- Cancella tutti i prelievi: <b>Ctrl</b>+<b>Shift</b>+<b>click dx</b>.\n- Torna allo strumento mano: <b>click dx</b> fuori dal prelievo.
-TOOLBAR_TOOLTIP_CROP;<b>Ritaglia</b> la selezione.\nScorciatoia: <b>c</b>\nSposta l'area di ritaglio tenendo premuto <b>Shift</b> mentre muovi il mouse
+TOOLBAR_TOOLTIP_CROP;<b>Ritaglia</b> la selezione.\nScorciatoia: <b>Shift-c</b>\nSposta l'area di ritaglio tenendo premuto <b>click sx</b> mentre muovi il mouse
 TOOLBAR_TOOLTIP_HAND;Strumento mano.\nScorciatoia: <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Correzione prospettiva</b>.\nScorciatoia: <b>Shift-p</b>\n\nModifica le linee di controllo per correggere la distorsione prospettica. Clicca di nuovo sul pulsante per applicare la correzione.
-TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Linea Dritta</b>/<b>Rotazione Precisa</b>.\nScorciatoia: <b>s</b>\n\nTraccia il verticale o l'orizzontale disegnando una linea sull'anteprima dell'immagine. L'angolo di rotazione verrà mostrato accanto alla linea guida. Il centro della rotazione è il centro geometrico dell'immagine.
-TOOLBAR_TOOLTIP_WB;Bilanciamento del bianco puntuale.\nScorciatoia: <b>w</b>
+TOOLBAR_TOOLTIP_STRAIGHTEN;<b>Linea Dritta</b>/<b>Rotazione Precisa</b>.\nScorciatoia: <b>Shift-s</b>\n\nTraccia il verticale o l'orizzontale disegnando una linea sull'anteprima dell'immagine. L'angolo di rotazione verrà mostrato accanto alla linea guida. Il centro della rotazione è il centro geometrico dell'immagine.
+TOOLBAR_TOOLTIP_WB;Bilanciamento del bianco puntuale.\nScorciatoia: <b>Shift-w</b>
 TOOL_SHORTCUT_HELP_HEADER;Scorciatoia Strumenti:\n(Premi il tasto assegnato e regola il cursore con +/- o la rotella del mouse)\n
 TP_BRIGHTCONTRSAT_CONTRAST;Contrasto
 TP_BWMIX_COLORCAST;Dominante
@@ -1529,9 +1531,9 @@ TP_ICM_APPLYHUESATMAP_TOOLTIP;Utilizza la tabella base del DCP incorporato (HueS
 TP_ICM_APPLYLOOKTABLE;Tabella di consultazione
 TP_ICM_APPLYLOOKTABLE_TOOLTIP;Utilizza la tabella di consultazione del DCP incorporato. L'impostazione è disponibile se il DCP selezionato ne ha uno.
 TP_ICM_BPC;Compensazione punto del nero
-TP_ICM_DCPILLUMINANT;Illuminazione
+TP_ICM_DCPILLUMINANT;Illuminante
 TP_ICM_DCPILLUMINANT_INTERPOLATED;Interpolato
-TP_ICM_DCPILLUMINANT_TOOLTIP;Seleziona il DCP del tipo di illuminazione da utilizzare. Il predefinito è "interpolato", un mix tra i due basato sul bilanciamento del bianco. Questa impostazione è abilitata solo se è selezionato Doppia Illuminazione con supporto interpolato.
+TP_ICM_DCPILLUMINANT_TOOLTIP;Seleziona quale illuminante DCP utilizzare. Il predefinito è "interpolato", un mix tra i due basato sul bilanciamento del bianco. Questa impostazione è abilitata solo se è selezionato un DCP a doppio illuminante con supporto interpolato.
 TP_ICM_INPUTCAMERA;Predefinito della fotocamera
 TP_ICM_INPUTCAMERAICC;Specifico della fotocamera
 TP_ICM_INPUTCAMERAICC_TOOLTIP;Utilizza i profili colore di ingresso DCP o ICC di ART specifici per la fotocamera. Questi profili sono più precisi dei semplici matrix. Non sono però disponibili per tutte le fotocamere. Questi profili sono archiviati nelle cartelle /iccprofiles/input e /dcpprofiles e sono recuperati automaticamente in base all'esatta corrispondenza tra nome del file e modello di fotocamera.
@@ -1561,7 +1563,7 @@ TP_IMPULSEDENOISE_LABEL;Riduzione Rumore Puntuale
 TP_IMPULSEDENOISE_THRESH;Soglia
 TP_LABCURVE_BRIGHTNESS;Luminosità
 TP_LABCURVE_CHROMATICITY;Cromaticità
-TP_LABCURVE_CHROMA_TOOLTIP;Per applicare il tono BN impostare la Cromaticità a -100.
+TP_LABCURVE_CHROMA_TOOLTIP;Per ottenere il Bianco-Nero impostare la cromaticità a -100.
 TP_LABCURVE_CONTRAST;Contrasto
 TP_LABCURVE_CURVEEDITOR_A_RANGE1;Verde Saturo
 TP_LABCURVE_CURVEEDITOR_A_RANGE2;Verde Pastello
@@ -1829,7 +1831,7 @@ TP_ROTATE_SELECTLINE;Seleziona una linea dritta
 TP_SATURATION_LABEL;Saturatione/Vividezza
 TP_SATURATION_SATURATION;Saturazione
 TP_SATURATION_VIBRANCE;Vividezza
-TP_SAVEDIALOG_OK_TIP;Scorciatoia: <b>Ctrl-Enter</b>
+TP_SAVEDIALOG_OK_TIP;Scorciatoia: <b>Ctrl-invio</b>
 TP_SHARPENING_AMOUNT;Quantità
 TP_SHARPENING_BLUR;Raggio di sfocatura
 TP_SHARPENING_CONTRAST;Soglia di contrasto
@@ -1910,6 +1912,7 @@ TP_TONE_EQUALIZER_BAND_3;Luci
 TP_TONE_EQUALIZER_BAND_4;Bianchi
 TP_TONE_EQUALIZER_DETAIL;Regolarizzazione
 TP_TONE_EQUALIZER_LABEL;Equalizzatore di tono
+TP_TONE_EQUALIZER_PIVOT;Pivot (Ev)
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Mostra mappa tonale
 TP_VIGNETTING_AMOUNT;Quantità
 TP_VIGNETTING_CENTER_X;Centro X
@@ -1934,7 +1937,7 @@ TP_WBALANCE_TEMPERATURE;Temperatura
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Apri (nuova) finestra di dettaglio
 ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
-ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>Alt</b>-<b>f</b>
+ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
 
