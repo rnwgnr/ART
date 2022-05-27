@@ -951,6 +951,16 @@ SONY ILCE-7M4
 
 Updated on Fri Apr 01 Apr 13:26:00 2022 (with LibRaw)
 OLYMPUS OM-1
+
+Updated on Fri May 27 12:16:05 2022 (with Adobe DNG converter 14.3.0.1072):
+CANON EOS R5 C
+IPAD13,16 BACK CAMERA
+IPHONE14,6 BACK CAMERA
+IPHONE14,6 FRONT CAMERA
+PANASONIC DC-GH6
+SONY XPERIA PRO-I TELEPHOTO CAMERA
+SONY XPERIA PRO-I ULTRAWIDE CAMERA
+SONY XPERIA PRO-I WIDE CAMERA
 */
 {"camera_constants": [
     {
@@ -1191,6 +1201,10 @@ OLYMPUS OM-1
     },
     {
         "make_model" : "CANON EOS R5",
+        "dcraw_matrix" : [9766, -2953, -1254, -4276, 12116, 2433, -437, 1336, 5131]
+    },
+    {
+        "make_model" : "CANON EOS R5 C",
         "dcraw_matrix" : [9766, -2953, -1254, -4276, 12116, 2433, -437, 1336, 5131]
     },
     {
@@ -1942,6 +1956,10 @@ OLYMPUS OM-1
         "dcraw_matrix" : [9368, -3064, -1010, -3724, 12223, 1658, -273, 1570, 4629]
     },
     {
+        "make_model" : "IPAD13,16 BACK CAMERA",
+        "dcraw_matrix" : [9094, -2859, -858, -5272, 13423, 2013, -1022, 2154, 4869]
+    },
+    {
         "make_model" : "IPAD13,4 BACK CAMERA",
         "dcraw_matrix" : [9368, -3064, -1010, -3724, 12223, 1658, -273, 1570, 4629]
     },
@@ -2228,6 +2246,14 @@ OLYMPUS OM-1
     {
         "make_model" : "IPHONE14,5 FRONT CAMERA",
         "dcraw_matrix" : [10337, -4217, -1006, -3362, 11806, 1741, -122, 1332, 4911]
+    },
+    {
+        "make_model" : "IPHONE14,6 BACK CAMERA",
+        "dcraw_matrix" : [10197, -4066, -1109, -5857, 14508, 1382, -983, 1816, 4928]
+    },
+    {
+        "make_model" : "IPHONE14,6 FRONT CAMERA",
+        "dcraw_matrix" : [12620, -5524, -1232, -3997, 12588, 1534, -27, 1245, 5507]
     },
     {
         "make_model" : "IPHONE8,1 BACK CAMERA",
@@ -3243,7 +3269,7 @@ OLYMPUS OM-1
     },
     {
         "make_model" : ["OLYMPUS OM-1", "OM DIGITAL SOLUTIONS OM-1"],
-        "dcraw_matrix": [9488,	-3984, -714, -2887, 10945, 2229, -137, 960, 5786]
+        "dcraw_matrix" : [9488, -3984, -714, -2887, 10945, 2229, -137, 960, 5786]
     },
     {
         "make_model" : "OLYMPUS PEN-F",
@@ -3388,6 +3414,10 @@ OLYMPUS OM-1
     {
         "make_model" : "PANASONIC DC-GH5S",
         "dcraw_matrix" : [6929, -2355, -708, -4192, 12534, 1828, -1097, 1989, 5195]
+    },
+    {
+        "make_model" : "PANASONIC DC-GH6",
+        "dcraw_matrix" : [7949, -3491, -709, -3435, 11681, 1976, -503, 1622, 5064]
     },
     {
         "make_model" : "PANASONIC DC-GX9",
@@ -4628,6 +4658,18 @@ OLYMPUS OM-1
     {
         "make_model" : "SONY XPERIA 5 WIDE-ANGLE CAMERA",
         "dcraw_matrix" : [12042, -5521, -995, -2205, 10859, 1535, 329, 1152, 4649]
+    },
+    {
+        "make_model" : "SONY XPERIA PRO-I TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12548, -5739, -1283, -2595, 11312, 1443, 172, 1094, 4811]
+    },
+    {
+        "make_model" : "SONY XPERIA PRO-I ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [13448, -6511, -1416, -4139, 12802, 1441, -651, 1739, 5014]
+    },
+    {
+        "make_model" : "SONY XPERIA PRO-I WIDE CAMERA",
+        "dcraw_matrix" : [10926, -4363, -1006, -4257, 12273, 2220, -322, 1175, 5546]
     },
     {
         "make_model" : "SONY ZV-E10",
