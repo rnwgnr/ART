@@ -16,6 +16,7 @@
 #15 2021-12-18 mrleemon, update for 1.12
 #16 2022-01-28 mrleemon, update for 1.12.1
 #17 2022-04-01 mrleemon, update for 1.13
+#18 2022-05-27 mrleemon, update for 1.14
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -679,6 +680,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;Ecualizador tonal
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Ecualizador tonal - Bandas
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Ecualizador tonal - Regularización
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Ecualizador tonal - Mapa tonal
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Ecualizador tonal - Pivote
 HISTORY_MSG_TONECURVE_SATCURVE;Curva tonal - Saturación
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Curva tonal - Intensidad perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Curva tonal - Modo antiguo de contraste
@@ -1924,6 +1926,7 @@ TP_TONE_EQUALIZER_BAND_4;Blancos
 TP_TONE_EQUALIZER_DETAIL;Regularización
 TP_TONE_EQUALIZER_LABEL;Ecualizador tonal
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Mostrar mapa tonal
+TP_TONE_EQUALIZER_PIVOT;Pivote (Ev)
 TP_VIGNETTING_AMOUNT;Cantidad
 TP_VIGNETTING_CENTER_X;Centro X
 TP_VIGNETTING_CENTER_Y;Centro Y
