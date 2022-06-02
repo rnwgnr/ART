@@ -2427,8 +2427,8 @@ void EditorPanel::beforeAfterToggled ()
         beforeHeaderBox->pack_end (*beforeLabel, Gtk::PACK_SHRINK, 2);
         beforeHeaderBox->set_size_request (0, HeaderBoxHeight);
 
-        history->blistenerLock ? tbBeforeLock->set_image (*iBeforeLockON) : tbBeforeLock->set_image (*iBeforeLockOFF);
-        tbBeforeLock->set_active (history->blistenerLock);
+        history->getBeforeAfterLock() ? tbBeforeLock->set_image (*iBeforeLockON) : tbBeforeLock->set_image (*iBeforeLockOFF);
+        tbBeforeLock->set_active(history->getBeforeAfterLock());
 
         beforeBox = Gtk::manage (new Gtk::VBox ());
         beforeBox->pack_start (*beforeHeaderBox, Gtk::PACK_SHRINK, 2);
@@ -2487,7 +2487,7 @@ void EditorPanel::beforeAfterToggled ()
 
 void EditorPanel::tbBeforeLock_toggled ()
 {
-    history->blistenerLock = tbBeforeLock->get_active();
+    history->setBeforeAfterLock(tbBeforeLock->get_active());
     tbBeforeLock->get_active() ? tbBeforeLock->set_image (*iBeforeLockON) : tbBeforeLock->set_image (*iBeforeLockOFF);
 }
 
