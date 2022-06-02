@@ -835,7 +835,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Background color of the preview: <b>theme-based</b>\nSho
 MAIN_TOOLTIP_BACKCOLOR1;Background color of the preview: <b>black</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Background color of the preview: <b>white</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\nUseful to evaluate the cumulative effect of multiple tools.\nAdditionally, comparisons can be made to any state in the History.\n\n<b>Unlock</b>: the <b>Before</b> view will follow the <b>After</b> view one step behind, showing the image before the effect of the currently used tool.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\n<b>Unlock</b>: the <b>Before</b> view is kept in sync with the <b>After</b> view.
 MAIN_TOOLTIP_FALSECOLORS;Toggle exposure indication using false color.\nShortcut: <b>Shift-e</b>\n\nKey (IRE range):\n%1
 MAIN_TOOLTIP_HIDEHP;Show/Hide the left panel (including the history).\nShortcut: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Clipped highlight indication.\nShortcut: <b>&gt;</b>
@@ -1253,8 +1253,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Best compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma halved h
 SAVEDLG_TIFFUNCOMPRESSED;Uncompressed TIFF
 SAVEDLG_WARNFILENAME;File will be named
 SHCSELECTOR_TOOLTIP;Click right mouse button to reset the position of those 3 sliders.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to the output profile.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the monitor profile, if soft-proofing is disabled.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to the monitor profile.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the output profile, if soft-proofing is disabled.
 SOFTPROOF_TOOLTIP;Soft-proofing simulates the appearance of the image when reproduced by a specific printer or monitor, if a proper profile is set in Preferences > Color Management.\n(Hold <b>Ctrl</b> while clicking to change the soft-proofing profile.)
 THRESHOLDSELECTOR_B;Bottom
 THRESHOLDSELECTOR_BL;Bottom-left
