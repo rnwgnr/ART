@@ -735,6 +735,47 @@ public:
         return thumb_monitor_xform_;
     }
 
+
+    bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
+    {
+        auto prof = getProfile(name);
+
+        if (!prof) {
+            if (name == procparams::ColorManagementParams::NoICMString) {
+                auto m = workingSpaceMatrix("sRGB");
+                for (int i = 0; i < 3; ++i) {
+                    for (int j = 0; j < 3; ++j) {
+                        out[i][j] = m[i][j];
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        if (cmsGetColorSpace(prof) == cmsSigRgbData && cmsIsMatrixShaper(prof) && !cmsIsCLUT(prof, RI_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
+
+            cmsCIEXYZ *red = static_cast<cmsCIEXYZ *>(cmsReadTag(prof, cmsSigRedMatrixColumnTag));
+            cmsCIEXYZ *green  = static_cast<cmsCIEXYZ *>(cmsReadTag(prof, cmsSigGreenMatrixColumnTag));
+            cmsCIEXYZ *blue  = static_cast<cmsCIEXYZ *>(cmsReadTag(prof, cmsSigBlueMatrixColumnTag));
+            
+            if (red && green && blue) {
+                out[0][0] = red->X;
+                out[0][1] = green->X;
+                out[0][2] = blue->X;
+                out[1][0] = red->Y;
+                out[1][1] = green->Y;
+                out[1][2] = blue->Y;
+                out[2][0] = red->Z;
+                out[2][1] = green->Z;
+                out[2][2] = blue->Z;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 private:
     void update_thumbnail_monitor_transform()
     {
@@ -1194,6 +1235,13 @@ cmsHTRANSFORM ICCStore::getThumbnailMonitorTransform()
 {
     return implementation->getThumbnailMonitorTransform();
 }
+
+
+bool ICCStore::getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
+{
+    return implementation->getProfileMatrix(name, out);
+}
+
 
 ICCStore::ICCStore() :
     implementation(new Implementation)

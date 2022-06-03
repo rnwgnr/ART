@@ -23,6 +23,7 @@
 #include "color.h"
 #include "sleef.h"
 #include "curves.h"
+#include "linalgebra.h"
 
 namespace rtengine {
 
@@ -188,8 +189,7 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
     LUTf sat;
     satcurve_lut(curve, sat, whitept);
 
-
-    if (whitept > 1.f) {
+    // if (whitept > 1.f) {
         TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
         TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
 
@@ -208,22 +208,22 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
                 Color::jzazbz2rgb(Jz, az, bz, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), iws);
             }
         }
-    } else {
-        rgb->setMode(Imagefloat::Mode::LAB, multithread);
-#ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
-#endif
-        for (int y = 0; y < rgb->getHeight(); ++y) {
-            for (int x = 0; x < rgb->getWidth(); ++x) {
-                float X, Y, Z;
-                Color::L2XYZ(rgb->g(y, x), X, Y, Z);
-                float s = sat[Y];
-                rgb->r(y, x) *= s;
-                rgb->b(y, x) *= s;
-            }
-        }
-        rgb->setMode(Imagefloat::Mode::RGB, multithread);
-    }
+//     } else {
+//         rgb->setMode(Imagefloat::Mode::LAB, multithread);
+// #ifdef _OPENMP
+// #       pragma omp parallel for if (multithread)
+// #endif
+//         for (int y = 0; y < rgb->getHeight(); ++y) {
+//             for (int x = 0; x < rgb->getWidth(); ++x) {
+//                 float X, Y, Z;
+//                 Color::L2XYZ(rgb->g(y, x), X, Y, Z);
+//                 float s = sat[Y];
+//                 rgb->r(y, x) *= s;
+//                 rgb->b(y, x) *= s;
+//             }
+//         }
+//         rgb->setMode(Imagefloat::Mode::RGB, multithread);
+//     }
 }
 
 
@@ -318,6 +318,90 @@ private:
     const Curve &c2_;
 };
 
+
+void gamut_compression(Imagefloat *img, const Glib::ustring &outprofile, float whitept, bool multithread)
+{
+    Mat33<float> om;
+    if (!ICCStore::getInstance()->getProfileMatrix(outprofile, om)) {
+        return;
+    }
+    auto iom = inverse(om);
+    auto ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
+    auto to_out = dot_product(ws, iom);
+    auto iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
+    auto to_work = dot_product(om, iws);
+
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+    const float Lmax = whitept * 65535.f;
+
+    // from https://github.com/jedypod/gamut-compress
+
+    // Distance limit: How far beyond the gamut boundary to compress
+    //const Vec3<float> dl(1.147f, 1.264f, 1.312f); // original ACES values
+    const Vec3<float> dl(1.1f, 1.2f, 1.5f); // hand-tuned
+    // Amount of outer gamut to affect
+    //const Vec3<float> th(0.815f, 0.803f, 0.88f); // original ACES values
+    const Vec3<float> th(0.85f, 0.75f, 0.95f); // hand-tuned
+
+    // Calculate scale so compression function passes through distance limit: (x=dl, y=1)
+    Vec3<float> s(
+        (1.0f-th[0])/std::sqrt(std::max(1.001f, dl[0])-1.0f),
+        (1.0f-th[1])/std::sqrt(std::max(1.001f, dl[1])-1.0f),
+        (1.0f-th[2])/std::sqrt(std::max(1.001f, dl[2])-1.0f)
+        );
+  
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            Vec3<float> rgb(img->r(y, x), img->g(y, x), img->b(y, x));
+            float iY = (rgb[0] + rgb[1] + rgb[2]) / 3.f;
+
+            rgb = dot_product(to_out, rgb);
+
+            // Achromatic axis
+            float ac = max(rgb[0], rgb[1], rgb[2]);
+
+            // Inverse RGB Ratios: distance from achromatic axis
+            Vec3<float> d;
+            float aac = std::abs(ac);
+            if (ac != 0.f) {
+                d[0] = (ac - rgb[0])/aac;
+                d[1] = (ac - rgb[1])/aac;
+                d[2] = (ac - rgb[2])/aac;
+            }
+
+            Vec3<float> cd; // Compressed distance
+            // Parabolic compression function: https://www.desmos.com/calculator/nvhp63hmtj
+            cd[0] = d[0]<th[0]?d[0]:s[0]*std::sqrt(d[0]-th[0]+s[0]*s[0]/4.0f)-s[0]*std::sqrt(s[0]*s[0]/4.0f)+th[0];
+            cd[1] = d[1]<th[1]?d[1]:s[1]*std::sqrt(d[1]-th[1]+s[1]*s[1]/4.0f)-s[1]*std::sqrt(s[1]*s[1]/4.0f)+th[1];
+            cd[2] = d[2]<th[2]?d[2]:s[2]*std::sqrt(d[2]-th[2]+s[2]*s[2]/4.0f)-s[2]*std::sqrt(s[2]*s[2]/4.0f)+th[2];
+
+            // Inverse RGB Ratios to RGB
+            rgb[0] = ac-cd[0]*aac;
+            rgb[1] = ac-cd[1]*aac;
+            rgb[2] = ac-cd[2]*aac;
+          
+            rgb = dot_product(to_work, rgb);
+
+            float oY = (rgb[0] + rgb[1] + rgb[2]) / 3.f;
+            if (oY > 0.f) {
+                float f = iY / oY;
+                rgb[0] *= f;
+                rgb[1] *= f;
+                rgb[2] *= f;
+                Color::filmlike_clip(&rgb[0], &rgb[1], &rgb[2], Lmax);
+            }
+            
+            img->r(y, x) = rgb[0];
+            img->g(y, x) = rgb[1];
+            img->b(y, x) = rgb[2];
+        }
+    }
+}
+
 } // namespace
 
 
@@ -341,12 +425,15 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
     if (params->toneCurve.enabled) {
         img->setMode(Imagefloat::Mode::RGB, multiThread);
 
+
         const float whitept = params->toneCurve.hasWhitePoint() ? params->toneCurve.whitePoint : 1.f;
 
         const bool single_curve = params->toneCurve.curveMode == params->toneCurve.curveMode2;
         
         ImProcData im(params, scale, multiThread);
-        if (!(single_curve && !params->toneCurve.contrastLegacyMode && params->toneCurve.curveMode == ToneCurveParams::TcMode::NEUTRAL)) {
+        if (single_curve && params->toneCurve.curveMode == ToneCurveParams::TcMode::NEUTRAL) {
+            gamut_compression(img, params->icm.outputProfile, whitept, multiThread);
+        } else {
             filmlike_clip(img, whitept, im.multiThread);
         }
 

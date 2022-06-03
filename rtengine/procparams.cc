@@ -1518,8 +1518,8 @@ ToneCurveParams::ToneCurveParams():
     curve2{
         DCT_Linear
     },
-    curveMode(ToneCurveParams::TcMode::STD),
-    curveMode2(ToneCurveParams::TcMode::STD),
+    curveMode(ToneCurveParams::TcMode::NEUTRAL),
+    curveMode2(ToneCurveParams::TcMode::NEUTRAL),
     histmatching(false),
     fromHistMatching(false),
     saturation{
@@ -2546,7 +2546,7 @@ ColorManagementParams::ColorManagementParams() :
     applyBaselineExposureOffset(true),
     applyHueSatMap(true),
     dcpIlluminant(0),
-    workingProfile("ProPhoto"),
+    workingProfile("Rec2020"),
     outputProfile(options.rtSettings.srgb),
     outputIntent(RI_RELATIVE),
     outputBPC(true),
