@@ -344,12 +344,39 @@ void gamut_compression(Imagefloat *img, const Glib::ustring &outprofile, float w
     //const Vec3<float> th(0.815f, 0.803f, 0.88f); // original ACES values
     const Vec3<float> th(0.85f, 0.75f, 0.95f); // hand-tuned
 
-    // Calculate scale so compression function passes through distance limit: (x=dl, y=1)
-    Vec3<float> s(
-        (1.0f-th[0])/std::sqrt(std::max(1.001f, dl[0])-1.0f),
-        (1.0f-th[1])/std::sqrt(std::max(1.001f, dl[1])-1.0f),
-        (1.0f-th[2])/std::sqrt(std::max(1.001f, dl[2])-1.0f)
-        );
+    // Power or Parabolic compression functions: https://www.desmos.com/calculator/nvhp63hmtj
+#if 0 // power compression
+    constexpr float p = 1.2f;
+    const auto scale =
+        [](float l, float t, float p) -> float
+        {
+            return (l - t) / std::pow(std::pow((1.f - t)/(l - t), -p) - 1.f, 1.f/p);
+        };
+    const Vec3<float> s(scale(dl[0], th[0], p),
+                        scale(dl[1], th[1], p),
+                        scale(dl[2], th[2], p));
+
+
+    const auto compr =
+        [&](float x, int i) -> float
+        {
+            float t = (x - th[i])/s[i];
+            return th[i] + s[i] * std::pow(t / (1.f + std::pow(t, p)), 1.f/p);
+        };
+#else // parabolic compression
+    const auto scale =
+        [](float l, float t) -> float
+        {
+            return (1.f - t) / std::sqrt(l-1.f);
+        };
+    Vec3<float> s(scale(dl[0], th[0]), scale(dl[1], th[1]), scale(dl[2], th[2]));
+
+    const auto compr =
+        [&](float x, int i) -> float
+        {
+            return s[i] * std::sqrt(x - th[i] + SQR(s[i])/4.0f) - s[i] * std::sqrt(SQR(s[i]) / 4.0f) + th[i];            
+        };
+#endif // power/parabolic compression
   
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
@@ -374,10 +401,9 @@ void gamut_compression(Imagefloat *img, const Glib::ustring &outprofile, float w
             }
 
             Vec3<float> cd; // Compressed distance
-            // Parabolic compression function: https://www.desmos.com/calculator/nvhp63hmtj
-            cd[0] = d[0]<th[0]?d[0]:s[0]*std::sqrt(d[0]-th[0]+s[0]*s[0]/4.0f)-s[0]*std::sqrt(s[0]*s[0]/4.0f)+th[0];
-            cd[1] = d[1]<th[1]?d[1]:s[1]*std::sqrt(d[1]-th[1]+s[1]*s[1]/4.0f)-s[1]*std::sqrt(s[1]*s[1]/4.0f)+th[1];
-            cd[2] = d[2]<th[2]?d[2]:s[2]*std::sqrt(d[2]-th[2]+s[2]*s[2]/4.0f)-s[2]*std::sqrt(s[2]*s[2]/4.0f)+th[2];
+            for (int i = 0; i < 3; ++i) {
+                cd[i] = d[i] < th[i] ? d[i] : compr(d[i], i);
+            }
 
             // Inverse RGB Ratios to RGB
             rgb[0] = ac-cd[0]*aac;
