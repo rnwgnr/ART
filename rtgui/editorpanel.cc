@@ -35,6 +35,7 @@
 #include "fastexport.h"
 #include "../rtengine/imgiomanager.h"
 #include "../rtengine/improccoordinator.h"
+#include "../rtengine/processingjob.h"
 
 using namespace rtengine::procparams;
 using ScopeType = Options::ScopeType;
@@ -884,16 +885,7 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
 
     updateHistogramPosition (0, options.histogramPosition);
 
-    show_all ();
-    /*
-        // save as dialog
-        if (Glib::file_test (options.lastSaveAsPath, Glib::FILE_TEST_IS_DIR))
-            saveAsDialog = new SaveAsDialog (options.lastSaveAsPath);
-        else
-            saveAsDialog = new SaveAsDialog (safe_get_user_picture_dir());
-
-        saveAsDialog->set_default_size (options.saveAsDialogWidth, options.saveAsDialogHeight);
-    */
+    show_all();
     // connect listeners
     profilep->setProfileChangeListener (tpc);
     history->setProfileChangeListener (tpc);
@@ -2038,12 +2030,16 @@ bool EditorPanel::idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImagef
 }
 
 
-BatchQueueEntry* EditorPanel::createBatchQueueEntry(bool fast_export)
+BatchQueueEntry* EditorPanel::createBatchQueueEntry(bool fast_export, bool use_batch_queue_profile, const rtengine::procparams::PartialProfile *export_profile)
 {
     rtengine::procparams::ProcParams pparams;
     ipc->getParams (&pparams);
+    if (export_profile) {
+        export_profile->applyTo(pparams);
+    }
     // rtengine::ProcessingJob* job = rtengine::ProcessingJob::create (openThm->getFileName (), openThm->getType() == FT_Raw, pparams);
     rtengine::ProcessingJob* job = create_processing_job(openThm->getFileName(), openThm->getType() == FT_Raw, pparams, fast_export);
+    static_cast<rtengine::ProcessingJobImpl *>(job)->use_batch_profile = use_batch_queue_profile;
     int fullW = 0, fullH = 0;
     isrc->getImageSource()->getFullSize (fullW, fullH, pparams.coarse.rotate == 90 || pparams.coarse.rotate == 270 ? TR_R90 : TR_NONE);
     int prevh = BatchQueue::calcMaxThumbnailHeight();
@@ -2071,9 +2067,9 @@ void EditorPanel::do_save_image(bool fast_export)
     auto toplevel = static_cast<Gtk::Window*> (get_toplevel ());
 
     if (Glib::file_test (options.lastSaveAsPath, Glib::FILE_TEST_IS_DIR)) {
-        saveAsDialog = new SaveAsDialog (options.lastSaveAsPath, toplevel);
+        saveAsDialog = new SaveAsDialog(options.lastSaveAsPath, toplevel);
     } else {
-        saveAsDialog = new SaveAsDialog (PlacesBrowser::userPicturesDir (), toplevel);
+        saveAsDialog = new SaveAsDialog(PlacesBrowser::userPicturesDir (), toplevel);
     }
 
     saveAsDialog->set_default_size (options.saveAsDialogWidth, options.saveAsDialogHeight);
@@ -2099,7 +2095,7 @@ void EditorPanel::do_save_image(bool fast_export)
             break;
         }
 
-        if (saveAsDialog->getImmediately ()) {
+        if (saveAsDialog->getImmediately()) {
             // separate filename and the path to the destination directory
             Glib::ustring dstdir = Glib::path_get_dirname (fnameOut);
             Glib::ustring dstfname = Glib::path_get_basename (removeExtension (fnameOut));
@@ -2134,7 +2130,12 @@ void EditorPanel::do_save_image(bool fast_export)
                 // save image
                 rtengine::procparams::ProcParams pparams;
                 ipc->getParams (&pparams);
+                auto ep = saveAsDialog->getExportProfile();
+                if (ep) {
+                    ep->applyTo(pparams);
+                }
                 rtengine::ProcessingJob *job = create_processing_job(ipc->getInitialImage(), pparams, fast_export);
+                static_cast<rtengine::ProcessingJobImpl *>(job)->use_batch_profile = false;
 
                 ProgressConnector<rtengine::IImagefloat*> *ld = new ProgressConnector<rtengine::IImagefloat*>();
                 ld->startFunc (sigc::bind (sigc::ptr_fun (&rtengine::processImage), job, err, parent->getProgressListener(), false ),
@@ -2143,7 +2144,7 @@ void EditorPanel::do_save_image(bool fast_export)
                 sendtogimp->set_sensitive (false);
             }
         } else {
-            BatchQueueEntry* bqe = createBatchQueueEntry(fast_export);
+            BatchQueueEntry* bqe = createBatchQueueEntry(fast_export, false, saveAsDialog->getExportProfile());
             bqe->outFileName = fnameOut;
             bqe->saveFormat = saveAsDialog->getFormat ();
             bqe->forceFormatOpts = saveAsDialog->getForceFormatOpts ();
@@ -2174,7 +2175,7 @@ void EditorPanel::do_queue_image(bool fast_export)
     }
 
     saveProfile();
-    parent->addBatchQueueJob(createBatchQueueEntry(fast_export));
+    parent->addBatchQueueJob(createBatchQueueEntry(fast_export, true, nullptr));
 }
 
 void EditorPanel::sendToGimpPressed ()

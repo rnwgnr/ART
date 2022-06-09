@@ -596,8 +596,8 @@ void Options::setDefaults()
 
     browser_width_for_inspector = 0;
 
-    batch_queue_use_profile = false;
-    batch_queue_profile_path = "";
+    // batch_queue_use_profile = false;
+    // batch_queue_profile_path = "";
 
     toolpanels_disable = false;
     adjuster_force_linear = false;
@@ -898,13 +898,13 @@ void Options::readFromFile(Glib::ustring fname)
                     overwriteOutputFile = keyFile.get_boolean("Output", "OverwriteOutputFile");
                 }
 
-                if (keyFile.has_key("Output", "BatchQueueUseProfile")) {
-                    batch_queue_use_profile = keyFile.get_boolean("Output", "BatchQueueUseProfile");
-                }
+                // if (keyFile.has_key("Output", "BatchQueueUseProfile")) {
+                //     batch_queue_use_profile = keyFile.get_boolean("Output", "BatchQueueUseProfile");
+                // }
                     
-                if (keyFile.has_key("Output", "BatchQueueProfile")) {
-                    batch_queue_profile_path = keyFile.get_string("Output", "BatchQueueProfile");
-                }
+                // if (keyFile.has_key("Output", "BatchQueueProfile")) {
+                //     batch_queue_profile_path = keyFile.get_string("Output", "BatchQueueProfile");
+                // }
 
                 if (keyFile.has_key("Output", "ProcParamsAutosaveInterval")) {
                     sidecar_autosave_interval = keyFile.get_integer("Output", "ProcParamsAutosaveInterval");
@@ -1752,6 +1752,30 @@ void Options::readFromFile(Glib::ustring fname)
                 theme_hl_color.resize(3);
             }
 
+            ExportProfileInfo default_export_profile_info;
+            if (keyFile.has_key("Output", "BatchQueueUseProfile")) {
+                default_export_profile_info.enabled = keyFile.get_boolean("Output", "BatchQueueUseProfile");
+            }
+                    
+            if (keyFile.has_key("Output", "BatchQueueProfile")) {
+                default_export_profile_info.profile = keyFile.get_string("Output", "BatchQueueProfile");
+            }
+            
+            for (auto group : keyFile.get_groups()) {
+                if (group.find("Export Profile ") != 0) {
+                    continue;
+                }
+                auto key = group.substr(15);
+                auto &info = export_profile_map[key];
+                info = default_export_profile_info;
+                if (keyFile.has_key(group, "Profile")) {
+                    info.profile = keyFile.get_string(group, "Profile");
+                }
+                if (keyFile.has_key(group, "Enabled")) {
+                    info.enabled = keyFile.get_boolean(group, "Enabled");
+                }
+            }
+
 // --------------------------------------------------------------------------------------------------------
 
             filterOutParsedExtensions();
@@ -1941,8 +1965,8 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Output", "UsePathTemplate", saveUsePathTemplate);
         keyFile.set_string("Output", "LastSaveAsPath", lastSaveAsPath);
         keyFile.set_boolean("Output", "OverwriteOutputFile", overwriteOutputFile);
-        keyFile.set_boolean("Output", "BatchQueueUseProfile", batch_queue_use_profile);
-        keyFile.set_string("Output", "BatchQueueProfile", batch_queue_profile_path);
+        // keyFile.set_boolean("Output", "BatchQueueUseProfile", batch_queue_use_profile);
+        // keyFile.set_string("Output", "BatchQueueProfile", batch_queue_profile_path);
         keyFile.set_integer("Output", "ProcParamsAutosaveInterval", sidecar_autosave_interval);
 
         keyFile.set_string("Profiles", "Directory", profilePath);
@@ -2136,6 +2160,11 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer_list("Theme Colors", "Background", theme_bg_color);
         keyFile.set_integer_list("Theme Colors", "Foreground", theme_fg_color);
         keyFile.set_integer_list("Theme Colors", "Highlight", theme_hl_color);
+
+        for (auto &p : export_profile_map) {
+            keyFile.set_string("Export Profile " + p.first, "Profile", p.second.profile);
+            keyFile.set_boolean("Export Profile " + p.first, "Enabled", p.second.enabled);
+        }
 
         keyData = keyFile.to_data();
 

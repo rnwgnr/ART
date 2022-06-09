@@ -23,6 +23,8 @@
 #include "adjuster.h"
 #include "saveformatpanel.h"
 #include "options.h"
+#include "profilestorecombobox.h"
+#include "../rtengine/procparams.h"
 #include <unordered_map>
 
 
@@ -38,6 +40,9 @@ protected:
                                       *  1 -> putToQueueHead
                                       *  2 -> putToQueueTail
                                       */
+    Gtk::CheckButton *apply_export_profile_;
+    ProfileStoreComboBox *profiles_cb_;
+    
     void forceFmtOptsSwitched();
     void saveImmediatlyClicked();
     void putToQueueClicked();
@@ -63,4 +68,6 @@ public:
     void cancelPressed();
     void formatChanged(const Glib::ustring &format) override;
     bool keyPressed(GdkEventKey *event);
+
+    const rtengine::procparams::PartialProfile *getExportProfile();
 };

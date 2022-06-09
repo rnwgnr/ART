@@ -89,13 +89,12 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
         f->add_pattern(Glib::ustring("*.") + e.uppercase());
     }
     
-    formatChanged(options.saveFormat.format);
+//    formatChanged(options.saveFormat.format);
 
 // Output Options
 // ~~~~~~~~~~~~~~
     formatOpts = Gtk::manage(new SaveFormatPanel());
     setExpandAlignProperties(formatOpts, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_START);
-    formatOpts->setListener(this);
 
 // queue/immediate
 // ~~~~~~~~~~~~~~~
@@ -154,8 +153,26 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     vbox_bottomRight->pack_start (*forceFormatOpts, Gtk::PACK_SHRINK, 4);
     vbox_bottomRight->pack_start (*autoSuffix, Gtk::PACK_SHRINK, 4);
 
+    Gtk::VBox *vbox_bottom_left = Gtk::manage(new Gtk::VBox());
+    vbox_bottom_left->pack_start(*formatOpts, Gtk::PACK_EXPAND_WIDGET, 2);
+    {
+        apply_export_profile_ = Gtk::manage(new Gtk::CheckButton(M("QUEUE_APPLY_BATCH_PROFILE") + ": "));
+        apply_export_profile_->set_active(false);
+        profiles_cb_ = Gtk::manage(new ProfileStoreComboBox());
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        hb->pack_start(*apply_export_profile_, Gtk::PACK_SHRINK);
+        hb->pack_start(*profiles_cb_, Gtk::PACK_SHRINK);
+        vbox_bottom_left->pack_start(*hb, Gtk::PACK_SHRINK, 4);
+        profiles_cb_->updateProfileList();
+        auto &info = options.export_profile_map[options.saveFormat.format];
+        apply_export_profile_->set_active(info.enabled);
+        if (!profiles_cb_->setActiveRowFromFullPath(info.profile)) {
+            profiles_cb_->unset_active();
+        }
+    }
+
     Gtk::HBox* hbox_bottom = Gtk::manage( new Gtk::HBox() );
-    hbox_bottom->pack_start (*formatOpts, Gtk::PACK_EXPAND_WIDGET, 2);
+    hbox_bottom->pack_start (*vbox_bottom_left, Gtk::PACK_EXPAND_WIDGET, 2);
     hbox_bottom->pack_start (*Gtk::manage(new Gtk::VSeparator ()), Gtk::PACK_SHRINK, 2);
     hbox_bottom->pack_start (*vbox_bottomRight, Gtk::PACK_EXPAND_WIDGET, 2);
 
@@ -167,6 +184,8 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
 
     show_all_children ();
 
+    formatOpts->setListener(this);
+    formatChanged(options.saveFormat.format);
     formatOpts->init (options.saveFormat);
 
     signal_key_press_event().connect( sigc::mem_fun(*this, &SaveAsDialog::keyPressed) );
@@ -324,6 +343,11 @@ void SaveAsDialog::cancelPressed ()
 void SaveAsDialog::formatChanged(const Glib::ustring& format)
 {
     fixExtension(getCurrentFilename(fchooser), format);
+    auto &info = options.export_profile_map[format];
+    if (!profiles_cb_->setActiveRowFromFullPath(info.profile)) {
+        profiles_cb_->unset_active();
+    }
+    apply_export_profile_->set_active(info.enabled);
 }
 
 
@@ -407,4 +431,16 @@ bool SaveAsDialog::keyPressed (GdkEventKey* event)
     }
 
     return false;
+}
+
+
+const rtengine::procparams::PartialProfile *SaveAsDialog::getExportProfile()
+{
+    if (apply_export_profile_->get_active()) {
+        auto entry = profiles_cb_->getSelectedEntry();
+        if (entry) {
+            return ProfileStore::getInstance()->getProfile(entry);
+        }
+    }
+    return nullptr;
 }

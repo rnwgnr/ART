@@ -422,8 +422,8 @@ public:
     bool thumbnail_inspector_show_histogram;
     bool thumbnail_inspector_hover;
 
-    Glib::ustring batch_queue_profile_path;
-    bool batch_queue_use_profile;
+    // Glib::ustring batch_queue_profile_path;
+    // bool batch_queue_use_profile;
 
     bool toolpanels_disable;
     bool adjuster_force_linear;
@@ -462,6 +462,14 @@ public:
     std::vector<int> theme_bg_color; // RGB in 0-255
     std::vector<int> theme_fg_color;
     std::vector<int> theme_hl_color;
+
+    struct ExportProfileInfo {
+        Glib::ustring profile;
+        bool enabled;
+        ExportProfileInfo(const Glib::ustring &p="", bool e=false):
+            profile(p), enabled(e) {}
+    };
+    std::map<Glib::ustring, ExportProfileInfo> export_profile_map;
 
     Options();
 
