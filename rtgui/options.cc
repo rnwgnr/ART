@@ -52,6 +52,20 @@ Glib::ustring versionString = RTVERSION;
 Glib::ustring paramFileExtension = ".arp";
 
 
+Glib::ustring SaveFormat::getKey() const
+{
+    if (format == "jpg") {
+        return format;
+    } else if (format == "png") {
+        return format + std::to_string(pngBits);
+    } else if (format == "tif") {
+        return format + std::to_string(tiffBits) + (tiffFloat ? "f" : "");
+    } else {
+        return format;
+    }
+}
+
+
 Options::RenameOptions::RenameOptions()
 {
     pattern = "%f.%e";

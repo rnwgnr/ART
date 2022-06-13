@@ -157,7 +157,7 @@ BatchQueuePanel::BatchQueuePanel (FileCatalog* aFileCatalog) : parent(nullptr)
         hb->pack_start(*profiles_cb_, Gtk::PACK_SHRINK);
         vb->pack_start(*hb, Gtk::PACK_SHRINK, 4);
         profiles_cb_->updateProfileList();
-        auto &info = options.export_profile_map[options.saveFormatBatch.format];
+        auto &info = options.export_profile_map[options.saveFormatBatch.getKey()];
         apply_batch_profile_->set_active(info.enabled);
         if (!profiles_cb_->setActiveRowFromFullPath(info.profile)) {
             profiles_cb_->unset_active();
@@ -428,7 +428,7 @@ void BatchQueuePanel::pathFolderChanged ()
 void BatchQueuePanel::formatChanged(const Glib::ustring& format)
 {
     options.saveFormatBatch = saveFormatPanel->getFormat();
-    auto &info = options.export_profile_map[options.saveFormatBatch.format];
+    auto &info = options.export_profile_map[options.saveFormatBatch.getKey()];
     ConnectionBlocker b1(apply_batch_profile_conn_);
     ConnectionBlocker b2(profiles_cb_conn_);
     apply_batch_profile_->set_active(info.enabled);
@@ -440,7 +440,7 @@ void BatchQueuePanel::formatChanged(const Glib::ustring& format)
 
 void BatchQueuePanel::applyBatchProfileToggled()
 {
-    auto &info = options.export_profile_map[saveFormatPanel->getFormat().format];
+    auto &info = options.export_profile_map[saveFormatPanel->getFormat().getKey()];
     info.enabled = apply_batch_profile_->get_active();
     info.profile = profiles_cb_->getFullPathFromActiveRow();
 }

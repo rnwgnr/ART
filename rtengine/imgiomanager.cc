@@ -103,6 +103,11 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                     continue;
                 }
 
+                std::string savefmt = ext;
+                if (kf.has_key(group, "SaveFormat")) {
+                    savefmt = kf.get_string(group, "SaveFormat").lowercase();
+                }
+
                 Glib::ustring cmd;
                 if (kf.has_key(group, "ReadCommand")) {
                     cmd = kf.get_string(group, "ReadCommand");
@@ -115,7 +120,7 @@ void ImageIOManager::init(const Glib::ustring &dirname)
 
                 if (kf.has_key(group, "WriteCommand")) {
                     cmd = kf.get_string(group, "WriteCommand");
-                    savers_[ext] = cmd;
+                    savers_[savefmt] = cmd;
                     Glib::ustring lbl;
                     if (kf.has_key(group, "Label")) {
                         lbl = kf.get_string(group, "Label");
@@ -123,10 +128,10 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                         lbl = Glib::ustring(ext).uppercase();
                     }
 
-                    savelbls_[ext] = lbl;
+                    savelbls_[savefmt] = SaveFormatInfo(ext, lbl);
                     
                     if (settings->verbose > 1) {
-                        std::cout << "Found saver for extension \"" << ext << "\": " << S(cmd) << std::endl;
+                        std::cout << "Found saver for format \"" << savefmt << "\" with extension \"" << ext << "\": " << S(cmd) << std::endl;
                     }
                 }
 
@@ -142,9 +147,11 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                         fmt = FMT_TIFF;
                     } else if (f == "float") {
                         fmt = FMT_TIFF_FLOAT;
+                    } else if (f == "half") {
+                        fmt = FMT_TIFF_FLOAT16;
                     }
                 }
-                fmts_[ext] = fmt;
+                fmts_[savefmt] = fmt;
             } catch (Glib::Exception &exc) {
                 std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what())
                           << std::endl;
@@ -336,6 +343,10 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
     case FMT_TIFF:
         ok = (img->saveAsTIFF(tmpname, 16, false, true) == 0);
         break;
+    case FMT_TIFF_FLOAT16:
+        ok = (img->saveAsTIFF(tmpname, 16, true, true) == 0);
+        break;
+    case FMT_TIFF_FLOAT:
     default:
         ok = (img->saveAsTIFF(tmpname, 32, true, true) == 0);
         break;
@@ -397,9 +408,9 @@ ImageIOManager::Format ImageIOManager::getFormat(const Glib::ustring &fname)
 }
 
 
-std::vector<std::pair<std::string, Glib::ustring>> ImageIOManager::getSaveFormats() const
+std::vector<std::pair<std::string, ImageIOManager::SaveFormatInfo>> ImageIOManager::getSaveFormats() const
 {
-    std::vector<std::pair<std::string, Glib::ustring>> ret(savelbls_.begin(), savelbls_.end());
+    std::vector<std::pair<std::string, ImageIOManager::SaveFormatInfo>> ret(savelbls_.begin(), savelbls_.end());
     return ret;
 }
 

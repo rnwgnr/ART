@@ -468,6 +468,10 @@ FramesData::FramesData(const Glib::ustring &fname):
                 sampleformat = SAMPLEFORMAT_IEEEFP;
                 bitspersample = 32;
                 break;
+            case ImageIOManager::FMT_TIFF_FLOAT16:
+                sampleformat = SAMPLEFORMAT_IEEEFP;
+                bitspersample = 16;
+                break;
             }
             if (is_external) {
                 photometric = PHOTOMETRIC_RGB;

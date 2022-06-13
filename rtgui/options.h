@@ -70,6 +70,8 @@ struct SaveFormat {
     {
     }
 
+    Glib::ustring getKey() const;
+
     Glib::ustring format;
     int pngBits;
     int jpegQuality;

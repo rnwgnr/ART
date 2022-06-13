@@ -42,11 +42,14 @@ protected:
                                       */
     Gtk::CheckButton *apply_export_profile_;
     ProfileStoreComboBox *profiles_cb_;
+    sigc::connection apply_export_profile_conn_;
+    sigc::connection profiles_cb_conn_;
     
     void forceFmtOptsSwitched();
     void saveImmediatlyClicked();
     void putToQueueClicked();
     void fixExtension(const Glib::ustring &name, const Glib::ustring &format);
+    void exportProfileChanged();
 
 public:
     SaveAsDialog(const Glib::ustring &initialDir, Gtk::Window *parent);
