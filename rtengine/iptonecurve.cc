@@ -25,6 +25,8 @@
 #include "curves.h"
 #include "linalgebra.h"
 
+#include <fstream>
+
 namespace rtengine {
 
 namespace {
@@ -470,38 +472,38 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             ccurve = get_contrast_curve(img, im, params->toneCurve.contrast, whitept);
         }
 
-        const auto adjust =
-            [whitept](std::vector<double> c) -> std::vector<double>
+        const auto expand =
+            [whitept](double x) -> double
             {
-                if (c.size() <= 3) {
-                    return c;
+                if (whitept <= 1.1f) {
+                    return x;
                 }
-                
+
+                double f = (pow_F(whitept, x) - 1) / (whitept - 1);
+                double g = rtengine::intp(SQR(x)*x, f * whitept, x);
+                return g;
+            };
+        
+        const auto adjust =
+            [whitept,&expand](std::vector<double> c) -> std::vector<double>
+            {
                 std::map<double, double> m;
-                bool set_white = false;
                 DiagonalCurveType tp = DiagonalCurveType(c[0]);
                 bool add_c = (tp == DCT_CatmullRom || tp == DCT_Spline);
-                {
-                    double &x = c[c.size()-2];
-                    double &y = c[c.size()-1];
-                    if (x == 1 && y == 1) {
-                        set_white = true;
-                    }
-                }
                 DiagonalCurve curve(c);
                 for (int i = 0; i < 25; ++i) {
                     double x = double(i)/100.0;
                     double v = Color::gammatab_srgb[x * 65535.0] / 65535.0;
                     double y = curve.getVal(v);
                     y = Color::igammatab_srgb[y * 65535.0] / 65535.0;
-                    m[x] = y;
+                    m[expand(x)] = expand(y);
                 }
                 for (int i = 25, j = 2; i < 100; ) {
                     double x = double(i)/100.0;
                     double v = Color::gammatab_srgb[x * 65535.0] / 65535.0;
                     double y = curve.getVal(v);
                     y = Color::igammatab_srgb[y * 65535.0] / 65535.0;
-                    m[x] = y;
+                    m[expand(x)] = expand(y);
                     i += j;
                     j *= 2;
                 }
@@ -511,25 +513,28 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
                         double v = Color::gammatab_srgb[x * 65535.0] / 65535.0;
                         double y = curve.getVal(v);
                         y = Color::igammatab_srgb[y * 65535.0] / 65535.0;
-                        m[x] = y;                    
+                        m[expand(x)] = expand(y);
                     }
                 }
-                if (set_white) {
-                    m[whitept] = whitept;
-                } else {
-                    m[1.0] = curve.getVal(1.0);
-                }
+                m[expand(1.0)] = expand(curve.getVal(1.0));
                 c = { DCT_CatmullRom };
                 for (auto &p : m) {
                     c.push_back(p.first);
                     c.push_back(p.second);
                 }
+#if 0
+                auto name = "/tmp/curve" + std::to_string(int(whitept)) + ".txt";
+                std::ofstream out(name.c_str());
+                for (size_t i = 1; i < c.size(); i += 2) {
+                    out << c[i] << " " << c[i+1] << "\n";
+                }
+#endif // if 0
                 return c;
             };
 
         ToneCurve tc;
-        DiagonalCurve tcurve1(adjust(params->toneCurve.curve), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         DiagonalCurve tcurve2(adjust(params->toneCurve.curve2), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        DiagonalCurve tcurve1(adjust(params->toneCurve.curve), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         DoubleCurve dcurve(tcurve1, tcurve2);
         std::unique_ptr<Curve> dccurve;
         Curve *tcurve = &dcurve;
