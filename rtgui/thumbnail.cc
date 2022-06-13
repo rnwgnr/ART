@@ -648,7 +648,7 @@ void Thumbnail::getFinalSize (const rtengine::procparams::ProcParams& pparams, i
     }
 }
 
-void Thumbnail::getOriginalSize (int& w, int& h)
+void Thumbnail::getOriginalSize(int &w, int &h, bool consider_coarse)
 {
     if (cfs.width < 0) {
         try {
@@ -659,6 +659,11 @@ void Thumbnail::getOriginalSize (int& w, int& h)
     }
     w = cfs.width;
     h = cfs.height;
+    if (consider_coarse && pparamsValid) {
+        if (pparams.master.coarse.rotate == 90 || pparams.master.coarse.rotate == 270) {
+            std::swap(w, h);
+        }
+    }
 }
 
 rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::ProcParams& pparams, int h, double& scale)
