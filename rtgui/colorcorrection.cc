@@ -324,10 +324,17 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     hb->pack_start(*mode);
     box->pack_start(*hb);
 
-    hueshift = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_HUESHIFT"), -180, 180, 0.1, 0));
+    // hueshift = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_HUESHIFT"), -180, 180, 0.1, 0));
+    // box->pack_start(*hueshift, Gtk::PACK_SHRINK, 4);
+    // hueshift->setLogScale(90, 0, true);
+    // hueshift->setAdjusterListener(this);
+    hueshift = Gtk::manage(new ThresholdAdjuster(M("TP_COLORCORRECTION_HUESHIFT"), -180.0, 180.0, 0., M("TP_COLORCORRECTION_HUESHIFT"), 1, -180.0, 180.0, 0.0, M("TP_COLORCORRECTION_HUESHIFT"), 1., nullptr, false));
     box->pack_start(*hueshift, Gtk::PACK_SHRINK, 4);
-    hueshift->setLogScale(90, 0, true);
+    hueshift->setActive(false, true);
     hueshift->setAdjusterListener(this);
+    hueshift->setBgColorProvider(this, 1);
+    hueshift->setUpdatePolicy(RTUP_DYNAMIC);
+    
     
     box_combined = Gtk::manage(new Gtk::VBox());
     box_rgb = Gtk::manage(new Gtk::VBox());
@@ -479,7 +486,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
     box_hsl->pack_start(*box_hsl_h);
 
-    hueshift->delay = options.adjusterMaxDelay;
+    //hueshift->delay = options.adjusterMaxDelay;
     inSaturation->delay = options.adjusterMaxDelay;
     outSaturation->delay = options.adjusterMaxDelay;
     slope->delay = options.adjusterMaxDelay;
@@ -545,7 +552,7 @@ void ColorCorrection::write(ProcParams *pp)
 
 void ColorCorrection::setDefaults(const ProcParams *defParams)
 {
-    hueshift->setDefault(defParams->colorcorrection.regions[0].hueshift);
+    hueshift->setDefault(defParams->colorcorrection.regions[0].hueshift, defParams->colorcorrection.regions[0].hueshift);
     inSaturation->setDefault(defParams->colorcorrection.regions[0].inSaturation);
     outSaturation->setDefault(defParams->colorcorrection.regions[0].outSaturation);
     slope->setDefault(defParams->colorcorrection.regions[0].slope[0]);
@@ -581,8 +588,8 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
         evt = EvPower;
     } else if (a == pivot) {
         evt = EvPivot;
-    } else if (a == hueshift) {
-        evt = EvHueShift;
+    // } else if (a == hueshift) {
+    //     evt = EvHueShift;
     } else if (a == compression) {
         evt = EvCompression;
     } else {
@@ -722,7 +729,10 @@ void ColorCorrection::regionGet(int idx)
     }
     r.inSaturation = inSaturation->getValue();
     r.outSaturation = outSaturation->getValue();
-    r.hueshift = hueshift->getValue();
+    //r.hueshift = hueshift->getValue();
+    double top, bot;
+    hueshift->getValue(bot, top);
+    r.hueshift = top;
     if (r.mode != rtengine::procparams::ColorCorrectionParams::Mode::RGB) {
         wheel->getParams(r.a, r.b, r.abscale);
         for (int c = 0; c < 3; ++c) {
@@ -775,7 +785,8 @@ void ColorCorrection::regionShow(int idx)
     }
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
-    hueshift->setValue(r.hueshift);
+    //hueshift->setValue(r.hueshift);
+    hueshift->setValue(0.0, r.hueshift);
     if (wheel->isCurrentSubscriber()) {
         wheel->unsubscribe();
     }
@@ -853,11 +864,47 @@ void ColorCorrection::setDeltaEColorProvider(DeltaEColorProvider *p)
 
 void ColorCorrection::adjusterChanged(ThresholdAdjuster *a, double newBottom, double newTop)
 {
+    if (listener && getEnabled() && a == hueshift) {
+        Glib::ustring st, sb;
+        hueshift->getValue(sb, st);
+        listener->panelChanged(EvHueShift, st);
+    }
 }
 
 
 void ColorCorrection::colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller)
 {
+    float R = 0.f, G = 0.f, B = 0.f;
+
+    const auto to_hue =
+        [](float x) -> float
+        {
+            //x -= 0.05f;
+            if (x < 0.f) {
+                x += 1.f;
+            } else if (x > 1.f) {
+                x -= 1.f;
+            }
+            return x;
+        };
+
+    if (callerId == 1) {  // Slider 1 background
+        if (valY <= 0.5) {
+            // the hue range
+            Color::hsv2rgb01(to_hue(valX), 1.0f, 0.65f, R, G, B);
+        } else {
+            // the shifted hue
+            double b, t;
+            hueshift->getValue(b, t);
+            double shift = t / 360.0;
+            double hue = to_hue(valX + shift);
+            Color::hsv2rgb01(hue, 1.0f, 0.65f, R, G, B);
+        }
+    }
+
+    caller->ccRed = double(R);
+    caller->ccGreen = double(G);
+    caller->ccBlue = double(B);
 }
 
 

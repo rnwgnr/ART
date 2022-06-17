@@ -125,7 +125,8 @@ private:
     ColorWheel *wheel;
     Adjuster *inSaturation;
     Adjuster *outSaturation;
-    Adjuster *hueshift;
+    //Adjuster *hueshift;
+    ThresholdAdjuster *hueshift;
     
     Adjuster *slope;
     Adjuster *offset;
