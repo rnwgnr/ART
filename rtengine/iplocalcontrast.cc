@@ -457,21 +457,7 @@ bool ImProcFunctions::localContrast(Imagefloat *rgb)
 
         const int W = rgb->getWidth();
         const int H = rgb->getHeight();
-
-#ifdef _OPENMP
-#       pragma omp parallel for if (multiThread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                auto &l = rgb->g(y, x);
-                if (LIKELY(l < 32768.f)) {
-                    l = Color::gammatab_srgb[l * 2.f] / 2.f;
-                } else {
-                    l = Color::gamma2(l / 32768.f) * 32768.f;
-                }
-            }
-        }
-
+        
         array2D<float> L(W, H, rgb->g.ptrs);
 
         for (int i = 0; i < n; ++i) {
@@ -493,21 +479,6 @@ bool ImProcFunctions::localContrast(Imagefloat *rgb)
                 }
             }
         }
-
-#ifdef _OPENMP
-#       pragma omp parallel for if (multiThread)
-#endif
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                auto &l = rgb->g(y, x);
-                if (LIKELY(l < 32768.f)) {
-                    l = Color::igammatab_srgb[l * 2.f] / 2.f;
-                } else {
-                    l = Color::igamma2(l / 32768.f) * 32768.f;
-                }
-            }
-        }
-        
     } else if (editWhatever) {
         editWhatever->fill(0.f);
     }
