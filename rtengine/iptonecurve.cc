@@ -174,6 +174,18 @@ std::unique_ptr<Curve> get_contrast_curve(Imagefloat *rgb, const ImProcData &im,
 }
 
 
+float expand_range(float whitept, float x)
+{
+    if (whitept <= 1.001f) {
+        return x;
+    }
+
+    float f = (pow_F(whitept, x) - 1) / (whitept - 1);
+    float g = rtengine::intp(SQR(x)*x, f * whitept, x);
+    return g;
+}
+
+
 void satcurve_lut(const FlatCurve &curve, LUTf &sat, float whitept)
 {
     sat(65536, LUT_CLIP_BELOW);
@@ -186,52 +198,70 @@ void satcurve_lut(const FlatCurve &curve, LUTf &sat, float whitept)
 }
 
 
+class SatCurveRemap {
+public:
+    SatCurveRemap(float whitept):
+        whitept_(whitept),
+        remapcurve_({
+            DCT_CatmullRom,
+                0.0, 0.0,
+                0.4, 0.4,
+                whitept, 1.0
+            })
+    {}
+
+    float operator()(float x) const
+    {
+        return Color::gamma2curve[LIM01((whitept_ == 1.f) ? x : remapcurve_.getVal(x)) * 65535.f] / 65535.f;
+    }
+
+private:
+    float whitept_;
+    DiagonalCurve remapcurve_;
+};
+
+
 void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring &working_profile, float whitept, bool multithread)
 {
     LUTf sat;
-    satcurve_lut(curve, sat, whitept);
+    const bool use_lut = (whitept == 1.f);
+    if (use_lut) {
+        satcurve_lut(curve, sat, whitept);
+    }
 
-    // if (whitept > 1.f) {
-        TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
-        TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
+    TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
+    TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
+
+    SatCurveRemap remap(whitept);
 
 #ifdef _OPENMP
-#       pragma omp parallel for if (multithread)
+#   pragma omp parallel for if (multithread)
 #endif
-        for (int y = 0; y < rgb->getHeight(); ++y) {
-            float X, Y, Z;
-            float Jz, az, bz;
-            for (int x = 0; x < rgb->getWidth(); ++x) {
-                Color::rgbxyz(rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), X, Y, Z, ws);
-                Color::xyz2jzazbz(X, Y, Z, Jz, az, bz);
-                float s = sat[Y];
-                az *= s;
-                bz *= s;
-                Color::jzazbz2rgb(Jz, az, bz, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), iws);
-            }
+    for (int y = 0; y < rgb->getHeight(); ++y) {
+        float X, Y, Z;
+        float Jz, az, bz;
+        for (int x = 0; x < rgb->getWidth(); ++x) {
+            float &R = rgb->r(y, x);
+            float &G = rgb->g(y, x);
+            float &B = rgb->b(y, x);
+            Color::rgbxyz(R/65535.f, G/65535.f, B/65535.f, X, Y, Z, ws);
+            Color::xyz2jzazbz(X, Y, Z, Jz, az, bz);
+            float s = use_lut ? sat[Y * 65535.f] : curve.getVal(remap(Y)) * 2.f;
+            az *= s;
+            bz *= s;
+            Color::jzazbz2rgb(Jz, az, bz, R, G, B, iws);
+            R *= 65535.f;
+            G *= 65535.f;
+            B *= 65535.f;
         }
-//     } else {
-//         rgb->setMode(Imagefloat::Mode::LAB, multithread);
-// #ifdef _OPENMP
-// #       pragma omp parallel for if (multithread)
-// #endif
-//         for (int y = 0; y < rgb->getHeight(); ++y) {
-//             for (int x = 0; x < rgb->getWidth(); ++x) {
-//                 float X, Y, Z;
-//                 Color::L2XYZ(rgb->g(y, x), X, Y, Z);
-//                 float s = sat[Y];
-//                 rgb->r(y, x) *= s;
-//                 rgb->b(y, x) *= s;
-//             }
-//         }
-//         rgb->setMode(Imagefloat::Mode::RGB, multithread);
-//     }
+    }
 }
 
 
 void fill_satcurve_pipette(Imagefloat *rgb, PlanarWhateverData<float>* editWhatever, const Glib::ustring &working_profile, float whitept, bool multithread)
 {
     TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
+    SatCurveRemap remap(whitept);
 
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
@@ -240,7 +270,7 @@ void fill_satcurve_pipette(Imagefloat *rgb, PlanarWhateverData<float>* editWhate
         for (int x = 0; x < rgb->getWidth(); ++x) {
             float r = rgb->r(y, x), g = rgb->g(y, x), b = rgb->b(y, x);
             float Y = Color::rgbLuminance(r, g, b, ws);
-            float s = Color::gamma2curve[Y] / 65535.f;
+            float s = remap(Y / 65535.f);
             editWhatever->v(y, x) = LIM01(s);
         }
     }
@@ -473,16 +503,7 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         }
 
         const auto expand =
-            [whitept](double x) -> double
-            {
-                if (whitept <= 1.1f) {
-                    return x;
-                }
-
-                double f = (pow_F(whitept, x) - 1) / (whitept - 1);
-                double g = rtengine::intp(SQR(x)*x, f * whitept, x);
-                return g;
-            };
+            [whitept](double x) -> double { return expand_range(whitept, x); };
         
         const auto adjust =
             [whitept,&expand](std::vector<double> c) -> std::vector<double>
@@ -580,7 +601,8 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             fill_satcurve_pipette(img, editWhatever, params->icm.workingProfile, whitept, multiThread);
         }
 
-        const FlatCurve satcurve(params->toneCurve.saturation, false, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+        auto satcurve_pts = params->toneCurve.saturation;
+        const FlatCurve satcurve(satcurve_pts, false, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         if (!satcurve.isIdentity()) {
             apply_satcurve(img, satcurve, params->icm.workingProfile, whitept, multiThread);
         }
