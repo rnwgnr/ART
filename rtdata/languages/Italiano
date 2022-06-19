@@ -7,6 +7,7 @@
 #07 2022-03-28 - completed for 1.12.1 - alvaro
 #08 2022-04-20 alvaro
 #09 2022-05-18 alvaro
+#10 2022-06-12 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -843,7 +844,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Colore di sfondo dell'anteprima: <b>Basato sul tema</b>\
 MAIN_TOOLTIP_BACKCOLOR1;Colore di sfondo dell'anteprima: <b>Nero</b>\nScorciatoia: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Colore di sfondo dell'anteprima: <b>Bianco</b>\nScorciatoia: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Colore di sfondo dell'anteprima: <b>Grigio medio</b>\nScorciatoia: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Blocca</b>/<b>Sblocca</b> la vista <b>Prima</b>\n\n<b>Blocca</b>: Conserva la vista <b>Prima</b>.\nUtile per valutare l'effetto cumulativo di diversi strumenti.\nIn più, possono essere confrontati diversi passi della cronologia.\n\n<b>Sblocca</b>: la vista <b>Prima</b> segue di un passo la vista <b>Dopo</b>, mostrando l'immagine prima dell'effetto dello strumento corrente.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Blocca</b>/<b>Sblocca</b> la vista <b>Prima</b>\n\n<b>Blocca</b>: mantiene la vista <b>Prima</b>.\n<b>Sblocca</b>: la vista <b>Prima</b> viene sincronizzata con la vista <b>Dopo</b>.
 MAIN_TOOLTIP_FALSECOLORS;Imposta l'indicazione dell'esposizione usando falsi colori.\nScorciatoia: <b>Shift-e</b>\n\nColori (gamma IRE):\n%1
 MAIN_TOOLTIP_HIDEHP;Mostra/Nascondi il pannello sinistro (inclusa la cronologia)\nScorciatoia: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indicazione delle alte luci bruciate.\nScorciatoia: <b>&gt;</b>
@@ -1261,8 +1262,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Migliore compressione:\nJ:a:b 4:2:0\nh/v 2/2\nCrominanza
 SAVEDLG_TIFFUNCOMPRESSED;TIFF non compresso
 SAVEDLG_WARNFILENAME;Il file verrà chiamato
 SHCSELECTOR_TOOLTIP;Click destro per ripristinare la posizione di questi tre cursori.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Evidenzia i pixel con colori fuori dal gamut rispetto a:\n- profilo soft-proofing, se impostato e se il soft-proofing è abilitato,\n- profilo monitor, se il soft-proofing è disabilitato.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Evidenzia i pixel con colori fuori del gamut rispetto al profilo di uscita.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Evidenzia i pixel con colori fuori dal gamut rispetto al profilo del monitor.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Evidenzia i pixel con colori fuori dal gamut rispetto a:\n- profilo soft-proofing, se impostato e se il soft-proofing è abilitato,\n- profilo di uscita, se il soft-proofing è disabilitato.
 SOFTPROOF_TOOLTIP;Il soft-proofing simula l'apparenza dell'immagine quando viene riprodotta da una specifica stampante o monitor, se un profilo corretto è impostato in Preferenze > Gestione Colore.\n(Premi <b>Ctrl</b> + click per cambiare i profili soft-proofing.)
 THRESHOLDSELECTOR_B;Basso
 THRESHOLDSELECTOR_BL;Basso-Sinistra
@@ -1941,4 +1942,5 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
+
 

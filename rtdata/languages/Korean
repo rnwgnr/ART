@@ -5,6 +5,7 @@
 #04 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
 #05 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
 #06 2022-05-27 Ohnishi, Yasuo, updates for 1.14
+#07 2022-06-15 Ohnishi, Yasuo, updated
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -838,7 +839,7 @@ MAIN_TOOLTIP_BACKCOLOR0;미리보기의 배경색을 지정합니다.: <b>주제
 MAIN_TOOLTIP_BACKCOLOR1;미리보기의 배경색을 지정합니다.: <b>검은색</b>\n단축키t: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;미리보기의 배경색을 지정합니다.: <b>하얀색</b>\n단축키: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;미리보기의 배경색을 지정합니다.: <b>중간 회색</b>\n단축키: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>고정</b> / <b>고정 해제</b> - <b>보정 전의 </b> 표시 설정\n\n<b>고정</b>: <b>보정 전 상태</b>를 그대로 표시하고 변경하지 않습니다.\n복수의 도구의 누적효과 평가에 도움이 됩니다.\n또, 비교는 이력상 어디에서도 할 수 있습니다.\n\n<b>고정 해제</b>: 현재 사용중 도구의  효과가 <b>보정 후</b>에  표시되고 그 전 단계 상태가  <b>보정 전 </b>에 표시 됩니다.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>고정</b> / <b>고정 해제</b> - <b>보정 전의 </b> 표시 설정\n\n<b>고정</b>: <b>보정 전 상태</b>를 그대로 표시하고 변경하지 않습니다.\n<b>고정 해제</b>: <b>보정 전 </b> 표시는 <b>보정 후</b>  표시와 연동합니다.
 MAIN_TOOLTIP_FALSECOLORS;노광량의 색깔 표시 표시/비표시.\n단축키: <b>Shift-e</b>\n\n범례 (IRE지수의 범위) :\n%1
 MAIN_TOOLTIP_HIDEHP;왼쪽패널 표시/비표시 (작업이력 포함)\n단축키:  <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;하이라이트 클리핑 영역の표시\n단축키: <b>&gt;</b>
@@ -1256,8 +1257,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;최고 압축률:\nJ:a:b 4:2:0\nh/v 2/2\n크로마 (색�
 SAVEDLG_TIFFUNCOMPRESSED;비압축 TIFF
 SAVEDLG_WARNFILENAME;파일에 이름을 붙입니다.
 SHCSELECTOR_TOOLTIP;이 세개 슬라이더 위치를 리셋하려면 \n마우스의 오른쪽버튼을 클릭함
-SOFTPROOF_GAMUTCHECK_TOOLTIP;유효화하면 출력 프로파일 색역외 색깔의  픽셀을 하이라이트로 표시합니다.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;이하 프로파일의 색공간외 픽셀을 하이라이트로 표시합니다.:\n- 출력 사진 미리 보기가 유효인 경우 출력 사진 미리 보기 프로파일,\n- 출력 사진 미리 보기가 무효인 경우, 모니터 프로파일.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;모니터 프로파일에 대하는 색공간외 픽셀을 하이라이트로 표시합니다.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;소프트 프루핑이 유효일 때 소프트 프루핑프로파일 색역외 색깔의  픽셀을\n소프트 프루핑이 무효일 때 출력 프로파일 색역외 색깔의  픽셀을 하이라이트로 표시합니다.
 SOFTPROOF_TOOLTIP;출력 사진 미리 보기는 특정의 인쇠기나 모니터 출력 이미지를 모방합니다.\n단, 환경 설정>색관리에서 적절한 프로파일을 설정할 필요가 있습니다.\n(출력 사진 미리 보기 프로파일을변경하려려면  <b>Ctrl</b> 을 누루면서 크릭하세요)
 THRESHOLDSELECTOR_B;아래
 THRESHOLDSELECTOR_BL;하래-왼쪽

@@ -14,6 +14,7 @@
 #13 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
 #14 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
 #15 2022-05-27 Ohnishi, Yasuo, updates for 1.14
+#16 2022-06-15 Ohnishi, Yasuo, updated
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -847,7 +848,7 @@ MAIN_TOOLTIP_BACKCOLOR0;プレビューの背景色を指定します: <b>テー
 MAIN_TOOLTIP_BACKCOLOR1;プレビューの背景色を指定します: <b>黒</b>\nショートカットt: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;プレビューの背景色を指定します: <b>白</b>\nショートカット: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;プレビューの背景色を指定します: <b>中間のグレー</b>\nショートカット: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>固定</b> / <b>固定解除</b> - <b>補正前</b> の表示設定\n\n<b>固定</b>: <b>補正前</b>をそのまま表示し変更されません\n複数のツールの累積効果を評価するのに役立ちます\nさらに 比較は履歴上のどこからでも行うことができます\n\n<b>固定解除</b>: 現在使用のツールの効果が <b>補正後</b> に表示され その1段階前が <b>補正前</b> に表示されます
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>固定</b> / <b>固定解除</b> - <b>補正前</b> の表示設定\n\n<b>固定</b>: <b>補正前</b>をそのまま表示し変更されません\n<b>固定解除</b>: <b>補正前</b>表示は<b>補正後</b>表示と連動します
 MAIN_TOOLTIP_FALSECOLORS;着色による露光量表示の切替.\nショートカット: <b>Shift-e</b>\n\n凡例 (IRE指数の範囲) :\n%1
 MAIN_TOOLTIP_HIDEHP;左パネル 表示/非表示 (履歴含む)\nショートカット:  <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;ハイライト･クリッピング領域の表示\nショートカット: <b>&gt;</b>
@@ -1265,8 +1266,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;圧縮率重視:\nJ:a:b 4:2:0\nh/v 2/2\n色差 (Chroma) 
 SAVEDLG_TIFFUNCOMPRESSED;非圧縮 TIFF
 SAVEDLG_WARNFILENAME;ファイルに名前が付けられます
 SHCSELECTOR_TOOLTIP;この3つのスライダーの位置をリセットするには\nマウスの右ボタンをクリック
-SOFTPROOF_GAMUTCHECK_TOOLTIP;有効にすると 出力プロファイル色域外の色のピクセルをハイライトで表示します
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;以下に関して色空間外のピクセルをハイライト表示します:\n- ソフトプルーフィングが有効な場合, ソフトプルーフィングプロファイル,\n- ソフトプルーフィングが無効な場合, モニタープロファイル
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;モニタープロファイルに対する色空間外のピクセルをハイライト表示します
+SOFTPROOF_GAMUTCHECK_TOOLTIP;ソフトプルーフが有効な場合 ソフトプルーフプロファイル色域外の色のピクセルを\nソフトプルーフが無効な場合 出力プロファイル色域外の色のピクセルをハイライトで表示します
 SOFTPROOF_TOOLTIP;ソフトプルーフィングは特定のプリンターもしくはモニターでのイメージをシミュレートします. \n但し 環境設定>カラーマネジメントでそれらに合った適切なプロファイルを設定する必要があります.\n(ソフトプルーフィングプロファイルを変更するには <b>Ctrl</b> を押しながらクリックしてください)
 THRESHOLDSELECTOR_B;下
 THRESHOLDSELECTOR_BL;下-左
