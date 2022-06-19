@@ -87,6 +87,7 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
         Glib::ustring e = p.second.extension;
         f->add_pattern(Glib::ustring("*.") + e);
         f->add_pattern(Glib::ustring("*.") + e.uppercase());
+        filters_[p.first] = f;
     }
     
 //    formatChanged(options.saveFormat.format);
@@ -350,7 +351,7 @@ void SaveAsDialog::cancelPressed ()
 
 void SaveAsDialog::formatChanged(const Glib::ustring& format)
 {
-    fixExtension(getCurrentFilename(fchooser), formatOpts->getExtension());
+    fixExtension(getCurrentFilename(fchooser));
     ConnectionBlocker b1(apply_export_profile_conn_);
     ConnectionBlocker b2(profiles_cb_conn_);
     auto &info = options.export_profile_map[getFormat().getKey()];
@@ -361,13 +362,17 @@ void SaveAsDialog::formatChanged(const Glib::ustring& format)
 }
 
 
-void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& format)
+void SaveAsDialog::fixExtension(const Glib::ustring &name)
 {
+    auto format = getFormat().getKey();
+    auto ext = formatOpts->getExtension();
+    
     const auto sanitize_suffix =
-        [this, name, format](const std::function<bool (const Glib::ustring&)>& has_suffix)
+        [this, name, ext](const std::function<bool (const Glib::ustring&)>& has_suffix)
         {
             if (!name.empty() && !has_suffix(name)) {
-                fchooser->set_current_name(removeExtension(Glib::path_get_basename(name)) + '.' + format);
+                auto newname = removeExtension(Glib::path_get_basename(name)) + '.' + ext;
+                fchooser->set_current_name(newname);
             }
         };
 
@@ -403,7 +408,7 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& 
         sanitize_suffix(
             [=](const Glib::ustring &filename)
             {
-                return rtengine::getFileExtension(filename).lowercase() == format;
+                return rtengine::getFileExtension(filename).lowercase() == ext;
             }
         ); 
     }
@@ -412,8 +417,7 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& 
 void SaveAsDialog::setInitialFileName (const Glib::ustring& fname)
 {
     this->fname = fname;
-    //fchooser->set_current_name(fname);
-    fixExtension(fname, formatOpts->getExtension());
+    fixExtension(fname);
 }
 
 void SaveAsDialog::setImagePath (const Glib::ustring& imagePath)

@@ -1125,7 +1125,7 @@ void EditorPanel::open(Thumbnail* tmb, rtengine::InitialImage* isrc)
     openThm->increaseRef();
 
     fname = openThm->getFileName();
-    lastSaveAsFileName = removeExtension (Glib::path_get_basename (fname));
+    lastSaveAsFileName = Glib::path_get_basename(fname);
 
     previewHandler = new PreviewHandler();
 
