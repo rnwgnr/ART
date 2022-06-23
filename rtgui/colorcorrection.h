@@ -125,8 +125,9 @@ private:
     ColorWheel *wheel;
     Adjuster *inSaturation;
     Adjuster *outSaturation;
-    //Adjuster *hueshift;
-    ThresholdAdjuster *hueshift;
+    Adjuster *hueshift;
+    Gtk::DrawingArea *hueshift_bar;
+    Gtk::Frame *hueframe;
     
     Adjuster *slope;
     Adjuster *offset;
