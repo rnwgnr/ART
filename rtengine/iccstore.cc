@@ -198,15 +198,35 @@ cmsHPROFILE createXYZProfile()
     return ICCStore::createFromMatrix(mat, false, "XYZ");
 }
 
-const float(*wprofiles[])[3]  = {xyz_sRGB, xyz_adobe, xyz_prophoto, xyz_widegamut, xyz_bruce, xyz_beta, xyz_best, xyz_rec2020, xyz_ACESp0, xyz_ACESp1};//
-const float(*iwprofiles[])[3] = {sRGB_xyz, adobe_xyz, prophoto_xyz, widegamut_xyz, bruce_xyz, beta_xyz, best_xyz, rec2020_xyz, ACESp0_xyz, ACESp1_xyz};//
-const char* wpnames[] = {"sRGB", "Adobe RGB", "ProPhoto", "WideGamut", "BruceRGB", "Beta RGB", "BestRGB", "Rec2020", "ACESp0", "ACESp1"};//
-//default = gamma inside profile
-//BT709 g=2.22 s=4.5  sRGB g=2.4 s=12.92310
-//linear g=1.0
-//std22 g=2.2   std18 g=1.8
-// high  g=1.3 s=3.35  for high dynamic images
-//low  g=2.6 s=6.9  for low contrast images
+const float(*wprofiles[])[3]  = {
+    xyz_sRGB,
+    xyz_adobe,
+    xyz_prophoto,
+    //xyz_widegamut, xyz_bruce, xyz_beta, xyz_best,
+    xyz_rec2020,
+    xyz_ACESp0,
+    xyz_ACESp1
+};
+
+const float(*iwprofiles[])[3] = {
+    sRGB_xyz,
+    adobe_xyz,
+    prophoto_xyz,
+    //widegamut_xyz, bruce_xyz, beta_xyz, best_xyz,
+    rec2020_xyz,
+    ACESp0_xyz,
+    ACESp1_xyz
+};
+
+const char* wpnames[] = {
+    "sRGB",
+    "Adobe RGB",
+    "ProPhoto",
+    // "WideGamut", "BruceRGB", "Beta RGB", "BestRGB",
+    "Rec2020",
+    "ACESp0",
+    "ACESp1"
+};
 
 //-----------------------------------------------------------------------------
 // helper functions to fix V2 profiles TRCs, used in
@@ -229,7 +249,7 @@ bool is_RTv2_profile(cmsHPROFILE profile)
     std::vector<char> buf(sz);
     cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
     buf.back() = 0; // sanity
-    return strcmp(&buf[0], "RawTherapee") == 0;
+    return (strcmp(&buf[0], "RawTherapee") == 0 || strcmp(&buf[0], "ART") == 0);
 }
 
 
@@ -274,22 +294,6 @@ bool get_RT_gamma_slope(cmsHPROFILE profile, double &gammatag, double &slopetag)
     return false;
 }
 
-
-Glib::ustring get_profile_description(cmsHPROFILE profile)
-{
-    const cmsMLU *mlu = static_cast<const cmsMLU *>(cmsReadTag(profile, cmsSigProfileDescriptionTag));
-    if (!mlu) {
-        return "";
-    }
-    cmsUInt32Number sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
-    if (!sz) {
-        return "";
-    }
-    std::vector<char> buf(sz);
-    cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
-    buf.back() = 0; // sanity
-    return std::string(&buf[0]);
-}
 
 } // namespace
 
@@ -354,7 +358,7 @@ cmsHPROFILE ProfileContent::toProfile() const
                 double slope = slopetag == 0 ? eps : slopetag;
 
                 GammaValues g_b; //gamma parameters
-                Color::calcGamma(pwr, ts, 0, g_b); // call to calcGamma with selected gamma and slope : return parameters for LCMS2
+                Color::calcGamma(pwr, ts, g_b); // call to calcGamma with selected gamma and slope : return parameters for LCMS2
                 cmsFloat64Number gammaParams[7]; //gamma parameters
                 gammaParams[4] = g_b[3] * ts;
                 gammaParams[0] = gammatag;
@@ -377,10 +381,10 @@ cmsHPROFILE ProfileContent::toProfile() const
                 cmsFreeToneCurve(GammaTRC);
 
                 if (settings->verbose > 1) {
-                    std::cout << "ICCStore: rebuilt TRC for RTv2 profile " << get_profile_description(profile) << ": gamma=" << gammatag << ", slope=" << slopetag << std::endl;
+                    std::cout << "ICCStore: rebuilt TRC for RTv2 profile " << ICCStore::getProfileTag(profile, cmsSigProfileDescriptionTag) << ": gamma=" << gammatag << ", slope=" << slopetag << std::endl;
                 }
             } else if (settings->verbose > 1) {
-                std::cout << "ICCStore: no gamma/slope info found for RTv2 profile " << get_profile_description(profile) << std::endl;
+                std::cout << "ICCStore: no gamma/slope info found for RTv2 profile " << ICCStore::getProfileTag(profile, cmsSigProfileDescriptionTag) << std::endl;
             }
         }
     }
@@ -398,6 +402,8 @@ class ICCStore::Implementation
     using MatrixMap = std::map<Glib::ustring, TMatrix>;
     using ContentMap = std::map<Glib::ustring, ProfileContent>;
     using NameMap = std::map<Glib::ustring, Glib::ustring>;
+
+    static constexpr const char *DEFAULT_WORKING_SPACE = "Rec2020";
 
 public:
     Implementation() :
@@ -500,19 +506,8 @@ public:
         return
             r != wProfiles.end()
             ? r->second
-            : wProfiles.find("sRGB")->second;
+            : wProfiles.find(DEFAULT_WORKING_SPACE)->second;
     }
-
-    // cmsHPROFILE workingSpaceGamma(const Glib::ustring& name) const
-    // {
-
-    //     const ProfileMap::const_iterator r = wProfilesGamma.find(name);
-
-    //     return
-    //         r != wProfilesGamma.end()
-    //             ? r->second
-    //             : wProfilesGamma.find("sRGB")->second;
-    // }
 
     TMatrix workingSpaceMatrix(const Glib::ustring& name) const
     {
@@ -521,7 +516,7 @@ public:
         return
             r != wMatrices.end()
             ? r->second
-            : wMatrices.find("sRGB")->second;
+            : wMatrices.find(DEFAULT_WORKING_SPACE)->second;
     }
 
     TMatrix workingSpaceInverseMatrix(const Glib::ustring& name) const
@@ -532,7 +527,7 @@ public:
         return
             r != iwMatrices.end()
             ? r->second
-            : iwMatrices.find("sRGB")->second;
+            : iwMatrices.find(DEFAULT_WORKING_SPACE)->second;
     }
 
     bool outputProfileExist(const Glib::ustring& name) const
@@ -545,6 +540,22 @@ public:
     {
         MyMutex::MyLock lock(mutex);
         return getProfile_unlocked(name);
+    }
+
+    static std::string getProfileTag(cmsHPROFILE profile, cmsTagSignature tag)
+    {
+        const cmsMLU *mlu = static_cast<const cmsMLU *>(cmsReadTag(profile, tag));
+        if (!mlu) {
+            return "";
+        }
+        cmsUInt32Number sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
+        if (!sz) {
+            return "";
+        }
+        std::vector<char> buf(sz);
+        cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
+        buf.back() = 0; // sanity
+        return std::string(&buf[0]);
     }
 
     cmsHPROFILE getStdProfile(const Glib::ustring& name)
@@ -1156,6 +1167,11 @@ bool ICCStore::outputProfileExist(const Glib::ustring& name) const
 cmsHPROFILE ICCStore::getProfile(const Glib::ustring& name) const
 {
     return implementation->getProfile(name);
+}
+
+std::string ICCStore::getProfileTag(cmsHPROFILE profile, cmsTagSignature tag)
+{
+    return Implementation::getProfileTag(profile, tag);
 }
 
 cmsHPROFILE ICCStore::getStdProfile(const Glib::ustring& name) const

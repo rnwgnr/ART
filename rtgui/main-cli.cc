@@ -40,6 +40,7 @@
 #include "pathutils.h"
 #include "../rtengine/profilestore.h"
 #include "fastexport.h"
+#include "makeicc.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -72,8 +73,7 @@ Glib::ustring argv1;
 bool progress = false;
 //bool simpleEditor;
 
-namespace
-{
+namespace {
 
 // For an unknown reason, Glib::filename_to_utf8 doesn't work on reliably Windows,
 // so we're using Glib::filename_to_utf8 for Linux/Apple and Glib::locale_to_utf8 for Windows.
@@ -124,9 +124,17 @@ int main (int argc, char **argv)
 #ifdef WITH_MIMALLOC
     mi_version();
 #endif
-    
+
     setlocale (LC_ALL, "");
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
+
+    if (argc > 1 && std::string(argv[1]) == "--make-icc") {
+        std::vector<std::string> args;
+        for (int i = 2; i < argc; ++i) {
+            args.push_back(argv[i]);
+        }
+        return ART_makeicc_main(std::cout, args);
+    }
 
     Gio::init ();
 
@@ -268,6 +276,8 @@ std::pair<bool, int> dontLoadCache(int argc, char **argv)
             case '?':
             case 'h':
                 ART_print_help(argv[0], false);
+                std::cout << "\nOptions for --make-icc:\n";
+                ART_makeicc_help(std::cout, 2);
                 exit(0);
             case 'V':
                 ++verbose;

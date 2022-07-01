@@ -1278,7 +1278,7 @@ void Color::interpolateRGBColor (float realL, float iplow, float iphigh, int alg
     Color::xyz2rgb(X, Y, Z, ro, go, bo, rgb_xyz);// ro go bo in gamut
 }
 
-void Color::calcGamma (double pwr, double ts, int mode, GammaValues &gamma)
+void Color::calcGamma(double pwr, double ts, GammaValues &gamma)
 {
     //from Dcraw (D.Coffin)
     int i;
@@ -1313,17 +1313,15 @@ void Color::calcGamma (double pwr, double ts, int mode, GammaValues &gamma)
         g[5] = 1. / (g[1] * SQR(g[3]) / 2. + 1. - g[2] - g[3] - g[2] * g[3] * (log(g[3]) - 1.)) - 1.;
     }
 
-    if (!mode--) {
-        gamma[0] = g[0];
-        gamma[1] = g[1];
-        gamma[2] = g[2];
-        gamma[3] = g[3];
-        gamma[4] = g[4];
-        gamma[5] = g[5];
-        gamma[6] = 0.;
-        return;
-    }
+    gamma[0] = g[0];
+    gamma[1] = g[1];
+    gamma[2] = g[2];
+    gamma[3] = g[3];
+    gamma[4] = g[4];
+    gamma[5] = g[5];
+    gamma[6] = 0.;
 }
+
 void Color::gammaf2lut (LUTf &gammacurve, float gamma, float start, float slope, float divisor, float factor)
 {
 #ifdef __SSE2__

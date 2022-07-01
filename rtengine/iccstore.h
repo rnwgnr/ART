@@ -72,6 +72,8 @@ public:
     cmsHPROFILE      getStdProfile(const Glib::ustring& name) const;
     ProfileContent   getContent(const Glib::ustring& name) const;
 
+    static std::string getProfileTag(cmsHPROFILE profile, cmsTagSignature tag);
+
     Glib::ustring getDefaultMonitorProfileName() const;
     void setDefaultMonitorProfileName(const Glib::ustring &name);
 

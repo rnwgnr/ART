@@ -1118,7 +1118,7 @@ public:
     *        gamma4 used in ip2Lab2rgb [0 ; 1], usually near 0.03(return value)
     *        gamma5 used in ip2Lab2rgb [0 ; 1], usually near 0.5 (return value)
     */
-    static void calcGamma (double pwr, double ts, int mode, GammaValues &gamma);
+    static void calcGamma(double pwr, double ts, GammaValues &gamma);
 
     // standard srgb gamma and its inverse
 
