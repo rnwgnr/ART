@@ -25,6 +25,7 @@
 #include "imagefloat.h"
 #include "image8.h"
 #include "image16.h"
+#include "../rtgui/pathutils.h"
 #include <iostream>
 #include <glib/gstdio.h>
 #include <unistd.h>
@@ -196,7 +197,7 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
         return false;
     }
     auto fmt = fmts_[ext];
-    Glib::ustring outname = Glib::filename_to_utf8(templ) + get_ext(fmt);
+    Glib::ustring outname = fname_to_utf8(templ) + get_ext(fmt);
     // int exit_status = -1;
     std::vector<Glib::ustring> argv = subprocess::split_command_line(it->second);
     argv.push_back(fileName);
@@ -323,7 +324,7 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
         return false;
     }
     auto fmt = fmts_[ext];
-    Glib::ustring tmpname = Glib::filename_to_utf8(templ) + get_ext(fmt);
+    Glib::ustring tmpname = fname_to_utf8(templ) + get_ext(fmt);
 
     bool ok = false;
 

@@ -42,6 +42,7 @@
 #include "../rtgui/paramsedited.h"
 #include "../rtgui/ppversion.h"
 #include "../rtgui/version.h"
+#include "../rtgui/pathutils.h"
 
 using namespace std;
 
@@ -579,7 +580,7 @@ Glib::ustring filenameToUri(const Glib::ustring &fname, const Glib::ustring &bas
             } else if (stripif(fn, options.rtdir)) {
                 return Glib::filename_to_uri(fn, "U");
             } else if (Glib::path_get_dirname(fname) == basedir) {
-                fn = Glib::filename_to_utf8(Glib::path_get_basename(fname));
+                fn = fname_to_utf8(Glib::path_get_basename(fname));
                 return Glib::filename_to_uri(fn, "B");
             } else {
                 return Glib::filename_to_uri(fn);
@@ -623,7 +624,7 @@ Glib::ustring filenameFromUri(const Glib::ustring &uri, const Glib::ustring &bas
                 return uri;
             }
         }
-        Glib::ustring ret = Glib::filename_to_utf8(f);
+        Glib::ustring ret = fname_to_utf8(f);
         return ret;
     } catch (Glib::ConvertError &e) {
         return uri;
