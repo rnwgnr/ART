@@ -1671,6 +1671,7 @@ public:
 
 class FullPartialProfile: public PartialProfile {
 public:
+    FullPartialProfile();
     explicit FullPartialProfile(const ProcParams &pp);
     bool applyTo(ProcParams &pp) const override;
 
@@ -1681,14 +1682,14 @@ private:
 
 class FilePartialProfile: public PartialProfile {
 public:
-    FilePartialProfile(): pl_(nullptr), fname_(""), full_(true) {}
-    explicit FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool full=false);
+    FilePartialProfile(): pl_(nullptr), fname_(""), append_(false) {}
+    FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool append);
     bool applyTo(ProcParams &pp) const override;
 
 private:
     ProgressListener *pl_;
     Glib::ustring fname_;
-    bool full_;
+    bool append_;
 };
 
 

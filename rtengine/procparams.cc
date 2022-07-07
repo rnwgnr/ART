@@ -2762,7 +2762,7 @@ ColorCorrectionParams::Region::Region():
     compression{0,0,0},
     rgbluminance(false),
     hueshift(0),
-    mode(ColorCorrectionParams::Mode::YUV)
+    mode(ColorCorrectionParams::Mode::JZAZBZ)
 {
 }
 
@@ -4177,6 +4177,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                      bool resetOnError, const Glib::ustring &fname)
 {
 #define RELEVANT_(n) (!pedited || pedited->n)
+#define APPEND_(n, p) (pedited && pedited->n == ParamsEdited::Undef && (n . regions != p . regions || n . labmasks != p . labmasks))
+#define DO_APPEND_(l,o) l.insert(l.begin(), o.begin(), o.end())
     
     try {
         Glib::ustring basedir = Glib::path_get_dirname(fname);
@@ -4428,6 +4430,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(localContrast, LocalContrastParams())) {
+                    DO_APPEND_(ll, localContrast.regions);
+                    DO_APPEND_(lm, localContrast.labmasks);
+                }
                 localContrast.regions = std::move(ll);
                 localContrast.labmasks = std::move(lm);
             }
@@ -4622,6 +4628,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(textureBoost, TextureBoostParams())) {
+                    DO_APPEND_(ll, textureBoost.regions);
+                    DO_APPEND_(lm, textureBoost.labmasks);
+                }
                 textureBoost.regions = std::move(ll);
                 textureBoost.labmasks = std::move(lm);
             }
@@ -5132,6 +5142,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(smoothing, SmoothingParams())) {
+                    DO_APPEND_(ll, smoothing.regions);
+                    DO_APPEND_(lm, smoothing.labmasks);
+                }
                 smoothing.regions = std::move(ll);
                 smoothing.labmasks = std::move(lm);
             }
@@ -5334,6 +5348,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(colorcorrection, ColorCorrectionParams())) {
+                    DO_APPEND_(lg, colorcorrection.regions);
+                    DO_APPEND_(lm, colorcorrection.labmasks);
+                }
                 colorcorrection.regions = std::move(lg);
                 colorcorrection.labmasks = std::move(lm);
             }
@@ -5665,6 +5683,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
     return 0;
 
+#undef DO_APPEND_
+#undef APPEND_
 #undef RELEVANT_
 }
 
@@ -5771,6 +5791,12 @@ int ProcParams::write(ProgressListener *pl,
 }
 
 
+FullPartialProfile::FullPartialProfile():
+    pp_()
+{
+}
+
+
 FullPartialProfile::FullPartialProfile(const ProcParams &pp):
     pp_(pp)
 {
@@ -5784,20 +5810,19 @@ bool FullPartialProfile::applyTo(ProcParams &pp) const
 }
 
 
-FilePartialProfile::FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool full):
+FilePartialProfile::FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool append):
     pl_(pl),
     fname_(fname),
-    full_(full)
+    append_(append)
 {
 }
 
 
 bool FilePartialProfile::applyTo(ProcParams &pp) const
 {
-    if (full_) {
-        pp.setDefaults();
-    }
-    return fname_.empty() || (pp.load(pl_, fname_) == 0);
+    ParamsEdited pe(true);
+    pe.set_append(append_);
+    return !fname_.empty() && (pp.load(pl_, fname_, &pe) == 0);
 }
 
 

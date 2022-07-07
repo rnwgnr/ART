@@ -460,7 +460,7 @@ void Options::setDefaults()
 #endif
     thumb_delay_update = false;
     thumb_lazy_caching = true;
-    filledProfile = false;
+    profile_append_mode = false;
     maxInspectorBuffers = 2; //  a rather conservative value for low specced systems...
     inspectorDelay = 0;
     serializeTiffRead = true;
@@ -946,8 +946,8 @@ void Options::readFromFile(Glib::ustring fname)
                     defProfImg = keyFile.get_string("Profiles", "ImgDefault");
                 }
 
-                if (keyFile.has_key("Profiles", "FilledProfile")) {
-                    filledProfile = keyFile.get_boolean("Profiles", "FilledProfile");
+                if (keyFile.has_key("Profiles", "AppendMode")) {
+                    profile_append_mode = keyFile.get_boolean("Profiles", "AppendMode");
                 }
 
                 if (keyFile.has_key("Profiles", "SaveParamsWithFile")) {
@@ -1988,7 +1988,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("Profiles", "LoadSaveProfilePath", loadSaveProfilePath);
         keyFile.set_string("Profiles", "RawDefault", defProfRaw);
         keyFile.set_string("Profiles", "ImgDefault", defProfImg);
-        keyFile.set_boolean("Profiles", "FilledProfile", filledProfile);
+        keyFile.set_boolean("Profiles", "AppendMode", profile_append_mode);
         keyFile.set_boolean("Profiles", "SaveParamsWithFile", saveParamsFile);
         keyFile.set_boolean("Profiles", "SaveParamsToCache", saveParamsCache);
         keyFile.set_integer("Profiles", "LoadParamsFromLocation", paramsLoadLocation);
