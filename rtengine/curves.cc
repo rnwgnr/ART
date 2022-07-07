@@ -1305,6 +1305,7 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, cons
 {
     auto work = ICCStore::getInstance()->workingSpaceMatrix(workingSpace);
     auto iwork = ICCStore::getInstance()->workingSpaceInverseMatrix(workingSpace);
+
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             ws[i][j] = work[i][j];
@@ -1315,11 +1316,24 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, cons
     Mat33<float> om;
     if (ICCStore::getInstance()->getProfileMatrix(outprofile, om)) {
         auto iom = inverse(om);
-        to_out = dot_product(ws, iom);
-        to_work = dot_product(om, iws);
+        to_out = dot_product(work, iom);
+        to_work = dot_product(om, iwork);
     } else {
         to_out = identity<float>();
         to_work = identity<float>();
+    }
+
+    hcurve(3600);
+    FlatCurve hc({
+            FCT_MinMaxCPoints,
+            0, 0, 0.35, 0.35,
+            0.09, 1.0, 0.35, 0.35,
+            0.18, 0, 0.35, 0.35
+        }, true);
+    for (int i = 0; i < 3600; ++i) {
+        float h = float(i)/3600.f;
+        float v = hc.getVal(h);
+        hcurve[i] = v;
     }
 }
 
@@ -1328,6 +1342,18 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 {
     Vec3f rgb;
     Vec3f jch;
+
+    const auto hcurve =
+        [&](float h) -> float
+        {
+            h *= 180.f / RT_PI_F;
+            if (h < 0.f) {
+                h += 1.f;
+            } else if (h > 1.f) {
+                h -= 1.f;
+            }
+            return state.hcurve[h * 10.f];
+        };
 
     const float Lmax = whitept * 65535.f;
 
@@ -1435,12 +1461,15 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 
         float sat = jch[1];
         float olum = jch[0];
+        float ohue = jch[2];
 
         float ccf = ilum > 1e-5f ? 1.f - (LIM01((olum / ilum) - 1.f) * 0.2f) : 1.f;
         sat *= ccf;
 
+        float hueblend = LIM01(oY) * hcurve(hue);
+        hue = intp(hueblend, ohue, hue);
+
         Color::jzch2jzazbz(sat, hue, jch[1], jch[2]);
-        Color::jzazbz2rgb(jch[0], jch[1], jch[2], rgb[0], rgb[1], rgb[2], state.iws);
 
         rc[i] = LIM(rgb[0] * 65535.f, 0.f, whitept);
         gc[i] = LIM(rgb[1] * 65535.f, 0.f, whitept);

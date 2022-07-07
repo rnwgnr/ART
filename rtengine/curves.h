@@ -600,6 +600,7 @@ public:
         float iws[3][3];
         Mat33<float> to_work;
         Mat33<float> to_out;
+        LUTf hcurve;
         
         explicit ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile);
     };
