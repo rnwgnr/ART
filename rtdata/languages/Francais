@@ -835,7 +835,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Couleur de fond de l'aperçu: <b>Selon le thème</b>\nRa
 MAIN_TOOLTIP_BACKCOLOR1;Couleur de fond de l'aperçu: <b>Noir</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Couleur de fond de l'aperçu: <b>Blanc</b>\nRaccourci : <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Couleur de fond de l'aperçu: <b>Gris moyen</b>\nRaccourci : <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vérouiller</b> / <b>Déverouiller</b> la vue <b>Avant</b>\n\n<b>Vérouiller</b>: garder la vue <b>Avant</b> inchangée - \nutile pour évaluer l'effet cumulatif de plusieurs outils.\nDe plus, une comparaison peut être faite à partir de n'importe quelle étape de l'historique\n\n<b>Déverouiller</b>: la vue <b>Avant</b> représentera l'étape précédant la vue <b>Après</b>, montrant l'effet qui vient d'être modifié
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vérouiller</b> / <b>Déverouiller</b> la vue <b>Avant</b>\n\n<b>Vérouiller</b>: garder la vue <b>Avant</b> inchangée.\n<b>Déverouiller</b>: la vue <b>avant</b> est conservée en synchronisation avec la vue après <b>After</b>.
 MAIN_TOOLTIP_FALSECOLORS;Indicateur d'expositions utilisant de fausses couleurs.\nRaccourci : <b>Shift-e</b>\n\nClés (Plage IRE) : \n%1
 MAIN_TOOLTIP_HIDEHP;Montrer/Cacher le panneau gauche (incluant l'historique)\nRaccourci : <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indication des zones Hautes Lumières écrêtées\nRaccourci : <b>&gt;</b>
@@ -1160,7 +1160,7 @@ PROFILEPANEL_GLOBALPROFILES;Profils de traitement fournis
 PROFILEPANEL_LABEL;Profils de traitement
 PROFILEPANEL_LOADDLGLABEL;Charger les paramètres de traitement...
 PROFILEPANEL_LOADPPASTE;Paramètres à charger
-PROFILEPANEL_MODE_TIP;Mode de remplissage des profils de traitement.\n\nBouton pressé : les profils partiels seront convertis en profils complets ; les valeurs manquantes seront remplacées par les valeurs programme par défaut\n\nBouton relevé : les profils seront appliqués tels quels, altérant uniquement les paramètres qu'ils contiennent
+PROFILEPANEL_MODE_TIP;Traitement du mode d'ajout de profil pour les outils d'édition locaux.\n\nBouton pressé : les paramètres d'édition locaux dans le profil seront ajoutés aux paramètres actuels.\n\nBouton relevé : les paramètres d'édition locaux dans le profil écraseront les paramètres actuels.
 PROFILEPANEL_MYPROFILES;Mes profils
 PROFILEPANEL_PASTEPPASTE;Paramètres à coller
 PROFILEPANEL_PCUSTOM;Personnalisé
@@ -1253,8 +1253,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Meilleure compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma div
 SAVEDLG_TIFFUNCOMPRESSED;TIFF non compressé
 SAVEDLG_WARNFILENAME;Le fichier sera nommé
 SHCSELECTOR_TOOLTIP;Cliquez le bouton droit de la souris\npour réinitialiser la position de ces 3 curseurs
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction du profil de sortie 
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction :\n- du profil d'Épreuvage à l'écran s'il y en a un de sélectionné et si "Épreuve numérique" est activé,\n- du profil de l'écran si "Épreuve numérique" est désactivé
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction du profil de sortie de l'écran.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction :\n- du profil d'Épreuvage à l'écran s'il y en a un de sélectionné et si "Épreuve numérique" est activé,\n- du profil de sortie l'écran si "Épreuve numérique" est désactivé
 SOFTPROOF_TOOLTIP;L'épreuve numérique simule l'apparence de l'image quand elle est reproduite par une imprimante ou un moniteur spécifique si un profil adapté est sélectionné dans Préférences > Gestions des couleurs.\n(Maintenir <b>Ctrl</b> en cliquant pour modifier le profil d'épreuvage à l'écran)
 THRESHOLDSELECTOR_B;Bas
 THRESHOLDSELECTOR_BL;Bas-gauche
