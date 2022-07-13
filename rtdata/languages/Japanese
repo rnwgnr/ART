@@ -14,7 +14,7 @@
 #13 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
 #14 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
 #15 2022-05-27 Ohnishi, Yasuo, updates for 1.14
-#16 2022-06-15 Ohnishi, Yasuo, updated
+#16 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -1173,7 +1173,7 @@ PROFILEPANEL_GLOBALPROFILES;付属のプロファイル
 PROFILEPANEL_LABEL;処理プロファイル
 PROFILEPANEL_LOADDLGLABEL;処理プロファイルを読み込む...
 PROFILEPANEL_LOADPPASTE;読み込むパラメータ
-PROFILEPANEL_MODE_TIP;処理プロファイルの適用モードボタン\n\nボタン On:処理プロファイルで設定されている値が適用され 他の値はART設定のデフォルト値が適用されます\n\nボタン Off:処理プロファイルで設定されている値のみ適用され 他の値は変更されません
+PROFILEPANEL_MODE_TIP;ローカル編集ツール用処理プロファイル追加モード\n\nボタン On:処理プロファイルのローカル編集パラメータが現在のプロファイルに追加されます\n\nボタン Off:処理プロファイルのローカル編集パラメータが現在のプロファイルを上書きします
 PROFILEPANEL_MYPROFILES;自分のプロファイル
 PROFILEPANEL_PASTEPPASTE;貼り付けるパラメータ
 PROFILEPANEL_PCUSTOM;カスタム
@@ -1917,7 +1917,7 @@ TP_TONE_EQUALIZER_BAND_4;ホワイト領域
 TP_TONE_EQUALIZER_DETAIL;領域間変化の円滑化 (Regularization)
 TP_TONE_EQUALIZER_LABEL;トーンイコライザー
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;トーン領域を色で表示
-TP_TONE_EQUALIZER_PIVOT;ピボット (Ev)
+TP_TONE_EQUALIZER_PIVOT;トーン領域境界の移動(Pivot) (Ev)
 TP_VIGNETTING_AMOUNT;適用量
 TP_VIGNETTING_CENTER_X;中心 X軸
 TP_VIGNETTING_CENTER_Y;中心 Y軸

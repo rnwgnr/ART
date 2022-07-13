@@ -5,7 +5,7 @@
 #04 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
 #05 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
 #06 2022-05-27 Ohnishi, Yasuo, updates for 1.14
-#07 2022-06-15 Ohnishi, Yasuo, updated
+#07 2022-07-14 Ohnishi, Yasuo, updates for 1.14
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -1164,7 +1164,7 @@ PROFILEPANEL_GLOBALPROFILES;ART의 프로파일
 PROFILEPANEL_LABEL;처리 프로파일
 PROFILEPANEL_LOADDLGLABEL;처리 프로파일 불러오기...
 PROFILEPANEL_LOADPPASTE;불러오는 매개 변수
-PROFILEPANEL_MODE_TIP;처리 프로파일의 적용 방식 버튼\n\n버튼 On:처리 프로파일에 설정된 값이 적용 되고 , 다른 값은 이 프로그램에 설정된 초기 설정 값으로 치환됩니다.\n\n버튼 Off:그 처리 프로파일에 설정되는 값만 적용되고 다른 값은 변경되지 않습니다.
+PROFILEPANEL_MODE_TIP;로컬 편집 도구의 처리 프로파일 추가 모드 \n\n버튼 On: 처리 프로파일의 로컬 편집 매개 변수가 현재 프로파일에 추가됩니다 \n\n버튼 Off: 처리 프로파일의 로컬 편집 매개 변수가 현재 프로파일을 겹쳐 쓰게 됩니다.
 PROFILEPANEL_MYPROFILES;마이 프로파일
 PROFILEPANEL_PASTEPPASTE;붙이는 매개 변수
 PROFILEPANEL_PCUSTOM;맞춤
