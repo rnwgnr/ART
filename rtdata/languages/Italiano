@@ -8,6 +8,7 @@
 #08 2022-04-20 alvaro
 #09 2022-05-18 alvaro
 #10 2022-06-12 alvaro
+#11 2022-07-14 v1.15 - alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -1169,7 +1170,7 @@ PROFILEPANEL_GLOBALPROFILES;Profili inclusi
 PROFILEPANEL_LABEL;Profili di sviluppo
 PROFILEPANEL_LOADDLGLABEL;Carico i parametri di sviluppo...
 PROFILEPANEL_LOADPPASTE;Parametri da caricare
-PROFILEPANEL_MODE_TIP;Modalità di completamento del Profilo di Sviluppo.\n\nPulsante premuto: i profili parziali vengono convertiti in profili completi; i valori mancanti sono sostituiti con i valori predefiniti.\n\nPulsante rilasciato: i profili vengono applicati così come sono, inserendo solo i valori presenti nel profilo.
+PROFILEPANEL_MODE_TIP;Modalità di aggiunta nel Profilo di Sviluppo per gli strumenti di modifica locale.\n\nPulsante premuto: i parametri di modifica locale nel profilo vengono aggiunti a quelli correnti.\n\nPulsante rilasciato: i parametri di modifica locale nel profilo sovrascriveranno quelli correnti.
 PROFILEPANEL_MYPROFILES;Miei profili
 PROFILEPANEL_PASTEPPASTE;Parametri da incollare
 PROFILEPANEL_PCUSTOM;Personalizzato
@@ -1942,5 +1943,3 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
-
-
