@@ -1439,7 +1439,7 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         rgb[2] = ac-cd[2]*aac;
           
         rgb = dot_product(state.to_work, rgb);
-
+        
         float oY = (rgb[0] + rgb[1] + rgb[2]) / 3.f;
         if (oY > 0.f) {
             float f = iY / oY;
@@ -1463,13 +1463,14 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         float olum = jch[0];
         float ohue = jch[2];
 
-        float ccf = ilum > 1e-5f ? 1.f - (LIM01((olum / ilum) - 1.f) * 0.2f) : 1.f;
+        float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
         sat *= ccf;
 
         float hueblend = LIM01(oY) * hcurve(hue);
         hue = intp(hueblend, ohue, hue);
 
         Color::jzch2jzazbz(sat, hue, jch[1], jch[2]);
+        Color::jzazbz2rgb(jch[0], jch[1], jch[2], rgb[0], rgb[1], rgb[2], state.iws);
 
         rc[i] = LIM(rgb[0] * 65535.f, 0.f, whitept);
         gc[i] = LIM(rgb[1] * 65535.f, 0.f, whitept);
