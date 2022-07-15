@@ -1405,8 +1405,8 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         rgb[1] = std::max(gc[i] / 65535.f, 0.f);
         rgb[2] = std::max(bc[i] / 65535.f, 0.f);
 
-        Color::rgb2jzazbz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
-        Color::jzazbz2jzch(jch[1], jch[2], jch[1], jch[2]);
+        Color::rgb2jzczhz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
+
 
         float ilum = jch[0];
         float hue = jch[2];
@@ -1456,8 +1456,7 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
             rgb[j] = nt / 65535.f;
         }
 
-        Color::rgb2jzazbz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
-        Color::jzazbz2jzch(jch[1], jch[2], jch[1], jch[2]);
+        Color::rgb2jzczhz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
 
         float sat = jch[1];
         float olum = jch[0];
@@ -1469,8 +1468,7 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         float hueblend = LIM01(oY) * hcurve(hue);
         hue = intp(hueblend, ohue, hue);
 
-        Color::jzch2jzazbz(sat, hue, jch[1], jch[2]);
-        Color::jzazbz2rgb(jch[0], jch[1], jch[2], rgb[0], rgb[1], rgb[2], state.iws);
+        Color::jzczhz2rgb(jch[0], sat, hue, rgb[0], rgb[1], rgb[2], state.iws);
 
         rc[i] = LIM(rgb[0] * 65535.f, 0.f, whitept);
         gc[i] = LIM(rgb[1] * 65535.f, 0.f, whitept);
