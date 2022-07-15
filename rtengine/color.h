@@ -1904,6 +1904,57 @@ public:
     {
         hsl2yuv(h, c, bz, az);
     }
+
+    template <class T>
+    static void rgb2jzczhz(float R, float G, float B, float &Jz, float &cz, float &hz, const T ws[3][3])
+    {
+        float az, bz;
+        rgb2jzazbz(R, G, B, Jz, az, bz, ws);
+        jzazbz2jzch(az, bz, cz, hz);
+    }
+
+    template <class T>
+    static void jzczhz2rgb(float Jz, float cz, float hz, float &R, float &G, float &B, const T iws[3][3])
+    {
+        float az, bz;
+        jzch2jzazbz(cz, hz, az, bz);
+        jzazbz2rgb(Jz, az, bz, R, G, B, iws);
+    }
+    
+    static void xyz2oklab(float X, float Y, float Z, float &L, float &a, float &b);
+    static void oklab2xyz(float L, float a, float b, float &X, float &Y, float &Z);
+
+    template <class T>
+    static void rgb2oklab(float R, float G, float B, float &L, float &a, float &b, const T ws[3][3])
+    {
+        float X, Y, Z;
+        rgbxyz(R, G, B, X, Y, Z, ws);
+        xyz2oklab(X, Y, Z, L, a, b);
+    }
+
+    template <class T>
+    static void oklab2rgb(float L, float a, float b, float &R, float &G, float &B, const T iws[3][3])
+    {
+        float X, Y, Z;
+        oklab2xyz(L, a, b, X, Y, Z);
+        xyz2rgb(X, Y, Z, R, G, B, iws);
+    }
+
+    template <class T>
+    static void rgb2oklch(float R, float G, float B, float &L, float &c, float &h, const T ws[3][3])
+    {
+        float a, b;
+        rgb2oklab(R, G, B, L, a, b, ws);
+        jzazbz2jzch(a, b, c, h);
+    }
+
+    template <class T>
+    static void oklch2rgb(float L, float c, float h, float &R, float &G, float &B, const T iws[3][3])
+    {
+        float a, b;
+        jzch2jzazbz(c, h, a, b);
+        oklab2rgb(L, a, b, R, G, B, iws);
+    }
 };
 
 } // namespace rtengine
