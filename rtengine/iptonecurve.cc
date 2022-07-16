@@ -221,7 +221,7 @@ private:
 };
 
 
-void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring &working_profile, float whitept, bool multithread)
+void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const FlatCurve &hmask, const FlatCurve &cmask, const Glib::ustring &working_profile, float whitept, bool multithread)
 {
     LUTf sat;
     const bool use_lut = (whitept == 1.f);
@@ -229,10 +229,28 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
         satcurve_lut(curve, sat, whitept);
     }
 
+    const float pi2 = 2.f * RT_PI_F;
+
+    const auto hue01 =
+        [=](float h) -> float
+        {
+            float v = h / pi2;
+            if (v < 0.f) {
+                return 1.f + v;
+            } else if (v > 1.f) {
+                return v - 1.f;
+            } else {
+                return v;
+            }
+        };   
+
     TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
     TMatrix iws = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile);
 
     SatCurveRemap remap(whitept);
+
+    const bool use_hmask = !hmask.isIdentity();
+    const bool use_cmask = !cmask.isIdentity();
 
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
@@ -240,16 +258,23 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
     for (int y = 0; y < rgb->getHeight(); ++y) {
         float X, Y, Z;
         float Jz, az, bz;
+        float cz, hz;
         for (int x = 0; x < rgb->getWidth(); ++x) {
             float &R = rgb->r(y, x);
             float &G = rgb->g(y, x);
             float &B = rgb->b(y, x);
             Color::rgbxyz(R/65535.f, G/65535.f, B/65535.f, X, Y, Z, ws);
             Color::xyz2jzazbz(X, Y, Z, Jz, az, bz);
+            Color::jzazbz2jzch(az, bz, cz, hz);
             float s = use_lut ? sat[Y * 65535.f] : curve.getVal(remap(Y)) * 2.f;
-            az *= s;
-            bz *= s;
-            Color::jzazbz2rgb(Jz, az, bz, R, G, B, iws);
+            if (use_hmask) {
+                s = intp(float(hmask.getVal(hue01(hz))), s, 1.f);
+            }
+            if (use_cmask) {
+                s = intp(float(cmask.getVal(cz * 50)), s, 1.f);
+            }
+            cz *= s;
+            Color::jzczhz2rgb(Jz, cz, hz, R, G, B, iws);
             R *= 65535.f;
             G *= 65535.f;
             B *= 65535.f;
@@ -258,20 +283,46 @@ void apply_satcurve(Imagefloat *rgb, const FlatCurve &curve, const Glib::ustring
 }
 
 
-void fill_satcurve_pipette(Imagefloat *rgb, PlanarWhateverData<float>* editWhatever, const Glib::ustring &working_profile, float whitept, bool multithread)
+void fill_satcurve_pipette(Imagefloat *rgb, EditUniqueID editID, PlanarWhateverData<float>* editWhatever, const Glib::ustring &working_profile, float whitept, bool multithread)
 {
     TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(working_profile);
-    SatCurveRemap remap(whitept);
+
+    if (editID == EUID_ToneCurveSaturation) {
+        SatCurveRemap remap(whitept);
 
 #ifdef _OPENMP
-#   pragma omp parallel for if (multithread)
+#       pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < rgb->getHeight(); ++y) {
-        for (int x = 0; x < rgb->getWidth(); ++x) {
-            float r = rgb->r(y, x), g = rgb->g(y, x), b = rgb->b(y, x);
-            float Y = Color::rgbLuminance(r, g, b, ws);
-            float s = remap(Y / 65535.f);
-            editWhatever->v(y, x) = LIM01(s);
+        for (int y = 0; y < rgb->getHeight(); ++y) {
+            for (int x = 0; x < rgb->getWidth(); ++x) {
+                float r = rgb->r(y, x), g = rgb->g(y, x), b = rgb->b(y, x);
+                float Y = Color::rgbLuminance(r, g, b, ws);
+                float s = remap(Y / 65535.f);
+                editWhatever->v(y, x) = LIM01(s);
+            }
+        }
+    } else {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < rgb->getHeight(); ++y) {
+            for (int x = 0; x < rgb->getWidth(); ++x) {
+                float r = rgb->r(y, x), g = rgb->g(y, x), b = rgb->b(y, x);
+                float Jz, cz, hz;
+                Color::rgb2jzczhz(r / 65535.f, g / 65535.f, b / 65535.f, Jz, cz, hz, ws);
+                float v = 0.f;
+                if (editID == EUID_ToneCurveSaturationHMask) {
+                    v = hz / (2.f * RT_PI_F);
+                    if (v < 0) {
+                        v += 1.f;
+                    } else if (v > 1.f) {
+                        v -= 1.f;
+                    }
+                } else {
+                    v = Jz > 1e-7f ? cz * 50 : 0.f;
+                }
+                editWhatever->v(y, x) = LIM01(v);
+            }
         }
     }
 }
@@ -367,7 +418,7 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
 
     if ((editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2) && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_IMAGEFLOAT) {
         editImgFloat = pipetteBuffer->getImgFloatBuffer();
-    } else if (editID == EUID_ToneCurveSaturation && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_SINGLEPLANE_FLOAT) {
+    } else if ((editID == EUID_ToneCurveSaturation || editID == EUID_ToneCurveSaturationHMask || editID == EUID_ToneCurveSaturationCMask) && pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType() == BT_SINGLEPLANE_FLOAT) {
         editWhatever = pipetteBuffer->getSinglePlaneBuffer();
     }
 
@@ -487,13 +538,15 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         }
 
         if (editWhatever) {
-            fill_satcurve_pipette(img, editWhatever, params->icm.workingProfile, whitept, multiThread);
+            fill_satcurve_pipette(img, editID, editWhatever, params->icm.workingProfile, whitept, multiThread);
         }
 
         auto satcurve_pts = params->toneCurve.saturation;
         const FlatCurve satcurve(satcurve_pts, false, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         if (!satcurve.isIdentity()) {
-            apply_satcurve(img, satcurve, params->icm.workingProfile, whitept, multiThread);
+            const FlatCurve satcurve_hmask(params->toneCurve.saturation_hmask, true, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+            const FlatCurve satcurve_cmask(params->toneCurve.saturation_cmask, false, CURVES_MIN_POLY_POINTS / max(int(scale), 1));
+            apply_satcurve(img, satcurve, satcurve_hmask, satcurve_cmask, params->icm.workingProfile, whitept, multiThread);
         }
     } else if (editImgFloat) {
         const int W = img->getWidth();

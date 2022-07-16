@@ -538,6 +538,8 @@ struct ToneCurveParams {
     bool histmatching; // histogram matching
     bool fromHistMatching;
     std::vector<double> saturation;
+    std::vector<double> saturation_hmask;
+    std::vector<double> saturation_cmask;
     int perceptualStrength;
     bool contrastLegacyMode;
     double whitePoint;

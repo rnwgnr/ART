@@ -29,12 +29,32 @@ using namespace rtengine::procparams;
 
 namespace {
 
+constexpr int ID_HUE_MASK = 1;
+
 const std::vector<double> default_satcurve{
     FCT_MinMaxCPoints,
     0, 0.5,
     0.35, 0.35,
     1, 0.5,
     0.35, 0.35
+};
+
+const std::vector<double> default_satcurve_c{
+    FCT_MinMaxCPoints,
+    0, 1,
+    0.35, 0.35,
+    1, 1,
+    0.35, 0.35
+};
+
+const std::vector<double> default_satcurve_h{
+    FCT_MinMaxCPoints,
+    0, 1, 0.35, 0.35,
+    0.166666666667, 1, 0.35, 0.35,
+    0.333333333333, 1, 0.35, 0.35,
+    0.5, 1, 0.35, 0.35,
+    0.666666666667, 1, 0.35, 0.35,
+    0.833333333333, 1, 0.35, 0.35
 };
 
 
@@ -169,12 +189,29 @@ ToneCurve::ToneCurve():
 
     satcurveG = Gtk::manage(new CurveEditorGroup(options.lastColorToningCurvesDir, M("TP_TONECURVE_SATCURVE"), 0.7));
     satcurveG->setCurveListener(this);
+
     satcurve = static_cast<FlatCurveEditor *>(satcurveG->addCurve(CT_Flat, "", nullptr, false, false));
     satcurve->setResetCurve(FlatCurveType(default_satcurve[0]), default_satcurve);
     satcurve->setEditID(EUID_ToneCurveSaturation, BT_SINGLEPLANE_FLOAT);
     satcurve->setBottomBarBgGradient(bottomMilestones);
+    
+    satcurve_h_ = static_cast<FlatCurveEditor *>(satcurveG->addCurve(CT_Flat, "", nullptr, false, true));
+    satcurve_h_->setIdentityValue(1.);
+    satcurve_h_->setResetCurve(FlatCurveType(default_satcurve_h[0]), default_satcurve_h);
+    satcurve_h_->setCurveColorProvider(this, ID_HUE_MASK);
+    satcurve_h_->setBottomBarColorProvider(this, ID_HUE_MASK);
+    satcurve_h_->setEditID(EUID_ToneCurveSaturationHMask, BT_SINGLEPLANE_FLOAT);
+
+    satcurve_c_ = static_cast<FlatCurveEditor *>(satcurveG->addCurve(CT_Flat, "", nullptr, false, false));
+    satcurve_c_->setIdentityValue(1.);
+    satcurve_c_->setResetCurve(FlatCurveType(default_satcurve_c[0]), default_satcurve_c);
+    satcurve_c_->setBottomBarColorProvider(this, ID_HUE_MASK+1);
+    satcurve_c_->setEditID(EUID_ToneCurveSaturationCMask, BT_SINGLEPLANE_FLOAT);
+
     satcurveG->curveListComplete();
     satcurveG->show();
+
+    satcurve->getCurveTypeButton()->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::updateSatCurves));
 
     pack_start(*satcurveG, Gtk::PACK_SHRINK, 2);
 
@@ -248,6 +285,12 @@ void ToneCurve::read(const ProcParams* pp)
     satcurve->setCurve(default_satcurve);
     satcurve->setCurve(pp->toneCurve.saturation);
 
+    satcurve_h_->setCurve(default_satcurve_h);
+    satcurve_h_->setCurve(pp->toneCurve.saturation_hmask);
+
+    satcurve_c_->setCurve(default_satcurve_c);
+    satcurve_c_->setCurve(pp->toneCurve.saturation_cmask);
+    
     tcmode2conn.block(false);
     tcmodeconn.block(false);
 
@@ -285,12 +328,14 @@ void ToneCurve::read(const ProcParams* pp)
 
     whitePoint->setValue(pp->toneCurve.whitePoint);
     showWhitePoint();
+
+    updateSatCurves(0);
     
     enableListener();
 }
 
 
-void ToneCurve::autoOpenCurve  ()
+void ToneCurve::autoOpenCurve()
 {
     shape->openIfNonlinear();
     shape2->openIfNonlinear();
@@ -303,6 +348,8 @@ void ToneCurve::setEditProvider(EditDataProvider *provider)
     shape->setEditProvider(provider);
     shape2->setEditProvider(provider);
     satcurve->setEditProvider(provider);
+    satcurve_h_->setEditProvider(provider);
+    satcurve_c_->setEditProvider(provider);
 }
 
 
@@ -332,6 +379,8 @@ void ToneCurve::write(ProcParams* pp)
     pp->toneCurve.fromHistMatching = fromHistMatching;
 
     pp->toneCurve.saturation = satcurve->getCurve();
+    pp->toneCurve.saturation_hmask = satcurve_h_->getCurve();
+    pp->toneCurve.saturation_cmask = satcurve_c_->getCurve();
 
     pp->toneCurve.perceptualStrength = perceptualStrength->getValue();
     pp->toneCurve.contrastLegacyMode = contrast_legacy_->get_active();
@@ -368,7 +417,7 @@ void ToneCurve::curveChanged(CurveEditor *ce)
         } else if (ce == shape2) {
             setHistmatching(false);
             listener->panelChanged(EvToneCurve2, M("HISTORY_CUSTOMCURVE"));
-        } else if (ce == satcurve) {
+        } else if (ce == satcurve || ce == satcurve_h_ || ce == satcurve_c_) {
             listener->panelChanged(EvSatCurve, M("HISTORY_CUSTOMCURVE"));
         }
     }
@@ -590,4 +639,32 @@ void ToneCurve::showWhitePoint()
 void ToneCurve::registerShortcuts(ToolShortcutManager *mgr)
 {
     mgr->addShortcut(GDK_KEY_c, this, contrast);
+}
+
+
+void ToneCurve::colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller)
+{
+    float R = 0.5, G = 0.5, B = 0.5;
+
+    if (callerId == ID_HUE_MASK) {
+        if (valX >= 0.5) {
+            valX -= 1;
+        }
+        auto h = rtengine::Color::huelab_to_huehsv2(valX * 2.0 * rtengine::RT_PI);
+        rtengine::Color::hsv2rgb01(h, 0.5f, 0.6f, R, G, B);
+    } else if (callerId == ID_HUE_MASK+1) {
+        rtengine::Color::hsv2rgb01(float(valY), float(valX), 0.8f, R, G, B);
+    } 
+    caller->ccRed = R;
+    caller->ccGreen = G;
+    caller->ccBlue = B;
+}
+
+
+void ToneCurve::updateSatCurves(int i)
+{
+    auto b = satcurve->getCurveTypeButton();
+    bool show = b->getSelected() > 0;
+    satcurve_h_->getCurveTypeButton()->buttonGroup->set_visible(show);
+    satcurve_c_->getCurveTypeButton()->buttonGroup->set_visible(show);
 }
