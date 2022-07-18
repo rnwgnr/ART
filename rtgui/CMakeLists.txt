@@ -10,6 +10,7 @@ set(CLISOURCEFILES
     threadutils.cc
     fastexport.cc
     exiffiltersettings.cc
+    makeicc.cc
     )
 
 set(NONCLISOURCEFILES
@@ -67,7 +68,6 @@ set(NONCLISOURCEFILES
     guiutils.cc
     histogrampanel.cc
     history.cc
-    iccprofilecreator.cc
     icmpanel.cc
     ilabel.cc
     imagearea.cc

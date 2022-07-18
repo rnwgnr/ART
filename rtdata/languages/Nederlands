@@ -29,6 +29,9 @@
 #28 2021-11-29 update to ART v1.10.1 by pm
 #29 2021-12-18 update to ART v1.12 by pm
 #30 2022-01-28 update to ART v1.12.1 by pm
+#31 2022-04-01 update to ART v1.13 by pm
+#32 27-05-2022 update to ART v1.14 by pm
+#33 13-07-2022 update to ART v1.15 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -95,6 +98,7 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Objectief
 EXIFFILTER_METADATAFILTER;Filter op metadata
 EXIFFILTER_SHUTTER;Sluitertijd
+EXIFFILTER_SOFTWARE;Software
 EXIFPANEL_ACTIVATE_ALL_HINT;Selecteer alle labels
 EXIFPANEL_ACTIVATE_NONE_HINT;Deselecteer alle labels
 EXIFPANEL_ADDEDITHINT;Voeg nieuw label toe of bewerk deze
@@ -503,8 +507,8 @@ HISTORY_MSG_81;Schalen
 HISTORY_MSG_82;Profiel veranderd
 HISTORY_MSG_84;Perspectiefcorrectie
 HISTORY_MSG_85;Lenscorrectie - LCP-profiel
-HISTORY_MSG_87;Spot-ruisonderdrukking
-HISTORY_MSG_88;Spot-ruisond. drempel
+HISTORY_MSG_87;Impulse ruisonderdrukking
+HISTORY_MSG_88;Impulse ruisonderdr. drempel
 HISTORY_MSG_89;Ruisonderdrukking
 HISTORY_MSG_8;Belichtingscompensatie
 HISTORY_MSG_90;RV -Luminantie
@@ -541,6 +545,7 @@ HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;K/Tc - parametrisch masker
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;K/Tc - nabewerking masker
 HISTORY_MSG_COLORCORRECTION_PIVOT;K/Tc - kantelpunt
 HISTORY_MSG_COLORCORRECTION_POWER;K/Tc - middentonen/gamma
+HISTORY_MSG_COLORCORRECTION_COMPRESSION;K/Tc - compressie
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;K/Tc - Luminantiemodus
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;K/Tc - toon masker
 HISTORY_MSG_COLORCORRECTION_SLOPE;K/Tc - hoge lichten/++
@@ -663,6 +668,8 @@ HISTORY_MSG_SMOOTHING_ANGLE;Hoek
 HISTORY_MSG_SMOOTHING_CURVATURE;Welving
 HISTORY_MSG_SMOOTHING_OFFSET;Verschuiving
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Nabewerking masker
+HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Verzachten - sterkte ruis
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Verzachten - grofheid ruis
 HISTORY_MSG_SMOOTHING_RADIUS;Straal
 HISTORY_MSG_SMOOTHING_SHOWMASK;Toon masker
 HISTORY_MSG_SMOOTHING_SIGMA;Straal
@@ -680,12 +687,13 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;Banden
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Toonequalizer
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Fijnafstemming
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Kleurenkaart
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Toonequalizer - Kantelpunt
 HISTORY_MSG_WBALANCE_MULT;WB - versterkers
 HISTORY_NEWSNAPSHOT_TOOLTIP;Sneltoets: <b>Alt-s</b>
 HISTORY_NEWSNAPSHOT;Voeg toe
-HISTORY_SNAPSHOT_CONFIRM_UPDATE;Huidige momentopname overschrijven?
-HISTORY_SNAPSHOT;Momentopname
-HISTORY_SNAPSHOTS;Momentopnamen
+HISTORY_SNAPSHOT_CONFIRM_UPDATE;Huidig snapshot overschrijven?
+HISTORY_SNAPSHOT;Snapshot
+HISTORY_SNAPSHOTS;Snapshots
 ICCPROFCREATOR_COPYRIGHT;Copyright:
 ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Zet terug naar standaard copyright, verleend aan "RawTherapee, CC0"
 ICCPROFCREATOR_CUSTOM;Handmatig
@@ -848,7 +856,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Achtergrondkleur van het voorbeeld: <b>themagebaseerd</b
 MAIN_TOOLTIP_BACKCOLOR1;Achtergrondkleur van het voorbeeld: <b>Zwart</b>\nSneltoets: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Achtergrondkleur van het voorbeeld: <b>Wit</b>\nSneltoets: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Achtergrondkleur van het voorbeeld: <b>middelgrijs</b>\nSneltoets: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vergrendel</b>/<b>ontgrendel</b> de <b>Voor</b>-afbeelding.\n\n<b>Vergrendel</b>: laat de <b>Voor</b>-afbeelding ongewijzigd.\nDit is handig om het cumulatieve effect van meerdere gereedschappen te beoordelen.\nBovendien kan er worden vergeleken met elke stap in de geschiedenislijst.\n\n<b>Ontgrendel</b>: de <b>Voor</b>-afbeelding volgt een stap achter de <b>Na</b>-afbeelding en laat de afbeelding zien zonder het effect van het huidige gereedschap.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Vergrendel</b>/<b>ontgrendel</b> de <b>Voor</b>-afbeelding.\n\n<b>Vergrendeld</b>: laat de <b>Voor</b>-afbeelding ongewijzigd.\n<b>Ontgrendeld</b>: de <b>Voor</b>-afbeelding is gelijk aan de  <b>Na</b>-afbeelding.
 MAIN_TOOLTIP_FALSECOLORS;Toon belichtingsindicatie op basis van valse kleuren.\nSneltoets: <b>Shift+e</b>\n\nSleutel (IRE-reeks):\n%1
 MAIN_TOOLTIP_HIDEHP;Toon/verberg linkerpaneel (incl. geschiedenis)\nSneltoets: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Overbelichtingsindicatie.\nSneltoets: <b>&gt;</b>
@@ -922,7 +930,7 @@ PARTIALPASTE_GRAIN;Filmkorrel
 PARTIALPASTE_HOT_DEAD_PIXEL_FILTER;Hete/dodepixelsfilter
 PARTIALPASTE_HSLEQUALIZER;Kleur-equalizer
 PARTIALPASTE_ICMSETTINGS;Kleurbeheer
-PARTIALPASTE_IMPULSEDENOISE;Spotruisonderdrukking
+PARTIALPASTE_IMPULSEDENOISE;Impulse ruisonderdrukking
 PARTIALPASTE_IPTCINFO;IPTC
 PARTIALPASTE_LABCURVE;L*a*b*-aanpassingen
 PARTIALPASTE_LENSGROUP;Objectiefgerelateerde instellingen
@@ -1168,7 +1176,7 @@ PROFILEPANEL_GLOBALPROFILES;Gebundelde profielen
 PROFILEPANEL_LABEL;Profielen
 PROFILEPANEL_LOADDLGLABEL;Kies profiel...
 PROFILEPANEL_LOADPPASTE;Te laden parameters
-PROFILEPANEL_MODE_TIP;Profiel aanvullen.\n\nKnop ingedrukt: gedeeltelijke profielen worden omgezet naar volledige profielen. De ontbrekende waarden worden vervangen door hardgecodeerde standaardwaarden.\n\nKnop losgelaten: profielen worden toegepast zo als ze zijn, alleen de aanwezige waarden worden gewijzigd.
+PROFILEPANEL_MODE_TIP;Verwerkingsprofielen - toevoegmodus voor gereedschappen uit de Lokaal bewerken-groep.\n\nKnop ingedrukt: Lokale bewerkingsparameters in het profiel worden toegevoegd aan de huidige parameters. \n\nKnop losgelaten: Lokale bewerkingsparameters overschrijven de bestaande parameters.
 PROFILEPANEL_MYPROFILES;Mijn profielen
 PROFILEPANEL_PASTEPPASTE;Te plakken parameters
 PROFILEPANEL_PCUSTOM;Handmatig
@@ -1198,7 +1206,7 @@ PROGRESSBAR_SAVEJPEG;Opslaan JPEG-bestand...
 PROGRESSBAR_SAVEPNG;Opslaan PNG-bestand...
 PROGRESSBAR_SAVETIFF;Opslaan TIFF-bestand...
 PROGRESSBAR_SAVING;Opslaan bestand...
-PROGRESSBAR_SNAPSHOT_ADDED;Momentopname toegevoegd
+PROGRESSBAR_SNAPSHOT_ADDED;Snapshot toegevoegd
 PROGRESSDLG_PROFILECHANGEDINBROWSER;Profiel veranderd in bestandsnavigator
 QINFO_FRAMECOUNT;%2 frames
 QINFO_HDR;HDR / %2 frame(s)
@@ -1228,7 +1236,7 @@ RENAME_DIALOG_NORM_OFF;Ongewijzigd
 RENAME_DIALOG_NORM_UPPERCASE;Hoofdletters
 RENAME_DIALOG_ON_EXISTING;Wat te doen als bestemming bestaat
 RENAME_DIALOG_PATTERN;Patroon bestandsnaam
-RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextentie\n<b>%C</b>: naam camera (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> to <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: '%'-karakter.
+RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextensie\n<b>%C</b>: naam camera (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> to <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: '%'-karakter.
 RENAME_DIALOG_PREVIEW;Voorbeeld
 RENAME_DIALOG_PROGRESSIVE;Oplopend nummer
 RENAME_DIALOG_RENAME;Genereer een unieke naam
@@ -1261,8 +1269,9 @@ SAVEDLG_SUBSAMP_TOOLTIP;Beste compressie:\nJ:a:b 4:2:0\nh/v 2/2\nChroma horizont
 SAVEDLG_TIFFUNCOMPRESSED;Geen TIFF-compressie
 SAVEDLG_WARNFILENAME;Bestandsnaam wordt
 SHCSELECTOR_TOOLTIP;Rechtsklik om de drie schuiven terug te zetten naar hun standaardpositie
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen met het gekozen uitvoerprofiel. 
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen bij het gekozen:\n- profiel voor afdruksimulatie indien opgegeven en met soft-proofing ingeschakeld,\n- het monitorprofiel als afdruksimulatie is uitgeschakeld.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the output profile, if soft-proofing is disabled.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen met:\nhet opgegeven soft-proofing profiel en soft-proofing is ingeschakeld,\n of met het uitvoerprofiel en soft-proofing is uitgeschakeld. 
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen bij het gekozen monitorprofiel.
 SOFTPROOF_TOOLTIP;Soft-proofing simuleert hoe een foto wordt getoond als deze wordt weergegeven op een beeldscherm of afgedrukt op een specifieke printer, als het overeenkomstige profiel is opgegeven in Voorkeuren > Kleurbeheer.\n(Met <b>Ctrl + linksklik</b> kan een ander profiel worden gekozen. 
 THRESHOLDSELECTOR_BL;Onderkant-links
 THRESHOLDSELECTOR_B;Onderkant
@@ -1353,6 +1362,7 @@ TP_COLORCORRECTION_OFFSET;Schaduwen/++
 TP_COLORCORRECTION_OUT;Uitvoer
 TP_COLORCORRECTION_PIVOT;Kantelpunt
 TP_COLORCORRECTION_POWER;Middentonen/Gamma
+TP_COLORCORRECTION_COMPRESSION;Compressie
 TP_COLORCORRECTION_RGBLUMINANCE;Luminantiemodus
 TP_COLORCORRECTION_SATURATION;Verzadiging
 TP_COLORCORRECTION_SLOPE;Hoge lichten/++
@@ -1556,7 +1566,7 @@ TP_ICM_TONECURVE;Tooncurve
 TP_ICM_TONECURVE_TOOLTIP;Gebruik de ingebedde DCP-tooncurve. De instelling is alleen beschikbaar als de geselecteerde DCP er een heeft.
 TP_ICM_WORKINGPROFILE;Werkprofiel
 TP_ICM_INPUT_CAT;Pas chromatische aanpassing (CAT) toe
-TP_IMPULSEDENOISE_LABEL;Spot-ruisonderdrukking
+TP_IMPULSEDENOISE_LABEL;Impulse ruisonderdrukking
 TP_IMPULSEDENOISE_THRESH;Drempel
 TP_LABCURVE_BRIGHTNESS;Helderheid
 TP_LABCURVE_CHROMATICITY;Chroma
@@ -1640,7 +1650,8 @@ TP_LABMASKS_POSTPROCESS_SMOOTHING;Verzachten
 TP_LABMASKS_SHOW;Toon masker
 TP_LENSGEOM_AUTOCROP;Automatisch bijsnijden
 TP_LENSGEOM_FILL;Automatisch uitvullen
-TP_LENSGEOM_LABEL;Objectief / Geometrie
+TP_GEOM_LABEL;Geometrie
+TP_LENS_LABEL;Objectief
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatisch via database
 TP_LENSPROFILE_CORRECTION_EXIF;Ingebed in metadata
 TP_LENSPROFILE_CORRECTION_LCPFILE;LCP-bestand
@@ -1883,6 +1894,8 @@ TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Gloed
 TP_SMOOTHING_MODE_NLMEANS;Globaal gemiddelde
 TP_SMOOTHING_MODE_LENS;Lensvervaging
 TP_SMOOTHING_MODE_MOTION;Bewegingsvervaging
+TP_SMOOTHING_MODE_NOISE;Voeg ruis toe
+TP_SMOOTHING_NOISE_COARSENESS;Grofheid
 TP_SMOOTHING_MODE_GUIDED;Begeleid (Guided filter)
 TP_SMOOTHING_MODE;Modus
 TP_SMOOTHING_RADIUS;Straal
@@ -1920,6 +1933,7 @@ TP_TONE_EQUALIZER_BAND_4;Witten
 TP_TONE_EQUALIZER_DETAIL;Fijnafstemming
 TP_TONE_EQUALIZER_LABEL;Toonequalizer
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Toon kleurenkaart
+TP_TONE_EQUALIZER_PIVOT;Kantelpunt (Ev)
 TP_VIGNETTING_AMOUNT;Hoeveelheid
 TP_VIGNETTING_CENTER;Centrum
 TP_VIGNETTING_CENTER_X;Centrum X

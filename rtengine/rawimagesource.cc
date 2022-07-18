@@ -430,11 +430,27 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
         return;
     }
 
-    static const Mat33f cat( // Bradford from http://brucelindbloom.com
+    static const Mat33f bradford( // Bradford from http://brucelindbloom.com
         0.8951f, 0.2664f, -0.1614f,
         -0.7502f, 1.7135f, 0.0367f,
         0.0389f, -0.0685f, 1.0296f
         );
+    static const Mat33f cat16( // CAT16 from darktable
+        0.401288f, 0.650173f, -0.051461f,
+        -0.250268f, 1.204414f,  0.045854f, 
+        -0.002079f, 0.048952f,  0.953127f
+        );
+
+    constexpr double FULL_DEG_TEMP = 3500.0;
+    const bool full_adapt = FULL_DEG_TEMP <= ctemp.getTemp();
+    const float deg = full_adapt ? 1.0 : (ctemp.getTemp() - MINTEMP) / (FULL_DEG_TEMP - MINTEMP);
+
+    if (settings->verbose) {
+        std::cout << "CAT - Basic adaptation degree: " << deg << std::endl;
+    }
+
+    const Mat33f &cat = full_adapt ? bradford : cat16;
+    
     Mat33f xyz_cam(imatrices->xyz_cam);
     auto ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
     auto iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
@@ -457,6 +473,7 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
     double r, g, b;
     ctemp.getMultipliers(r, g, b);
     src->wbMul2Camera(r, g, b);
+
     // src_w is now the "native" white point in camera space
     Vec3f src_w(src->get_pre_mul(0)/r,
                 src->get_pre_mul(1)/g,
@@ -465,8 +482,9 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
     // wbmul is used to restore the native wb, in camera space
     Mat33f wbmul = dot_product(cam2ws, dot_product(diagonal(src_w[0], src_w[1], src_w[2]), ws2cam));
 
-    // src_w is our source white point in "sharpened LMS" space
-    // (via Bradford adaptation)
+    // src_w is our source white point in LMS space, via Bradford or CAT16
+    // adaptation (depending on whether we use full adaptation or a partial
+    // one on the S cones -- see below)
     src_w = dot_product(cat, dot_product(xyz_cam, src_w));
 
     // our target white point is the one of the working space
@@ -477,28 +495,84 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
     const int W = img->getWidth();
     const int H = img->getHeight();
 
+    const float lm = dst_w[0]/src_w[0];
+    const float mm = dst_w[1]/src_w[1];
+    const float sm = dst_w[2]/src_w[2];
+
     // conv is our conversion matrix putting all the pieces together.
-    // From right to left:
+    Mat33f conv = dot_product(ws2lms, wbmul);
+    // in case of full adaptation, from right to left:
     // - restore the native wb in camera space
     // - convert to LMS
     // - perform the adaptation to the white point of the working space
     // - convert back to rgb
-    Mat33f conv = diagonal(dst_w[0]/src_w[0], dst_w[1]/src_w[1], dst_w[2]/src_w[2]);
-    conv = dot_product(lms2ws, dot_product(conv, ws2lms));
-    conv = dot_product(conv, wbmul);
+    Mat33f fullconv = dot_product(lms2ws, dot_product(diagonal(lm, mm, sm), conv));
+    // in case of partial adaptation, we don't use a single matrix but blend
+    // the adapted S value with the original one that was whitebalanced in
+    // camera space
+
+    const auto hue =
+        [&](const Vec3f &rgb) -> float
+        {
+            float L, a, b;
+            Color::rgb2lab(rgb[0], rgb[1], rgb[2], L, a, b, ws);
+            
+            float l, c, h;
+            Color::lab2lch01(L/327.68f, a/480.f, b/480.f, l, c, h);
+            return h;
+        };
+
+    constexpr float hue_hi = 90.f / 360.f;
+    constexpr float hue_lo = 340.f / 360.f;
+
+    FlatCurve hcurve({FCT_MinMaxCPoints,
+                      0.1, 0.1,
+                      0.35, 0.35,
+                      0.25, 1,
+                      0.35, 0.35,
+                      0.94, 1,
+                      0.35, 0.35
+        });
 
 #ifdef _OPENMP
 #   pragma omp parallel for
 #endif
     for (int y = 0; y < H; ++y) {
         Vec3f rgb;
+        Vec3f lms;
         for (int x = 0; x < W; ++x) {
             rgb[0] = img->r(y, x);
             rgb[1] = img->g(y, x);
             rgb[2] = img->b(y, x);
+            float m = rgb[0] + rgb[1] + rgb[2];
 
-            rgb = dot_product(conv, rgb);
-            
+            if (full_adapt) {
+                rgb = dot_product(fullconv, rgb);
+            } else {
+                float h = hue(rgb);
+                if (!(h <= hue_hi || h >= hue_lo)) {
+                    rgb = dot_product(fullconv, rgb);
+                } else {
+                    float blend = deg * hcurve.getVal(h);
+                    lms = dot_product(conv, rgb);
+                    float s = ws2lms[2][0] * rgb[0] + ws2lms[2][1] * rgb[1] + ws2lms[2][2] * rgb[2];
+                    lms[0] *= lm;
+                    lms[1] *= mm;
+                    lms[2] = intp(blend, lms[2] * sm, s);
+
+                    rgb = dot_product(lms2ws, lms);
+                }
+            }
+
+            // make sure we preserve the brightness
+            float m2 = rgb[0] + rgb[1] + rgb[2];
+            if (m > 0 && m2 > 0) {
+                float f = m / m2;
+                rgb[0] *= f;
+                rgb[1] *= f;
+                rgb[2] *= f;
+            }
+
             img->r(y, x) = rgb[0];
             img->g(y, x) = rgb[1];
             img->b(y, x) = rgb[2];
@@ -3056,9 +3130,9 @@ lab2ProphotoRgbD50(float L, float A, float B, float& r, float& g, float& b)
     r = prophoto_xyz[0][0] * X + prophoto_xyz[0][1] * Y + prophoto_xyz[0][2] * Z;
     g = prophoto_xyz[1][0] * X + prophoto_xyz[1][1] * Y + prophoto_xyz[1][2] * Z;
     b = prophoto_xyz[2][0] * X + prophoto_xyz[2][1] * Y + prophoto_xyz[2][2] * Z;
-    // r = CLIP01(r);
-    // g = CLIP01(g);
-    // b = CLIP01(b);
+    r = CLIP01(r);
+    g = CLIP01(g);
+    b = CLIP01(b);
 }
 
 // Converts raw image including ICC input profile to working space - floating point version

@@ -26,7 +26,7 @@
 #include "stdimagesource.h"
 #include "iccstore.h"
 #include "imgiomanager.h"
-//#define BENCHMARK
+#define BENCHMARK
 #include "StopWatch.h"
 
 
@@ -432,7 +432,11 @@ public:
 
     void fast_demosaic(bool mono)
     {
-        BENCHFUNMICRO
+        if (settings->verbose > 1) {
+            std::cout << "FAST PREVIEW DEMOSAIC: " << fileName << std::endl;
+        }
+        
+        BENCHFUN
             
         scaled_ = rescale(mono);
         
@@ -461,6 +465,18 @@ public:
         if (scaled_) {
             w = W;
             h = H;
+
+            if (ri) {
+                tr = defTransform(ri, tr);
+            }
+
+            if ((tr & TR_ROT) == TR_R90 || (tr & TR_ROT) == TR_R270) {
+                std::swap(w, h);
+            }
+
+            constexpr int border = 8;
+            w -= border;
+            h -= border;
         } else {
             RawImageSource::getFullSize(w, h, tr);
         }
@@ -469,7 +485,7 @@ public:
 private:
     bool rescale(bool mono)
     {
-        return false;
+        //return false;
         
         if (bbox_W_ < 0 || bbox_H_ < 0) {
             return false;
@@ -485,20 +501,16 @@ private:
         double sw = std::max(double(W) / bbox_W_, 1.0);
         double sh = std::max(double(H) / bbox_H_, 1.0);
         int skip = std::max(sw, sh);
+
+        if (settings->verbose > 1) {
+            std::cout << "  skip calculation: W = " << W << ", bbox_W = " << bbox_W_ << ", H = " << H << ", bbox_H_ = " << bbox_H_ << ", skip = " << skip << std::endl;
+        }
         
         if (skip <= 1) {
             return false;
         }
 
         if (ri->getSensorType() == ST_BAYER) {
-            skip /= 2;
-            if (skip & 1) {
-                --skip;
-            }
-            if (skip <= 1) {
-                return false;
-            }
-
             if (settings->verbose > 1) {
                 std::cout << "SKIP: " << skip << ", FROM: " << W << "x" << H
                           << " to " << (W/skip) << "x" << (H/skip) << std::endl;
@@ -506,8 +518,18 @@ private:
 
             if (!mono) {
                 // direct half-size demosaic
-                int ww = W / skip;
-                int hh = H / skip;
+                if (!ri || ri->get_ISOspeed() > 200) {
+                    skip /= 2;
+                }
+                if (skip & 1) {
+                    --skip;
+                }
+                if (skip <= 1) {
+                    return false;
+                }
+                
+                int ww = (W / skip) - 1;
+                int hh = (H / skip) - 1;
                 flushRGB();
                 red(ww, hh);
                 green(ww, hh);

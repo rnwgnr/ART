@@ -13,6 +13,7 @@ Other developers:
 Other contributors (profiles, ideas, mockups, testing, forum activity, translations, etc.), in last name alphabetical order:
 
   Felipe Bouabci Simões
+  Alvaro De Amicis
   André Gauthier
   Sebastien Guyader
   Paul Matthijsse

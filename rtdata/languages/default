@@ -67,6 +67,7 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Lens
 EXIFFILTER_METADATAFILTER;Enable metadata filters
 EXIFFILTER_SHUTTER;Shutter
+EXIFFILTER_SOFTWARE;Software
 EXIFPANEL_ACTIVATE_ALL_HINT;Select all tags
 EXIFPANEL_ACTIVATE_NONE_HINT;Unselect all tags
 EXIFPANEL_ADDEDIT;Add/Edit
@@ -658,6 +659,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;Tone equalizer
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Tone equalizer - Bands
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tone equalizer - Regularization
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Tone equalizer - Tonal map
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tone equalizer - Pivot
 HISTORY_MSG_TONECURVE_SATCURVE;Tone curve - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tone curve - Perceptual strength
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tone curve - Contrast legacy mode
@@ -833,7 +835,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Background color of the preview: <b>theme-based</b>\nSho
 MAIN_TOOLTIP_BACKCOLOR1;Background color of the preview: <b>black</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Background color of the preview: <b>white</b>\nShortcut: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\nUseful to evaluate the cumulative effect of multiple tools.\nAdditionally, comparisons can be made to any state in the History.\n\n<b>Unlock</b>: the <b>Before</b> view will follow the <b>After</b> view one step behind, showing the image before the effect of the currently used tool.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Lock</b> / <b>Unlock</b> the <b>Before</b> view\n\n<b>Lock</b>: keep the <b>Before</b> view unchanged.\n<b>Unlock</b>: the <b>Before</b> view is kept in sync with the <b>After</b> view.
 MAIN_TOOLTIP_FALSECOLORS;Toggle exposure indication using false color.\nShortcut: <b>Shift-e</b>\n\nKey (IRE range):\n%1
 MAIN_TOOLTIP_HIDEHP;Show/Hide the left panel (including the history).\nShortcut: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Clipped highlight indication.\nShortcut: <b>&gt;</b>
@@ -1158,7 +1160,7 @@ PROFILEPANEL_GLOBALPROFILES;Bundled profiles
 PROFILEPANEL_LABEL;Processing Profiles
 PROFILEPANEL_LOADDLGLABEL;Load Processing Parameters...
 PROFILEPANEL_LOADPPASTE;Parameters to load
-PROFILEPANEL_MODE_TIP;Processing profile fill mode.\n\nButton pressed: partial profiles will be converted to full profiles; the missing values will be replaced with hard-coded defaults.\n\nButton released: profiles will be applied as they are, altering only those values which they contain.
+PROFILEPANEL_MODE_TIP;Processing profile append mode for local editing tools.\n\nButton pressed: local editing parameters in the profile will be appended to the current ones.\n\nButton released: local editing parameters in the profile will overwrite the current ones.
 PROFILEPANEL_MYPROFILES;My profiles
 PROFILEPANEL_PASTEPPASTE;Parameters to paste
 PROFILEPANEL_PCUSTOM;Custom
@@ -1251,8 +1253,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Best compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma halved h
 SAVEDLG_TIFFUNCOMPRESSED;Uncompressed TIFF
 SAVEDLG_WARNFILENAME;File will be named
 SHCSELECTOR_TOOLTIP;Click right mouse button to reset the position of those 3 sliders.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to the output profile.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the monitor profile, if soft-proofing is disabled.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to the monitor profile.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the output profile, if soft-proofing is disabled.
 SOFTPROOF_TOOLTIP;Soft-proofing simulates the appearance of the image when reproduced by a specific printer or monitor, if a proper profile is set in Preferences > Color Management.\n(Hold <b>Ctrl</b> while clicking to change the soft-proofing profile.)
 THRESHOLDSELECTOR_B;Bottom
 THRESHOLDSELECTOR_BL;Bottom-left
@@ -1632,7 +1634,8 @@ TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterization
 TP_LABMASKS_POSTPROCESS_SMOOTHING;Smoothing
 TP_LENSGEOM_AUTOCROP;Auto-Crop
 TP_LENSGEOM_FILL;Auto-fill
-TP_LENSGEOM_LABEL;Lens / Geometry
+TP_GEOM_LABEL;Geometry
+TP_LENS_LABEL;Lens
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatic from database
 TP_LENSPROFILE_CORRECTION_EXIF;Embedded in metadata
 TP_LENSPROFILE_CORRECTION_LCPFILE;LCP file
@@ -1902,6 +1905,7 @@ TP_TONE_EQUALIZER_BAND_4;Whites
 TP_TONE_EQUALIZER_DETAIL;Regularization
 TP_TONE_EQUALIZER_LABEL;Tone Equalizer
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Show tonal map
+TP_TONE_EQUALIZER_PIVOT;Pivot (Ev)
 TP_VIGNETTING_AMOUNT;Amount
 TP_VIGNETTING_CENTER_X;Center X
 TP_VIGNETTING_CENTER_Y;Center Y

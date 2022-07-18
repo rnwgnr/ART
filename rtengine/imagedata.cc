@@ -77,6 +77,7 @@ FramesData::FramesData(const Glib::ustring &fname):
     model("Unknown"),
     orientation("Unknown"),
     lens("Unknown"),
+    software(""),
     sampleFormat(IIOSF_UNKNOWN),
     isPixelShift(false),
     isHDR(false),
@@ -132,8 +133,15 @@ FramesData::FramesData(const Glib::ustring &fname):
         const auto find_exif_tag =
             [&](const std::string &name) -> bool
             {
-                pos = exif.findKey(Exiv2::ExifKey(name));
-                return (pos != exif.end() && pos->size());
+                try {
+                    pos = exif.findKey(Exiv2::ExifKey(name));
+                    return (pos != exif.end() && pos->size());                
+                } catch (std::exception &e) {
+                    if (settings->verbose) {                        
+                        std::cerr << "Exiv2 WARNING -- error finding tag " << name << ": " << e.what() << std::endl;
+                    }
+                    return false;
+                }            
             };
 
         const auto find_tag =
@@ -186,6 +194,10 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         if (make.length() > 0 && model.find(make + " ") == 0) {
             model = model.substr(make.length() + 1);
+        }
+
+        if (find_exif_tag("Exif.Image.Software")) {
+            software = pos->print();
         }
 
         if (find_tag(Exiv2::exposureTime)) {
@@ -258,6 +270,16 @@ FramesData::FramesData(const Glib::ustring &fname):
 
         if (find_tag(Exiv2::lensName)) {
             lens = pos->print(&exif);
+            auto p = pos;
+            if (find_exif_tag("Exif.CanonFi.RFLensType") && find_exif_tag("Exif.Canon.LensModel")) {
+                lens = pos->print(&exif);
+            } else if (p->count() == 1 && lens == std::to_string(p->toLong())) {
+                if (find_exif_tag("Exif.Canon.LensModel")) {
+                    lens = pos->print(&exif);
+                } else if (find_exif_tag("Exif.Photo.LensModel")) {
+                    lens = p->print(&exif);
+                }
+            }
         } else if (find_exif_tag("Exif.Photo.LensSpecification") && pos->count() == 4) {
             const auto round =
                 [](float f) -> float
@@ -446,6 +468,10 @@ FramesData::FramesData(const Glib::ustring &fname):
                 sampleformat = SAMPLEFORMAT_IEEEFP;
                 bitspersample = 32;
                 break;
+            case ImageIOManager::FMT_TIFF_FLOAT16:
+                sampleformat = SAMPLEFORMAT_IEEEFP;
+                bitspersample = 16;
+                break;
             }
             if (is_external) {
                 photometric = PHOTOMETRIC_RGB;
@@ -604,6 +630,12 @@ bool FramesData::getHDR() const
 std::string FramesData::getImageType() const
 {
     return isPixelShift ? "PS" : isHDR ? "HDR" : "STD";
+}
+
+
+std::string FramesData::getSoftware() const
+{
+    return software;
 }
 
 

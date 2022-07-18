@@ -42,6 +42,7 @@
 #include "../rtgui/paramsedited.h"
 #include "../rtgui/ppversion.h"
 #include "../rtgui/version.h"
+#include "../rtgui/pathutils.h"
 
 using namespace std;
 
@@ -579,7 +580,7 @@ Glib::ustring filenameToUri(const Glib::ustring &fname, const Glib::ustring &bas
             } else if (stripif(fn, options.rtdir)) {
                 return Glib::filename_to_uri(fn, "U");
             } else if (Glib::path_get_dirname(fname) == basedir) {
-                fn = Glib::filename_to_utf8(Glib::path_get_basename(fname));
+                fn = fname_to_utf8(Glib::path_get_basename(fname));
                 return Glib::filename_to_uri(fn, "B");
             } else {
                 return Glib::filename_to_uri(fn);
@@ -623,7 +624,7 @@ Glib::ustring filenameFromUri(const Glib::ustring &uri, const Glib::ustring &bas
                 return uri;
             }
         }
-        Glib::ustring ret = Glib::filename_to_utf8(f);
+        Glib::ustring ret = fname_to_utf8(f);
         return ret;
     } catch (Glib::ConvertError &e) {
         return uri;
@@ -1518,13 +1519,13 @@ ToneCurveParams::ToneCurveParams():
     curve2{
         DCT_Linear
     },
-    curveMode(ToneCurveParams::TcMode::STD),
-    curveMode2(ToneCurveParams::TcMode::STD),
+    curveMode(ToneCurveParams::TcMode::NEUTRAL),
+    curveMode2(ToneCurveParams::TcMode::NEUTRAL),
     histmatching(false),
     fromHistMatching(false),
-    saturation{
-        FCT_Linear
-    },
+    saturation{ FCT_Linear },
+    saturation_hmask{ FCT_Linear },
+    saturation_cmask{ FCT_Linear },
     perceptualStrength(100),
     contrastLegacyMode(false),
     whitePoint(1.0)    
@@ -1543,6 +1544,8 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
         && histmatching == other.histmatching
         && fromHistMatching == other.fromHistMatching
         && saturation == other.saturation
+        && saturation_hmask == other.saturation_hmask
+        && saturation_cmask == other.saturation_cmask
         && perceptualStrength == other.perceptualStrength
         && contrastLegacyMode == other.contrastLegacyMode
         && whitePoint == other.whitePoint;
@@ -1882,7 +1885,7 @@ bool DenoiseParams::operator !=(const DenoiseParams& other) const
 
 
 TextureBoostParams::Region::Region():
-    strength(0.5),
+    strength(0),
     detailThreshold(1.0),
     iterations(1)
 {
@@ -2028,7 +2031,8 @@ ToneEqualizerParams::ToneEqualizerParams():
     enabled(false),
     bands{0,0,0,0,0},
     regularization(4),
-    show_colormap(false)
+    show_colormap(false),
+    pivot(0)
 {
 }
 
@@ -2039,7 +2043,8 @@ bool ToneEqualizerParams::operator ==(const ToneEqualizerParams& other) const
         enabled == other.enabled
         && bands == other.bands
         && regularization == other.regularization
-        && show_colormap == other.show_colormap;
+        && show_colormap == other.show_colormap
+        && pivot == other.pivot;
 }
 
 
@@ -2544,11 +2549,11 @@ ColorManagementParams::ColorManagementParams() :
     applyBaselineExposureOffset(true),
     applyHueSatMap(true),
     dcpIlluminant(0),
-    workingProfile("ProPhoto"),
+    workingProfile("Rec2020"),
     outputProfile(options.rtSettings.srgb),
     outputIntent(RI_RELATIVE),
     outputBPC(true),
-    inputProfileCAT(true)
+    inputProfileCAT(false)
 {
 }
 
@@ -2759,7 +2764,7 @@ ColorCorrectionParams::Region::Region():
     compression{0,0,0},
     rgbluminance(false),
     hueshift(0),
-    mode(ColorCorrectionParams::Mode::YUV)
+    mode(ColorCorrectionParams::Mode::JZAZBZ)
 {
 }
 
@@ -3428,6 +3433,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("ToneCurve", "Curve", toneCurve.curve, keyFile);
             saveToKeyfile("ToneCurve", "Curve2", toneCurve.curve2, keyFile);
             saveToKeyfile("ToneCurve", "Saturation", toneCurve.saturation, keyFile);
+            saveToKeyfile("ToneCurve", "SaturationHMask", toneCurve.saturation_hmask, keyFile);
+            saveToKeyfile("ToneCurve", "SaturationCMask", toneCurve.saturation_cmask, keyFile);
             if (toneCurve.perceptualStrength != 100) {
                 saveToKeyfile("ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength, keyFile);
             }
@@ -3646,6 +3653,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 saveToKeyfile("ToneEqualizer", "Band" + std::to_string(i), toneEqualizer.bands[i], keyFile);
             }
             saveToKeyfile("ToneEqualizer", "Regularization", toneEqualizer.regularization, keyFile);
+            saveToKeyfile("ToneEqualizer", "Pivot", toneEqualizer.pivot, keyFile);
         }
         
 // Crop
@@ -3883,10 +3891,10 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 Glib::ustring mode = "YUV";
                 if (l.mode == ColorCorrectionParams::Mode::RGB) {
                     mode = "RGB";
-                } else if (l.mode == ColorCorrectionParams::Mode::HSL) {
-                    mode = "HSL";
                 } else if (l.mode == ColorCorrectionParams::Mode::JZAZBZ) {
                     mode = "Jzazbz";
+                } else if (l.mode == ColorCorrectionParams::Mode::HSL) {
+                    mode = "HSL";
                 }
                 putToKeyfile("ColorCorrection", Glib::ustring("Mode_") + n, mode, keyFile);
                 {
@@ -4173,6 +4181,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                      bool resetOnError, const Glib::ustring &fname)
 {
 #define RELEVANT_(n) (!pedited || pedited->n)
+#define APPEND_(n, p) (pedited && pedited->n == ParamsEdited::Undef && (n . regions != p . regions || n . labmasks != p . labmasks))
+#define DO_APPEND_(l,o) l.insert(l.begin(), o.begin(), o.end())
     
     try {
         Glib::ustring basedir = Glib::path_get_dirname(fname);
@@ -4295,7 +4305,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             }
             if (keyFile.has_group("ToneCurve") && RELEVANT_(toneCurve)) {
                 assignFromKeyfile(keyFile, "ToneCurve", "Enabled", toneCurve.enabled);
-                assignFromKeyfile(keyFile, "ToneCurve", "Contrast", toneCurve.contrast);
+                if (assignFromKeyfile(keyFile, "ToneCurve", "Contrast", toneCurve.contrast) && ppVersion < 1034) {
+                    double c = std::pow(std::abs(toneCurve.contrast) * 0.125 / 16.0, 1.0/1.5) * 100;
+                    toneCurve.contrast = SGN(toneCurve.contrast) * int(c + 0.5);
+                }
                 if (assignFromKeyfile(keyFile, "ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode)) {
                     toneCurve.curveMode2 = toneCurve.curveMode;
                 }
@@ -4306,6 +4319,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 assignFromKeyfile(keyFile, "ToneCurve", "HistogramMatching", toneCurve.histmatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveFromHistogramMatching", toneCurve.fromHistMatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "Saturation", toneCurve.saturation);
+                assignFromKeyfile(keyFile, "ToneCurve", "SaturationHMask", toneCurve.saturation_hmask);
+                assignFromKeyfile(keyFile, "ToneCurve", "SaturationCMask", toneCurve.saturation_cmask);
                 if (!assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength) && ppVersion >= 1026) {
                     toneCurve.perceptualStrength = 100;
                 }
@@ -4421,6 +4436,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(localContrast, LocalContrastParams())) {
+                    DO_APPEND_(ll, localContrast.regions);
+                    DO_APPEND_(lm, localContrast.labmasks);
+                }
                 localContrast.regions = std::move(ll);
                 localContrast.labmasks = std::move(lm);
             }
@@ -4615,6 +4634,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(textureBoost, TextureBoostParams())) {
+                    DO_APPEND_(ll, textureBoost.regions);
+                    DO_APPEND_(lm, textureBoost.labmasks);
+                }
                 textureBoost.regions = std::move(ll);
                 textureBoost.labmasks = std::move(lm);
             }
@@ -4685,6 +4708,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             } else {
                 assignFromKeyfile(keyFile, "ToneEqualizer", "Detail", toneEqualizer.regularization);
             }
+            assignFromKeyfile(keyFile, "ToneEqualizer", "Pivot", toneEqualizer.pivot);
         }
         
         if (keyFile.has_group("Crop") && RELEVANT_(crop)) {
@@ -5124,6 +5148,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 }
             }
             if (found) {
+                if (APPEND_(smoothing, SmoothingParams())) {
+                    DO_APPEND_(ll, smoothing.regions);
+                    DO_APPEND_(lm, smoothing.labmasks);
+                }
                 smoothing.regions = std::move(ll);
                 smoothing.labmasks = std::move(lm);
             }
@@ -5258,7 +5286,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         cur.power[1] = cur.power[2] = cur.power[0];
                         get("Pivot_", cur.pivot[0]);
                         cur.pivot[1] = cur.pivot[2] = cur.pivot[0];
-                        get("Compression_", cur.compression[0]);
+                        if (get("Compression_", cur.compression[0])) {
+                            if (ppVersion < 1035) {
+                                cur.compression[0] /= 100.0;
+                            }
+                        }
                         cur.compression[1] = cur.compression[2] = cur.compression[0];
                     } else {
                         const char *chan[3] = { "R", "G", "B" };
@@ -5312,9 +5344,20 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 if (!done) {
                     lg.emplace_back(cur);
                     lm.emplace_back(curmask);
+                    if (ppVersion < 1036 && cur.mode == ColorCorrectionParams::Mode::HSL && cur.hueshift != 0) {
+                        lg.back().hueshift = 0;
+                        lm.emplace_back(curmask);
+                        lg.emplace_back();
+                        lg.back().hueshift = cur.hueshift;
+                        std::swap(lg.back(), lg[lg.size()-2]);
+                    }
                 }
             }
             if (found) {
+                if (APPEND_(colorcorrection, ColorCorrectionParams())) {
+                    DO_APPEND_(lg, colorcorrection.regions);
+                    DO_APPEND_(lm, colorcorrection.labmasks);
+                }
                 colorcorrection.regions = std::move(lg);
                 colorcorrection.labmasks = std::move(lm);
             }
@@ -5646,6 +5689,8 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
 
     return 0;
 
+#undef DO_APPEND_
+#undef APPEND_
 #undef RELEVANT_
 }
 
@@ -5752,6 +5797,12 @@ int ProcParams::write(ProgressListener *pl,
 }
 
 
+FullPartialProfile::FullPartialProfile():
+    pp_()
+{
+}
+
+
 FullPartialProfile::FullPartialProfile(const ProcParams &pp):
     pp_(pp)
 {
@@ -5765,20 +5816,19 @@ bool FullPartialProfile::applyTo(ProcParams &pp) const
 }
 
 
-FilePartialProfile::FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool full):
+FilePartialProfile::FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool append):
     pl_(pl),
     fname_(fname),
-    full_(full)
+    append_(append)
 {
 }
 
 
 bool FilePartialProfile::applyTo(ProcParams &pp) const
 {
-    if (full_) {
-        pp.setDefaults();
-    }
-    return fname_.empty() || (pp.load(pl_, fname_) == 0);
+    ParamsEdited pe(true);
+    pe.set_append(append_);
+    return !fname_.empty() && (pp.load(pl_, fname_, &pe) == 0);
 }
 
 

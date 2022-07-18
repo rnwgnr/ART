@@ -1278,7 +1278,7 @@ void Color::interpolateRGBColor (float realL, float iplow, float iphigh, int alg
     Color::xyz2rgb(X, Y, Z, ro, go, bo, rgb_xyz);// ro go bo in gamut
 }
 
-void Color::calcGamma (double pwr, double ts, int mode, GammaValues &gamma)
+void Color::calcGamma(double pwr, double ts, GammaValues &gamma)
 {
     //from Dcraw (D.Coffin)
     int i;
@@ -1313,17 +1313,15 @@ void Color::calcGamma (double pwr, double ts, int mode, GammaValues &gamma)
         g[5] = 1. / (g[1] * SQR(g[3]) / 2. + 1. - g[2] - g[3] - g[2] * g[3] * (log(g[3]) - 1.)) - 1.;
     }
 
-    if (!mode--) {
-        gamma[0] = g[0];
-        gamma[1] = g[1];
-        gamma[2] = g[2];
-        gamma[3] = g[3];
-        gamma[4] = g[4];
-        gamma[5] = g[5];
-        gamma[6] = 0.;
-        return;
-    }
+    gamma[0] = g[0];
+    gamma[1] = g[1];
+    gamma[2] = g[2];
+    gamma[3] = g[3];
+    gamma[4] = g[4];
+    gamma[5] = g[5];
+    gamma[6] = 0.;
 }
+
 void Color::gammaf2lut (LUTf &gammacurve, float gamma, float start, float slope, float divisor, float factor)
 {
 #ifdef __SSE2__
@@ -6939,5 +6937,67 @@ void Color::jzazbz2xyz(float Jz, float az, float bz, float &X, float &Y, float &
 
     XYZ_D65_to_D50(X, Y, Z);
 }
+
+
+//-----------------------------------------------------------------------------
+// oklab color space from https://bottosson.github.io/posts/oklab/
+//-----------------------------------------------------------------------------
+
+void Color::xyz2oklab(float X, float Y, float Z, float &L, float &a, float &b)
+{
+    XYZ_D50_to_D65(X, Y, Z);
+    
+    constexpr float M1[3][3] = {
+        {0.8189330101f, 0.3618667424f, -0.1288597137f},
+        {0.0329845436f, 0.9293118715f, 0.0361456387f},
+        {0.0482003018f, 0.2643662691f, 0.6338517070f}        
+    };
+    
+    A3 lms = dot_product(M1, A3(X, Y, Z));
+    for (int i = 0; i < 3; ++i) {
+        lms[i] = xcbrtf(lms[i]);
+    }
+    
+    constexpr float M2[3][3] = {
+        {0.2104542553f, 0.7936177850f, -0.0040720468f},
+        {1.9779984951f, -2.4285922050f, 0.4505937099f},
+        {0.0259040371f, 0.7827717662f, -0.8086757660f}
+    };
+
+    lms = dot_product(M2, lms);
+    
+    L = lms[0];
+    a = lms[1];
+    b = lms[2];
+}
+
+
+void Color::oklab2xyz(float L, float a, float b, float &X, float &Y, float &Z)
+{
+    constexpr float M2_inv[3][3] = {
+        {1.f, 0.39633779f, 0.21580376f},
+        {1.00000001f, -0.10556134f, -0.06385417f},
+        {1.00000005f, -0.08948418f, -1.29148554f}
+    };
+
+    A3 lms = dot_product(M2_inv, A3(L, a, b));
+    for (int i = 0; i < 3; ++i) {
+        lms[i] = SQR(lms[i])*lms[i];
+    }
+
+    constexpr float M1_inv[3][3] = {
+        {1.22701385f, -0.55779998f, 0.28125615f},
+        {-0.04058018f, 1.11225687f, -0.07167668f},
+        {-0.07638128f, -0.42148198f, 1.58616322}
+    };
+
+    lms = dot_product(M1_inv, lms);
+    X = lms[0];
+    Y = lms[1];
+    Z = lms[2];
+    
+    XYZ_D65_to_D50(X, Y, Z);
+}
+
 
 } // namespace rtengine

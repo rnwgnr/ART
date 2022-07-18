@@ -22,7 +22,6 @@
 #include "version.h"
 #include "options.h"
 #include "preferences.h"
-#include "iccprofilecreator.h"
 #include "cursormanager.h"
 #include "rtimage.h"
 #include "whitebalance.h"
@@ -560,13 +559,6 @@ RTWindow::RTWindow():
         iFullscreen = new RTImage ("fullscreen-enter.png");
         iFullscreen_exit = new RTImage ("fullscreen-leave.png");
 
-        Gtk::Button* iccProfileCreator = Gtk::manage (new Gtk::Button ());
-        setExpandAlignProperties (iccProfileCreator, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
-        iccProfileCreator->set_relief(Gtk::RELIEF_NONE);
-        iccProfileCreator->set_image (*Gtk::manage (new RTImage ("gamut-plus.png")));
-        iccProfileCreator->set_tooltip_markup (M ("MAIN_BUTTON_ICCPROFCREATOR"));
-        iccProfileCreator->signal_clicked().connect ( sigc::mem_fun (*this, &RTWindow::showICCProfileCreator) );
-
         Gtk::Button* preferences = Gtk::manage (new Gtk::Button ());
         setExpandAlignProperties (preferences, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         preferences->set_relief(Gtk::RELIEF_NONE);
@@ -594,7 +586,6 @@ RTWindow::RTWindow():
             prProgBar.set_inverted (true);
             actionGrid->set_orientation (Gtk::ORIENTATION_VERTICAL);
             actionGrid->attach_next_to (prProgBar, Gtk::POS_BOTTOM, 1, 1);
-            actionGrid->attach_next_to (*iccProfileCreator, Gtk::POS_BOTTOM, 1, 1);
             actionGrid->attach_next_to (*preferences, Gtk::POS_BOTTOM, 1, 1);
             actionGrid->attach_next_to (*btn_fullscreen, Gtk::POS_BOTTOM, 1, 1);
             mainNB->set_action_widget (actionGrid, Gtk::PACK_END);
@@ -602,7 +593,6 @@ RTWindow::RTWindow():
             prProgBar.set_orientation (Gtk::ORIENTATION_HORIZONTAL);
             actionGrid->set_orientation (Gtk::ORIENTATION_HORIZONTAL);
             actionGrid->attach_next_to (prProgBar, Gtk::POS_RIGHT, 1, 1);
-            actionGrid->attach_next_to (*iccProfileCreator, Gtk::POS_RIGHT, 1, 1);
             actionGrid->attach_next_to (*preferences, Gtk::POS_RIGHT, 1, 1);
             actionGrid->attach_next_to (*btn_fullscreen, Gtk::POS_RIGHT, 1, 1);
             mainNB->set_action_widget (actionGrid, Gtk::PACK_END);
@@ -794,6 +784,10 @@ void RTWindow::on_mainNB_switch_page (Gtk::Widget* widget, guint page_num)
                 }
             }
         } else {
+            if (mainNB->get_nth_page(page_num) == bpanel) {
+                bpanel->refreshProfiles();
+            }
+            
             // in single tab mode with command line filename epanel does not exist yet
             if (isSingleTabMode() && epanel) {
                 // Save profile on leaving the editor panel
@@ -1194,23 +1188,6 @@ void RTWindow::writeToolExpandedStatus (std::vector<int> &tpOpen)
     }
 }
 
-
-void RTWindow::showICCProfileCreator ()
-{
-    ICCProfileCreator *iccpc = new ICCProfileCreator (this);
-    iccpc->run ();
-    delete iccpc;
-
-    fpanel->optionsChanged ();
-
-    if (epanel) {
-        epanel->defaultMonitorProfileChanged (options.rtSettings.monitorProfile, options.rtSettings.autoMonitorProfile);
-    }
-
-    for (const auto &p : epanels) {
-        p.second->defaultMonitorProfileChanged (options.rtSettings.monitorProfile, options.rtSettings.autoMonitorProfile);
-    }
-}
 
 void RTWindow::showPreferences ()
 {

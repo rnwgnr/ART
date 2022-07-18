@@ -112,7 +112,8 @@ protected:
     Vignetting* vignetting;
     Gradient* gradient;
     PCVignette* pcvignette;
-    LensGeometry* lensgeom;
+    GeometryPanel *geompanel;
+    LensPanel *lenspanel;
     LensProfilePanel* lensProf;
     Rotate* rotate;
     Distortion* distortion;

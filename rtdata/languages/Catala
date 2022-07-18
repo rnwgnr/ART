@@ -12,6 +12,9 @@
 #11 2021-11-28 mrleemon, update for 1.10.1
 #12 2021-12-18 mrleemon, update for 1.12
 #13 2022-01-28 mrleemon, update for 1.12.1
+#14 2022-04-01 mrleemon, update for 1.13
+#15 2022-05-27 mrleemon, update for 1.14
+#16 2022-07-12 mrleemon, update for 1.15
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -78,6 +81,7 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Lent
 EXIFFILTER_METADATAFILTER;Activa els filtres de metadades
 EXIFFILTER_SHUTTER;Temps d'exposició
+EXIFFILTER_SOFTWARE;Programari
 EXIFPANEL_ACTIVATE_ALL_HINT;Selecciona totes les etiquetes
 EXIFPANEL_ACTIVATE_NONE_HINT;Desselecciona totes les etiquetes
 EXIFPANEL_ADDEDIT;Afegeix/Edita
@@ -527,6 +531,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - desenfocament de màscara de regió
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - ombres/aclareix
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - pivot
 HISTORY_MSG_COLORCORRECTION_POWER;CC - tons mitjans/gamma
+HISTORY_MSG_COLORCORRECTION_COMPRESSION;CC - compressió
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - mode luminància
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - saturació d'entrada
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - saturació de sortida
@@ -662,6 +667,8 @@ HISTORY_MSG_SMOOTHING_ANGLE;Suavitzat - angle
 HISTORY_MSG_SMOOTHING_CURVATURE;Suavitzat - curvatura
 HISTORY_MSG_SMOOTHING_OFFSET;Suavitzat - desplaçament
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Suavitzat - post-processament de màscara
+HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Suavitzat - intensitat del soroll
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Suavitzat - rugositat del soroll
 HISTORY_MSG_SOFTLIGHT_ENABLED;Llum tènue
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Llum tènue - Intensitat
 HISTORY_MSG_SPOT;Eliminació de taques
@@ -671,6 +678,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;Equalitzador tonal
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Equalitzador tonal - Bandes
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Equalitzador tonal - Regularització
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Equalitzador tonal - Mapa tonal
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Equalitzador tonal - Pivot
 HISTORY_MSG_TONECURVE_SATCURVE;Corba tonal - Saturació
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Corba tonal - Intensitat perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Corba tonal - Mode antic de contrast 
@@ -846,7 +854,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Color de fons de la vista prèvia: <b>basat en el tema</
 MAIN_TOOLTIP_BACKCOLOR1;Color de fons de la vista prèvia: <b>negre</b>\nDrecera: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Color de fons de la vista prèvia: <b>blanc</b>\nDrecera: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Color de fons de la vista prèvia: <b>gris mitjà</b>\nDrecera: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Bloqueja</b> / <b>Desbloqueja</b> la vista <b>Abans</b>\n\n<b>Bloqueja</b>: manté la vista <b>Abans</b> sense canvis.\nÚtil per avaluar l'efecte acumulatiu de diverses eines.\nA més, es pot fer una comparació amb qualsevol estat a l'historial.\n\n<b>Desbloqueja</b>: la vista <b>Abans</b> seguirà a la vista <b>Després</b> un pas per darrere, mostrant la imatge abans de l'efecte de l'eina que s'està utilitzant.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Bloqueja</b> / <b>Desbloqueja</b> la vista <b>Abans</b>\n\n<b>Bloqueja</b>: manté la vista <b>Abans</b> inalterada.\n<b>Desbloqueja</b>: la vista <b>Abans</b> es manté sincronitzada amb la vista <b>Després</b>.
 MAIN_TOOLTIP_FALSECOLORS;Alterna la indicació de l'exposició mitjançant color fals.\nDrecera: <b>Majús-e</b>\n\nClau (Rang IRE):\n%1
 MAIN_TOOLTIP_HIDEHP;Mostra/Oculta el panell esquerre (incloent la història).\nDrecera: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indicació d'altes llums retallades.\nDrecera: <b>&gt;</b>
@@ -1171,7 +1179,7 @@ PROFILEPANEL_GLOBALPROFILES;Perfils proporcionats
 PROFILEPANEL_LABEL;Perfils de processament
 PROFILEPANEL_LOADDLGLABEL;Carrega paràmetres de processament...
 PROFILEPANEL_LOADPPASTE;Paràmetres a carregar
-PROFILEPANEL_MODE_TIP;Mode d'emplenat de perfils de processament.\n\nBotó premut: els perfils parcials es convertiran en perfils complets; els valors que falten es completaran amb valors predeterminats de fàbrica.\n\nBotó deixat anar: els perfils s'aplicaran tal com estan, alterant només els valors que contenen.
+PROFILEPANEL_MODE_TIP;Mode d'agregació del perfil de processament per a les eines d'edició local.\n\nBotó premut: els paràmetres d'edició local al perfil s'agreguen als actuals.\n\nBotó deixat anar: els paràmetres d'edició local al perfil sobreescriuran els actuals.
 PROFILEPANEL_MYPROFILES;Els meus perfils
 PROFILEPANEL_PASTEPPASTE;Paràmetres a enganxar
 PROFILEPANEL_PCUSTOM;Personalitzat
@@ -1264,8 +1272,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Millor compressió:\nJ:a:b 4:2:0\nh/v 2/2\nCroma dividid
 SAVEDLG_TIFFUNCOMPRESSED;TIFF sense compressió
 SAVEDLG_WARNFILENAME;S'assignarà un nom al fitxer
 SHCSELECTOR_TOOLTIP;Cliqueu amb el botó dret del ratolí per restablir la posició d'aquests 3 controls lliscants.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa al perfil de sortida.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de la prova en pantalla, si està establert i la prova en pantalla està activada,\n- el perfil del monitor, si la prova en pantalla està desactivada.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa al perfil del monitor.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de prova en pantalla, si està establert i la prova en pantalla està activada,\n- el perfil de sortida, si la prova en pantalla està desactivada.
 SOFTPROOF_TOOLTIP;La prova en pantalla simula l'aparença de la imatge quan la reprodueix una impressora o monitor específic, si s'ha establert un perfil adequat a Preferències > Gestió de color.\n(Manteniu premuda la tecla <b>Ctrl</b> mentre feu clic per canviar el perfil de la prova en pantalla.)
 THRESHOLDSELECTOR_B;Inferior
 THRESHOLDSELECTOR_BL;Inferior esquerre
@@ -1357,6 +1365,7 @@ TP_COLORCORRECTION_LIST_TITLE;Correcció
 TP_COLORCORRECTION_OFFSET;Ombres/Aclareix
 TP_COLORCORRECTION_PIVOT;Pivot
 TP_COLORCORRECTION_POWER;Tons mitjans/Gamma
+TP_COLORCORRECTION_COMPRESSION;Compressió
 TP_COLORCORRECTION_RGBLUMINANCE;Mode luminància
 TP_COLORCORRECTION_SATURATION;Saturació
 TP_COLORCORRECTION_SLOPE;Altes llums/Guany
@@ -1644,7 +1653,8 @@ TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterització
 TP_LABMASKS_POSTPROCESS_SMOOTHING;Suavitzat
 TP_LENSGEOM_AUTOCROP;Retallada automàtica
 TP_LENSGEOM_FILL;Emplenat automàtic
-TP_LENSGEOM_LABEL;Lent / Geometria
+TP_GEOM_LABEL;Geometria
+TP_LENS_LABEL;Lent
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automàtic des de la base de dades
 TP_LENSPROFILE_CORRECTION_EXIF;Incrustat a les metadades
 TP_LENSPROFILE_CORRECTION_LCPFILE;Fitxer LCP
@@ -1865,6 +1875,8 @@ TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lluentor
 TP_SMOOTHING_MODE_NLMEANS;Mitjanes no locals
 TP_SMOOTHING_MODE_LENS;Desenfocament de lent
 TP_SMOOTHING_MODE_MOTION;Desenfocament de moviment
+TP_SMOOTHING_MODE_NOISE;Afegeix soroll
+TP_SMOOTHING_NOISE_COARSENESS;Rugositat
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminància
 TP_SMOOTHING_CHANNEL_C;Crominància
@@ -1912,6 +1924,7 @@ TP_TONE_EQUALIZER_BAND_4;Blancs
 TP_TONE_EQUALIZER_DETAIL;Regularització
 TP_TONE_EQUALIZER_LABEL;Equalitzador tonal
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Mostra mapa tonal
+TP_TONE_EQUALIZER_PIVOT;Pivot (Ev)
 TP_VIGNETTING_AMOUNT;Quantitat
 TP_VIGNETTING_CENTER_X;Centre X
 TP_VIGNETTING_CENTER_Y;Centre Y

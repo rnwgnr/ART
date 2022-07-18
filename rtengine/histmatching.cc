@@ -284,7 +284,7 @@ void mappingToCurve(const std::vector<int> &mapping, std::vector<double> &curve)
     } else {
         curve.insert(curve.begin(), DCT_Spline);
         DiagonalCurve c(curve);
-        curve = { DCT_CatmullRom };
+        curve = { DCT_Spline/*DCT_CatmullRom*/ };
         double pivot = -1.0;
         for (int i = 25; i < 256; ++i) {
             double xx = double(i) / 255.0;
@@ -351,7 +351,7 @@ public:
 
         for (int y = 0; y < img_.height(); ++y) {
             for (int x = 0; x < img_.width(); ++x) {
-                int l = c.getVal(img_[y][x]) * 255.f;
+                int l = LIM01(c.getVal(img_[y][x])) * 255.f;
                 ++hist[l];
             }
         }

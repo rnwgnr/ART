@@ -150,7 +150,30 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             float R, G, B;
             Color::jzazbz2rgb(Jz, az, bz, R, G, B, iws);
             Color::rgb2yuv(R * 65535.f, G * 65535.f, B * 65535.f, Jz, bz, az, ws);
-        };    
+        };
+
+    const auto yuv2hsl =
+        [&](float Y, float u, float v, float &h, float &s, float &l) -> void
+        {
+            float R, G, B;
+            Color::yuv2rgb(Y, u, v, R, G, B, ws);
+            Color::rgb2hsl(R, G, B, h, s, l);
+            h *= 2.f * RT_PI_F;
+        };
+
+    const auto hsl2yuv =
+        [&](float h, float s, float l, float &Y, float &u, float &v) -> void
+        {
+            h /= (2.f * RT_PI_F);
+            if (h < 0.f) {
+                h += 1.f;
+            } else if (h > 1.f) {
+                h -= 1.f;
+            }
+            float R, G, B;
+            Color::hsl2rgb(h, s, l, R, G, B);
+            Color::rgb2yuv(R, G, B, Y, u, v, ws);
+        };
     
     if (imgbuf) {
         const auto translate_uv =
@@ -222,6 +245,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     char rgbmode[n];
     bool enabled[n];
     bool jzazbz[n];
+    bool hsl[n];
     float rhs[n];
     for (int i = 0; i < n; ++i) {
         auto &r = params->colorcorrection.regions[i];
@@ -237,10 +261,10 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             abca[i] = 0.f;
             abcb[i] = 0.f;
             jzazbz[i] = false;
+            hsl[i] = r.mode == ColorCorrectionParams::Mode::HSL;
         } else {
             jzazbz[i] = r.mode == ColorCorrectionParams::Mode::JZAZBZ;
-            // abca[i] = abcoord(r.a);
-            // abcb[i] = abcoord(r.b);
+            hsl[i] = false;
             abcoord2(r.a, r.b, abca[i], abcb[i]);
         }
         rs[i] = 1.f + r.inSaturation / 100.f;
@@ -291,8 +315,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 roffset[i][c] = r.offset[j];
                 rpower[i][c] = 1.0 / r.power[j];
                 rpivot[i][c] = r.pivot[j];
-                rcompression[i][c][0] = r.compression[j] / r.pivot[j];
-                rcompression[i][c][1] = r.compression[j] > 0.f ? std::log(1.f + r.compression[j]) / r.pivot[j] : 0.f;
+                auto compr = r.compression[j] * 100.0;
+                if (compr > 0) {
+                    rcompression[i][c][0] = compr;
+                    double y0 = std::pow((rslope[i][c] + roffset[i][c])/rpivot[i][c], rpower[i][c]) * rpivot[i][c];
+                    rcompression[i][c][1] = std::log(1.0 + y0 * compr) / rslope[i][c];
+                } else {
+                    rcompression[i][c][0] = rcompression[i][c][1] = 0;
+                }
                 if (rslope[i][c] != 1.f || roffset[i][c] != 0.f || rpower[i][c] != 1.f || rcompression[i][c][1] != 0.f) {
                     enabled[i] = true;
                 }
@@ -324,14 +354,21 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
             if (hueshift != 0.f) {
                 float h, s;
-                if (jzazbz[region]) {
-                    yuv2jzazbz(Y, u, v);
-                }
-                Color::yuv2hsl(u, v, h, s);
-                h += hueshift;
-                Color::hsl2yuv(h, s, u, v);
-                if (jzazbz[region]) {
-                    jzazbz2yuv(Y, u, v);
+                if (hsl[region]) {
+                    float l;
+                    yuv2hsl(Y, u, v, h, s, l);
+                    h += hueshift;
+                    hsl2yuv(h, s, l, Y, u, v);
+                } else {
+                    if (jzazbz[region]) {
+                        yuv2jzazbz(Y, u, v);
+                    }
+                    Color::yuv2hsl(u, v, h, s);
+                    h += hueshift;
+                    Color::hsl2yuv(h, s, u, v);
+                    if (jzazbz[region]) {
+                        jzazbz2yuv(Y, u, v);
+                    }
                 }
             }
                 
@@ -350,6 +387,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                                 v = pow_F(v / pivot[i], power[i]) * pivot[i];
                             } else {
                                 v = pow_F(v, power[i]);
+                            }
+                            if (compression[i][0] != 0.f) {
+                                v = xlogf(v * compression[i][0] + 1.f) / compression[i][1];
                             }
                         } else {
                             v = 0.f;
@@ -384,27 +424,27 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 }
             } else {
                 if (enabled[region]) {
-                    float v = (Y / 65535.f) * slope[0] + offset[0]/2.f;
-                    if (v > 0.f) {
+                    float YY = (Y / 65535.f) * slope[0] + offset[0]/2.f;
+                    if (YY > 0.f) {
                         if (pivot[0] != 1.f) {
-                            v = pow_F(v / pivot[0], power[0]) * pivot[0];
+                            YY = pow_F(YY / pivot[0], power[0]) * pivot[0];
                         } else {
-                            v = pow_F(v, power[0]);
+                            YY = pow_F(YY, power[0]);
                         }
                         if (compression[0][0] != 0.f) {
-                            v = xlogf(v * compression[0][0] + 1.f) / compression[0][1];
+                            YY = xlogf(YY * compression[0][0] + 1.f) / compression[0][1];
                         }
-                        v *= 65535.f;
+                        YY *= 65535.f;
                     } else {
-                        v = 0.f;
+                        YY = 0.f;
                     }
                     if (Y > 0.f) {
-                        float f = v / Y;
-                        Y = v;
+                        float f = YY / Y;
+                        Y = YY;
                         u *= f;
                         v *= f;
                     } else {
-                        Y = v;
+                        Y = YY;
                     }
                 }
 
@@ -500,18 +540,30 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
             if (hueshift != 0.f) {
                 float h, s, uk, vk;
-                if (jzazbz[region]) {
-                    vyuv2jzazbz(Y, u, v);
-                }
-                for (int k = 0; k < 4; ++k) {
-                    Color::yuv2hsl(u[k], v[k], h, s);
-                    h += hueshift;
-                    Color::hsl2yuv(h, s, uk, vk);
-                    u[k] = uk;
-                    v[k] = vk;
-                }
-                if (jzazbz[region]) {
-                    vjzazbz2yuv(Y, u, v);
+                if (hsl[region]) {
+                    float l, Yk;
+                    for (int k = 0; k < 4; ++k) {
+                        yuv2hsl(Y[k], u[k], v[k], h, s, l);
+                        h += hueshift;
+                        hsl2yuv(h, s, l, Yk, uk, vk);
+                        Y[k] = Yk;
+                        u[k] = uk;
+                        v[k] = vk;
+                    }
+                } else {
+                    if (jzazbz[region]) {
+                        vyuv2jzazbz(Y, u, v);
+                    }
+                    for (int k = 0; k < 4; ++k) {
+                        Color::yuv2hsl(u[k], v[k], h, s);
+                        h += hueshift;
+                        Color::hsl2yuv(h, s, uk, vk);
+                        u[k] = uk;
+                        v[k] = vk;
+                    }
+                    if (jzazbz[region]) {
+                        vjzazbz2yuv(Y, u, v);
+                    }
                 }
             }
                 

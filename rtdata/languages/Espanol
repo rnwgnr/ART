@@ -15,6 +15,9 @@
 #14 2021-11-28 mrleemon, update for 1.10.1
 #15 2021-12-18 mrleemon, update for 1.12
 #16 2022-01-28 mrleemon, update for 1.12.1
+#17 2022-04-01 mrleemon, update for 1.13
+#18 2022-05-27 mrleemon, update for 1.14
+#19 2022-07-12 mrleemon, update for 1.15
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -81,6 +84,7 @@ EXIFFILTER_ISO;ISO
 EXIFFILTER_LENS;Lente
 EXIFFILTER_METADATAFILTER;Activar filtros de metadatos
 EXIFFILTER_SHUTTER;Tiempo de exposición
+EXIFFILTER_SOFTWARE;Software
 EXIFPANEL_ACTIVATE_ALL_HINT;Seleccionar todas las etiquetas
 EXIFPANEL_ACTIVATE_NONE_HINT;Deseleccionar todas las etiquetas
 EXIFPANEL_ADDEDIT;Añadir/Editar
@@ -530,6 +534,7 @@ HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - desenfoque de máscara de región
 HISTORY_MSG_COLORCORRECTION_OFFSET;CC - sombras/aclarar
 HISTORY_MSG_COLORCORRECTION_PIVOT;CC - pivote
 HISTORY_MSG_COLORCORRECTION_POWER;CC - tonos medios/gamma
+HISTORY_MSG_COLORCORRECTION_COMPRESSION;CC - compresión
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - modo luminancia
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - saturación de entrada
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - saturación de salida
@@ -665,6 +670,8 @@ HISTORY_MSG_SMOOTHING_ANGLE;Suavizado - ángulo
 HISTORY_MSG_SMOOTHING_CURVATURE;Suavizado - curvatura
 HISTORY_MSG_SMOOTHING_OFFSET;Suavizado - desplazamiento
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Suavizado - post-procesamiento de máscara
+HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Suavizado - intensidad del ruido
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Suavizado - rugosidad del ruido
 HISTORY_MSG_SOFTLIGHT_ENABLED;Luz tenue
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Luz tenue - Intensidad
 HISTORY_MSG_SPOT;Eliminación de manchas
@@ -674,6 +681,7 @@ HISTORY_MSG_TONE_EQUALIZER_ENABLED;Ecualizador tonal
 HISTORY_MSG_TONE_EQUALIZER_BANDS;Ecualizador tonal - Bandas
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Ecualizador tonal - Regularización
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Ecualizador tonal - Mapa tonal
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Ecualizador tonal - Pivote
 HISTORY_MSG_TONECURVE_SATCURVE;Curva tonal - Saturación
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Curva tonal - Intensidad perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Curva tonal - Modo antiguo de contraste
@@ -849,7 +857,7 @@ MAIN_TOOLTIP_BACKCOLOR0;Color de fondo de la vista previa: <b>basado en el tema<
 MAIN_TOOLTIP_BACKCOLOR1;Color de fondo de la vista previa: <b>negro</b>\nAtajo: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR2;Color de fondo de la vista previa: <b>blanco</b>\nAtajo: <b>9</b>
 MAIN_TOOLTIP_BACKCOLOR3;Color de fondo de la vista previa: <b>gris medio</b>\nAtajo: <b>9</b>
-MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Bloquear</b> / <b>Desbloquear</b> la vista <b>Antes</b>\n\n<b>Bloquear</b>: mantiene la vista <b>Antes</b> inalterada.\nÚtil para evaluar el efecto acumulativo de varias herramientas.\nAdemás, se puede hacer una comparación con cualquier estado en el historial.\n\n<b>Desbloquear</b>: la vista <b>Antes</b> seguirá a la vista <b>Después</b> un paso por detrás, mostrando la imagen antes del efecto de la herramienta que se está usando.
+MAIN_TOOLTIP_BEFOREAFTERLOCK;<b>Bloquear</b> / <b>Desbloquear</b> la vista <b>Antes</b>\n\n<b>Bloquear</b>: mantiene la vista <b>Antes</b> inalterada.\n<b>Desbloquear</b>: la vista <b>Antes</b> se mantiene sincronizada con la vista <b>Después</b>.
 MAIN_TOOLTIP_FALSECOLORS;Alternar la indicación de la exposición mediante color falso.\nAtajo: <b>Mayús-e</b>\n\nClave (Rango IRE):\n%1
 MAIN_TOOLTIP_HIDEHP;Mostrar/Ocultar el panel izquierdo (incluyendo la historia).\nAtajo: <b>l</b>
 MAIN_TOOLTIP_INDCLIPPEDH;Indicación de altas luces recortadas.\nAtajo: <b>&gt;</b>
@@ -1174,7 +1182,7 @@ PROFILEPANEL_GLOBALPROFILES;Perfiles proporcionados
 PROFILEPANEL_LABEL;Perfiles de procesamiento
 PROFILEPANEL_LOADDLGLABEL;Cargar parámetros de procesamiento...
 PROFILEPANEL_LOADPPASTE;Parámetros a cargar
-PROFILEPANEL_MODE_TIP;Modo de relleno de perfiles de procesamiento.\n\nBotón pulsado: los perfiles parciales se convertirán en perfiles completos; los valores que faltan se completarán con valores predeterminados de fábrica.\n\nBotón soltado: los perfiles se aplicarán tal como están, alterando solo los valores que contienen.
+PROFILEPANEL_MODE_TIP;Modo de agregación del perfil de procesamiento para las herramientas de edición local.\n\nBotón pulsado: los parámetros de edición local en el perfil se agregarán a los actuales.\n\nBotón soltado: los parámetros de edición local en el perfil sobrescribirán los actuales.
 PROFILEPANEL_MYPROFILES;Mis perfiles
 PROFILEPANEL_PASTEPPASTE;Parámetros a pegar
 PROFILEPANEL_PCUSTOM;Personalizado
@@ -1267,8 +1275,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Mejor compresión:\nJ:a:b 4:2:0\nh/v 2/2\nCroma dividida
 SAVEDLG_TIFFUNCOMPRESSED;TIFF sin compresión
 SAVEDLG_WARNFILENAME;Se asignará nombre al archivo
 SHCSELECTOR_TOOLTIP;Haga clic con el botón derecho del ratón para restablecer la posición de esos 3 controles deslizantes.
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto al perfil de salida.
-SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de la prueba en pantalla, si se ha establecido uno y la prueba en pantalla está activada,\n- el perfil del monitor, si la prueba en pantalla está desactivada.
+SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto al perfil del monitor.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de prueba en pantalla, si se ha establecido uno y la prueba en pantalla está activada,\n- el perfil de salida, si la prueba en pantalla está desactivada.
 SOFTPROOF_TOOLTIP;La prueba en pantalla simula la apariencia de la imagen cuando la reproduce una impresora o monitor específico, si se ha establecido un perfil adecuado en Preferencias > Gestión de color.\n(Mantenga pulsada la tecla <b>Ctrl</b> mientras hace clic para cambiar el perfil de prueba en pantalla).
 THRESHOLDSELECTOR_B;Inferior
 THRESHOLDSELECTOR_BL;Inferior izquierdo
@@ -1360,6 +1368,7 @@ TP_COLORCORRECTION_LIST_TITLE;Corrección
 TP_COLORCORRECTION_OFFSET;Sombras/Aclarar
 TP_COLORCORRECTION_PIVOT;Pivote
 TP_COLORCORRECTION_POWER;Tonos medios/Gamma
+TP_COLORCORRECTION_COMPRESSION;Compresión
 TP_COLORCORRECTION_RGBLUMINANCE;Modo luminancia
 TP_COLORCORRECTION_SATURATION;Saturación
 TP_COLORCORRECTION_SLOPE;Altas luces/Ganancia
@@ -1647,7 +1656,8 @@ TP_LABMASKS_POSTPROCESS_POSTERIZATION;Posterización
 TP_LABMASKS_POSTPROCESS_SMOOTHING;Suavizado
 TP_LENSGEOM_AUTOCROP;Recorte automático
 TP_LENSGEOM_FILL;Relleno automático
-TP_LENSGEOM_LABEL;Lente / Geometría
+TP_GEOM_LABEL;Geometría
+TP_LENS_LABEL;Lente
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automático desde la base de datos
 TP_LENSPROFILE_CORRECTION_EXIF;Incrustado en los metadatos
 TP_LENSPROFILE_CORRECTION_LCPFILE;Archivo LCP
@@ -1868,6 +1878,8 @@ TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Resplandor
 TP_SMOOTHING_MODE_NLMEANS;Medias no locales
 TP_SMOOTHING_MODE_LENS;Desenfoque de lente
 TP_SMOOTHING_MODE_MOTION;Desenfoque de movimiento
+TP_SMOOTHING_MODE_NOISE;Añadir ruido
+TP_SMOOTHING_NOISE_COARSENESS;Rugosidad
 TP_SMOOTHING_CHANNEL;Canal
 TP_SMOOTHING_CHANNEL_L;Luminancia
 TP_SMOOTHING_CHANNEL_C;Crominancia
@@ -1915,6 +1927,7 @@ TP_TONE_EQUALIZER_BAND_4;Blancos
 TP_TONE_EQUALIZER_DETAIL;Regularización
 TP_TONE_EQUALIZER_LABEL;Ecualizador tonal
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Mostrar mapa tonal
+TP_TONE_EQUALIZER_PIVOT;Pivote (Ev)
 TP_VIGNETTING_AMOUNT;Cantidad
 TP_VIGNETTING_CENTER_X;Centro X
 TP_VIGNETTING_CENTER_Y;Centro Y
