@@ -254,27 +254,27 @@ if(LIBRAW_FOUND)
 endif()
 
 # Create new executables targets
-add_executable(rth ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})
-add_executable(rth-cli ${EXTRA_SRC_CLI} ${CLISOURCEFILES})
+add_executable(art ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})
+add_executable(art-cli ${EXTRA_SRC_CLI} ${CLISOURCEFILES})
 
 # Add dependencies to executables targets
-add_dependencies(rth UpdateInfo)
-add_dependencies(rth-cli UpdateInfo)
+add_dependencies(art UpdateInfo)
+add_dependencies(art-cli UpdateInfo)
 
 #Define a target specific definition to use in code
-target_compile_definitions(rth PUBLIC GUIVERSION)
-target_compile_definitions(rth-cli PUBLIC CLIVERSION)
+target_compile_definitions(art PUBLIC GUIVERSION)
+target_compile_definitions(art-cli PUBLIC CLIVERSION)
 
 # Set executables targets properties, i.e. output filename and compile flags
 # for "Debug" builds, open a console in all cases for Windows version
 if((WIN32) AND NOT(UPPER_CMAKE_BUILD_TYPE STREQUAL "DEBUG"))
-    set_target_properties(rth PROPERTIES LINK_FLAGS "-mwindows")
+    set_target_properties(art PROPERTIES LINK_FLAGS "-mwindows")
 endif()
-set_target_properties(rth PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART)
-set_target_properties(rth-cli PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART-cli)
+set_target_properties(art PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME art)
+set_target_properties(art-cli PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME art-cli)
 
 # Add linked libraries dependencies to executables targets
-target_link_libraries(rth PUBLIC
+target_link_libraries(art PUBLIC
     rtengine
     ${CANBERRA-GTK_LIBRARIES}
     ${EXPAT_LIBRARIES}
@@ -298,7 +298,7 @@ target_link_libraries(rth PUBLIC
     ${EXIV2_LIBRARIES}
     )
 
-target_link_libraries(rth-cli PUBLIC
+target_link_libraries(art-cli PUBLIC
     rtengine
     ${CAIROMM_LIBRARIES}
     ${EXPAT_LIBRARIES}
@@ -321,10 +321,10 @@ target_link_libraries(rth-cli PUBLIC
     )
 
 if(HAS_MIMALLOC)
-    target_link_libraries(rth PUBLIC mimalloc)
-    target_link_libraries(rth-cli PUBLIC mimalloc)
+    target_link_libraries(art PUBLIC mimalloc)
+    target_link_libraries(art-cli PUBLIC mimalloc)
 endif()
 
 # Install executables
-install(TARGETS rth DESTINATION ${BINDIR})
-install(TARGETS rth-cli DESTINATION ${BINDIR})
+install(TARGETS art DESTINATION ${BINDIR})
+install(TARGETS art-cli DESTINATION ${BINDIR})
