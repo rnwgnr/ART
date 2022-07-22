@@ -289,8 +289,8 @@ ditto "${PROJECT_SOURCE_DIR}/rtdata/fonts" "${ETC}/fonts"
 
 # App bundle resources
 ditto "${PROJECT_SOURCE_DATA_DIR}/"{ART,profile}.icns "${RESOURCES}"
-ditto "${PROJECT_SOURCE_DATA_DIR}/PkgInfo" "${CONTENTS}"
-cmake -DPROJECT_SOURCE_DATA_DIR=${PROJECT_SOURCE_DATA_DIR} -DCONTENTS=${CONTENTS} -Dversion=${PROJECT_FULL_VERSION} -DshortVersion=${PROJECT_VERSION} -Darch=${arch} -P "${PROJECT_SOURCE_DATA_DIR}/info-plist.cmake"
+#ditto "${PROJECT_SOURCE_DATA_DIR}/PkgInfo" "${CONTENTS}"
+cmake -DPROJECT_SOURCE_DATA_DIR=${PROJECT_SOURCE_DATA_DIR} -DCONTENTS=${CONTENTS} -Dversion=${PROJECT_FULL_VERSION} -DshortVersion=${PROJECT_VERSION} -Dminimum_macos_version=${CMAKE_OSX_DEPLOYMENT_TARGET} -Darch=${arch} -P ${PROJECT_SOURCE_DATA_DIR}/info-plist.cmake
 update-mime-database -V  "${RESOURCES}/share/mime"
 cp -RL "${LOCAL_PREFIX}/share/locale" "${RESOURCES}/share/locale"
 
@@ -325,10 +325,12 @@ if [[ -n $UNIVERSAL_URL ]]; then
     if [[ $arch = "arm64" ]]; then
         cp -R ART.app ART-arm64.app
         cp -R ARTuniv/ART.app ART-x86_64.app
+        echo "\n\n=====================================\n\n" >> RawTherapee.app/Contents/Resources/AboutThisBuild.txt
         cat ART-x86_64.app/Contents/Resources/AboutThisBuild.txt >> ART.app/Contents/Resources/AboutThisBuild.txt
     else
         cp -R ART.app ART-x86_64.app
         cp -R ARTuniv/ART.app ART-arm64.app
+        echo "\n\n=====================================\n\n" >> RawTherapee.app/Contents/Resources/AboutThisBuild.txt
         cat ART-arm64.app/Contents/Resources/AboutThisBuild.txt >> ART.app/Contents/Resources/AboutThisBuild.txt
     fi
     hdiutil unmount ./ARTuniv
