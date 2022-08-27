@@ -38,14 +38,28 @@ void adjust_params(procparams::DenoiseParams &dnparams, double scale)
         return;
     }
     
+    const auto c =
+        [](double x, double f) -> double
+        {
+            int s = SGN(x);
+            double y = LIM01(std::abs(x)/100.0);
+            return s * intp(y, y * f, y) * 100.0;
+        };
+
     double scale_factor = 1.0 / scale;
     double noise_factor_c = std::pow(scale_factor, 0.46);
-    double noise_factor_l = std::pow(scale_factor, 0.62);
-    dnparams.luminance *= noise_factor_l;
+    double noise_factor_l = std::pow(scale_factor, 0.62) * scale_factor;
+    //noise_factor_l *= intp(std::pow(LIM01(dnparams.luminance / 100.0), 3.0), scale_factor, 1.0);
+    //std::cout << "ADJUSTING LUMINANCE SCALE: " << noise_factor_l << std::endl;
+    //dnparams.luminance *= noise_factor_l;
+    dnparams.luminance = c(dnparams.luminance, noise_factor_l);
     dnparams.luminanceDetail *= (1.0 + std::pow(1.0 - scale_factor, 2.2));
-    dnparams.chrominance *= noise_factor_c;
-    dnparams.chrominanceRedGreen *= noise_factor_c;
-    dnparams.chrominanceBlueYellow *= noise_factor_c;
+    dnparams.chrominance = c(dnparams.chrominance, noise_factor_c);
+    dnparams.chrominanceRedGreen = c(dnparams.chrominanceRedGreen, noise_factor_c);
+    dnparams.chrominanceBlueYellow = c(dnparams.chrominanceBlueYellow, noise_factor_c);
+    // dnparams.chrominance *= noise_factor_c;
+    // dnparams.chrominanceRedGreen *= noise_factor_c;
+    // dnparams.chrominanceBlueYellow *= noise_factor_c;
 }
 
 
@@ -679,7 +693,7 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
     int widIm, heiIm;
     int tr = getCoarseBitMask(params->coarse);
     imgsrc->getFullSize(widIm, heiIm, tr);
-    
+
     denoise::Tile_calc(tilesize, overlap, kall, widIm, heiIm, numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip);
     kall = 0;
 
@@ -757,6 +771,7 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
             coordH[0] = begH;
             coordH[1] = heiIm / 2 - crH / 2;
             coordH[2] = heiIm - crH - begH;
+
 
 #ifdef _OPENMP
 #           pragma omp for schedule(dynamic) collapse(2) nowait
