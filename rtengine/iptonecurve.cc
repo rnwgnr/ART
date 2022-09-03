@@ -332,7 +332,7 @@ void fill_pipette(Imagefloat *img, Imagefloat *pipette, bool multithread)
 {
     const int W = img->getWidth();
     const int H = img->getHeight();
-    
+
 #ifdef _OPENMP
 #    pragma omp parallel for if (multithread)
 #endif
@@ -440,15 +440,16 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
                     j *= 2;
                 }
                 if (add_c) {
-                    for (size_t i = 0; i < (c.size()-2)/2; ++i) {
+                    for (size_t i = 0; i < (c.size()-1)/2; ++i) {
                         double x = c[2*i+1];
                         double v = Color::gammatab_srgb[x * 65535.0] / 65535.0;
                         double y = curve.getVal(v);
                         y = Color::igammatab_srgb[y * 65535.0] / 65535.0;
                         m[expand(x)] = expand(y);
                     }
+                } else {
+                    m[expand(1.0)] = expand(curve.getVal(1.0));
                 }
-                m[expand(1.0)] = expand(curve.getVal(1.0));
                 c = { DCT_CatmullRom };
                 for (auto &p : m) {
                     c.push_back(p.first);
