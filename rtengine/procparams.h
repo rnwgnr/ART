@@ -1690,6 +1690,7 @@ public:
     FilePartialProfile(): pl_(nullptr), fname_(""), append_(false) {}
     FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool append);
     bool applyTo(ProcParams &pp) const override;
+    const Glib::ustring &filename() const { return fname_; }
 
 private:
     ProgressListener *pl_;

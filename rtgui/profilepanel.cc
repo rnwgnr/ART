@@ -664,12 +664,17 @@ void ProfilePanel::selection_changed ()
 
         if (s) {
             if (append_mode_->get_active()) {
-                ProcParams pp;
-                s->applyTo(pp);
-                ParamsEdited pe(true);
-                pe.set_append(true);
-                PEditedPartialProfile s2(pp, pe);
-                changeTo(&s2, pse->label + "+");
+                if (const FilePartialProfile *fs = dynamic_cast<const FilePartialProfile *>(s)) {
+                    FilePartialProfile f(dynamic_cast<rtengine::ProgressListener *>(parent), fs->filename(), true);
+                    changeTo(&f, pse->label + "+");
+                } else {
+                    ProcParams pp;
+                    s->applyTo(pp);
+                    ParamsEdited pe(true);
+                    pe.set_append(true);
+                    PEditedPartialProfile s2(pp, pe);
+                    changeTo(&s2, pse->label + "+");
+                }
             } else {
                 changeTo(s, pse->label);
             }
