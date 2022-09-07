@@ -38,15 +38,11 @@ void ImProcFunctions::expcomp(Imagefloat *img, const procparams::ExposureParams 
     
     img->setMode(Imagefloat::Mode::RGB, multiThread);
 
-    LUTf expcomp(65536);
     const float exp_scale = pow(2.f, expparams->expcomp);
     const float black = expparams->black * 2000.f;
-    for (int i = 0; i < 65536; ++i) {
-        expcomp[i] = std::max(i * exp_scale - black, 0.f);
-    }
-
 #ifdef __SSE2__
-    vfloat maxvalfv = F2V(MAXVALF);
+    vfloat exp_scalev = F2V(exp_scale);
+    vfloat blackv = F2V(black);
 #endif
 
     const int W = img->getWidth();
@@ -63,22 +59,14 @@ void ImProcFunctions::expcomp(Imagefloat *img, const procparams::ExposureParams 
         for (; x < W - 3; x += 4) {
             for (int c = 0; c < 3; ++c) {
                 vfloat v = LVF(chan[c][y][x]);
-                vmask m = vmaskf_ge(v, maxvalfv);
-                if (_mm_movemask_ps((vfloat)m)) {
-                    for (int k = 0; k < 4; ++k) {
-                        float &vv = chan[c][y][x + k];
-                        vv = (vv < MAXVALF ? expcomp[vv] : std::max(vv * exp_scale - black, 0.f));
-                    }
-                } else {
-                    STVF(chan[c][y][x], expcomp[v]);
-                }
+                STVF(chan[c][y][x], vmaxf(v * exp_scalev - blackv, ZEROV));
             }
         }
 #endif
         for (; x < W; ++x) {
             for (int c = 0; c < 3; ++c) {
                 float &v = chan[c][y][x];
-                v = (v < MAXVALF ? expcomp[v] : std::max(v * exp_scale - black, 0.f));
+                v = std::max(v * exp_scale - black, 0.f);
             }
         }
     }
