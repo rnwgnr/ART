@@ -877,3 +877,110 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
     }
 }
     
+
+void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, bool inclBatchProcessed, bool onlySelected)
+{
+    if (tbe.empty()) {
+        return;
+    }
+
+    Gtk::MessageDialog msd(getToplevelWindow(this), M("FILEBROWSER_DELETEDIALOG_HEADER"), true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+
+    Gtk::HBox hb5;
+    Gtk::Label lbl4(M("RENAME_DIALOG_SIDECARS"));
+    constexpr int pad = 4;
+    hb5.pack_start(lbl4, Gtk::PACK_SHRINK, pad);
+    Gtk::Entry sidecars;
+    sidecars.set_text(options.renaming.sidecars);
+    sidecars.set_tooltip_markup(M("RENAME_DIALOG_SIDECARS_TIP"));
+    hb5.pack_start(sidecars, Gtk::PACK_EXPAND_WIDGET, pad);
+    msd.get_message_area()->pack_start(hb5, Gtk::PACK_SHRINK, pad);
+    msd.show_all_children();
+
+    if (onlySelected) {
+        msd.set_secondary_text(Glib::ustring::compose (inclBatchProcessed ? M("FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC") : M("FILEBROWSER_DELETEDIALOG_SELECTED"), tbe.size()), true);
+    } else {
+        msd.set_secondary_text(Glib::ustring::compose (M("FILEBROWSER_DELETEDIALOG_ALL"), tbe.size()), true);
+    }
+
+    if (msd.run() == Gtk::RESPONSE_YES) {
+        removeFromBatchQueue(tbe);
+        Params params;
+        bool err = false;
+        Glib::ustring errmsg;
+        if (!parse_sidecars(sidecars.get_text(), params)) {
+            errmsg = M("RENAME_DIALOG_INVALID_SIDECARS");
+            err = true;
+        }
+
+        if (!err) {
+            options.renaming.sidecars = sidecars.get_text();
+            
+            for (unsigned int i = 0; i < tbe.size(); i++) {
+                const auto fname = tbe[i]->filename;
+                // remove from browser
+                delete fileBrowser->delEntry(fname);
+                // remove from cache
+                cacheMgr->deleteEntry(fname);
+                // delete from file system
+                ::g_remove(fname.c_str());
+                // delete also the arp sidecar
+                ::g_remove(options.getParamFile(fname).c_str());
+
+                if (!params.sidecars.empty()) {
+                    auto base_fn = removeExtension(fname);
+                    for (auto &s : params.sidecars) {
+                        Glib::ustring sidename;
+                        if (s[0] == '+') {
+                            sidename = fname + "." + s.substr(1);
+                        } else {
+                            sidename = base_fn + "." + s;
+                        }
+                        if (Glib::file_test(sidename, Glib::FILE_TEST_EXISTS)) {
+                            ::g_remove(sidename.c_str());
+                        }
+                    }
+                }
+
+                if (inclBatchProcessed) {
+                    Glib::ustring procfName = Glib::ustring::compose ("%1.%2", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format);
+                    ::g_remove (procfName.c_str ());
+
+                    Glib::ustring procfNameParamFile = Glib::ustring::compose ("%1.%2.out%3", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format, paramFileExtension);
+                    ::g_remove (procfNameParamFile.c_str ());
+                }
+
+                previewsLoaded--;
+            }
+                
+            //     // delete paramfile if found
+            //     // ::g_remove ((fname + paramFileExtension).c_str ());
+            //     // ::g_remove ((removeExtension(fname) + paramFileExtension).c_str ());
+            //     ::g_remove(options.getParamFile(fname).c_str());
+            //     // delete .thm file
+            //     ::g_remove ((removeExtension(fname) + ".thm").c_str ());
+            //     ::g_remove ((removeExtension(fname) + ".THM").c_str ());
+            //     auto xmp_sidecar = Thumbnail::getXmpSidecarPath(fname);
+            //     if (Glib::file_test(xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
+            //         ::g_remove(xmp_sidecar.c_str());
+            //     }
+
+            //     if (inclBatchProcessed) {
+            //         Glib::ustring procfName = Glib::ustring::compose ("%1.%2", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format);
+            //         ::g_remove (procfName.c_str ());
+
+            //         Glib::ustring procfNameParamFile = Glib::ustring::compose ("%1.%2.out%3", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format, paramFileExtension);
+            //         ::g_remove (procfNameParamFile.c_str ());
+            //     }
+
+            //     previewsLoaded--;
+            // }
+
+            _refreshProgressBar();
+            redrawAll ();
+        } else {
+            Gtk::MessageDialog errd(getToplevelWindow(this), errmsg, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+            errd.run();
+        }
+    }
+}

@@ -1225,7 +1225,7 @@ RENAME_DIALOG_SKIP;Skip
 RENAME_DIALOG_RENAME;Generate a unique name
 RENAME_DIALOG_PROGRESSIVE;Progressive number
 RENAME_DIALOG_SIDECARS;Additional sidecars
-RENAME_DIALOG_SIDECARS_TIP;List of extensions of additional sidecars to rename, separated by a ';' character. If an extension starts with a '+', it is appended to the original name instead of replacing its extension.\nFor example, if the input file is <i>file.raw</i>, specifying <i>ext1;+ext2</i> results in the sidecars <i>file.ext1</i> and <i>file.raw.ext2</i>.
+RENAME_DIALOG_SIDECARS_TIP;List of extensions of additional sidecars to include in the operation, separated by a ';' character. If an extension starts with a '+', it is appended to the original name instead of replacing its extension.\nFor example, if the input file is <i>file.raw</i>, specifying <i>ext1;+ext2</i> results in the sidecars <i>file.ext1</i> and <i>file.raw.ext2</i>.
 RENAME_DIALOG_FILENAMES;Files to rename
 RENAME_DIALOG_PREVIEW;Preview
 RENAME_DIALOG_INVALID_PATTERN;Invalid pattern
