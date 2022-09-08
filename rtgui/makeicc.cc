@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <array>
 #include <string>
 #include <cctype>
@@ -39,6 +40,7 @@ struct Options {
     std::array<float, 6> primaries;
     std::string output;
     bool v2;
+    std::string trcfile;
     Options() = default;
 };
 
@@ -132,7 +134,10 @@ bool getopts(std::ostream &sout, const std::vector<std::string> &args, Options &
                     out.gamma = -2;
                     out.slope = 0;
                 } else {
-                    err = "Invalid TRC (-t)";
+                    //err = "Invalid TRC (-t)";
+                    out.gamma = 0;
+                    out.slope = 0;
+                    out.trcfile = val;
                 }
             }
         } else if (a == "-c") {
@@ -312,7 +317,7 @@ cmsToneCurve *make_trc(size_t size, float (*trcFunc)(float, bool))
 
     for (size_t i = 0; i < size; ++i) {
         float x = float(i) / (size - 1);
-        float y = std::min(trcFunc(x, false), 1.0f);
+        float y = trcFunc(x, false); //, 1.0f);
         values[i] = y;
     }
 
@@ -334,6 +339,31 @@ cmsToneCurve *make_trc(float gamma, float slope)
     }
 }
 
+
+cmsToneCurve *make_trc(const std::string &filename)
+{
+    std::vector<float> values;
+    std::ifstream src(filename.c_str());
+    float val;
+    while (true) {
+        if (!(src >> val)) {
+            if (src.eof()) {
+                break;
+            } else {
+                return nullptr;
+            }
+        }
+        values.push_back(val);
+    }
+
+    if (values.empty()) {
+        return nullptr;
+    } else {
+        cmsToneCurve *result = cmsBuildTabulatedToneCurveFloat(NULL, values.size(), &values[0]);
+        return result;
+    }
+}
+
 } // namespace
 
 int ART_makeicc_main(std::ostream &out, const std::vector<std::string> &args)
@@ -348,6 +378,8 @@ int ART_makeicc_main(std::ostream &out, const std::vector<std::string> &args)
         trc = make_trc(4096, &rtengine::Color::eval_PQ_curve);
     } else if (opts.gamma == -1) {
         trc = make_trc(4096, &rtengine::Color::eval_HLG_curve);
+    } else if (opts.gamma == 0) {
+        trc = make_trc(opts.trcfile);
     } else {
         trc = make_trc(opts.gamma, opts.slope);
     }
@@ -382,6 +414,7 @@ void ART_makeicc_help(std::ostream &out, int indent)
         << pad << "          - sRGB\n"
         << pad << "          - HLG\n"
         << pad << "          - PQ\n"
+        << pad << "          - <filename> (path to a file with the 1d LUT for the TRC)\n"
         << pad << " -c Rx Ry Gx Gy Bx By : xy coordinates of primaries\n"
         << pad << " -p VAL : primaries preset. Possible values (case insensitive):\n"
         << pad << "          - sRGB\n"

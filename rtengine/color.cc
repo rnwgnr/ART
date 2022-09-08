@@ -7000,4 +7000,22 @@ float Color::eval_HLG_curve(float x, bool oetf)
 }
 
 
+float Color::eval_ACEScct_curve(float x, bool forward)
+{
+    if (forward) {
+        if (x <= 0.078125f) {
+            return 10.5402377416545f * x + 0.0729055341958355f;
+        } else {
+            return (std::log2(x) + 9.72f) / 17.52f;
+        }
+    } else {
+        if (x <= 0.155251141552511f) {
+            return (x - 0.0729055341958355f) / 10.5402377416545f;
+        } else {
+            return std::exp2(x * 17.52f - 9.72f);
+        }
+    }
+}
+
+
 } // namespace rtengine

@@ -1109,9 +1109,10 @@ public:
     // Hybrid-log gamma curve
     // https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-2-201807-I!!PDF-F.pdf
     static float eval_HLG_curve(float x, bool oetf);
-    
-    // standard srgb gamma and its inverse
 
+    static float eval_ACEScct_curve(float x, bool inverse);
+
+    // standard srgb gamma and its inverse
     /**
     * @brief sRGB gamma
     * See also calcGamma above with the following values: pwr=2.399  ts=12.92310  mode=0.003041  imax=0.055
