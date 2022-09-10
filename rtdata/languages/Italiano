@@ -11,6 +11,7 @@
 #11 2022-07-14 v1.15 - alvaro
 #12 2022-07-25 alvaro
 #13 2022-08-22 alvaro
+#14 2022-08-25 v1.16 - alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -225,10 +226,10 @@ FILECHOOSER_FILTER_ANY;Tutti i file
 FILECHOOSER_FILTER_COLPROF;Profili colore (*.icc)
 FILECHOOSER_FILTER_CURVE;File curve
 FILECHOOSER_FILTER_LCP;Profili correzione obiettivi
+FILECHOOSER_FILTER_LUT;File LUT supportati
 FILECHOOSER_FILTER_PP;Profili sviluppo
 FILECHOOSER_FILTER_SAME;Stesso formato come foto attuale
 FILECHOOSER_FILTER_TIFF;File TIFF
-FILECHOOSER_FILTER_LUT;File LUT supportati
 GENERAL_ABOUT;Informazioni
 GENERAL_AFTER;Dopo
 GENERAL_APPLY;Applica
@@ -611,6 +612,7 @@ HISTORY_MSG_LOGENC_REGULARIZATION;Log - Regolarizzazione
 HISTORY_MSG_LOGENC_SATCONTROL;Log - Controllo saturazione
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Grigio di riferimento
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Ev bianco
+HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - Precompressione alte luci
 HISTORY_MSG_METADATA_MODE;Modalità copia metadati
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrasto - Soglia di contrasto
 HISTORY_MSG_PCVIGNETTE_CENTER;FV - Centro
@@ -1133,6 +1135,7 @@ PREFERENCES_SHOWFILMSTRIPTOOLBAR;Mostra barra strumenti Rullino
 PREFERENCES_SHTHRESHOLD;Soglia per ombre chiuse
 PREFERENCES_SINGLETAB;Modalità a Scheda Singola
 PREFERENCES_SINGLETABVERTAB;Modalità a Scheda Singola, schede verticali
+PREFERENCES_SINGLETABBOTTOM;Modalità a Scheda Singola, Rullino sotto l'Editor
 PREFERENCES_SND_BATCHQUEUEDONE;Coda di sviluppo terminata
 PREFERENCES_SND_HELP;Inserire un percorso completo oppure lascia vuoto (per non avere suoni).\nSu Windows usa "SystemDefault", "SystemAsterisk" ecc. per i suoni di sistema.\nSu Linux usa "complete", "window-attention" ecc. per i suoni di sistema.
 PREFERENCES_SND_LNGEDITPROCDONE;Al termine delle operazioni di modifica
@@ -1355,11 +1358,11 @@ TP_COLORCORRECTION_L;Luminosità
 TP_COLORCORRECTION_LABEL;Correzione Colore/Tono
 TP_COLORCORRECTION_LIST_TITLE;Correzione
 TP_COLORCORRECTION_LUT_FILENAME;File LUT
-TP_COLORCORRECTION_MODE_LUT;LUT
 TP_COLORCORRECTION_MODE;Modalità
 TP_COLORCORRECTION_MODE_COMBINED;Standard
 TP_COLORCORRECTION_MODE_HSL;Fattori HSL
 TP_COLORCORRECTION_MODE_JZAZBZ;Percettivo
+TP_COLORCORRECTION_MODE_LUT;LUT
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Separa canali RGB
 TP_COLORCORRECTION_OFFSET;Ombre/Pendenza
 TP_COLORCORRECTION_OUT;Uscita
@@ -1507,6 +1510,7 @@ TP_GENERAL_11SCALE_TOOLTIP;L'effetto di questo strumento è visibile solo (o è 
 TP_GENERAL_RESET_DEFAULT;Reimposta default
 TP_GENERAL_RESET_SAVED;Reimposta come salvato
 TP_GENERAL_TOOL_RESET_TOOLTIP;Resetta tutte le impostazioni
+TP_GEOM_LABEL;Geometria
 TP_GRADIENT_CENTER_X;Centro X
 TP_GRADIENT_CENTER_X_TOOLTIP;Sposta il gradiente a sinistra (valori negativi) o a destra (valori positivi).
 TP_GRADIENT_CENTER_Y;Centro Y
@@ -1628,12 +1632,12 @@ TP_LABMASKS_DRAWNMASK_ERASE;Modalità gomma
 TP_LABMASKS_DRAWNMASK_GLOBAL;Impostazioni globali
 TP_LABMASKS_DRAWNMASK_INFO;%1 tratto/i
 TP_LABMASKS_DRAWNMASK_INTERSECT_TOOLTIP;Interseca la maschera pennello con le altre maschere
+TP_LABMASKS_DRAWNMASK_OPACITY;Opacità
 TP_LABMASKS_DRAWNMASK_PEN_SETTINGS;Impostazioni pennello
 TP_LABMASKS_DRAWNMASK_RADIUS;Raggio
 TP_LABMASKS_DRAWNMASK_RESET_TIP;Cancella tutti i tratti
 TP_LABMASKS_DRAWNMASK_SMOOTHNESS;Morbidezza
 TP_LABMASKS_DRAWNMASK_TOGGLE_TIP;Abilita il disegno sull'immagine con il pennello.\n\n<i>Se usi il mouse:</i>\n- Premi <b>Alt</b> per azionare temporaneamente la "modalità gomma";\n- Premi <b>Shift</b> per disegnare una linea dritta;\n- Use <b>Ctrl+rotella</b> per cambiare il raggio del pennello;\n- <b>Ctrl+Shift+rotella</b> per cambiare la durezza del pennello;\n- <b>Ctrl+click</b> per iniziare un nuovo gruppo di tratti senza cambiare parametri\n(così tratti multipli sulla stessa area si sommano);\n- Usa il <b>terzo pulsante</b> per disattivare il disegno su area.\n\n<i>Quando si usa un dispositivo sensibile al tocco:</i>\n- Usa il <b>primo pulsante</b> per invertire la "modalità gomma";\n- Premi <b>Shift</b> per disegnare una linea dritta;\n- Usa <b>Alt+primo pulsante</b> per aumentare il raggio del pennello, e\n- <b>Alt+secondo pulsante</b> per decrementarlo;\n- Usa il <b>secondo pulsante</b> per cambiare le modalità di sensibilità al tocco disponibili: off, durezza, raggio (premi <b>Shift</b> per invertire la direzione);\n- Usa <b>Ctrl+secondo pulsante</b> per disattivare il disegno sull'area.
-TP_LABMASKS_DRAWNMASK_OPACITY;Opacità
 TP_LABMASKS_DRAWNMASK_UNDO_TIP;Rimuovi l'ultimo gruppo di tratti
 TP_LABMASKS_HUE;H
 TP_LABMASKS_INVERTED;Invertita
@@ -1649,8 +1653,6 @@ TP_LABMASKS_POSTPROCESS_SMOOTHING;Morbidezza
 TP_LABMASKS_SHOW;Mostra maschera
 TP_LENSGEOM_AUTOCROP;Ritaglio automatico
 TP_LENSGEOM_FILL;Adattamento automatico
-TP_GEOM_LABEL;Geometria
-TP_LENS_LABEL;Obiettivo
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatico dal database
 TP_LENSPROFILE_CORRECTION_EXIF;Incorporato nei metadati
 TP_LENSPROFILE_CORRECTION_LCPFILE;File LCP
@@ -1662,6 +1664,7 @@ TP_LENSPROFILE_USE_CA;Aberrazione cromatica
 TP_LENSPROFILE_USE_GEOMETRIC;Geometrica
 TP_LENSPROFILE_USE_HEADER;Distorsioni da correggere:
 TP_LENSPROFILE_USE_VIGNETTING;Vignettatura
+TP_LENS_LABEL;Obiettivo
 TP_LOCALCONTRAST_CONTRAST;Contrasto residuo
 TP_LOCALCONTRAST_CURVE;Curva di contrasto locale
 TP_LOCALCONTRAST_LABEL;Contrasto Locale
@@ -1670,6 +1673,7 @@ TP_LOGENC_ADVANCED;Impostazioni avanzate
 TP_LOGENC_AUTO;Automatico
 TP_LOGENC_BLACK_EV;Esposizione relativa al nero (Ev)
 TP_LOGENC_GAIN;Guadagno (Ev)
+TP_LOGENC_HLCOMPRESSION;Precompressione alte luci
 TP_LOGENC_LABEL;Log Tone Mapping
 TP_LOGENC_REGULARIZATION;Regolarizzazione
 TP_LOGENC_TARGET_GRAY;Punto di grigio target (luminosità)
