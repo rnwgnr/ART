@@ -86,6 +86,7 @@ bool getopts(std::ostream &sout, const std::vector<std::string> &args, Options &
     out = Options();
     out.gamma = 1;
     out.slope = 0;
+    out.whitepoint = {0.3457, 0.3585}; // D50
     
     std::string err;
     for (int i = 0; err.empty() && i < argc; ++i) {
@@ -231,6 +232,9 @@ bool getopts(std::ostream &sout, const std::vector<std::string> &args, Options &
     }
     if (out.desc.empty()) {
         err = "missing profile description";
+    }
+    if (out.whitepoint.first <= 0 || out.whitepoint.second <= 0) {
+        err = "Invalid whitepoint";
     }
     if (!err.empty()) {
         sout << "ERROR: " << err << std::endl;
