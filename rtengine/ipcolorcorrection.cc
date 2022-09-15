@@ -249,7 +249,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     bool jzazbz[n];
     bool hsl[n];
     float rhs[n];
-    std::unique_ptr<HaldCLUTApplication> lut[n] = {};
+    std::unique_ptr<HaldCLUTApplication> lut[n];
     
     for (int i = 0; i < n; ++i) {
         auto &r = params->colorcorrection.regions[i];
@@ -338,6 +338,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             rhs[i] = 0.f;
         }
 
+        lut[i].reset(nullptr);
         if (r.mode == ColorCorrectionParams::Mode::LUT) {
             lut[i].reset(new HaldCLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, false));
             if (!(*lut[i])) {
