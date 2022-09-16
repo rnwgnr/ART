@@ -66,15 +66,17 @@ void Imagefloat::setScanline (int row, unsigned char* buffer, int bps, unsigned 
     // The DNG decoder convert to 32 bits float data even if the file contains 16 or 24 bits data.
     // DNG_HalfToFloat and DNG_FP24ToFloat from dcraw.cc can be used to manually convert
     // from 16 and 24 bits to 32 bits float respectively
+    constexpr float hival = std::numeric_limits<float>::max() / 100.f;
+    
     switch (sampleFormat) {
     case (IIOSF_FLOAT16): {
         int ix = 0;
         uint16_t* sbuffer = (uint16_t*) buffer;
 
         for (int i = 0; i < width; i++) {
-            r(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
-            g(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
-            b(row, i) = 65535.f * DNG_HalfToFloat(sbuffer[ix++]);
+            r(row, i) = std::min(hival, 65535.f * DNG_HalfToFloat(sbuffer[ix++]));
+            g(row, i) = std::min(hival, 65535.f * DNG_HalfToFloat(sbuffer[ix++]));
+            b(row, i) = std::min(hival, 65535.f * DNG_HalfToFloat(sbuffer[ix++]));
         }
 
         break;
@@ -85,9 +87,9 @@ void Imagefloat::setScanline (int row, unsigned char* buffer, int bps, unsigned 
         float* sbuffer = (float*) buffer;
 
         for (int i = 0; i < width; i++) {
-            r(row, i) = 65535.f * sbuffer[ix++];
-            g(row, i) = 65535.f * sbuffer[ix++];
-            b(row, i) = 65535.f * sbuffer[ix++];
+            r(row, i) = std::min(hival, 65535.f * sbuffer[ix++]);
+            g(row, i) = std::min(hival, 65535.f * sbuffer[ix++]);
+            b(row, i) = std::min(hival, 65535.f * sbuffer[ix++]);
         }
 
         break;

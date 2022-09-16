@@ -109,7 +109,8 @@ inline float power_norm(float r, float g, float b)
 
 inline float norm(float r, float g, float b, TMatrix ws)
 {
-    return (power_norm(r, g, b) + Color::rgbLuminance(r, g, b, ws)) / 2.f;
+    constexpr float hi = std::numeric_limits<float>::max() / 100.f;
+    return std::min(hi, power_norm(r, g, b) / 2.f + Color::rgbLuminance(r, g, b, ws) / 2.f);
 }
 
 
