@@ -288,7 +288,11 @@ void rtengine::HaldCLUT::splitClutFilename(
 
     profile_name = "sRGB";
 
-    if (!name.empty()) {
+    bool search_profile_name = true;
+#ifdef ART_USE_OCIO
+    search_profile_name = !(extension.casefold().find("clf") == 0);
+#endif
+    if (search_profile_name && !name.empty()) {
         for (const auto& working_profile : rtengine::ICCStore::getInstance()->getWorkingProfiles()) {
             if (
                 !working_profile.empty() // This isn't strictly needed, but an empty wp name should be skipped anyway
@@ -299,6 +303,8 @@ void rtengine::HaldCLUT::splitClutFilename(
                 break;
             }
         }
+    } else if (!search_profile_name) {
+        profile_name = "";
     }
 }
 
