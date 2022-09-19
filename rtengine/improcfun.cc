@@ -903,6 +903,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
             STEP_(saturationVibrance);
             dcpProfile(img, dcpProf, dcpApplyState, multiThread);
             STEP_(toneCurve);
+            STEP_(filmSimulation);
             STEP_(rgbCurves);
             STEP_(labAdjustments);
             // stop = stop || STEP_s_(textureBoost);
@@ -910,7 +911,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
         }
         stop = stop || STEP_s_(localContrast);
         if (!stop) {
-            STEP_(filmSimulation);
+            // STEP_(filmSimulation);
             STEP_(blackAndWhite);
             STEP_(filmGrain);
         }
