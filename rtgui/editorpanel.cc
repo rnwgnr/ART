@@ -1181,13 +1181,12 @@ void EditorPanel::open(Thumbnail* tmb, rtengine::InitialImage* isrc)
         beforeAfterToggled();
     }
 
-    // If in single tab mode, the main crop window is not constructed the very first time
-    // since there was no resize event
     if (iareapanel->imageArea->mainCropWindow) {
-        iareapanel->imageArea->mainCropWindow->cropHandler.newImage (ipc, false);
-    } else {
+        iareapanel->imageArea->mainCropWindow->cropHandler.newImage(ipc, false);
+    }
+    { // if there is no crop window, it will be constructed in on_resized
         Gtk::Allocation alloc;
-        iareapanel->imageArea->on_resized (alloc);
+        iareapanel->imageArea->on_resized(alloc);
     }
 
     history->resetSnapShotNumber();
