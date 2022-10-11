@@ -131,6 +131,7 @@ private:
     bool hasValidCurrentEFS;
 
     FilterPanel* filterPanel;
+    bool filter_panel_update_;
 
     int previewsToLoad;
     int previewsLoaded;

@@ -47,7 +47,16 @@ Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageDat
     loadProcParams(false);
 
     // should be safe to use the unprotected version of loadThumbnail, since we are in the constructor
-    _loadThumbnail(true, options.thumb_lazy_caching);
+//    _loadThumbnail(true, options.thumb_lazy_caching);
+    infoFromImage(fname);
+    {
+        int w, h;
+        getOriginalSize(w, h, true);
+        th = options.maxThumbnailHeight;
+        imgRatio = w / h;
+        tw = th * imgRatio;
+    }
+    
     generateExifDateTimeStrings();
 
     loadRating();
@@ -67,6 +76,7 @@ Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::s
     loadProcParams ();
     //initial_ = !pparamsValid;
     _generateThumbnailImage(true, options.thumb_lazy_caching);
+    
     cfs.recentlySaved = false;
 
     initial_ = false;

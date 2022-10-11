@@ -109,6 +109,7 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     hbToolBar1STB(nullptr),
     hasValidCurrentEFS(false),
     filterPanel(nullptr),
+    filter_panel_update_(false),
     previewsToLoad(0),
     previewsLoaded(0),
     modifierKey(0),
@@ -639,9 +640,9 @@ void FileCatalog::on_realize()
 void FileCatalog::closeDir ()
 {
 
-    if (filterPanel) {
-        filterPanel->set_sensitive (false);
-    }
+    // if (filterPanel) {
+    //     filterPanel->set_sensitive (false);
+    // }
 
     if (dirMonitor) {
         dirMonitor->cancel ();
@@ -1013,6 +1014,22 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
         dirEFS.cameras.insert (cfs->getCamera());
         dirEFS.lenses.insert (cfs->lens);
         dirEFS.expcomp.insert (cfs->expcomp);
+
+        filter_panel_update_ = true;
+        if (filterPanel) {
+            idle_register.add(
+                [this]() -> bool
+                {
+                    if (filter_panel_update_) {
+                        filter_panel_update_ = false;
+                        filterPanel->setFilter(dirEFS, false);
+                        if (options.remember_exif_filter_settings) {
+                            filterPanel->setFilter(options.last_exif_filter_settings, true);
+                        }
+                    }
+                    return false;
+                });
+        }
     }
 
     previewsLoaded++;
@@ -1031,7 +1048,7 @@ void FileCatalog::previewsFinishedUI ()
         previewsToLoad = 0;
 
         if (filterPanel) {
-            filterPanel->set_sensitive (true);
+//            filterPanel->set_sensitive (true);
 
             if ( !hasValidCurrentEFS ) {
                 MyMutex::MyLock lock(dirEFSMutex);
@@ -1914,7 +1931,7 @@ void FileCatalog::setFilterPanel (FilterPanel* fpanel)
 {
 
     filterPanel = fpanel;
-    filterPanel->set_sensitive (false);
+    //filterPanel->set_sensitive (false);
     filterPanel->setFilterPanelListener (this);
 }
 
