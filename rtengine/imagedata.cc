@@ -271,8 +271,9 @@ FramesData::FramesData(const Glib::ustring &fname):
         if (find_tag(Exiv2::lensName)) {
             lens = pos->print(&exif);
             auto p = pos;
-            if (find_exif_tag("Exif.CanonFi.RFLensType") && find_exif_tag("Exif.Canon.LensModel")) {
-                lens = pos->print(&exif);
+            std::string lenstmp;
+            if (find_exif_tag("Exif.CanonFi.RFLensType") && find_exif_tag("Exif.Canon.LensModel") && (lenstmp = pos->print(&exif)).size() > 0) {
+                lens = lenstmp;
             } else if (p->count() == 1 && lens == std::to_string(p->toLong())) {
                 if (find_exif_tag("Exif.Canon.LensModel")) {
                     lens = pos->print(&exif);
@@ -301,7 +302,7 @@ FramesData::FramesData(const Glib::ustring &fname):
             }
             lens = buf.str();
         }
-        if (lens.empty() || lens.find_first_not_of('-') == std::string::npos) {
+        if (lens.empty() || lens.find_first_not_of('-') == std::string::npos || std::regex_match(lens, std::regex("\\([0-9]+\\)"))) {
             lens = "Unknown";
         }
 
