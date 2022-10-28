@@ -215,6 +215,11 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     auto &dir = it->second.first;
     auto &cmd = it->second.second;
     std::vector<Glib::ustring> argv = subprocess::split_command_line(cmd);
+#ifdef WIN32
+    if (!argv.empty() && getFileExtension(argv[0]).empty()) {
+        argv[0] += ".exe";
+    }
+#endif // WIN32
     argv.push_back(fileName);
     argv.push_back(outname);
     argv.push_back(std::to_string(maxw_hint));
@@ -376,6 +381,11 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
         auto &dir = it->second.first;
         auto &cmd = it->second.second;
         std::vector<Glib::ustring> argv = subprocess::split_command_line(cmd);
+#ifdef WIN32
+        if (!argv.empty() && getFileExtension(argv[0]).empty()) {
+            argv[0] += ".exe";
+        }
+#endif // WIN32
         argv.push_back(tmpname);
         argv.push_back(fileName);
         std::string sout, serr;
