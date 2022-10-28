@@ -23,6 +23,7 @@
 #include "noncopyable.h"
 #include "rtengine.h"
 #include "imageio.h"
+#include "procparams.h"
 #include <glibmm/ustring.h>
 #include <unordered_map>
 #include <map>
@@ -51,7 +52,8 @@ public:
 
     static ImageIOManager *getInstance();
 
-    void init(const Glib::ustring &dir);
+    void init(const Glib::ustring &base_dir, const Glib::ustring &user_dir);
+    
     bool load(const Glib::ustring &fileName, ProgressListener *plistener, ImageIO *&img, int maxw_hint, int maxh_hint);
     bool save(IImagefloat *img, const std::string &ext, const Glib::ustring &fileName, ProgressListener *plistener);
     std::vector<std::pair<std::string, SaveFormatInfo>> getSaveFormats() const;
@@ -63,15 +65,18 @@ public:
 
     Format getFormat(const Glib::ustring &fileName);
 
+    const procparams::PartialProfile *getSaveProfile(const std::string &ext) const;
+
 private:
+    void do_init(const Glib::ustring &dir);
     static Glib::ustring get_ext(Format f);
-    
-    std::unordered_map<std::string, Glib::ustring> loaders_;
-    std::unordered_map<std::string, Glib::ustring> savers_;
+
+    typedef std::pair<Glib::ustring, Glib::ustring> Pair;
+    std::unordered_map<std::string, Pair> loaders_;
+    std::unordered_map<std::string, Pair> savers_;
     std::unordered_map<std::string, Format> fmts_;
     std::map<std::string, SaveFormatInfo> savelbls_;
-    
-    Glib::ustring dir_;
+    std::unordered_map<std::string, procparams::FilePartialProfile> saveprofiles_;
 };
 
 } // namespace rtengine

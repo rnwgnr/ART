@@ -92,6 +92,8 @@ private:
     void formatChanged(const Glib::ustring& format) override;
     void updateTab (int qsize, int forceOrientation = 0); // forceOrientation=0: base on options / 1: horizontal / 2: vertical
     void applyBatchProfileToggled();
+
+    rtengine::procparams::MultiPartialProfile bqprof_;
 };
 #endif
 

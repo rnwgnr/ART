@@ -320,6 +320,19 @@ void BatchQueuePanel::startBatchProc ()
                 bp = ProfileStore::getInstance()->getProfile(entry);
             }
         }
+        bqprof_.clear();
+        if (bp) {
+            bqprof_.add(bp);
+        }
+        bp = rtengine::ImageIOManager::getInstance()->getSaveProfile(options.saveFormatBatch.format);
+        if (bp) {
+            bqprof_.add(bp);
+        }
+        if (bqprof_) {
+            bp = &bqprof_;
+        } else {
+            bp = nullptr;
+        }
         batchQueue->setBatchProfile(bp);
         
         saveOptions();

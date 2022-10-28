@@ -1713,5 +1713,18 @@ private:
 };
 
 
+class MultiPartialProfile: public PartialProfile {
+public:
+    MultiPartialProfile() {}
+    void add(const PartialProfile *p);
+    void clear();
+    bool applyTo(ProcParams &pp) const override;
+    operator bool() const { return !profiles_.empty(); }
+
+private:
+    std::vector<const PartialProfile *> profiles_;
+};
+    
+
 }} // namespace rtengine::procparams
 

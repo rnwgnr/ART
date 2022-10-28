@@ -127,7 +127,7 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     Exiv2Metadata::init(baseDir, userSettingsDir);
 
     DynamicProfileRules::init(baseDir);
-    ImageIOManager::getInstance()->init(Glib::build_filename(userSettingsDir, "imageio"));
+    ImageIOManager::getInstance()->init(baseDir, userSettingsDir);
     
     delete lcmsMutex;
     lcmsMutex = new MyMutex;

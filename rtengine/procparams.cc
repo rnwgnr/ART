@@ -5912,6 +5912,30 @@ bool PEditedPartialProfile::applyTo(ProcParams &pp) const
 }
 
 
+void MultiPartialProfile::add(const PartialProfile *p)
+{
+    profiles_.push_back(p);
+}
+
+
+void MultiPartialProfile::clear()
+{
+    profiles_.clear();
+}
+
+
+bool MultiPartialProfile::applyTo(ProcParams &pp) const
+{
+    bool res = false;
+    for (auto p : profiles_) {
+        if (p->applyTo(pp)) {
+            res = true;
+        }
+    }
+    return res;
+}
+
+
 //-----------------------------------------------------------------------------
 // ProcParamsWithSnapshots
 //-----------------------------------------------------------------------------

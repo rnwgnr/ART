@@ -25,6 +25,7 @@
 #include "imagefloat.h"
 #include "image8.h"
 #include "image16.h"
+#include "profilestore.h"
 #include "../rtgui/pathutils.h"
 #include <iostream>
 #include <glib/gstdio.h>
@@ -61,15 +62,18 @@ ImageIOManager *ImageIOManager::getInstance()
 }
 
 
-void ImageIOManager::init(const Glib::ustring &dirname)
+void ImageIOManager::init(const Glib::ustring &base_dir, const Glib::ustring &user_dir)
 {
-    loaders_.clear();
+    do_init(Glib::build_filename(base_dir, "imageio"));
+    do_init(Glib::build_filename(user_dir, "imageio"));
+}
 
+
+void ImageIOManager::do_init(const Glib::ustring &dirname)
+{
     if (!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
         return;
     }
-
-    dir_ = dirname;
 
     try {
         Glib::Dir dir(dirname);
@@ -112,7 +116,7 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                 Glib::ustring cmd;
                 if (kf.has_key(group, "ReadCommand")) {
                     cmd = kf.get_string(group, "ReadCommand");
-                    loaders_[ext] = cmd;
+                    loaders_[ext] = Pair(dirname, cmd);
 
                     if (settings->verbose > 1) {
                         std::cout << "Found loader for extension \"" << ext << "\": " << S(cmd) << std::endl;
@@ -121,7 +125,7 @@ void ImageIOManager::init(const Glib::ustring &dirname)
 
                 if (kf.has_key(group, "WriteCommand")) {
                     cmd = kf.get_string(group, "WriteCommand");
-                    savers_[savefmt] = cmd;
+                    savers_[savefmt] = Pair(dirname, cmd);
                     Glib::ustring lbl;
                     if (kf.has_key(group, "Label")) {
                         lbl = kf.get_string(group, "Label");
@@ -153,6 +157,15 @@ void ImageIOManager::init(const Glib::ustring &dirname)
                     }
                 }
                 fmts_[savefmt] = fmt;
+
+                if (kf.has_key(group, "SaveProfile")) {
+                    auto f = kf.get_string(group, "SaveProfile");
+                    if (!Glib::path_is_absolute(f)) {
+                        f = Glib::build_filename(dirname, f);
+                    }
+                    procparams::FilePartialProfile p(nullptr, f, false);
+                    saveprofiles_[savefmt] = std::move(p);
+                }
             } catch (Glib::Exception &exc) {
                 std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what())
                           << std::endl;
@@ -199,7 +212,9 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     auto fmt = fmts_[ext];
     Glib::ustring outname = fname_to_utf8(templ) + get_ext(fmt);
     // int exit_status = -1;
-    std::vector<Glib::ustring> argv = subprocess::split_command_line(it->second);
+    auto &dir = it->second.first;
+    auto &cmd = it->second.second;
+    std::vector<Glib::ustring> argv = subprocess::split_command_line(cmd);
     argv.push_back(fileName);
     argv.push_back(outname);
     argv.push_back(std::to_string(maxw_hint));
@@ -207,10 +222,10 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
     std::string sout, serr;
     bool ok = true;
     if (settings->verbose) {
-        std::cout << "loading " << fileName << " with " << it->second << std::endl;
+        std::cout << "loading " << fileName << " with " << cmd << std::endl;
     }
     try {
-        subprocess::exec_sync(dir_, argv, true, &sout, &serr);
+        subprocess::exec_sync(dir, argv, true, &sout, &serr);
     } catch (subprocess::error &err) {
         if (settings->verbose) {
             std::cout << "  exec error: " << err.what() << std::endl;
@@ -358,15 +373,17 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
     }
         
     if (ok) {
-        std::vector<Glib::ustring> argv = subprocess::split_command_line(it->second);
+        auto &dir = it->second.first;
+        auto &cmd = it->second.second;
+        std::vector<Glib::ustring> argv = subprocess::split_command_line(cmd);
         argv.push_back(tmpname);
         argv.push_back(fileName);
         std::string sout, serr;
         if (settings->verbose) {
-            std::cout << "saving " << fileName << " with " << it->second << std::endl;
+            std::cout << "saving " << fileName << " with " << cmd << std::endl;
         }
         try {
-            subprocess::exec_sync(dir_, argv, true, &sout, &serr);
+            subprocess::exec_sync(dir, argv, true, &sout, &serr);
         } catch (subprocess::error &err) {
             if (settings->verbose) {
                 std::cout << "  exec error: " << err.what() << std::endl;
@@ -413,6 +430,16 @@ std::vector<std::pair<std::string, ImageIOManager::SaveFormatInfo>> ImageIOManag
 {
     std::vector<std::pair<std::string, ImageIOManager::SaveFormatInfo>> ret(savelbls_.begin(), savelbls_.end());
     return ret;
+}
+
+
+const procparams::PartialProfile *ImageIOManager::getSaveProfile(const std::string &ext) const
+{
+    auto it = saveprofiles_.find(ext);
+    if (it != saveprofiles_.end()) {
+        return &(it->second);
+    }
+    return nullptr;
 }
 
 } // namespace rtengine

@@ -2149,6 +2149,11 @@ void EditorPanel::do_save_image(bool fast_export)
                 if (ep) {
                     ep->applyTo(pparams);
                 }
+                ep = rtengine::ImageIOManager::getInstance()->getSaveProfile(sf.format);
+                if (ep) {
+                    ep->applyTo(pparams);
+                }
+                
                 rtengine::ProcessingJob *job = create_processing_job(ipc->getInitialImage(), pparams, fast_export);
                 static_cast<rtengine::ProcessingJobImpl *>(job)->use_batch_profile = false;
 
