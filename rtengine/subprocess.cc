@@ -178,9 +178,10 @@ void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &a
     }
 
     std::wstring pth = to_wstr(argv[0]);
-    if (search_in_path && Glib::path_get_basename(argv[0]) == argv[0]) {
+    if (search_in_path) {
         wchar_t pathbuf[MAX_PATH+1];
-        int n = SearchPathW(nullptr, pth.c_str(), nullptr, MAX_PATH+1, pathbuf, nullptr);
+        std::wstring suffix = to_wstr(".exe");
+        int n = SearchPathW(nullptr, pth.c_str(), suffix.c_str(), MAX_PATH+1, pathbuf, nullptr);
         if (n > 0) {
             pth = pathbuf;
         }
