@@ -901,7 +901,7 @@ int ImageIO::loadPPMFromMemory(const char* buffer, int width, int height, bool s
 }
 
 
-int ImageIO::savePNG  (const Glib::ustring &fname, int bps) const
+int ImageIO::savePNG(const Glib::ustring &fname, int bps, bool uncompressed) const
 {
     if (getWidth() < 1 || getHeight() < 1) {
         return IMIO_HEADERERROR;
@@ -947,7 +947,11 @@ int ImageIO::savePNG  (const Glib::ustring &fname, int bps) const
     png_set_write_fn (png, file, png_write_data, png_flush);
 
     png_set_filter(png, 0, PNG_FILTER_PAETH);
-    png_set_compression_level(png, 6);
+    if (!uncompressed) {
+        png_set_compression_level(png, 6);
+    } else {
+        png_set_compression_level(png, 0);
+    }
     png_set_compression_strategy(png, 3);
 
     int width = getWidth ();

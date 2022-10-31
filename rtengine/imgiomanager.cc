@@ -351,10 +351,10 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
         ok = (img->saveAsJPEG(tmpname) == 0);
         break;
     case FMT_PNG:
-        ok = (img->saveAsPNG(tmpname, 8) == 0);
+        ok = (img->saveAsPNG(tmpname, 8, true) == 0);
         break;
     case FMT_PNG16:
-        ok = (img->saveAsPNG(tmpname, 16) == 0);
+        ok = (img->saveAsPNG(tmpname, 16, true) == 0);
         break;
     case FMT_TIFF:
         ok = (img->saveAsTIFF(tmpname, 16, false, true) == 0);
