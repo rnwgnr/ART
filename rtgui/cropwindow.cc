@@ -516,6 +516,7 @@ void CropWindow::buttonPress(int button, int type, int bstate, int x, int y, dou
                         int spotx, spoty;
                         screenCoordToImage (x, y, spotx, spoty);
                         iarea->spotWBSelected (spotx, spoty);
+                        iarea->setToolHand();
                     } else if (iarea->getToolMode () == TMCropSelect && cropgl && !(bstate & GDK_SHIFT_MASK)) {
                         state = SCropSelecting;
                         screenCoordToImage (x, y, press_x, press_y);
