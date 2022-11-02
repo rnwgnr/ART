@@ -1350,7 +1350,7 @@ PREFERENCES_USEBUNDLEDPROFILES;Usar perfis agrupados
 PREFERENCES_WBPREVIEW_LABEL;Posição do balanço de brancos na previsão de pipeline:
 PREFERENCES_WBPREVIEW_AFTER;Depois do demosaico (mais rápido)
 PREFERENCES_WBPREVIEW_BEFORE;Antes do demosaico (mais preciso)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;ntes do demosaico a <100% zoom, depois nos outros casos
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;ntes do demosaico a >=100% zoom, depois nos outros casos
 PREFERENCES_WORKFLOW;Layout
 PREFERENCES_XMP_SIDECAR_MODE;Estilo do sidecar XMP
 PREFERENCES_XMP_SIDECAR_MODE_STD;Padrão (NOMEDOARQUIVO.xmp para NOMEDOARQUIVO.ext)

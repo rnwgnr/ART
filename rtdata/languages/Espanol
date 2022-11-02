@@ -1174,7 +1174,7 @@ PREFERENCES_USEBUNDLEDPROFILES;Usar los perfiles proporcionados
 PREFERENCES_WBPREVIEW_LABEL;Posición del balance de blancos en la cadena de previsualización:
 PREFERENCES_WBPREVIEW_AFTER;Después de la interpolación (más rápido)
 PREFERENCES_WBPREVIEW_BEFORE;Antes de la interpolación (más exacto)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Antes de la interpolación con un zoom de <100%, de lo contrario, después
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Antes de la interpolación con un zoom de >=100%, de lo contrario, después
 PREFERENCES_WORKFLOW;Disposición
 PREFERENCES_XMP_SIDECAR_MODE;XMP estilo sidecar
 PREFERENCES_XMP_SIDECAR_MODE_STD;Estándar (NOMBREARCHIVO.xmp para NOMBREARCHIVO.ext)

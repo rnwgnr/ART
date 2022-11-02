@@ -1171,7 +1171,7 @@ PREFERENCES_USEBUNDLEDPROFILES;Utilitza els perfils proporcionats
 PREFERENCES_WBPREVIEW_LABEL;Posició del balanç de blancs a la cadena de previsualització:
 PREFERENCES_WBPREVIEW_AFTER;Després de la interpolació (més ràpid)
 PREFERENCES_WBPREVIEW_BEFORE;Abans de la interpolació (més exacte)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Abans de la interpolació amb un zoom de <100%, en cas contrari, després
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Abans de la interpolació amb un zoom de >=100%, en cas contrari, després
 PREFERENCES_WORKFLOW;Disposició
 PREFERENCES_XMP_SIDECAR_MODE;XMP estil sidecar
 PREFERENCES_XMP_SIDECAR_MODE_STD;Estàndard (NOMFITXER.xmp para NOMFITXER.ext)

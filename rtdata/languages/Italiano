@@ -1164,7 +1164,7 @@ PREFERENCES_TP_VSCROLLBAR;Nascondi barra di scorr. verticale
 PREFERENCES_USEBUNDLEDPROFILES;Usa profili inclusi
 PREFERENCES_WBPREVIEW_AFTER;Dopo la demosaicizzazione (veloce)
 PREFERENCES_WBPREVIEW_BEFORE;Prima della demosaicizzazione (accurata)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Prima della demosaicizz. con zoom <100%, altrimenti dopo
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Prima della demosaicizz. con zoom >=100%, altrimenti dopo
 PREFERENCES_WBPREVIEW_LABEL;Posizione bilanciamento del bianco nella catena di elaboraz.:
 PREFERENCES_WORKFLOW;Disposizione
 PREFERENCES_XMP_SIDECAR_MODE;Stile sidecar XMP

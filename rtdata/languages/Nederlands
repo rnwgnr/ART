@@ -1167,7 +1167,7 @@ PREFERENCES_TP_LABEL;Gereedschapspaneel:
 PREFERENCES_TP_VSCROLLBAR;Verberg verticale schuifbalk
 PREFERENCES_USEBUNDLEDPROFILES;Gebruik gebundelde profielen
 PREFERENCES_WBPREVIEW_AFTER;Na demozaïeken (sneller)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Voor demozaïeken bij <100% zoom, anders na
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Voor demozaïeken bij >=100% zoom, anders na
 PREFERENCES_WBPREVIEW_BEFORE;Voor demozaïeken (accurater)
 PREFERENCES_WBPREVIEW_LABEL;Positie witbalans in voorbeeld-pijplijn: 
 PREFERENCES_WORKFLOW;Lay-out
