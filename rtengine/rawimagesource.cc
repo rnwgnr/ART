@@ -787,52 +787,41 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     double r, g, b;
     float rm, gm, bm;
 
-    if (ctemp.getTemp() < 0) {
-        // no white balance, ie revert unity multipliers
-        r = g = b = 1;
-        wbCamera2Mul(r, g, b);
-    } else {
-        ctemp.getMultipliers (r, g, b);
-    }
+    // start from reverting unity multipliers
+    r = g = b = 1;
+    wbCamera2Mul(r, g, b);
+    
     rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
     gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
     bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
 
-    if (true) {
-        double raw_expos = raw.enable_whitepoint ? raw.expos : 1.0;
+    double raw_expos = raw.enable_whitepoint ? raw.expos : 1.0;
         
-        // adjust gain so the maximum raw value of the least scaled channel just hits max
-        const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
-        float new_scale_mul[4];
+    // adjust gain so the maximum raw value of the least scaled channel just hits max
+    const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
+    float new_scale_mul[4];
 
-        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::Method::MONO)
-                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::Method::MONO);
+    bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::Method::MONO)
+        || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::Method::MONO);
 
-        for (int i = 0; i < 4; ++i) {
-            c_white[i] = (ri->get_white(i) - cblacksom[i]) / raw_expos + cblacksom[i];
-        }
+    for (int i = 0; i < 4; ++i) {
+        c_white[i] = (ri->get_white(i) - cblacksom[i]) / raw_expos + cblacksom[i];
+    }
 
-        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
-        rm = new_scale_mul[0] / scale_mul[0] * gain;
-        gm = new_scale_mul[1] / scale_mul[1] * gain;
-        bm = new_scale_mul[2] / scale_mul[2] * gain;
-        //fprintf(stderr, "camera gain: %f, current wb gain: %f, diff in stops %f\n", camInitialGain, gain, log2(camInitialGain) - log2(gain));
-    } else {
-        // old scaling: used a fixed reference gain based on camera (as-shot) white balance
+    float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+    rm = new_scale_mul[0] / scale_mul[0] * gain;
+    gm = new_scale_mul[1] / scale_mul[1] * gain;
+    bm = new_scale_mul[2] / scale_mul[2] * gain;
 
-        // how much we need to scale each channel to get our new white balance
-        rm = refwb_red / rm;
-        gm = refwb_green / gm;
-        bm = refwb_blue / bm;
-        // normalize so larger multiplier becomes 1.0
-        float minval = min(rm, gm, bm);
-        rm /= minval;
-        gm /= minval;
-        bm /= minval;
-        // multiply with reference gain, ie as-shot WB
-        rm *= camInitialGain;
-        gm *= camInitialGain;
-        bm *= camInitialGain;
+    // now apply the wb coefficients
+    if (ctemp.getTemp() >= 0) {
+        double r, g, b;
+        ctemp.getMultipliers(r, g, b);
+        wbMul2Camera(r, g, b);
+
+        rm *= r;
+        gm *= g;
+        bm *= b;
     }
 
     defGain = 0.0;
@@ -885,15 +874,11 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     hlmax[2] = clmax[2] * bm;
 
     const bool hrenabled = hrp.enabled && hrp.hrmode != procparams::ExposureParams::HR_OFF;
-    const bool clampOOG = !hrp.enabled;// || hrp.clampOOG;
+    const bool clampOOG = !hrp.enabled;
 
     const bool doClip = (chmax[0] >= clmax[0] || chmax[1] >= clmax[1] || chmax[2] >= clmax[2]) && !hrenabled && clampOOG;
 
     bool doHr = (hrenabled && hrp.hrmode == procparams::ExposureParams::HR_BLEND);
-    const float expcomp = std::pow(2, ri->getBaselineExposure());
-    rm *= expcomp;
-    gm *= expcomp;
-    bm *= expcomp;
 
     if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
                         hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
@@ -907,6 +892,11 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
             rgbSourceModified = true;
         }
     }
+
+    const float expcomp = std::pow(2, ri->getBaselineExposure());
+    rm *= expcomp;
+    gm *= expcomp;
+    bm *= expcomp;
 
     float area = skip * skip;
     rm /= area;
