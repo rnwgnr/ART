@@ -248,6 +248,7 @@ protected:
       int width, height, bps, comp, phint, offset, flip, samples, bytes;
       int tile_width, tile_length, sample_format, predictor;
       float shutter;
+      int extrasamples;
     } tiff_ifd[10];
 
     struct ph1 {
