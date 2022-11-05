@@ -813,16 +813,16 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     gm = new_scale_mul[1] / scale_mul[1] * gain;
     bm = new_scale_mul[2] / scale_mul[2] * gain;
 
-    // now apply the wb coefficients
-    if (ctemp.getTemp() >= 0) {
-        double r, g, b;
-        ctemp.getMultipliers(r, g, b);
-        wbMul2Camera(r, g, b);
+    // // now apply the wb coefficients
+    // if (ctemp.getTemp() >= 0) {
+    //     double r, g, b;
+    //     ctemp.getMultipliers(r, g, b);
+    //     wbMul2Camera(r, g, b);
 
-        rm *= r;
-        gm *= g;
-        bm *= b;
-    }
+    //     rm *= r;
+    //     gm *= g;
+    //     bm *= b;
+    // }
 
     defGain = 0.0;
     // compute image area to render in order to provide the requested part of the image
@@ -869,9 +869,9 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     int maxx = this->W, maxy = this->H, skip = pp.getSkip();
 
     // raw clip levels after white balance
-    hlmax[0] = clmax[0] * rm;
-    hlmax[1] = clmax[1] * gm;
-    hlmax[2] = clmax[2] * bm;
+    // hlmax[0] = clmax[0] * rm;
+    // hlmax[1] = clmax[1] * gm;
+    // hlmax[2] = clmax[2] * bm;
 
     const bool hrenabled = hrp.enabled && hrp.hrmode != procparams::ExposureParams::HR_OFF;
     const bool clampOOG = !hrp.enabled;
@@ -883,15 +883,29 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
                         hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
         if (!rgbSourceModified) {
-            if (settings->verbose) {
-                printf ("Applying Highlight Recovery: Color propagation...\n");
+            if (hrp.hrmode == procparams::ExposureParams::HR_COLOR) {
+                HLRecovery_inpaint(hrp.hrblur);
+            }  else {
+                float s[3] = { rm, gm, bm };
+                highlight_recovery_opposed(s, ctemp);
             }
-            bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
-            int blur = soft ? 0 : hrp.hrblur;
-            HLRecovery_inpaint(soft, blur, rm, gm, bm, red, green, blue);
             rgbSourceModified = true;
         }
     }
+
+    // now apply the wb coefficients
+    if (ctemp.getTemp() >= 0) {
+        double r, g, b;
+        ctemp.getMultipliers(r, g, b);
+        wbMul2Camera(r, g, b);
+
+        rm *= r;
+        gm *= g;
+        bm *= b;
+    }
+    hlmax[0] = clmax[0] * rm;
+    hlmax[1] = clmax[1] * gm;
+    hlmax[2] = clmax[2] * bm;
 
     const float expcomp = std::pow(2, ri->getBaselineExposure());
     rm *= expcomp;
