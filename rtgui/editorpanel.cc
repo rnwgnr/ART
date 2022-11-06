@@ -315,14 +315,14 @@ private:
             }
 
             if (profile.empty ()) {
-                profile = "sRGB IEC61966-2.1";
+                profile = "sRGB";
             }
         } else if (profileBox.get_active_row_number () > 0) {
             profile = profileBox.get_active_text ();
         }
 
 #else
-        profile = options.rtSettings.srgb;
+        profile = "sRGB";
 #endif
 
 #if !defined(__APPLE__) // monitor profile not supported on apple

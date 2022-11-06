@@ -690,7 +690,7 @@ Image8 *PreviewImage::load_raw(const Glib::ustring &fname, int w, int h)
 
     ProcParams neutral;
     neutral.icm.inputProfile = "(camera)";
-    neutral.icm.workingProfile = options.rtSettings.srgb;
+    neutral.icm.workingProfile = "sRGB";
     if (show_clip) {
         neutral.raw.bayersensor.method = RAWParams::BayerSensor::Method::MONO;
         neutral.raw.xtranssensor.method = RAWParams::XTransSensor::Method::MONO;

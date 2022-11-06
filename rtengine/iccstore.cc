@@ -736,7 +736,7 @@ private:
 #if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
         monitor = getProfile_unlocked(defaultMonitorProfile);
 #else
-        monitor = getProfile_unlocked(settings->srgb);
+        monitor = getsRGBProfile();
 #endif
 
         if (monitor) {
