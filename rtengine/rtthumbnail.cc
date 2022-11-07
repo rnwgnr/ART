@@ -236,32 +236,10 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
     // we want the same image type than the source file
     tpp->thumbImg = resizeToSameType (w, h, TI_Bilinear, img);
 
-    // histogram computation
-    tpp->aeHistCompression = 3;
-    tpp->aeHistogram (65536 >> tpp->aeHistCompression);
-
     double avg_r = 0;
     double avg_g = 0;
     double avg_b = 0;
     int n = 0;
-
-    if (img->getType() == rtengine::sImage8) {
-        Image8 *image = static_cast<Image8*> (img);
-        image->computeHistogramAutoWB (avg_r, avg_g, avg_b, n, tpp->aeHistogram, tpp->aeHistCompression);
-    } else if (img->getType() == sImage16) {
-        Image16 *image = static_cast<Image16*> (img);
-        image->computeHistogramAutoWB (avg_r, avg_g, avg_b, n, tpp->aeHistogram, tpp->aeHistCompression);
-    } else if (img->getType() == sImagefloat) {
-        Imagefloat *image = static_cast<Imagefloat*> (img);
-        image->computeHistogramAutoWB (avg_r, avg_g, avg_b, n, tpp->aeHistogram, tpp->aeHistCompression);
-    } else {
-        printf ("loadFromImage: Unsupported image type \"%s\"!\n", img->getType());
-    }
-
-    // ProcParams paramsForAutoExp; // Dummy for constructor
-    // ImProcFunctions ipf (&paramsForAutoExp, false);
-    // ipf.getAutoExp (tpp->aeHistogram, tpp->aeHistCompression, 0.02, tpp->aeExposureCompensation, tpp->aeLightness, tpp->aeContrast, tpp->aeBlack, tpp->aeHighlightCompression, tpp->aeHighlightCompressionThreshold);
-    // tpp->aeValid = true;
 
     if (n > 0) {
         ColorTemp cTemp;
@@ -658,12 +636,6 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
         tpp->scale = (double) height / (rotate_90 ? w : h);
     }
     if(!forHistogramMatching) { // we don't need this for histogram matching
-
-        // generate histogram for auto exposure, also calculate autoWB
-        tpp->aeHistCompression = 3;
-        tpp->aeHistogram(65536 >> tpp->aeHistCompression);
-        tpp->aeHistogram.clear();
-
         double pixSum[3] = {0.0};
         unsigned int n[3] = {0};
         const double clipval = 64000.0 / tpp->defGain;
@@ -838,14 +810,6 @@ Thumbnail::Thumbnail () :
     autoWBTemp (2700),
     autoWBGreen (1.0),
     wbEqual (-1.0),
-    aeHistCompression (3),
-    aeValid(false),
-    aeExposureCompensation(0.0),
-    aeLightness(0),
-    aeContrast(0),
-    aeBlack(0),
-    aeHighlightCompression(0),
-    aeHighlightCompressionThreshold(0),
     embProfileLength (0),
     embProfileData (nullptr),
     embProfile (nullptr),
@@ -869,7 +833,6 @@ Thumbnail::~Thumbnail ()
 {
 
     delete thumbImg;
-    //delete [] aeHistogram;
     delete [] embProfileData;
 
     if (embProfile) {
@@ -1642,42 +1605,6 @@ bool Thumbnail::readData  (const Glib::ustring& fname)
                 blueAWBMul          = keyFile.get_double ("LiveThumbData", "BlueAWBMul");
             }
 
-            if (keyFile.has_key ("LiveThumbData", "AEHistCompression")) {
-                aeHistCompression   = keyFile.get_integer ("LiveThumbData", "AEHistCompression");
-            }
-
-            aeValid = true;
-            if (keyFile.has_key ("LiveThumbData", "AEExposureCompensation")) {
-                aeExposureCompensation = keyFile.get_double ("LiveThumbData", "AEExposureCompensation");
-            } else {
-                aeValid = false;
-            }
-            if (keyFile.has_key ("LiveThumbData", "AELightness")) {
-                aeLightness   = keyFile.get_integer ("LiveThumbData", "AELightness");
-            } else {
-                aeValid = false;
-            }
-            if (keyFile.has_key ("LiveThumbData", "AEContrast")) {
-                aeContrast   = keyFile.get_integer ("LiveThumbData", "AEContrast");
-            } else {
-                aeValid = false;
-            }
-            if (keyFile.has_key ("LiveThumbData", "AEBlack")) {
-                aeBlack   = keyFile.get_integer ("LiveThumbData", "AEBlack");
-            } else {
-                aeValid = false;
-            }
-            if (keyFile.has_key ("LiveThumbData", "AEHighlightCompression")) {
-                aeHighlightCompression   = keyFile.get_integer ("LiveThumbData", "AEHighlightCompression");
-            } else {
-                aeValid = false;
-            }
-            if (keyFile.has_key ("LiveThumbData", "AEHighlightCompressionThreshold")) {
-                aeHighlightCompressionThreshold   = keyFile.get_integer ("LiveThumbData", "AEHighlightCompressionThreshold");
-            } else {
-                aeValid = false;
-            }
-
             if (keyFile.has_key ("LiveThumbData", "RedMultiplier")) {
                 redMultiplier       = keyFile.get_double ("LiveThumbData", "RedMultiplier");
             }
@@ -1755,12 +1682,6 @@ bool Thumbnail::writeData  (const Glib::ustring& fname)
         keyFile.set_double  ("LiveThumbData", "RedAWBMul", redAWBMul);
         keyFile.set_double  ("LiveThumbData", "GreenAWBMul", greenAWBMul);
         keyFile.set_double  ("LiveThumbData", "BlueAWBMul", blueAWBMul);
-        keyFile.set_double  ("LiveThumbData", "AEExposureCompensation", aeExposureCompensation);
-        keyFile.set_integer ("LiveThumbData", "AELightness", aeLightness);
-        keyFile.set_integer ("LiveThumbData", "AEContrast", aeContrast);
-        keyFile.set_integer ("LiveThumbData", "AEBlack", aeBlack);
-        keyFile.set_integer ("LiveThumbData", "AEHighlightCompression", aeHighlightCompression);
-        keyFile.set_integer ("LiveThumbData", "AEHighlightCompressionThreshold", aeHighlightCompressionThreshold);
         keyFile.set_double  ("LiveThumbData", "RedMultiplier", redMultiplier);
         keyFile.set_double  ("LiveThumbData", "GreenMultiplier", greenMultiplier);
         keyFile.set_double  ("LiveThumbData", "BlueMultiplier", blueMultiplier);

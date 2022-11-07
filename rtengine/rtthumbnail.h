@@ -45,15 +45,6 @@ class Thumbnail {
     double camwbBlue;
     double redAWBMul, greenAWBMul, blueAWBMul;  // multipliers for auto WB
     double autoWBTemp, autoWBGreen, wbEqual;    // autoWBTemp and autoWBGreen are updated each time autoWB is requested and if wbEqual has been modified
-    LUTu aeHistogram;
-    int  aeHistCompression;
-    bool aeValid;
-    double aeExposureCompensation;
-    int aeLightness;
-    int aeContrast;
-    int aeBlack;
-    int aeHighlightCompression;
-    int aeHighlightCompressionThreshold;
     int embProfileLength;
     unsigned char* embProfileData;
     cmsHPROFILE embProfile;
