@@ -148,9 +148,9 @@ option(WITH_SAN "Build with run-time sanitizer" OFF)
 option(WITH_PROF "Build with profiling instrumentation" OFF)
 option(WITH_SYSTEM_KLT "Build using system KLT library." OFF)
 option(OPTION_OMP "Build with OpenMP support" ON)
-option(ENABLE_MIMALLOC "Use the mimalloc library if available" OFF)
-option(ENABLE_LIBRAW "Use libraw for decoding" OFF)
-option(ENABLE_OCIO "Use OpenColorIOv2 for LUT application" OFF)
+option(ENABLE_MIMALLOC "Use the mimalloc library if available" ON)
+option(ENABLE_LIBRAW "Use libraw for decoding" ON)
+option(ENABLE_OCIO "Use OpenColorIOv2 for LUT application" ON)
 
 # Set installation directories:
 if(WIN32 OR APPLE)

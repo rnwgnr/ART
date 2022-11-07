@@ -19,7 +19,7 @@
 #include "image8.h"
 
 #ifdef ART_USE_LIBRAW
-# include <libraw/libraw.h>
+# include <libraw.h>
 #endif // ART_USE_LIBRAW
 
 
