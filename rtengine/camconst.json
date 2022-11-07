@@ -1463,6 +1463,11 @@ Camera constants:
         "raw_crop": [ 0, 5, 6032, 4026 ], // full raw 6160,4032, Usable 6032,4026 - for uncompressed and lossless compressed files (but reduces height by 6 pixels)
         "ranges": { "white": 16100 }
     },
+
+    { // Quality C
+        "make_model" : "Fujifilm X-H2",
+        "raw_crop" : [ 60, 6, 7692, 5184 ]
+    },
     
     { // Quality C
         "make_model": "FUJIFILM X-E4",
