@@ -394,6 +394,11 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
 
     int width = ri->get_width();
     int height = ri->get_height();
+    int iwidth = ri->get_iwidth();
+    int iheight = ri->get_iheight();
+    int left_margin = ri->get_leftmargin();
+    int top_margin = ri->get_topmargin();
+    
     rtengine::Thumbnail* tpp = new rtengine::Thumbnail;
 
     tpp->isRaw = true;
@@ -476,19 +481,19 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
     if (ri->getSensorType() == ST_BAYER) {
         // demosaicing! (sort of)
         for (int row = 1, y = 0; row < height - 1 && y < tmph; row += vskip, y++) {
-            rofs = row * width;
+            rofs = (row + top_margin) * iwidth;
 
             for (int col = firstgreen, x = 0; col < width - 1 && x < tmpw; col += hskip, x++) {
-                int ofs = rofs + col;
+                int ofs = rofs + col + left_margin;
                 int g = image[ofs][1];
                 int r, b;
 
                 if (FISRED (filter, row, col + 1)) {
                     r = (image[ofs + 1    ][0] + image[ofs - 1    ][0]) >> 1;
-                    b = (image[ofs + width][2] + image[ofs - width][2]) >> 1;
+                    b = (image[ofs + iwidth][2] + image[ofs - iwidth][2]) >> 1;
                 } else {
                     b = (image[ofs + 1    ][2] + image[ofs - 1    ][2]) >> 1;
-                    r = (image[ofs + width][0] + image[ofs - width][0]) >> 1;
+                    r = (image[ofs + iwidth][0] + image[ofs - iwidth][0]) >> 1;
                 }
 
                 tmpImg->r (y, x) = r;
@@ -498,28 +503,28 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
         }
     } else if (ri->get_colors() == 1) {
         for (int row = 1, y = 0; row < height - 1 && y < tmph; row += vskip, y++) {
-            rofs = row * width;
+            rofs = (row + top_margin) * iwidth;
 
             for (int col = firstgreen, x = 0; col < width - 1 && x < tmpw; col
                     += hskip, x++) {
-                int ofs = rofs + col;
+                int ofs = rofs + col + left_margin;
                 tmpImg->r (y, x) = tmpImg->g (y, x) = tmpImg->b (y, x) = image[ofs][0];
             }
         }
     } else {
         if (ri->getSensorType() == ST_FUJI_XTRANS) {
             for ( int row = 1, y = 0; row < height - 1 && y < tmph; row += vskip, y++) {
-                rofs = row * width;
+                rofs = (row + top_margin) * iwidth;
 
                 for ( int col = 1, x = 0; col < width - 1 && x < tmpw; col += hskip, x++ ) {
-                    int ofs = rofs + col;
+                    int ofs = rofs + col + left_margin;
                     float sum[3] = {};
                     int c;
 
                     for (int v = -1; v <= 1; v++) {
                         for (int h = -1; h <= 1; h++) {
                             c = ri->XTRANSFC (row + v, col + h);
-                            sum[c] += image[ofs + v * width + h][c];
+                            sum[c] += image[ofs + v * iwidth + h][c];
                         }
                     }
 
@@ -547,11 +552,11 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
                 }
             }
         } else {
-            int iwidth = ri->get_iwidth();
-            int iheight = ri->get_iheight();
-            int left_margin = ri->get_leftmargin();
+            // int iwidth = ri->get_iwidth();
+            // int iheight = ri->get_iheight();
+            // int left_margin = ri->get_leftmargin();
             firstgreen += left_margin;
-            int top_margin = ri->get_topmargin();
+            // int top_margin = ri->get_topmargin();
             int wmax = tmpw;
             int hmax = tmph;
 

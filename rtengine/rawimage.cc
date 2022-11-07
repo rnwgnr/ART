@@ -711,7 +711,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         shrink = 0;
 
         if (settings->verbose) {
-            printf ("Loading %s %s image from %s...\n", make, model, filename.c_str());
+            printf("Loading %s %s image from %s using %s...\n",
+                   make, model, filename.c_str(),
+                   use_internal_decoder_ ? "the internal decoder" : "libraw");
         }
 
         iheight = height;
@@ -807,51 +809,96 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         bool raw_crop_cc = false;
         int orig_raw_width = width;
         int orig_raw_height = height;
+        int raw_top_margin = 0;
+        int raw_left_margin = 0;
+        bool adjust_margins = false;
 
         if (raw_image) {
             unsigned raw_filters = filters;
             orig_raw_width = raw_width;
             orig_raw_height = raw_height;
             
-            if (cc && cc->has_rawCrop(raw_width, raw_height) && use_internal_decoder_) { 
+            if (cc && cc->has_rawCrop(raw_width, raw_height)) { 
                 raw_crop_cc = true;
                 int lm, tm, w, h;
                 cc->get_rawCrop(raw_width, raw_height, lm, tm, w, h);
 
-                // protect against DNG files that are already cropped
-                if (int(raw_width) <= w+lm) {
-                    lm = max(int(raw_width) - w, 0);
-                }
-                if (int(raw_height) <= h+tm) {
-                    tm = max(int(raw_height) - h, 0);
-                }
-                
-                if(isXtrans()) {
-                    shiftXtransMatrix(6 - ((top_margin - tm)%6), 6 - ((left_margin - lm)%6));
+                if ((w < 0 || h < 0) && !use_internal_decoder_) {
+                    raw_crop_cc = false;
                 } else {
-                    if(((int)top_margin - tm) & 1) { // we have an odd border difference
-                        filters = (filters << 4) | (filters >> 28);    // left rotate filters by 4 bits
+                    // protect against DNG files that are already cropped
+                    if (int(raw_width) <= w+lm) {
+                        lm = max(int(raw_width) - w, 0);
                     }
-                }
-                left_margin = lm;
-                top_margin = tm;
+                    if (int(raw_height) <= h+tm) {
+                        tm = max(int(raw_height) - h, 0);
+                    }
 
-                if (w < 0) {
-                    iwidth += w;
-                    iwidth -= left_margin;
-                    width += w;
-                    width -= left_margin;
-                } else if (w > 0) {
-                    iwidth = width = min((int)width, w);
-                }
+                    if (use_internal_decoder_) {
+                        if(isXtrans()) {
+                            shiftXtransMatrix(6 - ((top_margin - tm)%6), 6 - ((left_margin - lm)%6));
+                        } else {
+                            if(((int)top_margin - tm) & 1) { // we have an odd border difference
+                                filters = (filters << 4) | (filters >> 28);    // left rotate filters by 4 bits
+                            }
+                        }
+                        left_margin = lm;
+                        top_margin = tm;
+                    } else {
+                        if (lm < left_margin) {
+                            lm = left_margin;
+                        }
+                        if (tm < top_margin) {
+                            tm = top_margin;
+                        }
+                        // make sure we do not rotate filters
+                        if (isXtrans()) {
+                            if ((tm - top_margin) % 6) {
+                                tm = top_margin;
+                            }
+                            if ((lm - left_margin) % 6) {
+                                lm = left_margin;
+                            }
+                        } else {
+                            if ((tm - top_margin) & 1) {
+                                tm = top_margin;
+                            }
+                            if ((lm - left_margin) & 1) {
+                                lm = left_margin;
+                            }
+                        }
+                        raw_left_margin = lm - left_margin;
+                        raw_top_margin = tm - top_margin;
+                    }
 
-                if (h < 0) {
-                    iheight += h;
-                    iheight -= top_margin;
-                    height += h;
-                    height -= top_margin;
-                } else if (h > 0) {
-                    iheight = height = min((int)height, h);
+                    if (w < 0) {
+                        width += w;
+                        width -= left_margin;
+                        iwidth += w;
+                        iwidth -= left_margin;
+                    } else if (w > 0) {
+                        width = min((int)width, w);
+                        if (use_internal_decoder_) {
+                            iwidth = width;
+                        } else if (width > iwidth) {
+                            width = iwidth;
+                        }
+                    }
+
+                    if (h < 0) {
+                        height += h;
+                        height -= top_margin;
+                        iheight += h;
+                        iheight -= top_margin;
+                    } else if (h > 0) {
+                        height = min((int)height, h);
+                        if (use_internal_decoder_) {
+                            iheight = height;
+                        } else if (height > iheight) {
+                            height = iheight;
+                        }
+                    }
+                    std::cout << "DIMS: " << w << "x" << h << " | " << width << "x" << height << std::endl;
                 }
             }
 
@@ -896,6 +943,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 free(raw_image);
             }
             raw_image = nullptr;
+            adjust_margins = true;
         } else {
             if (get_maker() == "Sigma" && cc && cc->has_rawCrop(width, height) && use_internal_decoder_) { // foveon images
                 raw_crop_cc = true;
@@ -907,15 +955,21 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 if (w < 0) {
                     width += w;
                     width -= left_margin;
+                    iwidth += w;
+                    iwidth -= left_margin;
                 } else if (w > 0) {
                     width = min((int)width, w);
+                    iwidth = width;
                 }
 
                 if (h < 0) {
                     height += h;
                     height -= top_margin;
+                    iheight += h;
+                    iheight -= top_margin;
                 } else if (h > 0) {
                     height = min((int)height, h);
+                    iheight = height;
                 }
             }
         }
@@ -996,19 +1050,20 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         }
 
         if (settings->verbose) {
+            const char *decoder = use_internal_decoder_ ? "dcraw" : "libraw";
             if (cc) {
                 printf("constants exists for \"%s %s\" in camconst.json\n", make, model);
             } else {
-                printf("no constants in camconst.json exists for \"%s %s\" (relying only on dcraw defaults)\n", make, model);
+                printf("no constants in camconst.json exists for \"%s %s\" (relying only on %s defaults)\n", make, model, decoder);
             }
 
             printf("raw dimensions: %d x %d\n", orig_raw_width, orig_raw_height);
-            printf("black levels: R:%d G1:%d B:%d G2:%d (%s)\n", get_cblack(0), get_cblack(1), get_cblack(2), get_cblack(3),
-                   black_from_cc ? "provided by camconst.json" : "provided by dcraw");
-            printf("white levels: R:%d G1:%d B:%d G2:%d (%s)\n", get_white(0), get_white(1), get_white(2), get_white(3),
-                   white_from_cc ? "provided by camconst.json" : "provided by dcraw");
-            printf("raw crop: %d %d %d %d (provided by %s)\n", left_margin, top_margin, iwidth, iheight, raw_crop_cc ? "camconst.json" : "dcraw");
-            printf("color matrix provided by %s\n", (cc && cc->has_dcrawMatrix()) ? "camconst.json" : "dcraw");
+            printf("black levels: R:%d G1:%d B:%d G2:%d (provided by %s)\n", get_cblack(0), get_cblack(1), get_cblack(2), get_cblack(3),
+                   black_from_cc ? "camconst.json" : decoder);
+            printf("white levels: R:%d G1:%d B:%d G2:%d (provided by %s)\n", get_white(0), get_white(1), get_white(2), get_white(3),
+                   white_from_cc ? "camconst.json" : decoder);
+            printf("raw crop: %d %d %d %d (provided by %s)\n", left_margin, top_margin, width, height, raw_crop_cc ? "camconst.json" : decoder);
+            printf("color matrix provided by %s\n", (cc && cc->has_dcrawMatrix()) ? "camconst.json" : decoder);
             if (cc && cc->has_dcrawMatrix()) {
                 const short *mx = cc->get_dcrawMatrix();
                 printf("[");
@@ -1022,6 +1077,11 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 }
                 printf("]\n");
             }
+        }
+
+        if (adjust_margins) {
+            top_margin = raw_top_margin;
+            left_margin = raw_left_margin;
         }
     }
 
@@ -1095,7 +1155,7 @@ float** RawImage::compress_image(unsigned int frameNum, bool freeImage)
 
         for (int row = 0; row < height; row++)
             for (int col = 0; col < width; col++) {
-                this->data[row][col] = image[row * width + col][FC(row, col)];
+                this->data[row][col] = image[(row + top_margin) * iwidth + col + left_margin][FC(row, col)];
             }
     } else if (isXtrans()) {
 #ifdef _OPENMP
@@ -1104,7 +1164,7 @@ float** RawImage::compress_image(unsigned int frameNum, bool freeImage)
 
         for (int row = 0; row < height; row++)
             for (int col = 0; col < width; col++) {
-                this->data[row][col] = image[row * width + col][XTRANSFC(row, col)];
+                this->data[row][col] = image[(row + top_margin) * iwidth + col + left_margin][XTRANSFC(row, col)];
             }
     } else if (colors == 1) {
 #ifdef _OPENMP
@@ -1113,7 +1173,7 @@ float** RawImage::compress_image(unsigned int frameNum, bool freeImage)
 
         for (int row = 0; row < height; row++)
             for (int col = 0; col < width; col++) {
-                this->data[row][col] = image[row * width + col][0];
+                this->data[row][col] = image[row * iwidth + col][0];
             }
     } else {
         if((get_maker() == "Sigma" || get_maker() == "Pentax" || get_maker() == "Sony") && dng_version) { // Hack to prevent sigma dng files and dng files from PixelShift2DNG from crashing
