@@ -103,6 +103,9 @@ DirBrowser::DirBrowser () : dirTreeModel(),
     dirtree->set_rules_hint(false);
     dirtree->set_reorderable(false);
     dirtree->set_enable_search(false);
+
+    dirtree->set_activate_on_single_click(options.dir_browser_single_click);
+    
     scrolledwindow4->set_can_focus(true);
     scrolledwindow4->set_shadow_type(Gtk::SHADOW_NONE);
     scrolledwindow4->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);

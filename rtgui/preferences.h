@@ -201,6 +201,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::Entry *exiftoolPath;
     Gtk::ComboBoxText *wbpreview;
     Gtk::CheckButton *remember_metadata_filters;
+    Gtk::CheckButton *dir_browser_single_click;
 
     Gtk::CheckButton *thumbnailInspectorHover;
 

@@ -195,6 +195,7 @@ public:
     int adjusterMaxDelay;
     int startupDir;
     Gtk::SortType dirBrowserSortType;
+    bool dir_browser_single_click;
     Glib::ustring startupPath;
     Glib::ustring profilePath; // can be an absolute or relative path; depending on this value, bundled profiles may not be found
     bool useBundledProfiles;   // only used if multiUser == true

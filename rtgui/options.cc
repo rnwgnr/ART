@@ -336,6 +336,7 @@ void Options::setDefaults()
     dirBrowserWidth = 260;
     dirBrowserHeight = 350;
     dirBrowserSortType = Gtk::SORT_ASCENDING;
+    dir_browser_single_click = false;
     preferencesWidth = 800;
     preferencesHeight = 600;
     toolPanelWidth = 400;
@@ -1290,6 +1291,10 @@ void Options::readFromFile(Glib::ustring fname)
                     dirBrowserSortType = static_cast<Gtk::SortType>(keyFile.get_integer("GUI", "SortType"));
                 }
 
+                if (keyFile.has_key("GUI", "DirBrowserSingleClick")) {
+                    dir_browser_single_click = keyFile.get_boolean("GUI", "DirBrowserSingleClick");
+                }
+
                 if (keyFile.has_key("GUI", "PreferencesWidth")) {
                     preferencesWidth = keyFile.get_integer("GUI", "PreferencesWidth");
                 }
@@ -2017,6 +2022,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("GUI", "DirBrowserWidth", dirBrowserWidth);
         keyFile.set_integer("GUI", "DirBrowserHeight", dirBrowserHeight);
         keyFile.set_integer("GUI", "SortType", dirBrowserSortType);
+        keyFile.set_integer("GUI", "DirBrowserSingleClick", dir_browser_single_click);
         keyFile.set_integer("GUI", "PreferencesWidth", preferencesWidth);
         keyFile.set_integer("GUI", "PreferencesHeight", preferencesHeight);
         keyFile.set_integer("GUI", "SaveAsDialogWidth", saveAsDialogWidth);
