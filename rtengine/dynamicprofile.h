@@ -45,6 +45,15 @@ public:
         bool operator()(const Glib::ustring &val) const;
     };
 
+    struct CustomMetadata {
+        std::vector<std::pair<std::string, std::string>> value;
+        bool enabled;
+
+        explicit CustomMetadata(bool e=false): value(), enabled(e) {}
+
+        bool operator()(const rtengine::FramesMetaData *m) const;
+    };
+
     DynamicProfileRule();
     bool matches(const rtengine::FramesMetaData *im) const;
     bool operator<(const DynamicProfileRule &other) const;
@@ -60,6 +69,7 @@ public:
     Optional imagetype;
     Optional filetype;
     Optional software;
+    CustomMetadata customdata;
     Glib::ustring profilepath;
 };
 

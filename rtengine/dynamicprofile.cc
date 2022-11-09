@@ -17,7 +17,8 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../rtengine/dynamicprofile.h"
+#include "dynamicprofile.h"
+#include "metadata.h"
 
 #include <stdlib.h>
 #include <glibmm/regex.h>
@@ -54,13 +55,51 @@ bool DynamicProfileRule::Optional::operator()(const Glib::ustring &val) const
 }
 
 
+bool DynamicProfileRule::CustomMetadata::operator()(const FramesMetaData *m) const
+{
+    if (!enabled || value.empty()) {
+        return true;
+    }
+
+    try {
+        rtengine::Exiv2Metadata meta(m->getFileName());
+        meta.load();
+        auto &exif = meta.exifData();
+        for (auto &p : value) {
+            auto pos = exif.findKey(Exiv2::ExifKey(p.first));
+            if (pos == exif.end()) {
+                return false;
+            }
+            Glib::ustring found = pos->print(&exif);
+            if (!found.validate()) {
+                return false;
+            }
+            auto &val = p.second;
+            if (val.find("re:") == 0) {
+                if (!Glib::Regex::match_simple(val.substr(3), found, Glib::REGEX_CASELESS)) {
+                    return false;
+                }
+            } else {
+                if (Glib::ustring(val).casefold() != found.casefold()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    } catch (std::exception &exc) {
+        return false;
+    }
+}
+
+
 DynamicProfileRule::DynamicProfileRule():
     serial_number(0),
     iso(0, ISO_MAX),
     fnumber(0, FNUMBER_MAX),
     focallen(0, FOCALLEN_MAX),
     shutterspeed(0, SHUTTERSPEED_MAX),
-    expcomp(EXPCOMP_MIN, EXPCOMP_MAX)
+    expcomp(EXPCOMP_MIN, EXPCOMP_MAX),
+    customdata()
 {
 }
 
@@ -82,7 +121,8 @@ bool DynamicProfileRule::matches(const rtengine::FramesMetaData *im) const
             && lens(im->getLens())
             && imagetype(im->getImageType())
             && filetype(getFileExtension(im->getFileName()))
-            && software(im->getSoftware()));
+            && software(im->getSoftware())
+            && customdata(im));
 }
 
 namespace {
@@ -138,6 +178,31 @@ void get_optional(DynamicProfileRule::Optional &dest,
 }
 
 
+void get_customdata(DynamicProfileRule::CustomMetadata &dest,
+                    const Glib::KeyFile &kf, const Glib::ustring &group,
+                    const Glib::ustring &key)
+{
+    try {
+        bool e = kf.get_boolean(group, key + "_enabled");
+
+        if (e) {
+            Glib::ArrayHandle<Glib::ustring> ar = kf.get_string_list(group, key + "_value");
+            dest.enabled = e;
+            dest.value.clear();
+            for (const auto &s : ar) {
+                auto p = s.find("=");
+                if (p != Glib::ustring::npos) {
+                    dest.value.emplace_back(s.substr(0, p), s.substr(p+1));
+                } else {
+                    dest.value.emplace_back(s, "");
+                }
+            }
+        }
+    } catch (Glib::KeyFileError &) {
+    }
+}
+
+
 void set_int_range(Glib::KeyFile &kf, const Glib::ustring &group,
                    const Glib::ustring &key,
                    const DynamicProfileRule::Range<int> &val)
@@ -162,6 +227,20 @@ void set_optional(Glib::KeyFile &kf, const Glib::ustring &group,
 {
     kf.set_boolean(group, key + "_enabled", val.enabled);
     kf.set_string(group, key + "_value", val.value);
+}
+
+
+void set_customdata(Glib::KeyFile &kf, const Glib::ustring &group,
+                    const Glib::ustring &key,
+                    const DynamicProfileRule::CustomMetadata &val)
+{
+    kf.set_boolean(group, key + "_enabled", val.enabled);
+    std::vector<std::string> tmp;
+    for (auto &p : val.value) {
+        tmp.push_back(p.first + "=" + p.second);
+    }
+    Glib::ArrayHandle<Glib::ustring> arr = tmp;
+    kf.set_string_list(group, key + "_value", arr);
 }
 
 } // namespace
@@ -221,6 +300,7 @@ bool DynamicProfileRules::loadRules()
         get_optional(rule.imagetype, kf, group, "imagetype");
         get_optional(rule.filetype, kf, group, "filetype");
         get_optional(rule.software, kf, group, "software");
+        get_customdata(rule.customdata, kf, group, "customdata");
 
         try {
             rule.profilepath = kf.get_string(group, "profilepath");
@@ -257,6 +337,7 @@ bool DynamicProfileRules::storeRules()
         set_optional(kf, group, "imagetype", rule.imagetype);
         set_optional(kf, group, "filetype", rule.filetype);
         set_optional(kf, group, "software", rule.software);
+        set_customdata(kf, group, "customdata", rule.customdata);
         kf.set_string(group, "profilepath", rule.profilepath);
     }
 
