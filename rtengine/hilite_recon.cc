@@ -1412,8 +1412,8 @@ void RawImageSource::highlight_recovery_opposed(float scale_mul[3], const ColorT
     if (!anyclipped) {
         if (plistener) {
             plistener->setProgress(1.0);
-            return;
         }
+        return;
     }
 
     x1 = std::max(x1-1, 0);
