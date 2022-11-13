@@ -264,7 +264,8 @@ void clear_metadata_key(Data &data, const Key &key)
 Exiv2Metadata::Exiv2Metadata():
     src_(""),
     merge_xmp_(false),
-    image_(nullptr)
+    image_(nullptr),
+    rating_(0)
 {
 }
 
@@ -399,6 +400,14 @@ void Exiv2Metadata::saveToImage(ProgressListener *pl, const Glib::ustring &path,
     }
 
     dst->exifData()["Exif.Image.Software"] = RTNAME " " RTVERSION;
+    if (rating_ != 0) {
+        if (!preserve_all_tags || dst->exifData().findKey(Exiv2::ExifKey("Exif.Image.Rating")) == dst->exifData().end()) {
+            dst->exifData()["Exif.Image.Rating"] = static_cast<unsigned short>(LIM(rating_, 0, 5));
+        }
+        if (!preserve_all_tags || dst->xmpData().findKey(Exiv2::XmpKey("Xmp.xmp.Rating")) == dst->xmpData().end()) {
+            dst->xmpData()["Xmp.xmp.Rating"] = std::to_string(rating_);
+        }
+    }
     import_exif_pairs(dst->exifData());
     import_iptc_pairs(dst->iptcData());
     bool xmp_tried = false;
@@ -846,6 +855,20 @@ Exiv2::ExifData Exiv2Metadata::getOutputExifData() const
         }
     }
     return exif;
+}
+
+
+void Exiv2Metadata::setOutputRating(const rtengine::procparams::ProcParams &pparams, bool from_xmp_sidecar)
+{
+    if (from_xmp_sidecar) {
+        auto xmp = getXmpSidecar(src_);
+        auto it = xmp.findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
+        if (it != xmp.end()) {
+            rating_ = it->toLong();
+        }
+    } else {
+        rating_ = pparams.inTrash ? -1 : pparams.rank;
+    }
 }
 
 

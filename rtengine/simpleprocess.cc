@@ -429,6 +429,7 @@ private:
             if (!(params.metadata.exifKeys.size() == 1 && params.metadata.exifKeys[0] == "*")) {
                 info.setExifKeys(&(params.metadata.exifKeys));
             }
+            info.setOutputRating(params, options.thumbnail_rating_mode != Options::ThumbnailRatingMode::PROCPARAMS);
             readyImg->setMetadata(info);
             break;
         default: // case MetaDataParams::STRIP

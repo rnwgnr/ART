@@ -57,6 +57,8 @@ public:
     void saveToImage(ProgressListener *pl, const Glib::ustring &path, bool preserve_all_tags) const;
     void saveToXmp(const Glib::ustring &path) const;
 
+    void setOutputRating(const rtengine::procparams::ProcParams &pparams, bool from_xmp_sidecar);
+
     void setExifKeys(const std::vector<std::string> *keys);
 
     void getDimensions(int &w, int &h) const;
@@ -87,6 +89,7 @@ private:
     Exiv2::ExifData exif_data_;
     Exiv2::IptcData iptc_data_;
     Exiv2::XmpData xmp_data_;
+    int rating_;
 
     std::shared_ptr<std::unordered_set<std::string>> exif_keys_;
 
