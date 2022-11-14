@@ -2668,8 +2668,7 @@ bool DehazeParams::operator !=(const DehazeParams& other) const
 GrainParams::GrainParams():
     enabled(false),
     iso(400),
-    strength(25),
-    scale(100)
+    strength(25)
 {
 }
 
@@ -2677,8 +2676,7 @@ bool GrainParams::operator==(const GrainParams &other) const
 {
     return enabled == other.enabled
         && iso == other.iso
-        && strength == other.strength
-        && scale == other.scale;
+        && strength == other.strength;
 }
 
 bool GrainParams::operator!=(const GrainParams &other) const
@@ -3864,7 +3862,6 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Grain", "Enabled", grain.enabled, keyFile);
             saveToKeyfile("Grain", "ISO", grain.iso, keyFile);
             saveToKeyfile("Grain", "Strength", grain.strength, keyFile);
-            saveToKeyfile("Grain", "Scale", grain.scale, keyFile);
         }
 
 
@@ -5086,7 +5083,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "Grain", "Enabled", grain.enabled);
             assignFromKeyfile(keyFile, "Grain", "ISO", grain.iso);
             assignFromKeyfile(keyFile, "Grain", "Strength", grain.strength);
-            assignFromKeyfile(keyFile, "Grain", "Scale", grain.scale);
+            int gscale = 100;
+            if (assignFromKeyfile(keyFile, "Grain", "Scale", gscale)) {
+                grain.strength = int(float(grain.strength)/100.f * gscale);
+            }
         }
 
         const char *smoothing_group = ppVersion < 1016 ? "GuidedSmoothing" : "Smoothing";

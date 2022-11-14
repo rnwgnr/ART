@@ -1219,7 +1219,6 @@ struct GrainParams {
     bool enabled;
     int iso;
     int strength;
-    int scale;
 
     GrainParams();
 
