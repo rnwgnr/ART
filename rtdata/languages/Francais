@@ -1,7 +1,6 @@
 #01 2019-10-15 Initial translation by Serge Moreau
 #02 Using translated common strings from translation of RT by Hombre 2008-03-01
 #03 2019-12-17 Sébastien Guyader
-
 ABOUT_TAB_BUILD;Version
 ABOUT_TAB_CREDITS;Crédits
 ABOUT_TAB_LICENSE;Licence
@@ -49,6 +48,9 @@ DYNPROFILEEDITOR_NEW;Nouveau
 DYNPROFILEEDITOR_NEW_RULE;Nouvelle Règle de Profil Dynamique
 DYNPROFILEEDITOR_PROFILE;Profil de Traitement
 EDITWINDOW_TITLE;Édition d'image
+DYNPROFILEEDITOR_CUSTOMDATA;Étiquettes personnalisées
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Étiquette(s)
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;Liste des paires <i>key=value</i> d'étiquettes de métadonnées supplémentaires à faire correspondre, une par ligne, où <b>key</b> est le nom d'une étiquette dans la syntaxe d'Exiv2, et <b>value </b> est la valeur à faire correspondre (utilisez le préfixe "re:" pour entrer une expression régulière).
 EDIT_OBJECT_TOOLTIP;Afficher des éléments dans la fenêtre de prévisualisation qui vous permettront d'ajuster cet outil.
 EDIT_PIPETTE_TOOLTIP;Pour ajouter un point d'ajustement de la courbe, maintenez la touche Ctrl pressée en cliquant sur l'image avec le bouton gauche.\nPour ajuster le point, pressez la touche Ctrl lors du clic-gauche sur la zone correspondante dans l'aperçu, puis relachez Ctrl (sauf si vous désirez un contrôle plus fin) et tout en gardant le bouton gauche appuyé, déplacez le curseur vers le haut ou le bas pour ajuster la position du point
 ERROR_MSG_FILE_READ;Erreur de lecture du fichier : %1
@@ -1008,6 +1010,7 @@ PREFERENCES_DATEFORMAT;Format date
 PREFERENCES_DATEFORMATHINT;Vous pouvez utiliser les chaînes de formatage suivantes :\n<b>%y</b>	- année\n<b>%m</b>	- mois\n<b>%d</b>	- jour\n\nPar exemple, le format de date française est :</i>\n<b>%d-%m-%y</b>
 PREFERENCES_DENOISE_ZOOM_OUT;Montre les effets de la réduction du bruit dans l'aperçu à un zoom <100%
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;Notez que cela ne sera pas toujours parfaitement précis
+PREFERENCES_DIRBROWSER_SINGLECLICK;Ouverture des dossiers par un simple clic
 PREFERENCES_DIRDARKFRAMES;Dossier des images de Trame Noire
 PREFERENCES_DIRECTORIES;Dossiers
 PREFERENCES_DIRHOME;Dossier Utilisateur
@@ -1226,7 +1229,7 @@ RENAME_DIALOG_SKIP;Sauter
 RENAME_DIALOG_RENAME;Créer un nouveau nom
 RENAME_DIALOG_PROGRESSIVE;Numérotation
 RENAME_DIALOG_SIDECARS;Fichiers associés supplémentaires
-RENAME_DIALOG_SIDECARS_TIP;Liste des extensions des fichiers associés additionnels à renommer séparés par un caractére ';'. Si une extension commence par un '+', elle est ajoutée au nom original au lieu de remplacer son extension.\nPar exemple, si le fichier d'entrée est <i>fichier.raw</i>, spécifier <i>ext1;+ext2</i> se traduit par des fichiers associés <i>fichier.ext1</i> et <i>fichier.raw.ext2</i>.
+RENAME_DIALOG_SIDECARS_TIP;Liste des extensions des fichiers associés additionnels à inclure dans une opération, séparés par un caractére ';'. Si une extension commence par un '+', elle est ajoutée au nom original au lieu de remplacer son extension.\nPar exemple, si le fichier d'entrée est <i>fichier.raw</i>, spécifier <i>ext1;+ext2</i> se traduit par des fichiers associés <i>fichier.ext1</i> et <i>fichier.raw.ext2</i>.
 RENAME_DIALOG_FILENAMES;Fichiers à renommer
 RENAME_DIALOG_PREVIEW;Prévisualisation
 RENAME_DIALOG_INVALID_PATTERN;Modèle non valide

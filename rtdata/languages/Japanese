@@ -1,21 +1,3 @@
-#00 Japan - Japanese
-#01 2021-08-29 Ohnishi, Yasuo, initial translation for 1.9.3
-#02 2021-08-30 Ohnishi, Yasuo, some fixes
-#03 2021-08-31 Ohnishi, Yasuo, some fixes
-#04 2021-09-01 Ohnishi, Yasuo, some fixes
-#05 2021-09-05 Ohnishi, Yasuo, some fixes
-#06 2021-09-09 Ohnishi, Yasuo, some fixes
-#07 2021-10-06 Ohnishi, Yasuo, some fixes
-#08 2021-10-07 Ohnishi, Yasuo, updated for 1.10
-#09 2021-10-11 Ohnishi, Yasuo, updated
-#10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
-#11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
-#12 2021-12-23 Ohnishi, Yasuo, updated for 1.12
-#13 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
-#14 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
-#15 2022-05-27 Ohnishi, Yasuo, updates for 1.14
-#16 2022-07-14 Ohnishi, Yasuo, updates for 1.15
-#17 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -62,6 +44,9 @@ DYNPROFILEEDITOR_MOVE_UP;上に移動
 DYNPROFILEEDITOR_NEW;新規
 DYNPROFILEEDITOR_NEW_RULE;新しいダイナミックプロファイルの規定
 DYNPROFILEEDITOR_PROFILE;処理プロファイル
+DYNPROFILEEDITOR_CUSTOMDATA;カスタムタグ
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;タグ
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;照合する追加のメタデータ タグの <i>キー=値</i> ペアのリスト。1行に1ペアを指定。ここで、<b>キー</b>は Exiv2 の構文上のタグ名、<b>値</b>は照合する値 (正規表現を入力するには "re:"を頭につける）
 EDITWINDOW_TITLE;画像編集
 EDIT_OBJECT_TOOLTIP;この機能を使うための目安に プレビュー画面にガイドを表示する
 EDIT_PIPETTE_TOOLTIP;カーブ上に調整ポイントを追加するには Ctrlキーを押しながら プレビューの画像上の目標ポイントを左クリックします. \n追加されたそのポイントを調整するには Ctrlキーを押しながら プレビュー画像のそのポイントに当たる部分を左クリックします. それからCtrlキーを離し（微妙な調整をする場合はそのまま） 左クリックしたままマウスを画面上で上下に動かすと それに合わせてトーンカーブが調整されます.
@@ -1021,6 +1006,7 @@ PREFERENCES_DATEFORMAT;日付の形式
 PREFERENCES_DATEFORMATHINT;<i>次の書式を使用することができます:</i>\n<b>%y</b><i> : 年</i>\n<b>%m</b><i> : 月</i>\n<b>%d</b><i> : 日</i>\n<i>\n例として, ハンガリアン記法の日付:</i>\n<b>%y/%m/%d</b>
 PREFERENCES_DENOISE_ZOOM_OUT;100%ズーム未満でもノイズ低減効果をプレビューに表示
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;注意: この機能はまだ完全には正確ではありません
+PREFERENCES_DIRBROWSER_SINGLECLICK;ファイルブラウザフォルダを選択するには１回クリック
 PREFERENCES_DIRDARKFRAMES;ダークフレーム･ディレクトリ
 PREFERENCES_DIRECTORIES;ディレクトリ
 PREFERENCES_DIRHOME;ホーム･ディレクトリ
@@ -1165,7 +1151,7 @@ PREFERENCES_USEBUNDLEDPROFILES;付属のプロファイルを使用
 PREFERENCES_WBPREVIEW_LABEL;プレビューパイプラインにおけるホワイトバランスの位置:
 PREFERENCES_WBPREVIEW_AFTER;デモザイク後 (高速)
 PREFERENCES_WBPREVIEW_BEFORE;デモザイク前 (より正確)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;ズーム100%未満ではデモザイク前, それ以外はデモザイク後
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;ズーム100%以上ではデモザイク前, それ以外はデモザイク後
 PREFERENCES_WORKFLOW;レイアウト
 PREFERENCES_XMP_SIDECAR_MODE;XMP 現像設定 (sidecar) ファイルのスタイル
 PREFERENCES_XMP_SIDECAR_MODE_STD;標準 (FILENAME.extに対しFILENAME.xmp)
@@ -1239,7 +1225,7 @@ RENAME_DIALOG_SKIP;スキップ
 RENAME_DIALOG_RENAME;固有の名前を生成
 RENAME_DIALOG_PROGRESSIVE;名前に付加する増分値
 RENAME_DIALOG_SIDECARS;現像設定 (sidecar) ファイル
-RENAME_DIALOG_SIDECARS_TIP;名前を変更する現像設定 (sidecar) ファイルの拡張子リストは「；」で区切ります. 拡張子が「+」で始まる場合は 元の拡張子を置き換えずさらに拡張子を加えます. 例えば元の名が<i>file.raw</i>なら <i>ext1；+ext2</i>と指定すると現像設定ファイルは<i>file.ext1</i>および<i>file.raw.ext2</i>になります.
+RENAME_DIALOG_SIDECARS_TIP;操作に含まれる現像設定 (sidecar) ファイルの拡張子リストは「；」で区切ります. 拡張子が「+」で始まる場合は 元の拡張子を置き換えずさらに拡張子を加えます. 例えば元の名が<i>file.raw</i>なら <i>ext1；+ext2</i>と指定すると現像設定ファイルは<i>file.ext1</i>および<i>file.raw.ext2</i>になります.
 RENAME_DIALOG_FILENAMES;名前変更するファイル
 RENAME_DIALOG_PREVIEW;プレビュー
 RENAME_DIALOG_INVALID_PATTERN;無効なパターン
@@ -1368,7 +1354,7 @@ TP_COLORCORRECTION_COMPRESSION;シャドウ/ハイライト圧縮
 TP_COLORCORRECTION_RGBLUMINANCE;輝度モード
 TP_COLORCORRECTION_SATURATION;彩度 (Saturation)
 TP_COLORCORRECTION_SLOPE;ハイライト/増幅 (Gain)
-TP_COLORCORRECTION_SYNC_SLIDERS;リンク (Link) に対応するスライダー
+TP_COLORCORRECTION_SYNC_SLIDERS;全チャンネルの連動
 TP_COLORCORRECTION_L;明度
 TP_COLORCORRECTION_H;色相
 TP_COLORCORRECTION_S;彩度 (Saturation)
@@ -1555,8 +1541,8 @@ TP_ICM_INPUTCAMERA_TOOLTIP;カメラ固有のシンプルなマトリックス�
 TP_ICM_INPUTCUSTOM;カスタム
 TP_ICM_INPUTCUSTOM_TOOLTIP;独自の DCP/ICCプロファイルファイルを選択
 TP_ICM_INPUTDLGLABEL;DCP/ICC 入力プロファイルを選択...
-TP_ICM_INPUTEMBEDDED;埋め込み使用
-TP_ICM_INPUTEMBEDDED_TOOLTIP;ファイルに埋め込まれたカラープロファイルを使用. 使えない場合はカメラ標準プロファイル適用
+RENAME_DIALOG_SIDECARS_TIPTP_ICM_INPUTEMBEDDED;埋め込み使用
+RENAME_DIALOG_SIDECARS_TIPTP_ICM_INPUTEMBEDDED_TOOLTIP;ファイルに埋め込まれたカラープロファイルを使用. 使えない場合はカメラ標準プロファイル適用
 TP_ICM_INPUTNONE;プロファイルなし
 TP_ICM_INPUTNONE_TOOLTIP;すべてにカラープロファイルを使用しない 特殊な場合にのみ使用
 TP_ICM_INPUTPROFILE;入力プロファイル
