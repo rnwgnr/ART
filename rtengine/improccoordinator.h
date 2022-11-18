@@ -181,8 +181,6 @@ protected:
     void startProcessing ();
     void process ();
     bool highQualityComputed;
-    cmsHTRANSFORM customTransformIn;
-    cmsHTRANSFORM customTransformOut;
 
     void wait_not_running();
     void set_updater_running(bool val);
@@ -353,16 +351,6 @@ public:
         return imgsrc;
     }
 
-    cmsHTRANSFORM& getCustomTransformIn ()
-    {
-        return customTransformIn;
-    }
-
-    cmsHTRANSFORM& getCustomTransformOut ()
-    {
-        return customTransformOut;
-    }
-
     bool getDeltaELCH(EditUniqueID id, int x, int y, float &L, float &C, float &H) override;
 
     ImProcFunctions::DenoiseInfoStore denoiseInfoStore;
@@ -371,7 +359,10 @@ public:
     void requestUpdateHistogramRaw() override;
     void requestUpdateVectorscopeHC() override;
     void requestUpdateVectorscopeHS() override;
-    void requestUpdateWaveform() override;    
+    void requestUpdateWaveform() override;
+
+    // returns true if some mask is being displayed on the image
+    bool is_mask_image() const;
 };
 
 } // namespace rtengine

@@ -136,9 +136,7 @@ ImProcCoordinator::ImProcCoordinator():
     changeSinceLast(0),
     updaterRunning(false),
     destroying(false),
-    highQualityComputed(false),
-    customTransformIn(nullptr),
-    customTransformOut(nullptr)
+    highQualityComputed(false)
 {
     for (int i = 0; i < 3; ++i) {
         bufs_[i] = nullptr;
@@ -177,16 +175,6 @@ ImProcCoordinator::~ImProcCoordinator()
     }
 
     imgsrc->decreaseRef();
-
-    if(customTransformIn) {
-        cmsDeleteTransform(customTransformIn);
-        customTransformIn = nullptr;
-    }
-
-    if(customTransformOut) {
-        cmsDeleteTransform(customTransformOut);
-        customTransformOut = nullptr;
-    }
 
     // updaterThreadStart.unlock();
 }
@@ -1741,6 +1729,27 @@ bool ImProcCoordinator::is_running() const
             return true;
         }
     }
+    return false;
+}
+
+
+bool ImProcCoordinator::is_mask_image() const
+{
+    if (sharpMask) {
+        return true;
+    }
+
+#define CHECK_MASK_(p) \
+    if (p.enabled && p.showMask >= 0 && size_t(p.showMask) < p.labmasks.size() && p.labmasks[p.showMask].enabled) { \
+        return true; \
+    }
+    
+    CHECK_MASK_(params.colorcorrection);
+    CHECK_MASK_(params.smoothing);
+    CHECK_MASK_(params.textureBoost);
+    CHECK_MASK_(params.localContrast);
+#undef CHECK_MASK_
+
     return false;
 }
 
