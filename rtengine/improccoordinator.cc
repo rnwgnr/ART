@@ -45,18 +45,6 @@ constexpr int VECTORSCOPE_SIZE = 128;
 
 using rtengine::Coord2D;
 
-Coord2D translateCoord(const rtengine::ImProcFunctions& ipf, int fw, int fh, int x, int y)
-{
-    const std::vector<Coord2D> points = {Coord2D(x, y)};
-
-    std::vector<Coord2D> red;
-    std::vector<Coord2D> green;
-    std::vector<Coord2D> blue;
-    const_cast<rtengine::ImProcFunctions &>(ipf).transCoord(fw, fh, points, red, green, blue);
-
-    return green[0];
-}
-
 } // namespace
 
 
@@ -272,32 +260,28 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
         }
         
-        if (params.filmNegative.enabled) {
-            preproc_wb = ColorTemp();
-        } else {
-            switch (options.wb_preview_mode) {
-            case Options::WB_BEFORE:
-                if (wb_todo) {
-                    preproc_wb = currWB;
-                    todo |= M_PREPROC | M_RAW;
-                }
-                break;
-            case Options::WB_BEFORE_HIGH_DETAIL:
-                if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
-                    preproc_wb = currWB;
-                    todo |= M_PREPROC | M_RAW;
-                    if (todo & M_HIGHQUAL) {
-                        todo |= M_AUTOEXP;
-                    }
-                }
-                break;
-            case Options::WB_AFTER:
-            default:
-                break;
-            }
-            if (todo & M_INIT) {
+        switch (options.wb_preview_mode) {
+        case Options::WB_BEFORE:
+            if (wb_todo) {
                 preproc_wb = currWB;
+                todo |= M_PREPROC | M_RAW;
             }
+            break;
+        case Options::WB_BEFORE_HIGH_DETAIL:
+            if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
+                preproc_wb = currWB;
+                todo |= M_PREPROC | M_RAW;
+                if (todo & M_HIGHQUAL) {
+                    todo |= M_AUTOEXP;
+                }
+            }
+            break;
+        case Options::WB_AFTER:
+        default:
+            break;
+        }
+        if (todo & M_INIT) {
+            preproc_wb = currWB;
         }
         
         // raw auto CA is bypassed if no high detail is needed, so we have to compute it when high detail is needed
@@ -310,40 +294,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             hist_raw_dirty = !(hListener && hListener->updateHistogramRaw());
     
             highDetailPreprocessComputed = highDetailNeeded;
-
-            if (todo & M_RAW) {
-                std::array<float, 3> filmBaseValues = {
-                    static_cast<float>(params.filmNegative.redBase),
-                    static_cast<float>(params.filmNegative.greenBase),
-                    static_cast<float>(params.filmNegative.blueBase)
-                };
-                imgsrc->filmNegativeProcess(params.filmNegative, filmBaseValues);
-                if (params.filmNegative.enabled && filmNegListener && params.filmNegative.redBase <= 0.f) {
-                    filmNegListener->filmBaseValuesChanged(filmBaseValues);
-                }
-            }
         }
-    
-        /*
-        Demosaic is kicked off only when
-        Detail considerations:
-            accurate detail is not displayed yet needed based on preview specifics (driven via highDetailNeeded flag)
-        OR
-        HLR considerations:
-            Color HLR alters rgb output of demosaic, so re-demosaic is needed when Color HLR is being turned off;
-            if HLR is enabled and changing method *from* Color to any other method
-            OR HLR gets disabled when Color method was selected
-        */
-        // If high detail (=100%) is newly selected, do a demosaic update, since the last was just with FAST
     
         if (imageTypeListener) {
             imageTypeListener->imageTypeChanged(imgsrc->isRAW(), imgsrc->getSensorType() == ST_BAYER, imgsrc->getSensorType() == ST_FUJI_XTRANS, imgsrc->isMono());
         }
 
-        //const bool hrcolor = params.exposure.enabled && (params.exposure.hrmode == procparams::ExposureParams::HR_COLOR || params.exposure.hrmode == procparams::ExposureParams::HR_COLORSOFT);
-        //const bool hrcolor = false;
-        
-        if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded)) {// || (!hrcolor && imgsrc->isRGBSourceModified())) {
+        if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded)) {
             if (settings->verbose) {
                 if (imgsrc->getSensorType() == ST_BAYER) {
                     std::cout << "Demosaic Bayer image n." << rp.bayersensor.imageNum + 1 << " using method: " << RAWParams::BayerSensor::getMethodString(rp.bayersensor.method) << std::endl;
@@ -413,7 +370,21 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             //setScale(scale);
             imgsrc->getImage(currWB, tr, orig_prev, pp, params.exposure, params.raw);
             denoiseInfoStore.valid = false;
-            imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
+
+            bool converted = false;
+            if (params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::WORKING) {
+                converted = true;
+                imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
+            }            
+            // Perform negative inversion. If needed, upgrade filmNegative params for backwards compatibility with old profiles
+            if (params.filmNegative.enabled) {
+                if (ipf.filmNegativeProcess(orig_prev, orig_prev, params.filmNegative, params.raw, imgsrc, currWB) && filmNegListener) {
+                    filmNegListener->filmRefValuesChanged(params.filmNegative.refInput, params.filmNegative.refOutput);
+                }
+            }
+            if (!converted) {
+                imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
+            }
     
             ipf.firstAnalysis(orig_prev, params, vhist16);
         }
@@ -1281,41 +1252,6 @@ void ImProcCoordinator::getAutoCrop(double ratio, int &x, int &y, int &w, int &h
         w = ww;
         h = hh;
     }
-}
-
-
-bool ImProcCoordinator::getFilmNegativeExponents(int xA, int yA, int xB, int yB, std::array<float, 3>& newExps)
-{
-    MyMutex::MyLock lock(mProcessing);
-
-    const auto xlate =
-        [this](int x, int y) -> Coord2D
-        {
-            const std::vector<Coord2D> points = {Coord2D(x, y)};
-
-            std::vector<Coord2D> red;
-            std::vector<Coord2D> green;
-            std::vector<Coord2D> blue;
-            ipf.transCoord(fw, fh, points, red, green, blue);
-
-            return green[0];
-        };
-
-    const int tr = getCoarseBitMask(params.coarse);
-
-    const Coord2D p1 = xlate(xA, yA);
-    const Coord2D p2 = xlate(xB, yB);
-
-    return imgsrc->getFilmNegativeExponents(p1, p2, tr, params.filmNegative, newExps);
-}
-
-
-bool ImProcCoordinator::getImageSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues)
-{
-    MyMutex::MyLock lock(mProcessing);
-
-    return imgsrc->getImageSpotValues(translateCoord(ipf, fw, fh, x, y), spotSize,
-        getCoarseBitMask(params.coarse), params.filmNegative, rawValues);
 }
 
 

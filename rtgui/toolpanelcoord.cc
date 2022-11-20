@@ -26,6 +26,7 @@
 #include "../rtengine/procevents.h"
 #include "../rtengine/refreshmap.h"
 #include "../rtengine/perspectivecorrection.h"
+#include "../rtengine/improccoordinator.h"
 
 using namespace rtengine::procparams;
 
@@ -659,18 +660,19 @@ void ToolPanelCoordinator::initImage (rtengine::StagedImageProcessor* ipc_, bool
         metadata->setImageData(pMetaData);
 
         ipc->setAutoExpListener(this);
-        ipc->setFrameCountListener (bayerprocess);
-        ipc->setFlatFieldAutoClipListener (flatfield);
-        ipc->setBayerAutoContrastListener (bayerprocess);
-        ipc->setXtransAutoContrastListener (xtransprocess);
-        ipc->setAutoWBListener (whitebalance);
-        ipc->setAutoChromaListener (denoise);
-        ipc->setSizeListener (crop);
-        ipc->setSizeListener (resize);
-        ipc->setImageTypeListener (this);
+        ipc->setFrameCountListener(bayerprocess);
+        ipc->setFlatFieldAutoClipListener(flatfield);
+        ipc->setBayerAutoContrastListener(bayerprocess);
+        ipc->setXtransAutoContrastListener(xtransprocess);
+        ipc->setAutoWBListener(whitebalance);
+        ipc->setAutoChromaListener(denoise);
+        ipc->setSizeListener(crop);
+        ipc->setSizeListener(resize);
+        ipc->setImageTypeListener(this);
         ipc->setAutoLogListener(logenc);
         ipc->setAutoDeconvRadiusListener(sharpening);
-        flatfield->setShortcutPath (Glib::path_get_dirname (ipc->getInitialImage()->getFileName()));
+        ipc->setFilmNegListener(filmNegative);
+        flatfield->setShortcutPath(Glib::path_get_dirname(ipc->getInitialImage()->getFileName()));
 
         icm->setRawMeta (raw, (const rtengine::FramesData*)pMetaData);
         lensProf->setRawMeta(raw, pMetaData);
@@ -1231,18 +1233,6 @@ void ToolPanelCoordinator::autoMatchedToneCurveChanged(const std::vector<double>
 }
 
 
-bool ToolPanelCoordinator::getFilmNegativeExponents(rtengine::Coord spotA, rtengine::Coord spotB, std::array<float, 3>& newExps)
-{
-    return ipc && ipc->getFilmNegativeExponents(spotA.x, spotA.y, spotB.x, spotB.y, newExps);
-}
-
-
-bool ToolPanelCoordinator::getImageSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues)
-{
-    return ipc && ipc->getImageSpotValues(spot.x, spot.y, spotSize, rawValues);
-}
-
-
 void ToolPanelCoordinator::setAreaDrawListener(AreaDrawListener *listener)
 {
     colorcorrection->setAreaDrawListener(listener);
@@ -1282,4 +1272,10 @@ void ToolPanelCoordinator::setToolShortcutManager(ToolShortcutManager *mgr)
     static_cast<TPScrolledWindow *>(rawPanelSW)->setToolShortcutManager(mgr);
     static_cast<TPScrolledWindow *>(localPanelSW)->setToolShortcutManager(mgr);
     static_cast<TPScrolledWindow *>(effectsPanelSW)->setToolShortcutManager(mgr);
+}
+
+
+bool ToolPanelCoordinator::getFilmNegativeSpot(rtengine::Coord spot, int spotSize, RGB &refInput, RGB &refOutput)
+{
+    return ipc && static_cast<rtengine::ImProcCoordinator *>(ipc)->getFilmNegativeSpot(spot.x, spot.y, spotSize, refInput, refOutput);
 }

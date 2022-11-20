@@ -196,8 +196,11 @@ public:
     int setDeltaEData(EditUniqueID id, double x, double y);
 
     // Spot Removal Tool
-    void removeSpots (rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
+    void removeSpots(rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
 
+    bool filmNegativeProcess(Imagefloat *input, Imagefloat *output, FilmNegativeParams &fnp, const RAWParams &rawParams, const ImageSource* imgsrc, const ColorTemp &currWB);
+    void filmNegativeProcess(rtengine::Imagefloat *input, rtengine::Imagefloat *output, const procparams::FilmNegativeParams &params);
+    
 private:
     cmsHPROFILE monitor;
     cmsHTRANSFORM monitorTransform;

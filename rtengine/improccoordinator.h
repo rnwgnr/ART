@@ -240,8 +240,6 @@ public:
     void getCamWB    (double& temp, double& green) override;
     void getSpotWB   (int x, int y, int rectSize, double& temp, double& green) override;
     void getAutoCrop (double ratio, int &x, int &y, int &w, int &h) override;
-    bool getFilmNegativeExponents(int xA, int yA, int xB, int yB, std::array<float, 3>& newExps) override;
-    bool getImageSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues) override;
     bool getHighQualComputed() override;
     void setHighQualComputed() override;
     void setMonitorProfile (const Glib::ustring& profile, RenderingIntent intent) override;
@@ -363,6 +361,8 @@ public:
 
     // returns true if some mask is being displayed on the image
     bool is_mask_image() const;
+
+    bool getFilmNegativeSpot(int x, int y, const int spotSize, FilmNegativeParams::RGB &refInput, FilmNegativeParams::RGB &refOutput);
 };
 
 } // namespace rtengine

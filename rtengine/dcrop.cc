@@ -195,7 +195,14 @@ void Crop::update(int todo)
         //     parent->ipf.removeSpots(origCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, nullptr, tr);
         // }
 
+        if (params.filmNegative.enabled && params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::INPUT) {
+            parent->ipf.filmNegativeProcess(origCrop, origCrop, params.filmNegative);
+        }
         parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
+
+        if (params.filmNegative.enabled && params.filmNegative.colorSpace != FilmNegativeParams::ColorSpace::INPUT) {
+            parent->ipf.filmNegativeProcess(origCrop, origCrop, params.filmNegative);
+        }        
     }
 
     Imagefloat *hdr_base_crop = origCrop;

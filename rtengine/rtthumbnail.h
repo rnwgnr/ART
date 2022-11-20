@@ -61,6 +61,7 @@ class Thumbnail {
     SensorType sensorType;
 
     void processFilmNegative(const procparams::ProcParams& params, const Imagefloat* baseImg, int rwidth, int rheight);
+    void processFilmNegativeV2(const procparams::ProcParams &params, const Imagefloat* baseImg, const int rwidth, const int rheight);
 
 public:
 

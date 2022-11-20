@@ -160,7 +160,6 @@ protected:
     MetaDataPanel* metadata;
     Smoothing *smoothing;
     ColorCorrection *colorcorrection;
-    // DirPyrEqualizer *cbdl;
     FilmNegative *filmNegative;    
 
     std::vector<PParamsChangeListener*> paramcListeners;
@@ -313,8 +312,7 @@ public:
     bool hasEmbeddedFF() override;
 
     // FilmNegProvider interface
-    bool getFilmNegativeExponents(rtengine::Coord spotA, rtengine::Coord spotB, std::array<float, 3>& newExps) override;
-    bool getImageSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues) override;
+    bool getFilmNegativeSpot(rtengine::Coord spot, int spotSize, RGB &refInput, RGB &refOutput) override;
     
     // rotatelistener interface
     void straightenRequested () override;

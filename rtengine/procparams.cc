@@ -3114,10 +3114,33 @@ FilmNegativeParams::FilmNegativeParams() :
     redRatio(1.36),
     greenExp(1.5),
     blueRatio(0.86),
-    redBase(0),
-    greenBase(0),
-    blueBase(0)
+    refInput({0.0, 0.0, 0.0}),
+    refOutput({0.0, 0.0, 0.0}),
+    colorSpace(ColorSpace::WORKING),
+    backCompat(BackCompat::CURRENT)
 {
+}
+
+bool FilmNegativeParams::RGB::operator ==(const FilmNegativeParams::RGB& other) const
+{
+    return
+        r == other.r
+        && g == other.g
+        && b == other.b;
+}
+
+bool FilmNegativeParams::RGB::operator !=(const FilmNegativeParams::RGB& other) const
+{
+    return !(*this == other);
+}
+
+FilmNegativeParams::RGB FilmNegativeParams::RGB::operator *(const FilmNegativeParams::RGB& other) const
+{
+    return {
+        (*this).r * other.r,
+        (*this).g * other.g,
+        (*this).b * other.b
+    };
 }
 
 bool FilmNegativeParams::operator ==(const FilmNegativeParams& other) const
@@ -3127,9 +3150,10 @@ bool FilmNegativeParams::operator ==(const FilmNegativeParams& other) const
         && redRatio == other.redRatio
         && greenExp == other.greenExp
         && blueRatio == other.blueRatio
-        && redBase == other.redBase
-        && greenBase == other.greenBase
-        && blueBase == other.blueBase;
+        && refInput == other.refInput
+        && refOutput == other.refOutput
+        && colorSpace == other.colorSpace
+        && backCompat == other.backCompat;
 }
 
 bool FilmNegativeParams::operator !=(const FilmNegativeParams& other) const
@@ -4058,9 +4082,29 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Film Negative", "RedRatio", filmNegative.redRatio, keyFile);
             saveToKeyfile("Film Negative", "GreenExponent", filmNegative.greenExp, keyFile);
             saveToKeyfile("Film Negative", "BlueRatio", filmNegative.blueRatio, keyFile);
-            saveToKeyfile("Film Negative", "RedBase", filmNegative.redBase, keyFile);
-            saveToKeyfile("Film Negative", "GreenBase", filmNegative.greenBase, keyFile);
-            saveToKeyfile("Film Negative", "BlueBase", filmNegative.blueBase, keyFile);
+            if (filmNegative.backCompat == FilmNegativeParams::BackCompat::V2) {
+                saveToKeyfile("Film Negative", "RedBase", filmNegative.refInput.r, keyFile);
+                saveToKeyfile("Film Negative", "GreenBase", filmNegative.refInput.g, keyFile);
+                saveToKeyfile("Film Negative", "BlueBase", filmNegative.refInput.b, keyFile);
+            }
+            saveToKeyfile("Film Negative", "ColorSpace", toUnderlying(filmNegative.colorSpace), keyFile);
+            {
+                std::vector<double> v = {
+                    filmNegative.refInput.r,
+                    filmNegative.refInput.g,
+                    filmNegative.refInput.b
+                };
+                saveToKeyfile("Film Negative", "RefInput", v, keyFile);
+                v = {
+                    filmNegative.refOutput.r,
+                    filmNegative.refOutput.g,
+                    filmNegative.refOutput.b
+                };
+                saveToKeyfile("Film Negative", "RefOutput", v, keyFile);
+            }
+            if (filmNegative.backCompat != FilmNegativeParams::BackCompat::CURRENT) {
+                saveToKeyfile("Film Negative", "BackCompat", toUnderlying(filmNegative.backCompat), keyFile);
+            }
         }
 
 // MetaData
@@ -5622,15 +5666,47 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             assignFromKeyfile(keyFile, "Film Negative", "RedRatio", filmNegative.redRatio);
             assignFromKeyfile(keyFile, "Film Negative", "GreenExponent", filmNegative.greenExp);
             assignFromKeyfile(keyFile, "Film Negative", "BlueRatio", filmNegative.blueRatio);
-            if (ppVersion >= 1011) {
-                assignFromKeyfile(keyFile, "Film Negative", "RedBase", filmNegative.redBase);
-                assignFromKeyfile(keyFile, "Film Negative", "GreenBase", filmNegative.greenBase);
-                assignFromKeyfile(keyFile, "Film Negative", "BlueBase", filmNegative.blueBase);
+            if (ppVersion >= 1039) {
+                std::vector<float> v;
+                if (assignFromKeyfile(keyFile, "Film Negative", "RefInput", v)) {
+                    filmNegative.refInput.r = v[0];
+                    filmNegative.refInput.g = v[1];
+                    filmNegative.refInput.b = v[2];
+                }
+                if (assignFromKeyfile(keyFile, "Film Negative", "RefOutput", v)) {
+                    filmNegative.refOutput.r = v[0];
+                    filmNegative.refOutput.g = v[1];
+                    filmNegative.refOutput.b = v[2];
+                }
+
+                int cs = 0;
+                if (assignFromKeyfile(keyFile, "Film Negative", "ColorSpace", cs)) {
+                    filmNegative.colorSpace = static_cast<FilmNegativeParams::ColorSpace>(cs);
+                }
+
+                if (keyFile.has_key("Film Negative", "BackCompat")) {
+                    filmNegative.backCompat = FilmNegativeParams::BackCompat(keyFile.get_integer("Film Negative", "BackCompat"));
+                }
+            } else if (ppVersion >= 1011) {
+                filmNegative.backCompat = FilmNegativeParams::BackCompat::V2;
+                filmNegative.colorSpace = FilmNegativeParams::ColorSpace::INPUT;
+                double d;
+                if (assignFromKeyfile(keyFile, "Film Negative", "RedBase", d)) {
+                    filmNegative.refInput.r = d;
+                }
+                if (assignFromKeyfile(keyFile, "Film Negative", "GreenBase", d)) {
+                    filmNegative.refInput.g = d;
+                }
+                if (assignFromKeyfile(keyFile, "Film Negative", "BlueBase", d)) {
+                    filmNegative.refInput.b = d;
+                }
             } else {
+                filmNegative.backCompat = FilmNegativeParams::BackCompat::V1;
+                filmNegative.colorSpace = FilmNegativeParams::ColorSpace::INPUT;
                 // Backwards compatibility: use special film base value -1
-                filmNegative.redBase = -1.f;
-                filmNegative.greenBase = -1.f;
-                filmNegative.blueBase = -1.f;
+                filmNegative.refInput.r = -1.f;
+                filmNegative.refInput.g = -1.f;
+                filmNegative.refInput.b = -1.f;
             }
         }
 

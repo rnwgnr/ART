@@ -159,7 +159,6 @@ set(RTENGINESOURCEFILES
     iptonecurve.cc
     deconvautoradius.cc
     filmnegativeproc.cc
-    filmnegativethumb.cc
     canon_cr3_decoder.cc
     rawimage_gainmap.cc
     subprocess.cc

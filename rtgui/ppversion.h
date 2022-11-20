@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the ARP file format is modified or the behaviour of a tool changes
-#define PPVERSION 1038
+#define PPVERSION 1039
 
 /*
   Log of version changes
+  1039  2022-11-19
+        new film negative tool ported from RT5.9
   1038  2022-08-12
         brush mask: changed "hardness" and "transparency" to "opacity"
   1037  2022-07-23

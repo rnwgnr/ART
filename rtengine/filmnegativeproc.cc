@@ -21,865 +21,238 @@
 
 #include "rawimage.h"
 #include "rawimagesource.h"
-#include "stdimagesource.h"
+#include "improcfun.h"
+#include "improccoordinator.h"
 #include "imagefloat.h"
 
 #include "coord.h"
-#include "mytime.h"
 #include "opthelper.h"
 #include "pixelsmap.h"
 #include "procparams.h"
 #include "rt_algo.h"
 #include "rtengine.h"
+#include "rtthumbnail.h"
 #include "sleef.h"
 #include "settings.h"
 //#define BENCHMARK
-#include "StopWatch.h"
+//#include "StopWatch.h"
+#include "iccstore.h"
+#include "rt_math.h"
+#include "color.h"
 
-namespace rtengine {
+namespace rtengine { extern const Settings *settings; }
 
-extern const Settings *settings;
 
 namespace {
+using rtengine::settings;
+using rtengine::Coord2D;
+using rtengine::ColorTemp;
+using rtengine::findMinMaxPercentile;
+using rtengine::ImageSource;
+using rtengine::Imagefloat;
+using rtengine::procparams::FilmNegativeParams;
+using rtengine::procparams::ColorManagementParams;
+using rtengine::procparams::RAWParams;
+using rtengine::ICCStore;
+using rtengine::MAXVALF;
+using rtengine::CLIP;
+using rtengine::TMatrix;
+using rtengine::Color;
+using RGB = rtengine::procparams::FilmNegativeParams::RGB;
 
-bool channelsAvg(const rtengine::RawImage* ri, int width, int height, const float* cblacksom, rtengine::Coord spotPos, int spotSize, std::array<float, 3> &avgs)
+Coord2D translateCoord(rtengine::ImProcFunctions& ipf, int fw, int fh, int x, int y)
 {
-    avgs = {}; // Channel averages
 
-    if (settings->verbose > 1) {
-        printf("Spot coord:  x=%d y=%d\n", spotPos.x, spotPos.y);
+    const std::vector<Coord2D> points = {Coord2D(x, y)};
+
+    std::vector<Coord2D> red;
+    std::vector<Coord2D> green;
+    std::vector<Coord2D> blue;
+    ipf.transCoord(fw, fh, points, red, green, blue);
+
+    return green[0];
+}
+
+
+void getSpotAvgMax(ImageSource *imgsrc, ColorTemp currWB, const rtengine::procparams::ProcParams &params, Coord2D p, int tr, int spotSize, RGB &avg, RGB &max)
+{
+    int x1 = MAX(0, (int)p.x - spotSize / 2);
+    int y1 = MAX(0, (int)p.y - spotSize / 2);
+    PreviewProps pp(x1, y1, spotSize, spotSize, 1);
+
+    if (settings->verbose) {
+        printf("Spot: %d,%d   %d,%d\n", x1, y1, x1 + spotSize / 2, y1 + spotSize / 2);
     }
 
-    const int half_spot_size = spotSize / 2;
+    rtengine::Imagefloat spotImg(spotSize, spotSize);
+    imgsrc->getImage(currWB, tr, &spotImg, pp, params.exposure, params.raw);
 
-    const int& x1 = spotPos.x - half_spot_size;
-    const int& x2 = spotPos.x + half_spot_size;
-    const int& y1 = spotPos.y - half_spot_size;
-    const int& y2 = spotPos.y + half_spot_size;
+    auto avgMax = [spotSize, &spotImg](RGB & avg, RGB & max) -> void {
+        avg = {};
+        max = {};
 
-    if (x1 < 0 || x2 > width || y1 < 0 || y2 > height) {
-        return false; // Spot goes outside bounds, bail out.
-    }
+        for (int i = 0; i < spotSize; ++i)
+        {
+            for (int j = 0; j < spotSize; ++j) {
 
-    std::array<int, 3> pxCount = {}; // Per-channel sample counts
+                float r = spotImg.r(i, j);
+                float g = spotImg.g(i, j);
+                float b = spotImg.b(i, j);
 
-    if (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS) {
-        for (int c = x1; c < x2; ++c) {
-            for (int r = y1; r < y2; ++r) {
-                const int ch = ri->getSensorType() == ST_BAYER ? ri->FC(r, c) : ri->XTRANSFC(r, c);
-
-                ++pxCount[ch];
-
-                // Sample the original unprocessed values from RawImage, subtracting black levels.
-                // Scaling is irrelevant, as we are only interested in the ratio between two spots.
-                avgs[ch] += ri->data[r][c] - cblacksom[ch];
+                avg.r += r;
+                avg.g += g;
+                avg.b += b;
+                max.r = MAX(max.r, r);
+                max.g = MAX(max.g, g);
+                max.b = MAX(max.b, b);
             }
         }
-    } else if (ri->get_colors() == 3) {
-        for (int c = x1; c < x2; ++c) {
-            for (int r = y1; r < y2; ++r) {
-                for (int ch = 0; ch < 3; ++ch) {
-                    ++pxCount[ch];
-                    avgs[ch] += ri->data[r][3*c + ch] - cblacksom[c];
-                }
-            }
-        }
-    } else if (ri->get_colors() == 1) {
-        for (int c = x1; c < x2; ++c) {
-            for (int r = y1; r < y2; ++r) {
-                ++pxCount[0];
-                avgs[0] += ri->data[r][c] - cblacksom[0];
-            }
-            pxCount[1] = pxCount[2] = pxCount[0];
-            avgs[1] = avgs[2] = avgs[0];
-        }        
+
+        avg.r /= (spotSize * spotSize);
+        avg.g /= (spotSize * spotSize);
+        avg.b /= (spotSize * spotSize);
+    };
+
+    if (params.filmNegative.colorSpace == rtengine::FilmNegativeParams::ColorSpace::INPUT) {
+        avgMax(avg, max);
     } else {
-        assert(false);
-        return false;
+        // Convert spot image to current working space
+        imgsrc->convertColorSpace(&spotImg, params.icm, currWB);
+
+        avgMax(avg, max);
+
+        // TODO handle custom color profile !
     }
 
-    for (int ch = 0; ch < 3; ++ch) {
-        avgs[ch] /= pxCount[ch];
-    }
+    // Clip away zeroes or negative numbers, you never know
+    avg.r = MAX(avg.r, 1.f);
+    avg.g = MAX(avg.g, 1.f);
+    avg.b = MAX(avg.b, 1.f);
 
-    return true;
+    if (settings->verbose) {
+        printf("Average Spot RGB: %f,%f,%f\n", avg.r, avg.g, avg.b);
+    }
 }
 
 
-bool channelsAvg(const rtengine::Imagefloat* img, int width, int height, rtengine::Coord spotPos, int spotSize, std::array<float, 3>& avgs)
+void calcMedians(
+    const rtengine::Imagefloat* input,
+    int x1, int y1, int x2, int y2,
+    float &rmed, float &gmed, float &bmed
+)
 {
-    avgs = {}; // Channel averages
+    using rtengine::findMinMaxPercentile;
 
-    if (settings->verbose > 1) {
-        printf("Spot coord:  x=%d y=%d\n", spotPos.x, spotPos.y);
-    }
-
-    const int half_spot_size = spotSize / 2;
-
-    const int& x1 = spotPos.x - half_spot_size;
-    const int& x2 = spotPos.x + half_spot_size;
-    const int& y1 = spotPos.y - half_spot_size;
-    const int& y2 = spotPos.y + half_spot_size;
-
-    if (x1 < 0 || x2 > width || y1 < 0 || y2 > height) {
-        return false; // Spot goes outside bounds, bail out.
-    }
-
-    for (int c = x1; c < x2; ++c) {
-        for (int r = y1; r < y2; ++r) {
-            avgs[0] += img->r(r,c);
-            avgs[1] += img->g(r,c);
-            avgs[2] += img->b(r,c);
-        }
-    }
-
-    for (int ch = 0; ch < 3; ++ch) {
-        avgs[ch] /= (spotSize*spotSize);
-    }
-
-    return true;
-}
-
-
-void calcMedians(const rtengine::RawImage *ri, float **data, int x1, int y1, int x2, int y2, std::array<float, 3> &meds)
-{
-    MyTime t1, t2, t3;
-    t1.set();
-
-    // Channel vectors to calculate medians
-    std::array<std::vector<float>, 3> cvs;
-
-    // Sample one every 5 pixels, and push the value in the appropriate channel vector.
-    // Choose an odd step, not a multiple of the CFA size, to get a chance to visit each channel.
-    if (ri->getSensorType() == ST_BAYER) {
-        for (int row = y1; row < y2; row += 5) {
-            const int c0 = ri->FC(row, x1 + 0);
-            const int c1 = ri->FC(row, x1 + 5);
-            int col = x1;
-
-            for (; col < x2 - 5; col += 10) {
-                cvs[c0].push_back(data[row][col]);
-                cvs[c1].push_back(data[row][col + 5]);
-            }
-
-            if (col < x2) {
-                cvs[c0].push_back(data[row][col]);
-            }
-        }
-    } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
-        for (int row = y1; row < y2; row += 5) {
-            const std::array<unsigned int, 6> cs = {
-                ri->XTRANSFC(row, x1 + 0),
-                ri->XTRANSFC(row, x1 + 5),
-                ri->XTRANSFC(row, x1 + 10),
-                ri->XTRANSFC(row, x1 + 15),
-                ri->XTRANSFC(row, x1 + 20),
-                ri->XTRANSFC(row, x1 + 25)
-            };
-            int col = x1;
-
-            for (; col < x2 - 25; col += 30) {
-                for (int c = 0; c < 6; ++c) {
-                    cvs[cs[c]].push_back(data[row][col + c * 5]);
-                }
-            }
-
-            for (int c = 0; col < x2; col += 5, ++c) {
-                cvs[cs[c]].push_back(data[row][col]);
-            }
-        }
-    } else if (ri->get_colors() == 3) {
-        for (int row = y1; row < y2; row += 5) {
-            for (int col = x1; col < x2; col += 5) {
-                for (int c = 0; c < 3; ++c) {
-                    cvs[c].push_back(data[row][3*col+c]);
-                }
-            }
-        }
-    } else if (ri->get_colors() == 1) {
-        for (int row = y1; row < y2; row += 5) {
-            for (int col = x1; col < x2; col += 5) {
-                for (int c = 0; c < 3; ++c) {
-                    cvs[c].push_back(data[row][col]);
-                }
-            }
-        }        
-    }
-
-    t2.set();
-
-    if (settings->verbose > 1) {
-        printf("Median vector fill loop time us: %d\n", t2.etime(t1));
-    }
-
-    t2.set();
-
-    for (int c = 0; c < 3; ++c) {
-        // Find median values for each channel
-        if (!cvs[c].empty()) {
-            rtengine::findMinMaxPercentile(cvs[c].data(), cvs[c].size(), 0.5f, meds[c], 0.5f, meds[c], true);
-        }
-    }
-
-    t3.set();
-
-    if (settings->verbose  > 1) {
-        printf("Sample count: R=%zu, G=%zu, B=%zu\n", cvs[0].size(), cvs[1].size(), cvs[2].size());
-        printf("Median calc time us: %d\n", t3.etime(t2));
-    }
-
-}
-
-std::array<double, 3> calcWBMults(const rtengine::ColorTemp& wb, const rtengine::ImageMatrices& imatrices, const rtengine::RawImage *ri, const float ref_pre_mul[4])
-{
-    std::array<double, 3> wb_mul;
-    double r, g, b;
-    wb.getMultipliers(r, g, b);
-    wb_mul[0] = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
-    wb_mul[1] = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
-    wb_mul[2] = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
-
-    for (int c = 0; c < 3; ++c) {
-        wb_mul[c] = ri->get_pre_mul(c) / wb_mul[c] / ref_pre_mul[c];
-    }
-
-    // Normalize max channel gain to 1.0
-    float mg = rtengine::max(wb_mul[0], wb_mul[1], wb_mul[2]);
-
-    for (int c = 0; c < 3; ++c) {
-        wb_mul[c] /= mg;
-    }
-
-    return wb_mul;
-}
-
-
-void calcMedians(const Imagefloat* baseImg, const int x1, const int y1, const int x2, const int y2, int skip, std::array<float, 3> &meds)
-{
     // Channel vectors to calculate medians
     std::vector<float> rv, gv, bv;
 
-    const int sz = std::max(0, (y2 - y1) * (x2 - x1) / SQR(skip));
+    const int sz = (x2 - x1) * (y2 - y1);
     rv.reserve(sz);
     gv.reserve(sz);
     bv.reserve(sz);
 
-#ifdef _OPENMP
-#   pragma omp parallel for
-#endif
-    for (int i = y1; i < y2; i += skip) {
-        for (int j = x1; j < x2; j += skip) {
-            rv.push_back(baseImg->r(i, j));
-            gv.push_back(baseImg->g(i, j));
-            bv.push_back(baseImg->b(i, j));
+
+    for (int ii = y1; ii < y2; ii ++) {
+        for (int jj = x1; jj < x2; jj ++) {
+            rv.push_back(input->r(ii, jj));
+            gv.push_back(input->g(ii, jj));
+            bv.push_back(input->b(ii, jj));
         }
     }
 
-    // Calculate channel medians from whole image
-    findMinMaxPercentile(rv.data(), rv.size(), 0.5f, meds[0], 0.5f, meds[0], true);
-    findMinMaxPercentile(gv.data(), gv.size(), 0.5f, meds[1], 0.5f, meds[1], true);
-    findMinMaxPercentile(bv.data(), bv.size(), 0.5f, meds[2], 0.5f, meds[2], true);
+    // Calculate channel medians of the specified area
+    findMinMaxPercentile(rv.data(), rv.size(), 0.5f, rmed, 0.5f, rmed, true);
+    findMinMaxPercentile(gv.data(), gv.size(), 0.5f, gmed, 0.5f, gmed, true);
+    findMinMaxPercentile(bv.data(), bv.size(), 0.5f, bmed, 0.5f, bmed, true);
 }
 
 
-} // namespace
-
-bool RawImageSource::getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const procparams::FilmNegativeParams &currentParams, std::array<float, 3>& newExps)
+RGB getMedians(const rtengine::Imagefloat* input, int borderPercent)
 {
-    newExps = {
-        static_cast<float>(currentParams.redRatio * currentParams.greenExp),
-        static_cast<float>(currentParams.greenExp),
-        static_cast<float>(currentParams.blueRatio * currentParams.greenExp)
-    };
-
-    constexpr int spotSize = 32; // TODO: Make this configurable?
-
-    Coord spot;
-    std::array<float, 3> clearVals;
-    std::array<float, 3> denseVals;
-
-    // Get channel averages in the two spots, sampling from the original ri->data buffer.
-    // NOTE: rawData values might be affected by CA corection, FlatField, etc, so:
-    //   rawData[y][x] == (ri->data[y][x] - cblacksom[c]) * scale_mul[c]
-    // is not always true. To calculate exponents on the exact values, we should keep
-    // a copy of the rawData buffer after preprocessing. Worth the memory waste?
-
-    // Sample first spot
-    transformPosition(spotA.x, spotA.y, tran, spot.x, spot.y);
-
-    if (!channelsAvg(ri, W, H, cblacksom, spot, spotSize, clearVals)) {
-        return false;
-    }
-
-    // Sample second spot
-    transformPosition(spotB.x, spotB.y, tran, spot.x, spot.y);
-
-    if (!channelsAvg(ri, W, H, cblacksom, spot, spotSize, denseVals)) {
-        return false;
-    }
-
-    // Detect which one is the dense spot, based on green channel
-    if (clearVals[1] < denseVals[1]) {
-        std::swap(clearVals, denseVals);
-    }
+    float rmed, gmed, bmed;
+    // Cut 20% border from medians calculation. It will probably contain outlier values
+    // from the film holder, which will bias the median result.
+    const int bW = input->getWidth() * borderPercent / 100;
+    const int bH = input->getHeight() * borderPercent / 100;
+    calcMedians(input, bW, bH,
+                input->getWidth() - bW, input->getHeight() - bH,
+                rmed, gmed, bmed);
 
     if (settings->verbose) {
-        printf("Clear film values: R=%g G=%g B=%g\n", static_cast<double>(clearVals[0]), static_cast<double>(clearVals[1]), static_cast<double>(clearVals[2]));
-        printf("Dense film values: R=%g G=%g B=%g\n", static_cast<double>(denseVals[0]), static_cast<double>(denseVals[1]), static_cast<double>(denseVals[2]));
+        printf("Channel medians: R=%g, G=%g, B=%g\n", rmed, gmed, bmed);
     }
 
-    const float denseGreenRatio = clearVals[1] / denseVals[1];
-
-    // Calculate logarithms in arbitrary base
-    const auto logBase =
-        [](float base, float num) -> float
-        {
-            return std::log(num) / std::log(base);
-        };
-
-    // Calculate exponents for each channel, based on the ratio between the bright and dark values,
-    // compared to the ratio in the reference channel (green)
-    for (int ch = 0; ch < 3; ++ch) {
-        if (ch == 1) {
-            newExps[ch] = 1.f;  // Green is the reference channel
-        } else {
-            newExps[ch] = LIM(logBase(clearVals[ch] / denseVals[ch], denseGreenRatio), 0.3f, 4.f);
-        }
-    }
-
-    if (settings->verbose) {
-        printf("New exponents:  R=%g G=%g B=%g\n", static_cast<double>(newExps[0]), static_cast<double>(newExps[1]), static_cast<double>(newExps[2]));
-    }
-
-    return true;
+    return { rmed, gmed, bmed };
 }
 
-bool RawImageSource::getImageSpotValues(Coord2D spotCoord, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& rawValues)
+/*
+// TODO not needed for now
+void convertColorSpace(Imagefloat* input, const TMatrix &src2xyz, const TMatrix &xyz2dest)
 {
-    Coord spot;
-    transformPosition(spotCoord.x, spotCoord.y, tran, spot.x, spot.y);
-
-    if (settings->verbose > 1) {
-        printf("Transformed coords: %d,%d\n", spot.x, spot.y);
-    }
-
-    if (spotSize < 4) {
-        return false;
-    }
-
-    // Calculate averages of raw unscaled channels
-    if (!channelsAvg(ri, W, H, cblacksom, spot, spotSize, rawValues)) {
-        return false;
-    }
-
-    if (settings->verbose > 1) {
-        printf("Raw spot values: R=%g, G=%g, B=%g\n", rawValues[0], rawValues[1], rawValues[2]);
-    }
-
-    return true;
-}
-
-void RawImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &params, std::array<float, 3>& filmBaseValues)
-{
-//    BENCHFUNMICRO
-
-    if (!params.enabled) {
-        return;
-    }
-
-    // Exponents are expressed as positive in the parameters, so negate them in order
-    // to get the reciprocals.
-    const std::array<float, 3> exps = {
-        static_cast<float>(-params.redRatio * params.greenExp),
-        static_cast<float>(-params.greenExp),
-        static_cast<float>(-params.blueRatio * params.greenExp)
-    };
-
-    constexpr float MAX_OUT_VALUE = 65000.f;
-
-    // Get multipliers for a known, fixed WB setting, that will be the starting point
-    // for balancing the converted image.
-    const std::array<double, 3> wb_mul = calcWBMults(
-            ColorTemp(3500., 1., 1., "Custom"), imatrices, ri, ref_pre_mul);
-
-
-    if (settings->verbose) {
-        printf("Fixed WB mults: %g %g %g\n", wb_mul[0], wb_mul[1], wb_mul[2]);
-    }
-
-    // Compensation factor to restore the non-autoWB initialGain (see RawImageSource::load)
-    const float autoGainComp = camInitialGain / initialGain;
-
-    std::array<float, 3> mults;  // Channel normalization multipliers
-
-    // If film base values are set in params, use those
-    if (filmBaseValues[0] <= 0.f) {
-        // ...otherwise, the film negative tool might have just been enabled on this image,
-        // whithout any previous setting. So, estimate film base values from channel medians
-
-        std::array<float, 3> medians;
-
-        // Special value for backwards compatibility with profiles saved by RT 5.7
-        const bool oldChannelScaling = filmBaseValues[0] == -1.f;
-
-        // If using the old channel scaling method, get medians from the whole current image,
-        // reading values from the already-scaled rawData buffer.
-        if (oldChannelScaling) {
-            calcMedians(ri, rawData, 0, 0, W, H, medians);
-        } else {
-            // Cut 20% border from medians calculation. It will probably contain outlier values
-            // from the film holder, which will bias the median result.
-            const int bW = W * 20 / 100;
-            const int bH = H * 20 / 100;
-            calcMedians(ri, rawData, bW, bH, W - bW, H - bH, medians);
-        }
-
-        // Un-scale rawData medians
-        for (int c = 0; c < 3; ++c) {
-            medians[c] /= scale_mul[c];
-        }
-
-        if (settings->verbose) {
-            printf("Channel medians: R=%g, G=%g, B=%g\n", medians[0], medians[1], medians[2]);
-        }
-
-        for (int c = 0; c < 3; ++c) {
-
-            // Estimate film base values, so that in the output data, each channel
-            // median will correspond to 1/24th of MAX.
-            filmBaseValues[c] = pow_F(24.f / 512.f, 1.f / exps[c]) * medians[c];
-
-            if (oldChannelScaling) {
-                // If using the old channel scaling method, apply WB multipliers here to undo their
-                // effect later, since fixed wb compensation was not used in previous version.
-                // Also, undo the effect of the autoGainComp factor (see below).
-                filmBaseValues[c] /= pow_F((wb_mul[c] / autoGainComp), 1.f / exps[c]);// / autoGainComp;
-            }
-
-            // normalize to 0-1
-            //filmBaseValues[c] /= 65535.f;
-        }
-    }
-
-
-    // Calculate multipliers based on previously obtained film base input values.
-
-    // Apply current scaling coefficients to raw, unscaled base values.
-    std::array<float, 3> fb = {
-        filmBaseValues[0] * scale_mul[0],
-        filmBaseValues[1] * scale_mul[1],
-        filmBaseValues[2] * scale_mul[2]
-    };
-
-    if (settings->verbose) {
-        printf("Input film base values: %g %g %g\n", fb[0], fb[1], fb[2]);
-    }
-
-    for (int c = 0; c < 3; ++c) {
-        // Apply channel exponents, to obtain the corresponding base values in the output data
-        fb[c] = pow_F(max(fb[c], 1.f), exps[c]);
-
-        // Determine the channel multiplier so that the film base value is 1/512th of max.
-        mults[c] = (MAX_OUT_VALUE / 512.f) / fb[c];
-
-        // Un-apply the fixed WB multipliers, to reverse their effect later in the WB tool.
-        // This way, the output image will be adapted to this fixed WB setting
-        mults[c] /= wb_mul[c];
-
-        // Also compensate for the initialGain difference between the default scaling (forceAutoWB=true)
-        // and the non-autoWB scaling (see camInitialGain).
-        // This effectively restores camera scaling multipliers, and gives us stable multipliers
-        // (not depending on image content).
-        mults[c] *= autoGainComp;
-
-    }
-
-    if (settings->verbose) {
-        printf("Output film base values: %g %g %g\n", static_cast<double>(fb[0]), static_cast<double>(fb[1]), static_cast<double>(fb[2]));
-        printf("Computed multipliers: %g %g %g\n", static_cast<double>(mults[0]), static_cast<double>(mults[1]), static_cast<double>(mults[2]));
-    }
-
-
-    constexpr float CLIP_VAL = 65535.f;
-
-    MyTime t1, t2, t3;
-
-    t1.set();
-
-    if (ri->getSensorType() == ST_BAYER) {
-#ifdef __SSE2__
-        const vfloat onev = F2V(1.f);
-        const vfloat clipv = F2V(CLIP_VAL);
-#endif
 
 #ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic, 16)
+    #pragma omp parallel for
 #endif
 
-        for (int row = 0; row < H; ++row) {
-            int col = 0;
-            // Avoid trouble with zeroes, minimum pixel value is 1.
-            const float exps0 = exps[FC(row, col)];
-            const float exps1 = exps[FC(row, col + 1)];
-            const float mult0 = mults[FC(row, col)];
-            const float mult1 = mults[FC(row, col + 1)];
-#ifdef __SSE2__
-            const vfloat expsv = _mm_setr_ps(exps0, exps1, exps0, exps1);
-            const vfloat multsv = _mm_setr_ps(mult0, mult1, mult0, mult1);
+    for (int i = 0; i < input->getHeight(); i++) {
+        for (int j = 0; j < input->getWidth(); j++) {
 
-            for (; col < W - 3; col += 4) {
-                STVFU(rawData[row][col], vminf(multsv * pow_F(vmaxf(LVFU(rawData[row][col]), onev), expsv), clipv));
-            }
+            float newr = input->r(i, j);
+            float newg = input->g(i, j);
+            float newb = input->b(i, j);
 
-#endif // __SSE2__
+            float x, y, z;
+            Color::rgbxyz (newr, newg, newb, x, y, z, src2xyz);
+            Color::xyz2rgb (x, y, z, newr, newg, newb, xyz2dest);
 
-            for (; col < W - 1; col += 2) {
-                rawData[row][col] = min(mult0 * pow_F(max(rawData[row][col], 1.f), exps0), CLIP_VAL);
-                rawData[row][col + 1] = min(mult1 * pow_F(max(rawData[row][col + 1], 1.f), exps1), CLIP_VAL);
-            }
+            input->r(i, j) = newr;
+            input->g(i, j) = newg;
+            input->b(i, j) = newb;
 
-            if (col < W) {
-                rawData[row][col] = min(mult0 * pow_F(max(rawData[row][col], 1.f), exps0), CLIP_VAL);
-            }
         }
-    } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
-#ifdef __SSE2__
-        const vfloat onev = F2V(1.f);
-        const vfloat clipv = F2V(CLIP_VAL);
-#endif
-
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic, 16)
-#endif
-
-        for (int row = 0; row < H; row ++) {
-            int col = 0;
-            // Avoid trouble with zeroes, minimum pixel value is 1.
-            const std::array<float, 6> expsc = {
-                exps[ri->XTRANSFC(row, 0)],
-                exps[ri->XTRANSFC(row, 1)],
-                exps[ri->XTRANSFC(row, 2)],
-                exps[ri->XTRANSFC(row, 3)],
-                exps[ri->XTRANSFC(row, 4)],
-                exps[ri->XTRANSFC(row, 5)]
-            };
-            const std::array<float, 6> multsc = {
-                mults[ri->XTRANSFC(row, 0)],
-                mults[ri->XTRANSFC(row, 1)],
-                mults[ri->XTRANSFC(row, 2)],
-                mults[ri->XTRANSFC(row, 3)],
-                mults[ri->XTRANSFC(row, 4)],
-                mults[ri->XTRANSFC(row, 5)]
-            };
-#ifdef __SSE2__
-            const vfloat expsv0 = _mm_setr_ps(expsc[0], expsc[1], expsc[2], expsc[3]);
-            const vfloat expsv1 = _mm_setr_ps(expsc[4], expsc[5], expsc[0], expsc[1]);
-            const vfloat expsv2 = _mm_setr_ps(expsc[2], expsc[3], expsc[4], expsc[5]);
-            const vfloat multsv0 = _mm_setr_ps(multsc[0], multsc[1], multsc[2], multsc[3]);
-            const vfloat multsv1 = _mm_setr_ps(multsc[4], multsc[5], multsc[0], multsc[1]);
-            const vfloat multsv2 = _mm_setr_ps(multsc[2], multsc[3], multsc[4], multsc[5]);
-
-            for (; col < W - 11; col += 12) {
-                STVFU(rawData[row][col], vminf(multsv0 * pow_F(vmaxf(LVFU(rawData[row][col]), onev), expsv0), clipv));
-                STVFU(rawData[row][col + 4], vminf(multsv1 * pow_F(vmaxf(LVFU(rawData[row][col + 4]), onev), expsv1), clipv));
-                STVFU(rawData[row][col + 8], vminf(multsv2 * pow_F(vmaxf(LVFU(rawData[row][col + 8]), onev), expsv2), clipv));
-            }
-
-#endif // __SSE2__
-
-            for (; col < W - 5; col += 6) {
-                for (int c = 0; c < 6; ++c) {
-                    rawData[row][col + c] = min(multsc[c] * pow_F(max(rawData[row][col + c], 1.f), expsc[c]), CLIP_VAL);
-                }
-            }
-
-            for (int c = 0; col < W; col++, c++) {
-                rawData[row][col + c] = min(multsc[c] * pow_F(max(rawData[row][col + c], 1.f), expsc[c]), CLIP_VAL);
-            }
-        }
-    } else if (ri->get_colors() == 3) {
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic, 16)
-#endif
-        for (int row = 0; row < H; ++row) {
-            for (int col = 0; col < W; ++col) {
-                for (int c = 0; c < 3; ++c) {
-                    rawData[row][3*col+c] = min(mults[c] * pow_F(max(rawData[row][3*col+c], 1.f), exps[c]), CLIP_VAL);
-                }
-            }
-        }
-    } else if (ri->get_colors() == 1) {
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic, 16)
-#endif
-        for (int row = 0; row < H; ++row) {
-            for (int col = 0; col < W; ++col) {
-                rawData[row][col] = min(mults[1] * pow_F(max(rawData[row][col], 1.f), exps[1]), CLIP_VAL);
-            }
-        }
-    }
-
-    t2.set();
-
-    if (settings->verbose > 1) {
-        printf("Pow loop time us: %d\n", t2.etime(t1));
-    }
-
-    t2.set();
-
-    PixelsMap bitmapBads(W, H);
-
-    int totBP = 0; // Hold count of bad pixels to correct
-
-    if (ri->getSensorType() == ST_BAYER) {
-#ifdef _OPENMP
-        #pragma omp parallel for reduction(+:totBP) schedule(dynamic,16)
-#endif
-
-        for (int i = 0; i < H; ++i) {
-            for (int j = 0; j < W; ++j) {
-                if (rawData[i][j] >= MAX_OUT_VALUE) {
-                    bitmapBads.set(j, i);
-                    ++totBP;
-                }
-            }
-        }
-
-        if (totBP > 0) {
-            interpolateBadPixelsBayer(bitmapBads, rawData);
-        }
-
-    } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
-#ifdef _OPENMP
-        #pragma omp parallel for reduction(+:totBP) schedule(dynamic,16)
-#endif
-
-        for (int i = 0; i < H; ++i) {
-            for (int j = 0; j < W; ++j) {
-                if (rawData[i][j] >= MAX_OUT_VALUE) {
-                    bitmapBads.set(j, i);
-                    totBP++;
-                }
-            }
-        }
-
-        if (totBP > 0) {
-            interpolateBadPixelsXtrans(bitmapBads);
-        }
-    }
-
-    t3.set();
-
-    if (settings->verbose > 1) {
-        printf("Bad pixels count: %d\n", totBP);
-        printf("Bad pixels interpolation time us: %d\n", t3.etime(t2));
     }
 }
+*/
 
 
-//-----------------------------------------------------------------------------
-
-// *** Non-raw processing ***
-
-
-bool StdImageSource::getImageSpotValues(Coord2D spotCoord, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& out)
+/**
+ * Perform actual film negative inversion process.
+ * Returns true if the input and output reference values are not set in params; refIn/refOut will be updated with median-based estimates.
+ * Otherwise, use provided values in params and return false
+ */
+bool doProcess(Imagefloat *input, Imagefloat *output,
+               const FilmNegativeParams &params, const ColorManagementParams &icmParams,
+               RGB &refIn, RGB &refOut)
 {
-    if (!imgCopy) {
-        imgCopy = new Imagefloat(img->getWidth(), img->getHeight());
-        img->getStdImage(wb, 0, imgCopy, PreviewProps(0,0,img->getWidth(), img->getHeight(), 1));
+    bool refsUpdated = false;
+
+    float rexp = -(params.greenExp * params.redRatio);
+    float gexp = -params.greenExp;
+    float bexp = -(params.greenExp * params.blueRatio);
+
+    // In case we are processing a thumbnail, reference values might not be set in params,
+    // so make an estimate on the fly, using channel medians
+    if (refIn.g <= 0.f) {
+        // Calc medians, 20% border cut
+        refIn = getMedians(input, 20);
+        refsUpdated = true;
+    } else {
+        refIn = params.refInput;
     }
 
-    Coord spot;
-    imgCopy->transformPixel(spotCoord.x, spotCoord.y, tran, spot.x, spot.y);
-
-    if (settings->verbose > 1) {
-        printf("Transformed coords: %d,%d\n", spot.x, spot.y);
+    if (refOut.g <= 0.f) {
+        // Median will correspond to gray, 1/24th of max in the output
+        refOut = { MAXVALF / 24.f, MAXVALF / 24.f, MAXVALF / 24.f };
+        refsUpdated = true;
+    } else {
+        refOut = params.refOutput;
     }
 
-    if (spotSize < 4) {
-        return false;
-    }
-
-    // Calculate averages of raw unscaled channels
-    if (!channelsAvg(imgCopy, imgCopy->getWidth(), imgCopy->getHeight(), spot, spotSize, out)) {
-        return false;
-    }
-
-    // normalize to 0-1
-    // for (auto &v : out) {
-    //     v /= 65535.f;
-    // }
-
-    if (settings->verbose > 1) {
-        printf("Image spot values: R=%g, G=%g, B=%g\n", out[0], out[1], out[2]);
-    }
-
-    return true;
-}
-
-
-bool StdImageSource::getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const procparams::FilmNegativeParams &currentParams, std::array<float, 3>& newExps)
-{
-//    using rtengine::Imagefloat;
-
-    if (!imgCopy) {
-        imgCopy = new Imagefloat(img->getWidth(), img->getHeight());
-        img->getStdImage(wb, 0, imgCopy, PreviewProps(0,0,img->getWidth(), img->getHeight(), 1));
-    }
-
-
-    newExps = {
-        static_cast<float>(currentParams.redRatio * currentParams.greenExp),
-        static_cast<float>(currentParams.greenExp),
-        static_cast<float>(currentParams.blueRatio * currentParams.greenExp)
-    };
-
-    constexpr int spotSize = 32; // TODO: Make this configurable?
-
-    Coord spot;
-    std::array<float, 3> clearVals;
-    std::array<float, 3> denseVals;
-
-    // Sample first spot
-    imgCopy->transformPixel(spotA.x, spotA.y, tran, spot.x, spot.y);
-
-    if (!channelsAvg(imgCopy, imgCopy->getWidth(), imgCopy->getHeight(), spot, spotSize, clearVals)) {
-        return false;
-    }
-
-    // Sample second spot
-    imgCopy->transformPixel(spotB.x, spotB.y, tran, spot.x, spot.y);
-
-    if (!channelsAvg(imgCopy, imgCopy->getWidth(), imgCopy->getHeight(), spot, spotSize, denseVals)) {
-        return false;
-    }
-
-    // Detect which one is the dense spot, based on green channel
-    if (clearVals[1] < denseVals[1]) {
-        std::swap(clearVals, denseVals);
-    }
-
-    if (settings->verbose) {
-        printf("Clear film values: R=%g G=%g B=%g\n", clearVals[0], clearVals[1], clearVals[2]);
-        printf("Dense film values: R=%g G=%g B=%g\n", denseVals[0], denseVals[1], denseVals[2]);
-    }
-
-    const float denseGreenRatio = clearVals[1] / denseVals[1];
-
-    // Calculate logarithms in arbitrary base
-    const auto logBase =
-        [](float base, float num) -> float
-        {
-            return std::log(num) / std::log(base);
-        };
-
-    // Calculate exponents for each channel, based on the ratio between the bright and dark values,
-    // compared to the ratio in the reference channel (green)
-    for (int ch = 0; ch < 3; ++ch) {
-        if (ch == 1) {
-            newExps[ch] = 1.f;  // Green is the reference channel
-        } else {
-            newExps[ch] = LIM(logBase(clearVals[ch] / denseVals[ch], denseGreenRatio), 0.3f, 4.f);
-        }
-    }
-
-    if (settings->verbose) {
-        printf("New exponents:  R=%g G=%g B=%g\n", newExps[0], newExps[1], newExps[2]);
-    }
-
-    return true;
-}
-
-void rtengine::StdImageSource::filmNegativeProcess(const procparams::FilmNegativeParams &params, std::array<float, 3>& filmBaseValues)
-{
-    if (!params.enabled) {
-        // If filmneg is not enabled, restore the copy as main image.
-        if (imgCopy) {
-            if(img) {
-                img->allocate(0,0);
-                delete img;
-            }
-            img = imgCopy;
-            imgCopy = nullptr;
-        }
-
-        return;
-    }
-
-    if (params.enabled && !imgCopy) {
-        //printf("ONCE!!!!!!\n");
-        imgCopy = new Imagefloat(img->getWidth(), img->getHeight());
-        img->getStdImage(wb, 0, imgCopy, PreviewProps(0,0,img->getWidth(), img->getHeight(), 1));
-    }
-
-    // Destroy old buffer
-    img->allocate(0,0);
-    delete img;
-
-    // Overwrite working buffer with a copy of the float version
-    Imagefloat* posImg = imgCopy->copy();
-    img = posImg;
-
-
-    std::array<float, 3> exps = {
-        float(-(params.greenExp * params.redRatio)), // 2.2f;
-        float(-params.greenExp),  // 2.2f;
-        float(-(params.greenExp * params.blueRatio)) // 2.2f;
-    };
-
-    std::array<float, 3> mults;  // Channel normalization multipliers
-    constexpr float MAX_OUT_VALUE = 65000.f;
-
-    const int W = imgCopy->getWidth();
-    const int H = imgCopy->getHeight();
-
-    // If film base values are set in params, use those
-    if (filmBaseValues[0] <= 0.f) {
-        // ...otherwise, the film negative tool might have just been enabled on this image,
-        // whithout any previous setting. So, estimate film base values from channel medians
-
-        std::array<float, 3> medians;
-
-        // Cut 20% border from medians calculation. It will probably contain outlier values
-        // from the film holder, which will bias the median result.
-        const int bW = W * 20 / 100;
-        const int bH = H * 20 / 100;
-        calcMedians(imgCopy, bW, bH, W - bW, H - bH, 4, medians);
-
-        for (int c = 0; c < 3; ++c) {
-
-            // Estimate film base values, so that in the output data, each channel
-            // median will correspond to 1/24th of MAX.
-            filmBaseValues[c] = pow_F(24.f / 512.f, 1.f / exps[c]) * medians[c];
-        }
-
-        if (settings->verbose) {
-            printf("Channel medians: R=%g, G=%g, B=%g\n", medians[0], medians[1], medians[2]);
-            printf("Estimated base values: R=%g, G=%g, B=%g\n", filmBaseValues[0], filmBaseValues[1], filmBaseValues[2]);
-        }
-    }
-
-    std::array<float, 3> fb;
-
-    for (int c = 0; c < 3; ++c) {
-        // Apply channel exponents, to obtain the corresponding base values in the output data
-        fb[c] = pow_F(std::max(filmBaseValues[c], 1.f), exps[c]);
-
-        // Determine the channel multiplier so that the film base value is 1/512th of max.
-        mults[c] = (MAX_OUT_VALUE / 512.f) / fb[c];
-    }
-
-    if (settings->verbose) {
-        printf("Output film base values: %g %g %g\n", static_cast<double>(fb[0]), static_cast<double>(fb[1]), static_cast<double>(fb[2]));
-        printf("Computed multipliers: %g %g %g\n", static_cast<double>(mults[0]), static_cast<double>(mults[1]), static_cast<double>(mults[2]));
-    }
-    const float rmult = mults[0];
-    const float gmult = mults[1];
-    const float bmult = mults[2];
-
-    const float rexp = exps[0];
-    const float gexp = exps[1];
-    const float bexp = exps[2];
+    // Apply channel exponents to reference input values, and compute suitable multipliers
+    // in order to reach reference output values.
+    float rmult = refOut.r / pow_F(rtengine::max(refIn.r, 1.f), rexp);
+    float gmult = refOut.g / pow_F(rtengine::max(refIn.g, 1.f), gexp);
+    float bmult = refOut.b / pow_F(rtengine::max(refIn.b, 1.f), bexp);
 
 
 #ifdef __SSE2__
@@ -892,16 +265,16 @@ void rtengine::StdImageSource::filmNegativeProcess(const procparams::FilmNegativ
     const vfloat bmultv = F2V(bmult);
 #endif
 
-    const int rheight = imgCopy->getHeight();
-    const int rwidth = imgCopy->getWidth();
+    const int rheight = input->getHeight();
+    const int rwidth = input->getWidth();
 
     for (int i = 0; i < rheight; i++) {
-        float *rlinein = imgCopy->r(i);
-        float *glinein = imgCopy->g(i);
-        float *blinein = imgCopy->b(i);
-        float *rlineout = posImg->r(i);
-        float *glineout = posImg->g(i);
-        float *blineout = posImg->b(i);
+        float *rlinein = input->r(i);
+        float *glinein = input->g(i);
+        float *blinein = input->b(i);
+        float *rlineout = output->r(i);
+        float *glineout = output->g(i);
+        float *blineout = output->b(i);
         int j = 0;
 #ifdef __SSE2__
 
@@ -919,6 +292,377 @@ void rtengine::StdImageSource::filmNegativeProcess(const procparams::FilmNegativ
             blineout[j] = CLIP(bmult * pow_F(blinein[j], bexp));
         }
     }
+
+    return refsUpdated;
 }
 
-} // namespace rtengine
+
+}
+
+
+
+bool rtengine::ImProcFunctions::filmNegativeProcess(
+    Imagefloat *input, Imagefloat *output, FilmNegativeParams &fnp,
+    const RAWParams &rawParams, const ImageSource* imgsrc, const ColorTemp &currWB)
+{
+    //BENCHFUNMICRO
+
+    if (!fnp.enabled) {
+        return false;
+    }
+
+    bool paramsUpdated = false;
+
+    RGB &refIn = fnp.refInput;
+    RGB &refOut = fnp.refOutput;
+
+    // If we're opening a profile from an older version, apply the proper multiplier
+    // compensations to make processing backwards compatible.
+
+    if (fnp.backCompat == FilmNegativeParams::BackCompat::V1) {
+        // Calc medians, no border cut, compensate currWB in+out
+        refIn = getMedians(input, 0);
+        refOut = { MAXVALF / 24.f, MAXVALF / 24.f, MAXVALF / 24.f };
+
+        std::array<float, 4> scale_mul = { 1.f, 1.f, 1.f, 1.f };
+        float autoGainComp, rm, gm, bm;
+        imgsrc->getWBMults(currWB, params->raw, scale_mul, autoGainComp, rm, gm, bm);
+
+        refOut.r *= rm;
+        refOut.g *= gm;
+        refOut.b *= bm;
+
+        paramsUpdated = true;
+
+    } else if (fnp.backCompat == FilmNegativeParams::BackCompat::V2) {
+
+        std::array<float, 4> scale_mul = { 1.f, 1.f, 1.f, 1.f };
+        float autoGainComp, rm, gm, bm;
+        imgsrc->getWBMults(currWB, params->raw, scale_mul, autoGainComp, rm, gm, bm);
+
+        float rm2, gm2, bm2;
+        imgsrc->getWBMults(rtengine::ColorTemp(3500., 1., 1., "Custom"), params->raw, scale_mul, autoGainComp, rm2, gm2, bm2);
+        float mg = rtengine::max(rm2, gm2, bm2);
+        rm2 /= mg;
+        gm2 /= mg;
+        bm2 /= mg;
+
+        if (fnp.refInput.g == 0.f) {
+            // Calc medians, 20% border cut
+            refIn = getMedians(input, 20);
+            refOut = { MAXVALF / 24.f, MAXVALF / 24.f, MAXVALF / 24.f };
+        } else if (fnp.refInput.g > 0.f) {
+            // Calc refInput + refOutput from base levels, compensate currWB in, 3500 out
+            refIn = fnp.refInput;
+            refIn.r *= rm * scale_mul[0];
+            refIn.g *= gm * scale_mul[1];
+            refIn.b *= bm * scale_mul[2];
+            refOut = { MAXVALF / 512.f, MAXVALF / 512.f, MAXVALF / 512.f };
+        }
+
+        refOut.r *= rm * autoGainComp / rm2;
+        refOut.g *= gm * autoGainComp / gm2;
+        refOut.b *= bm * autoGainComp / bm2;
+
+        paramsUpdated = true;
+
+    }
+
+    if (settings->verbose > 1 && fnp.backCompat != FilmNegativeParams::BackCompat::CURRENT) {
+        printf("Film Negative - Upgraded from V%d - refIn: R=%g G=%g B=%g refOut: R=%g G=%g B=%g\n",
+               (int)fnp.backCompat,
+               static_cast<double>(refIn.r), static_cast<double>(refIn.g), static_cast<double>(refIn.b),
+               static_cast<double>(refOut.r), static_cast<double>(refOut.g), static_cast<double>(refOut.b));
+    }
+
+    // FilmNeg params are now upgraded to the latest version
+    fnp.backCompat = FilmNegativeParams::BackCompat::CURRENT;
+
+    // Perform actual inversion. Return true if reference values are computed from medians
+    paramsUpdated |= doProcess(input, output, fnp, this->params->icm, refIn, refOut);
+
+    return paramsUpdated;
+
+}
+
+void rtengine::ImProcFunctions::filmNegativeProcess(rtengine::Imagefloat *input, rtengine::Imagefloat *output,
+        const procparams::FilmNegativeParams &params)
+{
+    //BENCHFUNMICRO
+
+    if (!params.enabled) {
+        return;
+    }
+
+    RGB refIn = params.refInput, refOut = params.refOutput;
+
+    doProcess(input, output, params, this->params->icm, refIn, refOut);
+
+}
+
+
+bool rtengine::ImProcCoordinator::getFilmNegativeSpot(int x, int y, const int spotSize, RGB &refInput, RGB &refOutput)
+{
+    MyMutex::MyLock lock(mProcessing);
+
+    const int tr = getCoarseBitMask(params.coarse);
+
+    const Coord2D p = translateCoord(ipf, fw, fh, x, y);
+
+    // Get the average channel values from the sampled spot
+    RGB avg, max;
+    getSpotAvgMax(imgsrc, currWB, params, p, tr, spotSize, avg, max);
+
+    float rexp = -(params.filmNegative.greenExp * params.filmNegative.redRatio);
+    float gexp = -params.filmNegative.greenExp;
+    float bexp = -(params.filmNegative.greenExp * params.filmNegative.blueRatio);
+
+    float rmult = params.filmNegative.refOutput.r / pow_F(rtengine::max(params.filmNegative.refInput.r, 1.f), rexp);
+    float gmult = params.filmNegative.refOutput.g / pow_F(rtengine::max(params.filmNegative.refInput.g, 1.f), gexp);
+    float bmult = params.filmNegative.refOutput.b / pow_F(rtengine::max(params.filmNegative.refInput.b, 1.f), bexp);
+
+    refInput = avg;
+
+    refOutput.r = rmult * pow_F(avg.r, rexp);
+    refOutput.g = gmult * pow_F(avg.g, gexp);
+    refOutput.b = bmult * pow_F(avg.b, bexp);
+
+    return true;
+}
+
+
+
+
+
+
+
+// ---------- >>> legacy mode >>> ---------------
+
+
+// For backwards compatibility with profiles saved by RT 5.7 - 5.8
+void rtengine::Thumbnail::processFilmNegative(
+    const procparams::ProcParams &params,
+    const Imagefloat* baseImg,
+    const int rwidth, const int rheight
+)
+{
+
+    // Channel exponents
+    const float rexp = -params.filmNegative.redRatio * params.filmNegative.greenExp;
+    const float gexp = -params.filmNegative.greenExp;
+    const float bexp = -params.filmNegative.blueRatio * params.filmNegative.greenExp;
+
+    const float MAX_OUT_VALUE = 65000.f;
+
+    // Channel medians
+    float rmed, gmed, bmed;
+
+    // If using the old method, calculate medians on the whole image
+    calcMedians(baseImg, 0, 0, rwidth, rheight, rmed, gmed, bmed);
+
+    if (settings->verbose) {
+        printf("FilmNeg legacy V1 :: Thumbnail input channel medians: %g %g %g\n", rmed, gmed, bmed);
+    }
+
+    // Calculate output medians
+    rmed = powf(rmed, rexp);
+    gmed = powf(gmed, gexp);
+    bmed = powf(bmed, bexp);
+
+    // Calculate output multipliers so that the median value is 1/24 of the output range.
+    float rmult, gmult, bmult;
+    rmult = (MAX_OUT_VALUE / 24.f) / rmed;
+    gmult = (MAX_OUT_VALUE / 24.f) / gmed;
+    bmult = (MAX_OUT_VALUE / 24.f) / bmed;
+
+    float rsum = 0.f, gsum = 0.f, bsum = 0.f;
+
+    for (int i = 0; i < rheight; i++) {
+        for (int j = 0; j < rwidth; j++) {
+            rsum += baseImg->r(i, j);
+            gsum += baseImg->g(i, j);
+            bsum += baseImg->b(i, j);
+        }
+    }
+
+    const float ravg = rsum / (rheight * rwidth);
+    const float gavg = gsum / (rheight * rwidth);
+    const float bavg = bsum / (rheight * rwidth);
+
+    // Shifting current WB multipliers, based on channel averages.
+    rmult /= gavg / ravg;
+    // gmult /= gAvg / gAvg;  green chosen as reference channel
+    bmult /= gavg / bavg;
+
+    if (settings->verbose) {
+        printf("FilmNeg legacy V1 :: Thumbnail computed multipliers: %g %g %g\n", static_cast<double>(rmult), static_cast<double>(gmult), static_cast<double>(bmult));
+    }
+
+#ifdef __SSE2__
+    const vfloat clipv = F2V(MAXVALF);
+    const vfloat rexpv = F2V(rexp);
+    const vfloat gexpv = F2V(gexp);
+    const vfloat bexpv = F2V(bexp);
+    const vfloat rmultv = F2V(rmult);
+    const vfloat gmultv = F2V(gmult);
+    const vfloat bmultv = F2V(bmult);
+#endif
+
+    for (int i = 0; i < rheight; i++) {
+        float *rline = baseImg->r(i);
+        float *gline = baseImg->g(i);
+        float *bline = baseImg->b(i);
+        int j = 0;
+#ifdef __SSE2__
+
+        for (; j < rwidth - 3; j += 4) {
+            STVFU(rline[j], vminf(rmultv * pow_F(LVFU(rline[j]), rexpv), clipv));
+            STVFU(gline[j], vminf(gmultv * pow_F(LVFU(gline[j]), gexpv), clipv));
+            STVFU(bline[j], vminf(bmultv * pow_F(LVFU(bline[j]), bexpv), clipv));
+        }
+
+#endif
+
+        for (; j < rwidth; ++j) {
+            rline[j] = CLIP(rmult * pow_F(rline[j], rexp));
+            gline[j] = CLIP(gmult * pow_F(gline[j], gexp));
+            bline[j] = CLIP(bmult * pow_F(bline[j], bexp));
+        }
+    }
+}
+
+
+// For backwards compatibility with intermediate dev version (see filmneg_stable_mults branch)
+void rtengine::Thumbnail::processFilmNegativeV2(
+    const procparams::ProcParams &params,
+    const Imagefloat* baseImg,
+    const int rwidth, const int rheight
+)
+{
+
+    // Channel exponents
+    const float rexp = -params.filmNegative.redRatio * params.filmNegative.greenExp;
+    const float gexp = -params.filmNegative.greenExp;
+    const float bexp = -params.filmNegative.blueRatio * params.filmNegative.greenExp;
+
+    // Calculate output multipliers
+    float rmult, gmult, bmult;
+
+    const float MAX_OUT_VALUE = 65000.f;
+
+    // If the film base values are not set in params, estimate multipliers from each channel's median value.
+    if (params.filmNegative.refInput.r <= 0.f) {
+
+        // Channel medians
+        float rmed, gmed, bmed;
+
+        // The new method cuts out a 20% border from medians calculation.
+        const int bW = rwidth * 20 / 100;
+        const int bH = rheight * 20 / 100;
+        calcMedians(baseImg, bW, bH, rwidth - bW, rheight - bH, rmed, gmed, bmed);
+
+        if (settings->verbose) {
+            printf("FilmNeg legacy V2 :: Thumbnail input channel medians: %g %g %g\n", rmed, gmed, bmed);
+        }
+
+        // Calculate output medians
+        rmed = powf(rmed, rexp);
+        gmed = powf(gmed, gexp);
+        bmed = powf(bmed, bexp);
+
+        // Calculate output multipliers so that the median value is 1/24 of the output range.
+        rmult = (MAX_OUT_VALUE / 24.f) / rmed;
+        gmult = (MAX_OUT_VALUE / 24.f) / gmed;
+        bmult = (MAX_OUT_VALUE / 24.f) / bmed;
+
+    } else {
+
+        // Read film-base values from params
+        float rbase = params.filmNegative.refInput.r; // redBase;
+        float gbase = params.filmNegative.refInput.g; // greenBase;
+        float bbase = params.filmNegative.refInput.b; // blueBase;
+
+        // Reconstruct scale_mul coefficients from thumbnail metadata:
+        //   redMultiplier / camwbRed is pre_mul[0]
+        //   pre_mul[0] * scaleGain is scale_mul[0]
+        // Apply channel scaling to raw (unscaled) input base values, to
+        // match with actual (scaled) data in baseImg
+        rbase *= (redMultiplier / camwbRed)     * scaleGain;
+        gbase *= (greenMultiplier / camwbGreen) * scaleGain;
+        bbase *= (blueMultiplier / camwbBlue)   * scaleGain;
+
+        if (settings->verbose) {
+            printf("FilmNeg legacy V2 :: Thumbnail input film base values: %g %g %g\n", rbase, gbase, bbase);
+        }
+
+        // Apply exponents to get output film base values
+        rbase = powf(rbase, rexp);
+        gbase = powf(gbase, gexp);
+        bbase = powf(bbase, bexp);
+
+        // Calculate multipliers so that film base value is 1/512th of the output range.
+        rmult = (MAX_OUT_VALUE / 512.f) / rbase;
+        gmult = (MAX_OUT_VALUE / 512.f) / gbase;
+        bmult = (MAX_OUT_VALUE / 512.f) / bbase;
+
+    }
+
+
+    // Get and un-apply multipliers to adapt the thumbnail to a known fixed WB setting,
+    // as in the main image processing.
+
+    double r, g, b;
+    ColorTemp(3500., 1., 1., "Custom").getMultipliers(r, g, b);
+    //iColorMatrix is cam_rgb
+    const double rm = camwbRed   / (iColorMatrix[0][0] * r + iColorMatrix[0][1] * g + iColorMatrix[0][2] * b);
+    const double gm = camwbGreen / (iColorMatrix[1][0] * r + iColorMatrix[1][1] * g + iColorMatrix[1][2] * b);
+    const double bm = camwbBlue  / (iColorMatrix[2][0] * r + iColorMatrix[2][1] * g + iColorMatrix[2][2] * b);
+
+    // Normalize max WB multiplier to 1.f
+    const double m = max(rm, gm, bm);
+    rmult /= rm / m;
+    gmult /= gm / m;
+    bmult /= bm / m;
+
+
+    if (settings->verbose) {
+        printf("FilmNeg legacy V2 :: Thumbnail computed multipliers: %g %g %g\n", static_cast<double>(rmult), static_cast<double>(gmult), static_cast<double>(bmult));
+    }
+
+
+#ifdef __SSE2__
+    const vfloat clipv = F2V(MAXVALF);
+    const vfloat rexpv = F2V(rexp);
+    const vfloat gexpv = F2V(gexp);
+    const vfloat bexpv = F2V(bexp);
+    const vfloat rmultv = F2V(rmult);
+    const vfloat gmultv = F2V(gmult);
+    const vfloat bmultv = F2V(bmult);
+#endif
+
+    for (int i = 0; i < rheight; i++) {
+        float *rline = baseImg->r(i);
+        float *gline = baseImg->g(i);
+        float *bline = baseImg->b(i);
+        int j = 0;
+#ifdef __SSE2__
+
+        for (; j < rwidth - 3; j += 4) {
+            STVFU(rline[j], vminf(rmultv * pow_F(LVFU(rline[j]), rexpv), clipv));
+            STVFU(gline[j], vminf(gmultv * pow_F(LVFU(gline[j]), gexpv), clipv));
+            STVFU(bline[j], vminf(bmultv * pow_F(LVFU(bline[j]), bexpv), clipv));
+        }
+
+#endif
+
+        for (; j < rwidth; ++j) {
+            rline[j] = CLIP(rmult * pow_F(rline[j], rexp));
+            gline[j] = CLIP(gmult * pow_F(gline[j], gexp));
+            bline[j] = CLIP(bmult * pow_F(bline[j], bexp));
+        }
+    }
+}
+
+// ----------------- <<< legacy mode <<< ------------
+
+

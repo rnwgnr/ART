@@ -212,16 +212,7 @@ private:
             }
         }
 
-        imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, params.filmNegative.enabled ? ColorTemp() : currWB);
-
-        if (params.filmNegative.enabled) {
-            std::array<float, 3> filmBaseValues = {
-                static_cast<float>(params.filmNegative.redBase),
-                static_cast<float>(params.filmNegative.greenBase),
-                static_cast<float>(params.filmNegative.blueBase)
-            };
-            imgsrc->filmNegativeProcess (params.filmNegative, filmBaseValues);
-        }            
+        imgsrc->preprocess(params.raw, params.lensProf, params.coarse, params.denoise.enabled, currWB);
 
         if (pl) {
             pl->setProgress (0.20);
@@ -297,7 +288,20 @@ private:
         procparams::ProcParams& params = job->pparams;
         ImProcFunctions &ipf = *(ipf_p.get());
 
-        imgsrc->convertColorSpace(img, params.icm, currWB);
+        bool converted = false;
+        if (params.filmNegative.colorSpace != FilmNegativeParams::ColorSpace::INPUT) {
+            imgsrc->convertColorSpace(img, params.icm, currWB);
+            converted = true;
+        }
+        
+        if (params.filmNegative.enabled) {
+            FilmNegativeParams copy = params.filmNegative;
+            ipf.filmNegativeProcess(img, img, copy, params.raw, imgsrc, currWB);
+        }
+
+        if (!converted) {
+            imgsrc->convertColorSpace(img, params.icm, currWB);
+        }
         
         if (params.denoise.enabled) {
             ipf.denoise(imgsrc, currWB, img, dnstore, params.denoise);

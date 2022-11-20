@@ -405,7 +405,7 @@ class FilmNegListener
 {
 public:
     virtual ~FilmNegListener() = default;
-    virtual void filmBaseValuesChanged(std::array<float, 3> rgb) = 0;
+    virtual void filmRefValuesChanged(const procparams::FilmNegativeParams::RGB &refInput, const procparams::FilmNegativeParams::RGB &refOutput) = 0;
 };
 
 /** This class represents a detailed part of the image (looking through a kind of window).
@@ -507,8 +507,6 @@ public:
     virtual void        getCamWB    (double& temp, double& green) = 0;
     virtual void        getSpotWB  (int x, int y, int rectSize, double& temp, double& green) = 0;
     virtual void        getAutoCrop (double ratio, int &x, int &y, int &w, int &h) = 0;
-    virtual bool getFilmNegativeExponents(int xA, int yA, int xB, int yB, std::array<float, 3>& newExps) = 0;
-    virtual bool getImageSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues) = 0;
 
     virtual bool getDeltaELCH(EditUniqueID id, int x, int y, float &L, float &C, float &H) = 0;
 

@@ -958,7 +958,13 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     rheight = std::max(rheight, 1);
 
     Imagefloat* baseImg = resizeTo<Imagefloat> (rwidth, rheight, interp, thumbImg);
-    processFilmNegative(params, baseImg, rwidth, rheight);
+    if (params.filmNegative.enabled) {
+        if (params.filmNegative.backCompat == FilmNegativeParams::BackCompat::V1) {
+            processFilmNegative(params, baseImg, rwidth, rheight);
+        } else if (params.filmNegative.backCompat == FilmNegativeParams::BackCompat::V2) {
+            processFilmNegativeV2(params, baseImg, rwidth, rheight);
+        }
+    }
     baseImg->assignColorSpace(params.icm.workingProfile);
 
     if (params.coarse.rotate) {
@@ -998,7 +1004,14 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
         }
     }
 
-    // if luma denoise has to be done for thumbnails, it should be right here
+    int fw = baseImg->getWidth();
+    int fh = baseImg->getHeight();
+
+    ImProcFunctions ipf (&params, forHistogramMatching); // enable multithreading when forHistogramMatching is true
+
+    if (params.filmNegative.enabled && params.filmNegative.backCompat == FilmNegativeParams::BackCompat::CURRENT && params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::INPUT) {
+        ipf.filmNegativeProcess(baseImg, baseImg, params.filmNegative);
+    }
 
     // perform color space transformation
 
@@ -1009,10 +1022,10 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
         StdImageSource::colorSpaceConversion (baseImg, params.icm, embProfile, thumbImg->getSampleFormat());
     }
 
-    int fw = baseImg->getWidth();
-    int fh = baseImg->getHeight();
-
-    ImProcFunctions ipf (&params, forHistogramMatching); // enable multithreading when forHistogramMatching is true
+    if (params.filmNegative.enabled && params.filmNegative.backCompat == FilmNegativeParams::BackCompat::CURRENT && params.filmNegative.colorSpace != FilmNegativeParams::ColorSpace::INPUT) {
+        ipf.filmNegativeProcess(baseImg, baseImg, params.filmNegative);
+    }
+     
     int origFW;
     int origFH;
     double tscale = 0.0;

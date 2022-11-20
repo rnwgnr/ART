@@ -79,6 +79,7 @@ public:
     virtual int getFrameCount() = 0;
     virtual int getFlatFieldAutoClipValue() = 0;
 
+    virtual void getWBMults(const ColorTemp &ctemp, const procparams::RAWParams &raw, std::array<float, 4>& scale_mul, float &autoGainComp, float &rm, float &gm, float &bm) const = 0;
 
     // use right after demosaicing image, add coarse transformation and put the result in the provided Imagefloat*
     virtual void getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ExposureParams &hlp, const RAWParams &raw) = 0;
