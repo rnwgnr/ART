@@ -508,27 +508,21 @@ bool FilmNegative::mouseOver(int modifierKey)
 bool FilmNegative::button1Pressed(int modifierKey)
 {
     EditDataProvider* const provider = getEditProvider();
-
     EditSubscriber::action = EditSubscriber::ES_ACTION_NONE;
 
     if (listener) {
         if (spotButton->get_active()) {
-
             refSpotCoords.push_back(provider->posImage);
-
             if (refSpotCoords.size() == 2) {
                 // User has selected 2 reference gray spots. Calculating new exponents
                 // from channel values and updating parameters.
 
                 RGB ref1, ref2, dummy;
-
                 if (fnp->getFilmNegativeSpot(refSpotCoords[0], 32, ref1, dummy) &&
                         fnp->getFilmNegativeSpot(refSpotCoords[1], 32, ref2, dummy)) {
-
                     disableListener();
 
                     RGB newExps = getFilmNegativeExponents(ref1, ref2);
-
                     // Leaving green exponent unchanged, setting red and blue exponents based on
                     // the ratios between newly calculated exponents.
                     redRatio->setValue(newExps.r / newExps.g);
@@ -547,16 +541,9 @@ bool FilmNegative::button1Pressed(int modifierKey)
                             )
                         );
                     }
-
                 }
-
-                switchOffEditMode();
-
             }
-
-
         } else if (refSpotButton->get_active()) {
-
             disableListener();
 
             // If the luminance reference is not set, copy the current reference input
@@ -570,10 +557,8 @@ bool FilmNegative::button1Pressed(int modifierKey)
 
             RGB refOut;
             fnp->getFilmNegativeSpot(provider->posImage, 32, refInputValues, refOut);
-
             // Output luminance of the sampled spot
             float spotLum = rtengine::Color::rgbLuminance(refOut.r, refOut.g, refOut.b);
-
             float rexp = -(greenExp->getValue() * redRatio->getValue());
             float gexp = -greenExp->getValue();
             float bexp = -(greenExp->getValue() * blueRatio->getValue());
@@ -609,9 +594,10 @@ bool FilmNegative::button1Pressed(int modifierKey)
                     round(refInputValues.r), round(refInputValues.g), round(refInputValues.b)
                 )
             );
-
         }
     }
+
+    switchOffEditMode();
 
     return true;
 }
