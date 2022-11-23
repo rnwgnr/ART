@@ -564,11 +564,13 @@ HISTORY_MSG_EPD_DRAWNMASK;TB - masque au pinceau
 HISTORY_MSG_EPD_PARAMETRICMASK;TB - masque paramétrique
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - Post-traitement du masque
 HISTORY_MSG_EXPOSURE_BLACK;Exposition - Point noir
-HISTORY_MSG_EXPOSURE_HRBLUR;Exposition - Porpragation de la couleur, adoucissement
+HISTORY_MSG_EXPOSURE_HRBLUR;Exposition - Propagation de la couleur, adoucissement
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Négatif
+HISTORY_MSG_FILMNEGATIVE_BALANCE;FN - Référence en sortie
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base couleur
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valeurs du Film Négatif
 HISTORY_MSG_FLATFIELD_EMBEDDED;Champ uniforme intégré
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Référence en entrée
 HISTORY_MSG_GRAIN_ENABLED;Grain d'émulsion
 HISTORY_MSG_GRAIN_ISO;Grain d'émulsion - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Grain d'émulsion - Force
@@ -1475,14 +1477,24 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Standard Pondéré
 TP_EXPOS_BLACKPOINT_LABEL;Points Noir Raw
 TP_EXPOS_WHITEPOINT_LABEL;Points Blanc/Gain Raw
 TP_FILMNEGATIVE_BLUE;Ratio de bleu
+TP_FILMNEGATIVE_BLUEBALANCE;Froid/Chaud
 TP_FILMNEGATIVE_FILMBASE_PICK;Choisissez la couleur de base du film.
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Choisissez un point du film non exposé (eg. la bordure entre les cadres), pour obtenir les valeurs actuelles des couleurs de base du film, et les sauver dans le profile de traitement.\nCeci permet d'obtenir facilement une valeur plus consitente de la balance des couleurs lors du traitement par lot de plusieurs images.\nUtilisez-le également lorsque l'image convertie est extrêmement sombre, lumineuse ou asymétrique.
 TP_FILMNEGATIVE_FILMBASE_VALUES;Film base RGB:
-TP_FILMNEGATIVE_GREEN;Exposant de référence (contraste)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Calculer l'exposition en collectant 2 points de référence neutre dans l'image ; un blanc (gris léger) et un noir (gris foncé). L'ordre n'a pas d'importance. L'exposition sera mise à jour aprés la collecte du second point
+TP_FILMNEGATIVE_GREEN;Exposant de référence
+TP_FILMNEGATIVE_GREENBALANCE;Magenta/Vert
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Définissez automatiquement les ratios rouge et bleu en choisissant deux patchs qui avaient une teinte neutre (pas de couleur) dans la scène d'origine. Les patchs doivent différer en luminosité.
 TP_FILMNEGATIVE_LABEL;Film Négatif
 TP_FILMNEGATIVE_PICK;Echantillonner les points Blanc et Noir
 TP_FILMNEGATIVE_RED;Ratio de Rouge
+TP_FILMNEGATIVE_COLORSPACE;Espace colorimétrique d'inversion:
+TP_FILMNEGATIVE_COLORSPACE_INPUT;Espace colorimétrique d'entrée
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIPSélectionnez l'espace colorimétrique utilisé pour effectuer l'inversion négative :\n<b>Espace colorimétrique d'entrée</b> : effectuez l'inversion avant l'application du profil d'entrée, comme dans les versions précédentes de RT.\n<b>Espace colorimétrique de travail< /b> : effectue l'inversion après le profil d'entrée, en utilisant le profil de travail actuellement sélectionné.
+TP_FILMNEGATIVE_COLORSPACE_WORKING;Espace colorimétrique de travail
+TP_FILMNEGATIVE_OUT_LEVEL;Niveau de sortie
+TP_FILMNEGATIVE_REF_LABEL;Entrée RGB: %1
+TP_FILMNEGATIVE_REF_PICK;Choisissez le point de la balance des blancs
+TP_FILMNEGATIVE_REF_TOOLTIP;Choisissez un patch de gris pour équilibrer les blancs de la sortie, image positive.
 TP_FILMSIMULATION_LABEL;Simulation de Film
 TP_FILMSIMULATION_SLOWPARSEDIR;ART est configuré pour rechercher les images HaldCLUT, qui sont utilisées pour l'outil Simulation de Film, dans un dossier qui prend trop de temps à se charger.\nAllez dans Préférences > Traitement de l'image > Simulation de Film\npour voir quel dossier est utilisé. Vous devriez soit pointer ART vers un dossier qui ne contient que les images HaldCLUT et rien d'autre, ou vers un dossier vide si vous ne voulez pas utiliser l'outil Simulation de Film.\n\nLisez l'article Simulation de Film dans RawPedia pour plus d'information.\n\nVoulez-vous abandonner la recherche maintenant ?
 TP_FILMSIMULATION_STRENGTH;Force

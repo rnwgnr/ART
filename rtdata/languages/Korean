@@ -1,3 +1,13 @@
+#00 Korea - Korean
+#01 2021-10-22 Ohnishi, Yasuo, initial translation for 1.10.1
+#02 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
+#03 2021-12-27 Ohnishi, Yasuo, some refinements and updated for 1.12
+#04 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
+#05 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
+#06 2022-05-27 Ohnishi, Yasuo, updates for 1.14
+#07 2022-07-14 Ohnishi, Yasuo, updates for 1.15
+#08 2022-08-24 Ohnishi, Yasuo, updates for 1.16
+#09 2022-11-23 Ohnishi, Yasuo, updates for 1.16.4
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -44,9 +54,9 @@ DYNPROFILEEDITOR_MOVE_UP;위에 이동
 DYNPROFILEEDITOR_NEW;새로
 DYNPROFILEEDITOR_NEW_RULE;새로운 동직 프로파일 규정
 DYNPROFILEEDITOR_PROFILE;처리 프로파일
-DYNPROFILEEDITOR_CUSTOMDATA;맞춤 태그
-DYNPROFILEEDITOR_CUSTOMDATA_TAGS;태그
-DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;일치시킬 추가 메타데이터 태그의 <i>key=value</i> 쌍 목록(한 줄에 하나씩, <b>키</b>는 Exiv2 구문의 태그 이름이고 <b>값) </b>는 일치시킬 값입니다(정규 표현식을 입력하려면 "re:" 접두어 사용).
+DYNPROFILEEDITOR_CUSTOMDATA;Custom Tags
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Tag(s)
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;List of <i>key=value</i> pairs of additional metadata tags to match, one per line, where <b>key</b> is the name of a tag in the syntax of Exiv2, and <b>value</b> is the value to match (use the "re:" prefix to enter a regular expression).
 EDITWINDOW_TITLE;화상편집
 EDIT_OBJECT_TOOLTIP;이 기능 사용시 편의로 미리보기화면에 가이드를 표시함.
 EDIT_PIPETTE_TOOLTIP;곡선상에 조정점을 추가할 때에는, Ctrl 키를 누르면서, 미리보기 화상상에 있는 목표점을 왼쪽 클릭합니다.\n추가된 그 점을 조정하려면, Ctrl 키를 누르면서 미리보기상의 그 점에 상당하는 부분을 왼쪽 클릭합니다. 그리고 Ctrl 키를 놓고 (미묘한 조정을 할 때는 그대로) 왼쪽 버튼을 누르면서 마우스를 화면상에서 위아래로 이동하면, 그에 따라 톤 곡선이 조정됩니다.
@@ -562,9 +572,11 @@ HISTORY_MSG_EPD_PARAMETRICMASK;TB - 매개 변수 지정 마스크
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - 마스크추가처리
 HISTORY_MSG_EXPOSURE_BLACK;노출 - 블랙 포인트
 HISTORY_MSG_EXPOSURE_HRBLUR;노출 - 색 파급 (Color propagation) 매끄러움
-HISTORY_MSG_FILMNEGATIVE_ENABLED;네가필름
+HISTORY_MSG_FILMNEGATIVE_BALANCE;네거필름 - 기준 출력
+HISTORY_MSG_FILMNEGATIVE_ENABLED;네거필름
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;필름 기본색
-HISTORY_MSG_FILMNEGATIVE_VALUES;네가필름값
+HISTORY_MSG_FILMNEGATIVE_VALUES;네거필름값
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;네거필름 - 기준 입력
 HISTORY_MSG_FLATFIELD_EMBEDDED;센서의 오점 그늘 제거- 메타데이터에 포함
 HISTORY_MSG_GRAIN_ENABLED;필름 효과
 HISTORY_MSG_GRAIN_ISO;필름 효과 - ISO
@@ -903,7 +915,7 @@ PARTIALPASTE_EQUALIZER;웨이블릿
 PARTIALPASTE_EVERYTHING;모두
 PARTIALPASTE_EXIFCHANGES;exif 데이터 변경
 PARTIALPASTE_EXPOSURE;노출량
-PARTIALPASTE_FILMNEGATIVE;네가필름
+PARTIALPASTE_FILMNEGATIVE;네거필름
 PARTIALPASTE_FILMSIMULATION;필름 시뮬레이션
 PARTIALPASTE_FLATFIELDAUTOSELECT;센서의 오점 그늘 제거 - 자동선택
 PARTIALPASTE_FLATFIELDBLURRADIUS;센서의 오점 그늘 제거 - 흐림 (Blur) 반경
@@ -1006,7 +1018,7 @@ PREFERENCES_DATEFORMAT;날짜 형식
 PREFERENCES_DATEFORMATHINT;<i>다음 서식을 사용할 수 있습니다.:</i>\n<b>%y</b><i> : 년</i>\n<b>%m</b><i> : 월</i>\n<b>%d</b><i> : 일</i>\n<i>\n예: 헝가리 서식의 날짜:</i>\n<b>%y/%m/%d</b>
 PREFERENCES_DENOISE_ZOOM_OUT;100%줌미만에도 노이즈 감소 효과를 미리보기에 표시함
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;주의: 이 기능은 아직 완전하게 정확이 아닙니다.
-PREFERENCES_DIRBROWSER_SINGLECLICK;한 번의 클릭으로 파일 브라우저 폴더을 선택함
+PREFERENCES_DIRBROWSER_SINGLECLICK;Single-click activation of file browser folders
 PREFERENCES_DIRDARKFRAMES;장시간노출 노이즈 제거용 파일이 있는 디렉토리
 PREFERENCES_DIRECTORIES;디렉토리
 PREFERENCES_DIRHOME;홈 디렉토리
@@ -1151,7 +1163,7 @@ PREFERENCES_USEBUNDLEDPROFILES;ART의 프로파일을 사용
 PREFERENCES_WBPREVIEW_LABEL;미리보기 관로 (pipeline) 에있는 화이트 밸런스의 위치:
 PREFERENCES_WBPREVIEW_AFTER;디모자이킹 후 (고속)
 PREFERENCES_WBPREVIEW_BEFORE;디모자이킹 전 (더 정확)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;줌100%이상에서는 디모자이킹 전, 그이외는 디모자이킹 후
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;줌100%미만에서는 디모자이킹 전, 그이외는 디모자이킹 후
 PREFERENCES_WORKFLOW;레이아웃
 PREFERENCES_XMP_SIDECAR_MODE;XMP 사이드카 파일의 형식
 PREFERENCES_XMP_SIDECAR_MODE_STD;표준 (FILENAME.ext에 대해 FILENAME.xmp)
@@ -1225,7 +1237,7 @@ RENAME_DIALOG_SKIP;피하기 (skip)
 RENAME_DIALOG_RENAME;고유명 생성
 RENAME_DIALOG_PROGRESSIVE;파일명에 부가되는 증분치
 RENAME_DIALOG_SIDECARS;사이드카 파일
-RENAME_DIALOG_SIDECARS_TIP;작업에 포함되는 사이드카 (sidecar) 파일의 확장자 리스트는 「；」로 구분합니다.확장자가 "+"로 시작하는 경우, 원래 확장자를 치환하지 않고 또 확장자를 부가합니다. 예: 원래 이름이<i>file.raw</i>이면, <i>ext1；+ext2</i>로 지정하면 사이드카 파일은 <i>file.ext1</i> 과 <i>file.raw.ext2</i>이 됩니다.
+RENAME_DIALOG_SIDECARS_TIP;이름을 변경하는 사이드카 (sidecar) 파일의 확장자 리스트는 「；」로 구분합니다.확장자가 "+"로 시작하는 경우, 원래 확장자를 치환하지 않고 또 확장자를 부가합니다. 예: 원래 이름이<i>file.raw</i>이면, <i>ext1；+ext2</i>로 지정하면 사이드카 파일은 <i>file.ext1</i> 과 <i>file.raw.ext2</i>이 됩니다.
 RENAME_DIALOG_FILENAMES;이름을 변경할 파일
 RENAME_DIALOG_PREVIEW;미리보기
 RENAME_DIALOG_INVALID_PATTERN;무효한 패턴
@@ -1354,7 +1366,7 @@ TP_COLORCORRECTION_COMPRESSION;어두움/하이라이트 압축
 TP_COLORCORRECTION_RGBLUMINANCE;휘도방식
 TP_COLORCORRECTION_SATURATION;채도 (Saturation)
 TP_COLORCORRECTION_SLOPE;하이라이트 영역/증폭 (Gain)
-TP_COLORCORRECTION_SYNC_SLIDERS;모든 채널 연동
+TP_COLORCORRECTION_SYNC_SLIDERS;색 채널 연결 슬라이더
 TP_COLORCORRECTION_L;밝기
 TP_COLORCORRECTION_H;색조 (Hue)
 TP_COLORCORRECTION_S;채도 (Saturation)
@@ -1471,14 +1483,24 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;가중평균
 TP_EXPOS_BLACKPOINT_LABEL;raw 블랙 포인트
 TP_EXPOS_WHITEPOINT_LABEL;raw 증폭 (Gain) /화이트 포인트
 TP_FILMNEGATIVE_BLUE;Blue 비율
+TP_FILMNEGATIVE_BLUEBALANCE;따뚯함/차가움
 TP_FILMNEGATIVE_FILMBASE_PICK;필름 기본색 취득
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;실제 필름 기본 색깔 값을 취득하기 위해,필름 미노광부분을 찾고 (예: 프레임간의 경계) 현상 프로파일에 보존합니다.\n이 기능은 같은 필름롤에 있는 복수의 사진을 일괄 현상 처리를 할 때, 더 일관한 색깔 균형을 쉽게 얻을 수 있게 합니다.\n또한 반전하는 이미지가 극단적으로 어둡이거나 밝이거나, 색깔  균형이 잃었을 때 사용합니다.
 TP_FILMNEGATIVE_FILMBASE_VALUES;필름 기본RGB:
-TP_FILMNEGATIVE_GREEN;기준지수 (대비)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색조가 무채색이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다. 그 후, 화이트 밸런스를  설정합니다.
-TP_FILMNEGATIVE_LABEL;네가필름
+TP_FILMNEGATIVE_GREEN;기준지수
+TP_FILMNEGATIVE_GREENBALANCE;마젠타/그린
+TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색조가 무채색이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다.
+TP_FILMNEGATIVE_LABEL;네거필름
 TP_FILMNEGATIVE_PICK;무채색이 되어야 할 곳 찾기
 TP_FILMNEGATIVE_RED;Red 비율
+TP_FILMNEGATIVE_COLORSPACE;색공간 반전:
+TP_FILMNEGATIVE_COLORSPACE_INPUT;색공간 입력
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;음화 반전에 사용되는 색공간을 선택합니다:\n<b>Input color space</b> : 입력 프로파일 적용전에 반전을 실행합니다. (이전의 RT와 같은 방식)\n<b>작업 색공간</b> : 입력 프로파일 적용후에 반전을 실행합니다.현행 작업 색공간이 사용됩니다.
+TP_FILMNEGATIVE_COLORSPACE_WORKING;직압 색공간
+TP_FILMNEGATIVE_OUT_LEVEL;출력 수준
+TP_FILMNEGATIVE_REF_LABEL;입력 RGB: %1
+TP_FILMNEGATIVE_REF_PICK;화이트 밸런스 채취 점을 지정함
+TP_FILMNEGATIVE_REF_TOOLTIP;양화 화이트 밸런스 출력에 위한 무채색 점을 지정합니다.
 TP_FILMSIMULATION_LABEL;필름 시뮬레이션
 TP_FILMSIMULATION_SLOWPARSEDIR;ART는 필름 시뮬레이션 기능에 사용하는 화상을 Hald CLUT 디렉토리 속에서 찾도록 있게 설계됩니다.（프로그램에 포함하려면 디렉토리가 너무 크기 때문에）。\n변경하려면 환경 설정 > 화상처리 > 필름 시뮬레이션을 선택하고 \n어느 디렉토리가 사용되는 지 확인합니다. 이 기능을 사용할 경우 Hald CLUT 파일만 있는 디렉토리를 지정하고, 이 기능을 사용하지 않는 경우 그 디렉토리를 비웁니다.\n\n자세한 것은  RawPedia를 참조하세요.\n\n필름화상의 스캔을 정지합니까?
 TP_FILMSIMULATION_STRENGTH;강도
