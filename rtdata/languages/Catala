@@ -16,6 +16,7 @@
 #15 2022-05-27 mrleemon, update for 1.14
 #16 2022-07-12 mrleemon, update for 1.15
 #17 2022-08-24 mrleemon, update for 1.16
+#18 2022-11-23 mrleemon, update for 1.17
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -63,6 +64,9 @@ DYNPROFILEEDITOR_MOVE_UP;Mou cap amunt
 DYNPROFILEEDITOR_NEW;Nou
 DYNPROFILEEDITOR_NEW_RULE;Nova regla de perfil dinàmic
 DYNPROFILEEDITOR_PROFILE;Perfil de processament
+DYNPROFILEEDITOR_CUSTOMDATA;Etiquetes personalitzades
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Etiqueta(es)
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;Llista de parells <i>clau=valor</i> d'etiquetes de metadades addicionals per fer coincidir, una per línia, on <b>clau</b> és el nom d'una etiqueta en la sintaxi d'Exiv2 i <b>valor</b> és el valor a fer coincidir (utilitzeu el prefix "re:" per introduir una expressió regular).
 EDITWINDOW_TITLE;Edició d'imatge
 EDIT_OBJECT_TOOLTIP;Mostra un giny a la finestra de vista prèvia que us permetrà ajustar aquesta eina.
 EDIT_PIPETTE_TOOLTIP;Per afegir un punt d'ajust a la corba, mantingueu la tecla Ctrl pressionada mentre premeu el botó esquerre del ratolí sobre el punt desitjat a la vista prèvia de la imatge.\nPer ajustar el punt, mantingueu la tecla Ctrl pressionada mentre premeu el botó esquerre del ratolí sobre l'àrea corresponent a la vista prèvia, llavors deixeu anar la tecla Ctrl (a menys que desitgeu un control més precís) i mentre manteniu premut el botó esquerre del ratolí moveu el ratolí cap amunt o cap avall per moure aquest punt cap amunt o cap avall a la corba.
@@ -583,9 +587,11 @@ HISTORY_MSG_EPD_PARAMETRICMASK;AT - màscara paramètrica
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - post-processament de màscara
 HISTORY_MSG_EXPOSURE_BLACK;Exposició - Punt negre
 HISTORY_MSG_EXPOSURE_HRBLUR;Exposició - Suavitzat de la propagació de color
+ISTORY_MSG_FILMNEGATIVE_BALANCE;NP - Sortida de referència
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Negatiu de pel·lícula
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la pel·lícula
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valors del negatiu de pel·lícula
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Entrada de referència
 HISTORY_MSG_FLATFIELD_EMBEDDED;Camp pla incrustat
 HISTORY_MSG_GRAIN_ENABLED;Gra de pel·lícula
 HISTORY_MSG_GRAIN_ISO;Gra de pel·lícula - ISO
@@ -1027,6 +1033,7 @@ PREFERENCES_DATEFORMAT;Format de data
 PREFERENCES_DATEFORMATHINT;Podeu fer servir aquestes cadenes de format:\n<b>%y</b>	- any\n<b>%m</b>	- mes\n<b>%d</b>	- dia\n\nPer exemple, la norma ISO 8601 dicta el format de la data de la següent manera:\n<b>%y-%m-%d</b>
 PREFERENCES_DENOISE_ZOOM_OUT;Mostra els efectes de la reducció de soroll a la vista prèvia amb un zoom de <100%
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;Tingueu en compte que això encara no serà completament exacte
+PREFERENCES_DIRBROWSER_SINGLECLICK;Activació amb un sol clic de les carpetes del navegador de fitxers
 PREFERENCES_DIRDARKFRAMES;Carpeta de preses negres
 PREFERENCES_DIRECTORIES;Carpetes
 PREFERENCES_DIRHOME;Carpeta d'usuari
@@ -1491,14 +1498,24 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Estàndard ponderat
 TP_EXPOS_BLACKPOINT_LABEL;Punt negre raw
 TP_EXPOS_WHITEPOINT_LABEL;Punt blanc raw
 TP_FILMNEGATIVE_BLUE;Proporció de blau
+TP_FILMNEGATIVE_BLUEBALANCE;Fred/Càlid
 TP_FILMNEGATIVE_FILMBASE_PICK;Tria el color base de la pel·lícula
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Trieu un punt no exposat de la pel·lícula (p. ex. la vora entre les preses) per obtenir els valors de color base reals de la pel·lícula, i deseu-los en el perfil de processament.\nAixò facilita l'obtenció d'un balanç de color més consistent quan es processen per lots diverses imatges del mateix rotllo.\nTambé utilitzeu això quan la imatge convertida és molt fosca, brillant o sense balanç de color.
 TP_FILMNEGATIVE_FILMBASE_VALUES;Base RGB de la pel·lícula:
-TP_FILMNEGATIVE_GREEN;Exponent de referència (contrast)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Estableix automàticament les proporcions de vermell i blau triant dos punts que tenien un to neutre (sense color) a l'escena original. Els punts han de diferir en brillantor. Establiu el balanç de blancs després.
+TP_FILMNEGATIVE_GREEN;Exponent de referència
+TP_FILMNEGATIVE_GREENBALANCE;Magenta/Verd
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Estableix automàticament les proporcions de vermell i blau triant dos punts que tenien un to neutre (sense color) a l'escena original. Els punts han de diferir en brillantor.
 TP_FILMNEGATIVE_LABEL;Negatiu de pel·lícula
 TP_FILMNEGATIVE_PICK;Tria punts neutres
 TP_FILMNEGATIVE_RED;Proporció de vermell
+TP_FILMNEGATIVE_COLORSPACE;Espai de color d'inversió:
+TP_FILMNEGATIVE_COLORSPACE_INPUT;Espai de color d'entrada
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;Selecciona l'espai de color utilitzat per realitzar la inversió negativa:\n<b>Espai de color d'entrada</b>: realitza la inversió abans que s'apliqui el perfil d'entrada, com en les versions anteriors de RT.\n<b>Espai de color de treball</b>: realitza la inversió després del perfil d'entrada, utilitzant el perfil de treball seleccionat actualment.
+TP_FILMNEGATIVE_COLORSPACE_WORKING;Espai de color de treball
+TP_FILMNEGATIVE_OUT_LEVEL;Nivell de sortida
+TP_FILMNEGATIVE_REF_LABEL;Entrada RGB: %1
+TP_FILMNEGATIVE_REF_PICK;Trieu el punt de balanç de blancs
+TP_FILMNEGATIVE_REF_TOOLTIP;Trieu un punt gris per al balanç de blancs de la imatge positiva de sortida.
 TP_FILMSIMULATION_LABEL;Simulació de pel·lícula
 TP_FILMSIMULATION_SLOWPARSEDIR;ART està configurat per cercar imatges Hald CLUT, que s'utilitzen a l'eina de simulació de pel·lícula, en una carpeta que està trigant massa a carregar.\nAneu a Preferències > Processament d'imatges > Simulació de pel·lícula\nper veure quina carpeta s'està utilitzant. Hauríeu d'apuntar ART a una carpeta que contingui només imatges Hald CLUT i res més, o a una carpeta buida si no voleu utilitzar l'eina de simulació de pel·lícula.\n\nLlegiu l'article sobre simulació de pel·lícula a RawPedia per obtenir més informació.\n\nVoleu cancel·lar l'exploració ara?
 TP_FILMSIMULATION_STRENGTH;Intensitat

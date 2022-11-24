@@ -19,6 +19,7 @@
 #18 2022-05-27 mrleemon, update for 1.14
 #19 2022-07-12 mrleemon, update for 1.15
 #20 2022-08-24 mrleemon, update for 1.16
+#21 2022-11-23 mrleemon, update for 1.17
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -66,6 +67,9 @@ DYNPROFILEEDITOR_MOVE_UP;Mover hacia arriba
 DYNPROFILEEDITOR_NEW;Nuevo
 DYNPROFILEEDITOR_NEW_RULE;Nueva regla de perfil dinámico
 DYNPROFILEEDITOR_PROFILE;Perfil de procesamiento
+DYNPROFILEEDITOR_CUSTOMDATA;Etiquetas personalizadas
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Etiqueta(s)
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;Lista de pares <i>clave=valor</i> de etiquetas de metadatos adicionales para hacer coincidir, una por línea, donde <b>clave</b> es el nombre de una etiqueta en la sintaxis de Exiv2 y <b>valor</b> es el valor que debe coincidir (usa el prefijo "re:" para introducir una expresión regular).
 EDITWINDOW_TITLE;Edición de imagen
 EDIT_OBJECT_TOOLTIP;Muestra un widget en la ventana de vista previa que le permitirá ajustar esta herramienta.
 EDIT_PIPETTE_TOOLTIP;Para añadir un punto de ajuste en la curva, mantenga la tecla Ctrl pulsada mientras pulsa el botón izquierdo del ratón sobre el punto deseado en la vista previa de la imagen.\nPara ajustar el punto, mantenga la tecla Ctrl pulsada mientras pulsa el botón izquierdo del ratón sobre el área correspondiente en la vista previa, entonces suelte la tecla Ctrl (a menos que desee un control más preciso) y mientras mantiene pulsado el botón izquierdo del ratón mueva el ratón hacia arriba o hacia abajo para mover ese punto hacia arriba o hacia abajo en la curva.
@@ -586,9 +590,11 @@ HISTORY_MSG_EPD_PARAMETRICMASK;AT - máscara paramétrica
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - post-procesamiento de máscara
 HISTORY_MSG_EXPOSURE_BLACK;Exposición - Punto negro
 HISTORY_MSG_EXPOSURE_HRBLUR;Exposición - Suavizado de la propagación de color
+HISTORY_MSG_FILMNEGATIVE_BALANCE;NP - Salida de referencia
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Negativo de película
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la película
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valores del negativo de película
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;NP - Entrada de referencia
 HISTORY_MSG_FLATFIELD_EMBEDDED;Campo plano incrustado
 HISTORY_MSG_GRAIN_ENABLED;Grano de película
 HISTORY_MSG_GRAIN_ISO;Grano de película - ISO
@@ -1030,6 +1036,7 @@ PREFERENCES_DATEFORMAT;Formato de fecha
 PREFERENCES_DATEFORMATHINT;Puede usar las siguientes cadenas de formato:\n<b>%y</b>	- año\n<b>%m</b>	- mes\n<b>%d</b>	- día\n\nPor ejemplo, la norma ISO 8601 dicta el formato de la fecha de la siguiente manera:\n<b>%y-%m-%d</b>
 PREFERENCES_DENOISE_ZOOM_OUT;Mostrar los efectos de la reducción de ruido en la vista previa con un zoom de <100%
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;Tenga en cuenta que esto todavía no será completamente exacto
+PREFERENCES_DIRBROWSER_SINGLECLICK;Activación con un solo clic de las carpetas del explorador de archivos
 PREFERENCES_DIRDARKFRAMES;Carpeta de tomas negras
 PREFERENCES_DIRECTORIES;Carpetas
 PREFERENCES_DIRHOME;Carpeta de usuario
@@ -1494,14 +1501,24 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Estándar ponderado
 TP_EXPOS_BLACKPOINT_LABEL;Punto negro raw
 TP_EXPOS_WHITEPOINT_LABEL;Punto blanco raw
 TP_FILMNEGATIVE_BLUE;Proporción de azul
+TP_FILMNEGATIVE_BLUEBALANCE;Frío/Cálido
 TP_FILMNEGATIVE_FILMBASE_PICK;Escoger el color base de la película
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Escoja un punto no expuesto de la película (p. ej., el borde entre las tomas) para obtener los valores de color base reales de la película, y guárdelos en el perfil de procesamiento.\nEsto facilita la obtención de un balance de color más consistente cuando se procesan por lotes varias imágenes del mismo rollo.\nTambién use esto cuando la imagen convertida es muy oscura, brillante o sin balance de color.
 TP_FILMNEGATIVE_FILMBASE_VALUES;Base RGB de la película:
-TP_FILMNEGATIVE_GREEN;Exponente de referencia (contraste)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Establecer automáticamente las proporciones de rojo y azul escogiendo dos puntos que tenían un tono neutro (sin color) en la escena original. Los puntos deben diferir en brillo. Establezca el balance de blancos después.
+TP_FILMNEGATIVE_GREEN;Exponente de referencia
+TP_FILMNEGATIVE_GREENBALANCE;Magenta/Verde
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Establecer automáticamente las proporciones de rojo y azul escogiendo dos puntos que tenían un tono neutro (sin color) en la escena original. Los puntos deben diferir en brillo.
 TP_FILMNEGATIVE_LABEL;Negativo de película
 TP_FILMNEGATIVE_PICK;Escoger puntos neutros
 TP_FILMNEGATIVE_RED;Proporción de rojo
+TP_FILMNEGATIVE_COLORSPACE;Espacio de color de inversión:
+TP_FILMNEGATIVE_COLORSPACE_INPUT;Espacio de color de entrada
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;Seleccione el espacio de color usado para realizar la inversión negativa:\n<b>Espacio de color de entrada</b>: realiza la inversión antes de que se aplique el perfil de entrada, como en las versiones anteriores de RT.\n<b>Espacio de color de trabajo</b>: realiza la inversión después del perfil de entrada, usando el perfil de trabajo seleccionado actualmente.
+TP_FILMNEGATIVE_COLORSPACE_WORKING;Espacio de color de trabajo
+TP_FILMNEGATIVE_OUT_LEVEL;Nivel de salida
+TP_FILMNEGATIVE_REF_LABEL;Entrada RGB: %1
+TP_FILMNEGATIVE_REF_PICK;Elija el punto de balance de blancos
+TP_FILMNEGATIVE_REF_TOOLTIP;Elija un punto gris para el balance de blancos de la imagen positiva de salida.
 TP_FILMSIMULATION_LABEL;Simulación de película
 TP_FILMSIMULATION_SLOWPARSEDIR;ART está configurado para buscar imágenes Hald CLUT, que se usan en la herramienta de simulación de película, en una carpeta que está tardando demasiado en cargarse.\nVaya a Preferencias > Procesamiento de imágenes > Simulación de película\npara ver qué carpeta se está usando. Debería apuntar ART a una carpeta que contenga sólo imágenes Hald CLUT y nada más, o a una carpeta vacía si no desea usar la herramienta de simulación de película.\n\nLea el artículo sobre simulación de película en RawPedia para obtener más información.\n\n¿Desea cancelar la exploración ahora?
 TP_FILMSIMULATION_STRENGTH;Intensidad

@@ -13,6 +13,7 @@
 #13 2022-08-22 alvaro
 #14 2022-08-25 v1.16 - alvaro
 #15 2022-11-20 alvaro
+#16 2022-11-23 v1.17 - alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -572,8 +573,10 @@ HISTORY_MSG_EPD_PARAMETRICMASK;TB - Maschera parametrica
 HISTORY_MSG_EPD_SHOWMASK;TB - Mostra maschera
 HISTORY_MSG_EXPOSURE_BLACK;Exposure - Punto nero
 HISTORY_MSG_EXPOSURE_HRBLUR;Exposure - Sfumatura propagazione colore
+HISTORY_MSG_FILMNEGATIVE_BALANCE;PN - Uscita di riferimento
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Pellicola negativa
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Colore base pellicola
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;PN - Ingresso di riferimento
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valori pellicola negativa
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field incorporato
 HISTORY_MSG_GRAIN_ENABLED;Grana pellicola
@@ -1488,14 +1491,24 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Standard Pesata
 TP_EXPOS_BLACKPOINT_LABEL;Punto del nero raw
 TP_EXPOS_WHITEPOINT_LABEL;Punto del bianco/guadagno raw
 TP_FILMNEGATIVE_BLUE;Rapporto di blu
+TP_FILMNEGATIVE_BLUEBALANCE;Freddo/Caldo
+TP_FILMNEGATIVE_COLORSPACE;Spazio colore di inversione:
+TP_FILMNEGATIVE_COLORSPACE_INPUT;Spazio colore di ingresso
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;Seleziona lo spazio colore usato per effettuare l'inversione del negativo:\n<b>Spazio colore di ingresso</b> : effettua l'inversione prima di applicare il profilo di ingresso, come nella precedente versione di RT.\n<b>Spazio colore di lavoro</b> : effettua l'inversione dopo il profilo di ingresso, usando il profilo di lavoro attualmente selezionato.
+TP_FILMNEGATIVE_COLORSPACE_WORKING;Spazio colore di lavoro
 TP_FILMNEGATIVE_FILMBASE_PICK;Preleva colore base pellicola
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Preleva un punto di pellicola non esposta (es. il bordo tra i fotogrammi), per ottenere il colore base effettivo della pellicola, e lo salva nel profilo di sviluppo.\nQuesto rende più semplice ottenere un bilanciamento del colore coerente quando si elaborano più immagini dallo stesso rullino.\nSi utilizza inoltre quando l'immagine convertita è molto scura, molto chiara o dal colore sbilanciato.
 TP_FILMNEGATIVE_FILMBASE_VALUES;RGB base pellicola:
-TP_FILMNEGATIVE_GREEN;Esponente di riferimento (contrasto)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Imposta automaticamente il rapporto blu/rosso prelevando due zone con tinta neutra (nessun colore) nella scena originale. Le zone dovrebbero differire in luminosità. Imposta il bilanciamento del bianco in seguito.
+TP_FILMNEGATIVE_GREEN;Esponente di riferimento
+TP_FILMNEGATIVE_GREENBALANCE;Magenta/Verde
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Imposta automaticamente il rapporto blu/rosso prelevando due zone con tinta neutra (nessun colore) nella scena originale. Le zone dovrebbero differire in luminosità.
 TP_FILMNEGATIVE_LABEL;Pellicola negativa
 TP_FILMNEGATIVE_PICK;Preleva punti neutri
 TP_FILMNEGATIVE_RED;Rapporto di rosso
+TP_FILMNEGATIVE_OUT_LEVEL;Livello di uscita
+TP_FILMNEGATIVE_REF_LABEL;Ingresso RGB: %1
+TP_FILMNEGATIVE_REF_PICK;Preleva un punto per bilanciamento del bianco
+TP_FILMNEGATIVE_REF_TOOLTIP;Seleziona una zona grigia per il bilanciamento del bianco dell'uscita, immagine positiva.
 TP_FILMSIMULATION_LABEL;Simulazione della pellicola
 TP_FILMSIMULATION_SLOWPARSEDIR;ART è configurato per cercare immagini Hald CLUT (usate per la Simulazione Pellicola) in una cartella che impiega troppo tempo per caricarsi.\nVai a Preferenze > Elaborazione Immagine > Simulazione pellicola\nper vedere quale cartella è usata. Dovresti configurare una cartella che contiene solo immagini Hald CLUT e nient'altro, oppure una cartella vuota se non vuoi usare lo strumento Simulazione Pellicola.\n\nLeggi l'articolo della Simulazione Pellicola su Rawpedia per ulteriori informazioni.\n\nVuoi annullare la scansione adesso?
 TP_FILMSIMULATION_STRENGTH;intensità

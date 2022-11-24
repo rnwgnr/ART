@@ -54,9 +54,9 @@ DYNPROFILEEDITOR_MOVE_UP;위에 이동
 DYNPROFILEEDITOR_NEW;새로
 DYNPROFILEEDITOR_NEW_RULE;새로운 동직 프로파일 규정
 DYNPROFILEEDITOR_PROFILE;처리 프로파일
-DYNPROFILEEDITOR_CUSTOMDATA;Custom Tags
-DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Tag(s)
-DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;List of <i>key=value</i> pairs of additional metadata tags to match, one per line, where <b>key</b> is the name of a tag in the syntax of Exiv2, and <b>value</b> is the value to match (use the "re:" prefix to enter a regular expression).
+DYNPROFILEEDITOR_CUSTOMDATA;맞춤 태그
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;태그
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;일치시킬 추가 메타데이터 태그의 <i>키=값</i> 쌍 목록(한 줄에 하나씩, <b>키</b>는 Exiv2 구문의 태그 이름이고 <b>값</b>은 일치시킬 값입니다(정규 표현식을 입력하려면 "re:" 접두어를  사용함).
 EDITWINDOW_TITLE;화상편집
 EDIT_OBJECT_TOOLTIP;이 기능 사용시 편의로 미리보기화면에 가이드를 표시함.
 EDIT_PIPETTE_TOOLTIP;곡선상에 조정점을 추가할 때에는, Ctrl 키를 누르면서, 미리보기 화상상에 있는 목표점을 왼쪽 클릭합니다.\n추가된 그 점을 조정하려면, Ctrl 키를 누르면서 미리보기상의 그 점에 상당하는 부분을 왼쪽 클릭합니다. 그리고 Ctrl 키를 놓고 (미묘한 조정을 할 때는 그대로) 왼쪽 버튼을 누르면서 마우스를 화면상에서 위아래로 이동하면, 그에 따라 톤 곡선이 조정됩니다.
@@ -1018,7 +1018,7 @@ PREFERENCES_DATEFORMAT;날짜 형식
 PREFERENCES_DATEFORMATHINT;<i>다음 서식을 사용할 수 있습니다.:</i>\n<b>%y</b><i> : 년</i>\n<b>%m</b><i> : 월</i>\n<b>%d</b><i> : 일</i>\n<i>\n예: 헝가리 서식의 날짜:</i>\n<b>%y/%m/%d</b>
 PREFERENCES_DENOISE_ZOOM_OUT;100%줌미만에도 노이즈 감소 효과를 미리보기에 표시함
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;주의: 이 기능은 아직 완전하게 정확이 아닙니다.
-PREFERENCES_DIRBROWSER_SINGLECLICK;Single-click activation of file browser folders
+PREFERENCES_DIRBROWSER_SINGLECLICK;한 번의 클릭으로 파일 브라우저 폴더를 활성화함
 PREFERENCES_DIRDARKFRAMES;장시간노출 노이즈 제거용 파일이 있는 디렉토리
 PREFERENCES_DIRECTORIES;디렉토리
 PREFERENCES_DIRHOME;홈 디렉토리
