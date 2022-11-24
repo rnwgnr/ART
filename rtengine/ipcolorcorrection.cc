@@ -560,8 +560,15 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         {
             vfloat R, G, B;
             Color::yuv2rgb(Y, u, v, R, G, B, vws);
+            float Rk, Gk, Bk;
             for (int k = 0; k < 4; ++k) {
-                lut[region]->apply_single(R[k], G[k], B[k]);
+                Rk = R[k];
+                Gk = G[k];
+                Bk = B[k];
+                lut[region]->apply_single(Rk, Gk, Bk);
+                R[k] = Rk;
+                B[k] = Bk;
+                G[k] = Gk;
             }
             Color::rgb2yuv(R, G, B, Y, u, v, vws);
         };
