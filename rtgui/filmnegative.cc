@@ -215,37 +215,19 @@ FilmNegative::FilmNegative() :
     refSpotButton->set_tooltip_text(M("TP_FILMNEGATIVE_REF_TOOLTIP"));
 
     setExpandAlignProperties(refInputLabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-//    refInputLabel->set_justify(Gtk::Justification::JUSTIFY_CENTER);
-//    refInputLabel->set_line_wrap(true);
-
-    // TODO make spot size configurable ?
-
-    // Gtk::Label* slab = Gtk::manage (new Gtk::Label (M("TP_WBALANCE_SIZE")));
-    // setExpandAlignProperties(slab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-
-    // Gtk::Grid* wbsizehelper = Gtk::manage(new Gtk::Grid());
-    // wbsizehelper->set_name("WB-Size-Helper");
-    // setExpandAlignProperties(wbsizehelper, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-
-    // spotsize = Gtk::manage (new MyComboBoxText ());
-    // setExpandAlignProperties(spotsize, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
-    // spotsize->append ("2");
-    // spotsize->set_active(0);
-    // spotsize->append ("4");
-
-    // spotgrid->attach(*spotButton, 0, 1, 1, 1);
-    // spotgrid->attach (*slab, 1, 0, 1, 1);
-    // spotgrid->attach (*wbsizehelper, 2, 0, 1, 1);
 
     colorSpace->append(M("TP_FILMNEGATIVE_COLORSPACE_INPUT"));
     colorSpace->append(M("TP_FILMNEGATIVE_COLORSPACE_WORKING"));
     setExpandAlignProperties(colorSpace, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
     colorSpace->set_tooltip_markup(M("TP_FILMNEGATIVE_COLORSPACE_TOOLTIP"));
 
-    Gtk::Grid* csGrid = Gtk::manage(new Gtk::Grid());
+    csGrid = Gtk::manage(new Gtk::Grid());
     Gtk::Label* csLabel = Gtk::manage(new Gtk::Label(M("TP_FILMNEGATIVE_COLORSPACE")));
     csGrid->attach(*csLabel, 0, 0, 1, 1);
     csGrid->attach(*colorSpace, 1, 0, 1, 1);
+    Gtk::Image *w = Gtk::manage(new RTImage("warning-small.png"));
+    w->set_tooltip_markup(M("GENERAL_DEPRECATED_TOOLTIP"));
+    csGrid->attach(*w, 2, 0, 1, 1);
 
     pack_start(*csGrid);
 
@@ -258,16 +240,10 @@ FilmNegative::FilmNegative() :
     pack_start(*blueRatio, Gtk::PACK_SHRINK, 0);
     pack_start(*spotButton, Gtk::PACK_SHRINK, 0);
 
-//    pack_start(*oldMethod, Gtk::PACK_SHRINK, 0);
-
     Gtk::Separator* const sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
     sep->get_style_context()->add_class("grid-row-separator");
     pack_start(*sep, Gtk::PACK_SHRINK, 0);
 
-//    Gtk::Grid* const fbGrid = Gtk::manage(new Gtk::Grid());
-//    fbGrid->attach(*refInputLabel, 0, 0, 1, 1);
-//    fbGrid->attach(*filmBaseValuesLabel, 1, 0, 1, 1);
-//    pack_start(*fbGrid, Gtk::PACK_SHRINK, 0);
     pack_start(*refInputLabel, Gtk::PACK_SHRINK, 0);
 
     pack_start(*outputLevel, Gtk::PACK_SHRINK, 0);
@@ -277,7 +253,6 @@ FilmNegative::FilmNegative() :
     pack_start(*refSpotButton, Gtk::PACK_SHRINK, 0);
 
     spotButton->signal_toggled().connect(sigc::mem_fun(*this, &FilmNegative::editToggled));
-    // spotsize->signal_changed().connect( sigc::mem_fun(*this, &WhiteBalance::spotSizeChanged) );
 
     refSpotButton->signal_toggled().connect(sigc::mem_fun(*this, &FilmNegative::refSpotToggled));
 
@@ -348,6 +323,8 @@ void FilmNegative::read(const rtengine::procparams::ProcParams* pp)
     // (after processing) via FilmNegListener
     refInputLabel->set_markup(
         Glib::ustring::compose(M("TP_FILMNEGATIVE_REF_LABEL"), fmt(refInputValues)));
+
+    csGrid->set_visible(!(pp->filmNegative.backCompat == BackCompat::CURRENT && pp->filmNegative.colorSpace == rtengine::procparams::FilmNegativeParams::ColorSpace::WORKING));
 
     if (pp->filmNegative.backCompat == BackCompat::CURRENT) {
         outputLevel->show();

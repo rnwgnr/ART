@@ -127,6 +127,8 @@ private:
     Adjuster* const greenBalance;
     Adjuster* const blueBalance;
 
+    Gtk::Grid *csGrid;
+
     IdleRegister idle_register;
 
     rtengine::procparams::FilmNegativeParams initial_params;
