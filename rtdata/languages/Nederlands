@@ -33,6 +33,7 @@
 #32 27-05-2022 update to ART v1.14 by pm
 #33 13-07-2022 update to ART v1.15 by pm
 #34 24-08-2022 update to ART v1.16 by pm
+#35 24-11-2022 update to ART v1.17 by pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -80,6 +81,9 @@ DYNPROFILEEDITOR_MOVE_UP;Naar boven
 DYNPROFILEEDITOR_NEW;Nieuw
 DYNPROFILEEDITOR_NEW_RULE;Nieuwe dynamische profielregel
 DYNPROFILEEDITOR_PROFILE;Verwerkingsprofiel
+DYNPROFILEEDITOR_CUSTOMDATA;Aangepaste tags
+DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Tag(s)
+DYNPROFILEEDITOR_CUSTOMDATA_TOOLTIP;Lijst met <i>sleutel=waarde</i>-paren van extra metadata-tags, een per regel, waar <b>sleutel</b> de naam van een tag is in de syntax van Exiv2, en <b>waarde</b> de waarde is die je zoekt (begin met "re:" om een reguliere expressie in te voeren).
 EDIT_OBJECT_TOOLTIP;Toont een widget in het voorbeeldscherm waarmee de werking van dit gereedschap aangepast kan worden
 EDIT_PIPETTE_TOOLTIP;Voeg een punt aan de curve toe met Ctrl+klik op de gewenste plek in het voorbeeld.\nOm dit punt te wijzigen, doe Ctrl+klik op het gewenste gebied in het voorbeeld, laat dan de Ctrl+toets los (behalve wanneer fijnmazige controle gewenst is), blijf de linkermuisknop ingedrukt houden en beweeg de muis naar boven of beneden om dit punt te verschuiven op de curve.
 EDITWINDOW_TITLE;Bewerk afbeelding
@@ -586,9 +590,11 @@ HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - nabewerking masker
 HISTORY_MSG_EPD_SHOWMASK;TV - toon masker
 HISTORY_MSG_EXPOSURE_BLACK;Zwartpuntcompensatie
 HISTORY_MSG_EXPOSURE_HRBLUR;Belichting - gladheid kleurverspreiding
+HISTORY_MSG_FILMNEGATIVE_BALANCE;FN - Referentie uitvoer
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatief
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Basiskleur film
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Referentie invoer
 HISTORY_MSG_FLATFIELD_EMBEDDED;Ingebed vlakveld
 HISTORY_MSG_GRAIN_ENABLED;Filmkorrel
 HISTORY_MSG_GRAIN_ISO;Filmkorrel - ISO
@@ -1024,6 +1030,7 @@ PREFERENCES_DATEFORMAT;Datumformaat
 PREFERENCES_DATEFORMATHINT;U kunt de volgende formaten gebruiken:\n<b>%y</b>  jaar\n<b>%m</b>  maand\n<b>%d</b> dag\nHet Nederlandse datumformaat is \n<b>%d/%m/%y</b>
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;Maar dit is nog steeds niet volledig accuraat...
 PREFERENCES_DENOISE_ZOOM_OUT;Toon effect ruisonderdrukking in voorbeeldvenster bij <100% zoom
+PREFERENCES_DIRBROWSER_SINGLECLICK;Open mappen in de Bestandsnavigator met een enkele muisklik
 PREFERENCES_DIRDARKFRAMES;Map met donkerframes
 PREFERENCES_DIRECTORIES;Mappen
 PREFERENCES_DIRHOME;Standaardmap
@@ -1486,14 +1493,24 @@ TP_EXPOSURE_TCMODE_STANDARD;Standaard
 TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Gewogen standaard
 TP_EXPOS_WHITEPOINT_LABEL;Raw-witpunten
 TP_FILMNEGATIVE_BLUE;Blauwe ratio
+TP_FILMNEGATIVE_BLUEBALANCE;Koel/Warm
 TP_FILMNEGATIVE_FILMBASE_PICK;Kies basiskleur film
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;Klik op een stuk onbelichte film (bijvoorbeeld de verticale strook tussen twee foto's) om de basiskleur van deze film te bepalen, en bewaar deze waarden in een verwerkingsprofiel.\nDit maakt de kleurbalans consistenter wanneer meerdere foto's van dezelfde filmrol worden verwerkt. \nGebruik dit ook als het geconverteerde beeld erg donker of te helder is, of wanneer de kleuren uit balans zijn.
 TP_FILMNEGATIVE_FILMBASE_VALUES;Basiskleur film RGB:
-TP_FILMNEGATIVE_GREEN;Referentie-exponent (contrast)
-TP_FILMNEGATIVE_GUESS_TOOLTIP;Stelt automatisch de rode en blauwe ratio's in door twee patches met een neutrale toon (geen kleur) in de oorspronkelijke afbeelding te kiezen. Deze patches moeten een verschillende helderheid hebben. Stel de witbalans nadien in. 
+TP_FILMNEGATIVE_GREEN;Referentie-exponent
+TP_FILMNEGATIVE_GREENBALANCE;Magenta/Groen
+TP_FILMNEGATIVE_GUESS_TOOLTIP;Stelt automatisch de rode en blauwe ratio's in door twee patches met een neutrale toon (geen kleur) in de oorspronkelijke afbeelding te kiezen. Deze patches moeten een verschillende helderheid hebben.
 TP_FILMNEGATIVE_LABEL;Filmnegatief
 TP_FILMNEGATIVE_PICK;Kies neutrale punten
 TP_FILMNEGATIVE_RED;Rode ratio
+TP_FILMNEGATIVE_COLORSPACE;Kleurruimte omkering:
+TP_FILMNEGATIVE_COLORSPACE_INPUT;Kleurruimte invoer
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;Selecteer de kleurruimte waarin de negatief-omkering gedaan zal worden:\n<b>Kleurruimte invoer</b> : pas de omkering toe voordat het invoerprofiel wordt toegepast, zoals in eerdere versies van RawTherapee.\n<b>Werk-kleurruimte</b> : pas de omkering toe ná het invoerprofiel en gebruik het huidig geselecteerde werkprofiel.
+TP_FILMNEGATIVE_COLORSPACE_WORKING;Werk-kleurruimte
+TP_FILMNEGATIVE_OUT_LEVEL;Uitvoerniveau
+TP_FILMNEGATIVE_REF_LABEL;Invoer RGB: %1
+TP_FILMNEGATIVE_REF_PICK;Kies plek voor witbalans
+TP_FILMNEGATIVE_REF_TOOLTIP;Kies een grijs vlak om de kleurbalans van de uitvoerafbeelding (het positieve beeld) te bepalen.
 TP_FILMSIMULATION_LABEL;Filmsimulatie
 TP_FILMSIMULATION_SLOWPARSEDIR;ART is ingesteld om naar Hald CLUT-afbeeldingen te zoeken die gebruikt worden voor het Filmsimulatie-gereedschap, in een map die teveel tijd vraagt om te laden.\nGa naar Voorkeuren > Beeldverwerking > Filmsimulatie\nom te zien welke map hiervoor gebruikt wordt. U moet ART naar een map verwijzen die alleen Hald CLUT-afbeeldingen bevat en verder niets, of naar een lege map verwijzen als u Filmsimulatie niet wilt gebruiken.\n\nLees het artikel over Filmsimulatie in RawPedia voor meer informatie.\n\nWilt u de scan nu afbreken?
 TP_FILMSIMULATION_STRENGTH;Kracht
