@@ -84,7 +84,7 @@ FILE* g_fopen_withBinaryAndLock(const Glib::ustring& fname)
 
 Glib::ustring ImageIO::errorMsg[6] = {"Success", "Cannot read file.", "Invalid header.", "Error while reading header.", "File reading error", "Image format not supported."};
 
-void ImageIO::setOutputProfile  (const char* pdata, int plen)
+void ImageIO::setOutputProfile(const char* pdata, int plen)
 {
 
     delete [] profileData;
@@ -1477,6 +1477,11 @@ bool ImageIO::saveMetadata(const Glib::ustring &fname) const
     if (has_meta) {
         try {
             metadataInfo.saveToImage(pl, fname, false);
+            if (!profileData) {
+                Exiv2Metadata outmd(fname);
+                outmd.exifData()["Exif.Photo.ColorSpace"] = 1;
+                outmd.saveToImage(nullptr, fname, true);
+            }
         } catch (std::exception &exc) {
             //std::cout << "EXIF ERROR: " << exc.what() << std::endl;
             //return false;
