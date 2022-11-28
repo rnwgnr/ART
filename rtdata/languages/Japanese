@@ -16,7 +16,7 @@
 #15 2022-05-27 Ohnishi, Yasuo, updates for 1.14
 #16 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 #17 2022-08-24 Ohnishi, Yasuo, updates for 1.16
-#18 2022-11-23 Ohnishi, Yasuo, updates for 1.16.4
+#18 2022-11-28 Ohnishi, Yasuo, updates for 1.17
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -236,7 +236,7 @@ FILECHOOSER_FILTER_PP;処理プロファイル
 FILECHOOSER_FILTER_SAME;現在の画像と同じフォーマット
 FILECHOOSER_FILTER_TIFF;TIFFファイル
 FILECHOOSER_FILTER_LUT;サポートされている LUT ファイル
-GENERAL_ABOUT;RawTherapeeについて..
+GENERAL_ABOUT;本ソフトウェアについて..
 GENERAL_AFTER;補正後
 GENERAL_APPLY;適用
 GENERAL_ASIMAGE;画像通り
@@ -266,8 +266,8 @@ GENERAL_SAVE_AS;...で保存
 GENERAL_SLIDER;スライダー
 GENERAL_UNCHANGED;(変更なし)
 GENERAL_WARNING;警告
-GENERAL_DEPRECATED;Deprecated
-GENERAL_DEPRECATED_TOOLTIP;<b>廃止予定 (Deprecated) !</b> は 将来のバージョンで削除されます.
+GENERAL_DEPRECATED;非推奨
+GENERAL_DEPRECATED_TOOLTIP;<b>非推奨 (Deprecated) !</b> は 将来のバージョンで削除されます.
 GIMP_PLUGIN_INFO;ART GIMPプラグインにようこそ！\n画像編集終了後 単にARTのメインウィンドウを閉じるだけで 画像が自動的にGIMPに送られます.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), peak: %5 (%6)\n    range: %7 EV, values: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;ブルー･ヒストグラム 表示/非表示
@@ -345,6 +345,7 @@ HISTORY_MSG_68;ハイライト復元 方式
 HISTORY_MSG_69;作業色空間
 HISTORY_MSG_70;出力色空間
 HISTORY_MSG_71;入力色空間
+HISTORY_MSG_72;周辺光量補正 - 補正量
 HISTORY_MSG_73;チャンネルミキサー
 HISTORY_MSG_74;リサイズ スケール
 HISTORY_MSG_75;リサイズ 方式
@@ -1504,7 +1505,7 @@ TP_FILMNEGATIVE_PICK;無彩色点をピックアップ
 TP_FILMNEGATIVE_RED;レッドの比率
 TP_FILMNEGATIVE_COLORSPACE;色空間の反転:
 TP_FILMNEGATIVE_COLORSPACE_INPUT;色空間の入力
-TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;ネガ反転に使う色空間を選択します:\n<b>色空間の入力</b> : 入力プロファイル適用前に反転を行います (以前のバージョンのRTと同様)\n<b>作業色空間</b> : 入力プロファイル適用後反転を行います 現行の作業プロファイルが使われます
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;ネガ反転に使う色空間を選択します:\n<b>色空間の入力</b> : 入力プロファイル適用前に反転を行います (以前のバージョンと同様)\n<b>作業色空間</b> : 入力プロファイル適用後反転を行います 現行の作業プロファイルが使われます
 TP_FILMNEGATIVE_COLORSPACE_WORKING;作業色空間
 TP_FILMNEGATIVE_OUT_LEVEL;出力レベル
 TP_FILMNEGATIVE_REF_LABEL;入力 RGB: %1

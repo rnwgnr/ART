@@ -330,6 +330,7 @@ HISTORY_MSG_68;Exposure - HLR reconstruction
 HISTORY_MSG_69;Working color space
 HISTORY_MSG_70;Output color space
 HISTORY_MSG_71;Input color space
+HISTORY_MSG_72;Vignetting correction - Amount
 HISTORY_MSG_73;Channel Mixer
 HISTORY_MSG_74;Resize - Scale
 HISTORY_MSG_75;Resize - Method
@@ -1823,7 +1824,6 @@ TP_RESET_DEFAULT;Reset to default
 TP_RESET_SAVED;Reset to last saved
 TP_RESIZE_ALLOW_UPSCALING;Allow Upscaling
 TP_RESIZE_APPLIESTO;Applies to:
-TP_RESIZE_ALLOW_UPSCALING;Allow Upscaling
 TP_RESIZE_CROPPEDAREA;Cropped Area
 TP_RESIZE_FITBOX;Bounding Box
 TP_RESIZE_FULLIMAGE;Full Image

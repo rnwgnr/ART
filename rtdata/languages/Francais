@@ -329,6 +329,7 @@ HISTORY_MSG_68;Reconst. HL - Méthode
 HISTORY_MSG_69;Espace colorimétrique de travail
 HISTORY_MSG_70;Espace colorimétrique de sortie
 HISTORY_MSG_71;Espace colorimétrique d'entrée
+HISTORY_MSG_72;Correction du vignettage - quantité
 HISTORY_MSG_73;Mixeur des canaux
 HISTORY_MSG_74;Redimensionnement - Échelle
 HISTORY_MSG_75;Méthode de redimensionnement
@@ -1823,7 +1824,6 @@ TP_RESET_DEFAULT;Réinitialiser à la valeur par défaut
 TP_RESET_SAVED;réinitialiser à la dernière valeur sauvegardée
 TP_RESIZE_ALLOW_UPSCALING;Autoriser l'agrandissement
 TP_RESIZE_APPLIESTO;S'applique à :
-TP_RESIZE_ALLOW_UPSCALING;Autoriser l'agrandissement
 TP_RESIZE_CROPPEDAREA;La zone rognée
 TP_RESIZE_FITBOX;Une boîte englobante
 TP_RESIZE_FULLIMAGE;L'image entière

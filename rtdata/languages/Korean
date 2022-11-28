@@ -7,7 +7,7 @@
 #06 2022-05-27 Ohnishi, Yasuo, updates for 1.14
 #07 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 #08 2022-08-24 Ohnishi, Yasuo, updates for 1.16
-#09 2022-11-23 Ohnishi, Yasuo, updates for 1.16.4
+#09 2022-11-28 Ohnishi, Yasuo, updates for 1.17
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -336,6 +336,7 @@ HISTORY_MSG_68;하이라이트복원 방식
 HISTORY_MSG_69;작업 색 공간
 HISTORY_MSG_70;출력 색 공간
 HISTORY_MSG_71;입력 색 공간
+HISTORY_MSG_72;주변광량 보정 - 보정량
 HISTORY_MSG_73;채널믹서
 HISTORY_MSG_74;크기 조정 척도
 HISTORY_MSG_75;크기 조정 방식
@@ -572,11 +573,11 @@ HISTORY_MSG_EPD_PARAMETRICMASK;TB - 매개 변수 지정 마스크
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - 마스크추가처리
 HISTORY_MSG_EXPOSURE_BLACK;노출 - 블랙 포인트
 HISTORY_MSG_EXPOSURE_HRBLUR;노출 - 색 파급 (Color propagation) 매끄러움
-HISTORY_MSG_FILMNEGATIVE_BALANCE;네거필름 - 기준 출력
-HISTORY_MSG_FILMNEGATIVE_ENABLED;네거필름
+HISTORY_MSG_FILMNEGATIVE_BALANCE;FN - Reference output
+HISTORY_MSG_FILMNEGATIVE_ENABLED;네가필름
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;필름 기본색
-HISTORY_MSG_FILMNEGATIVE_VALUES;네거필름값
-HISTORY_MSG_FILMNEGATIVE_REF_SPOT;네거필름 - 기준 입력
+HISTORY_MSG_FILMNEGATIVE_VALUES;네가필름값
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Reference input
 HISTORY_MSG_FLATFIELD_EMBEDDED;센서의 오점 그늘 제거- 메타데이터에 포함
 HISTORY_MSG_GRAIN_ENABLED;필름 효과
 HISTORY_MSG_GRAIN_ISO;필름 효과 - ISO
@@ -915,7 +916,7 @@ PARTIALPASTE_EQUALIZER;웨이블릿
 PARTIALPASTE_EVERYTHING;모두
 PARTIALPASTE_EXIFCHANGES;exif 데이터 변경
 PARTIALPASTE_EXPOSURE;노출량
-PARTIALPASTE_FILMNEGATIVE;네거필름
+PARTIALPASTE_FILMNEGATIVE;네가필름
 PARTIALPASTE_FILMSIMULATION;필름 시뮬레이션
 PARTIALPASTE_FLATFIELDAUTOSELECT;센서의 오점 그늘 제거 - 자동선택
 PARTIALPASTE_FLATFIELDBLURRADIUS;센서의 오점 그늘 제거 - 흐림 (Blur) 반경
@@ -1018,7 +1019,7 @@ PREFERENCES_DATEFORMAT;날짜 형식
 PREFERENCES_DATEFORMATHINT;<i>다음 서식을 사용할 수 있습니다.:</i>\n<b>%y</b><i> : 년</i>\n<b>%m</b><i> : 월</i>\n<b>%d</b><i> : 일</i>\n<i>\n예: 헝가리 서식의 날짜:</i>\n<b>%y/%m/%d</b>
 PREFERENCES_DENOISE_ZOOM_OUT;100%줌미만에도 노이즈 감소 효과를 미리보기에 표시함
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;주의: 이 기능은 아직 완전하게 정확이 아닙니다.
-PREFERENCES_DIRBROWSER_SINGLECLICK;한 번의 클릭으로 파일 브라우저 폴더를 활성화함
+PREFERENCES_DIRBROWSER_SINGLECLICK;Single-click activation of file browser folders
 PREFERENCES_DIRDARKFRAMES;장시간노출 노이즈 제거용 파일이 있는 디렉토리
 PREFERENCES_DIRECTORIES;디렉토리
 PREFERENCES_DIRHOME;홈 디렉토리
@@ -1483,19 +1484,19 @@ TP_EXPOSURE_TCMODE_WEIGHTEDSTD;가중평균
 TP_EXPOS_BLACKPOINT_LABEL;raw 블랙 포인트
 TP_EXPOS_WHITEPOINT_LABEL;raw 증폭 (Gain) /화이트 포인트
 TP_FILMNEGATIVE_BLUE;Blue 비율
-TP_FILMNEGATIVE_BLUEBALANCE;따뚯함/차가움
+TP_FILMNEGATIVE_BLUEBALANCE;Cool/Warm
 TP_FILMNEGATIVE_FILMBASE_PICK;필름 기본색 취득
 TP_FILMNEGATIVE_FILMBASE_TOOLTIP;실제 필름 기본 색깔 값을 취득하기 위해,필름 미노광부분을 찾고 (예: 프레임간의 경계) 현상 프로파일에 보존합니다.\n이 기능은 같은 필름롤에 있는 복수의 사진을 일괄 현상 처리를 할 때, 더 일관한 색깔 균형을 쉽게 얻을 수 있게 합니다.\n또한 반전하는 이미지가 극단적으로 어둡이거나 밝이거나, 색깔  균형이 잃었을 때 사용합니다.
 TP_FILMNEGATIVE_FILMBASE_VALUES;필름 기본RGB:
-TP_FILMNEGATIVE_GREEN;기준지수
-TP_FILMNEGATIVE_GREENBALANCE;마젠타/그린
-TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색조가 무채색이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다.
-TP_FILMNEGATIVE_LABEL;네거필름
+TP_FILMNEGATIVE_GREEN;기준지수 (대비)
+TP_FILMNEGATIVE_GREENBALANCE;Magenta/Green
+TP_FILMNEGATIVE_GUESS_TOOLTIP;원화상 중, 색조가 무채색이고 밝기가 다른 두군데를 찾아 Red와 Blue의 비율을 자동적으로  설정합니다. 그 후, 화이트 밸런스를  설정합니다.
+TP_FILMNEGATIVE_LABEL;네가필름
 TP_FILMNEGATIVE_PICK;무채색이 되어야 할 곳 찾기
 TP_FILMNEGATIVE_RED;Red 비율
 TP_FILMNEGATIVE_COLORSPACE;색공간 반전:
 TP_FILMNEGATIVE_COLORSPACE_INPUT;색공간 입력
-TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;음화 반전에 사용되는 색공간을 선택합니다:\n<b>Input color space</b> : 입력 프로파일 적용전에 반전을 실행합니다. (이전의 RT와 같은 방식)\n<b>작업 색공간</b> : 입력 프로파일 적용후에 반전을 실행합니다.현행 작업 색공간이 사용됩니다.
+TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;음화 반전에 사용되는 색공간을 선택합니다:\n<b>Input color space</b> : 입력 프로파일 적용전에 반전을 실행합니다. (이전와 같은 방식)\n<b>작업 색공간</b> : 입력 프로파일 적용후에 반전을 실행합니다.현행 작업 색공간이 사용됩니다.
 TP_FILMNEGATIVE_COLORSPACE_WORKING;직압 색공간
 TP_FILMNEGATIVE_OUT_LEVEL;출력 수준
 TP_FILMNEGATIVE_REF_LABEL;입력 RGB: %1
