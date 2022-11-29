@@ -268,3 +268,17 @@ void BatchQueueEntry::_updateImage (guint8* img, int w, int h)
     delete [] img;
 }
 
+
+void BatchQueueEntry::customBackBufferUpdate(Cairo::RefPtr<Cairo::Context> c)
+{
+    if (params.crop.enabled) {
+        int w, h;
+        thumbnail->getOriginalSize(w, h, true);
+        if (h > 0) {
+            double cur_scale = double(preh) / double(h);
+            auto cparams = params.crop;
+            cparams.guide = "Frame";
+            drawCrop (c, prex, prey, prew, preh, 0, 0, cur_scale, cparams, true, false);
+        }
+    }
+}

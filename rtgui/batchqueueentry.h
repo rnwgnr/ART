@@ -37,7 +37,9 @@ class BatchQueueEntry : public ThumbBrowserEntryBase, public BQEntryUpdateListen
     int origpw, origph;
     BatchQueueEntryIdleHelper* bqih;
     static bool iconsLoaded;
-
+ 
+    void customBackBufferUpdate(Cairo::RefPtr<Cairo::Context> c) override;
+   
 public:
 
     static Glib::RefPtr<Gdk::Pixbuf> savedAsIcon;
