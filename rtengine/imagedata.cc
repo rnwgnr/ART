@@ -20,7 +20,7 @@
 #include <strings.h>
 #include <glib/gstdio.h>
 #include <tiff.h>
-#include <regex>
+#include <glibmm/regex.h>
 #include <sstream>
 
 #include "imagedata.h"
@@ -302,7 +302,7 @@ FramesData::FramesData(const Glib::ustring &fname):
             }
             lens = buf.str();
         }
-        if (lens.empty() || lens.find_first_not_of('-') == std::string::npos || std::regex_match(lens, std::regex("\\([0-9]+\\)"))) {
+        if (lens.empty() || lens.find_first_not_of('-') == std::string::npos || Glib::Regex::match_simple("\\([0-9]+\\)", lens)) {
             lens = "Unknown";
         }
 
@@ -340,10 +340,15 @@ FramesData::FramesData(const Glib::ustring &fname):
             find_exif_tag("Exif.Image.ImageDescription")) {
             std::string s = pos->toString();
             std::string line;
-            std::smatch m;
+            Glib::MatchInfo m;
+            auto iso_re = Glib::Regex::create("ISO: +([0-9]+) *");
+            auto aperture_re = Glib::Regex::create("Aperture: +F([0-9.]+) *");
+            auto shutter_re = Glib::Regex::create("Shutter: +([0-9.]+) *");
+            auto lens_re = Glib::Regex::create("Lens \\(mm\\): +([0-9.]+) *");
+            auto expcomp_re = Glib::Regex::create("Exp Comp: +([0-9.]+) *");
             const auto d =
                 [&m]() -> double {
-                    std::string s = m[1];
+                    std::string s = m.fetch(1);
                     return atof(s.c_str());
                 };
             while (true) {
@@ -354,18 +359,18 @@ FramesData::FramesData(const Glib::ustring &fname):
                 auto line = s.substr(0, p);
                 s = s.substr(p+1);
 
-                if (std::regex_match(line, m, std::regex("ISO: +([0-9]+) *"))) {
+                if (iso_re->match(line, m)) {
                     iso_speed = d();
-                } else if (std::regex_match(line, m, std::regex("Aperture: +F([0-9.]+) *"))) {
+                } else if (aperture_re->match(line, m)) {
                     aperture = d();
-                } else if (std::regex_match(line, m, std::regex("Shutter: +([0-9.]+) *"))) {
+                } else if (shutter_re->match(line, m)) {
                     shutter = d();
                     if (shutter) {
                         shutter = 1.0/shutter;
                     }
-                } else if (std::regex_match(line, m, std::regex("Lens \\(mm\\): +([0-9.]+) *"))) {
+                } else if (lens_re->match(line, m)) {
                     focal_len = d();
-                } else if (std::regex_match(line, m, std::regex("Exp Comp: +([0-9.]+) *"))) {
+                } else if (expcomp_re->match(line, m)) {
                     expcomp = d();
                 }
             }
