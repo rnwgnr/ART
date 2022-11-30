@@ -177,6 +177,20 @@ void Crop::update(int todo)
     bool needstransform  = parent->ipf.needsTransform();
     bool show_denoise = params.denoise.enabled && (skip == 1 || options.denoiseZoomedOut);
 
+    const auto invert_negative =
+        [&](Imagefloat *img) -> bool
+        {
+            bool converted = false;
+            if (params.filmNegative.enabled) {
+                if (params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::WORKING) {
+                    converted = true;
+                    parent->imgsrc->convertColorSpace(img, params.icm, parent->currWB);
+                } 
+                parent->ipf.filmNegativeProcess(img, img, params.filmNegative, params.raw, parent->imgsrc, parent->currWB);
+            }
+            return converted;
+        };
+
     if (todo & M_INIT) {
         MyMutex::MyLock lock(parent->minit);  // Also used in improccoord
 
@@ -189,20 +203,9 @@ void Crop::update(int todo)
         PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
         parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.exposure, params.raw);
         
-        // if ((todo & M_SPOT) && params.spot.enabled && !params.spot.entries.empty()) {
-        //     spotsDone = true;
-        //     PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-        //     parent->ipf.removeSpots(origCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, nullptr, tr);
-        // }
-
-        if (params.filmNegative.enabled && params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::INPUT) {
-            parent->ipf.filmNegativeProcess(origCrop, origCrop, params.filmNegative);
+        if (!invert_negative(origCrop)) {
+            parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
         }
-        parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
-
-        if (params.filmNegative.enabled && params.filmNegative.colorSpace != FilmNegativeParams::ColorSpace::INPUT) {
-            parent->ipf.filmNegativeProcess(origCrop, origCrop, params.filmNegative);
-        }        
     }
 
     Imagefloat *hdr_base_crop = origCrop;
@@ -290,7 +293,9 @@ void Crop::update(int todo)
                 PreviewProps pp(0, 0, parent->fw, parent->fh, skip);
                 int tr = getCoarseBitMask(params.coarse);
                 parent->imgsrc->getImage(parent->currWB, tr, f, pp, params.exposure, params.raw);
-                parent->imgsrc->convertColorSpace(f, params.icm, parent->currWB);
+                if (!invert_negative(f)) {
+                    parent->imgsrc->convertColorSpace(f, params.icm, parent->currWB);
+                }
 
                 if (copy_from_earlier_steps) {
                     // copy the denoised crop
