@@ -7261,7 +7261,7 @@ void CLASS apply_tiff()
 	  !strcasestr(make,"Kodak") && !strstr(model2,"DEBUG RAW")))
       is_raw = 0;
     // ART
-    if (is_raw && raw >= 0 && tiff_ifd[raw].phint == 2 && tiff_ifd[raw].extrasamples > 0 && tiff_ifd[raw].samples > 3) {
+    if (is_raw && raw >= 0 && tiff_ifd[raw].phint == 2 && tiff_ifd[raw].extrasamples > 0 && tiff_ifd[raw].samples > 3 && !(is_raw == 4 && load_raw == &CLASS sony_arq_load_raw)) {
         is_raw = 0; // SKIP RGB+Alpha IFDs
     }
   }
