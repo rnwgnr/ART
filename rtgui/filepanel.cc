@@ -363,7 +363,8 @@ bool FilePanel::imageLoaded( Thumbnail* thm, ProgressConnector<rtengine::Initial
 #ifdef WIN32
 MAXGDIHANDLESREACHED:
 #endif
-        delete pl->pc;
+        //delete pl->pc;
+        pl->pc->destroy();
 
         {
             GThreadLock lock; // Acquiring the GUI... not sure that it's necessary, but it shouldn't harm

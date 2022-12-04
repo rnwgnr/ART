@@ -24,6 +24,7 @@
 #include "../rtengine/rtengine.h"
 #include "guiutils.h"
 #include "../rtengine/threadpool.h"
+#include <mutex>
 
 #undef THREAD_PRIORITY_NORMAL
 
@@ -73,10 +74,10 @@ class ProgressConnector {
     sigc::signal0<bool> opEnd;
     T retval;
     bool working_;
+    std::mutex mtx_;
 
     static int emitEndSignalUI(void* data)
     {
-
         sigc::signal0<bool>* opEnd = (sigc::signal0<bool>*) data;
         int r = opEnd->emit ();
         delete opEnd;
@@ -86,6 +87,7 @@ class ProgressConnector {
 
     void workingThread()
     {
+        std::unique_lock<std::mutex> lock(mtx_);
         retval = opStart.emit ();
         gdk_threads_add_idle(ProgressConnector<T>::emitEndSignalUI, new sigc::signal0<bool>(opEnd));
         working_ = false;
@@ -107,5 +109,11 @@ public:
     T returnValue()
     {
         return retval;
+    }
+
+    void destroy()
+    {
+        std::unique_lock<std::mutex> lock(mtx_);
+        delete this;
     }
 };

@@ -1963,7 +1963,8 @@ void EditorPanel::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams)
 {
     rtengine::IImagefloat* img = pc->returnValue();
-    delete pc;
+    //delete pc;
+    pc->destroy();
 
     if (img) {
         setProgressStr (M ("GENERAL_SAVE"));
@@ -2038,7 +2039,8 @@ bool EditorPanel::idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImagef
 
     setProgressState (false);
 
-    delete pc;
+    //delete pc;
+    pc->destroy();
     SoundManager::playSoundAsync (options.sndBatchQueueDone);
     isProcessing = false;
     return false;
@@ -2282,7 +2284,8 @@ bool EditorPanel::idle_sendToGimp ( ProgressConnector<rtengine::IImagefloat*> *p
 {
 
     rtengine::IImagefloat* img = pc->returnValue();
-    delete pc;
+    //delete pc;
+    pc->destroy();
 
     if (img) {
         // get file name base
@@ -2348,7 +2351,8 @@ bool EditorPanel::idle_sentToGimp (ProgressConnector<int> *pc, rtengine::IImagef
     img->free ();
     int errore = pc->returnValue();
     setProgressState(false);
-    delete pc;
+    //delete pc;
+    pc->destroy();
 
     if (!errore) {
         saveimgas->set_sensitive (true);
