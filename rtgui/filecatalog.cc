@@ -644,8 +644,11 @@ void FileCatalog::closeDir ()
     //     filterPanel->set_sensitive (false);
     // }
 
+    if (dir_refresh_conn_.connected()) {
+        dir_refresh_conn_.disconnect();
+    }
     if (dirMonitor) {
-        dirMonitor->cancel ();
+        dirMonitor->cancel();
     }
 
     // ignore old requests
@@ -875,8 +878,8 @@ void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring
             filepanel->loadingThumbs(M("PROGRESSBAR_LOADINGTHUMBS"), 0);
         }
 
-        dirMonitor = dir->monitor_directory ();
-        dirMonitor->signal_changed().connect (sigc::bind(sigc::mem_fun(*this, &FileCatalog::on_dir_changed), false));
+        dirMonitor = dir->monitor_directory();
+        dirMonitor->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &FileCatalog::on_dir_changed), false));
     } catch (Glib::Exception& ex) {
         std::cout << ex.what();
     }
@@ -1792,12 +1795,28 @@ void FileCatalog::on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Gli
 
     if (options.has_retained_extention(file->get_parse_name())
             && (event_type == Gio::FILE_MONITOR_EVENT_CREATED || event_type == Gio::FILE_MONITOR_EVENT_DELETED || event_type == Gio::FILE_MONITOR_EVENT_CHANGED)) {
-        if (!internal) {
-            GThreadLock lock;
-            reparseDirectory ();
-        } else {
-            reparseDirectory ();
+        const auto doit =
+            [this,internal]() -> bool
+            {
+                if (!internal) {
+                    GThreadLock lock;
+                    reparseDirectory();
+                } else {
+                    reparseDirectory();
+                }
+                return false;
+            };
+        if (dir_refresh_conn_.connected()) {
+            dir_refresh_conn_.disconnect();
         }
+        dir_refresh_conn_ = Glib::signal_timeout().connect(sigc::slot<bool>(doit), DIR_REFRESH_DELAY);
+        
+        // if (!internal) {
+        //     GThreadLock lock;
+        //     reparseDirectory ();
+        // } else {
+        //     reparseDirectory ();
+        // }
     }
 }
 

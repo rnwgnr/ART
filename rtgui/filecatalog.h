@@ -141,7 +141,9 @@ private:
     std::set<Glib::ustring> editedFiles;
     guint modifierKey; // any modifiers held when rank button was pressed
 
+    static const unsigned int DIR_REFRESH_DELAY = 2000;
     Glib::RefPtr<Gio::FileMonitor> dirMonitor;
+    sigc::connection dir_refresh_conn_;
 
     IdleRegister idle_register;
 
@@ -159,6 +161,8 @@ private:
 
     void removeFromBatchQueue(const std::vector<FileBrowserEntry*>& tbe);
     
+    void on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal);
+
 public:
     // thumbnail browsers
     FileBrowser* fileBrowser;
@@ -271,8 +275,6 @@ public:
 
     void showToolBar();
     void hideToolBar();
-
-    void on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal);
 
     void setBatchQueue(BatchQueue *bq) { bqueue_ = bq; }
 };
