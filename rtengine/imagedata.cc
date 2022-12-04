@@ -310,13 +310,15 @@ FramesData::FramesData(const Glib::ustring &fname):
             std::string datetime_taken = validateUtf8(pos->print(&exif));
             if (sscanf(datetime_taken.c_str(), "%d:%d:%d %d:%d:%d", &time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, &time.tm_min, &time.tm_sec) == 6) {
                 auto d = Glib::DateTime::create_utc(time.tm_year, time.tm_mon, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec);
-                d.get_ymd(time.tm_year, time.tm_mon, time.tm_mday);
-                time.tm_year -= 1900;
-                time.tm_mon -= 1;
-                time.tm_hour = d.get_hour();
-                time.tm_min = d.get_minute();
-                time.tm_sec = d.get_second();
-                timeStamp = d.to_unix();
+                if (d) {
+                    d.get_ymd(time.tm_year, time.tm_mon, time.tm_mday);
+                    time.tm_year -= 1900;
+                    time.tm_mon -= 1;
+                    time.tm_hour = d.get_hour();
+                    time.tm_min = d.get_minute();
+                    time.tm_sec = d.get_second();
+                    timeStamp = d.to_unix();
+                }
             }
         }
 
