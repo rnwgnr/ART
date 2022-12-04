@@ -519,6 +519,7 @@ bool FilmNegative::button1Pressed(int modifierKey)
                         );
                     }
                 }
+                switchOffEditMode();
             }
         } else if (refSpotButton->get_active()) {
             disableListener();
@@ -571,10 +572,13 @@ bool FilmNegative::button1Pressed(int modifierKey)
                     round(refInputValues.r), round(refInputValues.g), round(refInputValues.b)
                 )
             );
+            switchOffEditMode();
+        } else {
+            switchOffEditMode();
         }
+    } else {
+        switchOffEditMode();
     }
-
-    switchOffEditMode();
 
     return true;
 }
