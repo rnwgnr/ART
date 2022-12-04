@@ -273,7 +273,8 @@ Exiv2Metadata::Exiv2Metadata():
 Exiv2Metadata::Exiv2Metadata(const Glib::ustring &path):
     src_(path),
     merge_xmp_(settings->metadata_xmp_sync != Settings::MetadataXmpSync::NONE),
-    image_(nullptr)
+    image_(nullptr),
+    rating_(0)
 {
 }
 
@@ -281,7 +282,8 @@ Exiv2Metadata::Exiv2Metadata(const Glib::ustring &path):
 Exiv2Metadata::Exiv2Metadata(const Glib::ustring &path, bool merge_xmp_sidecar):
     src_(path),
     merge_xmp_(merge_xmp_sidecar),
-    image_(nullptr)
+    image_(nullptr),
+    rating_(0)
 {
 }
 
