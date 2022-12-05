@@ -17,6 +17,7 @@
 #16 2022-07-12 mrleemon, update for 1.15
 #17 2022-08-24 mrleemon, update for 1.16
 #18 2022-11-23 mrleemon, update for 1.17
+#19 2022-12-01 mrleemon, update for 1.17.2
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -346,6 +347,7 @@ HISTORY_MSG_68;Exposició - Recuperació d'altes llums
 HISTORY_MSG_69;Espai de color de treball
 HISTORY_MSG_70;Espai de color de sortida
 HISTORY_MSG_71;Espai de color d'entrada
+HISTORY_MSG_72;Correcció de vinyetatge - Quantitat
 HISTORY_MSG_73;Mesclador de canals
 HISTORY_MSG_74;Canviar mida - Escala
 HISTORY_MSG_75;Canviar mida - Mètode
@@ -1844,7 +1846,6 @@ TP_RESET_DEFAULT;Restableix al valor predeterminat
 TP_RESET_SAVED;Restableix a l'últim valor desat
 TP_RESIZE_ALLOW_UPSCALING;Permet l'ampliació
 TP_RESIZE_APPLIESTO;Aplicable a:
-TP_RESIZE_ALLOW_UPSCALING;Permet l'ampliació
 TP_RESIZE_CROPPEDAREA;Àrea retallada
 TP_RESIZE_FITBOX;Quadre delimitador
 TP_RESIZE_FULLIMAGE;Imatge completa

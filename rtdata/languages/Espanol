@@ -20,6 +20,7 @@
 #19 2022-07-12 mrleemon, update for 1.15
 #20 2022-08-24 mrleemon, update for 1.16
 #21 2022-11-23 mrleemon, update for 1.17
+#22 2022-12-01 mrleemon, update for 1.17.2
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -349,6 +350,7 @@ HISTORY_MSG_68;Exposición - Recuperación de altas luces
 HISTORY_MSG_69;Espacio de color de trabajo
 HISTORY_MSG_70;Espacio de color de salida
 HISTORY_MSG_71;Espacio de color de entrada
+HISTORY_MSG_72;Corrección de viñeteo - Cantidad
 HISTORY_MSG_73;Mezclador de canales
 HISTORY_MSG_74;Cambiar tamaño - Escala
 HISTORY_MSG_75;Cambiar tamaño - Método
@@ -1692,7 +1694,7 @@ TP_LENSPROFILE_MODE_HEADER;Perfil de lente:
 TP_LENSPROFILE_USE_CA;Aberración cromática
 TP_LENSPROFILE_USE_GEOMETRIC;Geométrico
 TP_LENSPROFILE_USE_HEADER;Distorsiones a corregir:
-TP_LENSPROFILE_USE_VIGNETTING;Viñeteado
+TP_LENSPROFILE_USE_VIGNETTING;Viñeteo
 TP_LOCALCONTRAST_CONTRAST;Contraste residual
 TP_LOCALCONTRAST_CURVE;Curva de contraste local
 TP_LOCALCONTRAST_LABEL;Contraste local
@@ -1847,7 +1849,6 @@ TP_RESET_DEFAULT;Restablecer al valor predeterminado
 TP_RESET_SAVED;Restablecer al último valor guardado
 TP_RESIZE_ALLOW_UPSCALING;Permitir la ampliación
 TP_RESIZE_APPLIESTO;Aplicable a:
-TP_RESIZE_ALLOW_UPSCALING;Permitir la ampliación
 TP_RESIZE_CROPPEDAREA;Área recortada
 TP_RESIZE_FITBOX;Cuadro delimitador
 TP_RESIZE_FULLIMAGE;Imagen completa

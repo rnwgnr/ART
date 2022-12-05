@@ -14,6 +14,7 @@
 #14 2022-08-25 v1.16 - alvaro
 #15 2022-11-20 alvaro
 #16 2022-11-23 v1.17 - alvaro
+#17 2022-12-03 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -345,6 +346,7 @@ HISTORY_MSG_68;Esposizione - Ricostruzione HLR
 HISTORY_MSG_69;Spazio Colore di Lavoro
 HISTORY_MSG_70;Spazio Colore di Uscita
 HISTORY_MSG_71;Spazio Colore di Ingresso
+HISTORY_MSG_72;CV - Quantità
 HISTORY_MSG_73;Miscelatore Canali
 HISTORY_MSG_74;Ridimensiona - Scala
 HISTORY_MSG_75;Ridimensiona - Metodo
@@ -441,9 +443,9 @@ HISTORY_MSG_239;FG - Intensità
 HISTORY_MSG_240;FG - Centro
 HISTORY_MSG_241;FV - Gradiente
 HISTORY_MSG_242;FV - Circolarità
-HISTORY_MSG_243;VC - Raggio
-HISTORY_MSG_244;VC - Intensità
-HISTORY_MSG_245;VC - Centro
+HISTORY_MSG_243;CV - Raggio
+HISTORY_MSG_244;CV - Intensità
+HISTORY_MSG_245;CV - Centro
 HISTORY_MSG_250;NR - Miglioramento
 HISTORY_MSG_255;NR - Levigatura finale
 HISTORY_MSG_256;NR - Mediana - Tipo
