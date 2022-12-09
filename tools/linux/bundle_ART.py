@@ -184,6 +184,8 @@ export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
 export GTK_CSD=0
 d=$(dirname $(readlink -f "$0"))
 t=$(mktemp -d --suffix=-ART)
+ln -s "$d" "$t/ART"
+d="$t/ART"
 "$d/lib/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so" > "$t/loader.cache"
 export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
 export GDK_PIXBUF_MODULEDIR="$d/lib/gdk-pixbuf-2.0"
