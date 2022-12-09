@@ -480,10 +480,8 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             if (editImgFloat && (editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2)) {
                 fill_pipette(img, editImgFloat, multiThread);
             }
-            if (!tcurve->isIdentity()) {
-                tc.Set(*tcurve, 65535.f * whitept);
-                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
-            }
+            tc.Set(*tcurve, 65535.f * whitept);
+            apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
         } else {
             if (ccurve) {
                 tc.Set(*ccurve, 65535.f * whitept);
