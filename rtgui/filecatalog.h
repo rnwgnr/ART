@@ -138,6 +138,8 @@ private:
 
 
     std::vector<Glib::ustring> fileNameList;
+    std::unordered_set<std::string> file_name_set_;
+    
     std::set<Glib::ustring> editedFiles;
     guint modifierKey; // any modifiers held when rank button was pressed
 

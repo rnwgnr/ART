@@ -145,19 +145,28 @@ void PlacesBrowser::refreshPlacesList ()
     }
 
     for (size_t i = 0; i < options.favoriteDirs.size(); i++) {
-        Glib::RefPtr<Gio::File> hfile = Gio::File::create_for_path (options.favoriteDirs[i]);
+        if (Options::isSession(options.favoriteDirs[i])) {
+            Gtk::TreeModel::Row newrow = *(placesModel->append());
+            newrow[placesColumns.label] = options.favoriteDirs[i];
+            newrow[placesColumns.icon] = Gio::ThemedIcon::create("folder-saved-search");
+            newrow[placesColumns.root] = options.favoriteDirs[i];
+            newrow[placesColumns.type] = 5;
+            newrow[placesColumns.rowSeparator] = false;
+        } else {
+            Glib::RefPtr<Gio::File> hfile = Gio::File::create_for_path (options.favoriteDirs[i]);
 
-        if (hfile && hfile->query_exists()) {
-            try {
-                if (auto info = hfile->query_info ()) {
-                    Gtk::TreeModel::Row newrow = *(placesModel->append());
-                    newrow[placesColumns.label] = info->get_display_name ();
-                    newrow[placesColumns.icon]  = info->get_icon ();
-                    newrow[placesColumns.root]  = hfile->get_parse_name ();
-                    newrow[placesColumns.type]  = 5;
-                    newrow[placesColumns.rowSeparator] = false;
-                }
-            } catch(Gio::Error&) {}
+            if (hfile && hfile->query_exists()) {
+                try {
+                    if (auto info = hfile->query_info ()) {
+                        Gtk::TreeModel::Row newrow = *(placesModel->append());
+                        newrow[placesColumns.label] = info->get_display_name ();
+                        newrow[placesColumns.icon]  = info->get_icon ();
+                        newrow[placesColumns.root]  = hfile->get_parse_name ();
+                        newrow[placesColumns.type]  = 5;
+                        newrow[placesColumns.rowSeparator] = false;
+                    }
+                } catch(Gio::Error&) {}
+            }
         }
     }
     
@@ -303,6 +312,9 @@ void PlacesBrowser::selectionChanged ()
 
 void PlacesBrowser::dirSelected (const Glib::ustring& dirname, const Glib::ustring& openfile)
 {
+    // if (Options::isSession(dirname)) {
+    //     return;
+    // }
 
     lastSelectedDir = dirname;
 }
@@ -321,15 +333,20 @@ void PlacesBrowser::addPressed ()
         }
 
     // append
-    Glib::RefPtr<Gio::File> hfile = Gio::File::create_for_path (lastSelectedDir);
+    if (Options::isSession(lastSelectedDir)) {
+        options.favoriteDirs.push_back(lastSelectedDir);
+        refreshPlacesList();
+    } else {
+        Glib::RefPtr<Gio::File> hfile = Gio::File::create_for_path (lastSelectedDir);
 
-    if (hfile && hfile->query_exists()) {
-        try {
-            if (auto info = hfile->query_info ()) {
-                options.favoriteDirs.push_back (hfile->get_parse_name ());
-                refreshPlacesList ();
-            }
-        } catch(Gio::Error&) {}
+        if (hfile && hfile->query_exists()) {
+            try {
+                if (auto info = hfile->query_info ()) {
+                    options.favoriteDirs.push_back (hfile->get_parse_name ());
+                    refreshPlacesList ();
+                }
+            } catch(Gio::Error&) {}
+        }
     }
 }
 

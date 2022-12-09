@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _OPTIONS_
-#define _OPTIONS_
+#pragma once
 
 #include <set>
 #include <gtkmm.h>
@@ -108,6 +107,8 @@ public:
     static constexpr const char *DEFPROFILE_RAW = DEFPROFILE_DYNAMIC;
 
     static constexpr const char *DEFAULT_THEME = "Default";
+
+    static constexpr const char *SESSION_PATH = ":session:";
     
     class Error: public std::exception {
     public:
@@ -505,6 +506,9 @@ public:
 
     Glib::ustring getParamFile(const Glib::ustring &fname);
     Glib::ustring getXmpSidecarFile(const Glib::ustring &fname);
+
+    static bool isSession(const Glib::ustring &fname);
+    static Glib::ustring getSessionFile();
 };
 
 extern Options options;
@@ -515,5 +519,3 @@ extern bool gimpPlugin;
 extern bool remote;
 extern Glib::ustring versionString;
 extern Glib::ustring paramFileExtension;
-
-#endif

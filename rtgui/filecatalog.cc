@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 #include <glib/gstdio.h>
 
@@ -665,6 +666,7 @@ void FileCatalog::closeDir ()
     selectedDirectory = "";
     fileBrowser->close ();
     fileNameList.clear ();
+    file_name_set_.clear();
 
     {
         MyMutex::MyLock lock(dirEFSMutex);
@@ -785,30 +787,34 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
 
     std::vector<Glib::ustring> names;
 
-    const std::set<std::string>& extensions = options.parsedExtensionsSet;
+    const std::set<std::string> &extensions = options.parsedExtensionsSet;
 
     try {
-
-        const auto dir = Gio::File::create_for_path(selectedDirectory);
-
-        auto enumerator = dir->enumerate_children("standard::name,standard::type,standard::is-hidden");
-
-        while (true) {
-            try {
-                const auto file = enumerator->next_file();
-                if (!file) {
+        if (Options::isSession(selectedDirectory)) {
+            auto session_file = Options::getSessionFile();
+            if (!Glib::file_test(session_file, Glib::FILE_TEST_EXISTS)) {
+                return names;
+            }
+            
+            std::unordered_set<std::string> seen;
+            
+            auto dir = Gio::File::create_for_path(session_file);
+            auto src = dir->read();
+            std::stringstream sbuf;
+            char buf[4097];
+            while (true) {
+                auto n = src->read(buf, 4096);
+                if (!n) {
                     break;
+                } else {
+                    buf[n] = 0;
+                    sbuf << buf;
                 }
-
-                if (file->get_file_type() == Gio::FILE_TYPE_DIRECTORY) {
-                    continue;
-                }
-
-                if (!options.fbShowHidden && file->is_hidden()) {
-                    continue;
-                }
-
-                const Glib::ustring fname = file->get_name();
+            }
+            sbuf.seekg(0);
+            std::string line;
+            while (src && std::getline(sbuf, line)) {
+                Glib::ustring fname = line;
                 const auto lastdot = fname.find_last_of('.');
 
                 if (lastdot >= fname.length() - 1) {
@@ -819,15 +825,50 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
                     continue;
                 }
 
-                names.push_back(Glib::build_filename(selectedDirectory, fname));
-            } catch (Glib::Exception& exception) {
-                if (options.rtSettings.verbose) {
-                    std::cerr << exception.what() << std::endl;
+                if (Glib::file_test(fname, Glib::FILE_TEST_EXISTS) && seen.insert(fname).second) {
+                    names.push_back(fname);
+                }
+            }
+        } else {
+            const auto dir = Gio::File::create_for_path(selectedDirectory);
+
+            auto enumerator = dir->enumerate_children("standard::name,standard::type,standard::is-hidden");
+
+            while (true) {
+                try {
+                    const auto file = enumerator->next_file();
+                    if (!file) {
+                        break;
+                    }
+
+                    if (file->get_file_type() == Gio::FILE_TYPE_DIRECTORY) {
+                        continue;
+                    }
+
+                    if (!options.fbShowHidden && file->is_hidden()) {
+                        continue;
+                    }
+
+                    const Glib::ustring fname = file->get_name();
+                    const auto lastdot = fname.find_last_of('.');
+
+                    if (lastdot >= fname.length() - 1) {
+                        continue;
+                    }
+
+                    if (extensions.find(fname.substr(lastdot + 1).lowercase()) == extensions.end()) {
+                        continue;
+                    }
+
+                    names.push_back(Glib::build_filename(selectedDirectory, fname));
+                } catch (Glib::Exception& exception) {
+                    if (options.rtSettings.verbose) {
+                        std::cerr << exception.what() << std::endl;
+                    }
                 }
             }
         }
-
-    } catch (Glib::Exception& exception) {
+    } catch (std::exception &exception) {
 
         if (options.rtSettings.verbose) {
             std::cerr << "Failed to list directory \"" << selectedDirectory << "\": " << exception.what() << std::endl;
@@ -843,7 +884,8 @@ void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring
 {
 
     try {
-        const Glib::RefPtr<Gio::File> dir = Gio::File::create_for_path(dirname);
+        bool is_session = Options::isSession(dirname);
+        Glib::RefPtr<Gio::File> dir = is_session ? Gio::File::create_for_path(Options::getSessionFile()) : Gio::File::create_for_path(dirname);
 
         if (!dir) {
             return;
@@ -858,13 +900,18 @@ void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring
             addAndOpenFile (openfile);
         }
 
-        selectedDirectory = dir->get_parse_name();
+        if (!is_session) {
+            selectedDirectory = dir->get_parse_name();
+        } else {
+            selectedDirectory = dirname;
+        }
 
         BrowsePath->set_text(selectedDirectory);
         buttonBrowsePath->set_image(*iRefreshWhite);
         fileNameList = getFileList();
 
         for (unsigned int i = 0; i < fileNameList.size(); i++) {
+            file_name_set_.insert(fileNameList[i]);
             if (openfile.empty() || fileNameList[i] != openfile) { // if we opened a file at the beginning don't add it again
                 addFile(fileNameList[i]);
             }
@@ -878,7 +925,7 @@ void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring
             filepanel->loadingThumbs(M("PROGRESSBAR_LOADINGTHUMBS"), 0);
         }
 
-        dirMonitor = dir->monitor_directory();
+        dirMonitor = is_session ? dir->monitor_file() : dir->monitor_directory();
         dirMonitor->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &FileCatalog::on_dir_changed), false));
     } catch (Glib::Exception& ex) {
         std::cout << ex.what();
@@ -1748,18 +1795,35 @@ void FileCatalog::reparseDirectory ()
         return;
     }
 
-    if (!Glib::file_test(selectedDirectory, Glib::FILE_TEST_IS_DIR)) {
+    const bool is_session = Options::isSession(selectedDirectory);
+    
+    if (!is_session && !Glib::file_test(selectedDirectory, Glib::FILE_TEST_IS_DIR)) {
         closeDir();
         return;
+    }
+
+    auto new_file_list = getFileList();
+    std::set<std::string> seen;
+
+    if (is_session) {
+        for (auto &n : new_file_list) {
+            seen.insert(n.collate_key());
+        }
     }
 
     // check if a thumbnailed file has been deleted
     const std::vector<ThumbBrowserEntryBase*>& t = fileBrowser->getEntries();
     std::vector<Glib::ustring> fileNamesToDel;
 
-    for (const auto& entry : t) {
-        if (!Glib::file_test(entry->filename, Glib::FILE_TEST_EXISTS)) {
-            fileNamesToDel.push_back(entry->filename);
+    for (const auto &entry : t) {
+        if (is_session) {
+            if (seen.find(entry->filename.collate_key()) == seen.end()) {
+                fileNamesToDel.push_back(entry->filename);
+            }
+        } else {
+            if (!Glib::file_test(entry->filename, Glib::FILE_TEST_EXISTS)) {
+                fileNamesToDel.push_back(entry->filename);
+            }
         }
     }
 
@@ -1775,26 +1839,29 @@ void FileCatalog::reparseDirectory ()
 
     // check if a new file has been added
     // build a set of collate-keys for faster search
-    std::set<std::string> oldNames;
+    seen.clear();
     for (const auto& oldName : fileNameList) {
-        oldNames.insert(oldName.collate_key());
+        seen.insert(oldName.collate_key());
     }
 
-    fileNameList = getFileList();
+    fileNameList = std::move(new_file_list);
+    file_name_set_.clear();
+    
     for (const auto& newName : fileNameList) {
-        if (oldNames.find(newName.collate_key()) == oldNames.end()) {
+        file_name_set_.insert(newName);
+        if (seen.find(newName.collate_key()) == seen.end()) {
             addFile(newName);
             _refreshProgressBar();
         }
     }
-
 }
 
 void FileCatalog::on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal)
 {
 
-    if (options.has_retained_extention(file->get_parse_name())
-            && (event_type == Gio::FILE_MONITOR_EVENT_CREATED || event_type == Gio::FILE_MONITOR_EVENT_DELETED || event_type == Gio::FILE_MONITOR_EVENT_CHANGED)) {
+    if (Options::isSession(selectedDirectory) ||
+        (options.has_retained_extention(file->get_parse_name())
+         && (event_type == Gio::FILE_MONITOR_EVENT_CREATED || event_type == Gio::FILE_MONITOR_EVENT_DELETED || event_type == Gio::FILE_MONITOR_EVENT_CHANGED))) {
         const auto doit =
             [this,internal]() -> bool
             {
@@ -1810,13 +1877,6 @@ void FileCatalog::on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Gli
             dir_refresh_conn_.disconnect();
         }
         dir_refresh_conn_ = Glib::signal_timeout().connect(sigc::slot<bool>(doit), DIR_REFRESH_DELAY);
-        
-        // if (!internal) {
-        //     GThreadLock lock;
-        //     reparseDirectory ();
-        // } else {
-        //     reparseDirectory ();
-        // }
     }
 }
 
@@ -2050,7 +2110,7 @@ void FileCatalog::buttonBrowsePathPressed ()
     BrowsePath->set_text(BrowsePathValue);
 
     // validate the path
-    if (Glib::file_test(BrowsePathValue, Glib::FILE_TEST_IS_DIR) && selectDir) {
+    if ((Options::isSession(BrowsePathValue) || Glib::file_test(BrowsePathValue, Glib::FILE_TEST_IS_DIR)) && selectDir) {
         selectDir(BrowsePathValue);
     } else { // error, likely path not found: show red arrow
         buttonBrowsePath->set_image (*iRefreshRed);
@@ -2170,6 +2230,9 @@ void FileCatalog::selectImage (Glib::ustring fname, bool clearFilters)
 {
 
     Glib::ustring dirname = Glib::path_get_dirname(fname);
+    if (Options::isSession(selectedDirectory) && file_name_set_.find(fname) != file_name_set_.end()) {
+        dirname = selectedDirectory;
+    }
 
     if (!dirname.empty()) {
         BrowsePath->set_text(dirname);
@@ -2593,6 +2656,10 @@ void FileCatalog::hideToolBar()
 Glib::ustring FileCatalog::getBrowsePath()
 {
     auto txt = BrowsePath->get_text();
+    if (Options::isSession(txt)) {
+        return txt;
+    }
+    
     Glib::ustring expanded = "";
     auto prefix = txt.substr(0, 1);
     if (prefix == "~") { // home directory

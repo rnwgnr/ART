@@ -483,32 +483,37 @@ Gtk::TreePath DirBrowser::expandToDir (const Glib::ustring& absDirPath)
     return path;
 }
 
-void DirBrowser::open (const Glib::ustring& dirname, const Glib::ustring& fileName)
+void DirBrowser::open(const Glib::ustring& dirname, const Glib::ustring& fileName)
 {
+    if (Options::isSession(dirname)) {
+        selected_dir_ = dirname;
+        dirtree->get_selection()->unselect_all();
+        dirSelectionSignal(selected_dir_, fileName);
+    } else {
+        dirtree->collapse_all();
 
-    dirtree->collapse_all ();
+        // WARNING & TODO: One should test here if the directory/file has R/W access permission to avoid crash
 
-    // WARNING & TODO: One should test here if the directory/file has R/W access permission to avoid crash
+        Glib::RefPtr<Gio::File> dir = Gio::File::create_for_path(dirname);
 
-    Glib::RefPtr<Gio::File> dir = Gio::File::create_for_path(dirname);
+        if( !dir->query_exists()) {
+            return;
+        }
 
-    if( !dir->query_exists()) {
-        return;
+        Glib::ustring absDirPath = dir->get_parse_name ();
+        Gtk::TreePath path = expandToDir (absDirPath);
+        dirtree->scroll_to_row (path);
+        dirtree->get_selection()->select (path);
+        Glib::ustring absFilePath;
+
+        if (!fileName.empty()) {
+            absFilePath = Glib::build_filename (absDirPath, fileName);
+        }
+
+        selected_dir_ = absDirPath;
+        dirSelectionSignal (absDirPath, absFilePath);
+        dirtree->queue_draw();
     }
-
-    Glib::ustring absDirPath = dir->get_parse_name ();
-    Gtk::TreePath path = expandToDir (absDirPath);
-    dirtree->scroll_to_row (path);
-    dirtree->get_selection()->select (path);
-    Glib::ustring absFilePath;
-
-    if (!fileName.empty()) {
-        absFilePath = Glib::build_filename (absDirPath, fileName);
-    }
-
-    selected_dir_ = absDirPath;
-    dirSelectionSignal (absDirPath, absFilePath);
-    dirtree->queue_draw();
 }
 
 void DirBrowser::file_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, const Gtk::TreeModel::iterator& iter, const Glib::ustring& dirName)
