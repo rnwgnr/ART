@@ -67,6 +67,7 @@ protected:
     MyImageMenuItem* colorlabel[6];
     Gtk::MenuItem* trash;
     Gtk::MenuItem* untrash;
+    Gtk::MenuItem *add_to_session_;
     Gtk::MenuItem* develop;
     Gtk::MenuItem* developfast;
     Gtk::MenuItem* rename;
@@ -122,6 +123,7 @@ protected:
 
     void toTrashRequested   (std::vector<FileBrowserEntry*> tbe);
     void fromTrashRequested (std::vector<FileBrowserEntry*> tbe);
+    void addToSessionRequested(std::vector<FileBrowserEntry*> tbe);
     void rankingRequested   (std::vector<FileBrowserEntry*> tbe, int rank);
     void colorlabelRequested   (std::vector<FileBrowserEntry*> tbe, int colorlabel);
     void requestRanking (int rank);

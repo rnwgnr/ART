@@ -111,6 +111,10 @@ private:
 
     Gtk::Entry* BrowsePath;
     Gtk::Button* buttonBrowsePath;
+    Gtk::Button *button_session_add_;
+    Gtk::Button *button_session_remove_;
+    Gtk::Button *button_session_load_;
+    Gtk::Button *button_session_save_;
     Glib::RefPtr<Gtk::EntryCompletion> browsePathCompletion;
 
     Gtk::Entry* Query;
@@ -243,6 +247,12 @@ public:
     void zoomOut ();
 
     void buttonBrowsePathPressed ();
+
+    void sessionAddPressed();
+    void sessionRemovePressed();
+    void sessionLoadPressed();
+    void sessionSavePressed();
+    
     bool BrowsePath_key_pressed (GdkEventKey *event);
     void buttonQueryClearPressed ();
     void executeQuery ();

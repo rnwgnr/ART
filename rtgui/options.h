@@ -506,9 +506,6 @@ public:
 
     Glib::ustring getParamFile(const Glib::ustring &fname);
     Glib::ustring getXmpSidecarFile(const Glib::ustring &fname);
-
-    static bool isSession(const Glib::ustring &fname);
-    static Glib::ustring getSessionFile();
 };
 
 extern Options options;

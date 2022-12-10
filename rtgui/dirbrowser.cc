@@ -31,9 +31,9 @@
 #include "rtimage.h"
 #include "multilangmgr.h"
 #include "options.h"
+#include "session.h"
 
-namespace
-{
+namespace {
 
 std::vector<Glib::ustring> listSubDirs (const Glib::RefPtr<Gio::File>& dir, bool addHidden)
 {
@@ -81,7 +81,8 @@ std::vector<Glib::ustring> listSubDirs (const Glib::RefPtr<Gio::File>& dir, bool
     return subDirs;
 }
 
-}
+} // namespace
+
 
 DirBrowser::DirBrowser () : dirTreeModel(),
     dtColumns(),
@@ -485,7 +486,7 @@ Gtk::TreePath DirBrowser::expandToDir (const Glib::ustring& absDirPath)
 
 void DirBrowser::open(const Glib::ustring& dirname, const Glib::ustring& fileName)
 {
-    if (Options::isSession(dirname)) {
+    if (art::session::check(dirname)) {
         selected_dir_ = dirname;
         dirtree->get_selection()->unselect_all();
         dirSelectionSignal(selected_dir_, fileName);

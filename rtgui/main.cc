@@ -42,6 +42,7 @@
 #include "printhelp.h"
 #include "wbprovider.h"
 #include "pathutils.h"
+#include "session.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -121,75 +122,102 @@ void process_help_params(int argc, char **argv)
  *  -1 if there is an error in parameters
  *  -2 if an error occurred during processing
  *  -3 if at least one required procparam file was not found */
-int processLineParams ( int argc, char **argv )
+int processLineParams(int argc, char **argv)
 {
     int ret = 1;
-    for ( int iArg = 1; iArg < argc; iArg++) {
+    for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
-        if ( currParam.empty() ) {
+        if (currParam.empty()) {
             continue;
         }
 #if ECLIPSE_ARGS
-        currParam = currParam.substr (1, currParam.length() - 2);
+        currParam = currParam.substr(1, currParam.length() - 2);
 #endif
 
-        if ( currParam.at (0) == '-' && currParam.size() > 1 ) {
-            switch ( currParam.at (1) ) {
+        if (currParam[0] == '-' && currParam.size() > 1) {
+            switch (currParam[1]) {
 #ifdef WIN32
 
-                case 'w': // This case is handled outside this function
-                    break;
+            case 'w': // This case is handled outside this function
+                break;
 #endif
 
-                case 'v':
-                    printf("%s, version %s\n", RTNAME, RTVERSION);
-                    ret = 0;
-                    break;
+            case 'v':
+                printf("%s, version %s\n", RTNAME, RTVERSION);
+                ret = 0;
+                break;
 
 #ifndef __APPLE__ // TODO agriggio - there seems to be already some "single instance app" support for OSX in rtwindow. Disabling it here until I understand how to merge the two
 
-                case 'R':
-                    if (!gimpPlugin) {
-                        remote = true;
-                    }
+            case 'R':
+                if (!gimpPlugin) {
+                    remote = true;
+                }
 
-                    break;
+                break;
 #endif
-                case 's':
+            case 's':
+                simpleEditor = true;
+                remote = false;
+                break;
+                
+            case '-':
+                if (currParam.substr(5) == "--gtk" || currParam == "--g-fatal-warnings") {
+                    break;
+                }
+
+            case 'g':
+                if (currParam == "-gimp") {
+                    gimpPlugin = true;
                     simpleEditor = true;
                     remote = false;
                     break;
-                
-                case '-':
-                    if (currParam.substr(5) == "--gtk" || currParam == "--g-fatal-warnings") {
+                }
+
+            case 'S':
+                if (remote) {
+                    if (currParam == "-S" && iArg < argc) {
+                        ++iArg;
+                        art::session::load(Glib::ustring(fname_to_utf8(argv[iArg])));
+                        argv1 = art::session::path();
+                        break;
+                    } else if (currParam == "-Sc") {
+                        art::session::clear();
+                        argv1 = art::session::path();
+                        break;
+                    } else if (currParam == "-Sa" || currParam == "-Sr") {
+                        std::vector<Glib::ustring> fnames;
+                        ++iArg;
+                        while (iArg < argc && argv[iArg][0] != '-') {
+                            fnames.emplace_back(fname_to_utf8(argv[iArg]));
+                            ++iArg;
+                        }
+                        if (currParam == "-Sa") {
+                            art::session::add(fnames);
+                        } else {
+                            art::session::remove(fnames);
+                        }
+                        argv1 = art::session::path();
                         break;
                     }
-
-                case 'g':
-                    if (currParam == "-gimp") {
-                        gimpPlugin = true;
-                        simpleEditor = true;
-                        remote = false;
-                        break;
-                    }
-
+                }
                 // no break here on purpose
 
-                case 'h':
-                case '?':
-                default:
-                    ART_print_help(argv[0], true);
-                    ret = -1;
-                    break;
+            case 'h':
+            case '?':
+            default:
+                ART_print_help(argv[0], true);
+                ret = -1;
+                break;
             }
         } else {
             if (argv1.empty()) {
-                argv1 = Glib::ustring (fname_to_utf8 (argv[iArg]));
+                argv1 = Glib::ustring(fname_to_utf8(argv[iArg]));
 #if ECLIPSE_ARGS
-                argv1 = argv1.substr (1, argv1.length() - 2);
+                argv1 = argv1.substr(1, argv1.length() - 2);
 #endif
             } else if (gimpPlugin) {
-                argv2 = Glib::ustring (fname_to_utf8 (argv[iArg]));
+                argv2 = Glib::ustring(fname_to_utf8(argv[iArg]));
                 break;
             }
 
@@ -248,8 +276,8 @@ class RTApplication: public Gtk::Application
 {
 public:
     RTApplication():
-        Gtk::Application ("com.rawtherapee.application",
-                          Gio::APPLICATION_HANDLES_OPEN),
+        Gtk::Application("us.pixls.art.application",
+                         Gio::APPLICATION_HANDLES_OPEN),
         rtWindow (nullptr)
     {
     }
@@ -261,8 +289,11 @@ public:
         }
 
         cleanup_rt();
+        if (!is_remote()) {
+            art::session::clear();
+        }
     }
-
+    
 private:
     bool create_window()
     {
@@ -290,8 +321,8 @@ private:
         }
     }
 
-    void on_open (const Gio::Application::type_vec_files& files,
-                  const Glib::ustring& hint) override
+    void on_open(const Gio::Application::type_vec_files& files,
+                 const Glib::ustring& hint) override
     {
         if (create_window()) {
             struct Data {
@@ -313,13 +344,13 @@ private:
 
             if (!d->entries.empty()) {
                 const auto doit =
-                [] (gpointer data) -> gboolean {
-                    Data *d = static_cast<Data *> (data);
-                    d->filecatalog->openRequested (d->entries);
-                    d->filecatalog->selectImage (d->lastfilename, true);
-                    delete d;
-                    return FALSE;
-                };
+                    [] (gpointer data) -> gboolean {
+                        Data *d = static_cast<Data *> (data);
+                        d->filecatalog->openRequested (d->entries);
+                        d->filecatalog->selectImage (d->lastfilename, true);
+                        delete d;
+                        return FALSE;
+                    };
                 gdk_threads_add_idle (doit, d);
             } else {
                 delete d;
@@ -346,6 +377,7 @@ void show_gimp_plugin_info_dialog(Gtk::Window *parent)
     }
 }
 
+
 } // namespace
 
 
@@ -368,7 +400,7 @@ int main (int argc, char **argv)
     process_help_params(argc, argv);
 
     Glib::init();  // called by Gtk::Main, but this may be important for thread handling, so we call it ourselves now
-    Gio::init ();
+    Gio::init();
 
 #ifdef WIN32
     if (GetFileType (GetStdHandle (STD_OUTPUT_HANDLE)) == 0x0003) {
@@ -423,6 +455,13 @@ int main (int argc, char **argv)
     licensePath = LICENCE_SEARCH_PATH;
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
 #endif
+
+    Glib::ustring fatalError;
+    try {
+        Options::load();
+    } catch (Options::Error &e) {
+        fatalError = e.get_msg();
+    }
 
 #ifdef WIN32
     bool consoleOpened = false;
@@ -500,14 +539,6 @@ int main (int argc, char **argv)
     }
 
 #endif
-
-    Glib::ustring fatalError;
-
-    try {
-        Options::load();
-    } catch (Options::Error &e) {
-        fatalError = e.get_msg();
-    }
 
     if (gimpPlugin) {
         if (!Glib::file_test (argv1, Glib::FILE_TEST_EXISTS) || Glib::file_test (argv1, Glib::FILE_TEST_IS_DIR)) {

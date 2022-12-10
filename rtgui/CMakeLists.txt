@@ -168,6 +168,7 @@ set(NONCLISOURCEFILES
     filecatalog_rename.cc
     focusmask.cc
     shortcutmanager.cc
+    session.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")

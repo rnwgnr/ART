@@ -30,6 +30,7 @@
 #include "../rtengine/ffmanager.h"
 #include "rtimage.h"
 #include "threadutils.h"
+#include "session.h"
 
 extern Options options;
 
@@ -380,6 +381,8 @@ void FileBrowser::build_menu()
         p++;
         submenuFileOperations->attach (*Gtk::manage(untrash = new Gtk::MenuItem (M("FILEBROWSER_POPUPUNTRASH"))), 0, 1, p, p + 1);
         p++;
+        submenuFileOperations->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_ADD_TO_SESSION_LABEL"))), 0, 1, p, p + 1);
+        p++;
         submenuFileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
         submenuFileOperations->attach (*Gtk::manage(rename = new Gtk::MenuItem (M("FILEBROWSER_POPUPRENAME"))), 0, 1, p, p + 1);
@@ -401,6 +404,8 @@ void FileBrowser::build_menu()
         pmenu->attach (*Gtk::manage(trash = new Gtk::MenuItem (M("FILEBROWSER_POPUPTRASH"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(untrash = new Gtk::MenuItem (M("FILEBROWSER_POPUPUNTRASH"))), 0, 1, p, p + 1);
+        p++;
+        pmenu->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_ADD_TO_SESSION_LABEL"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
@@ -508,6 +513,7 @@ void FileBrowser::build_menu()
 
     trash->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), trash));
     untrash->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), untrash));
+    add_to_session_->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), add_to_session_));
     develop->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), develop));
     developfast->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), developfast));
     rename->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), rename));
@@ -856,6 +862,8 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         toTrashRequested (mselected);
     } else if (m == untrash) {
         fromTrashRequested (mselected);
+    } else if (m == add_to_session_) {
+        addToSessionRequested(mselected);
     }
 
     else if (m == develop) {
@@ -2191,4 +2199,14 @@ void FileBrowser::enableThumbRefresh()
         static_cast<FileBrowserEntry *>(f)->enableThumbRefresh();
     }
     queue_draw();
+}
+
+
+void FileBrowser::addToSessionRequested(std::vector<FileBrowserEntry *> tbe)
+{
+    std::vector<Glib::ustring> names;
+    for (auto e : tbe) {
+        names.push_back(e->filename);
+    }
+    art::session::add(names);
 }

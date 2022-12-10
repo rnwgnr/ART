@@ -21,6 +21,7 @@
 #include "rtwindow.h"
 #include "inspector.h"
 #include "placesbrowser.h"
+#include "session.h"
 
 
 FilePanel::FilePanel () :
@@ -181,7 +182,7 @@ void FilePanel::init ()
     dirBrowser->fillDirTree ();
     placesBrowser->refreshPlacesList ();
 
-    if (!argv1.empty() && Options::isSession(argv1)) {
+    if (!argv1.empty() && art::session::check(argv1)) {
         dirBrowser->open(argv1);
     } else if (!argv1.empty() && Glib::file_test(argv1, Glib::FILE_TEST_EXISTS)) {
         Glib::ustring d(argv1);
@@ -195,7 +196,7 @@ void FilePanel::init ()
         } else if (options.startupDir == Options::STARTUPDIR_CURRENT) {
             dirBrowser->open (argv0);
         } else if (options.startupDir == Options::STARTUPDIR_CUSTOM || options.startupDir == Options::STARTUPDIR_LAST) {
-            if (options.startupPath.length() && ((Glib::file_test(options.startupPath, Glib::FILE_TEST_EXISTS) && Glib::file_test(options.startupPath, Glib::FILE_TEST_IS_DIR)) || Options::isSession(options.startupPath))) {
+            if (options.startupPath.length() && ((Glib::file_test(options.startupPath, Glib::FILE_TEST_EXISTS) && Glib::file_test(options.startupPath, Glib::FILE_TEST_IS_DIR)) || art::session::check(options.startupPath))) {
                 dirBrowser->open (options.startupPath);
             } else {
                 // Fallback option if the path is empty or the folder doesn't exist

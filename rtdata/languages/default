@@ -1955,3 +1955,10 @@ ZOOMPANEL_ZOOM100;Zoom to 100%\nShortcut: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Fit whole image to screen\nShortcut: <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoom In\nShortcut: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoom Out\nShortcut: <b>-</b>
+SESSION_LABEL;Session
+FILEBROWSER_SESSION_ADD_LABEL;Add to session
+FILEBROWSER_SESSION_REMOVE_LABEL;Remove selected from session
+FILEBROWSER_SESSION_LOAD_LABEL;Load session from file
+FILEBROWSER_SESSION_SAVE_LABEL;Save session to file
+FILECHOOSER_FILTER_ARS;ART session files (*.ars)
+

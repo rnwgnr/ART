@@ -12,9 +12,6 @@ inline void ART_print_help(std::ostream &out, const char *progname, bool gui)
     out << "  An advanced, cross-platform program for developing raw photos." << std::endl;
     out << std::endl;
     out << "  Website: http://bitbucket.org/agriggio/ART" << std::endl;
-    // out << "  Documentation: http://rawpedia.rawtherapee.com/" << std::endl;
-    // out << "  Forum: https://discuss.pixls.us/c/software/rawtherapee" << std::endl;
-    // out << "  Code and bug reports: https://github.com/Beep6581/RawTherapee" << std::endl;
     out << std::endl;
     out << "Symbols:" << std::endl;
     out << "  <Chevrons> indicate parameters you can change." << std::endl;
@@ -25,8 +22,8 @@ inline void ART_print_help(std::ostream &out, const char *progname, bool gui)
     
     if (gui) {
         out << "Usage:\n";
-        out << "  " << pn << " <folder>           Start File Browser inside folder.\n";
-        out << "  " << pn << " <file>             Start Image Editor with file.\n\n";
+        out << "  " << pn << " <folder> Start File Browser inside folder.\n";
+        out << "  " << pn << " <file>   Start Image Editor with file.\n\n";
         out << "Options:\n";
 #ifdef WIN32
         out << "  -w Do not open the Windows console\n";
@@ -36,6 +33,10 @@ inline void ART_print_help(std::ostream &out, const char *progname, bool gui)
         out << "  -R Raise an already running instance (if available)\n";
 #endif
         out << "  -s Simple editor mode\n";
+        out << "  -S <file> Start with session from file\n"
+            << "  -Sc Clear the session\n"
+            << "  -Sa <file1> [... <fileN>] Add the files to the session\n"
+            << "  -Sr <file1> [... <fileN>] Remove the files from the session\n";
         out << "  -h -? Display this help message\n";
     } else {        
         Glib::ustring pparamsExt = paramFileExtension.substr(1);

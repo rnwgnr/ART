@@ -2536,15 +2536,3 @@ Glib::ustring Options::getXmpSidecarFile(const Glib::ustring &fname)
 {
     return rtengine::Exiv2Metadata::xmpSidecarPath(fname);
 }
-
-
-bool Options::isSession(const Glib::ustring &fname)
-{
-    return fname == Options::SESSION_PATH;
-}
-
-
-Glib::ustring Options::getSessionFile()
-{
-    return Glib::build_filename(rtdir, "session");
-}

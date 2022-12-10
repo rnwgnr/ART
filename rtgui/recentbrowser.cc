@@ -19,6 +19,7 @@
 #include "recentbrowser.h"
 #include "multilangmgr.h"
 #include "options.h"
+#include "session.h"
 
 using namespace rtengine;
 
@@ -54,9 +55,9 @@ void RecentBrowser::selectionChanged ()
 
 void RecentBrowser::dirSelected (const Glib::ustring& dirname, const Glib::ustring& openfile)
 {
-    // if (Options::isSession(dirname)) {
-    //     return;
-    // }
+    if (art::session::check(dirname)) {
+        return;
+    }
 
     ssize_t numFolders = options.recentFolders.size();
     ssize_t i = -1;
