@@ -585,6 +585,10 @@ void Options::setDefaults()
     lastLensProfileDir = "";
     lastICCProfCreatorDir = "";
     gimpPluginShowInfoDialog = true;
+
+    last_session_add_dir = "";
+    last_session_loadsave_dir = "";
+    
     maxRecentFolders = 15;
     rtSettings.lensfunDbDirectory = ""; // set also in main.cc and main-cli.cc
 
@@ -912,14 +916,6 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Output", "OverwriteOutputFile")) {
                     overwriteOutputFile = keyFile.get_boolean("Output", "OverwriteOutputFile");
                 }
-
-                // if (keyFile.has_key("Output", "BatchQueueUseProfile")) {
-                //     batch_queue_use_profile = keyFile.get_boolean("Output", "BatchQueueUseProfile");
-                // }
-                    
-                // if (keyFile.has_key("Output", "BatchQueueProfile")) {
-                //     batch_queue_profile_path = keyFile.get_string("Output", "BatchQueueProfile");
-                // }
 
                 if (keyFile.has_key("Output", "ProcParamsAutosaveInterval")) {
                     sidecar_autosave_interval = keyFile.get_integer("Output", "ProcParamsAutosaveInterval");
@@ -1667,6 +1663,8 @@ void Options::readFromFile(Glib::ustring fname)
                 safeDirGet(keyFile, "Dialogs", "LastLensProfileDir", lastLensProfileDir);
                 safeDirGet(keyFile, "Dialogs", "LastICCProfCreatorDir", lastICCProfCreatorDir);
                 safeDirGet(keyFile, "Dialogs", "LastCopyMovePath", lastCopyMovePath);
+                safeDirGet(keyFile, "Dialogs", "LastSessionAddDir", last_session_add_dir);
+                safeDirGet(keyFile, "Dialogs", "LastSessionLoadSaveDir", last_session_loadsave_dir);
 
                 if (keyFile.has_key("Dialogs", "GimpPluginShowInfoDialog")) {
                     gimpPluginShowInfoDialog = keyFile.get_boolean("Dialogs", "GimpPluginShowInfoDialog");
@@ -2135,6 +2133,8 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_string("Dialogs", "LastLensProfileDir", lastLensProfileDir);
         keyFile.set_string("Dialogs", "LastICCProfCreatorDir", lastICCProfCreatorDir);
         keyFile.set_string("Dialogs", "LastCopyMovePath", lastCopyMovePath);
+        keyFile.set_string("Dialogs", "LastSessionAddDir", last_session_add_dir);
+        keyFile.set_string("Dialogs", "LastSessionLoadSaveDir", last_session_loadsave_dir);
         keyFile.set_boolean("Dialogs", "GimpPluginShowInfoDialog", gimpPluginShowInfoDialog);
 
         keyFile.set_string("Lensfun", "DBDirectory", rtSettings.lensfunDbDirectory);

@@ -54,10 +54,14 @@ private:
     Gtk::Button *add;
     Gtk::Button *del;
     sigc::connection selection_conn_;
+    Glib::RefPtr<Gio::FileMonitor> session_monitor_;
 
+    void on_session_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type);
+    
 public:
 
     PlacesBrowser();
+    ~PlacesBrowser();
 
     void setDirSelector(const DirSelectionSlot& selectDir);
     void dirSelected(const Glib::ustring& dirname, const Glib::ustring& openfile);

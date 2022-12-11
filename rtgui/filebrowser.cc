@@ -381,7 +381,7 @@ void FileBrowser::build_menu()
         p++;
         submenuFileOperations->attach (*Gtk::manage(untrash = new Gtk::MenuItem (M("FILEBROWSER_POPUPUNTRASH"))), 0, 1, p, p + 1);
         p++;
-        submenuFileOperations->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_ADD_TO_SESSION_LABEL"))), 0, 1, p, p + 1);
+        submenuFileOperations->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_SESSION_ADD_LABEL"))), 0, 1, p, p + 1);
         p++;
         submenuFileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
@@ -405,7 +405,7 @@ void FileBrowser::build_menu()
         p++;
         pmenu->attach (*Gtk::manage(untrash = new Gtk::MenuItem (M("FILEBROWSER_POPUPUNTRASH"))), 0, 1, p, p + 1);
         p++;
-        pmenu->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_ADD_TO_SESSION_LABEL"))), 0, 1, p, p + 1);
+        pmenu->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_SESSION_ADD_LABEL"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
@@ -490,7 +490,7 @@ void FileBrowser::build_menu()
 //    pmenu->set_accel_group (pmaccelgroup);
     selall->add_accelerator ("activate", pmaccelgroup, GDK_KEY_a, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     trash->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
-    untrash->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
+    untrash->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE); 
     open->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Return, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
     develop->add_accelerator ("activate", pmaccelgroup, GDK_KEY_B, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     developfast->add_accelerator ("activate", pmaccelgroup, GDK_KEY_B, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);

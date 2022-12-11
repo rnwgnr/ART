@@ -928,7 +928,7 @@ void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring
         }
 
         dirMonitor = is_session ? dir->monitor_file() : dir->monitor_directory();
-        dirMonitor->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &FileCatalog::on_dir_changed), false));
+        dirMonitor->signal_changed().connect(sigc::mem_fun(*this, &FileCatalog::on_dir_changed));
     } catch (Glib::Exception& ex) {
         std::cout << ex.what();
     }
@@ -1859,26 +1859,18 @@ void FileCatalog::reparseDirectory ()
 }
 
 
-void FileCatalog::on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal)
+void FileCatalog::on_dir_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type)
 {
     if (art::session::check(selectedDirectory)) {
-        if (!internal) {
-            GThreadLock lock;
-            reparseDirectory();
-        } else {
-            reparseDirectory();
-        }
+        GThreadLock lock;
+        reparseDirectory();
     } else if (options.has_retained_extention(file->get_parse_name())
                && (event_type == Gio::FILE_MONITOR_EVENT_CREATED || event_type == Gio::FILE_MONITOR_EVENT_DELETED || event_type == Gio::FILE_MONITOR_EVENT_CHANGED)) {
         const auto doit =
-            [this,internal]() -> bool
+            [this]() -> bool
             {
-                if (!internal) {
-                    GThreadLock lock;
-                    reparseDirectory();
-                } else {
-                    reparseDirectory();
-                }
+                GThreadLock lock;
+                reparseDirectory();
                 return false;
             };
         if (dir_refresh_conn_.connected()) {
@@ -2758,8 +2750,8 @@ void FileCatalog::removeFromBatchQueue(const std::vector<FileBrowserEntry*> &tbe
 
 void FileCatalog::sessionAddPressed()
 {
-    Gtk::FileChooserDialog dialog(getToplevelWindow (this), M("FILEBROWSER_SESSION_ADD_LABEL"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-    bindCurrentFolder(dialog, options.lastSaveAsPath);
+    Gtk::FileChooserDialog dialog(getToplevelWindow(this), M("FILEBROWSER_SESSION_ADD_LABEL"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+    bindCurrentFolder(dialog, options.last_session_add_dir);
 
     dialog.add_button(M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
     dialog.add_button(M("PREFERENCES_ADD"), Gtk::RESPONSE_OK);
@@ -2793,7 +2785,7 @@ void FileCatalog::sessionRemovePressed()
 void FileCatalog::sessionLoadPressed()
 {
     Gtk::FileChooserDialog dialog(getToplevelWindow(this), M("FILEBROWSER_SESSION_LOAD_LABEL"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-    bindCurrentFolder(dialog, options.lastSaveAsPath);
+    bindCurrentFolder(dialog, options.last_session_loadsave_dir);
 
     dialog.add_button(M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
     dialog.add_button(M("GENERAL_OPEN"), Gtk::RESPONSE_OK);
@@ -2821,7 +2813,7 @@ void FileCatalog::sessionLoadPressed()
 void FileCatalog::sessionSavePressed()
 {
     Gtk::FileChooserDialog dialog(getToplevelWindow(this), M("FILEBROWSER_SESSION_SAVE_LABEL"), Gtk::FILE_CHOOSER_ACTION_SAVE);
-    bindCurrentFolder(dialog, options.lastSaveAsPath);
+    bindCurrentFolder(dialog, options.last_session_loadsave_dir);
 
     dialog.add_button(M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
     dialog.add_button(M("GENERAL_SAVE"), Gtk::RESPONSE_OK);

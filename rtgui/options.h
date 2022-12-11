@@ -408,6 +408,8 @@ public:
     Glib::ustring lastProfilingReferenceDir;
     Glib::ustring lastLensProfileDir;
     Glib::ustring lastICCProfCreatorDir;
+    Glib::ustring last_session_add_dir;
+    Glib::ustring last_session_loadsave_dir;
     bool gimpPluginShowInfoDialog;
 
     size_t maxRecentFolders;                   // max. number of recent folders stored in options file

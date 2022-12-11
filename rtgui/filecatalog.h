@@ -167,7 +167,7 @@ private:
 
     void removeFromBatchQueue(const std::vector<FileBrowserEntry*>& tbe);
     
-    void on_dir_changed (const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type, bool internal);
+    void on_dir_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type);
 
 public:
     // thumbnail browsers

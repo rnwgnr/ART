@@ -72,6 +72,7 @@ Glib::ustring argv2;
 bool simpleEditor = false;
 bool gimpPlugin = false;
 bool remote = false;
+bool is_session = false;
 unsigned char initialGdkScale = 1;
 
 namespace {
@@ -124,6 +125,7 @@ void process_help_params(int argc, char **argv)
  *  -3 if at least one required procparam file was not found */
 int processLineParams(int argc, char **argv)
 {
+    Glib::setenv("ART_IS_SESSION", "0");
     int ret = 1;
     for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
@@ -176,14 +178,13 @@ int processLineParams(int argc, char **argv)
 
             case 'S':
                 if (remote) {
+                    Glib::setenv("ART_IS_SESSION", "1");
                     if (currParam == "-S" && iArg < argc) {
                         ++iArg;
                         art::session::load(Glib::ustring(fname_to_utf8(argv[iArg])));
-                        argv1 = art::session::path();
                         break;
                     } else if (currParam == "-Sc") {
                         art::session::clear();
-                        argv1 = art::session::path();
                         break;
                     } else if (currParam == "-Sa" || currParam == "-Sr") {
                         std::vector<Glib::ustring> fnames;
@@ -197,7 +198,6 @@ int processLineParams(int argc, char **argv)
                         } else {
                             art::session::remove(fnames);
                         }
-                        argv1 = art::session::path();
                         break;
                     }
                 }
@@ -277,7 +277,7 @@ class RTApplication: public Gtk::Application
 public:
     RTApplication():
         Gtk::Application("us.pixls.art.application",
-                         Gio::APPLICATION_HANDLES_OPEN),
+                         Gio::APPLICATION_SEND_ENVIRONMENT|Gio::APPLICATION_HANDLES_COMMAND_LINE),
         rtWindow (nullptr)
     {
     }
@@ -308,56 +308,69 @@ private:
             return false;
         } else {
             rtWindow = create_rt_window();
-            add_window (*rtWindow);
+            add_window(*rtWindow);
             return true;
         }
     }
 
-    // Override default signal handlers:
-    void on_activate() override
+    int on_command_line(const Glib::RefPtr<Gio::ApplicationCommandLine> &command_line) override
     {
-        if (create_window()) {
-            rtWindow->present();
+        auto s = command_line->getenv("ART_IS_SESSION");
+        if (!s.empty() && atoi(s.c_str())) {
+            is_session = true;
         }
-    }
-
-    void on_open(const Gio::Application::type_vec_files& files,
-                 const Glib::ustring& hint) override
-    {
-        if (create_window()) {
-            struct Data {
-                std::vector<Thumbnail *> entries;
-                Glib::ustring lastfilename;
-                FileCatalog *filecatalog;
-            };
-            Data *d = new Data;
-            d->filecatalog = rtWindow->fpanel->fileCatalog;
-
-            for (const auto &f : files) {
-                Thumbnail *thm = cacheMgr->getEntry (f->get_path());
-
-                if (thm) {
-                    d->entries.push_back (thm);
-                    d->lastfilename = f->get_path();
-                }
-            }
-
-            if (!d->entries.empty()) {
+        int argc = 0;
+        auto argv = command_line->get_arguments(argc);
+        if (is_session) {
+            bool raise = !rtWindow;
+            if (create_window()) {
                 const auto doit =
                     [] (gpointer data) -> gboolean {
-                        Data *d = static_cast<Data *> (data);
-                        d->filecatalog->openRequested (d->entries);
-                        d->filecatalog->selectImage (d->lastfilename, true);
+                        FileCatalog *filecatalog = static_cast<FileCatalog *>(data);
+                        filecatalog->dirSelected(art::session::path(), "");
+                        return FALSE;
+                    };
+                gdk_threads_add_idle(doit, rtWindow->fpanel->fileCatalog);
+                if (raise) {
+                    rtWindow->present();
+                }
+                return 0;
+            }
+        } else if (argc == 2) {
+            if (create_window()) {
+                struct Data {
+                    Glib::ustring dirname;
+                    Glib::ustring fname;
+                    FileCatalog *filecatalog;
+                };
+                Data *d = new Data;
+                d->fname = fname_to_utf8(argv[1]);
+                if (Glib::file_test(d->fname, Glib::FILE_TEST_IS_DIR)) {
+                    d->dirname = d->fname;
+                    d->fname = "";
+                } else {
+                    d->dirname = Glib::path_get_dirname(d->fname);
+                }
+                d->filecatalog = rtWindow->fpanel->fileCatalog;
+
+                const auto doit =
+                    [] (gpointer data) -> gboolean {
+                        Data *d = static_cast<Data *>(data);
+                        d->filecatalog->dirSelected(d->dirname, d->fname);
                         delete d;
                         return FALSE;
                     };
-                gdk_threads_add_idle (doit, d);
-            } else {
-                delete d;
+                gdk_threads_add_idle(doit, d);
+                rtWindow->present();
+                return 0;
             }
-
-            rtWindow->present();
+        } else {
+            if (create_window()) {
+                rtWindow->present();
+                return 0;
+            }
         }
+        return 1;
     }
 
 private:
@@ -580,7 +593,7 @@ int main (int argc, char **argv)
         }
 
         RTApplication app;
-        ret = app.run (app_argc, app_argv);
+        ret = app.run(app_argc, app_argv);
     } else {
         if (fatalError.empty() && init_rt()) {
             Gtk::Main m (&argc, &argv);

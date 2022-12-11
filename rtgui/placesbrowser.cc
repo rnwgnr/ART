@@ -95,8 +95,26 @@ PlacesBrowser::PlacesBrowser ()
     add->signal_clicked().connect(sigc::mem_fun(*this, &PlacesBrowser::addPressed));
     del->signal_clicked().connect(sigc::mem_fun(*this, &PlacesBrowser::delPressed));
 
+    session_monitor_ = Gio::File::create_for_path(art::session::filename())->monitor_file();
+    session_monitor_->signal_changed().connect(sigc::mem_fun(*this, &PlacesBrowser::on_session_changed));
+
     show_all ();
 }
+
+
+PlacesBrowser::~PlacesBrowser()
+{
+    if (session_monitor_) {
+        session_monitor_->cancel();
+    }
+}
+
+
+void PlacesBrowser::on_session_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type)
+{
+    refreshPlacesList();
+}
+
 
 // For drive letter comparison
 bool compareMountByRoot (Glib::RefPtr<Gio::Mount> a, Glib::RefPtr<Gio::Mount> b)
@@ -142,7 +160,7 @@ void PlacesBrowser::refreshPlacesList ()
 
     // session
     Gtk::TreeModel::Row newrow = *(placesModel->append());
-    newrow[placesColumns.label] = M("SESSION_LABEL");
+    newrow[placesColumns.label] = M("SESSION_LABEL") + " (" + std::to_string(art::session::list().size()) + ")";
     newrow[placesColumns.icon] = Gio::ThemedIcon::create("document-open-recent");
     newrow[placesColumns.root] = art::session::path();
     newrow[placesColumns.type] = 4;

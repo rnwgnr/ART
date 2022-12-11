@@ -56,6 +56,8 @@ void RecentBrowser::selectionChanged ()
 void RecentBrowser::dirSelected (const Glib::ustring& dirname, const Glib::ustring& openfile)
 {
     if (art::session::check(dirname)) {
+        ConnectionBlocker b(conn);
+        recentDirs->set_active_text("");
         return;
     }
 
