@@ -52,6 +52,11 @@ std::unordered_set<std::string> get_file_list(const Glib::ustring &fname)
         std::string line;
         while (src && std::getline(sbuf, line)) {
             Glib::ustring name = line;
+#ifdef WIN32
+            if (name.size() && name[name.size()-1] == '\r') {
+                name.resize(name.size()-1);
+            }
+#endif // WIN32
             if (Glib::file_test(name, Glib::FILE_TEST_EXISTS)) {
                 res.insert(name);
             }
@@ -66,7 +71,7 @@ void save(const Glib::ustring &fname, const std::unordered_set<std::string> &nam
 {
     std::vector<std::string> l(names.begin(), names.end());
     std::sort(l.begin(), l.end());
-    FILE *out = g_fopen(fname.c_str(), "w");
+    FILE *out = g_fopen(fname.c_str(), "wb");
     for (auto &s : l) {
         fputs(s.c_str(), out);
         fputs("\n", out);

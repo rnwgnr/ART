@@ -112,7 +112,11 @@ PlacesBrowser::~PlacesBrowser()
 
 void PlacesBrowser::on_session_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type)
 {
+    bool is_session = art::session::check(lastSelectedDir);
     refreshPlacesList();
+    if (is_session) {
+        dirSelected(lastSelectedDir, "");
+    }
 }
 
 

@@ -285,12 +285,10 @@ public:
     ~RTApplication() override
     {
         if (rtWindow) {
-            delete rtWindow;
-        }
+//            delete rtWindow;
 
-        cleanup_rt();
-        if (!is_remote()) {
             art::session::clear();
+            cleanup_rt();
         }
     }
     
@@ -327,7 +325,9 @@ private:
                 const auto doit =
                     [] (gpointer data) -> gboolean {
                         FileCatalog *filecatalog = static_cast<FileCatalog *>(data);
-                        filecatalog->dirSelected(art::session::path(), "");
+                        if (!art::session::check(filecatalog->lastSelectedDir())) {
+                            filecatalog->dirSelected(art::session::path(), "");
+                        }
                         return FALSE;
                     };
                 gdk_threads_add_idle(doit, rtWindow->fpanel->fileCatalog);
