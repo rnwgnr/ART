@@ -52,11 +52,10 @@ std::unordered_set<std::string> get_file_list(const Glib::ustring &fname)
         std::string line;
         while (src && std::getline(sbuf, line)) {
             Glib::ustring name = line;
-#ifdef WIN32
+            // handle crlf files
             if (name.size() && name[name.size()-1] == '\r') {
                 name.resize(name.size()-1);
             }
-#endif // WIN32
             if (Glib::file_test(name, Glib::FILE_TEST_EXISTS)) {
                 res.insert(name);
             }
