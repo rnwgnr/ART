@@ -383,15 +383,15 @@ void PlacesBrowser::delPressed ()
     Glib::RefPtr<Gtk::TreeSelection> selection = treeView->get_selection();
     Gtk::TreeModel::iterator iter = selection->get_selected();
 
-    if (iter && iter->get_value (placesColumns.type) == 5) {
+    if (iter && iter->get_value(placesColumns.type) == 5) {
         std::vector<Glib::ustring>::iterator i = std::find (options.favoriteDirs.begin(), options.favoriteDirs.end(), iter->get_value (placesColumns.root));
 
         if (i != options.favoriteDirs.end()) {
             options.favoriteDirs.erase (i);
         }
-    }
 
-    refreshPlacesList ();
+        refreshPlacesList();
+    }
 }
 
 Glib::ustring PlacesBrowser::userHomeDir ()
