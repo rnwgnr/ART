@@ -149,11 +149,8 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
     const float hlcompr_factor = LIM01(float(params->logenc.highlightCompression) / 100.f);
 
     const auto apply =
-        [=](float x, bool scale=true) -> float
+        [=](float x) -> float
         {
-            if (scale) {
-                x /= 65535.f;
-            }
             x = max(x, noise);
             x = max(x / gray, noise);
             if (hlcompr && x >= 1.f) {
@@ -164,11 +161,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
             if (linbase > 0.f) {
                 x = xlog2lin(x, linbase);
             }
-            if (scale) {
-                return x * 65535.f;
-            } else {
-                return x;
-            }
+            return x;
         };
 
     const auto sf =
@@ -205,7 +198,7 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
                 float r = rgb->r(y, x);
                 float g = rgb->g(y, x);
                 float b = rgb->b(y, x);
-                float m = norm(r, g, b, ws);
+                float m = norm(r / 65535.f, g / 65535.f, b / 65535.f, ws);
                 if (m > noise) {
                     float mm = apply(m);
                     float f = mm / m;
@@ -265,8 +258,8 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
                 float &b = rgb->b(y, x);
                 float t = Y[y][x];
                 float t2;
-                if (t > noise && (t2 = norm(r, g, b, ws)) > noise) {
-                    float c = apply(t, false);
+                if (t > noise && (t2 = norm(r / 65535.f, g / 65535.f, b / 65535.f, ws)) > noise) {
+                    float c = apply(t);
                     float f = c / t;
                     float f2 = apply(t2) / t2;
                     f = intp(blend, f, f2);
