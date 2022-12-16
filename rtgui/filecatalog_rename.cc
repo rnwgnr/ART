@@ -30,6 +30,7 @@
 #include <ctype.h>
 #include <sstream>
 #include <iomanip>
+#include <glibmm/regex.h>
 
 
 namespace {
@@ -201,6 +202,7 @@ private:
     F func_;
 };
 
+
 template <class F>
 std::unique_ptr<Pattern> make_pattern(F func)
 {
@@ -281,6 +283,7 @@ std::string tostr(T n, int digits)
  * pattern syntax:
  * %f : FileNamePattern
  * %e : FileExtPattern
+ * %# : FileNumberPattern
  * %a : DatePattern(day name abbreviated)
  * %A : DatePattern(day name full)
  * %b : DatePattern(month name abbreviated)
@@ -333,6 +336,20 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                         make_pattern(
                             [](FD fd) {
                                 return getExtension(fd->getFileName());
+                            }));
+                    break;
+                case '#':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                auto re = Glib::Regex::create("^.*?([0-9]+)$");
+                                Glib::MatchInfo m;
+                                auto name = removeExtension(
+                                    Glib::path_get_basename(fd->getFileName()));
+                                if (re->match(name, m)) {
+                                    return m.fetch(1);
+                                }
+                                return Glib::ustring("");
                             }));
                     break;
                 case 'm':
