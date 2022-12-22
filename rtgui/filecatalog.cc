@@ -2833,6 +2833,9 @@ void FileCatalog::sessionSavePressed()
 
     if (result == Gtk::RESPONSE_OK) {
         auto fname = dialog.get_filename();
+        if (getExtension(fname).empty()) {
+            fname += ".ars";
+        }
         art::session::save(fname);
     }    
 }
