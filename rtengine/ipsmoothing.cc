@@ -630,7 +630,7 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
         
         int n = params->smoothing.regions.size();
         int show_mask_idx = params->smoothing.showMask;
-        if (show_mask_idx >= n || (cur_pipeline != Pipeline::PREVIEW && cur_pipeline != Pipeline::OUTPUT)) {
+        if (show_mask_idx >= n || (cur_pipeline != Pipeline::PREVIEW /*&& cur_pipeline != Pipeline::OUTPUT*/)) {
             show_mask_idx = -1;
         }
         std::vector<array2D<float>> mask(n);
