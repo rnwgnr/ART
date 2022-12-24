@@ -148,7 +148,8 @@ cmake \
     -DWITH_SAN="OFF" \
     -DWITH_SYSTEM_KLT="OFF" \
     -DWITH_BENCHMARK="OFF" \
-    -DENABLE_TCMALLOC="ON" \
+    -DENABLE_LIBRAW="ON" \
+    -DENABLE_OCIO="ON" \
     "$HOME/programs/code-${prog}" || exit 1
 
 make --jobs="$cpuCount" install || exit 1
