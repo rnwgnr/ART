@@ -1961,4 +1961,3 @@ FILEBROWSER_SESSION_REMOVE_LABEL;Remove selected from session
 FILEBROWSER_SESSION_LOAD_LABEL;Load session from file
 FILEBROWSER_SESSION_SAVE_LABEL;Save session to file
 FILECHOOSER_FILTER_ARS;ART session files (*.ars)
-
