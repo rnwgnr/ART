@@ -180,6 +180,11 @@ FILEBROWSER_RENAMEDLGLABEL;Rename file(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Reset to default
 FILEBROWSER_SELECTDARKFRAME;Select dark-frame...
 FILEBROWSER_SELECTFLATFIELD;Select flat-field...
+FILEBROWSER_SESSION_ADD_LABEL;Add to session
+FILEBROWSER_SESSION_REMOVE_LABEL;Remove selected from session
+FILEBROWSER_SESSION_LOAD_LABEL;Load session from file
+FILEBROWSER_SESSION_SAVE_LABEL;Save session to file
+FILECHOOSER_FILTER_ARS;ART session files (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;Show images labeled Red.\nShortcut: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Show images labeled Yellow.\nShortcut: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Show images labeled Green.\nShortcut: <b>Alt-3</b>
@@ -1220,7 +1225,7 @@ QUEUE_LOCATION_TITLE;Output Location
 QUEUE_STARTSTOP_TOOLTIP;Start or stop processing the images in the queue.\n\nShortcut: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Base directory
 RENAME_DIALOG_PATTERN;File name pattern
-RENAME_DIALOG_PATTERN_TIP;Specify the output name based on the source photo's name and metadata.\n\nThe meaning of the formatting strings are as follows:\n<b>%f</b>: file name without extension\n<b>%e</b>: file extension\n<b>%#</b>: file name numeric suffix\n<b>%C</b>: camera name (make and model)\n<b>%M</b>: camera brand\n<b>%N</b>: camera model\n<b>%Y</b>: photo date, year (4 digits)\n<b>%y</b>: photo date, year (2 digits)\n<b>%m</b>: photo date, month (numeric)\n<b>%b</b>: photo date, month (abbreviated name)\n<b>%B</b>: photo date, month (full name)\n<b>%d</b>: photo date, day (numeric)\n<b>%a</b>: photo date, day (abbreviated name)\n<b>%A</b>: photo date, day (full name)\n<b>%n1</b> to <b>%n9</b>: progressive number, with the number specifying the padding with zeroes (e.g. <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO speed\n<b>%L</b>: lens name\n<b>%F</b>: lens aperture (F number)\n<b>%l</b>: focal length\n<b>%E</b>: exposure compensation\n<b>%s</b>: shutter speed\n<b>%r</b>: photo rating\n<b>%T[<i>tagname</i>]</b>: content of the metadata tag <i>tagname</i> (with invalid characters replaced by '_')\n<b>%%</b>: '%' character.
+RENAME_DIALOG_PATTERN_TIP;Specify the output name based on the source photo's name and metadata.\n\nThe meaning of the formatting strings are as follows:\n<b>%f</b>: file name without extension\n<b>%e</b>: file extension\n<b>%C</b>: camera name (make and model)\n<b>%M</b>: camera brand\n<b>%N</b>: camera model\n<b>%Y</b>: photo date, year (4 digits)\n<b>%y</b>: photo date, year (2 digits)\n<b>%m</b>: photo date, month (numeric)\n<b>%b</b>: photo date, month (abbreviated name)\n<b>%B</b>: photo date, month (full name)\n<b>%d</b>: photo date, day (numeric)\n<b>%a</b>: photo date, day (abbreviated name)\n<b>%A</b>: photo date, day (full name)\n<b>%n1</b> to <b>%n9</b>: progressive number, with the number specifying the padding with zeroes (e.g. <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO speed\n<b>%L</b>: lens name\n<b>%F</b>: lens aperture (F number)\n<b>%l</b>: focal length\n<b>%E</b>: exposure compensation\n<b>%s</b>: shutter speed\n<b>%r</b>: photo rating\n<b>%T[<i>tagname</i>]</b>: content of the metadata tag <i>tagname</i> (with invalid characters replaced by '_')\n<b>%%</b>: '%' character.
 RENAME_DIALOG_ALLOW_WHITESPACE;Allow whitespace in output names
 RENAME_DIALOG_NAME_NORMALIZATION;File name normalization
 RENAME_DIALOG_NORM_OFF;None
@@ -1263,6 +1268,7 @@ SAVEDLG_SUBSAMP_3;Best quality
 SAVEDLG_SUBSAMP_TOOLTIP;Best compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma halved horizontally and vertically.\n\nBalanced:\nJ:a:b 4:2:2\nh/v 2/1\nChroma halved horizontally.\n\nBest quality:\nJ:a:b 4:4:4\nh/v 1/1\nNo chroma subsampling.
 SAVEDLG_TIFFUNCOMPRESSED;Uncompressed TIFF
 SAVEDLG_WARNFILENAME;File will be named
+SESSION_LABEL;Session
 SHCSELECTOR_TOOLTIP;Click right mouse button to reset the position of those 3 sliders.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to the monitor profile.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the output profile, if soft-proofing is disabled.
@@ -1956,8 +1962,3 @@ ZOOMPANEL_ZOOMFITSCREEN;Fit whole image to screen\nShortcut: <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoom In\nShortcut: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoom Out\nShortcut: <b>-</b>
 SESSION_LABEL;Session
-FILEBROWSER_SESSION_ADD_LABEL;Add to session
-FILEBROWSER_SESSION_REMOVE_LABEL;Remove selected from session
-FILEBROWSER_SESSION_LOAD_LABEL;Load session from file
-FILEBROWSER_SESSION_SAVE_LABEL;Save session to file
-FILECHOOSER_FILTER_ARS;ART session files (*.ars)
