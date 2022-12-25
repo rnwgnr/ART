@@ -1273,9 +1273,11 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
         // open dialog at the 1-st file's path
         fc.set_current_folder(Glib::path_get_dirname(tbe[0]->filename));
     }
-    //!!! TODO prevent dialog closing on "enter" key press
 
-    if( fc.run() == Gtk::RESPONSE_OK ) {
+    if (fc.run() == Gtk::RESPONSE_OK) {
+        const bool is_session = art::session::check(selectedDirectory);
+        std::vector<Glib::ustring> session_add, session_rem;
+        
         if (moveRequested) {
             removeFromBatchQueue(tbe);
         }
@@ -1288,7 +1290,7 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
             Glib::ustring src_Dir = Glib::path_get_dirname(src_fPath);
             Glib::RefPtr<Gio::File> src_file = Gio::File::create_for_path ( src_fPath );
 
-            if( !src_file ) {
+            if (!src_file) {
                 continue;    // if file is missing - skip it
             }
 
@@ -1310,13 +1312,18 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
             bool filecopymovecomplete = false;
             int i_copyindex = 1;
 
-            while(!filecopymovecomplete) {
+            while (!filecopymovecomplete) {
                 // check for filename conflicts at destination - prevent overwriting (actually RT will crash on overwriting attempt)
                 if (!Glib::file_test(dest_fPath, Glib::FILE_TEST_EXISTS) && !Glib::file_test(dest_fPath_param, Glib::FILE_TEST_EXISTS) && !Glib::file_test(Thumbnail::getXmpSidecarPath(dest_fPath), Glib::FILE_TEST_EXISTS)) {
                     // copy/move file to destination
                     Glib::RefPtr<Gio::File> dest_file = Gio::File::create_for_path ( dest_fPath );
 
                     if (moveRequested) {
+                        if (is_session) {
+                            session_rem.push_back(src_fPath);
+                            session_add.push_back(dest_fPath);
+                        }
+                        
                         // move file
                         src_file->move(dest_file);
                         // re-attach cache files
@@ -1370,14 +1377,20 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
                     dest_fPath_param = options.getParamFile(dest_fPath);
                     i_copyindex++;
                 }
-            }//while
-        } // i<tbe.size() loop
+            }
+        }
 
-        redrawAll ();
+        if (is_session) {
+            art::session::remove(session_rem);
+            art::session::add(session_add);
+        } else {
+            redrawAll();
+        }
 
         _refreshProgressBar();
-    } // Gtk::RESPONSE_OK
+    }
 }
+
 
 void FileCatalog::developRequested(const std::vector<FileBrowserEntry*>& tbe, bool fastmode)
 {

@@ -26,6 +26,7 @@
 #include "pathutils.h"
 #include "filepanel.h"
 #include "rtwindow.h"
+#include "session.h"
 #include <time.h>
 #include <ctype.h>
 #include <sstream>
@@ -871,7 +872,10 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
 {
     Params params;
     if (get_params(getToplevelWindow(this), args, params)) {
+        const bool is_session = art::session::check(selectedDirectory);
+        
         removeFromBatchQueue(args);
+        std::vector<Glib::ustring> session_add, session_rem;
         
         std::vector<std::pair<Glib::ustring, Glib::ustring>> torename;
         for (auto e : args) {
@@ -883,6 +887,10 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
                     ::g_rename(p.first.c_str(), p.second.c_str()) == 0) {
                     if (first) {
                         cacheMgr->renameEntry(p.first, e->thumbnail->getMD5(), p.second);
+                        if (is_session) {
+                            session_add.push_back(p.second);
+                            session_rem.push_back(p.first);
+                        }
                     }
                 } else {
                     filepanel->getParent()->error(Glib::ustring::compose(M("RENAME_DIALOG_ERROR"), p.first, p.second));
@@ -890,7 +898,12 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
                 first = false;
             }
         }
-        reparseDirectory();
+        if (is_session) {
+            art::session::remove(session_rem);
+            art::session::add(session_add);
+        } else {
+            reparseDirectory();
+        }
     }
 }
     
@@ -931,6 +944,9 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
         }
 
         if (!err) {
+            const bool is_session = art::session::check(selectedDirectory);
+            std::vector<Glib::ustring> session_rem;
+            
             options.renaming.sidecars = sidecars.get_text();
             
             for (unsigned int i = 0; i < tbe.size(); i++) {
@@ -968,33 +984,18 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
                 }
 
                 previewsLoaded--;
+
+                if (is_session) {
+                    session_rem.push_back(fname);
+                }
             }
-                
-            //     // delete paramfile if found
-            //     // ::g_remove ((fname + paramFileExtension).c_str ());
-            //     // ::g_remove ((removeExtension(fname) + paramFileExtension).c_str ());
-            //     ::g_remove(options.getParamFile(fname).c_str());
-            //     // delete .thm file
-            //     ::g_remove ((removeExtension(fname) + ".thm").c_str ());
-            //     ::g_remove ((removeExtension(fname) + ".THM").c_str ());
-            //     auto xmp_sidecar = Thumbnail::getXmpSidecarPath(fname);
-            //     if (Glib::file_test(xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
-            //         ::g_remove(xmp_sidecar.c_str());
-            //     }
-
-            //     if (inclBatchProcessed) {
-            //         Glib::ustring procfName = Glib::ustring::compose ("%1.%2", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format);
-            //         ::g_remove (procfName.c_str ());
-
-            //         Glib::ustring procfNameParamFile = Glib::ustring::compose ("%1.%2.out%3", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format, paramFileExtension);
-            //         ::g_remove (procfNameParamFile.c_str ());
-            //     }
-
-            //     previewsLoaded--;
-            // }
 
             _refreshProgressBar();
-            redrawAll ();
+            if (is_session) {
+                art::session::remove(session_rem);
+            } else {
+                redrawAll();
+            }
         } else {
             Gtk::MessageDialog errd(getToplevelWindow(this), errmsg, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
             errd.run();
