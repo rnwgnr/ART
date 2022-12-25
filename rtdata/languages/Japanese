@@ -17,6 +17,7 @@
 #16 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 #17 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 #18 2022-11-28 Ohnishi, Yasuo, updates for 1.17
+#19 2022-12-14 Ohnishi, Yasuo, updates for sessions
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -195,6 +196,11 @@ FILEBROWSER_RENAMEDLGLABEL;ファイル名変更
 FILEBROWSER_RESETDEFAULTPROFILE;デフォルトにリセット
 FILEBROWSER_SELECTDARKFRAME;ダークフレームの選択...
 FILEBROWSER_SELECTFLATFIELD;フラットフィールドの選択...
+FILEBROWSER_SESSION_ADD_LABEL;セッションに追加する
+FILEBROWSER_SESSION_REMOVE_LABEL;選択したファイルをセッションから除く
+FILEBROWSER_SESSION_LOAD_LABEL;ファイルからセッションを読み込む
+FILEBROWSER_SESSION_SAVE_LABEL;セッションをファイルに保存する
+FILECHOOSER_FILTER_ARS;ART セッションファイル (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;レッド･ラベルの画像を表示\nショートカット: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;イエロー･ラベルの画像を表示\nショートカット: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;グリーン･ラベルの画像を表示\nショートカット: <b>Alt-3</b>
@@ -1278,6 +1284,7 @@ SAVEDLG_SUBSAMP_3;画質重視
 SAVEDLG_SUBSAMP_TOOLTIP;圧縮率重視:\nJ:a:b 4:2:0\nh/v 2/2\n色差 (Chroma) は水平方向･垂直方向で半分になります\n\nバランス重視の圧縮:\nJ:a:b 4:2:2\nh/v 2/1\n色差は水平方向で半分になります\n\n画質重視の圧縮:\nJ:a:b 4:4:4\nh/v 1/1\n色差のサブサンプリングはありません.
 SAVEDLG_TIFFUNCOMPRESSED;非圧縮 TIFF
 SAVEDLG_WARNFILENAME;ファイルに名前が付けられます
+SESSION_LABEL;セッション
 SHCSELECTOR_TOOLTIP;この3つのスライダーの位置をリセットするには\nマウスの右ボタンをクリック
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;モニタープロファイルに対する色空間外のピクセルをハイライト表示します
 SOFTPROOF_GAMUTCHECK_TOOLTIP;ソフトプルーフが有効な場合 ソフトプルーフプロファイル色域外の色のピクセルを\nソフトプルーフが無効な場合 出力プロファイル色域外の色のピクセルをハイライトで表示します

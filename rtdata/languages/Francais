@@ -179,6 +179,11 @@ FILEBROWSER_RENAMEDLGLABEL;Renommer le(s) fichier(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Réinitialiser au profil par défaut
 FILEBROWSER_SELECTDARKFRAME;Choisir une image de Trame Noire...
 FILEBROWSER_SELECTFLATFIELD;Sélectionner une image de Champ Uniforme...
+FILEBROWSER_SESSION_ADD_LABEL;Ajouter à la session
+FILEBROWSER_SESSION_REMOVE_LABEL;Supprimer la sélection de la session
+FILEBROWSER_SESSION_LOAD_LABEL;Charger une session depuis un fichier
+FILEBROWSER_SESSION_SAVE_LABEL;Sauvegarder la session dans un fichier
+FILECHOOSER_FILTER_ARS;ART Fichiers de session (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;Afficher les images avec un label Rouge\nRaccourci : <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Afficher les images avec un label Jaune\nRaccourci : <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Afficher les images avec un label Vert\nRaccourci : <b>Alt-3</b>
@@ -1263,6 +1268,7 @@ SAVEDLG_SUBSAMP_3;Meilleure qualité
 SAVEDLG_SUBSAMP_TOOLTIP;Meilleure compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma divisé par deux horizontalement et verticalement.\n\nÉquilibré:\nJ:a:b 4:2:2\nh/v 2/1\nChroma divisé par deux horizontalement.\n\nMeilleure qualité:\nJ:a:b 4:4:4\nh/v 1/1\nPas de sous-échantillonnage chroma.
 SAVEDLG_TIFFUNCOMPRESSED;TIFF non compressé
 SAVEDLG_WARNFILENAME;Le fichier sera nommé
+SESSION_LABEL;Session
 SHCSELECTOR_TOOLTIP;Cliquez le bouton droit de la souris\npour réinitialiser la position de ces 3 curseurs
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction du profil de sortie de l'écran.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Visualiser les pixels dont la couleur est hors gamut en fonction :\n- du profil d'Épreuvage à l'écran s'il y en a un de sélectionné et si "Épreuve numérique" est activé,\n- du profil de sortie l'écran si "Épreuve numérique" est désactivé
@@ -1845,7 +1851,7 @@ TP_RGBCURVES_LABEL;Courbes RVB
 TP_RGBCURVES_RED;R
 TP_ROTATE_DEGREE;Degré
 TP_ROTATE_LABEL;Rotation
-TP_ROTATE_SELECTLINE;Choisir la ligne d'horizon
+TP_ROTATE_SELECTLINE;Choisir une ligne droite
 TP_SAVEDIALOG_OK_TIP;Raccourci : <b>Ctrl-Entrée</b>
 TP_SHARPENING_AMOUNT;Quantité
 TP_SHARPENING_BLUR;Rayon de floutage

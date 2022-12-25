@@ -8,6 +8,7 @@
 #07 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 #08 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 #09 2022-11-28 Ohnishi, Yasuo, updates for 1.17
+#10 2022-12-14 Ohnishi, Yasuo, updates for sessions
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -186,6 +187,11 @@ FILEBROWSER_RENAMEDLGLABEL;파일명변경
 FILEBROWSER_RESETDEFAULTPROFILE;초기 설정으로 리셋함
 FILEBROWSER_SELECTDARKFRAME;장시간노출 노이즈 제거 선택...
 FILEBROWSER_SELECTFLATFIELD;센서의 오점 그늘 제거용 화상을 선택함...
+FILEBROWSER_SESSION_ADD_LABEL;세션에 추가함
+FILEBROWSER_SESSION_REMOVE_LABEL;세션에서 제거함
+FILEBROWSER_SESSION_LOAD_LABEL;세션에를 파일에서 호출함
+FILEBROWSER_SESSION_SAVE_LABEL;세션에를 파일에 보존함
+FILECHOOSER_FILTER_ARS;ART 세션 파일 (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;빨간색 레이블의 화상을 표시함\n단축키: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;노란 레이블의 화상을 표시함\n단축키: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;초록색 레이블의 화상을 표시함\n단축키: <b>Alt-3</b>
@@ -1269,6 +1275,7 @@ SAVEDLG_SUBSAMP_3;최적 화질
 SAVEDLG_SUBSAMP_TOOLTIP;최고 압축률:\nJ:a:b 4:2:0\nh/v 2/2\n크로마 (색차) 는 수평방향, 수직방향으로 반이 됩니다.\n\n균형을 중시한 압축:\nJ:a:b 4:2:2\nh/v 2/1\n크로마는 수평방향으로 반이 됩니다.\n\n화질을 중시한 압축:\nJ:a:b 4:4:4\nh/v 1/1\n크로마 서브샘플링을 안 합니다.
 SAVEDLG_TIFFUNCOMPRESSED;비압축 TIFF
 SAVEDLG_WARNFILENAME;파일에 이름을 붙입니다.
+SESSION_LABEL;세션
 SHCSELECTOR_TOOLTIP;이 세개 슬라이더 위치를 리셋하려면 \n마우스의 오른쪽버튼을 클릭함
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;모니터 프로파일에 대하는 색공간외 픽셀을 하이라이트로 표시합니다.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;소프트 프루핑이 유효일 때 소프트 프루핑프로파일 색역외 색깔의  픽셀을\n소프트 프루핑이 무효일 때 출력 프로파일 색역외 색깔의  픽셀을 하이라이트로 표시합니다.

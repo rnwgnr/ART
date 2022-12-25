@@ -15,6 +15,7 @@
 #15 2022-11-20 alvaro
 #16 2022-11-23 v1.17 - alvaro
 #17 2022-12-03 alvaro
+#18 2022-12-12 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -195,6 +196,10 @@ FILEBROWSER_RENAMEDLGLABEL;Rinomina il file
 FILEBROWSER_RESETDEFAULTPROFILE;Reimposta al default
 FILEBROWSER_SELECTDARKFRAME;Seleziona un Dark Frame...
 FILEBROWSER_SELECTFLATFIELD;Seleziona un Flat Field...
+FILEBROWSER_SESSION_ADD_LABEL;Aggiungi alla sessione
+FILEBROWSER_SESSION_REMOVE_LABEL;Rimuovi la selezione dalla sessione
+FILEBROWSER_SESSION_LOAD_LABEL;Carica sessione da file
+FILEBROWSER_SESSION_SAVE_LABEL;Salva sessione su file
 FILEBROWSER_SHOWCOLORLABEL1HINT;Mostra le immagini con etichetta Rossa.\nScorciatoia: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Mostra le immagini con etichetta Gialla.\nScorciatoia: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Mostra le immagini con etichetta Verde.\nScorciatoia: <b>Alt-3</b>
@@ -229,6 +234,7 @@ FILEBROWSER_UNRANK_TOOLTIP;Nessun Punteggio.\nScorciatoia: <b>Shift-0</b>
 FILEBROWSER_ZOOMINHINT;Aumenta la dimensione delle miniature.\n\nScorciatoie:\n<b>+</b> - Modalità a Schede Multiple,\n<b>Alt</b>-<b>+</b> - Modalità a Schede Singole.
 FILEBROWSER_ZOOMOUTHINT;Riduce la dimensione delle miniature.\n\nScorciatoie:\n<b>-</b> - Modalità a Schede Multiple,\n<b>Alt</b>-<b>-</b> - Modalità a Schede Singole.
 FILECHOOSER_FILTER_ANY;Tutti i file
+FILECHOOSER_FILTER_ARS;File sessione di ART (*.ars)
 FILECHOOSER_FILTER_COLPROF;Profili colore (*.icc)
 FILECHOOSER_FILTER_CURVE;File curve
 FILECHOOSER_FILTER_LCP;Profili correzione obiettivi
@@ -1280,6 +1286,7 @@ SAVEDLG_SUBSAMP_3;Migliore Qualità
 SAVEDLG_SUBSAMP_TOOLTIP;Migliore compressione:\nJ:a:b 4:2:0\nh/v 2/2\nCrominanza dimezz. orizzontalmente e verticalmente.\n\nBilanciato:\nJ:a:b 4:2:2\nh/v 2/1\nCrominanza dimezz. orizzontalmente\n\nMigliore qualità:\nJ:a:b 4:4:4\nh/v 1/1\nNessun sottocampionam. di crominanza.
 SAVEDLG_TIFFUNCOMPRESSED;TIFF non compresso
 SAVEDLG_WARNFILENAME;Il file verrà chiamato
+SESSION_LABEL;Sessione
 SHCSELECTOR_TOOLTIP;Click destro per ripristinare la posizione di questi tre cursori.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Evidenzia i pixel con colori fuori dal gamut rispetto al profilo del monitor.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Evidenzia i pixel con colori fuori dal gamut rispetto a:\n- profilo soft-proofing, se impostato e se il soft-proofing è abilitato,\n- profilo di uscita, se il soft-proofing è disabilitato.
