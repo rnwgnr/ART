@@ -27,6 +27,7 @@
 #include "image16.h"
 #include "profilestore.h"
 #include "../rtgui/pathutils.h"
+#include "../rtgui/config.h"
 #include <iostream>
 #include <glib/gstdio.h>
 #include <unistd.h>
@@ -383,7 +384,19 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
             std::cout << "saving " << fileName << " with " << cmd << std::endl;
         }
         try {
+#ifdef BUILD_BUNDLE
+            auto pth = Glib::getenv("PATH");
+            auto extrapath = argv0;
+            auto epth = Glib::getenv("ART_EXIFTOOL_BASE_DIR");
+            if (!epth.empty()) {
+                extrapath += G_SEARCHPATH_SEPARATOR_S + epth;
+            }
+            Glib::setenv("PATH", extrapath + G_SEARCHPATH_SEPARATOR_S + pth);
+#endif // BUILD_BUNDLE
             subprocess::exec_sync(dir, argv, true, &sout, &serr);
+#ifdef BUILD_BUNDLE
+            Glib::setenv("PATH", pth);
+#endif // BUILD_BUNDLE
         } catch (subprocess::error &err) {
             if (settings->verbose) {
                 std::cout << "  exec error: " << err.what() << std::endl;
