@@ -34,6 +34,7 @@
 #33 13-07-2022 update to ART v1.15 by pm
 #34 24-08-2022 update to ART v1.16 by pm
 #35 24-11-2022 update to ART v1.17 by pm
+#36 27-12-2022 update to ART v1.18 door pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -213,6 +214,11 @@ FILEBROWSER_RENAMEDLGLABEL; Hernoem bestand(en)
 FILEBROWSER_RESETDEFAULTPROFILE;Terugzetten naar standaardwaarde
 FILEBROWSER_SELECTDARKFRAME;Kies donkerframe...
 FILEBROWSER_SELECTFLATFIELD;Kies vlakveldopname...
+FILEBROWSER_SESSION_ADD_LABEL;Voeg foto of geselecteerde foto's aan sessie toe
+FILEBROWSER_SESSION_REMOVE_LABEL;Verwijder foto of selectie uit sessie
+FILEBROWSER_SESSION_LOAD_LABEL;Laad sessiebestand
+FILEBROWSER_SESSION_SAVE_LABEL;Bewaar sessiebestand
+FILECHOOSER_FILTER_ARS;ART sessiebestanden (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;Toon foto's met label Rood\nSneltoets <b>Alt+1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Toon foto's met label Geel\nSneltoets <b>Alt+2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Toon foto's met label Groen\nSneltoets <b>Alt+3</b>
@@ -1249,7 +1255,7 @@ RENAME_DIALOG_NORM_OFF;Ongewijzigd
 RENAME_DIALOG_NORM_UPPERCASE;Hoofdletters
 RENAME_DIALOG_ON_EXISTING;Wat te doen als bestemming bestaat
 RENAME_DIALOG_PATTERN;Patroon bestandsnaam
-RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextensie\n<b>%C</b>: naam camera (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> to <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: '%'-karakter.
+RENAME_DIALOG_PATTERN_TIP;Geef een nieuwe naam gebaseerd op de oorspronkelijke bestandsnaam en metadata.\n\nDe betekenis van de verschillende elementen is als volgt:\n\n<b>%f</b>: bestandsnaam zonder extensie\n<b>%e</b>: bestandsextensie\n<b>%C</b>: cameranaam (merk en model)\n<b>%M</b>: cameramerk\n<b>%N</b>: cameramodel\n<b>%Y</b>: datum foto, jaar (4 cijfers)\n<b>%y</b>: datum foto, jaar (2 cijfers)\n<b>%m</b>: datum foto, maand (numeriek)\n<b>%b</b>: datum foto, maand (korte maandnaam)\n<b>%B</b>: datum foto, maand (volledige maandnaam)\n<b>%d</b>: datum foto, dag (numeriek)\n<b>%a</b>: datum foto, dag (korte dagnaam)\n<b>%A</b>: datum foto, dag (volledige dagnaam)\n<b>%n1</b> tot <b>%n9</b>: oplopend nummer, het nummer bepaalt aantal voorloopnullen (bv. <b>%n2</b> resulteert in <i>01</i>)\n<b>%I</b>: ISO-waarde\n<b>%L</b>: lensnaam\n<b>%F</b>: diafragma (F-getal)\n<b>%l</b>: brandpuntsafstand\n<b>%E</b>: belichtingscompensatie\n<b>%s</b>: sluitertijd\n<b>%r</b>: fotowaardering\n<b>%T[<i>veldnaam</i>]</b>: inhoud van de metadata-veldnaam <i>veldnaam</i> (ongeldige karakters worden vervangen door '_')\n<b>%%</b>: het '%'-karakter.
 RENAME_DIALOG_PREVIEW;Voorbeeld
 RENAME_DIALOG_PROGRESSIVE;Oplopend nummer
 RENAME_DIALOG_RENAME;Genereer een unieke naam
@@ -1281,8 +1287,8 @@ SAVEDLG_SUBSAMP;Subsampling
 SAVEDLG_SUBSAMP_TOOLTIP;Beste compressie:\nJ:a:b 4:2:0\nh/v 2/2\nChroma horizontaal en verticaal gehalveerd\n\nGebalanceerd:\nJ:a:b 4:2:2\nh/v 2/1\nChroma horizontaal gehalveerd.\n\nBeste kwaliteit:\nJ:a:b 4:4:4\nh/v 1/1\nGeen chroma-subsampling.
 SAVEDLG_TIFFUNCOMPRESSED;Geen TIFF-compressie
 SAVEDLG_WARNFILENAME;Bestandsnaam wordt
+SESSION_LABEL;Sessie
 SHCSELECTOR_TOOLTIP;Rechtsklik om de drie schuiven terug te zetten naar hun standaardpositie
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Highlight pixels with out-of-gamut colors with respect to:\n- the soft-proofing profile, if one is set and soft-proofing is enabled,\n- the output profile, if soft-proofing is disabled.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen met:\nhet opgegeven soft-proofing profiel en soft-proofing is ingeschakeld,\n of met het uitvoerprofiel en soft-proofing is uitgeschakeld. 
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Markeer pixels waarvan de kleuren buiten het kleurgamma vallen bij het gekozen monitorprofiel.
 SOFTPROOF_TOOLTIP;Soft-proofing simuleert hoe een foto wordt getoond als deze wordt weergegeven op een beeldscherm of afgedrukt op een specifieke printer, als het overeenkomstige profiel is opgegeven in Voorkeuren > Kleurbeheer.\n(Met <b>Ctrl + linksklik</b> kan een ander profiel worden gekozen. 
