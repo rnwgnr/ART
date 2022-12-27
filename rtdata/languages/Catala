@@ -18,6 +18,7 @@
 #17 2022-08-24 mrleemon, update for 1.16
 #18 2022-11-23 mrleemon, update for 1.17
 #19 2022-12-01 mrleemon, update for 1.17.2
+#20 2022-12-27 mrleemon, update for 1.18
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -197,6 +198,11 @@ FILEBROWSER_RENAMEDLGLABEL;Canvia el nom a fitxer(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Restableix al valor predeterminat
 FILEBROWSER_SELECTDARKFRAME;Selecciona presa negra...
 FILEBROWSER_SELECTFLATFIELD;Selecciona camp pla...
+FILEBROWSER_SESSION_ADD_LABEL;Afegeix a la sessió
+FILEBROWSER_SESSION_REMOVE_LABEL;Elimina els seleccionats de la sessió
+FILEBROWSER_SESSION_LOAD_LABEL;Carrega la sessió d'un fitxer
+FILEBROWSER_SESSION_SAVE_LABEL;Desa la sessió a un fitxer
+FILECHOOSER_FILTER_ARS;Fitxers de sessió d'ART (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;Mostra imatges etiquetades amb vermell.\nDrecera: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Mostra imatges etiquetades amb groc.\nDrecera: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Mostra imatges etiquetades amb verd.\nDrecera: <b>Alt-3</b>
@@ -1242,7 +1248,7 @@ QUEUE_LOCATION_TITLE;Ubicació de sortida
 QUEUE_STARTSTOP_TOOLTIP;Inicia o atura el processament de les imatges a la cua.\n\nDrecera: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Directori base
 RENAME_DIALOG_PATTERN;Patró del nom de fitxer
-RENAME_DIALOG_PATTERN_TIP;Especifiqueu el nom de sortida en funció del nom i les metadades de la foto d'origen.\n\nEl significat de les cadenes de format és el següent:\n<b>%f</b>: nom del fitxer sense extensió\n<b>%e</b>: extensió del fitxer\n<b>%C</b>: nom de la càmera (marca i model)\n<b>%M</b>: marca de la càmera\n<b>%N</b>: model de la càmera\n<b>%Y</b>: data de la foto, any (4 dígits)\n<b>%y</b>: data de la foto, any (2 dígits)\n<b>%m</b>: data de la foto, mes (numèric)\n<b>%b</b>: data de la foto, mes (nom abreujat)\n<b>%B</b>: data de la foto, mes (nom complet)\n<b>%d</b>: data de la foto, dia (numèric)\n<b>%a</b>: data de la foto, dia (nom abreujat)\n<b>%A</b>: data de la foto, dia (nom complet)\n<b>%n1</b> a <b>%n9</b>: nombre progressiu, on el nombre especifica l'emplenat amb zeros (P. ex. <b>%n2</b> resulta en <i>01</i>)\n<b>%I</b>: velocitat ISO\n<b>%L</b>: nom de la lent\n<b>%F</b>: diafragma de la lent (nombre F)\n<b>%l</b>: distància focal\n<b>%E</b>: compensació de l'exposició\n<b>%s</b>: velocitat d'obturació\n<b>%r</b>: puntuació de la foto\n<b>%T[<i>nometiqueta</i>]</b>: contingut de l'etiqueta de metadades <i>nometiqueta</i> (amb els caràcters no vàlids reemplaçats per '_')\n<b>%%</b>: caràcter '%'.
+RENAME_DIALOG_PATTERN_TIP;Especifiqueu el nom de sortida en funció del nom i les metadades de la foto d'origen.\n\nEl significat de les cadenes de format és el següent:\n<b>%f</b>: nom del fitxer sense extensió\n<b>%e</b>: extensió del fitxer\n<b>%#</b>: sufix numèric del nom del fitxer\n<b>%C</b>: nom de la càmera (marca i model)\n<b>%M</b>: marca de la càmera\n<b>%N</b>: model de la càmera\n<b>%Y</b>: data de la foto, any (4 dígits)\n<b>%y</b>: data de la foto, any (2 dígits)\n<b>%m</b>: data de la foto, mes (numèric)\n<b>%b</b>: data de la foto, mes (nom abreujat)\n<b>%B</b>: data de la foto, mes (nom complet)\n<b>%d</b>: data de la foto, dia (numèric)\n<b>%a</b>: data de la foto, dia (nom abreujat)\n<b>%A</b>: data de la foto, dia (nom complet)\n<b>%n1</b> a <b>%n9</b>: nombre progressiu, on el nombre especifica l'emplenat amb zeros (P. ex. <b>%n2</b> resulta en <i>01</i>)\n<b>%I</b>: velocitat ISO\n<b>%L</b>: nom de la lent\n<b>%F</b>: diafragma de la lent (nombre F)\n<b>%l</b>: distància focal\n<b>%E</b>: compensació de l'exposició\n<b>%s</b>: velocitat d'obturació\n<b>%r</b>: puntuació de la foto\n<b>%T[<i>nometiqueta</i>]</b>: contingut de l'etiqueta de metadades <i>nometiqueta</i> (amb els caràcters no vàlids reemplaçats per '_')\n<b>%%</b>: caràcter '%'.
 RENAME_DIALOG_ALLOW_WHITESPACE;Permet espais en blanc en els noms de sortida
 RENAME_DIALOG_NAME_NORMALIZATION;Normalització de noms de fitxer
 RENAME_DIALOG_NORM_OFF;Cap
@@ -1285,6 +1291,7 @@ SAVEDLG_SUBSAMP_3;Màxima qualitat
 SAVEDLG_SUBSAMP_TOOLTIP;Millor compressió:\nJ:a:b 4:2:0\nh/v 2/2\nCroma dividida per dos horitzontalment i verticalment.\n\nEquilibrat:\nJ:a:b 4:2:2\nh/v 2/1\nCroma dividida per dos horitzontalment.\n\nMillor qualitat:\nJ:a:b 4:4:4\nh/v 1/1\nSense submostreig de croma.
 SAVEDLG_TIFFUNCOMPRESSED;TIFF sense compressió
 SAVEDLG_WARNFILENAME;S'assignarà un nom al fitxer
+SESSION_LABEL;Sessió
 SHCSELECTOR_TOOLTIP;Cliqueu amb el botó dret del ratolí per restablir la posició d'aquests 3 controls lliscants.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa al perfil del monitor.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Ressalta els píxels amb colors fora de rang pel que fa a:\n- el perfil de prova en pantalla, si està establert i la prova en pantalla està activada,\n- el perfil de sortida, si la prova en pantalla està desactivada.

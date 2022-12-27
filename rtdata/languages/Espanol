@@ -21,6 +21,7 @@
 #20 2022-08-24 mrleemon, update for 1.16
 #21 2022-11-23 mrleemon, update for 1.17
 #22 2022-12-01 mrleemon, update for 1.17.2
+#23 2022-12-27 mrleemon, update for 1.18
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -200,6 +201,11 @@ FILEBROWSER_RENAMEDLGLABEL;Renombrar archivo(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Restablecer al valor predeterminado
 FILEBROWSER_SELECTDARKFRAME;Seleccionar toma negra...
 FILEBROWSER_SELECTFLATFIELD;Seleccionar campo plano...
+FILEBROWSER_SESSION_ADD_LABEL;Añadir a la sesión
+FILEBROWSER_SESSION_REMOVE_LABEL;Eliminar los seleccionados de la sesión
+FILEBROWSER_SESSION_LOAD_LABEL;Cargar la sesión de un archivo
+FILEBROWSER_SESSION_SAVE_LABEL;Guardar la sesión a un archivo
+FILECHOOSER_FILTER_ARS;Archivos de sesión de ART (*.ars)
 FILEBROWSER_SHOWCOLORLABEL1HINT;Mostrar imágenes etiquetadas con rojo.\nAtajo: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Mostrar imágenes etiquetadas con amarillo.\nAtajo: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Mostrar imágenes etiquetadas con verde.\nAtajo: <b>Alt-3</b>
@@ -1245,7 +1251,7 @@ QUEUE_LOCATION_TITLE;Ubicación de salida
 QUEUE_STARTSTOP_TOOLTIP;Iniciar o detener el procesamiento de las imágenes en la cola.\n\nAtajo: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Directorio base
 RENAME_DIALOG_PATTERN;Patrón del nombre de archivo
-RENAME_DIALOG_PATTERN_TIP;Especifique el nombre de salida en función del nombre y los metadatos de la foto de origen.\n\nEl significado de las cadenas de formato es el siguiente:\n<b>%f</b>: nombre del archivo sin extensión\n<b>%e</b>: extensión del archivo\n<b>%C</b>: nombre de la cámara (marca y modelo)\n<b>%M</b>: marca de la cámara\n<b>%N</b>: modelo de la cámara\n<b>%Y</b>: fecha de la foto, año (4 dígitos)\n<b>%y</b>: fecha de la foto, año (2 dígitos)\n<b>%m</b>: fecha de la foto, mes (numérico)\n<b>%b</b>: fecha de la foto, mes (nombre abreviado)\n<b>%B</b>: fecha de la foto, mes (nombre completo)\n<b>%d</b>: fecha de la foto, día (numérico)\n<b>%a</b>: fecha de la foto, día (nombre abreviado)\n<b>%A</b>: fecha de la foto, día (nombre completo)\n<b>%n1</b> a <b>%n9</b>: número progresivo, donde el número especifica el relleno con ceros (P. ej. <b>%n2</b> resulta en <i>01</i>)\n<b>%I</b>: velocidad ISO\n<b>%L</b>: nombre de la lente\n<b>%F</b>: diafragma de la lente (número F)\n<b>%l</b>: distancia focal\n<b>%E</b>: compensación de la exposición\n<b>%s</b>: velocidad de obturación\n<b>%r</b>: puntuación de la foto\n<b>%T[<i>nombreetiqueta</i>]</b>: contenido de la etiqueta de metadatos <i>nombreetiqueta</i> (con los caracteres no válidos reemplazados por '_')\n<b>%%</b>: carácter '%'.
+RENAME_DIALOG_PATTERN_TIP;Especifique el nombre de salida en función del nombre y los metadatos de la foto de origen.\n\nEl significado de las cadenas de formato es el siguiente:\n<b>%f</b>: nombre del archivo sin extensión\n<b>%e</b>: extensión del archivo\n<b>%#</b>: sufijo numérico del nombre del archivo\n<b>%C</b>: nombre de la cámara (marca y modelo)\n<b>%M</b>: marca de la cámara\n<b>%N</b>: modelo de la cámara\n<b>%Y</b>: fecha de la foto, año (4 dígitos)\n<b>%y</b>: fecha de la foto, año (2 dígitos)\n<b>%m</b>: fecha de la foto, mes (numérico)\n<b>%b</b>: fecha de la foto, mes (nombre abreviado)\n<b>%B</b>: fecha de la foto, mes (nombre completo)\n<b>%d</b>: fecha de la foto, día (numérico)\n<b>%a</b>: fecha de la foto, día (nombre abreviado)\n<b>%A</b>: fecha de la foto, día (nombre completo)\n<b>%n1</b> a <b>%n9</b>: número progresivo, donde el número especifica el relleno con ceros (P. ej. <b>%n2</b> resulta en <i>01</i>)\n<b>%I</b>: velocidad ISO\n<b>%L</b>: nombre de la lente\n<b>%F</b>: diafragma de la lente (número F)\n<b>%l</b>: distancia focal\n<b>%E</b>: compensación de la exposición\n<b>%s</b>: velocidad de obturación\n<b>%r</b>: puntuación de la foto\n<b>%T[<i>nombreetiqueta</i>]</b>: contenido de la etiqueta de metadatos <i>nombreetiqueta</i> (con los caracteres no válidos reemplazados por '_')\n<b>%%</b>: carácter '%'.
 RENAME_DIALOG_ALLOW_WHITESPACE;Permitir espacios en blanco en los nombres de salida
 RENAME_DIALOG_NAME_NORMALIZATION;Normalización de nombres de archivo
 RENAME_DIALOG_NORM_OFF;Ninguno
@@ -1288,6 +1294,7 @@ SAVEDLG_SUBSAMP_3;Máxima calidad
 SAVEDLG_SUBSAMP_TOOLTIP;Mejor compresión:\nJ:a:b 4:2:0\nh/v 2/2\nCroma dividida por dos horizontalmente y verticalmente.\n\nEquilibrado:\nJ:a:b 4:2:2\nh/v 2/1\nCroma dividida por dos horizontalmente.\n\nMejor calidad:\nJ:a:b 4:4:4\nh/v 1/1\nSin submuestreo de croma.
 SAVEDLG_TIFFUNCOMPRESSED;TIFF sin compresión
 SAVEDLG_WARNFILENAME;Se asignará nombre al archivo
+SESSION_LABEL;Sesión
 SHCSELECTOR_TOOLTIP;Haga clic con el botón derecho del ratón para restablecer la posición de esos 3 controles deslizantes.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto al perfil del monitor.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Resaltar los píxeles con colores fuera de rango con respecto a:\n- el perfil de prueba en pantalla, si se ha establecido uno y la prueba en pantalla está activada,\n- el perfil de salida, si la prueba en pantalla está desactivada.
