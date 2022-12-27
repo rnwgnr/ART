@@ -8,7 +8,7 @@
 #07 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 #08 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 #09 2022-11-28 Ohnishi, Yasuo, updates for 1.17
-#10 2022-12-14 Ohnishi, Yasuo, updates for sessions
+#10 2022-12-27 Ohnishi, Yasuo, updates for 1.18
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -1232,7 +1232,7 @@ QUEUE_LOCATION_TITLE;출력장소
 QUEUE_STARTSTOP_TOOLTIP;큐에 있는 화상의 현상 시작/ 중지\n\n단축키: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;기본 디렉토리
 RENAME_DIALOG_PATTERN;파일명의패턴
-RENAME_DIALOG_PATTERN_TIP;원래 사진이나 메타데이터명을 바탕으로 출력명을 지정하세요.\n\n형식을 지정하는 문자열의 뜻은 이하와 같습니다.:\n<b>%f</b>: 확장자가 없는 파일명\n<b>%e</b>: 확장자\n<b>%C</b>: 사진기명 (회사명 및 머델)\n<b>%M</b>: 사진기브랜드\n<b>%N</b>: 사진기 머델\n<b>%Y</b>: 촬영 년 (4자리)\n<b>%y</b>: 촬영 년 (2자리)\n<b>%m</b>: 촬영 월 (수자)\n<b>%b</b>: 촬영 월 (영어 약칭)\n<b>%B</b>: 촬영 월 (영어 fullname)\n<b>%d</b>: 촬영 날짜 (수자)\n<b>%a</b>: 촬영 날짜 (영어 약칭)\n<b>%A</b>: 촬영 날짜 (영어  fullname)\n<b>%n1</b> to <b>%n9</b>: 증분치 자리수 지정 (예, <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO감도\n<b>%L</b>: 렌즈 모델명\n<b>%F</b>: 렌즈조 리개 값 (F값)\n<b>%l</b>: 초점거리\n<b>%E</b>: 노출 보정량\n<b>%s</b>: 셔터속도\n<b>%r</b>: 사진의 평가\n<b>%T[<i>태그명</i>]</b>: 메타데이터태그 내용 <i>태그명</i> (무효 문자는  '_' 로 대체됨)\n<b>%%</b>: '%' 문자.
+RENAME_DIALOG_PATTERN_TIP;원래 사진이나 메타데이터명을 바탕으로 출력명을 지정하세요.\n\n형식을 지정하는 문자열의 뜻은 이하와 같습니다.:\n<b>%f</b>: 확장자가 없는 파일명\n<b>%e</b>: 확장자\n<b>%#</b>: 파일명과 부가번호\n<b>%C</b>: 사진기명 (회사명 및 머델)\n<b>%M</b>: 사진기브랜드\n<b>%N</b>: 사진기 머델\n<b>%Y</b>: 촬영 년 (4자리)\n<b>%y</b>: 촬영 년 (2자리)\n<b>%m</b>: 촬영 월 (수자)\n<b>%b</b>: 촬영 월 (영어 약칭)\n<b>%B</b>: 촬영 월 (영어 fullname)\n<b>%d</b>: 촬영 날짜 (수자)\n<b>%a</b>: 촬영 날짜 (영어 약칭)\n<b>%A</b>: 촬영 날짜 (영어  fullname)\n<b>%n1</b> to <b>%n9</b>: 증분치 자리수 지정 (예, <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO감도\n<b>%L</b>: 렌즈 모델명\n<b>%F</b>: 렌즈조 리개 값 (F값)\n<b>%l</b>: 초점거리\n<b>%E</b>: 노출 보정량\n<b>%s</b>: 셔터속도\n<b>%r</b>: 사진의 평가\n<b>%T[<i>태그명</i>]</b>: 메타데이터태그 내용 <i>태그명</i> (무효 문자는  '_' 로 대체됨)\n<b>%%</b>: '%' 문자.
 RENAME_DIALOG_ALLOW_WHITESPACE;출력명에 공백을 허용함
 RENAME_DIALOG_NAME_NORMALIZATION;파일명 표준화 (normalization)
 RENAME_DIALOG_NORM_OFF;없음

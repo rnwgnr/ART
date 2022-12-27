@@ -17,7 +17,7 @@
 #16 2022-07-14 Ohnishi, Yasuo, updates for 1.15
 #17 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 #18 2022-11-28 Ohnishi, Yasuo, updates for 1.17
-#19 2022-12-14 Ohnishi, Yasuo, updates for sessions
+#19 2022-12-27 Ohnishi, Yasuo, updates for 1.18
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -1241,7 +1241,7 @@ QUEUE_LOCATION_TITLE;出力の場所
 QUEUE_STARTSTOP_TOOLTIP;キューにある画像の現像を始める 或いは中止する\n\nショートカット: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;基本ディレクトリ
 RENAME_DIALOG_PATTERN;ファイル名のパターン
-RENAME_DIALOG_PATTERN_TIP;元の写真やメタデータ名に基づき出力名を指定して下さい.\n\n形式を指定する文字列の意味は以下の通りです:\n<b>%f</b>: 拡張子のないファイル名\n<b>%e</b>: 拡張子\n<b>%C</b>: カメラ名 (メーカー及モデル)\n<b>%M</b>: カメラブランド\n<b>%N</b>: カメラモデル\n<b>%Y</b>: 写真の年 (4桁)\n<b>%y</b>: 写真の年 (2桁)\n<b>%m</b>: 写真の月 (数字)\n<b>%b</b>: 写真の月 (英略称)\n<b>%B</b>: 写真の月 (英フルネーム)\n<b>%d</b>: 写真の日付 (数字)\n<b>%a</b>: 写真の日付 (英略称)\n<b>%A</b>: 写真の日付 (英フルネーム)\n<b>%n1</b> to <b>%n9</b>: 増分値の桁指定 (例: <b>%n2</b> は <i>01</i> となる)\n<b>%I</b>: ISO感度\n<b>%L</b>: レンズ名\n<b>%F</b>: レンズ絞り (F番号)\n<b>%l</b>: 焦点距離\n<b>%E</b>: 露出補正量 (compensation)\n<b>%s</b>: シャッター速度\n<b>%r</b>: 写真の評価\n<b>%T[<i>タグ名</i>]</b>: メタデータタグの内容 <i>タグ名</i> (無効な文字は '_' で代替)\n<b>%%</b>: '%' 文字.
+RENAME_DIALOG_PATTERN_TIP;元の写真やメタデータ名に基づき出力名を指定して下さい.\n\n形式を指定する文字列の意味は以下の通りです:\n<b>%f</b>: 拡張子のないファイル名\n<b>%e</b>: 拡張子\n<b>%#</b>: ファイル名と付加番号\n<b>%C</b>: カメラ名 (メーカー及モデル)\n<b>%M</b>: カメラブランド\n<b>%N</b>: カメラモデル\n<b>%Y</b>: 写真の年 (4桁)\n<b>%y</b>: 写真の年 (2桁)\n<b>%m</b>: 写真の月 (数字)\n<b>%b</b>: 写真の月 (英略称)\n<b>%B</b>: 写真の月 (英フルネーム)\n<b>%d</b>: 写真の日付 (数字)\n<b>%a</b>: 写真の日付 (英略称)\n<b>%A</b>: 写真の日付 (英フルネーム)\n<b>%n1</b> to <b>%n9</b>: 増分値の桁指定 (例: <b>%n2</b> は <i>01</i> となる)\n<b>%I</b>: ISO感度\n<b>%L</b>: レンズ名\n<b>%F</b>: レンズ絞り (F番号)\n<b>%l</b>: 焦点距離\n<b>%E</b>: 露出補正量 (compensation)\n<b>%s</b>: シャッター速度\n<b>%r</b>: 写真の評価\n<b>%T[<i>タグ名</i>]</b>: メタデータタグの内容 <i>タグ名</i> (無効な文字は '_' で代替)\n<b>%%</b>: '%' 文字.
 RENAME_DIALOG_ALLOW_WHITESPACE;出力名に空白を許容
 RENAME_DIALOG_NAME_NORMALIZATION;ファイル名の標準化 (normalization)
 RENAME_DIALOG_NORM_OFF;なし
