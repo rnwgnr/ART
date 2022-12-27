@@ -54,6 +54,24 @@ std::ostream &operator<<(std::ostream &out, const S &s)
     }
 }
 
+
+inline void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, std::string *out, std::string *err)
+{
+#ifdef BUILD_BUNDLE
+    auto pth = Glib::getenv("PATH");
+    auto extrapath = Glib::build_filename(argv0, "imageio", "bin") + G_SEARCHPATH_SEPARATOR_S + argv0;
+    auto epth = Glib::getenv("ART_EXIFTOOL_BASE_DIR");
+    if (!epth.empty()) {
+        extrapath += G_SEARCHPATH_SEPARATOR_S + epth;
+    }
+    Glib::setenv("PATH", extrapath + G_SEARCHPATH_SEPARATOR_S + pth);
+#endif // BUILD_BUNDLE
+    subprocess::exec_sync(workdir, argv, search_in_path, out, err);
+#ifdef BUILD_BUNDLE
+    Glib::setenv("PATH", pth);
+#endif // BUILD_BUNDLE
+}
+
 } // namespace
 
 
@@ -226,7 +244,7 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
         std::cout << "loading " << fileName << " with " << cmd << std::endl;
     }
     try {
-        subprocess::exec_sync(dir, argv, true, &sout, &serr);
+        exec_sync(dir, argv, true, &sout, &serr);
     } catch (subprocess::error &err) {
         if (settings->verbose) {
             std::cout << "  exec error: " << err.what() << std::endl;
@@ -384,19 +402,7 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
             std::cout << "saving " << fileName << " with " << cmd << std::endl;
         }
         try {
-#ifdef BUILD_BUNDLE
-            auto pth = Glib::getenv("PATH");
-            auto extrapath = argv0;
-            auto epth = Glib::getenv("ART_EXIFTOOL_BASE_DIR");
-            if (!epth.empty()) {
-                extrapath += G_SEARCHPATH_SEPARATOR_S + epth;
-            }
-            Glib::setenv("PATH", extrapath + G_SEARCHPATH_SEPARATOR_S + pth);
-#endif // BUILD_BUNDLE
-            subprocess::exec_sync(dir, argv, true, &sout, &serr);
-#ifdef BUILD_BUNDLE
-            Glib::setenv("PATH", pth);
-#endif // BUILD_BUNDLE
+            exec_sync(dir, argv, true, &sout, &serr);
         } catch (subprocess::error &err) {
             if (settings->verbose) {
                 std::cout << "  exec error: " << err.what() << std::endl;
