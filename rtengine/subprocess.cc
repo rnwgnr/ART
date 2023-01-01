@@ -82,6 +82,39 @@ std::vector<Glib::ustring> split_command_line(const Glib::ustring &cmdl)
 }
 
 
+namespace {
+
+void add_quoted(std::wostream &out, const std::wstring &ws)
+{
+    for (size_t j = 0; j < ws.size(); ) {
+        int backslashes = 0;
+        while (j < ws.size() && ws[j] == '\\') {
+            ++backslashes;
+            ++j;
+        }
+        if (j == ws.size()) {
+            backslashes = backslashes * 2;
+        } else if (ws[j] == '"') {
+            backslashes = backslashes * 2 + 1;
+        }
+        for (int i = 0; i < backslashes; ++i) {
+            out << '\\';
+        }
+        if (j < ws.size()) {
+            if (isspace(ws[j])) {
+                out << '"' << ws[j] << '"';
+            } else {
+                out << ws[j];
+            }
+            ++j;
+        } else {
+            break;
+        }
+    }
+}
+
+} // namespace
+
 // Glib::spawn_sync opens a console window for command-line apps, I wasn't
 // able to find out how not to do that (see also:
 // http://gtk.10911.n7.nabble.com/g-spawn-on-windows-td84743.html).
@@ -95,36 +128,6 @@ void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &a
     out = nullptr;
     err = nullptr;
     
-    const auto add_quoted =
-        [](std::wostream &out, const std::wstring &ws) -> void
-        {
-            for (size_t j = 0; j < ws.size(); ) {
-                int backslashes = 0;
-                while (j < ws.size() && ws[j] == '\\') {
-                    ++backslashes;
-                    ++j;
-                }
-                if (j == ws.size()) {
-                    backslashes = backslashes * 2;
-                } else if (ws[j] == '"') {
-                    backslashes = backslashes * 2 + 1;
-                }
-                for (int i = 0; i < backslashes; ++i) {
-                    out << '\\';
-                }
-                if (j < ws.size()) {
-                    if (isspace(ws[j])) {
-                        out << '"' << ws[j] << '"';
-                    } else {
-                        out << ws[j];
-                    }
-                    ++j;
-                } else {
-                    break;
-                }
-            }
-        };
-
     struct HandleCloser {
         ~HandleCloser()
         {
@@ -260,6 +263,13 @@ void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &a
     }
 }
 
+
+std::wstring quote(const std::wstring &s)
+{
+    std::wostringstream out;
+    add_quoted(out, s);
+    return out.str();
+}
 
 #else // WIN32
 

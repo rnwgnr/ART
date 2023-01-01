@@ -56,6 +56,10 @@ private:
 
 std::wstring to_wstr(const Glib::ustring &s);
 
+#ifdef WIN32
+std::wstring quote(const std::wstring &s);
+#endif // WIN32
+
 std::vector<Glib::ustring> split_command_line(const Glib::ustring &cmdl);
 
 void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, std::string *out, std::string *err);

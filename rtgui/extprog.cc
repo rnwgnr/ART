@@ -347,9 +347,10 @@ bool openInGimp(const Glib::ustring &fileName)
 {
 #if defined WIN32
 
-    auto executable = Glib::build_filename (options.gimpDir, "bin", "gimp-win-remote");
-    auto fn = '"' + fileName + '"';
-    auto success = ShellExecute( NULL, "open", executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
+    auto executable = rtengine::subprocess::to_wstr(Glib::build_filename (options.gimpDir, "bin", "gimp-win-remote"));
+    auto fn = rtengine::subprocess::quote(rtengine::subprocess::to_wstr(fileName)); //'"' + fileName + '"';
+    auto open = rtengine::subprocess::to_wstr("open");
+    auto success = ShellExecuteW( NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
 
 #elif defined __APPLE__
 
@@ -381,8 +382,8 @@ bool openInGimp(const Glib::ustring &fileName)
 
     for (auto ver = 12; ver >= 0; --ver) {
 
-        executable = Glib::build_filename (options.gimpDir, "bin", Glib::ustring::compose (Glib::ustring("gimp-2.%1.exe"), ver));
-        auto success = ShellExecute( NULL, "open", executable.c_str(), fileName.c_str(), NULL, SW_SHOWNORMAL );
+        executable = rtengine::subprocess::to_wstr(Glib::build_filename (options.gimpDir, "bin", Glib::ustring::compose (Glib::ustring("gimp-2.%1.exe"), ver)));
+        auto success = ShellExecuteW( NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
 
         if ((uintptr_t)success > 32) {
             return true;
@@ -409,20 +410,23 @@ bool openInPhotoshop(const Glib::ustring& fileName)
 {
 #if defined WIN32
 
-    const auto executable = Glib::build_filename(options.psDir, "Photoshop.exe");
-    const auto cmdLine = Glib::ustring("\"") + executable + Glib::ustring("\" \"") + fileName + Glib::ustring("\"");
+    const auto executable = rtengine::subprocess::to_wstr(Glib::build_filename(options.psDir, "Photoshop.exe"));
+    const auto fn = rtengine::subprocess::quote(rtengine::subprocess::to_wstr(fileName));
+    auto open = rtengine::subprocess::to_wstr("open");
+    auto success = ShellExecuteW(NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL);
+    return (uintptr_t)success > 32;
 
 #elif defined __APPLE__
 
     const auto cmdLine = Glib::ustring("open -a Photoshop \'") + fileName + Glib::ustring("\'");
+    return spawnCommandAsync (cmdLine);
 
 #else
 
     const auto cmdLine = Glib::ustring("\"") + Glib::build_filename(options.psDir, "Photoshop.exe") + Glib::ustring("\" \"") + fileName + Glib::ustring("\"");
-
-#endif
-
     return spawnCommandAsync (cmdLine);
+    
+#endif
 }
 
 
@@ -430,9 +434,10 @@ bool openInCustomEditor(const Glib::ustring& fileName)
 {
 #if defined WIN32
 
-    const auto cmdLine = Glib::ustring("\"") + options.customEditorProg + Glib::ustring("\"");
-    auto fn = '"' + fileName + '"';
-    auto success = ShellExecute( NULL, "open", cmdLine.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
+    const auto cmdLine = rtengine::subprocess::to_wstr(options.customEditorProg);
+    auto fn = rtengine::subprocess::quote(rtengine::subprocess::to_wstr(fileName));
+    auto open = rtengine::subprocess::to_wstr("open");
+    auto success = ShellExecuteW( NULL, open.c_str(), cmdLine.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
     return (uintptr_t)success > 32;
 
 #elif defined __APPLE__
