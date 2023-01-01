@@ -2840,15 +2840,22 @@ void FileCatalog::sessionSavePressed()
     filter_any->set_name(M("FILECHOOSER_FILTER_ANY"));
     filter_any->add_pattern("*");
     dialog.add_filter(filter_any);
-    
-    int result = dialog.run();
-    dialog.hide();
 
-    if (result == Gtk::RESPONSE_OK) {
-        auto fname = dialog.get_filename();
-        if (getExtension(fname).empty()) {
-            fname += ".ars";
+    while (true) {
+        int result = dialog.run();
+        //dialog.hide();
+
+        if (result == Gtk::RESPONSE_OK) {
+            auto fname = dialog.get_filename();
+            if (getExtension(fname).empty()) {
+                fname += ".ars";
+            }
+            if (confirmOverwrite(dialog, fname)) {
+                art::session::save(fname);
+                break;
+            }
+        } else {
+            break;
         }
-        art::session::save(fname);
-    }    
+    }
 }
