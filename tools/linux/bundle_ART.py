@@ -181,6 +181,7 @@ export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
 export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
+export ART_restore_GDK_BACKEND=$GDK_BACKEND     
 export GTK_CSD=0
 d=$(dirname $(readlink -f "$0"))
 t=$(mktemp -d --suffix=-ART)
@@ -193,6 +194,7 @@ export GIO_MODULE_DIR="$d/lib/gio/modules"
 export LD_LIBRARY_PATH="$d/lib"
 export FONTCONFIG_FILE="$d/fonts.conf"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
+export GDK_BACKEND=x11        
 "$d/ART.bin" "$@"
 rm -rf "$t"
 """)
