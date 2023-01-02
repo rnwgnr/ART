@@ -991,6 +991,9 @@ void FileCatalog::_refreshProgressBar ()
         if (nb) {
             nb->set_tab_label(*filepanel, *grid);
         }
+        if (previewsToLoad) {
+            filepanel->loadingThumbs(M("PROGRESSBAR_LOADINGTHUMBS"), float(previewsLoaded) / float(previewsToLoad));
+        }
     }
 }
 
