@@ -37,6 +37,9 @@
 #include "../rtgui/options.h"
 #include "../rtgui/threadutils.h"
 #include "lcms2_plugin.h"
+#ifdef ART_LCMS2_FAST_FLOAT
+# include <lcms2_fast_float.h>
+#endif // ART_LCMS2_FAST_FLOAT
 
 #include "color.h"
 #include "cJSON.h"
@@ -1074,6 +1077,9 @@ ICCStore* ICCStore::getInstance()
 
 void ICCStore::init(const Glib::ustring& usrICCDir, const Glib::ustring& stdICCDir, bool loadAll)
 {
+#ifdef ART_LCMS2_FAST_FLOAT
+    cmsPlugin(cmsFastFloatExtensions());
+#endif
     implementation->init(usrICCDir, stdICCDir, loadAll);
 }
 

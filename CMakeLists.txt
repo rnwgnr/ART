@@ -566,6 +566,34 @@ int main()
 }" LENSFUN_HAS_LOAD_DIRECTORY)
 
 
+# check whether we can use the fast float plugin of LCMS2
+set(ART_LCMS_VERSION_INFO "${LCMS_VERSION}")
+set(CMAKE_REQUIRED_INCLUDES ${LCMS_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_LIBRARIES)
+foreach(l ${LCMS_LIBRARIES})
+    set(_f "_f-NOTFOUND")
+    find_library(_f ${l} PATHS ${LCMS_LIBRARY_DIRS} NO_DEFAULT_PATH)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${_f})
+endforeach()
+check_c_source_compiles(
+"#include <lcms2.h>
+#include <lcms2_fast_float.h>
+#if LCMS2_FAST_FLOAT_VERSION < 1500
+#  error \"fast float too old\"
+#endif
+
+int main()
+{
+    cmsPlugin(cmsFastFloatExtensions());
+    return 0;
+}" _lcms2_fast_float)
+if(_lcms2_fast_float)
+    add_definitions(-DART_LCMS2_FAST_FLOAT)
+    message(STATUS "using LCMS2 fast float plugin")
+    set(ART_LCMS_VERSION_INFO "${ART_LCMS_VERSION_INFO}-fastfloat")
+endif()
+
+
 set(HAS_MIMALLOC)
 set(ART_MIMALLOC_VERSION_INFO "N/A")
 find_package(mimalloc)
@@ -664,7 +692,7 @@ set(ABOUT_COMMAND_WITH_ARGS ${CMAKE_COMMAND}
     -DOPTION_OMP:STRING=${OPTION_OMP}
     -DLENSFUN_VERSION:STRING=${LENSFUN_VERSION}
     -DEXIV2_VERSION:STRING=${EXIV2_VERSION}
-    -DLCMS_VERSION_INFO:STRING="${LCMS_VERSION}"
+    -DLCMS_VERSION_INFO:STRING="${ART_LCMS_VERSION_INFO}"
     -DART_MIMALLOC_VERSION_INFO:STRING="${ART_MIMALLOC_VERSION_INFO}"
     )
 
