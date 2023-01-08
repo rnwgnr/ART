@@ -89,6 +89,20 @@ BatchQueue::BatchQueue (FileCatalog* aFileCatalog):
     selall->signal_activate().connect (sigc::mem_fun(*this, &BatchQueue::selectAll));
 
     setArrangement (ThumbBrowserBase::TB_Vertical);
+
+    format2ext_ = {
+        {"jpg", "jpg"},
+        {"tif8", "tif"},
+        {"tif16", "tif"},
+        {"tif16f", "tif"},
+        {"tif32f", "tif"},
+        {"png8", "png"},
+        {"png16", "png"}
+    };
+    auto extra_fmts = rtengine::ImageIOManager::getInstance()->getSaveFormats();
+    for (auto &p : extra_fmts) {
+        format2ext_[p.first] = p.second.extension;
+    }
 }
 
 BatchQueue::~BatchQueue ()
@@ -969,6 +983,12 @@ Glib::ustring BatchQueue::autoCompleteFileName (const Glib::ustring& fileName, c
     Glib::ustring dstfname = Glib::path_get_basename (fileName);
     Glib::ustring fname;
 
+    Glib::ustring ext = format;
+    auto it = format2ext_.find(format);
+    if (it != format2ext_.end()) {
+        ext = it->second;
+    }
+
     // create directory, if does not exist
     if (g_mkdir_with_parents (dstdir.c_str (), 0755)) {
         return Glib::ustring ();
@@ -980,9 +1000,9 @@ Glib::ustring BatchQueue::autoCompleteFileName (const Glib::ustring& fileName, c
 
     for (int tries = 0; tries < 100; tries++) {
         if (tries == 0) {
-            fname = Glib::ustring::compose ("%1.%2", Glib::build_filename (dstdir,  dstfname), format);
+            fname = Glib::ustring::compose ("%1.%2", Glib::build_filename (dstdir,  dstfname), ext);
         } else {
-            fname = Glib::ustring::compose ("%1-%2.%3", Glib::build_filename (dstdir,  dstfname), tries, format);
+            fname = Glib::ustring::compose ("%1-%2.%3", Glib::build_filename (dstdir,  dstfname), tries, ext);
         }
 
         int fileExists = Glib::file_test (fname, Glib::FILE_TEST_EXISTS);

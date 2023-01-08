@@ -129,6 +129,8 @@ private:
     IdleRegister idle_register;
 
     const rtengine::procparams::PartialProfile *batch_profile_;
+
+    std::unordered_map<std::string, std::string> format2ext_;
 };
 
 #endif
