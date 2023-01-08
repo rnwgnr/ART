@@ -57,7 +57,7 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     fchooser->signal_file_activated().connect(sigc::mem_fun(*this, &SaveAsDialog::okPressed));
 
     auto filter_jpg = Gtk::FileFilter::create();
-    filter_jpg->set_name(M("SAVEDLG_JPGFILTER"));
+    filter_jpg->set_name("JPEG");//M("SAVEDLG_JPGFILTER"));
     filter_jpg->add_pattern("*.jpg");
     filter_jpg->add_pattern("*.JPG");
     filter_jpg->add_pattern("*.jpeg");
@@ -66,14 +66,14 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     filter_jpg->add_pattern("*.JPE");
 
     auto filter_tif = Gtk::FileFilter::create();
-    filter_tif->set_name(M("SAVEDLG_JPGFILTER"));
+    filter_tif->set_name("TIFF");//M("SAVEDLG_JPGFILTER"));
     filter_tif->add_pattern("*.tif");
     filter_tif->add_pattern("*.TIF");
     filter_tif->add_pattern("*.tiff");
     filter_tif->add_pattern("*.TIFF");
 
     auto filter_png = Gtk::FileFilter::create();
-    filter_png->set_name(M("SAVEDLG_JPGFILTER"));
+    filter_png->set_name("PNG");//M("SAVEDLG_JPGFILTER"));
     filter_png->add_pattern("*.png");
     filter_png->add_pattern("*.PNG");
 
@@ -366,13 +366,17 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name)
 {
     auto format = getFormat().getKey();
     auto ext = formatOpts->getExtension();
-    
+
     const auto sanitize_suffix =
         [this, name, ext](const std::function<bool (const Glib::ustring&)>& has_suffix)
         {
-            if (!name.empty() && !has_suffix(name)) {
-                auto newname = removeExtension(Glib::path_get_basename(name)) + '.' + ext;
-                fchooser->set_current_name(newname);
+            if (!name.empty()) {
+                if (!has_suffix(name)) {
+                    auto newname = removeExtension(Glib::path_get_basename(name)) + '.' + ext;
+                    fchooser->set_current_name(newname);
+                } else{
+                    fchooser->set_current_name(name);
+                }
             }
         };
 
@@ -384,15 +388,15 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name)
                 return rtengine::hasJpegExtension(filename);
             }
         );
-    } else if (format == "png") {
-        fchooser->set_filter (filters_["png"]);
+    } else if (format.find("png") == 0) {
+        fchooser->set_filter(filters_["png"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
             {
                 return rtengine::hasPngExtension(filename);
             }
         );
-    } else if (format == "tif") {
+    } else if (format.find("tif") == 0) {
         fchooser->set_filter(filters_["tif"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
