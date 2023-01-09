@@ -348,7 +348,9 @@ std::string decompress_to_temp(const Glib::ustring &fname)
     if (fd < 0) {
         throw "error";
     }
+
     close(fd);
+    bool err = false;
 
     auto f = Gio::File::create_for_path(templ);
     auto s = f->append_to();
@@ -361,15 +363,24 @@ std::string decompress_to_temp(const Glib::ustring &fname)
         auto src_fname = Glib::filename_from_utf8(fname);
         FILE *src = g_fopen(src_fname.c_str(), "rb");
         if (!src) {
-            throw "error";
+            err = true; 
+        } else {
+            try {
+                size_t n = 0;
+                while ((n = fread(buffer, 1, chunk, src)) > 0) {
+                    stream->write(buffer, n);
+                }
+            } catch (...) {
+                err = true;
+            }
+            fclose(src);
         }
-        size_t n = 0;
-        while ((n = fread(buffer, 1, chunk, src)) > 0) {
-            stream->write(buffer, n);
-        }
-        fclose(src);
     }
-    
+
+    if (err) {
+        g_remove(templ.c_str());
+        throw "error";
+    }
     return templ;
 }
 
@@ -387,11 +398,11 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
             : filename;
 
     if (!ocio_cache_.get(full_filename, result)) {
+        std::string fn = "";
+        bool del_fn = false;
         try {
             OCIO::ConstConfigRcPtr config = OCIO::Config::CreateRaw();
             OCIO::FileTransformRcPtr t = OCIO::FileTransform::Create();
-            std::string fn;
-            bool del_fn = false;
             if (getFileExtension(full_filename) == "clfz") {
                 fn = decompress_to_temp(full_filename);
                 del_fn = true;
@@ -402,10 +413,10 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
             t->setInterpolation(OCIO::INTERP_BEST);
             result = config->getProcessor(t);
             ocio_cache_.insert(full_filename, result);
-            if (del_fn) {
-                g_remove(fn.c_str());
-            }
         } catch (...) {
+        }
+        if (del_fn && !fn.empty()) {
+            g_remove(fn.c_str());
         }
     }
 
