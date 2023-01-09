@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <giomm.h>
 #include <set>
+#include <mutex>
 
 #include "metadata.h"
 #include "settings.h"
@@ -41,6 +42,7 @@ extern const Settings *settings;
 
 std::unique_ptr<Exiv2Metadata::ImageCache> Exiv2Metadata::cache_(nullptr);
 std::unique_ptr<Exiv2Metadata::JSONCache> Exiv2Metadata::jsoncache_(nullptr);
+std::unique_ptr<Exiftool> Exiv2Metadata::exiftool_(nullptr);
 
 namespace {
 
@@ -80,99 +82,25 @@ std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname,
 }
 
 
+template <class Data, class Key>
+void clear_metadata_key(Data &data, const Key &key)
+{
+    while (true) {
+        auto it = data.findKey(key);
+        if (it == data.end()) {
+            break;
+        } else {
+            data.erase(it);
+        }
+    }
+}
+
 Glib::ustring exiftool_base_dir;
 #ifdef WIN32
   const Glib::ustring exiftool_default = "exiftool.exe";
 #else
   const Glib::ustring exiftool_default = "exiftool";
 #endif
-
-
-std::unique_ptr<Exiv2::Image> exiftool_import(const Glib::ustring &fname, const std::exception &exc)
-{
-    Glib::ustring exiftool = settings->exiftool_path;
-    if (exiftool == exiftool_default) {
-        Glib::ustring e = Glib::build_filename(exiftool_base_dir, exiftool);
-        if (Glib::file_test(e, Glib::FILE_TEST_EXISTS)) {
-            exiftool = e;
-        }
-    }
-        
-    std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-exiftool-%1-XXXXXX", Glib::path_get_basename(fname)));
-    int fd = Glib::mkstemp(templ);
-    if (fd < 0) {
-        throw exc;
-    }
-    Glib::ustring outname = fname_to_utf8(templ) + ".xmp";
-    // int exit_status = -1;
-    std::vector<Glib::ustring> argv = {
-        exiftool,
-        "-TagsFromFile",
-        fname,
-        "-xmp:all<all",       
-        outname
-    };
-    if (settings->verbose) {
-        std::cout << "importing metadata for " << fname << " with exiftool"
-                  << std::endl;
-    }
-    std::string out, err;
-    bool ok = true;
-    try {
-        subprocess::exec_sync("", argv, true, &out, &err);
-    } catch (subprocess::error &err) {
-        if (settings->verbose) {
-            std::cout << "  exec error: " << err.what() << std::endl;
-        }
-        ok = false;
-    }
-    close(fd);
-    g_remove(templ.c_str());
-    if (settings->verbose > 1) {
-        if (!out.empty()) {
-            std::cout << "  exiftool stdout: " << out << std::flush;
-        }
-        if (!err.empty()) {
-            std::cout << "  exiftool stderr: " << err << std::flush;
-        }
-    }
-    if (!ok) {
-        if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
-            g_remove(outname.c_str());
-        }
-        throw exc;
-    }
-    std::unique_ptr<Exiv2::Image> ret;
-    try {
-        auto image = Exiv2::ImageFactory::open(outname);
-        image->readMetadata();
-        auto &exif = image->exifData();
-        auto &xmp = image->xmpData();
-        const auto set_from =
-            [&](const char *src, const char *dst) -> void
-            {
-                auto dk = Exiv2::ExifKey(dst);
-                auto pos = exif.findKey(dk);
-                if (pos == exif.end() || !pos->size()) {
-                    auto sk = Exiv2::XmpKey(src);
-                    auto it = xmp.findKey(sk);
-                    if (it != xmp.end() && it->size()) {
-                        exif[dst] = it->toString();
-                    }
-                }
-            };
-        set_from("Xmp.exifEX.LensModel", "Exif.Photo.LensModel");
-        xmp.clear();
-        g_remove(outname.c_str());
-        ret.reset(image.release());
-    } catch (std::exception &) {
-        if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
-            g_remove(outname.c_str());
-        }
-        throw exc;
-    }
-    return ret;
-}
 
 Glib::ustring exiftool_config_dir;
 
@@ -194,72 +122,224 @@ const char *exiftool_xmp_config =
  ");\n";
 
 
-bool exiftool_embed_procparams(const Glib::ustring &fname, const std::string &data)
-{
-    Glib::ustring cfg = Glib::build_filename(exiftool_config_dir, "ART-exiftool.config");
-    if (!Glib::file_test(cfg, Glib::FILE_TEST_EXISTS)) {
-        FILE *f = g_fopen(cfg.c_str(), "w");
-        if (!f) {
-            return false;
-        }
-        bool err = (fputs(exiftool_xmp_config, f) == EOF);
-        fclose(f);
-        if (err) {
-            return false;
-        }
-    }
-
-    Glib::ustring exiftool = settings->exiftool_path;
-    if (exiftool == exiftool_default) {
-        Glib::ustring e = Glib::build_filename(exiftool_base_dir, exiftool);
-        if (Glib::file_test(e, Glib::FILE_TEST_EXISTS)) {
-            exiftool = e;
-        }
-    }
-
-    std::vector<Glib::ustring> argv = {
-        exiftool,
-        "-config",
-        cfg,
-        "-overwrite_original",
-        "-Arp=" + data,
-        fname
-    };
-    if (settings->verbose) {
-        std::cout << "embedding params for " << fname << " with exiftool"
-                  << std::endl;
-    }
-    std::string out, err;
-    bool ok = true;
-    try {
-        subprocess::exec_sync("", argv, true, &out, &err);
-    } catch (subprocess::error &exc) {
-        if (settings->verbose) {
-            std::cout << "  exec error: " << exc.what() << std::endl;
-            std::cout << "  stdout: " << out << std::endl;
-            std::cout << "  stderr: " << err << std::endl;
-        }
-        ok = false;
-    }
-    return ok;
-}
-
-
-template <class Data, class Key>
-void clear_metadata_key(Data &data, const Key &key)
-{
-    while (true) {
-        auto it = data.findKey(key);
-        if (it == data.end()) {
-            break;
-        } else {
-            data.erase(it);
-        }
-    }
-}
-
 } // namespace
 
+
+class Exiftool {
+public:
+    Exiftool(): initialized_(false) {}
+
+    std::unique_ptr<Exiv2::Image> import(const Glib::ustring &fname, const std::exception &exc)
+    {
+        std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-exiftool-%1-XXXXXX", Glib::path_get_basename(fname)));
+        int fd = Glib::mkstemp(templ);
+        if (fd < 0) {
+            throw exc;
+        }
+        Glib::ustring outname = templ + ".xmp";
+        std::vector<Glib::ustring> argv = {
+            "-TagsFromFile",
+            /*fname_to_utf8*/(fname),
+            "-xmp:all<all",       
+            outname
+        };
+        if (settings->verbose) {
+            std::cout << "importing metadata for " << fname << " with exiftool"
+                      << std::endl;
+        }
+        std::string out, err;
+        bool ok = exec(argv, &out, &err);
+        close(fd);
+        g_remove(templ.c_str());
+        if (settings->verbose > 1) {
+            if (!out.empty()) {
+                std::cout << "  exiftool stdout: " << out << std::flush;
+            }
+            if (!err.empty()) {
+                std::cout << "  exiftool stderr: " << err << std::flush;
+            }
+        }
+        if (!ok) {
+            if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
+                g_remove(outname.c_str());
+            }
+            throw exc;
+        }
+        std::unique_ptr<Exiv2::Image> ret;
+        try {
+            auto image = open_exiv2(outname, false);
+            image->readMetadata();
+            auto &exif = image->exifData();
+            auto &xmp = image->xmpData();
+            const auto set_from =
+                [&](const char *src, const char *dst) -> void
+                {
+                    auto dk = Exiv2::ExifKey(dst);
+                    auto pos = exif.findKey(dk);
+                    if (pos == exif.end() || !pos->size()) {
+                        auto sk = Exiv2::XmpKey(src);
+                        auto it = xmp.findKey(sk);
+                        if (it != xmp.end() && it->size()) {
+                            exif[dst] = it->toString();
+                        }
+                    }
+                };
+            set_from("Xmp.exifEX.LensModel", "Exif.Photo.LensModel");
+            xmp.clear();
+            g_remove(outname.c_str());
+            ret.reset(image.release());
+        } catch (std::exception &e2) {
+            if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
+                g_remove(outname.c_str());
+            }
+            throw exc;
+        }
+        return ret;
+    }
+    
+    bool exec(const std::vector<Glib::ustring> &argv, std::string *out, std::string *err)
+    {
+#if 0
+        bool ok = true;
+        std::vector<Glib::ustring> args = { get_bin() };
+        args.insert(args.end(), argv.begin(), argv.end());
+        try {
+            subprocess::exec_sync("", args, true, out, err);
+        } catch (subprocess::error &err) {
+            if (settings->verbose) {
+                std::cout << "  exec error: " << err.what() << std::endl;
+            }
+            ok = false;
+        }
+        return ok;
+#else // if 0
+        std::unique_lock<std::mutex> lck(mutex_);
+
+        init();
+        if (!p_) {
+            return false;
+        }
+
+        for (auto &a : argv) {
+            if (!p_->write(a.c_str(), a.bytes()) || !p_->write("\n", 1)) {
+                return false;
+            }
+        }
+        if (!p_->write("-execute\n", 9)) {
+            return false;
+        }
+        if (!p_->flush()) {
+            return false;
+        }
+        
+        std::string line;
+        std::ostringstream buf;
+        if (err) {
+            *err = "";
+        }
+        while (true) {
+            int c = p_->read();
+            if (c == EOF) {
+                return false;
+            } else if (c == '\n'
+#ifdef WIN32
+                       || c == '\r'
+#endif
+                ) {
+                if (line == "{ready}") {
+                    break;
+                } else {
+                    if (out) {
+                        buf << line << '\n';
+                    }
+                    line = "";
+                }
+            } else {
+                line.push_back(c);
+            }
+        }
+        if (out) {
+            *out = buf.str();
+        }
+
+        return true;
+#endif // if 0
+    }
+
+    bool embed_procparams(const Glib::ustring &fname, const std::string &data)
+    {
+        Glib::ustring cfg = Glib::build_filename(exiftool_config_dir, "ART-exiftool.config");
+        if (!Glib::file_test(cfg, Glib::FILE_TEST_EXISTS)) {
+            FILE *f = g_fopen(cfg.c_str(), "w");
+            if (!f) {
+                return false;
+            }
+            bool err = (fputs(exiftool_xmp_config, f) == EOF);
+            fclose(f);
+            if (err) {
+                return false;
+            }
+        }
+
+        std::vector<Glib::ustring> argv = {
+            "-config",
+            cfg,
+            "-overwrite_original",
+            "-Arp=" + data,
+            fname
+        };
+        if (settings->verbose) {
+            std::cout << "embedding params for " << fname << " with exiftool"
+                      << std::endl;
+        }
+        std::string out, err;
+        bool ok = exec(argv, &out, &err);
+        return ok;
+    }
+
+private:
+    Glib::ustring get_bin()
+    {
+        Glib::ustring exiftool = settings->exiftool_path;
+        if (exiftool == exiftool_default) {
+            Glib::ustring e = Glib::build_filename(exiftool_base_dir, exiftool);
+            if (Glib::file_test(e, Glib::FILE_TEST_EXISTS)) {
+                exiftool = e;
+            }
+        }
+        return exiftool;
+    }
+
+    void init()
+    {
+        if (!initialized_) {
+            if (settings->verbose) {
+                std::cout << "starting exiftool... " << std::flush;
+            }
+            initialized_ = true;
+            
+            std::vector<Glib::ustring> argv = {
+                get_bin(),
+                "-stay_open", "true",
+                "-@", "-",
+                "-common_args", "-charset", "filename=utf8"
+            };
+            p_ = subprocess::popen("", argv, true, true, true);
+            if (settings->verbose) {
+                std::cout << (p_? "OK" : "ERROR!") << std::endl;
+            }
+        }
+    }
+    
+    std::unique_ptr<subprocess::SubprocessInfo> p_;
+    std::mutex mutex_;
+    bool initialized_;
+};
+
+
+//-----------------------------------------------------------------------------
+// Exiv2Metadata
+//-----------------------------------------------------------------------------
 
 Exiv2Metadata::Exiv2Metadata():
     src_(""),
@@ -308,10 +388,11 @@ void Exiv2Metadata::load() const
             image_ = val.image;
         } else {
             try {
+                //throw Error("test exiftool");
                 auto img = open_exiv2(src_, true);
                 image_.reset(img.release());
             } catch (std::exception &exc) {
-                auto img = exiftool_import(src_, exc);
+                auto img = exiftool_->import(src_, exc);
                 image_.reset(img.release());
             }
             if (merge_xmp_) {
@@ -691,12 +772,14 @@ void Exiv2Metadata::init(const Glib::ustring &base_dir, const Glib::ustring &use
     } else {
         exiftool_base_dir = base_dir;
     }
+    exiftool_config_dir = user_dir;
+    exiftool_.reset(new Exiftool());
+    
     Exiv2::XmpParser::initialize();
     Exiv2::XmpProperties::registerNs("us/pixls/ART/", "ART");
 #ifdef EXV_ENABLE_BMFF
     Exiv2::enableBMFF(true);
 #endif
-    exiftool_config_dir = user_dir;
 }
 
 
@@ -713,7 +796,7 @@ void Exiv2Metadata::embedProcParamsData(const Glib::ustring &fname, const std::s
         img->xmpData()["Xmp.ART.arp"] = data;
         img->writeMetadata();
     } catch (std::exception &exc) {
-        if (!exiftool_embed_procparams(fname, data)) {
+        if (!exiftool_->embed_procparams(fname, data)) {
             throw exc;
         }
     }
@@ -740,14 +823,6 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
         return val.first;
     }
 
-    Glib::ustring exiftool = settings->exiftool_path;
-    if (exiftool == exiftool_default) {
-        Glib::ustring e = Glib::build_filename(exiftool_base_dir, exiftool);
-        if (Glib::file_test(e, Glib::FILE_TEST_EXISTS)) {
-            exiftool = e;
-        }
-    }
-
     std::unordered_map<std::string, std::string> ret;
     
     std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-exiftool-json-%1-XXXXXX", Glib::path_get_basename(fname)));
@@ -758,7 +833,6 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
     Glib::ustring outname = fname_to_utf8(templ);
     
     std::vector<Glib::ustring> argv = {
-        exiftool,
         "-json",
         "-MakerNotes:all",
         "-RAF:all",
@@ -766,9 +840,7 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
         "-w+", "%0f" + outname,
         fname
     };
-    try {
-        subprocess::exec_sync("", argv, true, nullptr, nullptr);
-    } catch (subprocess::error &exc) {
+    if (!exiftool_->exec(argv, nullptr, nullptr)) {
         if (Glib::file_test(outname, Glib::FILE_TEST_EXISTS)) {
             g_remove(outname.c_str());
         }

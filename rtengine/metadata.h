@@ -30,6 +30,7 @@
 namespace rtengine {
 
 class ProgressListener;
+class Exiftool;
 
 class Exiv2Metadata {
 public:
@@ -106,6 +107,8 @@ private:
     typedef std::pair<std::unordered_map<std::string, std::string>, Glib::TimeVal> JSONCacheVal;
     typedef Cache<Glib::ustring, JSONCacheVal> JSONCache;
     static std::unique_ptr<JSONCache> jsoncache_;
+
+    static std::unique_ptr<Exiftool> exiftool_;
 };
 
 } // namespace rtengine

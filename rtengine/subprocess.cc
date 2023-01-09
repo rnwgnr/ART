@@ -33,6 +33,7 @@
 #else
 #  include <sys/types.h>
 #  include <sys/wait.h>
+#  include <signal.h>
 #endif
 
 #include "subprocess.h"
@@ -113,6 +114,17 @@ void add_quoted(std::wostream &out, const std::wstring &ws)
     }
 }
 
+struct HandleCloser {
+    ~HandleCloser()
+    {
+        for (auto h : toclose) {
+            CloseHandle(h);
+        }
+    }
+    std::set<HANDLE> toclose;
+};
+
+
 } // namespace
 
 // Glib::spawn_sync opens a console window for command-line apps, I wasn't
@@ -128,16 +140,6 @@ void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &a
     out = nullptr;
     err = nullptr;
     
-    struct HandleCloser {
-        ~HandleCloser()
-        {
-            for (auto h : toclose) {
-                CloseHandle(h);
-            }
-        }
-        std::set<HANDLE> toclose;
-    };
-
     HANDLE fds_from[2];
     HANDLE fds_from_e[2];
     SECURITY_ATTRIBUTES sa;
@@ -271,6 +273,196 @@ std::wstring quote(const std::wstring &s)
     return out.str();
 }
 
+
+class SubprocessData {
+public:
+    SubprocessData() = default;
+    ~SubprocessData()
+    {
+        for (auto h : toclose) {
+            CloseHandle(h);
+        }
+    }
+    
+    std::set<HANDLE> toclose;
+    SECURITY_ATTRIBUTES sa;
+    PROCESS_INFORMATION pi;
+    STARTUPINFOW si;
+    HANDLE child_in;
+    HANDLE child_out;
+};
+
+
+SubprocessData *D(uintptr_t impl)
+{
+    return reinterpret_cast<SubprocessData *>(impl);
+}
+
+
+SubprocessInfo::~SubprocessInfo()
+{
+    kill();
+    delete D(impl_);
+}
+
+
+bool SubprocessInfo::live() const
+{
+    DWORD exitcode = 0;
+    return GetExitCodeProcess(D(impl_)->pi.hProcess, &exitcode) &&
+        exitcode == STILL_ACTIVE;
+}
+
+
+int SubprocessInfo::wait()
+{
+    const DWORD wait_timeout_ms = INFINITE;
+    if (WaitForSingleObject(D(impl_)->pi.hProcess, wait_timeout_ms) != WAIT_OBJECT_0) {
+        kill();
+        return -1;
+    }
+    DWORD status = -1;
+    GetExitCodeProcess(D(impl_)->pi.hProcess, &status);
+    return status;
+}
+
+
+void SubprocessInfo::kill()
+{
+    TerminateProcess(D(impl_)->pi.hProcess, 255);
+}
+
+
+int SubprocessInfo::read()
+{
+    char buf[1] = { 0 };
+    if (!ReadFile(D(impl_)->child_out, &buf, 1, nullptr, nullptr)) {
+        return EOF;
+    }
+    return buf[0];
+}
+
+
+bool SubprocessInfo::write(const char *msg, size_t n)
+{
+    DWORD w = 0;
+    return WriteFile(D(impl_)->child_in, msg, n, &w, nullptr);
+}
+
+
+bool SubprocessInfo::flush()
+{
+    return FlushFileBuffers(D(impl_)->child_in);
+}
+
+
+std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, bool pipe_in, bool pipe_out)
+{
+    std::unique_ptr<SubprocessData> data(new SubprocessData());
+    
+    HANDLE fds_to[2];
+    HANDLE fds_from[2];
+    SECURITY_ATTRIBUTES &sa = data->sa;
+
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = TRUE;
+
+    const auto mkpipe =
+        [&](HANDLE *fd, int direction) -> bool
+        {
+            if (!CreatePipe(&(fd[0]), &(fd[1]), &sa, 0)) {
+                return false;
+            }
+            data->toclose.insert(fd[0]);
+            data->toclose.insert(fd[1]);
+            if (!SetHandleInformation(fd[direction], HANDLE_FLAG_INHERIT, 0)) {
+                return false;
+            }
+            return true;
+        };
+
+    if (pipe_in && !mkpipe(fds_to, 1)) {
+        throw (error() << "mkpipe failed");
+    }
+    if (pipe_out && !mkpipe(fds_from, 0)) {
+        throw (error() << "mkpipe failed");
+    }
+
+    PROCESS_INFORMATION &pi = data->pi;
+    STARTUPINFOW &si = data->si;
+
+    ZeroMemory(&si, sizeof(STARTUPINFOW));
+    si.cb = sizeof(STARTUPINFOW);
+    si.wShowWindow = SW_HIDE;
+    si.dwFlags = STARTF_USESTDHANDLES;
+
+    if (pipe_in) {
+        si.hStdInput = fds_to[0];
+    } else {
+        si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    }
+    if (pipe_out) {
+        si.hStdOutput = fds_from[1];
+        si.hStdError = fds_from[1];
+    } else {
+        si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    }
+
+    std::wstring pth = to_wstr(argv[0]);
+    if (search_in_path) {
+        wchar_t pathbuf[MAX_PATH+1];
+        std::wstring suffix = to_wstr(".exe");
+        int n = SearchPathW(nullptr, pth.c_str(), suffix.c_str(), MAX_PATH+1, pathbuf, nullptr);
+        if (n > 0) {
+            pth = pathbuf;
+        }
+    }
+
+    wchar_t *cmdline = nullptr;
+    {
+        std::wostringstream cmdlinebuf;
+        add_quoted(cmdlinebuf, pth);
+        for (size_t i = 1; i < argv.size(); ++i) {
+            cmdlinebuf << ' ';
+            add_quoted(cmdlinebuf, to_wstr(argv[i]));
+        }
+        std::wstring s = cmdlinebuf.str();
+        cmdline = new wchar_t[s.size()+1];
+        memcpy(cmdline, s.c_str(), s.size() * sizeof(wchar_t));
+        cmdline[s.size()] = 0;
+    }
+
+    std::wstring wd = to_wstr(workdir);
+    if (!CreateProcessW(pth.c_str(), cmdline, nullptr, nullptr, TRUE,
+                        CREATE_NO_WINDOW,
+                        (LPVOID)nullptr, wd.empty() ? nullptr : wd.c_str(),
+                        &si, &pi)) {
+        delete[] cmdline;
+        throw (error() << "impossible to create process");
+    } else {
+        data->toclose.insert(pi.hProcess);
+        data->toclose.insert(pi.hThread);
+    }
+    delete[] cmdline;
+
+    if (pipe_in) {
+        data->toclose.erase(fds_to[1]);
+    }
+
+    if (pipe_out) {
+        data->toclose.erase(fds_from[0]);
+    }
+
+    auto impl = data.release();
+    impl->child_out = fds_from[0];
+    impl->child_in = fds_to[1];
+    std::unique_ptr<SubprocessInfo> res(new SubprocessInfo(reinterpret_cast<uintptr_t>(impl)));
+
+    return res;
+}
+
 #else // WIN32
 
 
@@ -310,6 +502,171 @@ void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &a
     } catch (Glib::Exception &e) {
         throw (error() << e.what());
     }
+}
+
+
+class SubprocessData {
+public:
+    SubprocessData() = default;
+    ~SubprocessData()
+    {
+        for (auto d : toclose) {
+            close(d);
+        }
+    }
+    std::set<int> toclose;
+    int child_in;
+    int child_out;
+    pid_t pid;
+};
+
+
+SubprocessData *D(uintptr_t impl)
+{
+    return reinterpret_cast<SubprocessData *>(impl);
+}
+
+
+SubprocessInfo::~SubprocessInfo()
+{
+    delete D(impl_);
+}
+
+
+bool SubprocessInfo::live() const
+{
+    int status = 0;
+    auto pid = D(impl_)->pid;
+    if (pid < 0 || waitpid(pid, &status, WNOHANG)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+int SubprocessInfo::wait()
+{
+    int status = 0;
+    auto pid = D(impl_)->pid;
+    if (pid > 0) {
+        waitpid(pid, &status, 0);
+        return WEXITSTATUS(status);
+    } else {
+        return -1;
+    }
+}
+
+
+void SubprocessInfo::kill()
+{
+    ::kill(D(impl_)->pid, SIGTERM);
+}
+
+
+int SubprocessInfo::read()
+{
+    char buf[1] = { 0 };
+    if (::read(D(impl_)->child_out, buf, 1) <= 0) { 
+        return EOF;
+    }
+    return buf[0];
+}
+
+
+bool SubprocessInfo::write(const char *msg, size_t n)
+{
+    return ::write(D(impl_)->child_in, msg, n) >= 0;
+}
+
+
+bool SubprocessInfo::flush()
+{
+    fsync(D(impl_)->child_in);
+    return true;
+}
+
+
+std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, bool pipe_in, bool pipe_out)
+{
+    int fds_to[2];
+    int fds_from[2];
+
+    std::unique_ptr<SubprocessInfo> res;
+    std::unique_ptr<SubprocessData> data(new SubprocessData());
+
+    if (pipe_in) {
+        if (pipe(fds_to) != 0) {
+            throw (error() << "pipe failed");
+        } else {
+            data->toclose.insert(fds_to[0]);
+            data->toclose.insert(fds_to[1]);
+        }
+    }
+    if (pipe_out) {
+        if (pipe(fds_from) != 0) {
+            throw (error() << "pipe failed");
+        } else {
+            data->toclose.insert(fds_from[0]);
+            data->toclose.insert(fds_from[1]);
+        }
+    }
+
+    data->pid = fork();
+    pid_t pid = data->pid;
+
+    if (pid < 0) {
+        throw (error() << "fork failed");
+    } else if (pid == 0) {
+        /* child */
+        if (pipe_in) {
+            close(fds_to[1]);
+            data->toclose.erase(fds_to[1]);
+            dup2(fds_to[0], 0);
+        }
+
+        if (pipe_out) {
+            close(fds_from[0]);
+            data->toclose.erase(fds_from[0]);
+            dup2(fds_from[1], 1);
+            dup2(fds_from[1], 2);
+        }
+
+        if (!workdir.empty()) {
+            chdir(workdir.c_str());
+        }
+
+        std::vector<char *> args_vec(argv.size()+1);
+        const char *path = argv[0].c_str();
+        for (size_t i = 0; i < argv.size(); ++i) {
+            args_vec[i] = const_cast<char *>(argv[i].c_str());
+        }
+        args_vec.back() = nullptr;
+        auto args = &args_vec[0];
+        
+        if (search_in_path) {
+            execvp(path, args);
+        } else {
+            execv(path, args);
+        }
+        return res;
+    }
+
+    if (pipe_in) {
+        close(fds_to[0]);
+    }
+
+    if (pipe_out) {
+        close(fds_from[1]);
+    }
+
+    auto impl = data.release();
+    impl->child_in = fds_to[1];
+    impl->child_out = fds_from[0];
+    
+    res.reset(new SubprocessInfo(reinterpret_cast<uintptr_t>(impl)));
+
+    return res;
 }
 
 #endif // WIN32
