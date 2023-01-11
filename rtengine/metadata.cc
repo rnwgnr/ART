@@ -222,14 +222,14 @@ public:
 
         for (auto &a : argv) {
             if (!p_->write(a.c_str(), a.bytes()) || !p_->write("\n", 1)) {
-                return false;
+                return try_recover();
             }
         }
         if (!p_->write("-execute\n", 9)) {
-            return false;
+            return try_recover();
         }
         if (!p_->flush()) {
-            return false;
+            return try_recover();
         }
         
         std::string line;
@@ -240,12 +240,12 @@ public:
         while (true) {
             int c = p_->read();
             if (c == EOF) {
-                return false;
-            } else if (c == '\n'
+                return try_recover();
 #ifdef WIN32
-                       || c == '\r'
-#endif
-                ) {
+            } else if (c == '\r') {
+                continue;
+#endif // WIN32
+            } else if (c == '\n') {
                 if (line == "{ready}") {
                     break;
                 } else {
@@ -308,6 +308,16 @@ private:
             }
         }
         return exiftool;
+    }
+
+    bool try_recover()
+    {
+        if (p_) {
+            p_.reset(nullptr);
+            initialized_ = false;
+            init();
+        }
+        return false;
     }
 
     void init()
