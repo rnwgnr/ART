@@ -467,9 +467,9 @@ if(WITH_LTO)
         message(STATUS "Binutils version detected as less than " ${BINUTILS_VERSION_MININUM} " - setting CMake parameters to enable LTO linking:\n    CMAKE_AR=\"" ${CMAKE_AR} "\"\n    CMAKE_RANLIB=\"" ${CMAKE_RANLIB} "\"")
     endif()
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto=auto")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto=auto")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto=auto")
 endif()
 
 if(WITH_SAN)
