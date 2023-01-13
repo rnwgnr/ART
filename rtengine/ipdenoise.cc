@@ -669,6 +669,22 @@ void RGB_denoise_info(ImProcData &im, Imagefloat * src, Imagefloat * provicalc, 
 } // namespace
 
 
+bool ImProcFunctions::DenoiseInfoStore::update_pparams(const procparams::ProcParams &p)
+{
+    if (!valid) {
+        pparams = p;
+        return false;
+    } else {
+        bool changed =
+            (pparams.exposure != p.exposure)
+            || (pparams.wb != p.wb)
+            || (pparams.raw != p.raw)
+            || (pparams.denoise != p.denoise);
+        pparams = p;
+        return !changed;
+    }
+}
+
 void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp &currWB, DenoiseInfoStore &store, procparams::DenoiseParams &dnparams)
 {
     float autoNR = settings->nrauto;

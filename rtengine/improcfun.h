@@ -120,6 +120,8 @@ public:
         float max_b[9];
         float ch_M[9];
         bool valid;
+        ProcParams pparams;
+        bool update_pparams(const ProcParams &p); 
     };
     void denoiseComputeParams(ImageSource *imgsrc, const ColorTemp &currWB, DenoiseInfoStore &store, procparams::DenoiseParams &dnparams);
     void denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imagefloat *img, const DenoiseInfoStore &store, const procparams::DenoiseParams &dnparams);
