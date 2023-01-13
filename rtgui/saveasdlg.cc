@@ -371,11 +371,12 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name)
         [this, name, ext](const std::function<bool (const Glib::ustring&)>& has_suffix)
         {
             if (!name.empty()) {
+                auto basename = Glib::path_get_basename(name);
                 if (!has_suffix(name)) {
-                    auto newname = removeExtension(Glib::path_get_basename(name)) + '.' + ext;
+                    auto newname = removeExtension(basename) + '.' + ext;
                     fchooser->set_current_name(newname);
                 } else{
-                    fchooser->set_current_name(name);
+                    fchooser->set_current_name(basename);
                 }
             }
         };
