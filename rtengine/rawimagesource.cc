@@ -890,6 +890,9 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
                 highlight_recovery_opposed(s, ctemp);
             }
             rgbSourceModified = true;
+            if (plistener) {
+                plistener->setProgressStr(M("PROGRESSBAR_PROCESSING"));
+            }
         }
     }
 
