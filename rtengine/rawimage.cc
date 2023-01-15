@@ -90,7 +90,14 @@ RawImage::~RawImage()
 
 void RawImage::pre_interpolate()
 {
+    int w = width, h = height;
+    if (!use_internal_decoder_) {
+        width = iwidth;
+        height = iheight;
+    }
     DCraw::pre_interpolate();
+    width = w;
+    height = h;
 }
 
 
