@@ -357,20 +357,22 @@ void RGB_denoise_info(ImProcData &im, Imagefloat * src, Imagefloat * provicalc, 
             }
 
             float realred, realblue;
-            float interm_med = static_cast<float>(dnparams.chrominance) / 10.0;
+            float interm_med = 1.5f; //static_cast<float>(dnparams.chrominance) / 10.0;
             float intermred, intermblue;
 
-            if (dnparams.chrominanceRedGreen > 0.) {
-                intermred = (dnparams.chrominanceRedGreen / 10.);
-            } else {
-                intermred = static_cast<float>(dnparams.chrominanceRedGreen) / 7.0;     //increase slower than linear for more sensit
-            }
+            intermred = 0.f;
+            intermblue = 0.f;
+            // if (dnparams.chrominanceRedGreen > 0.) {
+            //     intermred = (dnparams.chrominanceRedGreen / 10.);
+            // } else {
+            //     intermred = static_cast<float>(dnparams.chrominanceRedGreen) / 7.0;     //increase slower than linear for more sensit
+            // }
 
-            if (dnparams.chrominanceBlueYellow > 0.) {
-                intermblue = (dnparams.chrominanceBlueYellow / 10.);
-            } else {
-                intermblue = static_cast<float>(dnparams.chrominanceBlueYellow) / 7.0;     //increase slower than linear for more sensit
-            }
+            // if (dnparams.chrominanceBlueYellow > 0.) {
+            //     intermblue = (dnparams.chrominanceBlueYellow / 10.);
+            // } else {
+            //     intermblue = static_cast<float>(dnparams.chrominanceBlueYellow) / 7.0;     //increase slower than linear for more sensit
+            // }
 
             realred = interm_med + intermred;
 
@@ -669,17 +671,60 @@ void RGB_denoise_info(ImProcData &im, Imagefloat * src, Imagefloat * provicalc, 
 } // namespace
 
 
+
+void ImProcFunctions::DenoiseInfoStore::reset()
+{
+    chM = 0;
+    for (int i = 0; i < 9; ++i) {
+        max_r[i] = 0.f;
+        max_b[i] = 0.f;
+        ch_M[i] = 0.f;
+    }
+    valid = false;
+    DenoiseParams p;
+    chrominance = p.chrominance;
+    chrominanceRedGreen = p.chrominanceRedGreen;
+    chrominanceBlueYellow = p.chrominanceBlueYellow;
+}
+
+
 bool ImProcFunctions::DenoiseInfoStore::update_pparams(const procparams::ProcParams &p)
 {
     if (!valid) {
+        // std::cout << "** INVALID ** " << std::endl;
         pparams = p;
         return false;
     } else {
-        bool changed =
-            (pparams.exposure != p.exposure)
-            || (pparams.wb != p.wb)
+        const auto &d1 = pparams.denoise;
+        const auto &d2 = p.denoise;
+        const auto dn_eq =
+            [&]() -> bool
+            {
+                return (d1.enabled == d2.enabled)
+                    && (d1.colorSpace == d2.colorSpace)
+                    && (d1.aggressive == d2.aggressive)
+                    && (d1.gamma == d2.gamma);
+            };
+        const auto &w1 = pparams.wb;
+        const auto &w2 = p.wb;
+        const auto wb_eq =
+            [&]() -> bool
+            {
+                if (w1.enabled == w2.enabled && w1.method == w2.method &&
+                    (w1.method == procparams::WBParams::CAMERA ||
+                     w1.method == procparams::WBParams::AUTO)) {
+                    return true;
+                }
+                return w1 == w2;
+            };
+        const bool changed =
+               (pparams.exposure != p.exposure)
             || (pparams.raw != p.raw)
-            || (pparams.denoise != p.denoise);
+            || !wb_eq()
+            || !dn_eq();
+        // if (changed) {
+        //     std::cout << "** CHANGED " << std::endl;
+        // }
         pparams = p;
         return !changed;
     }
@@ -687,6 +732,19 @@ bool ImProcFunctions::DenoiseInfoStore::update_pparams(const procparams::ProcPar
 
 void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp &currWB, DenoiseInfoStore &store, procparams::DenoiseParams &dnparams)
 {
+    if (store.valid || dnparams.chrominanceMethod != procparams::DenoiseParams::ChrominanceMethod::AUTOMATIC) {
+        if (dnparams.chrominanceMethod == procparams::DenoiseParams::ChrominanceMethod::AUTOMATIC) {
+            dnparams.chrominance = store.chrominance * dnparams.chrominanceAutoFactor;
+            dnparams.chrominanceRedGreen = store.chrominanceRedGreen * dnparams.chrominanceAutoFactor;
+            dnparams.chrominanceBlueYellow = store.chrominanceBlueYellow * dnparams.chrominanceAutoFactor;
+        }
+        return;
+    }
+
+    if (settings->verbose) {
+        std::cout << "Denoise: computing auto chrominance params..." << std::endl;
+    }
+    
     float autoNR = settings->nrauto;
     float autoNRmax = settings->nrautomax;
 
@@ -737,7 +795,7 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
         MyTime t1aue, t2aue;
         t1aue.set();
 
-        store = DenoiseInfoStore();
+        store.reset();// = DenoiseInfoStore();
 
         int crW = 100; // settings->leveldnv == 0
         int crH = 100; // settings->leveldnv == 0
@@ -940,13 +998,13 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
         }
 
 //                  printf("DCROP skip=%d cha=%f red=%f bl=%f \n",skip, chM,maxr,maxb);
-        dnparams.chrominance = chM / (autoNR * multip * adjustr);
-        dnparams.chrominanceRedGreen = maxr;
-        dnparams.chrominanceBlueYellow = maxb;
+        store.chrominance = chM / (autoNR * multip * adjustr);
+        store.chrominanceRedGreen = maxr;
+        store.chrominanceBlueYellow = maxb;
 
-        dnparams.chrominance *= dnparams.chrominanceAutoFactor;
-        dnparams.chrominanceRedGreen *= dnparams.chrominanceAutoFactor;
-        dnparams.chrominanceBlueYellow *= dnparams.chrominanceAutoFactor;
+        dnparams.chrominance = store.chrominance * dnparams.chrominanceAutoFactor;
+        dnparams.chrominanceRedGreen = store.chrominanceRedGreen * dnparams.chrominanceAutoFactor;
+        dnparams.chrominanceBlueYellow = store.chrominanceBlueYellow * dnparams.chrominanceAutoFactor;
         
         store.valid = true;
 

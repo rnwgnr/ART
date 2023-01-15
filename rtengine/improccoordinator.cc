@@ -137,6 +137,7 @@ ImProcCoordinator::ImProcCoordinator():
 void ImProcCoordinator::assign(ImageSource* imgsrc)
 {
     this->imgsrc = imgsrc;
+    denoiseInfoStore.valid = false;
 }
 
 ImProcCoordinator::~ImProcCoordinator()
@@ -369,12 +370,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     
             //setScale(scale);
             imgsrc->getImage(currWB, tr, orig_prev, pp, params.exposure, params.raw);
-            if (todo & M_INIT) {
-                denoiseInfoStore.pparams = params;
-                denoiseInfoStore.valid = false;
-            } else {
+            // if (todo & M_INIT) {
+            //     denoiseInfoStore.pparams = params;
+            //     denoiseInfoStore.valid = false;
+            // } else {
                 denoiseInfoStore.valid = denoiseInfoStore.update_pparams(params);
-            }
+            // }
 
             bool converted = false;
             if (params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::WORKING) {

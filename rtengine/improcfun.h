@@ -114,14 +114,19 @@ public:
     bool textureBoost(Imagefloat *rgb);
 
     struct DenoiseInfoStore {
-        DenoiseInfoStore () : chM (0), max_r{}, max_b{}, ch_M{}, valid (false)  {}
+        DenoiseInfoStore(): pparams() { reset(); }
         float chM;
         float max_r[9];
         float max_b[9];
         float ch_M[9];
         bool valid;
         ProcParams pparams;
-        bool update_pparams(const ProcParams &p); 
+        double chrominance;
+        double chrominanceRedGreen;
+        double chrominanceBlueYellow;
+        
+        bool update_pparams(const ProcParams &p);
+        void reset();
     };
     void denoiseComputeParams(ImageSource *imgsrc, const ColorTemp &currWB, DenoiseInfoStore &store, procparams::DenoiseParams &dnparams);
     void denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imagefloat *img, const DenoiseInfoStore &store, const procparams::DenoiseParams &dnparams);
