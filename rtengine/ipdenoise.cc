@@ -729,7 +729,15 @@ bool ImProcFunctions::DenoiseInfoStore::update_pparams(const procparams::ProcPar
         const auto raw_eq =
             [&]() -> bool
             {
-                return r1 == r2;
+                auto r2b = r2;
+#define MK_EQ_(k) r2b.k = r1.k
+                MK_EQ_(bayersensor.method);
+                MK_EQ_(bayersensor.lmmse_iterations);
+                MK_EQ_(bayersensor.dualDemosaicAutoContrast);
+                MK_EQ_(bayersensor.dualDemosaicContrast);
+                MK_EQ_(xtranssensor.method);
+#undef MK_EQ_
+                return r1 == r2b;
             };
         const bool changed = !dn_eq() || !wb_eq() || !exposure_eq() || !raw_eq();
         // if (changed) {
