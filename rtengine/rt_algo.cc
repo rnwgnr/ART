@@ -195,7 +195,7 @@ void findMinMaxPercentile(const float* data, size_t size, float minPrct, float& 
     // we make a rough calculation to reduce the number of threads for small data size.
     // This also works fine for the minmax loop.
     if (multithread) {
-        const size_t maxThreads = omp_get_max_threads();
+        const size_t maxThreads = omp_get_num_procs();
         while (size > numThreads * numThreads * 16384 && numThreads < maxThreads) {
             ++numThreads;
         }
@@ -826,7 +826,7 @@ struct ConvolutionData {
 #ifdef RT_FFTW3F_OMP
             if (multithread) {
                 fftwf_init_threads();
-                fftwf_plan_with_nthreads(omp_get_max_threads());
+                fftwf_plan_with_nthreads(omp_get_num_procs());
             }
 #endif
             

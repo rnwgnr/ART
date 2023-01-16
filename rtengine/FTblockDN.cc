@@ -1946,7 +1946,7 @@ BENCHFUN
             // }
 
 #ifdef _OPENMP
-            denoiseNestedLevels = omp_get_max_threads() / numthreads;
+            denoiseNestedLevels = omp_get_num_procs() / numthreads;
             //bool oldNested = omp_get_nested();
 
             if (denoiseNestedLevels < 2) {

@@ -255,7 +255,7 @@ void ImProcFunctions::firstAnalysis (const Imagefloat* const original, const Pro
     if (multiThread) {
 
 #ifdef _OPENMP
-        const int numThreads = min (max (W * H / (int)histogram.getSize(), 1), omp_get_max_threads());
+        const int numThreads = min (max (W * H / (int)histogram.getSize(), 1), omp_get_num_procs());
         #pragma omp parallel num_threads(numThreads) if(numThreads>1)
 #endif
         {

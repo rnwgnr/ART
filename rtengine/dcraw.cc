@@ -1174,7 +1174,7 @@ void CLASS lossless_dnglj92_load_raw()
     }
 
 #ifdef _OPENMP
-    #pragma omp parallel for num_threads(std::min<int>(tileCount, omp_get_max_threads()))
+    #pragma omp parallel for num_threads(std::min<int>(tileCount, omp_get_num_procs()))
 #endif
     for (size_t t = 0; t < tileCount; ++t) {
         size_t tcol = t * tile_width;

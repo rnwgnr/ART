@@ -446,7 +446,7 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     threadsSpinBtn->set_increments (1, 5);
     threadsSpinBtn->set_max_length (2); // Will this be sufficient? :)
 #ifdef _OPENMP
-    int maxThreadNumber = omp_get_max_threads();
+    int maxThreadNumber = omp_get_num_procs();
 #else
     int maxThreadNumber = 10;
 #endif

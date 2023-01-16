@@ -883,7 +883,7 @@ void solve_pde_fft (Array2Df *F, Array2Df *U, Array2Df *buf, bool multithread)/*
 
     if (multithread) {
         fftwf_init_threads();
-        fftwf_plan_with_nthreads ( omp_get_max_threads() );
+        fftwf_plan_with_nthreads(omp_get_num_procs());
     }
 
 // #else
@@ -1098,7 +1098,7 @@ void ToneMapFattal02(Imagefloat *rgb, ImProcFunctions *ipf, const ProcParams *pa
     Array2Df L (w2, h2);
     {
 #ifdef _OPENMP
-        int num_threads = multiThread ? omp_get_max_threads() : 1;
+        int num_threads = multiThread ? omp_get_num_procs() : 1;
 #else
         int num_threads = 1;
 #endif

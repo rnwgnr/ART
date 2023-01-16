@@ -3854,7 +3854,7 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     int numThreads;
     // reduce the number of threads under certain conditions to avoid overhead of too many critical regions
     numThreads = sqrt((((H - 2 * border) * (W - 2 * border)) / 262144.f));
-    numThreads = std::min(std::max(numThreads, 1), omp_get_max_threads());
+    numThreads = std::min(std::max(numThreads, 1), omp_get_num_procs());
 
     #pragma omp parallel num_threads(numThreads)
 #endif
@@ -4048,7 +4048,7 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     int numThreads;
     // reduce the number of threads under certain conditions to avoid overhead of too many critical regions
     numThreads = sqrt((((H - 2 * border) * (W - 2 * border)) / 262144.f));
-    numThreads = std::min(std::max(numThreads, 1), omp_get_max_threads());
+    numThreads = std::min(std::max(numThreads, 1), omp_get_num_procs());
 
     #pragma omp parallel num_threads(numThreads)
 #endif
