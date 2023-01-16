@@ -717,11 +717,21 @@ bool ImProcFunctions::DenoiseInfoStore::update_pparams(const procparams::ProcPar
                 }
                 return w1 == w2;
             };
-        const bool changed =
-               (pparams.exposure != p.exposure)
-            || (pparams.raw != p.raw)
-            || !wb_eq()
-            || !dn_eq();
+        const auto &e1 = pparams.exposure;
+        const auto &e2 = p.exposure;
+        const auto exposure_eq =
+            [&]() -> bool
+            {
+                return e1.enabled == e2.enabled && e1.hrmode == e2.hrmode;
+            };
+        const auto &r1 = pparams.raw;
+        const auto &r2 = p.raw;
+        const auto raw_eq =
+            [&]() -> bool
+            {
+                return r1 == r2;
+            };
+        const bool changed = !dn_eq() || !wb_eq() || !exposure_eq() || !raw_eq();
         // if (changed) {
         //     std::cout << "** CHANGED " << std::endl;
         // }
