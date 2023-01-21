@@ -9,6 +9,8 @@ set(CLISOURCEFILES
     pathutils.cc
     threadutils.cc
     fastexport.cc
+    exiffiltersettings.cc
+    makeicc.cc
     )
 
 set(NONCLISOURCEFILES
@@ -44,7 +46,6 @@ set(NONCLISOURCEFILES
     diagonalcurveeditorsubgroup.cc
     dirbrowser.cc
     denoise.cc
-    #dirpyrequalizer.cc
     distortion.cc
     dynamicprofilepanel.cc
     edit.cc
@@ -53,7 +54,6 @@ set(NONCLISOURCEFILES
     textureboost.cc
     exiffiltersettings.cc
     exifpanel.cc
-    exportpanel.cc
     extprog.cc
     filebrowser.cc
     filebrowserentry.cc
@@ -68,7 +68,6 @@ set(NONCLISOURCEFILES
     guiutils.cc
     histogrampanel.cc
     history.cc
-    iccprofilecreator.cc
     icmpanel.cc
     ilabel.cc
     imagearea.cc
@@ -168,6 +167,8 @@ set(NONCLISOURCEFILES
     controllines.cc
     filecatalog_rename.cc
     focusmask.cc
+    shortcutmanager.cc
+    session.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
@@ -249,28 +250,37 @@ endif()
 # Create config.h which defines where data are stored
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
+if(LIBRAW_FOUND)
+    link_directories(${LIBRAW_LIBRARY_DIRS})
+endif()
+if(OCIO_FOUND)
+    include_directories(${OCIO_INCLUDE_DIRS})
+    link_directories(${OCIO_LIBRARY_DIRS})
+endif()
+
 # Create new executables targets
-add_executable(rth ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})
-add_executable(rth-cli ${EXTRA_SRC_CLI} ${CLISOURCEFILES})
+add_executable(art ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})
+add_executable(art-cli ${EXTRA_SRC_CLI} ${CLISOURCEFILES})
 
 # Add dependencies to executables targets
-add_dependencies(rth UpdateInfo)
-add_dependencies(rth-cli UpdateInfo)
+add_dependencies(art UpdateInfo)
+add_dependencies(art-cli UpdateInfo)
 
 #Define a target specific definition to use in code
-target_compile_definitions(rth PUBLIC GUIVERSION)
-target_compile_definitions(rth-cli PUBLIC CLIVERSION)
+target_compile_definitions(art PUBLIC GUIVERSION)
+target_compile_definitions(art-cli PUBLIC CLIVERSION)
 
 # Set executables targets properties, i.e. output filename and compile flags
 # for "Debug" builds, open a console in all cases for Windows version
 if((WIN32) AND NOT(UPPER_CMAKE_BUILD_TYPE STREQUAL "DEBUG"))
-    set_target_properties(rth PROPERTIES LINK_FLAGS "-mwindows")
+    set_target_properties(art PROPERTIES LINK_FLAGS "-mwindows")
 endif()
-set_target_properties(rth PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART)
-set_target_properties(rth-cli PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART-cli)
+set_target_properties(art PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART)
+set_target_properties(art-cli PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS}" OUTPUT_NAME ART-cli)
 
 # Add linked libraries dependencies to executables targets
-target_link_libraries(rth rtengine
+target_link_libraries(art PUBLIC
+    rtengine
     ${CANBERRA-GTK_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${EXTRA_LIB_RTGUI}
@@ -290,11 +300,11 @@ target_link_libraries(rth rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${MALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
 
-target_link_libraries(rth-cli rtengine
+target_link_libraries(art-cli PUBLIC
+    rtengine
     ${CAIROMM_LIBRARIES}
     ${EXPAT_LIBRARIES}
     ${EXTRA_LIB_RTGUI}
@@ -312,10 +322,14 @@ target_link_libraries(rth-cli rtengine
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
     ${RSVG_LIBRARIES}
-    ${MALLOC_LIBRARIES}
     ${EXIV2_LIBRARIES}
     )
 
+if(HAS_MIMALLOC)
+    target_link_libraries(art PUBLIC mimalloc)
+    target_link_libraries(art-cli PUBLIC mimalloc)
+endif()
+
 # Install executables
-install(TARGETS rth DESTINATION ${BINDIR})
-install(TARGETS rth-cli DESTINATION ${BINDIR})
+install(TARGETS art DESTINATION ${BINDIR})
+install(TARGETS art-cli DESTINATION ${BINDIR})

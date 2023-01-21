@@ -17,29 +17,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _OPTIONS_
-#define _OPTIONS_
+#pragma once
 
 #include <set>
 #include <gtkmm.h>
 #include "../rtengine/rtengine.h"
 #include <exception>
-
-#define STARTUPDIR_CURRENT 0
-#define STARTUPDIR_HOME    1
-#define STARTUPDIR_CUSTOM  2
-#define STARTUPDIR_LAST    3
-
-#define THEMEREGEXSTR      "^(.+)-GTK3-(\\d{1,2})?_(\\d{1,2})?\\.css$"
-
-// Profile name to use for internal values' profile
-#define DEFPROFILE_INTERNAL "Neutral"
-// Special name for the Dynamic profile
-#define DEFPROFILE_DYNAMIC  "Dynamic"
-// Default bundled profile name to use for Standard images
-#define DEFPROFILE_IMG DEFPROFILE_INTERNAL
-// Default bundled profile name to use for Raw images
-#define DEFPROFILE_RAW DEFPROFILE_DYNAMIC
+#include "exiffiltersettings.h"
 
 struct SaveFormat {
     SaveFormat(
@@ -85,6 +69,8 @@ struct SaveFormat {
     {
     }
 
+    Glib::ustring getKey() const;
+
     Glib::ustring format;
     int pngBits;
     int jpegQuality;
@@ -102,6 +88,28 @@ enum prevdemo_t {PD_Sidecar = 1, PD_Fast = 0};
 
 class Options {
 public:
+    enum {
+        STARTUPDIR_CURRENT = 0,
+        STARTUPDIR_HOME = 1,
+        STARTUPDIR_CUSTOM = 2,
+        STARTUPDIR_LAST = 3
+    };
+
+    static constexpr const char *THEMEREGEXSTR = "^(.+)-GTK3-(\\d{1,2})?_(\\d{1,2})?(-DEPRECATED)?\\.css$";
+
+    // Profile name to use for internal values' profile
+    static constexpr const char *DEFPROFILE_INTERNAL = "Neutral";
+    // Special name for the Dynamic profile
+    static constexpr const char *DEFPROFILE_DYNAMIC = "Dynamic";
+    // Default bundled profile name to use for Standard images
+    static constexpr const char *DEFPROFILE_IMG = DEFPROFILE_INTERNAL;
+    // Default bundled profile name to use for Raw images
+    static constexpr const char *DEFPROFILE_RAW = DEFPROFILE_DYNAMIC;
+
+    static constexpr const char *DEFAULT_THEME = "Default";
+
+    static constexpr const char *SESSION_PATH = ":session:";
+    
     class Error: public std::exception {
     public:
         explicit Error (const Glib::ustring &msg): msg_ (msg) {}
@@ -188,6 +196,7 @@ public:
     int adjusterMaxDelay;
     int startupDir;
     Gtk::SortType dirBrowserSortType;
+    bool dir_browser_single_click;
     Glib::ustring startupPath;
     Glib::ustring profilePath; // can be an absolute or relative path; depending on this value, bundled profiles may not be found
     bool useBundledProfiles;   // only used if multiUser == true
@@ -246,7 +255,7 @@ public:
     ThumbnailOrder thumbnailOrder;
     bool showHistory;
     bool showInfo;
-    bool mainNBVertical;  // main notebook vertical tabs?
+    bool filmstripBottom;
     bool showClippedHighlights;
     bool showClippedShadows;
     int highlightThreshold;
@@ -345,10 +354,9 @@ public:
     int maxInspectorBuffers;   // maximum number of buffers (i.e. images) for the Inspector feature
     int inspectorDelay;
     int clutCacheSize;
-    int thumb_update_thread_limit;
     bool thumb_delay_update;
     bool thumb_lazy_caching;
-    bool filledProfile;  // Used as reminder for the ProfilePanel "mode"
+    bool profile_append_mode;  // Used as reminder for the ProfilePanel "mode"
     prevdemo_t prevdemo; // Demosaicing method used for the <100% preview
     bool serializeTiffRead;
     bool denoiseZoomedOut;
@@ -383,34 +391,8 @@ public:
     bool ICCPC_appendParamsToDesc;
 
     // fast export options
-    bool fastexport_bypass_sharpening;
-    bool fastexport_bypass_defringe;
-    bool fastexport_bypass_dirpyrDenoise;
-    bool fastexport_bypass_localContrast;
-    Glib::ustring fastexport_raw_bayer_method;
-    bool fastexport_bypass_raw_bayer_dcb_iterations;
-    bool fastexport_bypass_raw_bayer_dcb_enhance;
-    bool fastexport_bypass_raw_bayer_lmmse_iterations;
-    bool fastexport_bypass_raw_bayer_linenoise;
-    bool fastexport_bypass_raw_bayer_greenthresh;
-    Glib::ustring fastexport_raw_xtrans_method;
-    bool fastexport_bypass_raw_ccSteps;
-    bool fastexport_bypass_raw_ca;
-    bool fastexport_bypass_raw_df;
-    bool fastexport_bypass_raw_ff;
-    Glib::ustring fastexport_icm_input_profile;
-    Glib::ustring fastexport_icm_working_profile;
-    Glib::ustring fastexport_icm_output_profile;
-    rtengine::RenderingIntent fastexport_icm_outputIntent;
-    bool fastexport_icm_outputBPC;
-    Glib::ustring fastexport_icm_custom_output_profile;
-    bool fastexport_resize_enabled;
-    double fastexport_resize_scale;
-    Glib::ustring fastexport_resize_appliesTo;
-    int fastexport_resize_dataspec;
     int fastexport_resize_width;
     int fastexport_resize_height;
-    bool fastexport_use_fast_pipeline;
 
     std::vector<Glib::ustring> favorites;
     // Dialog settings
@@ -426,6 +408,8 @@ public:
     Glib::ustring lastProfilingReferenceDir;
     Glib::ustring lastLensProfileDir;
     Glib::ustring lastICCProfCreatorDir;
+    Glib::ustring last_session_add_dir;
+    Glib::ustring last_session_loadsave_dir;
     bool gimpPluginShowInfoDialog;
 
     size_t maxRecentFolders;                   // max. number of recent folders stored in options file
@@ -444,8 +428,8 @@ public:
     bool thumbnail_inspector_show_histogram;
     bool thumbnail_inspector_hover;
 
-    Glib::ustring batch_queue_profile_path;
-    bool batch_queue_use_profile;
+    // Glib::ustring batch_queue_profile_path;
+    // bool batch_queue_use_profile;
 
     bool toolpanels_disable;
     bool adjuster_force_linear;
@@ -474,6 +458,24 @@ public:
     RenameOptions renaming;
 
     int sidecar_autosave_interval; // in seconds
+
+    int editor_keyboard_scroll_step; // in pixels
+    int adjuster_shortcut_scrollwheel_factor; // to control the adjustment step when using tool shortcuts with the mouse wheel
+
+    bool remember_exif_filter_settings;
+    ExifFilterSettings last_exif_filter_settings;
+
+    std::vector<int> theme_bg_color; // RGB in 0-255
+    std::vector<int> theme_fg_color;
+    std::vector<int> theme_hl_color;
+
+    struct ExportProfileInfo {
+        Glib::ustring profile;
+        bool enabled;
+        ExportProfileInfo(const Glib::ustring &p="", bool e=false):
+            profile(p), enabled(e) {}
+    };
+    std::map<Glib::ustring, ExportProfileInfo> export_profile_map;
 
     Options();
 
@@ -516,5 +518,3 @@ extern bool gimpPlugin;
 extern bool remote;
 extern Glib::ustring versionString;
 extern Glib::ustring paramFileExtension;
-
-#endif

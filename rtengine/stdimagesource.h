@@ -102,9 +102,11 @@ public:
 
     void flushRGB() override;
 
-    void filmNegativeProcess(const procparams::FilmNegativeParams &params, std::array<float, 3>& filmBaseValues) override;
-    bool getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const FilmNegativeParams& currentParams, std::array<float, 3>& newExps) override;
-    bool getImageSpotValues(Coord2D spot, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& rawValues) override;    
+    void wbMul2Camera(double &rm, double &gm, double &bm) override;
+    void wbCamera2Mul(double &rm, double &gm, double &bm) override;
+
+    void getWBMults(const ColorTemp &ctemp, const procparams::RAWParams &raw, std::array<float, 4>& scale_mul, float &autoGainComp, float &rm, float &gm, float &bm) const override {}
+    
 };
 
 } // namespace rtengine

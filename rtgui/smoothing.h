@@ -74,6 +74,8 @@ private:
     rtengine::ProcEvent EvAngle;
     rtengine::ProcEvent EvCurvature;
     rtengine::ProcEvent EvOffset;
+    rtengine::ProcEvent EvNoiseStrength;
+    rtengine::ProcEvent EvNoiseCoarseness;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -107,12 +109,15 @@ private:
     Adjuster *angle;
     Adjuster *curvature;
     Adjuster *offset;
+    Adjuster *noise_strength;
+    Adjuster *noise_coarseness;
     Gtk::VBox *box;
     Gtk::HBox *chan_box;
     Gtk::VBox *guided_box;
     Gtk::VBox *gaussian_box;
     Gtk::VBox *nl_box;
     Gtk::VBox *lens_motion_box;
+    Gtk::VBox *noise_box;
 
     rtengine::procparams::SmoothingParams initial_params;
 };

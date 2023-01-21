@@ -99,7 +99,7 @@ CropWindow::CropWindow (ImageArea* parent, bool isLowUpdatePriority_, bool isDet
     minWidth = bsw + iw + 2 * sideBorderWidth;
 
     cropHandler.setDisplayHandler(this);
-    cropHandler.newImage (parent->getImProcCoordinator(), isDetailWindow);
+    cropHandler.newImage(parent->getImProcCoordinator(), isDetailWindow);
 }
 
 CropWindow::~CropWindow ()
@@ -132,9 +132,9 @@ void CropWindow::initZoomSteps()
     zoomSteps.push_back(ZoomStep("1600%", 16, 16000, true));
 }
 
-void CropWindow::enable()
+void CropWindow::enable(bool do_update)
 {
-    cropHandler.setEnabled (true);
+    cropHandler.setEnabled(true, do_update);
 }
 
 void CropWindow::setPosition (int x, int y)
@@ -516,6 +516,7 @@ void CropWindow::buttonPress(int button, int type, int bstate, int x, int y, dou
                         int spotx, spoty;
                         screenCoordToImage (x, y, spotx, spoty);
                         iarea->spotWBSelected (spotx, spoty);
+                        iarea->setToolHand();
                     } else if (iarea->getToolMode () == TMCropSelect && cropgl && !(bstate & GDK_SHIFT_MASK)) {
                         state = SCropSelecting;
                         screenCoordToImage (x, y, press_x, press_y);
@@ -1142,8 +1143,8 @@ void CropWindow::pointerMoved(int bstate, int x, int y, double pressure)
                 int gval = pix[1];
                 int bval = pix[2];
                 bool isRaw = false;
-                rtengine::StagedImageProcessor* ipc = iarea->getImProcCoordinator();
-                if(ipc) {
+                auto ipc = iarea->getImProcCoordinator();
+                if (ipc) {
                     procparams::ProcParams params;
                     ipc->getParams(&params);
                     isRaw = params.raw.bayersensor.method == RAWParams::BayerSensor::Method::NONE || params.raw.xtranssensor.method == RAWParams::XTransSensor::Method::NONE;
@@ -1595,16 +1596,10 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
             break;
         }
     }
-    bool useBgColor = (tweak_crop_guides || state == SDragPicker || state == SDeletePicker || state == SEditDrag1);
+    const bool editing_crop = (tweak_crop_guides || state == SDragPicker || state == SDeletePicker || state == SEditDrag1);
     if (tweak_crop_guides) {
         cropParams.guide = "None";
-        // if (state == SCropSelecting && area_updater_) {
-        //     cropParams.guide = "Frame";
-        //     cropParams.enabled = true;
-        //     useBgColor = false;
-        // }
     }
-    
 
     // draw image
     if (state == SCropImgMove || state == SCropWinResize) {
@@ -1623,7 +1618,7 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
             if (cropParams.enabled) {
                 int cropX, cropY;
                 cropHandler.getPosition (cropX, cropY);
-                drawCrop(style, cr, posX, posY, rough->get_width(), rough->get_height(), cropX, cropY, zoomSteps[cropZoom].zoom, cropParams, (this == iarea->mainCropWindow), useBgColor, cropHandler.isFullDisplay ());
+                drawCrop(style, cr, posX, posY, rough->get_width(), rough->get_height(), cropX, cropY, zoomSteps[cropZoom].zoom, cropParams, (this == iarea->mainCropWindow), editing_crop, cropHandler.isFullDisplay ());
             }
         }
 
@@ -1668,7 +1663,10 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
                 get_rgb(options.clipped_shadows_color.c_str(), cs_color);
             }
 
-            if (showcs || showch || showR || showG || showB || showL || showFocusMask || showFalseColors) {
+            const auto ipc = static_cast<const rtengine::ImProcCoordinator *>(iarea->getImProcCoordinator().get());
+            const bool mask_shown = ipc && ipc->is_mask_image();
+
+            if (!mask_shown && (showcs || showch || showR || showG || showB || showL || showFocusMask || showFalseColors)) {
                 Glib::RefPtr<Gdk::Pixbuf> tmp = cropHandler.cropPixbuf->copy ();
                 guint8* pix = tmp->get_pixels();
                 guint8* pixWrkSpace = cropHandler.cropPixbuftrue->get_pixels();
@@ -1850,7 +1848,7 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
             if (cropParams.enabled) {
                 int cropX, cropY;
                 cropHandler.getPosition (cropX, cropY);
-                drawCrop(style, cr, x + imgAreaX + imgX, y + imgAreaY + imgY, imgW, imgH, cropX, cropY, zoomSteps[cropZoom].zoom, cropParams, (this == iarea->mainCropWindow), useBgColor, cropHandler.isFullDisplay ());
+                drawCrop(style, cr, x + imgAreaX + imgX, y + imgAreaY + imgY, imgW, imgH, cropX, cropY, zoomSteps[cropZoom].zoom, cropParams, (this == iarea->mainCropWindow), editing_crop, cropHandler.isFullDisplay ());
             }
 
             if (observedCropWin) {
@@ -1942,7 +1940,7 @@ void CropWindow::expose (Cairo::RefPtr<Cairo::Context> cr)
                 cr->fill();
 
                 if (cropParams.enabled) {
-                    drawCrop(style, cr, x + imgAreaX + imgX, y + imgAreaY + imgY, rough->get_width(), rough->get_height(), cropX, cropY, zoomSteps[cropZoom].zoom, cropParams, (this == iarea->mainCropWindow), useBgColor, cropHandler.isFullDisplay ());
+                    drawCrop(style, cr, x + imgAreaX + imgX, y + imgAreaY + imgY, rough->get_width(), rough->get_height(), cropX, cropY, zoomSteps[cropZoom].zoom, cropParams, (this == iarea->mainCropWindow), editing_crop, cropHandler.isFullDisplay ());
                 }
 
                 if (observedCropWin) {
@@ -2732,7 +2730,10 @@ void CropWindow::remoteMove (int deltaX, int deltaY)
 
 void CropWindow::remoteMoveReady ()
 {
-
+    if (state == SNormal) {
+        return;
+    }
+    
     cropHandler.update ();
     state = SNormal;
 

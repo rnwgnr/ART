@@ -112,18 +112,18 @@ void encode(rtengine::Imagefloat *src, rtengine::Imagefloat *dest, bool multiThr
 {
     LUTf lut(65536);
     for (int i = 0; i < 65536; ++i) {
-        lut[i] = xcbrtf(float(i));
+        lut[i] = Color::gamma2(float(i) / 65535.f) * 65535.f;
     }
 
     const auto enc =
         [&](float f) -> float
         {
             if (f <= 0.f) {
-                return 0.f;
+                return f;
             } else if (f <= 65535.f) {
                 return lut[f];
             } else {
-                return xcbrtf(f);
+                return Color::gamma2(f / 65535.f) * 65535.f;
             }
         };
     
@@ -144,18 +144,18 @@ void decode(rtengine::Imagefloat *img, bool multiThread)
 {
     LUTf lut(65536);
     for (int i = 0; i < 65536; ++i) {
-        lut[i] = SQR(float(i)) * float(i);
+        lut[i] = Color::igamma2(float(i) / 65535.f) * 65535.f;
     }
 
     const auto dec =
         [&](float f) -> float
         {
             if (f <= 0.f) {
-                return 0.f;
+                return f;
             } else if (f <= 65535.f) {
                 return lut[f];
             } else {
-                return SQR(f) * f;
+                return Color::igamma2(f / 65535.f) * 65535.f;
             }
         };
     
@@ -594,6 +594,10 @@ void ImProcFunctions::transform(Imagefloat* original, Imagefloat* transformed, i
         std::unique_ptr<Imagefloat> logimg;
         if (do_encode) {
             logimg.reset(new Imagefloat(original->getWidth(), original->getHeight()));
+            if (needs_luminance) {
+                transformLuminanceOnly(original, logimg.get(), cx, cy, oW, oH, fW, fH, false);
+                original = logimg.get();
+            }
             encode(original, logimg.get(), multiThread);
             original = logimg.get();
         }
@@ -1054,7 +1058,7 @@ void ImProcFunctions::transformGeneral(bool highQuality, Imagefloat *original, I
     const bool enableCA = highQuality && needsCA();
     constexpr bool enableGradient = false;
     constexpr bool enablePCVignetting = false;
-    bool enableVignetting = needsVignetting();
+    bool enableVignetting = !highQuality && needsVignetting();
     bool enableDistortion = needsDistortion();
 
     double w2 = (double) oW  / 2.0 - 0.5;

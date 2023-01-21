@@ -407,14 +407,14 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
         {
             int r = std::min(width_, height_) * s.radius * 0.25;
 
-            if (r != radius_ || neg_ != s.erase || hardness_ != s.hardness) {
-                if (neg_ != s.erase || hardness_ != s.hardness || !s.radius) {
+            if (r != radius_ || neg_ != s.erase || hardness_ != s.opacity) {
+                if (neg_ != s.erase || hardness_ != s.opacity || !s.radius) {
                     ++curflag_;
                 }
 
                 radius_ = r;
                 neg_ = s.erase;
-                hardness_ = s.hardness;
+                hardness_ = s.opacity;
 
                 int w = 2*radius_ + 1;
                 int h = 2*radius_ + 1;
@@ -664,6 +664,9 @@ public:
         float decay = std::abs(m.decay);
         bool invert = m.decay < 0.f;
         float ret = getval(m.range, 1.0 + LIM01(decay/100.0), d);
+        if (m.strength < 100) {
+            ret *= float(m.strength)/100.f;
+        }
         if (invert) {
             ret = 1.f - ret;
         }
@@ -729,20 +732,20 @@ bool contrast_threshold_mask(int width, int height, float scale, array2D<float> 
 }
 
 
-bool mask_postprocess(int width, int height, float scale, const array2D<float> &guide, const std::vector<double> &curve, int regularization, bool multithread, array2D<float> &mask)
+bool mask_postprocess(int width, int height, float scale, const array2D<float> &guide, const std::vector<double> &curve, int posterization, int smoothing, bool multithread, array2D<float> &mask)
 {
     DiagonalCurve ccurve(curve);
-    if (!regularization && ccurve.isIdentity()) {
+    if (!posterization && ccurve.isIdentity()) {
         return false;
     }
 
     int W = mask.width();
     int H = mask.height();
 
-    if (regularization) {
-        constexpr float posterization[] = { 30.f, 20.f, 10.f, 5.f, 3.f };
-        const int idx = LIM(regularization, 0, 5)-1;
-        const float p = posterization[idx];
+    if (posterization) {
+        constexpr float pp[] = { 30.f, 20.f, 10.f, 5.f, 3.f, 2.f };
+        const int idx = LIM(posterization, 0, 6)-1;
+        const float p = pp[idx];
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
@@ -764,11 +767,33 @@ bool mask_postprocess(int width, int height, float scale, const array2D<float> &
         }
     }
 
-    if (regularization) {
-        constexpr float radius_coeff = 30.f;
+    if (posterization && smoothing) {
+        const float radius_coeff = 10.f * (101.f - float(LIM(smoothing, 0, 100)));
         const float radius = (max(width, height) / radius_coeff);
         const float epsilon = 0.015f;
-        rtengine::guidedFilter(mask, mask, mask, radius, epsilon, multithread);
+        array2D<float> threshold(W, H);
+        constexpr float l = 0.0;
+        constexpr float h = 0.25;
+        float f = LIM01(float(smoothing)/100.f);
+        float f2 = std::max(f-l, 0.f) / (h-l);
+        const float fillval = LIM01((f < l ? 0.f : (f > h ? 1.f : (f2 < 0.5f ? 2.f * SQR(f2) : 1.f - 2.f * SQR(1.f - f2)))));
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                threshold[y][x] = mask[y][x] > 1e-4f ? 1.f : fillval;
+            }
+        }
+        rtengine::guidedFilter(guide, mask, mask, radius, epsilon, multithread);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] *= threshold[y][x];
+            }
+        }
     }
 
     return true;
@@ -1058,7 +1083,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
                 }
                 if (generate_drawn_mask(offset_x, offset_y, full_width, full_height, masks[i].drawnMask, guide, multithread, amask)) {
                     const bool add = masks[i].drawnMask.mode != DrawnMask::INTERSECT;
-                    const float alpha = 1.f - LIM01(masks[i].drawnMask.transparency);
+                    const float alpha = LIM01(masks[i].drawnMask.opacity);
 #ifdef _OPENMP
 #                   pragma omp parallel for if (multithread)
 #endif
@@ -1132,12 +1157,13 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 
     for (int i = begin_idx; i < end_idx; ++i) {
         const auto &curve = masks[i].curve;
-        auto regularization = masks[i].regularization;
+        auto posterization = masks[i].posterization;
+        auto smoothing = masks[i].smoothing;
         if (abmask) {
-            mask_postprocess(full_width, full_height, scale, guide, curve, regularization, multithread, (*abmask)[i]);
+            mask_postprocess(full_width, full_height, scale, guide, curve, posterization, smoothing, multithread, (*abmask)[i]);
         }
         if (Lmask) {
-            mask_postprocess(full_width, full_height, scale, guide, curve, regularization, multithread, (*Lmask)[i]);
+            mask_postprocess(full_width, full_height, scale, guide, curve, posterization, smoothing, multithread, (*Lmask)[i]);
         }
     }
     

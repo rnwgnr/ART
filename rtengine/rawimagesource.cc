@@ -44,11 +44,14 @@
 #include <omp.h>
 #endif
 #include "opthelper.h"
+#include "linalgebra.h"
+
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
 
-namespace
-{
+namespace rtengine {
+
+namespace {
 
 void rotateLine (const float* const line, rtengine::PlanarPtr<float> &channel, const int tran, const int i, const int w, const int h)
 {
@@ -412,11 +415,173 @@ void transLineD1x (const float* const red, const float* const green, const float
     }
 }
 
+
+//
+// white balancing via chromatic adaptation, as described e.g. in
+// 
+//   http://yuhaozhu.com/blog/chromatic-adaptation.html
+//
+// (also similar to what darktable does in color calibration)
+//
+void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
+{
+    auto imatrices = src->getImageMatrices();
+    if (!imatrices) {
+        return;
+    }
+
+    static const Mat33f bradford( // Bradford from http://brucelindbloom.com
+        0.8951f, 0.2664f, -0.1614f,
+        -0.7502f, 1.7135f, 0.0367f,
+        0.0389f, -0.0685f, 1.0296f
+        );
+    static const Mat33f cat16( // CAT16 from darktable
+        0.401288f, 0.650173f, -0.051461f,
+        -0.250268f, 1.204414f,  0.045854f, 
+        -0.002079f, 0.048952f,  0.953127f
+        );
+
+    constexpr double FULL_DEG_TEMP = 3500.0;
+    const bool full_adapt = FULL_DEG_TEMP <= ctemp.getTemp();
+    const float deg = full_adapt ? 1.0 : (ctemp.getTemp() - MINTEMP) / (FULL_DEG_TEMP - MINTEMP);
+
+    if (settings->verbose) {
+        std::cout << "CAT - Basic adaptation degree: " << deg << std::endl;
+    }
+
+    const Mat33f &cat = full_adapt ? bradford : cat16;
+    
+    Mat33f xyz_cam(imatrices->xyz_cam);
+    auto ws = ICCStore::getInstance()->workingSpaceMatrix(img->colorSpace());
+    auto iws = ICCStore::getInstance()->workingSpaceInverseMatrix(img->colorSpace());
+    Mat33f ws2lms = dot_product(cat, ws);
+    auto lms2ws = inverse(ws2lms);
+    if (!lms2ws[1][1]) {
+        return;
+    }
+
+    auto cam2ws = dot_product(iws, xyz_cam);
+    auto ws2cam = inverse(cam2ws);
+    if (!ws2cam[1][1]) {
+        return;
+    }
+
+    // we start with img in the current working space, already white balanced
+    // via simple rgb scaling in camera space
+    //
+    // step 1: revert to the "native" white balance of the camera matrix (~D65)
+    double r, g, b;
+    ctemp.getMultipliers(r, g, b);
+    src->wbMul2Camera(r, g, b);
+
+    // src_w is now the "native" white point in camera space
+    Vec3f src_w(src->get_pre_mul(0)/r,
+                src->get_pre_mul(1)/g,
+                src->get_pre_mul(2)/b);
+
+    // wbmul is used to restore the native wb, in camera space
+    Mat33f wbmul = dot_product(cam2ws, dot_product(diagonal(src_w[0], src_w[1], src_w[2]), ws2cam));
+
+    // src_w is our source white point in LMS space, via Bradford or CAT16
+    // adaptation (depending on whether we use full adaptation or a partial
+    // one on the S cones -- see below)
+    src_w = dot_product(cat, dot_product(xyz_cam, src_w));
+
+    // our target white point is the one of the working space
+    // (also converted to LMS)
+    Vec3f dst_w(1, 1, 1);
+    dst_w = dot_product(cat, dot_product(ws, dst_w));
+
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+
+    const float lm = dst_w[0]/src_w[0];
+    const float mm = dst_w[1]/src_w[1];
+    const float sm = dst_w[2]/src_w[2];
+
+    // conv is our conversion matrix putting all the pieces together.
+    Mat33f conv = dot_product(ws2lms, wbmul);
+    // in case of full adaptation, from right to left:
+    // - restore the native wb in camera space
+    // - convert to LMS
+    // - perform the adaptation to the white point of the working space
+    // - convert back to rgb
+    Mat33f fullconv = dot_product(lms2ws, dot_product(diagonal(lm, mm, sm), conv));
+    // in case of partial adaptation, we don't use a single matrix but blend
+    // the adapted S value with the original one that was whitebalanced in
+    // camera space
+
+    const auto hue =
+        [&](const Vec3f &rgb) -> float
+        {
+            float L, a, b;
+            Color::rgb2lab(rgb[0], rgb[1], rgb[2], L, a, b, ws);
+            
+            float l, c, h;
+            Color::lab2lch01(L/327.68f, a/480.f, b/480.f, l, c, h);
+            return h;
+        };
+
+    constexpr float hue_hi = 90.f / 360.f;
+    constexpr float hue_lo = 340.f / 360.f;
+
+    FlatCurve hcurve({FCT_MinMaxCPoints,
+                      0.1, 0.1,
+                      0.35, 0.35,
+                      0.25, 1,
+                      0.35, 0.35,
+                      0.94, 1,
+                      0.35, 0.35
+        });
+
+#ifdef _OPENMP
+#   pragma omp parallel for
+#endif
+    for (int y = 0; y < H; ++y) {
+        Vec3f rgb;
+        Vec3f lms;
+        for (int x = 0; x < W; ++x) {
+            rgb[0] = img->r(y, x);
+            rgb[1] = img->g(y, x);
+            rgb[2] = img->b(y, x);
+            float m = rgb[0] + rgb[1] + rgb[2];
+
+            if (full_adapt) {
+                rgb = dot_product(fullconv, rgb);
+            } else {
+                float h = hue(rgb);
+                if (!(h <= hue_hi || h >= hue_lo)) {
+                    rgb = dot_product(fullconv, rgb);
+                } else {
+                    float blend = deg * hcurve.getVal(h);
+                    lms = dot_product(conv, rgb);
+                    float s = ws2lms[2][0] * rgb[0] + ws2lms[2][1] * rgb[1] + ws2lms[2][2] * rgb[2];
+                    lms[0] *= lm;
+                    lms[1] *= mm;
+                    lms[2] = intp(blend, lms[2] * sm, s);
+
+                    rgb = dot_product(lms2ws, lms);
+                }
+            }
+
+            // make sure we preserve the brightness
+            float m2 = rgb[0] + rgb[1] + rgb[2];
+            if (m > 0 && m2 > 0) {
+                float f = m / m2;
+                rgb[0] *= f;
+                rgb[1] *= f;
+                rgb[2] *= f;
+            }
+
+            img->r(y, x) = rgb[0];
+            img->g(y, x) = rgb[1];
+            img->b(y, x) = rgb[2];
+        }
+    }
 }
 
+} // namespace
 
-namespace rtengine
-{
 
 extern const Settings* settings;
 #undef ABS
@@ -622,54 +787,42 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     double r, g, b;
     float rm, gm, bm;
 
-    if (ctemp.getTemp() < 0) {
-        // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
-        rm = ri->get_pre_mul(0);
-        gm = ri->get_pre_mul(1);
-        bm = ri->get_pre_mul(2);
-    } else {
-        ctemp.getMultipliers (r, g, b);
-        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
-        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
-        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
-    }
+    // start from reverting unity multipliers
+    r = g = b = 1;
+    wbCamera2Mul(r, g, b);
+    
+    rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+    gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+    bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
 
-    if (true) {
-        double raw_expos = raw.enable_whitepoint ? raw.expos : 1.0;
+    double raw_expos = raw.enable_whitepoint ? raw.expos : 1.0;
         
-        // adjust gain so the maximum raw value of the least scaled channel just hits max
-        const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
-        float new_scale_mul[4];
+    // adjust gain so the maximum raw value of the least scaled channel just hits max
+    const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
+    float new_scale_mul[4];
 
-        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::Method::MONO)
-                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::Method::MONO);
+    bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::Method::MONO)
+        || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::Method::MONO);
 
-        for (int i = 0; i < 4; ++i) {
-            c_white[i] = (ri->get_white(i) - cblacksom[i]) / raw_expos + cblacksom[i];
-        }
-
-        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
-        rm = new_scale_mul[0] / scale_mul[0] * gain;
-        gm = new_scale_mul[1] / scale_mul[1] * gain;
-        bm = new_scale_mul[2] / scale_mul[2] * gain;
-        //fprintf(stderr, "camera gain: %f, current wb gain: %f, diff in stops %f\n", camInitialGain, gain, log2(camInitialGain) - log2(gain));
-    } else {
-        // old scaling: used a fixed reference gain based on camera (as-shot) white balance
-
-        // how much we need to scale each channel to get our new white balance
-        rm = refwb_red / rm;
-        gm = refwb_green / gm;
-        bm = refwb_blue / bm;
-        // normalize so larger multiplier becomes 1.0
-        float minval = min(rm, gm, bm);
-        rm /= minval;
-        gm /= minval;
-        bm /= minval;
-        // multiply with reference gain, ie as-shot WB
-        rm *= camInitialGain;
-        gm *= camInitialGain;
-        bm *= camInitialGain;
+    for (int i = 0; i < 4; ++i) {
+        c_white[i] = (ri->get_white(i) - cblacksom[i]) / raw_expos + cblacksom[i];
     }
+
+    float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+    rm = new_scale_mul[0] / scale_mul[0] * gain;
+    gm = new_scale_mul[1] / scale_mul[1] * gain;
+    bm = new_scale_mul[2] / scale_mul[2] * gain;
+
+    // // now apply the wb coefficients
+    // if (ctemp.getTemp() >= 0) {
+    //     double r, g, b;
+    //     ctemp.getMultipliers(r, g, b);
+    //     wbMul2Camera(r, g, b);
+
+    //     rm *= r;
+    //     gm *= g;
+    //     bm *= b;
+    // }
 
     defGain = 0.0;
     // compute image area to render in order to provide the requested part of the image
@@ -716,32 +869,51 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     int maxx = this->W, maxy = this->H, skip = pp.getSkip();
 
     // raw clip levels after white balance
-    hlmax[0] = clmax[0] * rm;
-    hlmax[1] = clmax[1] * gm;
-    hlmax[2] = clmax[2] * bm;
+    // hlmax[0] = clmax[0] * rm;
+    // hlmax[1] = clmax[1] * gm;
+    // hlmax[2] = clmax[2] * bm;
 
     const bool hrenabled = hrp.enabled && hrp.hrmode != procparams::ExposureParams::HR_OFF;
-    const bool clampOOG = !hrp.enabled;// || hrp.clampOOG;
+    const bool clampOOG = !hrp.enabled;
 
     const bool doClip = (chmax[0] >= clmax[0] || chmax[1] >= clmax[1] || chmax[2] >= clmax[2]) && !hrenabled && clampOOG;
 
     bool doHr = (hrenabled && hrp.hrmode == procparams::ExposureParams::HR_BLEND);
-    const float expcomp = std::pow(2, ri->getBaselineExposure());
-    rm *= expcomp;
-    gm *= expcomp;
-    bm *= expcomp;
 
     if (hrp.enabled && (hrp.hrmode == procparams::ExposureParams::HR_COLOR ||
                         hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT)) {
         if (!rgbSourceModified) {
-            if (settings->verbose) {
-                printf ("Applying Highlight Recovery: Color propagation...\n");
+            if (hrp.hrmode == procparams::ExposureParams::HR_COLOR) {
+                HLRecovery_inpaint(hrp.hrblur);
+            }  else {
+                float s[3] = { rm, gm, bm };
+                highlight_recovery_opposed(s, ctemp);
             }
-            bool soft = (hrp.hrmode == procparams::ExposureParams::HR_COLORSOFT);
-            HLRecovery_inpaint(soft, rm, gm, bm, red, green, blue);
             rgbSourceModified = true;
+            if (plistener) {
+                plistener->setProgressStr(M("PROGRESSBAR_PROCESSING"));
+            }
         }
     }
+
+    // now apply the wb coefficients
+    if (ctemp.getTemp() >= 0) {
+        double r, g, b;
+        ctemp.getMultipliers(r, g, b);
+        wbMul2Camera(r, g, b);
+
+        rm *= r;
+        gm *= g;
+        bm *= b;
+    }
+    hlmax[0] = clmax[0] * rm;
+    hlmax[1] = clmax[1] * gm;
+    hlmax[2] = clmax[2] * bm;
+
+    const float expcomp = std::pow(2, ri->getBaselineExposure());
+    rm *= expcomp;
+    gm *= expcomp;
+    bm *= expcomp;
 
     float area = skip * skip;
     rm /= area;
@@ -765,7 +937,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
             int i = sy1 + skip * ix;
             i = std::min(i, maxy - skip); // avoid trouble
 
-            if (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS || ri->get_colors() == 1) {
+            if (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS || ri->get_colors() == 1 || ri->get_colors() == 3) {
                 for (int j = 0, jx = sx1; j < imwidth; j++, jx += skip) {
                     jx = std::min(jx, maxx - skip); // avoid trouble
 
@@ -947,9 +1119,30 @@ DCPProfile *RawImageSource::getDCP(const ColorManagementParams &cmp, DCPProfile:
 
 void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb)
 {
-    double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
-    colorSpaceConversion (image, cmp, wb, pre_mul, embProfile, camProfile, imatrices.xyz_cam, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, plistener);
+    cmsHPROFILE in;
+    DCPProfile *dcpProf;
+
+    if (findInputProfile(cmp.inputProfile, embProfile, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, &dcpProf, in, plistener)) {
+        
+        double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
+        colorSpaceConversion_(image, cmp, wb, pre_mul, camProfile, imatrices.xyz_cam, in, dcpProf, plistener);
+
+        if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT && wb.getTemp() > 0) {
+            apply_cat(this, image, wb);
+        }        
+    }
 }
+
+
+void RawImageSource::colorSpaceConversion(Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double cam[3][3], const std::string &camName, const Glib::ustring &fileName, ProgressListener *plistener)
+{
+    cmsHPROFILE in;
+    DCPProfile *dcpProf;
+    if (findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in, plistener)) {
+        colorSpaceConversion_(im, cmp, wb, pre_mul, camprofile, cam, in, dcpProf, plistener);
+    }
+}
+
 
 void RawImageSource::getFullSize(int& w, int& h, int tr)
 {
@@ -1464,7 +1657,13 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         if (lensProf.useLensfun()) {
             pmap = LFDatabase::getInstance()->findModifier(lensProf, idata, W, H, coarse, -1);
         } else if (lensProf.useExif()) {
-            pmap.reset(new ExifLensCorrection(idata, W, H, coarse, -1));
+            ExifLensCorrection *e = new ExifLensCorrection(idata, W, H, coarse, -1);
+            pmap.reset(e);
+            if (!e->ok()) {
+                LensProfParams lf = lensProf;
+                lf.lcMode = LensProfParams::LcMode::LENSFUNAUTOMATCH;
+                pmap = LFDatabase::getInstance()->findModifier(lf, idata, W, H, coarse, -1);
+            }
         } else {
             const std::shared_ptr<LCPProfile> pLCPProf = LCPStore::getInstance()->getProfile(lensProf.lcpFile);
 
@@ -1736,6 +1935,9 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
     } else if (ri->get_colors() == 1) {
         // Monochrome
         nodemosaic(true);
+    } else {
+        // RGB
+        nodemosaic(false);
     }
 
     t2.set();
@@ -2938,25 +3140,15 @@ lab2ProphotoRgbD50(float L, float A, float B, float& r, float& g, float& b)
     r = prophoto_xyz[0][0] * X + prophoto_xyz[0][1] * Y + prophoto_xyz[0][2] * Z;
     g = prophoto_xyz[1][0] * X + prophoto_xyz[1][1] * Y + prophoto_xyz[1][2] * Z;
     b = prophoto_xyz[2][0] * X + prophoto_xyz[2][1] * Y + prophoto_xyz[2][2] * Z;
-    // r = CLIP01(r);
-    // g = CLIP01(g);
-    // b = CLIP01(b);
+    r = CLIP01(r);
+    g = CLIP01(g);
+    b = CLIP01(b);
 }
 
 // Converts raw image including ICC input profile to working space - floating point version
-void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE embedded, cmsHPROFILE camprofile, double camMatrix[3][3], const std::string &camName, const Glib::ustring &fileName, ProgressListener *plistener)
+void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE camprofile, double camMatrix[3][3], cmsHPROFILE in, DCPProfile *dcpProf, ProgressListener *plistener)
 {
-
-//    MyTime t1, t2, t3;
-//    t1.set ();
-    cmsHPROFILE in;
-    DCPProfile *dcpProf;
-
-    if (!findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in, plistener)) {
-        return;
-    }
-
-    if (dcpProf != nullptr) {
+    if (dcpProf != nullptr && wb.getTemp() > 0) {
         // DCP processing
         const DCPProfile::Triple pre_mul_row = {
             pre_mul[0],
@@ -3090,7 +3282,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
                     if (rgb[j] < 0.f || rgb[j] > 1.f) {
                         working_space_is_prophoto = true;
                         prophoto = ICCStore::getInstance()->workingSpace(cmp.workingProfile);
-                        if (settings->verbose) {
+                        if (settings->verbose > 1) {
                             std::cout << "colorSpaceConversion_: converting directly to " << cmp.workingProfile << " instead of passing through ProPhoto" << std::endl;
                         }
                         break;
@@ -3662,7 +3854,7 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     int numThreads;
     // reduce the number of threads under certain conditions to avoid overhead of too many critical regions
     numThreads = sqrt((((H - 2 * border) * (W - 2 * border)) / 262144.f));
-    numThreads = std::min(std::max(numThreads, 1), omp_get_max_threads());
+    numThreads = std::min(std::max(numThreads, 1), omp_get_num_procs());
 
     #pragma omp parallel num_threads(numThreads)
 #endif
@@ -3856,7 +4048,7 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     int numThreads;
     // reduce the number of threads under certain conditions to avoid overhead of too many critical regions
     numThreads = sqrt((((H - 2 * border) * (W - 2 * border)) / 262144.f));
-    numThreads = std::min(std::max(numThreads, 1), omp_get_max_threads());
+    numThreads = std::min(std::max(numThreads, 1), omp_get_num_procs());
 
     #pragma omp parallel num_threads(numThreads)
 #endif
@@ -4552,4 +4744,104 @@ void RawImageSource::cleanup ()
 }
 
 
-} /* namespace */
+void RawImageSource::wbMul2Camera(double &rm, double &gm, double &bm)
+{
+    double r = rm;
+    double g = gm;
+    double b = bm;
+
+    auto imatrices = getImageMatrices();
+
+    if (imatrices) {
+        double rr = imatrices->cam_rgb[0][0] * r + imatrices->cam_rgb[0][1] * g + imatrices->cam_rgb[0][2] * b;
+        double gg = imatrices->cam_rgb[1][0] * r + imatrices->cam_rgb[1][1] * g + imatrices->cam_rgb[1][2] * b;
+        double bb = imatrices->cam_rgb[2][0] * r + imatrices->cam_rgb[2][1] * g + imatrices->cam_rgb[2][2] * b;
+        r = rr;
+        g = gg;
+        b = bb;
+    }
+
+    rm = get_pre_mul(0) / r;
+    gm = get_pre_mul(1) / g;
+    bm = get_pre_mul(2) / b;
+
+    rm /= gm;
+    bm /= gm;
+    gm = 1.0;
+}
+
+
+void RawImageSource::wbCamera2Mul(double &rm, double &gm, double &bm)
+{
+    auto imatrices = getImageMatrices();
+
+    double r = get_pre_mul(0) / rm;
+    double g = get_pre_mul(1) / gm;
+    double b = get_pre_mul(2) / bm;
+    
+    if (imatrices) {
+        double rr = imatrices->rgb_cam[0][0] * r + imatrices->rgb_cam[0][1] * g + imatrices->rgb_cam[0][2] * b;
+        double gg = imatrices->rgb_cam[1][0] * r + imatrices->rgb_cam[1][1] * g + imatrices->rgb_cam[1][2] * b;
+        double bb = imatrices->rgb_cam[2][0] * r + imatrices->rgb_cam[2][1] * g + imatrices->rgb_cam[2][2] * b;
+        r = rr;
+        g = gg;
+        b = bb;
+    }
+
+    rm = r / g;
+    bm = b / g;
+    gm = 1.0;
+}
+
+
+void RawImageSource::getWBMults(const ColorTemp &ctemp, const RAWParams &raw, std::array<float, 4>& out_scale_mul, float &autoGainComp, float &rm, float &gm, float &bm) const
+{
+    // compute channel multipliers
+    double r, g, b;
+    //float rm, gm, bm;
+
+    if (ctemp.getTemp() < 0) {
+        // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
+        rm = ri->get_pre_mul(0);
+        gm = ri->get_pre_mul(1);
+        bm = ri->get_pre_mul(2);
+    } else {
+        ctemp.getMultipliers (r, g, b);
+        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
+    }
+
+    // adjust gain so the maximum raw value of the least scaled channel just hits max
+    const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
+    float new_scale_mul[4];
+
+    bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::Method::MONO)
+                    || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::Method::MONO);
+
+    float c_white[4];
+    for (int i = 0; i < 4; ++i) {
+        c_white[i] = (ri->get_white(i) - cblacksom[i]) / static_cast<float>(raw.expos) + cblacksom[i];
+    }
+
+    float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+    rm = new_scale_mul[0] / scale_mul[0] * gain;
+    gm = new_scale_mul[1] / scale_mul[1] * gain;
+    bm = new_scale_mul[2] / scale_mul[2] * gain;
+    //fprintf(stderr, "camera gain: %f, current wb gain: %f, diff in stops %f\n", camInitialGain, gain, log2(camInitialGain) - log2(gain));
+
+    const float expcomp = std::pow(2, ri->getBaselineExposure());
+    rm *= expcomp;
+    gm *= expcomp;
+    bm *= expcomp;
+
+    out_scale_mul[0] = scale_mul[0];
+    out_scale_mul[1] = scale_mul[1];
+    out_scale_mul[2] = scale_mul[2];
+    out_scale_mul[3] = scale_mul[3];
+
+    autoGainComp = camInitialGain / initialGain;
+}
+
+
+} // namespace rtengine

@@ -30,6 +30,7 @@
 namespace rtengine {
 
 class ProgressListener;
+class Exiftool;
 
 class Exiv2Metadata {
 public:
@@ -56,6 +57,8 @@ public:
     
     void saveToImage(ProgressListener *pl, const Glib::ustring &path, bool preserve_all_tags) const;
     void saveToXmp(const Glib::ustring &path) const;
+
+    void setOutputRating(const rtengine::procparams::ProcParams &pparams, bool from_xmp_sidecar);
 
     void setExifKeys(const std::vector<std::string> *keys);
 
@@ -87,15 +90,25 @@ private:
     Exiv2::ExifData exif_data_;
     Exiv2::IptcData iptc_data_;
     Exiv2::XmpData xmp_data_;
+    int rating_;
 
     std::shared_ptr<std::unordered_set<std::string>> exif_keys_;
 
-    typedef std::pair<std::shared_ptr<Exiv2::Image>, Glib::TimeVal> CacheVal;
+    struct CacheVal {
+        std::shared_ptr<Exiv2::Image> image;
+        Glib::TimeVal image_mtime;
+        Glib::TimeVal xmp_mtime;
+        bool use_xmp;
+        CacheVal(): image(nullptr), image_mtime(), xmp_mtime(), use_xmp(false) {}
+    };
+    //typedef std::pair<std::shared_ptr<Exiv2::Image>, Glib::TimeVal> CacheVal;
     typedef Cache<Glib::ustring, CacheVal> ImageCache;
     static std::unique_ptr<ImageCache> cache_;
     typedef std::pair<std::unordered_map<std::string, std::string>, Glib::TimeVal> JSONCacheVal;
     typedef Cache<Glib::ustring, JSONCacheVal> JSONCache;
     static std::unique_ptr<JSONCache> jsoncache_;
+
+    static std::unique_ptr<Exiftool> exiftool_;
 };
 
 } // namespace rtengine

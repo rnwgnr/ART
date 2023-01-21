@@ -28,12 +28,13 @@
 #include <lcms2.h>
 
 #include "color.h"
+#include "linalgebra.h"
 
 namespace rtengine {
 
 namespace procparams { struct ColorManagementParams; }
 
-typedef const double(*TMatrix)[3];
+typedef const float(*TMatrix)[3];
 
 class ProfileContent {
 public:
@@ -71,6 +72,8 @@ public:
     cmsHPROFILE      getStdProfile(const Glib::ustring& name) const;
     ProfileContent   getContent(const Glib::ustring& name) const;
 
+    static std::string getProfileTag(cmsHPROFILE profile, cmsTagSignature tag);
+
     Glib::ustring getDefaultMonitorProfileName() const;
     void setDefaultMonitorProfileName(const Glib::ustring &name);
 
@@ -91,9 +94,14 @@ public:
     /*static*/ std::vector<Glib::ustring> getWorkingProfiles();
 
     static cmsHPROFILE makeStdGammaProfile(cmsHPROFILE iprof);
-    static cmsHPROFILE createFromMatrix(const double matrix[3][3], bool gamma = false, const Glib::ustring& name = Glib::ustring());
+    static cmsHPROFILE createFromMatrix(const float matrix[3][3], bool gamma=false, const Glib::ustring &name=Glib::ustring());
+    static cmsHPROFILE createFromMatrix(const double matrix[3][3], bool gamma=false, const Glib::ustring &name=Glib::ustring());
 
     cmsHTRANSFORM getThumbnailMonitorTransform();
+
+    bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out);
+    static bool getProfileMatrix(cmsHPROFILE prof, Mat33<float> &out);
+    static bool getProfileParametricTRC(cmsHPROFILE prof, float &out_gamma, float &out_slope);
 
 private:
     class Implementation;

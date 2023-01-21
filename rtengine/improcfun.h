@@ -59,7 +59,7 @@ public:
     
     void setScale(double iscale);
 
-    void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, bool gamutCheck);
+    void updateColorProfiles(const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, GamutCheck gamutCheck);
     void setMonitorTransform(cmsHTRANSFORM xform) { monitorTransform = xform; }
 
     void setDCPProfile(DCPProfile *dcp, const DCPProfile::ApplyState &as)
@@ -114,12 +114,19 @@ public:
     bool textureBoost(Imagefloat *rgb);
 
     struct DenoiseInfoStore {
-        DenoiseInfoStore () : chM (0), max_r{}, max_b{}, ch_M{}, valid (false)  {}
+        DenoiseInfoStore(): pparams() { reset(); }
         float chM;
         float max_r[9];
         float max_b[9];
         float ch_M[9];
         bool valid;
+        ProcParams pparams;
+        double chrominance;
+        double chrominanceRedGreen;
+        double chrominanceBlueYellow;
+        
+        bool update_pparams(const ProcParams &p);
+        void reset();
     };
     void denoiseComputeParams(ImageSource *imgsrc, const ColorTemp &currWB, DenoiseInfoStore &store, procparams::DenoiseParams &dnparams);
     void denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imagefloat *img, const DenoiseInfoStore &store, const procparams::DenoiseParams &dnparams);
@@ -148,7 +155,7 @@ public:
     //----------------------------------------------------------------------
     // Lab/RGB conversion
     //----------------------------------------------------------------------
-    void rgb2monitor(Imagefloat *img, Image8* image);
+    void rgb2monitor(Imagefloat *img, Image8* image, bool bypass_out=false);
     
     Image8 *rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings = true);
 
@@ -196,8 +203,11 @@ public:
     int setDeltaEData(EditUniqueID id, double x, double y);
 
     // Spot Removal Tool
-    void removeSpots (rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
+    void removeSpots(rtengine::Imagefloat* img, rtengine::ImageSource* imgsrc, const std::vector<procparams::SpotEntry> &entries, const PreviewProps &pp, const rtengine::ColorTemp &currWB, const procparams::ColorManagementParams *cmp, int tr);
 
+    bool filmNegativeProcess(Imagefloat *input, Imagefloat *output, FilmNegativeParams &fnp, const RAWParams &rawParams, const ImageSource* imgsrc, const ColorTemp &currWB);
+    void filmNegativeProcess(rtengine::Imagefloat *input, rtengine::Imagefloat *output, const procparams::FilmNegativeParams &params);
+    
 private:
     cmsHPROFILE monitor;
     cmsHTRANSFORM monitorTransform;
@@ -236,6 +246,8 @@ private:
     void transformGeneral(bool highQuality, Imagefloat *original, Imagefloat *transformed, int cx, int cy, int sx, int sy, int oW, int oH, int fW, int fH, const LensCorrection *pLCPMap);
     void transformLCPCAOnly(Imagefloat *original, Imagefloat *transformed, int cx, int cy, const LensCorrection *pLCPMap);
 
+    void expcomp(Imagefloat *rgb, const procparams::ExposureParams *expparams);
+    
     bool needsCA();
     bool needsDistortion();
     bool needsRotation();

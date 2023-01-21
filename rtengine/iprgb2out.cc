@@ -27,8 +27,8 @@
 #include "alignedbuffer.h"
 #include "color.h"
 
-// #define BENCHMARK
-// #include "StopWatch.h"
+#define BENCHMARK
+#include "StopWatch.h"
 
 namespace rtengine {
 
@@ -36,15 +36,21 @@ extern const Settings* settings;
 
 namespace {
 
-inline void copyAndClampLine(const float *src, unsigned char *dst, const int W)
+inline void copyAndClampLine(const float *src, unsigned char *dst, const int W, bool scale=true)
 {
-    for (int j = 0; j < W * 3; ++j) {
-        dst[j] = uint16ToUint8Rounded(CLIP(src[j] * MAXVALF));
+    if (scale) {
+        for (int j = 0; j < W * 3; ++j) {
+            dst[j] = uint16ToUint8Rounded(CLIP(src[j] * MAXVALF));
+        }
+    } else {
+        for (int j = 0; j < W * 3; ++j) {
+            dst[j] = uint16ToUint8Rounded(CLIP(src[j]));
+        }
     }
 }
 
 
-inline void copyAndClamp(Imagefloat *src, unsigned char *dst, const double rgb_xyz[3][3], bool multiThread)
+inline void copyAndClamp(Imagefloat *src, unsigned char *dst, const float rgb_xyz[3][3], bool multiThread)
 {
     src->setMode(Imagefloat::Mode::XYZ, multiThread);
     
@@ -77,16 +83,186 @@ inline void copyAndClamp(Imagefloat *src, unsigned char *dst, const double rgb_x
     }
 }
 
+
+class ARTOutputProfile {
+public:
+    ARTOutputProfile(cmsHPROFILE prof, const procparams::ColorManagementParams &icm, const Glib::ustring &colorspace, int lutsz):
+        mode_(MODE_INVALID),
+        tc_(nullptr),
+        lutsz_(lutsz),
+        factor_(float(lutsz-1))
+    {
+        auto ws = ICCStore::getInstance()->workingSpaceMatrix(colorspace);
+        Mat33<float> m, mi;
+        float g = 0, s = 0;
+        cmsCIEXYZ bp;
+        if (ICCStore::getProfileMatrix(prof, m) && ICCStore::getProfileParametricTRC(prof, g, s) && inverse(m, mi) && (!icm.outputBPC || !cmsDetectDestinationBlackPoint(&bp, prof, icm.outputIntent, 0) || (bp.X == 0 && bp.Y == 0 && bp.Z == 0))) {
+            if (g == -2) {
+                mode_ = MODE_PQ;
+            } else if (g == -1) {
+                mode_ = MODE_HLG;
+            } else if (g == 1 && s == 0) {
+                mode_ = MODE_LINEAR;
+            } else {
+                mode_ = MODE_GAMMA;
+                LMCSToneCurveParams params;
+                Color::compute_LCMS_tone_curve_params(g, s, params);
+                auto tc = cmsBuildParametricToneCurve(0, 5, &params[0]);
+                if (tc) {
+                    tc_ = cmsReverseToneCurve(tc);
+                    cmsFreeToneCurve(tc);
+                }
+                if (!tc_) {
+                    mode_ = MODE_INVALID;
+                }
+            }
+            matrix_ = dot_product(mi, ws);
+        }
+        if (mode_ != MODE_INVALID && lutsz_ > 0) {
+            compute_lut();
+        }
+    }
+
+    ~ARTOutputProfile()
+    {
+        if (tc_) {
+            cmsFreeToneCurve(tc_);
+        }
+    }
+
+    operator bool() const { return mode_ != MODE_INVALID; }
+    
+    void operator()(const Imagefloat *src, Imagefloat *dst, bool multiThread)
+    {
+        const int W = src->getWidth();
+        const int H = src->getHeight();
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            Vec3<float> rgb;
+            for (int x = 0; x < W; ++x) {
+                rgb[0] = src->r(y, x) / 65535.f;
+                rgb[1] = src->g(y, x) / 65535.f;
+                rgb[2] = src->b(y, x) / 65535.f;
+
+                rgb = dot_product(matrix_, rgb);
+
+                for (int i = 0; i < 3; ++i) {
+                    if (lutsz_ > 0 && rgb[i] <= 1.f) {
+                        rgb[i] = lut_[rgb[i] * factor_];
+                    } else {
+                        rgb[i] = eval(rgb[i]);
+                    }
+                }
+
+                // switch (mode_) {
+                // case MODE_LINEAR:
+                //     break;
+                // case MODE_PQ:
+                //     for (int i = 0; i < 3; ++i) {
+                //         rgb[i] = Color::eval_PQ_curve(rgb[i], true);
+                //     }
+                //     break;
+                // case MODE_HLG:
+                //     for (int i = 0; i < 3; ++i) {
+                //         rgb[i] = Color::eval_HLG_curve(rgb[i], true);
+                //     }
+                //     break;
+                // default: // MODE_GAMMA
+                //     for (int i = 0; i < 3; ++i) {
+                //         rgb[i] = cmsEvalToneCurveFloat(tc_, rgb[i]);
+                //     }
+                // }
+
+                dst->r(y, x) = rgb[0] * 65535.f;
+                dst->g(y, x) = rgb[1] * 65535.f;
+                dst->b(y, x) = rgb[2] * 65535.f;
+            }
+        }
+    }
+
+    void operator()(const float *src, float *dst, int W)
+    {
+        Vec3<float> rgb;
+        const int W3 = W * 3;
+        for (int x = 0; x < W3; x += 3) {
+            rgb[0] = src[x];
+            rgb[1] = src[x+1];
+            rgb[2] = src[x+2];
+
+            rgb = dot_product(matrix_, rgb);
+
+            for (int i = 0; i < 3; ++i) {
+                if (lutsz_ > 0 && rgb[i] <= 1.f) {
+                    rgb[i] = lut_[rgb[i] * factor_];
+                } else {
+                    rgb[i] = eval(rgb[i]);
+                }
+            }
+
+            dst[x] = rgb[0];
+            dst[x+1] = rgb[1];
+            dst[x+2] = rgb[2];
+        }
+    }
+
+private:
+    float eval(float x)
+    {
+        switch (mode_) {
+        case MODE_LINEAR:
+            return x;
+        case MODE_PQ:
+            return Color::eval_PQ_curve(x, true);
+        case MODE_HLG:
+            return Color::eval_HLG_curve(x, true);
+        default: // MODE_GAMMA
+            return cmsEvalToneCurveFloat(tc_, x);
+        }
+    }
+    
+    void compute_lut()
+    {
+        lut_(lutsz_);
+        for (int i = 0; i < lutsz_; ++i) {
+            float x = float(i)/float(lutsz_-1);
+            float y = eval(x);
+            lut_[i] = y;
+        }
+    }
+    
+    enum Mode { MODE_INVALID, MODE_LINEAR, MODE_GAMMA, MODE_HLG, MODE_PQ };
+    Mode mode_;
+    Mat33<float> matrix_;
+    cmsToneCurve *tc_;
+    const int lutsz_;
+    const float factor_;
+    LUTf lut_;
+};
+
 } // namespace
 
-void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image)
+void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image, bool bypass_out)
 {
-    //BENCHFUN
+//    BENCHFUN
+    Imagefloat *inimg = img;
         
     image->allocate(img->getWidth(), img->getHeight());
     
     if (monitorTransform) {
-        img->setMode(Imagefloat::Mode::LAB, multiThread);
+        std::unique_ptr<Imagefloat> del_img;
+        if (!bypass_out) {
+            img = rgb2out(img, params->icm);
+            del_img.reset(img);
+            img->setMode(Imagefloat::Mode::RGB, multiThread);
+        } else {
+            img->setMode(Imagefloat::Mode::LAB, multiThread);
+        }
+        if (gamutWarning) {
+            inimg->setMode(Imagefloat::Mode::LAB, multiThread);
+        }
 
         const int W = img->getWidth();
         const int H = img->getHeight();
@@ -102,14 +278,17 @@ void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image)
 
             AlignedBuffer<float> gwBuf1;
             AlignedBuffer<float> gwBuf2;
+            AlignedBuffer<float> gwSrcBuf;
 
             if (gamutWarning) {
+                gwSrcBuf.resize(3 * W);
                 gwBuf1.resize(3 * W);
                 gwBuf2.resize(3 * W);
             }
 
             float *buffer = pBuf.data;
             float *outbuffer = mBuf.data;
+            float *gwbuffer = gwSrcBuf.data;
 
 #ifdef _OPENMP
             #pragma omp for schedule(dynamic,16)
@@ -120,29 +299,54 @@ void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image)
                 const int ix = i * 3 * W;
                 int iy = 0;
 
-                float* rL = img->g(i);
-                float* ra = img->r(i);
-                float* rb = img->b(i);
+                if (gamutWarning) {
+                    float *rL = inimg->g(i);
+                    float *ra = inimg->r(i);
+                    float *rb = inimg->b(i);
 
-                for (int j = 0; j < W; j++) {
-                    buffer[iy++] = rL[j] / 327.68f;
-                    buffer[iy++] = ra[j] / 327.68f;
-                    buffer[iy++] = rb[j] / 327.68f;
+                    for (int j = 0; j < W; j++) {
+                        gwbuffer[iy++] = rL[j] / 327.68f;
+                        gwbuffer[iy++] = ra[j] / 327.68f;
+                        gwbuffer[iy++] = rb[j] / 327.68f;
+                    }
                 }
 
+                iy = 0;
+                if (!bypass_out) {
+                    float *rr = img->r(i);
+                    float *rg = img->g(i);
+                    float *rb = img->b(i);
+
+                    for (int j = 0; j < W; j++) {
+                        buffer[iy++] = rr[j] / 65535.f;
+                        buffer[iy++] = rg[j] / 65535.f;
+                        buffer[iy++] = rb[j] / 65535.f;
+                    }
+                } else {
+                    float *rL = inimg->g(i);
+                    float *ra = inimg->r(i);
+                    float *rb = inimg->b(i);
+
+                    for (int j = 0; j < W; j++) {
+                        buffer[iy++] = rL[j] / 327.68f;
+                        buffer[iy++] = ra[j] / 327.68f;
+                        buffer[iy++] = rb[j] / 327.68f;
+                    }
+                }
+                
                 cmsDoTransform(monitorTransform, buffer, outbuffer, W);
                 copyAndClampLine(outbuffer, data + ix, W);
 
                 if (gamutWarning) {
-                    gamutWarning->markLine(image, i, buffer, gwBuf1.data, gwBuf2.data);
+                    gamutWarning->markLine(image, i, gwSrcBuf.data, gwBuf1.data, gwBuf2.data);
                 }
             }
         } // End of parallelization
     } else {
+        img->setMode(Imagefloat::Mode::LAB, multiThread);
         copyAndClamp(img, image->data, sRGB_xyz, multiThread);
     }
 }
-
 
 Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch, const procparams::ColorManagementParams &icm, bool consider_histogram_settings)
 {
@@ -165,7 +369,7 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
         ch = H - cy;
     }
 
-    Image8* image = new Image8(cw, ch);
+    Image8 *image = new Image8(cw, ch);
     Glib::ustring profile;
 
     cmsHPROFILE oprof = nullptr;
@@ -184,24 +388,30 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
 
     if (oprof) {
         img->setMode(Imagefloat::Mode::RGB, true);
+
+        cmsHTRANSFORM hTransform = nullptr;
+
+        ARTOutputProfile op(oprof, icm, img->colorSpace(), 256);
+
+        if (!op) {
+            cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+
+            if (icm.outputBPC) {
+                flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
+            }
+
         
-        cmsHPROFILE oprofG = oprof;
-        cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
-
-        if (icm.outputBPC) {
-            flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
+            lcmsMutex->lock();
+            auto iprof = ICCStore::getInstance()->workingSpace(img->colorSpace());
+            hTransform = cmsCreateTransform(iprof, TYPE_RGB_FLT, oprof, TYPE_RGB_FLT, icm.outputIntent, flags);  // NOCACHE is important for thread safety
+            lcmsMutex->unlock();
         }
-
-        lcmsMutex->lock();
-        auto iprof = ICCStore::getInstance()->workingSpace(img->colorSpace());
-        cmsHTRANSFORM hTransform = cmsCreateTransform(iprof, TYPE_RGB_FLT, oprofG, TYPE_RGB_FLT, icm.outputIntent, flags);  // NOCACHE is important for thread safety
-        lcmsMutex->unlock();
 
         unsigned char *data = image->data;
 
         // cmsDoTransform is relatively expensive
 #ifdef _OPENMP
-        #pragma omp parallel
+#pragma omp parallel
 #endif
         {
             AlignedBuffer<float> pBuf(3 * cw);
@@ -227,15 +437,17 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
                     buffer[iy++] = rb[j] / 65535.f;
                 }
 
-                cmsDoTransform(hTransform, buffer, outbuffer, cw);
+                if (op) {
+                    op(buffer, outbuffer, cw);
+                } else {
+                    cmsDoTransform(hTransform, buffer, outbuffer, cw);
+                }
                 copyAndClampLine(outbuffer, data + ix, cw);
             }
         } // End of parallelization
 
-        cmsDeleteTransform(hTransform);
-
-        if (oprofG != oprof) {
-            cmsCloseProfile(oprofG);
+        if (hTransform) {
+            cmsDeleteTransform(hTransform);
         }
     } else {
         const auto xyz_rgb = ICCStore::getInstance()->workingSpaceInverseMatrix(profile);
@@ -260,20 +472,28 @@ Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorMan
 
     if (oprof) {
         img->setMode(Imagefloat::Mode::RGB, multiThread);
-        
-        cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
 
-        if (icm.outputBPC) {
-            flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
+        ARTOutputProfile op(oprof, icm, img->colorSpace(), cur_pipeline == Pipeline::OUTPUT ? -1 : (cur_pipeline == Pipeline::PREVIEW && scale == 1 ? 65536 : (cur_pipeline == Pipeline::THUMBNAIL ? 256 : 1024)));
+        if (op) {
+            // if (settings->verbose) {
+            //     std::cout << "rgb2out: converting using fast path" << std::endl;
+            // }
+            op(img, image, multiThread);
+        } else {
+            cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
+
+            if (icm.outputBPC) {
+                flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
+            }
+
+            lcmsMutex->lock();
+            cmsHPROFILE iprof = ICCStore::getInstance()->workingSpace(img->colorSpace());
+            cmsHTRANSFORM hTransform = cmsCreateTransform(iprof, TYPE_RGB_FLT, oprof, TYPE_RGB_FLT, icm.outputIntent, flags);
+            lcmsMutex->unlock();
+
+            image->ExecCMSTransform(hTransform, img);
+            cmsDeleteTransform(hTransform);
         }
-
-        lcmsMutex->lock();
-        cmsHPROFILE iprof = ICCStore::getInstance()->workingSpace(img->colorSpace());
-        cmsHTRANSFORM hTransform = cmsCreateTransform(iprof, TYPE_RGB_FLT, oprof, TYPE_RGB_FLT, icm.outputIntent, flags);
-        lcmsMutex->unlock();
-
-        image->ExecCMSTransform(hTransform, img);
-        cmsDeleteTransform(hTransform);
     } else if (icm.outputProfile != procparams::ColorManagementParams::NoProfileString) {
         img->setMode(Imagefloat::Mode::XYZ, multiThread);
         

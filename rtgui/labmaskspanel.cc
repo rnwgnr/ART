@@ -355,7 +355,7 @@ public:
         radius_->setLogScale(2, 0);
         vb->pack_start(*radius_);
 
-        hardness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_HARDNESS"), 0, 100, 1, 100, Gtk::manage(new RTImage("pen-ocra-small.png"))));
+        hardness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_OPACITY"), 0, 100, 1, 100, Gtk::manage(new RTImage("pen-ocra-small.png"))));
         vb->pack_start(*hardness_);
 
         erase_ = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_DRAWNMASK_ERASE")));
@@ -375,15 +375,20 @@ public:
         hb->pack_start(*grid, Gtk::PACK_SHRINK, 2);
         
         tb->pack_start(*hb);
+
+        auto glbl = Gtk::manage(new Gtk::Label(M("TP_LABMASKS_DRAWNMASK_GLOBAL")));
+        setExpandAlignProperties(glbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+        tb->pack_start(*glbl);
+        tb->pack_start(*Gtk::manage(new Gtk::HSeparator()));
         
         feather_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_AREA_FEATHER"), 0, 100, 0.1, 0));
         tb->pack_start(*feather_);
         feather_->setAdjusterListener(this);
         feather_->setLogScale(10.0, 0.0);
 
-        transparency_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_TRANSPARENCY"), 0, 100, 1, 0));
-        tb->pack_start(*transparency_);
-        transparency_->setAdjusterListener(this);
+        opacity_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_OPACITY"), 0, 100, 1, 0));
+        tb->pack_start(*opacity_);
+        opacity_->setAdjusterListener(this);
 
         smoothness_ = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_SMOOTHNESS"), 0, 100, 1, 0));
         tb->pack_start(*smoothness_);
@@ -414,7 +419,7 @@ public:
     {
         if (mask_) {
             mask_->feather = feather_->getValue();
-            mask_->transparency = transparency_->getValue() / 100.0;
+            mask_->opacity = rtengine::LIM01(opacity_->getValue() / 100.0);
             mask_->smoothness = smoothness_->getValue() / 100.0;
             sig_draw_updated_.emit();
         }
@@ -440,9 +445,9 @@ public:
     {
         if (pressure_mode_ == PRESSURE_OFF) {
             bool ctrl = modifierKey & GDK_CONTROL_MASK;
-            bool shift = modifierKey & GDK_SHIFT_MASK;
-            if ((!ctrl && shift) != prev_erase_) {
-                prev_erase_ = (!ctrl && shift);
+            bool alt = modifierKey & GDK_MOD1_MASK;            
+            if ((!ctrl && alt) != prev_erase_) {
+                prev_erase_ = (!ctrl && alt);
                 erase_->set_active(!erase_->get_active());
             }
         }
@@ -462,12 +467,12 @@ public:
         bool ctrl = modifierKey & GDK_CONTROL_MASK;
         bool shift = modifierKey & GDK_SHIFT_MASK;
         bool alt = modifierKey & GDK_MOD1_MASK;
-        bool dragging = alt && !mask_->strokes.empty();
+        bool dragging = shift && !mask_->strokes.empty();
         if (ctrl && !shift) {
             mask_->strokes.push_back(rtengine::procparams::DrawnMask::Stroke());
             dragging = false;
-        } else if ((!ctrl && shift) != prev_erase_) {
-            prev_erase_ = !ctrl && shift;
+        } else if ((!ctrl && alt) != prev_erase_) {
+            prev_erase_ = !ctrl && alt;
             erase_->set_active(!erase_->get_active());
             dragging = false;
         }
@@ -545,7 +550,7 @@ public:
 
     bool scroll(int bstate, GdkScrollDirection direction, double deltaX, double deltaY, bool &propagateEvent) override
     {
-        double delta = (abs(deltaX) > abs(deltaY)) ? deltaX : deltaY;
+        double delta = (fabs(deltaX) > fabs(deltaY)) ? deltaX : deltaY;
         bool isUp = direction == GDK_SCROLL_UP || (direction == GDK_SCROLL_SMOOTH && delta < 0.0);
         int incr = isUp ? 1 : -1;
 
@@ -580,7 +585,7 @@ public:
                 info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask->strokes.size()));
                 setEnabled(mask->enabled);
                 feather_->setValue(mask->feather);
-                transparency_->setValue(mask->transparency * 100.0);
+                opacity_->setValue(rtengine::LIM01(mask->opacity) * 100.0);
                 smoothness_->setValue(mask->smoothness * 100.0);
                 contrast_->setCurve(mask->contrast);
                 set_mode(int(mask->mode));
@@ -725,7 +730,7 @@ private:
                     s.x = prev.x + (dx / steps) * i;
                     s.y = prev.y + (dy / steps) * i;
                     s.radius = prev.radius + (dr / steps) * i;
-                    s.hardness = hardness;
+                    s.opacity = hardness;
                     s.erase = erase;
 
                     brush_preview_->strokes.push_back(s);
@@ -738,7 +743,7 @@ private:
         s.x = x;
         s.y = y;
         s.radius = radius;
-        s.hardness = hardness;
+        s.opacity = hardness;
         s.erase = erase;
         info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
 
@@ -797,7 +802,7 @@ private:
             undo_stack_.clear();
             info_->set_markup(Glib::ustring::compose(M("TP_LABMASKS_DRAWNMASK_INFO"), mask_->strokes.size()));
             feather_->setValue(mask_->feather);
-            transparency_->setValue(mask_->transparency * 100.0);
+            opacity_->setValue(rtengine::LIM01(mask_->opacity) * 100.0);
             smoothness_->setValue(mask_->smoothness * 100.0);
             contrast_->setCurve(mask_->contrast);
             set_mode(int(mask_->mode));
@@ -832,10 +837,10 @@ private:
             p = 0;
             if (pressure_mode_ == PRESSURE_HARDNESS) {
                 for (size_t i = stroke_idx_; i < s.size(); ++i) {
-                    p = std::max(p, s[i].hardness);
+                    p = std::max(p, s[i].opacity);
                 }
                 for (size_t i = stroke_idx_; i < s.size(); ++i) {
-                    s[i].hardness = p;
+                    s[i].opacity = p;
                 }
             } else if (pressure_mode_ == PRESSURE_RADIUS) {
                 for (size_t i = stroke_idx_; i < s.size(); ++i) {
@@ -882,7 +887,7 @@ private:
     Gtk::Button *undo_;
     Adjuster *feather_;
     Adjuster *radius_;
-    Adjuster *transparency_;
+    Adjuster *opacity_;
     Adjuster *smoothness_;
     Adjuster *hardness_;
     Gtk::CheckButton *erase_;
@@ -968,6 +973,8 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         list->get_column(col-1)->set_expand(true);
     }
     list->set_activate_on_single_click(true);
+    setTreeViewCssProvider(list);
+    
     selectionConn = list->get_selection()->signal_changed().connect(sigc::mem_fun(this, &LabMasksPanel::onSelectionChanged));
     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
     Gtk::ScrolledWindow *scroll = Gtk::manage(new Gtk::ScrolledWindow());
@@ -1113,11 +1120,16 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     deltaEDecay = Gtk::manage(new Adjuster(M("TP_LABMASKS_DELTAE_DECAY"), 1, 100, 1, 1, nullptr, nullptr, nullptr, nullptr, false, false));//true));
     deltaEDecay->setLogScale(10.f, 10.f, true);
     deltaEDecay->setAdjusterListener(this);
+    deltaEStrength = Gtk::manage(new Adjuster(M("TP_SOFTLIGHT_STRENGTH"), 0, 100, 1, 100));
+    deltaEStrength->setAdjusterListener(this);
     deltaEInverted = Gtk::manage(new Gtk::CheckButton(M("TP_LABMASKS_INVERTED")));
     vb = Gtk::manage(new Gtk::VBox());
     vb->pack_start(*deltaERange);
     vb->pack_start(*deltaEDecay);
-    vb->pack_start(*deltaEInverted);
+    hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*deltaEInverted);
+    hb->pack_start(*deltaEStrength);
+    vb->pack_start(*hb);
     hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*vb);
     vb = Gtk::manage(new Gtk::VBox());
@@ -1343,9 +1355,13 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
         ppMask->add(*tb, false);
         ppMask->setLevel(1);
 
-        maskRegularization = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_REGULARIZATION"), 0, 5, 1, 0));
-        tb->pack_start(*maskRegularization);
-        maskRegularization->setAdjusterListener(this);
+        maskPosterization = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_POSTERIZATION"), 0, 6, 1, 0));
+        tb->pack_start(*maskPosterization);
+        maskPosterization->setAdjusterListener(this);
+
+        maskSmoothing = Gtk::manage(new Adjuster(M("TP_LABMASKS_POSTPROCESS_SMOOTHING"), 0, 100, 1, 0));
+        tb->pack_start(*maskSmoothing);
+        maskSmoothing->setAdjusterListener(this);
         
         CurveEditorGroup *cg = Gtk::manage(new CurveEditorGroup(options.lastToneCurvesDir, M("TP_LABMASKS_POSTPROCESS_CURVE")));
         cg->setCurveListener(this);
@@ -1540,9 +1556,11 @@ void LabMasksPanel::maskGet(int idx)
     r.deltaEMask.range = deltaERange->getValue();
     int sgn = deltaEInverted->get_active() ? -1 : 1;
     r.deltaEMask.decay = sgn * deltaEDecay->getValue();
+    r.deltaEMask.strength = deltaEStrength->getValue();
     r.name = maskName->get_text();
     r.curve = maskCurve->getCurve();
-    r.regularization = maskRegularization->getValue();
+    r.posterization = maskPosterization->getValue();
+    r.smoothing = maskSmoothing->getValue();
 }
 
 
@@ -1730,7 +1748,8 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         maskInverted->set_active(r.inverted);
         maskName->set_text(r.name);
         maskCurve->setCurve(r.curve);
-        maskRegularization->setValue(r.regularization);
+        maskPosterization->setValue(r.posterization);
+        maskSmoothing->setValue(r.smoothing);
 
         if (unsub && isCurrentSubscriber()) {
             if (areaMaskToggle->get_active()) {
@@ -1813,6 +1832,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         deltaEH->setValue(r.deltaEMask.weight_H, r.deltaEMask.H);
         deltaERange->setValue(r.deltaEMask.range);
         deltaEDecay->setValue(std::abs(r.deltaEMask.decay));
+        deltaEStrength->setValue(std::abs(r.deltaEMask.strength));
         deltaEInverted->set_active(r.deltaEMask.decay < 0);
         static_cast<DeltaEArea *>(deltaEColor)->setColor(r.deltaEMask.L, r.deltaEMask.C, r.deltaEMask.H);
     }
@@ -2149,7 +2169,7 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
         if (l) {
             l->panelChanged(areaMaskEvent(), M("GENERAL_CHANGED"));
         }
-    } else if (a == deltaERange || a == deltaEDecay) {
+    } else if (a == deltaERange || a == deltaEDecay || a == deltaEStrength) {
         if (l) {
             l->panelChanged(deltaEMaskEvent(), M("GENERAL_CHANGED"));
         }
@@ -2161,9 +2181,13 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
         if (l) {
             l->panelChanged(EvLMask, a->getTextValue());
         }
-    } else if (a == maskRegularization) {
+    } else if (a == maskPosterization) {
         if (l) {
-            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_REGULARIZATION") + ": " + a->getTextValue());
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_POSTERIZATION") + ": " + a->getTextValue());
+        }
+    } else if (a == maskSmoothing) {
+        if (l) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_SMOOTHING") + ": " + a->getTextValue());
         }
     }
     maskShow(selected_, true);
@@ -2195,18 +2219,19 @@ void LabMasksPanel::adjusterAutoToggled(Adjuster *a, bool newval)
 }
 
 
-void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int show_mask_idx)
+void LabMasksPanel::setMasks(const std::vector<rtengine::procparams::Mask> &masks, int selected_idx, bool show_mask)
 {
     disableListener();
     ConnectionBlocker b(selectionConn);
     
     masks_ = masks;
     selected_ = 0;
-    if (show_mask_idx >= 0) {
-        selected_ = show_mask_idx;
-        showMask->set_active(true);
-    } else {
-        showMask->set_active(false);
+    showMask->set_active(false);
+    if (selected_idx >= 0 && size_t(selected_idx) < masks.size()) {
+        selected_ = selected_idx;
+        if (show_mask) {
+            showMask->set_active(true);
+        }
     }
     static_cast<DrawnMaskPanel *>(drawnMask)->setTargetMask(nullptr);
     populateList();

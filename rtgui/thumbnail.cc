@@ -310,14 +310,14 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
         getCacheFileName("profiles", paramFileExtension);
 
     if (!run_cpb) {
-        if (defProf == DEFPROFILE_DYNAMIC && create && cfs && cfs->exifValid) {
+        if (defProf == Options::DEFPROFILE_DYNAMIC && create && cfs && cfs->exifValid) {
             auto imageMetaData = getMetaData();
             auto pp = ProfileStore::getInstance()->loadDynamicProfile(imageMetaData.get());
             ProcParams params;
             if (pp->applyTo(params) && params.save(cachemgr->getProgressListener(), outFName) == 0) {
                 loadProcParams();
             }
-        } else if (create && defProf != DEFPROFILE_DYNAMIC) {
+        } else if (create && defProf != Options::DEFPROFILE_DYNAMIC) {
             const PartialProfile *p = ProfileStore::getInstance()->getProfile(defProf);
             ProcParams params;
             if (p && p->applyTo(params) && params.save(cachemgr->getProgressListener(), outFName) == 0) {
@@ -329,12 +329,12 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
         Glib::ustring tmpFileName( Glib::build_filename(options.cacheBaseDir, Glib::ustring::compose("CPB_temp_%1.txt", index++)) );
 
         CPBDump(tmpFileName, fname, outFName,
-                defaultPparamsPath == DEFPROFILE_INTERNAL ? DEFPROFILE_INTERNAL : Glib::build_filename(defaultPparamsPath, Glib::path_get_basename(defProf) + paramFileExtension), cfs, flaggingMode);
+                defaultPparamsPath == Options::DEFPROFILE_INTERNAL ? Options::DEFPROFILE_INTERNAL : Glib::build_filename(defaultPparamsPath, Glib::path_get_basename(defProf) + paramFileExtension), cfs, flaggingMode);
         
         // For the filename etc. do NOT use streams, since they are not UTF8 safe
         Glib::ustring cmdLine = options.CPBPath + Glib::ustring(" \"") + tmpFileName + Glib::ustring("\"");
 
-        if (options.rtSettings.verbose) {
+        if (options.rtSettings.verbose > 1) {
             printf("Custom profile builder's command line: %s\n", Glib::ustring(cmdLine).c_str());
         }
 
@@ -648,7 +648,7 @@ void Thumbnail::getFinalSize (const rtengine::procparams::ProcParams& pparams, i
     }
 }
 
-void Thumbnail::getOriginalSize (int& w, int& h)
+void Thumbnail::getOriginalSize(int &w, int &h, bool consider_coarse)
 {
     if (cfs.width < 0) {
         try {
@@ -659,6 +659,11 @@ void Thumbnail::getOriginalSize (int& w, int& h)
     }
     w = cfs.width;
     h = cfs.height;
+    if (consider_coarse && pparamsValid) {
+        if (pparams.master.coarse.rotate == 90 || pparams.master.coarse.rotate == 270) {
+            std::swap(w, h);
+        }
+    }
 }
 
 rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::ProcParams& pparams, int h, double& scale)
@@ -720,7 +725,6 @@ rtengine::IImage8* Thumbnail::upgradeThumbImage (const rtengine::procparams::Pro
 
 void Thumbnail::generateExifDateTimeStrings ()
 {
-
     exifString = "";
     dateTimeString = "";
 
@@ -730,45 +734,24 @@ void Thumbnail::generateExifDateTimeStrings ()
 
     exifString = Glib::ustring::compose ("f/%1 %2s %3%4 %5mm", Glib::ustring(rtengine::FramesData::apertureToString(cfs.fnumber)), Glib::ustring(rtengine::FramesData::shutterToString(cfs.shutter)), M("QINFO_ISO"), cfs.iso, Glib::ustring::format(std::setw(3), std::fixed, std::setprecision(2), cfs.focalLen));
 
-    if (options.fbShowExpComp && cfs.expcomp != "0.00" && cfs.expcomp != "") { // don't show exposure compensation if it is 0.00EV;old cache iles do not have ExpComp, so value will not be displayed.
-        exifString = Glib::ustring::compose ("%1 %2EV", exifString, cfs.expcomp);    // append exposure compensation to exifString
+    if (options.fbShowExpComp && cfs.expcomp != "0.00" && cfs.expcomp != "") {
+        exifString = Glib::ustring::compose ("%1 %2EV", exifString, cfs.expcomp);
     }
 
     std::ostringstream ostr;
-    // std::string dateFormat = options.dateFormat;
-    // bool spec = false;
-
-    // for (size_t i = 0; i < dateFormat.size(); i++)
-    //     if (spec && dateFormat[i] == 'y') {
-    //         ostr << cfs.year;
-    //         spec = false;
-    //     } else if (spec && dateFormat[i] == 'm') {
-    //         ostr << (int)cfs.month;
-    //         spec = false;
-    //     } else if (spec && dateFormat[i] == 'd') {
-    //         ostr << (int)cfs.day;
-    //         spec = false;
-    //     } else if (dateFormat[i] == '%') {
-    //         spec = true;
-    //     } else {
-    //         ostr << (char)dateFormat[i];
-    //         spec = false;
-    //     }
 
     if (g_date_valid_dmy(int(cfs.day), GDateMonth(cfs.month), cfs.year)) {
         Glib::Date d(cfs.day, Glib::Date::Month(cfs.month), cfs.year);
-        ostr << std::string(d.format_string(options.dateFormat));
-    
-        ostr << " " << (int)cfs.hour;
-        ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.min;
-        ostr << ":" << std::setw(2) << std::setfill('0') << (int)cfs.sec;
+        ostr << std::string(d.format_string(options.dateFormat));    
+        ostr << " " << std::setw(2) << std::setfill('0') << int(cfs.hour);
+        ostr << ":" << std::setw(2) << std::setfill('0') << int(cfs.min);
+        ostr << ":" << std::setw(2) << std::setfill('0') << int(cfs.sec);
     }
-    dateTimeString = ostr.str ();
+    dateTimeString = ostr.str();
 }
 
-const Glib::ustring& Thumbnail::getExifString ()
+const Glib::ustring& Thumbnail::getExifString()
 {
-
     return exifString;
 }
 
@@ -1281,7 +1264,7 @@ void Thumbnail::saveMetadata()
         meta.setExif(pparams.master.metadata.exif);
         meta.setIptc(pparams.master.metadata.iptc);
         meta.saveToXmp(fn);
-        if (options.rtSettings.verbose) {
+        if (options.rtSettings.verbose > 1) {
             std::cout << "saved edited metadata for " << fname << " to "
                       << fn << std::endl;
         }

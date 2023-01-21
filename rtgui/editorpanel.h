@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <memory>
 #include "imageareapanel.h"
 #include "toolpanelcoord.h"
 #include "profilepanel.h"
@@ -67,10 +68,7 @@ public:
     void leftPaneButtonReleased (GdkEventButton *event);
     void rightPaneButtonReleased (GdkEventButton *event);
 
-    void setParent (RTWindow* p)
-    {
-        parent = p;
-    }
+    void setParent(RTWindow* p);
 
     void setParentWindow (Gtk::Window* p)
     {
@@ -172,11 +170,16 @@ public:
     Glib::ustring getShortName ();
     Glib::ustring getFileName ();
     bool handleShortcutKey (GdkEventKey* event);
+    bool keyPressedBefore(GdkEventKey *event);
+    bool keyReleased(GdkEventKey *event);
+    bool scrollPressed(GdkEventScroll *event);
 
     bool getIsProcessing() const
     {
-        return isProcessing;
+        return isProcessing || !can_open_now();
     }
+    void setIsProcessing() { isProcessing = true; }
+    
     void updateProfiles (const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC);
     void updateTPVScrollbar (bool hide);
     void updateHistogramPosition (int oldPosition, int newPosition);
@@ -192,7 +195,7 @@ public:
     
 private:
 
-    BatchQueueEntry *createBatchQueueEntry(bool fast_export=false);
+    BatchQueueEntry *createBatchQueueEntry(bool fast_export, bool use_batch_queue_profile, const rtengine::procparams::PartialProfile *export_profile);
     bool idle_imageSaved(ProgressConnector<int> *pc, rtengine::IImagefloat* img, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
     bool idle_saveImage(ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams);
     bool idle_sendToGimp( ProgressConnector<rtengine::IImagefloat*> *pc, Glib::ustring fname);
@@ -203,6 +206,8 @@ private:
     void do_queue_image(bool fast_export);
     bool autosave();
 
+    bool can_open_now() const;
+    
     Glib::ustring lastSaveAsFileName;
     bool realized;
 
@@ -270,8 +275,8 @@ private:
     int selectedFrame;
 
     rtengine::InitialImage* isrc;
-    rtengine::StagedImageProcessor* ipc;
-    rtengine::StagedImageProcessor* beforeIpc;    // for the before-after view
+    std::shared_ptr<rtengine::StagedImageProcessor> ipc;
+    std::shared_ptr<rtengine::StagedImageProcessor> beforeIpc;    // for the before-after view
 
     EditorPanelIdleHelper* epih;
 
@@ -289,5 +294,7 @@ private:
     Options::ScopeType histogram_scope_type;
 
     sigc::connection autosave_conn_;
+
+    std::unique_ptr<ToolShortcutManager> shortcut_mgr_;
 };
 

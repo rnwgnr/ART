@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __CURVES_H__
-#define __CURVES_H__
+#pragma once
 
 #include <map>
 #include <string>
@@ -39,6 +38,7 @@
 #define CURVES_MIN_POLY_POINTS  1000
 
 #include "rt_math.h"
+#include "linalgebra.h"
 
 #define CLIPI(a) ((a)>0?((a)<65534?(a):65534):0)
 
@@ -291,12 +291,13 @@ public:
         }
     }
 
-public:
     static void complexCurve (double ecomp, double black, double hlcompr, double hlcomprthresh, double shcompr, double br, double contr,
                               const std::vector<double>& curvePoints, const std::vector<double>& curvePoints2,
                               LUTu & histogram, LUTf & hlCurve, LUTf & shCurve, LUTf & outCurve, LUTu & outBeforeCCurveHistogram, ToneCurve & outToneCurve, ToneCurve & outToneCurve2,
 
                               int skip = 1);
+public:
+    static void contrastCurve(double contr, LUTu &histogram, LUTf &outCurve, int skip=1);
 
     static void RGBCurve (const std::vector<double>& curvePoints, LUTf & outCurve, int skip);
 
@@ -436,8 +437,7 @@ inline void setLutVal(const LUTf &lut, const Curve *curve, float &val)
 } // namespace curves
 
 
-class ToneCurve
-{
+class ToneCurve {
 public:
     LUTf lutToneCurve;  // 0xffff range
     float whitecoeff;
@@ -448,7 +448,7 @@ public:
     virtual ~ToneCurve() {};
 
     void Reset();
-    void Set(const Curve &pCurve, float gamma=0, float whitecoeff=1.f);
+    void Set(const Curve &pCurve, float whitecoeff=1.f);
     operator bool (void) const
     {
         return lutToneCurve;
@@ -555,7 +555,7 @@ class LuminanceToneCurve : public ToneCurve
 {
 public:
     // void Apply(float& r, float& g, float& b) const;
-    void Apply(float& r, float& g, float& b, const double ws[3][3]) const;
+    void Apply(float& r, float& g, float& b, const float ws[3][3]) const;
 };
 
 class PerceptualToneCurveState
@@ -591,6 +591,22 @@ public:
     void initApplyState(PerceptualToneCurveState & state, const Glib::ustring &workingSpace) const;
     void BatchApply(const size_t start, const size_t end, float *r, float *g, float *b, const PerceptualToneCurveState &state) const;
 };
+
+
+class NeutralToneCurve: public ToneCurve {
+public:
+    struct ApplyState {
+        float ws[3][3];
+        float iws[3][3];
+        Mat33<float> to_work;
+        Mat33<float> to_out;
+        LUTf hcurve;
+        
+        explicit ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile);
+    };
+    void BatchApply(const size_t start, const size_t end, float *r, float *g, float *b, const ApplyState &state) const;
+};
+
 
 // Standard tone curve
 inline void StandardToneCurve::Apply (float& r, float& g, float& b) const
@@ -707,7 +723,7 @@ inline void AdobeToneCurve::RGBTone (float& r, float& g, float& b) const
 }
 
 // Modifying the Luminance channel only
-inline void LuminanceToneCurve::Apply(float &ir, float &ig, float &ib, const double ws[3][3]) const
+inline void LuminanceToneCurve::Apply(float &ir, float &ig, float &ib, const float ws[3][3]) const
 {
     assert (lutToneCurve);
 
@@ -908,4 +924,3 @@ inline void SatAndValueBlendingToneCurve::Apply (float& ir, float& ig, float& ib
 
 #undef CLIPI
 
-#endif

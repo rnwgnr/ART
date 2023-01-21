@@ -39,7 +39,9 @@
 #include "printhelp.h"
 #include "pathutils.h"
 #include "../rtengine/profilestore.h"
+#include "../rtengine/imgiomanager.h"
 #include "fastexport.h"
+#include "makeicc.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -55,6 +57,10 @@
 #include <thread>
 #include <chrono>
 
+#ifdef WITH_MIMALLOC
+#  include <mimalloc.h>
+#endif
+
 // Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
 #define ECLIPSE_ARGS 0
 
@@ -67,29 +73,8 @@ Glib::ustring licensePath;
 Glib::ustring argv1;
 bool progress = false;
 //bool simpleEditor;
-//Glib::Threads::Thread* mainThread;
 
-namespace
-{
-
-// For an unknown reason, Glib::filename_to_utf8 doesn't work on reliably Windows,
-// so we're using Glib::filename_to_utf8 for Linux/Apple and Glib::locale_to_utf8 for Windows.
-Glib::ustring fname_to_utf8 (const char* fname)
-{
-#ifdef WIN32
-
-    try {
-        return Glib::locale_to_utf8 (fname);
-    } catch (Glib::Error&) {
-        return Glib::convert_with_fallback (fname, "UTF-8", "ISO-8859-1", "?");
-    }
-
-#else
-
-    return Glib::filename_to_utf8 (fname);
-
-#endif
-}
+namespace {
 
 bool fast_export = false;
 
@@ -114,16 +99,26 @@ bool check_partial_profile(const PartialProfile &pp)
  *  -3 if at least one required procparam file was not found */
 int processLineParams ( int argc, char **argv );
 
-std::pair<bool, bool> dontLoadCache(int argc, char **argv);
+std::pair<bool, int> dontLoadCache(int argc, char **argv);
 
 int main (int argc, char **argv)
 {
+#ifdef WITH_MIMALLOC
+    mi_version();
+#endif
+
     setlocale (LC_ALL, "");
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
-    Gio::init ();
+    if (argc > 1 && std::string(argv[1]) == "--make-icc") {
+        std::vector<std::string> args;
+        for (int i = 2; i < argc; ++i) {
+            args.push_back(argv[i]);
+        }
+        return ART_makeicc_main(std::cout, args);
+    }
 
-    //mainThread = Glib::Threads::Thread::self();
+    Gio::init ();
 
 #ifdef BUILD_BUNDLE
     char exname[512] = {0};
@@ -173,7 +168,8 @@ int main (int argc, char **argv)
 #endif
 
     auto p = dontLoadCache(argc, argv);
-    bool quickstart = p.first, verbose = p.second;
+    bool quickstart = p.first;
+    int verbose = p.second;
 
     try {
         Options::load(quickstart, verbose);
@@ -184,33 +180,33 @@ int main (int argc, char **argv)
     }
 
     if (options.is_defProfRawMissing()) {
-        options.defProfRaw = DEFPROFILE_RAW;
+        options.defProfRaw = Options::DEFPROFILE_RAW;
         std::cerr << std::endl
                   << "The default profile for raw photos could not be found or is not set." << std::endl
                   << "Please check your profiles' directory, it may be missing or damaged." << std::endl
-                  << "\"" << DEFPROFILE_RAW << "\" will be used instead." << std::endl << std::endl;
+                  << "\"" << Options::DEFPROFILE_RAW << "\" will be used instead." << std::endl << std::endl;
     }
     if (options.is_bundledDefProfRawMissing()) {
         std::cerr << std::endl
                   << "The bundled profile \"" << options.defProfRaw << "\" could not be found!" << std::endl
                   << "Your installation could be damaged." << std::endl
                   << "Default internal values will be used instead." << std::endl << std::endl;
-        options.defProfRaw = DEFPROFILE_INTERNAL;
+        options.defProfRaw = Options::DEFPROFILE_INTERNAL;
     }
 
     if (options.is_defProfImgMissing()) {
-        options.defProfImg = DEFPROFILE_IMG;
+        options.defProfImg = Options::DEFPROFILE_IMG;
         std::cerr << std::endl
                   << "The default profile for non-raw photos could not be found or is not set." << std::endl
                   << "Please check your profiles' directory, it may be missing or damaged." << std::endl
-                  << "\"" << DEFPROFILE_IMG << "\" will be used instead." << std::endl << std::endl;
+                  << "\"" << Options::DEFPROFILE_IMG << "\" will be used instead." << std::endl << std::endl;
     }
     if (options.is_bundledDefProfImgMissing()) {
         std::cerr << std::endl
                   << "The bundled profile " << options.defProfImg << " could not be found!" << std::endl
                   << "Your installation could be damaged." << std::endl
                   << "Default internal values will be used instead." << std::endl << std::endl;
-        options.defProfImg = DEFPROFILE_INTERNAL;
+        options.defProfImg = Options::DEFPROFILE_INTERNAL;
     }
 
     TIFFSetWarningHandler (nullptr);   // avoid annoying message boxes
@@ -241,10 +237,10 @@ int main (int argc, char **argv)
 }
 
 
-std::pair<bool, bool> dontLoadCache(int argc, char **argv)
+std::pair<bool, int> dontLoadCache(int argc, char **argv)
 {
     bool quick = false;
-    bool verbose = false;
+    int verbose = 0;
     
     for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
@@ -262,9 +258,11 @@ std::pair<bool, bool> dontLoadCache(int argc, char **argv)
             case '?':
             case 'h':
                 ART_print_help(argv[0], false);
+                std::cout << "\nOptions for --make-icc:\n";
+                ART_makeicc_help(std::cout, 2);
                 exit(0);
             case 'V':
-                verbose = true;
+                ++verbose;
                 break;
             case '-':
                 if (currParam == "--progress") {
@@ -278,7 +276,7 @@ std::pair<bool, bool> dontLoadCache(int argc, char **argv)
     }
 
     if (progress) {
-        verbose = false;
+        verbose = 0;
     }
 
     return std::make_pair(quick, verbose);
@@ -374,240 +372,252 @@ int processLineParams ( int argc, char **argv )
 
         if ( currParam.at (0) == '-' && currParam.size() > 1) {
             switch ( currParam.at (1) ) {
-                case '-':
-                    // GTK --argument, we're skipping it
-                    break;
+            case '-':
+                // GTK --argument, we're skipping it
+                break;
 
-                case 'O':
-                    copyParamsFile = true;
+            case 'O':
+                copyParamsFile = true;
 
-                case 'o': // outputfile or dir
-                    if ( iArg + 1 < argc ) {
-                        iArg++;
-                        outputPath = Glib::ustring (fname_to_utf8 (argv[iArg]));
+            case 'o': // outputfile or dir
+                if ( iArg + 1 < argc ) {
+                    iArg++;
+                    outputPath = Glib::ustring (fname_to_utf8 (argv[iArg]));
 #if ECLIPSE_ARGS
-                        outputPath = outputPath.substr (1, outputPath.length() - 2);
+                    outputPath = outputPath.substr (1, outputPath.length() - 2);
 #endif
 
-                        if (outputPath.substr (0, 9) == "/dev/null") {
-                            outputPath.assign ("/dev/null"); // removing any useless chars or filename
-                            outputDirectory = false;
-                            leaveUntouched = true;
-                        } else if (Glib::file_test (outputPath, Glib::FILE_TEST_IS_DIR)) {
-                            outputDirectory = true;
-                        }
+                    if (outputPath.substr (0, 9) == "/dev/null") {
+                        outputPath.assign ("/dev/null"); // removing any useless chars or filename
+                        outputDirectory = false;
+                        leaveUntouched = true;
+                    } else if (Glib::file_test (outputPath, Glib::FILE_TEST_IS_DIR)) {
+                        outputDirectory = true;
                     }
+                }
 
-                    break;
+                break;
 
-                case 'p': // processing parameters for all inputs; all set procparams are required, so
+            case 'p': // processing parameters for all inputs; all set procparams are required, so
 
-                    // RT stop if any of them can't be loaded for any reason.
-                    if ( iArg + 1 < argc ) {
-                        iArg++;
-                        Glib::ustring fname (fname_to_utf8 (argv[iArg]));
+                // RT stop if any of them can't be loaded for any reason.
+                if ( iArg + 1 < argc ) {
+                    iArg++;
+                    Glib::ustring fname (fname_to_utf8 (argv[iArg]));
 #if ECLIPSE_ARGS
-                        fname = fname.substr (1, fname.length() - 2);
+                    fname = fname.substr (1, fname.length() - 2);
 #endif
 
-                        if (fname.at (0) == '-') {
-                            std::cerr << "Error: filename missing next to the -p switch." << std::endl;
-                            return -3;
-                        }
-
-                        PartialProfile currentParams(new rtengine::procparams::FilePartialProfile(nullptr, fname));
-
-                        if (check_partial_profile(currentParams)) {
-                            processingParams.push_back(std::move(currentParams));
-                        } else {
-                            std::cerr << "Error: \"" << fname << "\" not found." << std::endl;
-                            return -3;
-                        }
-                    }
-
-                    break;
-
-                case 'S':
-                    skipIfNoSidecar = true;
-
-                case 's': // Processing params next to file (file extension appended)
-                    sideProcParams = true;
-                    sideCarFilePos = processingParams.size();
-                    break;
-
-                case 'd':
-                    useDefault = true;
-                    break;
-
-                case 'q':
-                    break;
-
-                case 'V':
-                    break;
-
-                case 'Y':
-                    overwriteFiles = true;
-                    break;
-
-                case 'a':
-                    allExtensions = true;
-                    break;
-
-                case 'j':
-                    if (currParam.length() > 2 && currParam.at (2) == 's') {
-                        if (currParam.length() == 3) {
-                            std::cerr << "Error: the -js switch requires a mandatory value!" << std::endl;
-                            return -3;
-                        }
-
-                        // looking for the subsampling parameter
-                        subsampling = atoi (currParam.substr (3).c_str());
-
-                        if (subsampling < 1 || subsampling > 3) {
-                            std::cerr << "Error: the value accompanying the -js switch has to be in the [1-3] range!" << std::endl;
-                            return -3;
-                        }
-                    } else {
-                        outputType = "jpg";
-                        if(currParam.size() < 3) {
-                            compression = 92;
-                        } else {
-                            compression = atoi (currParam.substr (2).c_str());
-
-                            if (compression < 0 || compression > 100) {
-                                std::cerr << "Error: the value accompanying the -j switch has to be in the [0-100] range!" << std::endl;
-                                return -3;
-                            }
-                        }
-                    }
-
-                    break;
-
-                case 'b':
-                    bits = atoi (currParam.substr (2).c_str());
-
-                    if (currParam.length() >= 3 && currParam.at(2) == '8') { // -b8
-                        bits = 8;
-                    } else if (currParam.length() >= 4 && currParam.length() <= 5 && currParam.at(2) == '1' && currParam.at(3) == '6') { // -b16, -b16f
-                        bits = 16;
-                        if (currParam.length() == 5 && currParam.at(4) == 'f') {
-                            isFloat = true;
-                        }
-                    } else if (currParam.length() >= 4 && currParam.length() <= 5 && currParam.at(2) == '3' && currParam.at(3) == '2') { // -b32 == -b32f
-                        bits = 32;
-                        isFloat = true;
-                    }
-
-                    if (bits != 8 && bits != 16 && bits != 32) {
-                        std::cerr << "Error: specify output bit depth per channel as -b8 for 8-bit integer, -b16 for 16-bit integer, -b16f for 16-bit float or -b32 for 32-bit float." << std::endl;
+                    if (fname.at (0) == '-') {
+                        std::cerr << "Error: filename missing next to the -p switch." << std::endl;
                         return -3;
                     }
 
-                    break;
+                    PartialProfile currentParams(new rtengine::procparams::FilePartialProfile(nullptr, fname, false));
 
-                case 't':
-                    outputType = "tif";
-                    compression = ((currParam.size() < 3 || currParam.at (2) != 'z') ? 0 : 1);
-                    break;
+                    if (check_partial_profile(currentParams)) {
+                        processingParams.push_back(std::move(currentParams));
+                    } else {
+                        std::cerr << "Error: \"" << fname << "\" not found." << std::endl;
+                        return -3;
+                    }
+                }
 
-                case 'n':
-                    outputType = "png";
-                    compression = -1;
-                    break;
+                break;
 
-                case 'f':
-                    fast_export = true;
-                    break;
+            case 'S':
+                skipIfNoSidecar = true;
 
-                case 'c': // MUST be last option
-                    while (iArg + 1 < argc) {
-                        iArg++;
-                        Glib::ustring argument (fname_to_utf8 (argv[iArg]));
-#if ECLIPSE_ARGS
-                        argument = argument.substr (1, argument.length() - 2);
-#endif
+            case 's': // Processing params next to file (file extension appended)
+                sideProcParams = true;
+                sideCarFilePos = processingParams.size();
+                break;
 
-                        if (!Glib::file_test (argument, Glib::FILE_TEST_EXISTS)) {
-                            std::cerr << "\"" << argument << "\"  doesn't exist!" << std::endl;
-                            continue;
-                        }
+            case 'd':
+                useDefault = true;
+                break;
 
-                        if (Glib::file_test (argument, Glib::FILE_TEST_IS_REGULAR)) {
-                            bool notAll = allExtensions && !options.is_parse_extention (argument);
-                            bool notRetained = !allExtensions && !options.has_retained_extention (argument);
+            case 'q':
+                break;
 
-                            if (notAll || notRetained) {
-                                if (notAll) {
-                                    std::cout << "\"" << argument << "\"  is not one of the parsed extensions. Image skipped." << std::endl;
-                                } else if (notRetained) {
-                                    std::cout << "\"" << argument << "\"  is not one of the selected parsed extensions. Image skipped." << std::endl;
-                                }
-                            } else {
-                                inputFiles.emplace_back (argument);
-                            }
+            case 'V':
+                break;
 
-                            continue;
+            case 'Y':
+                overwriteFiles = true;
+                break;
 
-                        }
+            case 'a':
+                allExtensions = true;
+                break;
 
-                        if (Glib::file_test (argument, Glib::FILE_TEST_IS_DIR)) {
-
-                            auto dir = Gio::File::create_for_path (argument);
-
-                            if (!dir || !dir->query_exists()) {
-                                continue;
-                            }
-
-                            try {
-
-                                auto enumerator = dir->enumerate_children ("standard::name,standard::type");
-
-                                while (auto file = enumerator->next_file()) {
-
-                                    const auto fileName = Glib::build_filename (argument, file->get_name());
-                                    bool isDir = file->get_file_type() == Gio::FILE_TYPE_DIRECTORY;
-                                    bool notAll = allExtensions && !options.is_parse_extention (fileName);
-                                    bool notRetained = !allExtensions && !options.has_retained_extention (fileName);
-
-                                    if (isDir || notAll || notRetained) {
-                                        if (isDir) {
-                                            std::cout << "\"" << fileName << "\"  is a folder. Folder skipped" << std::endl;
-                                        } else if (notAll) {
-                                            std::cout << "\"" << fileName << "\"  is not one of the parsed extensions. Image skipped." << std::endl;
-                                        } else if (notRetained) {
-                                            std::cout << "\"" << fileName << "\"  is not one of the selected parsed extensions. Image skipped." << std::endl;
-                                        }
-
-                                        continue;
-
-                                    }
-
-                                    if (sideProcParams && skipIfNoSidecar) {
-                                        // look for the sidecar proc params
-                                        if (!Glib::file_test(options.getParamFile(fileName), Glib::FILE_TEST_EXISTS)) {
-                                            std::cout << "\"" << fileName << "\"  has no side-car file. Image skipped." << std::endl;
-                                            continue;
-                                        }
-                                    }
-
-                                    inputFiles.emplace_back (fileName);
-                                }
-
-                            } catch (Glib::Exception&) {}
-
-                            continue;
-                        }
-
-                        std::cerr << "\"" << argument << "\" is neither a regular file nor a directory." << std::endl;
+            case 'j':
+                if (currParam.length() > 2 && currParam.at (2) == 's') {
+                    if (currParam.length() == 3) {
+                        std::cerr << "Error: the -js switch requires a mandatory value!" << std::endl;
+                        return -3;
                     }
 
-                    break;
+                    // looking for the subsampling parameter
+                    subsampling = atoi (currParam.substr (3).c_str());
 
-                case 'h':
-                case '?':
-                default:
-                    ART_print_help(argv[0], false);
-                    return -1;
+                    if (subsampling < 1 || subsampling > 3) {
+                        std::cerr << "Error: the value accompanying the -js switch has to be in the [1-3] range!" << std::endl;
+                        return -3;
+                    }
+                } else {
+                    outputType = "jpg";
+                    if(currParam.size() < 3) {
+                        compression = 92;
+                    } else {
+                        compression = atoi (currParam.substr (2).c_str());
+
+                        if (compression < 0 || compression > 100) {
+                            std::cerr << "Error: the value accompanying the -j switch has to be in the [0-100] range!" << std::endl;
+                            return -3;
+                        }
+                    }
+                }
+
+                break;
+
+            case 'b':
+                bits = atoi (currParam.substr (2).c_str());
+
+                if (currParam.length() >= 3 && currParam.at(2) == '8') { // -b8
+                    bits = 8;
+                } else if (currParam.length() >= 4 && currParam.length() <= 5 && currParam.at(2) == '1' && currParam.at(3) == '6') { // -b16, -b16f
+                    bits = 16;
+                    if (currParam.length() == 5 && currParam.at(4) == 'f') {
+                        isFloat = true;
+                    }
+                } else if (currParam.length() >= 4 && currParam.length() <= 5 && currParam.at(2) == '3' && currParam.at(3) == '2') { // -b32 == -b32f
+                    bits = 32;
+                    isFloat = true;
+                }
+
+                if (bits != 8 && bits != 16 && bits != 32) {
+                    std::cerr << "Error: specify output bit depth per channel as -b8 for 8-bit integer, -b16 for 16-bit integer, -b16f for 16-bit float or -b32 for 32-bit float." << std::endl;
+                    return -3;
+                }
+
+                break;
+
+            case 't':
+                outputType = "tif";
+                compression = ((currParam.size() < 3 || currParam.at (2) != 'z') ? 0 : 1);
+                break;
+
+            case 'n':
+                outputType = "png";
+                compression = -1;
+                break;
+
+            case 'f':
+                fast_export = true;
+                break;
+
+            case 'T':
+                if (currParam.size() > 2) {
+                    outputType = currParam.substr(2).lowercase();
+                } else if (iArg + 1 < argc) {
+                    ++iArg;
+                    outputType = Glib::ustring(argv[iArg]).lowercase();
+                } else {
+                    std::cerr << "Error: the -T switch requires a mandatory value!" << std::endl;
+                    return -3;
+                }
+                break;
+
+            case 'c': // MUST be last option
+                while (iArg + 1 < argc) {
+                    iArg++;
+                    Glib::ustring argument (fname_to_utf8 (argv[iArg]));
+#if ECLIPSE_ARGS
+                    argument = argument.substr (1, argument.length() - 2);
+#endif
+
+                    if (!Glib::file_test (argument, Glib::FILE_TEST_EXISTS)) {
+                        std::cerr << "\"" << argument << "\"  doesn't exist!" << std::endl;
+                        continue;
+                    }
+
+                    if (Glib::file_test (argument, Glib::FILE_TEST_IS_REGULAR)) {
+                        bool notAll = allExtensions && !options.is_parse_extention (argument);
+                        bool notRetained = !allExtensions && !options.has_retained_extention (argument);
+
+                        if (notAll || notRetained) {
+                            if (notAll) {
+                                std::cout << "\"" << argument << "\"  is not one of the parsed extensions. Image skipped." << std::endl;
+                            } else if (notRetained) {
+                                std::cout << "\"" << argument << "\"  is not one of the selected parsed extensions. Image skipped." << std::endl;
+                            }
+                        } else {
+                            inputFiles.emplace_back (argument);
+                        }
+
+                        continue;
+
+                    }
+
+                    if (Glib::file_test (argument, Glib::FILE_TEST_IS_DIR)) {
+
+                        auto dir = Gio::File::create_for_path (argument);
+
+                        if (!dir || !dir->query_exists()) {
+                            continue;
+                        }
+
+                        try {
+
+                            auto enumerator = dir->enumerate_children ("standard::name,standard::type");
+
+                            while (auto file = enumerator->next_file()) {
+
+                                const auto fileName = Glib::build_filename (argument, file->get_name());
+                                bool isDir = file->get_file_type() == Gio::FILE_TYPE_DIRECTORY;
+                                bool notAll = allExtensions && !options.is_parse_extention (fileName);
+                                bool notRetained = !allExtensions && !options.has_retained_extention (fileName);
+
+                                if (isDir || notAll || notRetained) {
+                                    if (isDir) {
+                                        std::cout << "\"" << fileName << "\"  is a folder. Folder skipped" << std::endl;
+                                    } else if (notAll) {
+                                        std::cout << "\"" << fileName << "\"  is not one of the parsed extensions. Image skipped." << std::endl;
+                                    } else if (notRetained) {
+                                        std::cout << "\"" << fileName << "\"  is not one of the selected parsed extensions. Image skipped." << std::endl;
+                                    }
+
+                                    continue;
+
+                                }
+
+                                if (sideProcParams && skipIfNoSidecar) {
+                                    // look for the sidecar proc params
+                                    if (!Glib::file_test(options.getParamFile(fileName), Glib::FILE_TEST_EXISTS)) {
+                                        std::cout << "\"" << fileName << "\"  has no side-car file. Image skipped." << std::endl;
+                                        continue;
+                                    }
+                                }
+
+                                inputFiles.emplace_back (fileName);
+                            }
+
+                        } catch (Glib::Exception&) {}
+
+                        continue;
+                    }
+
+                    std::cerr << "\"" << argument << "\" is neither a regular file nor a directory." << std::endl;
+                }
+
+                break;
+
+            case 'h':
+            case '?':
+            default:
+                ART_print_help(argv[0], false);
+                return -1;
             }
         } else {
             argv1 = Glib::ustring (fname_to_utf8 (argv[iArg]));
@@ -628,14 +638,14 @@ int processLineParams ( int argc, char **argv )
                 }
             }
 
+            options.saveFormat.format = outputType;
             if (outputType == "jpg") {
-                options.saveFormat.format = outputType;
                 options.saveFormat.jpegQuality = compression;
                 options.saveFormat.jpegSubSamp = subsampling;
-            } else if (outputType == "tif") {
-                options.saveFormat.format = outputType;
-            } else if (outputType == "png") {
-                options.saveFormat.format = outputType;
+            // } else if (outputType == "tif") {
+            //     options.saveFormat.format = outputType;
+            // } else if (outputType == "png") {
+            //     options.saveFormat.format = outputType;
             }
 
             break;
@@ -650,43 +660,55 @@ int processLineParams ( int argc, char **argv )
         } else if (outputType == "tif") {
             bits = 16;
         } else {
-            bits = 8;
+            bits = 32;
         }
     }
 
-    if ( !argv1.empty() ) {
+    if (!argv1.empty()) {
         return 1;
     }
 
-    if ( inputFiles.empty() ) {
+    if (inputFiles.empty()) {
         return 2;
     }
 
+    std::unordered_map<std::string, Glib::ustring> output_ext;
+    for (auto &p : rtengine::ImageIOManager::getInstance()->getSaveFormats()) {
+        output_ext[p.first] = p.second.extension;
+    }
+    output_ext["jpg"] = "jpg";
+    output_ext["tif"] = "tif";
+    output_ext["png"] = "png";
+
     if (useDefault) {
         Glib::ustring profPath = options.findProfilePath(options.defProfRaw);
-        Glib::ustring fname =
-            profPath == DEFPROFILE_INTERNAL ?
-            DEFPROFILE_INTERNAL :
-            Glib::build_filename(profPath,
-                                 Glib::path_get_basename(options.defProfRaw) +
-                                 paramFileExtension);
-        rawParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
+        if (profPath == Options::DEFPROFILE_INTERNAL) {
+            rawParams.reset(new rtengine::procparams::FullPartialProfile());
+        } else {
+            Glib::ustring fname =
+                Glib::build_filename(profPath,
+                                     Glib::path_get_basename(options.defProfRaw) +
+                                     paramFileExtension);
+            rawParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname, false));
+        }
 
-        if (options.is_defProfRawMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
+        if (options.is_defProfRawMissing() || profPath.empty() || (profPath != Options::DEFPROFILE_DYNAMIC && !check_partial_profile(rawParams))) {
             std::cerr << "Error: default raw processing profile not found." << std::endl;
             return -3;
         }
 
         profPath = options.findProfilePath(options.defProfImg);
-        fname =
-            profPath == DEFPROFILE_INTERNAL ?
-            DEFPROFILE_INTERNAL :
-            Glib::build_filename(profPath,
-                                 Glib::path_get_basename(options.defProfImg) +
-                                 paramFileExtension);
-        imgParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname));
+        if (profPath == Options::DEFPROFILE_INTERNAL) {
+            imgParams.reset(new rtengine::procparams::FullPartialProfile());
+        } else {
+            auto fname =
+                Glib::build_filename(profPath,
+                                     Glib::path_get_basename(options.defProfImg) +
+                                     paramFileExtension);
+            imgParams.reset(new rtengine::procparams::FilePartialProfile(nullptr, fname, false));
+        }
 
-        if (options.is_defProfImgMissing() || profPath.empty() || (profPath != DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
+        if (options.is_defProfImgMissing() || profPath.empty() || (profPath != Options::DEFPROFILE_DYNAMIC && !check_partial_profile(imgParams))) {
             std::cerr << "Error: default non-raw processing profile not found." << std::endl;
             return -3;
         }
@@ -714,7 +736,7 @@ int processLineParams ( int argc, char **argv )
         rtengine::procparams::ProcParams currentParams;
 
         Glib::ustring inputFile = inputFiles[iFile];
-        cpl.info(Glib::ustring::compose("Output is %1-bit %2.", bits, (isFloat ? "floating-point" : "integer")));
+        //cpl.info(Glib::ustring::compose("Output is %1-bit %2.", bits, (isFloat ? "floating-point" : "integer")));
         if (progress) {
             cpl.msg(Glib::ustring::compose("Processing: %1 (%2/%3)", inputFile, iFile+1, inputFiles.size()));
         } else {
@@ -728,29 +750,34 @@ int processLineParams ( int argc, char **argv )
 
         Glib::ustring outputFile;
 
-        if ( outputType.empty() ) {
+        if (outputType.empty()) {
             outputType = "jpg";
         }
 
-        if ( outputPath.empty() ) {
+        auto oext = output_ext[outputType];
+        if (oext.empty()) {
+            oext = outputType;
+        }
+
+        if (outputPath.empty()) {
             Glib::ustring s = inputFile;
-            Glib::ustring::size_type ext = s.find_last_of ('.');
-            outputFile = s.substr (0, ext) + "." + outputType;
-        } else if ( outputDirectory ) {
-            Glib::ustring s = Glib::path_get_basename ( inputFile );
-            Glib::ustring::size_type ext = s.find_last_of ('.');
-            outputFile = Glib::build_filename(outputPath, s.substr (0, ext) + "." + outputType);
+            Glib::ustring::size_type ext = s.find_last_of('.');
+            outputFile = s.substr(0, ext) + "." + oext;
+        } else if (outputDirectory) {
+            Glib::ustring s = Glib::path_get_basename(inputFile);
+            Glib::ustring::size_type ext = s.find_last_of('.');
+            outputFile = Glib::build_filename(outputPath, s.substr(0, ext) + "." + oext);
         } else {
             if (leaveUntouched) {
                 outputFile = outputPath;
             } else {
                 Glib::ustring s = outputPath;
-                Glib::ustring::size_type ext = s.find_last_of ('.');
-                outputFile = s.substr (0, ext) + "." + outputType;
+                Glib::ustring::size_type ext = s.find_last_of('.');
+                outputFile = s.substr(0, ext) + "." + oext;
             }
         }
 
-        if ( inputFile == outputFile) {
+        if (inputFile == outputFile) {
             cpl.error(Glib::ustring::compose("cannot overwrite: %1", inputFile));
             continue;
         }
@@ -762,9 +789,9 @@ int processLineParams ( int argc, char **argv )
 
         // Load the image
         isRaw = true;
-        Glib::ustring ext = getExtension(inputFile);
+        Glib::ustring ext = getExtension(inputFile).lowercase();
 
-        if (ext.lowercase() == "jpg" || ext.lowercase() == "jpeg" || ext.lowercase() == "tif" || ext.lowercase() == "tiff" || ext.lowercase() == "png") {
+        if (ext == "jpg" || ext == "jpeg" || ext == "tif" || ext == "tiff" || ext == "png" || rtengine::ImageIOManager::getInstance()->canLoad(ext)) {
             isRaw = false;
         }
 
@@ -778,15 +805,15 @@ int processLineParams ( int argc, char **argv )
 
         if (useDefault) {
             if (isRaw) {
-                if (options.defProfRaw == DEFPROFILE_DYNAMIC) {
-                    rawParams = ProfileStore::getInstance()->loadDynamicProfile (ii->getMetaData());
+                if (options.defProfRaw == Options::DEFPROFILE_DYNAMIC) {
+                    rawParams = ProfileStore::getInstance()->loadDynamicProfile(ii->getMetaData());
                 }
                 
                 cpl.info("Merging default raw processing profile.");
                 rawParams->applyTo(currentParams);
             } else {
-                if (options.defProfImg == DEFPROFILE_DYNAMIC) {
-                    imgParams = ProfileStore::getInstance()->loadDynamicProfile (ii->getMetaData());
+                if (options.defProfImg == Options::DEFPROFILE_DYNAMIC) {
+                    imgParams = ProfileStore::getInstance()->loadDynamicProfile(ii->getMetaData());
                 }
 
                 cpl.info("Merging default non-raw processing profile.");
@@ -827,6 +854,11 @@ int processLineParams ( int argc, char **argv )
             continue;
         }
 
+        auto p = rtengine::ImageIOManager::getInstance()->getSaveProfile(outputType);
+        if (p) {
+            p->applyTo(currentParams);
+        }
+
         job = create_processing_job(ii, currentParams, fast_export);
 
         if (!job) {
@@ -854,7 +886,8 @@ int processLineParams ( int argc, char **argv )
         } else if (outputType == "png") {
             errorCode = resultImage->saveAsPNG(outputFile, bits);
         } else {
-            errorCode = resultImage->saveToFile(outputFile);
+            errorCode = rtengine::ImageIOManager::getInstance()->save(resultImage, outputType, outputFile, nullptr) ? 0 : 1;
+            //errorCode = resultImage->saveToFile(outputFile);
         }
 
         if (errorCode) {

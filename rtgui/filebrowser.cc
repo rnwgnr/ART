@@ -30,6 +30,7 @@
 #include "../rtengine/ffmanager.h"
 #include "rtimage.h"
 #include "threadutils.h"
+#include "session.h"
 
 extern Options options;
 
@@ -218,8 +219,7 @@ FileBrowser::FileBrowser () :
     clearFromCacheFull(nullptr),
     colorLabel_actionData(nullptr),
     tbl(nullptr),
-    numFiltered(-1)//,
-//    exportPanel(nullptr)
+    numFiltered(-1)
 {
     session_id_ = 0;
 
@@ -381,6 +381,8 @@ void FileBrowser::build_menu()
         p++;
         submenuFileOperations->attach (*Gtk::manage(untrash = new Gtk::MenuItem (M("FILEBROWSER_POPUPUNTRASH"))), 0, 1, p, p + 1);
         p++;
+        submenuFileOperations->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_SESSION_ADD_LABEL"))), 0, 1, p, p + 1);
+        p++;
         submenuFileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
         submenuFileOperations->attach (*Gtk::manage(rename = new Gtk::MenuItem (M("FILEBROWSER_POPUPRENAME"))), 0, 1, p, p + 1);
@@ -402,6 +404,8 @@ void FileBrowser::build_menu()
         pmenu->attach (*Gtk::manage(trash = new Gtk::MenuItem (M("FILEBROWSER_POPUPTRASH"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(untrash = new Gtk::MenuItem (M("FILEBROWSER_POPUPUNTRASH"))), 0, 1, p, p + 1);
+        p++;
+        pmenu->attach(*Gtk::manage(add_to_session_ = new Gtk::MenuItem (M("FILEBROWSER_SESSION_ADD_LABEL"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
@@ -486,7 +490,7 @@ void FileBrowser::build_menu()
 //    pmenu->set_accel_group (pmaccelgroup);
     selall->add_accelerator ("activate", pmaccelgroup, GDK_KEY_a, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     trash->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
-    untrash->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
+    untrash->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE); 
     open->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Return, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
     develop->add_accelerator ("activate", pmaccelgroup, GDK_KEY_B, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     developfast->add_accelerator ("activate", pmaccelgroup, GDK_KEY_B, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
@@ -509,6 +513,7 @@ void FileBrowser::build_menu()
 
     trash->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), trash));
     untrash->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), untrash));
+    add_to_session_->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), add_to_session_));
     develop->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), develop));
     developfast->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), developfast));
     rename->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), rename));
@@ -857,17 +862,13 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         toTrashRequested (mselected);
     } else if (m == untrash) {
         fromTrashRequested (mselected);
+    } else if (m == add_to_session_) {
+        addToSessionRequested(mselected);
     }
 
     else if (m == develop) {
         tbl->developRequested (mselected, false);
     } else if (m == developfast) {
-        // if (exportPanel) {
-        //     // force saving export panel settings
-        //     exportPanel->setExportPanelListener(nullptr);
-        //     exportPanel->FastExportPressed();
-        //     exportPanel->setExportPanelListener(this);
-        // }
         tbl->developRequested (mselected, true);
     }
 
@@ -1118,7 +1119,8 @@ void FileBrowser::partPasteProfile ()
         }
 
         auto toplevel = static_cast<Gtk::Window*> (get_toplevel ());
-        PartialPasteDlg partialPasteDlg (M("PARTIALPASTE_DIALOGLABEL"), toplevel);
+        PartialPasteDlg partialPasteDlg(M("PARTIALPASTE_DIALOGLABEL"), toplevel);
+        partialPasteDlg.set_allow_3way(true);
 
         int i = partialPasteDlg.run ();
 
@@ -1422,7 +1424,8 @@ void FileBrowser::applyPartialMenuItemActivated (ProfileStoreLabel *label)
     if (srcProfiles) {
 
         auto toplevel = static_cast<Gtk::Window*> (get_toplevel ());
-        PartialPasteDlg partialPasteDlg (M("PARTIALPASTE_DIALOGLABEL"), toplevel);
+        PartialPasteDlg partialPasteDlg(M("PARTIALPASTE_DIALOGLABEL"), toplevel);
+        partialPasteDlg.set_allow_3way(true);
 
         if (partialPasteDlg.run() == Gtk::RESPONSE_OK) {
             MYREADERLOCK(l, entryRW);
@@ -2045,20 +2048,6 @@ FileBrowser::type_trash_changed FileBrowser::trash_changed ()
 }
 
 
-// // ExportPanel interface
-// void FileBrowser::exportRequested ()
-// {
-//     FileBrowser::menuItemActivated(developfast);
-// }
-
-// void FileBrowser::setExportPanel (ExportPanel* expanel)
-// {
-
-//     exportPanel = expanel;
-//     exportPanel->set_sensitive (false);
-//     exportPanel->setExportPanelListener (this);
-// }
-
 void FileBrowser::storeCurrentValue()
 {
 }
@@ -2210,4 +2199,14 @@ void FileBrowser::enableThumbRefresh()
         static_cast<FileBrowserEntry *>(f)->enableThumbRefresh();
     }
     queue_draw();
+}
+
+
+void FileBrowser::addToSessionRequested(std::vector<FileBrowserEntry *> tbe)
+{
+    std::vector<Glib::ustring> names;
+    for (auto e : tbe) {
+        names.push_back(e->filename);
+    }
+    art::session::add(names);
 }

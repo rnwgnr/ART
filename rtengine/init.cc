@@ -34,13 +34,22 @@
 #include "rtlensfun.h"
 #include "metadata.h"
 #include "imgiomanager.h"
+#include "threadpool.h"
+
+#ifdef _OPENMP
+# include <omp.h>
+#endif
 
 namespace rtengine {
 
+std::unique_ptr<ThreadPool> ThreadPool::instance_;
+
+
 const Settings* settings;
 
-MyMutex* lcmsMutex = nullptr;
+MyMutex *lcmsMutex = nullptr;
 MyMutex *fftwMutex = nullptr;
+MyMutex *librawMutex = nullptr;
 
 int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDir, bool loadAll)
 {
@@ -48,6 +57,15 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     ProcParams::init();
     PerceptualToneCurve::init();
     RawImageSource::init();
+
+    int num_threads = settings->thread_pool_size;
+    if (num_threads <= 0) {
+        num_threads = 1;
+#ifdef _OPENMP
+        num_threads = std::max(omp_get_num_procs()-1, num_threads);
+#endif
+    }
+    ThreadPool::init(num_threads);
 
 #ifdef _OPENMP
 #pragma omp parallel sections if (!settings->verbose)
@@ -57,7 +75,11 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
 #pragma omp section
 #endif
 {
-    if (s->lensfunDbDirectory.empty() || Glib::path_is_absolute(s->lensfunDbDirectory)) {
+    if (s->lensfunDbDirectory.empty()) {
+        if (!LFDatabase::init(s->lensfunDbDirectory)) {
+            LFDatabase::init(Glib::build_filename(baseDir, "share", "lensfun"));
+        }
+    } else if (Glib::path_is_absolute(s->lensfunDbDirectory)) {
         LFDatabase::init(s->lensfunDbDirectory);
     } else {
         LFDatabase::init(Glib::build_filename(baseDir, s->lensfunDbDirectory));
@@ -105,11 +127,14 @@ int init (const Settings* s, Glib::ustring baseDir, Glib::ustring userSettingsDi
     Exiv2Metadata::init(baseDir, userSettingsDir);
 
     DynamicProfileRules::init(baseDir);
-    ImageIOManager::getInstance()->init(Glib::build_filename(userSettingsDir, "imageio"));
+    ImageIOManager::getInstance()->init(baseDir, userSettingsDir);
     
     delete lcmsMutex;
     lcmsMutex = new MyMutex;
     fftwMutex = new MyMutex;
+#ifdef ART_USE_LIBRAW
+    librawMutex = new MyMutex;
+#endif
 
     return 0;
 }

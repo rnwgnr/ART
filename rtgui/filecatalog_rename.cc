@@ -26,10 +26,12 @@
 #include "pathutils.h"
 #include "filepanel.h"
 #include "rtwindow.h"
+#include "session.h"
 #include <time.h>
 #include <ctype.h>
 #include <sstream>
 #include <iomanip>
+#include <glibmm/regex.h>
 
 
 namespace {
@@ -56,9 +58,7 @@ public:
             res.tm_year = cd_->year - 1900;
             res.tm_mday = cd_->day;
             res.tm_mon = cd_->month - 1;
-            res.tm_isdst = -1;
-            time_t t = mktime(&res);
-            return *localtime(&t);
+            return res;
         } else {
             fd_.reset(FramesMetaData::fromFile(fname_));
             return fd_->getDateTime();
@@ -82,6 +82,7 @@ public:
     bool getPixelShift () const override { return f()->getPixelShift(); }
     bool getHDR() const override { return f()->getHDR(); }
     std::string getImageType() const override { return f()->getImageType(); }
+    std::string getSoftware() const override { return f()->getSoftware(); }
     rtengine::IIOSampleFormat getSampleFormat() const override { return f()->getSampleFormat(); }
     int getRating() const override { return f()->getRating(); }
     std::vector<rtengine::GainMap> getGainMaps() const override { return f()->getGainMaps(); }
@@ -202,6 +203,7 @@ private:
     F func_;
 };
 
+
 template <class F>
 std::unique_ptr<Pattern> make_pattern(F func)
 {
@@ -282,6 +284,7 @@ std::string tostr(T n, int digits)
  * pattern syntax:
  * %f : FileNamePattern
  * %e : FileExtPattern
+ * %# : FileNumberPattern
  * %a : DatePattern(day name abbreviated)
  * %A : DatePattern(day name full)
  * %b : DatePattern(month name abbreviated)
@@ -334,6 +337,20 @@ bool parse_pattern(const Glib::ustring &s, Params &out)
                         make_pattern(
                             [](FD fd) {
                                 return getExtension(fd->getFileName());
+                            }));
+                    break;
+                case '#':
+                    out.pattern.push_back(
+                        make_pattern(
+                            [](FD fd) {
+                                auto re = Glib::Regex::create("^.*?([0-9]+)$");
+                                Glib::MatchInfo m;
+                                auto name = removeExtension(
+                                    Glib::path_get_basename(fd->getFileName()));
+                                if (re->match(name, m)) {
+                                    return m.fetch(1);
+                                }
+                                return Glib::ustring("");
                             }));
                     break;
                 case 'm':
@@ -855,7 +872,10 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
 {
     Params params;
     if (get_params(getToplevelWindow(this), args, params)) {
+        const bool is_session = art::session::check(selectedDirectory);
+        
         removeFromBatchQueue(args);
+        std::vector<Glib::ustring> session_add, session_rem;
         
         std::vector<std::pair<Glib::ustring, Glib::ustring>> torename;
         for (auto e : args) {
@@ -867,6 +887,10 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
                     ::g_rename(p.first.c_str(), p.second.c_str()) == 0) {
                     if (first) {
                         cacheMgr->renameEntry(p.first, e->thumbnail->getMD5(), p.second);
+                        if (is_session) {
+                            session_add.push_back(p.second);
+                            session_rem.push_back(p.first);
+                        }
                     }
                 } else {
                     filepanel->getParent()->error(Glib::ustring::compose(M("RENAME_DIALOG_ERROR"), p.first, p.second));
@@ -874,7 +898,107 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
                 first = false;
             }
         }
-        reparseDirectory();
+        if (is_session) {
+            art::session::remove(session_rem);
+            art::session::add(session_add);
+        } else {
+            reparseDirectory();
+        }
     }
 }
     
+
+void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, bool inclBatchProcessed, bool onlySelected)
+{
+    if (tbe.empty()) {
+        return;
+    }
+
+    Gtk::MessageDialog msd(getToplevelWindow(this), M("FILEBROWSER_DELETEDIALOG_HEADER"), true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+
+    Gtk::HBox hb5;
+    Gtk::Label lbl4(M("RENAME_DIALOG_SIDECARS"));
+    constexpr int pad = 4;
+    hb5.pack_start(lbl4, Gtk::PACK_SHRINK, pad);
+    Gtk::Entry sidecars;
+    sidecars.set_text(options.renaming.sidecars);
+    sidecars.set_tooltip_markup(M("RENAME_DIALOG_SIDECARS_TIP"));
+    hb5.pack_start(sidecars, Gtk::PACK_EXPAND_WIDGET, pad);
+    msd.get_message_area()->pack_start(hb5, Gtk::PACK_SHRINK, pad);
+    msd.show_all_children();
+
+    if (onlySelected) {
+        msd.set_secondary_text(Glib::ustring::compose (inclBatchProcessed ? M("FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC") : M("FILEBROWSER_DELETEDIALOG_SELECTED"), tbe.size()), true);
+    } else {
+        msd.set_secondary_text(Glib::ustring::compose (M("FILEBROWSER_DELETEDIALOG_ALL"), tbe.size()), true);
+    }
+
+    if (msd.run() == Gtk::RESPONSE_YES) {
+        removeFromBatchQueue(tbe);
+        Params params;
+        bool err = false;
+        Glib::ustring errmsg;
+        if (!parse_sidecars(sidecars.get_text(), params)) {
+            errmsg = M("RENAME_DIALOG_INVALID_SIDECARS");
+            err = true;
+        }
+
+        if (!err) {
+            const bool is_session = art::session::check(selectedDirectory);
+            std::vector<Glib::ustring> session_rem;
+            
+            options.renaming.sidecars = sidecars.get_text();
+            
+            for (unsigned int i = 0; i < tbe.size(); i++) {
+                const auto fname = tbe[i]->filename;
+                // remove from browser
+                delete fileBrowser->delEntry(fname);
+                // remove from cache
+                cacheMgr->deleteEntry(fname);
+                // delete from file system
+                ::g_remove(fname.c_str());
+                // delete also the arp sidecar
+                ::g_remove(options.getParamFile(fname).c_str());
+
+                if (!params.sidecars.empty()) {
+                    auto base_fn = removeExtension(fname);
+                    for (auto &s : params.sidecars) {
+                        Glib::ustring sidename;
+                        if (s[0] == '+') {
+                            sidename = fname + "." + s.substr(1);
+                        } else {
+                            sidename = base_fn + "." + s;
+                        }
+                        if (Glib::file_test(sidename, Glib::FILE_TEST_EXISTS)) {
+                            ::g_remove(sidename.c_str());
+                        }
+                    }
+                }
+
+                if (inclBatchProcessed) {
+                    Glib::ustring procfName = Glib::ustring::compose ("%1.%2", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format);
+                    ::g_remove (procfName.c_str ());
+
+                    Glib::ustring procfNameParamFile = Glib::ustring::compose ("%1.%2.out%3", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format, paramFileExtension);
+                    ::g_remove (procfNameParamFile.c_str ());
+                }
+
+                previewsLoaded--;
+
+                if (is_session) {
+                    session_rem.push_back(fname);
+                }
+            }
+
+            _refreshProgressBar();
+            if (is_session) {
+                art::session::remove(session_rem);
+            } else {
+                redrawAll();
+            }
+        } else {
+            Gtk::MessageDialog errd(getToplevelWindow(this), errmsg, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+            errd.run();
+        }
+    }
+}

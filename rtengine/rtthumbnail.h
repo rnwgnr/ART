@@ -45,15 +45,6 @@ class Thumbnail {
     double camwbBlue;
     double redAWBMul, greenAWBMul, blueAWBMul;  // multipliers for auto WB
     double autoWBTemp, autoWBGreen, wbEqual;    // autoWBTemp and autoWBGreen are updated each time autoWB is requested and if wbEqual has been modified
-    LUTu aeHistogram;
-    int  aeHistCompression;
-    bool aeValid;
-    double aeExposureCompensation;
-    int aeLightness;
-    int aeContrast;
-    int aeBlack;
-    int aeHighlightCompression;
-    int aeHighlightCompressionThreshold;
     int embProfileLength;
     unsigned char* embProfileData;
     cmsHPROFILE embProfile;
@@ -70,6 +61,7 @@ class Thumbnail {
     SensorType sensorType;
 
     void processFilmNegative(const procparams::ProcParams& params, const Imagefloat* baseImg, int rwidth, int rheight);
+    void processFilmNegativeV2(const procparams::ProcParams &params, const Imagefloat* baseImg, const int rwidth, const int rheight);
 
 public:
 

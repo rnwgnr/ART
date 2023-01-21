@@ -233,7 +233,8 @@ GENERAL_SAVE_AS;Salvar como...
 GENERAL_SLIDER;Controle deslizante
 GENERAL_UNCHANGED;(Inalterado)
 GENERAL_WARNING;Atenção
-GENERAL_DEPRECATED_TOOLTIP;<b>Depreciado!</b> Será removido em uma versão futura.
+GENERAL_DEPRECATED;Depreciado
+GENERAL_DEPRECATED_TOOLTIP;Depreciado! Será removido em uma versão futura.
 GIMP_PLUGIN_INFO;Bem-vindo ao plugin ART do GIMP!\nDepois de terminar de editar, feche a janela principal do ART e a imagem será importada automaticamente no GIMP.
 HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), pico: %5 (%6)\n    intervalo: %7 EV, valores: %8, pixels: %9
 HISTOGRAM_TOOLTIP_B;Mostrar/Ocultar histograma azul.
@@ -1349,7 +1350,7 @@ PREFERENCES_USEBUNDLEDPROFILES;Usar perfis agrupados
 PREFERENCES_WBPREVIEW_LABEL;Posição do balanço de brancos na previsão de pipeline:
 PREFERENCES_WBPREVIEW_AFTER;Depois do demosaico (mais rápido)
 PREFERENCES_WBPREVIEW_BEFORE;Antes do demosaico (mais preciso)
-PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;ntes do demosaico a <100% zoom, depois nos outros casos
+PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;ntes do demosaico a >=100% zoom, depois nos outros casos
 PREFERENCES_WORKFLOW;Layout
 PREFERENCES_XMP_SIDECAR_MODE;Estilo do sidecar XMP
 PREFERENCES_XMP_SIDECAR_MODE_STD;Padrão (NOMEDOARQUIVO.xmp para NOMEDOARQUIVO.ext)
@@ -1817,7 +1818,8 @@ TP_LABMASKS_DRAWNMASK_ADD_BOUNDED_TOOLTIP;Adicionar a máscara de pincel acima d
 TP_LABMASKS_PARAMETRIC;Máscara paramétrica
 TP_LENSGEOM_AUTOCROP;Corte automático
 TP_LENSGEOM_FILL;Preenchimento automático
-TP_LENSGEOM_LABEL;Lente / Geometria
+TP_GEOM_LABEL;Geometria
+TP_LENS_LABEL;Lente
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automaticamente da base de dados
 TP_LENSPROFILE_CORRECTION_EXIF;Embutido nos metadados
 TP_LENSPROFILE_CORRECTION_LCPFILE;Ficheiro LCP

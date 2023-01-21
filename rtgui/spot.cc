@@ -110,9 +110,9 @@ Spot::Spot() :
 
     auto m = ProcEventMapper::getInstance();
     EvSpotEnabled = m->newEvent(ALLNORAW, "TP_SPOT_LABEL");
-    EvSpotEnabledOPA = m->newEvent(SPOTADJUST, "");
-    EvSpotEntry = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
-    EvSpotEntryOPA = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
+    EvSpotEnabledOPA = m->newAnonEvent(ALLNORAW);
+    EvSpotEntry = m->newEvent(ALLNORAW, "HISTORY_MSG_SPOT_ENTRY");
+    EvSpotEntryOPA = m->newEvent(ALLNORAW, "HISTORY_MSG_SPOT_ENTRY");
     EvToolReset.set_action(ALLNORAW);
 
     spot_frame = Gtk::manage(new Gtk::Frame(M("TP_SPOT_CUR_SPOT_LABEL")));
@@ -220,13 +220,14 @@ void Spot::editedToggled ()
 void Spot::enabledChanged ()
 {
     if (listener) {
-        if (get_inconsistent()) {
-            listener->panelChanged (edit->get_active() ? EvSpotEnabledOPA : EvSpotEnabled, M ("GENERAL_UNCHANGED"));
-        } else if (getEnabled()) {
-            listener->panelChanged (edit->get_active() ? EvSpotEnabledOPA : EvSpotEnabled, M ("GENERAL_ENABLED"));
-        } else {
-            listener->panelChanged (edit->get_active() ? EvSpotEnabledOPA : EvSpotEnabled, M ("GENERAL_DISABLED"));
-        }
+        listener->panelChanged(EvSpotEnabled, getEnabled() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+        // if (get_inconsistent()) {
+        //     listener->panelChanged (edit->get_active() ? EvSpotEnabledOPA : EvSpotEnabled, M ("GENERAL_UNCHANGED"));
+        // } else if (getEnabled()) {
+        //     listener->panelChanged (edit->get_active() ? EvSpotEnabledOPA : EvSpotEnabled, M ("GENERAL_ENABLED"));
+        // } else {
+        //     listener->panelChanged (edit->get_active() ? EvSpotEnabledOPA : EvSpotEnabled, M ("GENERAL_DISABLED"));
+        // }
     }
 }
 

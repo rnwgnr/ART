@@ -96,7 +96,7 @@ public:
     int loadJPEGFromMemory (const char* buffer, int bufsize);
     int loadPPMFromMemory(const char* buffer, int width, int height, bool swap, int bps);
 
-    int savePNG (const Glib::ustring &fname, int bps = -1) const;
+    int savePNG (const Glib::ustring &fname, int bps = -1, bool uncompressed=false) const;
     int saveJPEG (const Glib::ustring &fname, int quality = 100, int subSamp = 3) const;
     int saveTIFF (const Glib::ustring &fname, int bps = -1, bool isFloat = false, bool uncompressed = false) const;
 

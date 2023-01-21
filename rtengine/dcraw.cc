@@ -1174,7 +1174,7 @@ void CLASS lossless_dnglj92_load_raw()
     }
 
 #ifdef _OPENMP
-    #pragma omp parallel for num_threads(std::min<int>(tileCount, omp_get_max_threads()))
+    #pragma omp parallel for num_threads(std::min<int>(tileCount, omp_get_num_procs()))
 #endif
     for (size_t t = 0; t < tileCount; ++t) {
         size_t tcol = t * tile_width;
@@ -6380,11 +6380,14 @@ void CLASS parse_mos (int offset)
 void CLASS linear_table (unsigned len)
 {
   int i;
-  if (len > 0x1000) len = 0x1000;
-  read_shorts (curve, len);
-  for (i=len; i < 0x1000; i++)
-    curve[i] = curve[i-1];
-  maximum = curve[0xfff];
+  if (len > 0x10000)
+    len = 0x10000;
+  else if (len < 1)
+    return;
+  read_shorts(curve, len);
+  for (i = len; i < 0x10000; i++)
+    curve[i] = curve[i - 1];
+  maximum = curve[len < 0x1000 ? 0xfff : len - 1];
 }
 
 void CLASS parse_kodak_ifd (int base)
@@ -6571,6 +6574,9 @@ int CLASS parse_tiff_ifd (int base)
       case 277:				/* SamplesPerPixel */
 	tiff_ifd[ifd].samples = getint(type) & 7;
 	break;
+      case 0x0152: /* Extrasamples */
+        tiff_ifd[ifd].extrasamples = (getint(type) & 0xff) + 1024;
+        break;
       case 279:				/* StripByteCounts */
       case 514:
       case 61448:
@@ -7248,12 +7254,17 @@ void CLASS apply_tiff()
       case 8: break;
       default: is_raw = 0;
     }
-  if (!dng_version)
+  if (!dng_version) {
     if ( (tiff_samples == 3 && tiff_ifd[raw].bytes && tiff_bps != 14 &&
 	  (tiff_compress & -16) != 32768)
       || (tiff_bps == 8 && strncmp(make,"Phase",5) &&
 	  !strcasestr(make,"Kodak") && !strstr(model2,"DEBUG RAW")))
       is_raw = 0;
+    // ART
+    if (is_raw && raw >= 0 && tiff_ifd[raw].phint == 2 && tiff_ifd[raw].extrasamples > 0 && tiff_ifd[raw].samples > 3 && !(is_raw == 4 && load_raw == &CLASS sony_arq_load_raw)) {
+        is_raw = 0; // SKIP RGB+Alpha IFDs
+    }
+  }
   for (i=0; i < tiff_nifds; i++)
     if (i != raw && tiff_ifd[i].samples == max_samp &&
 	tiff_ifd[i].width * tiff_ifd[i].height / (SQR(tiff_ifd[i].bps)+1) >
@@ -10702,7 +10713,7 @@ notraw:
   // ART
   if (make[0] == 0) {
       is_raw = 0;
-  }  
+  }
 }
 
 //#ifndef NO_LCMS

@@ -37,7 +37,9 @@ class BatchQueueEntry : public ThumbBrowserEntryBase, public BQEntryUpdateListen
     int origpw, origph;
     BatchQueueEntryIdleHelper* bqih;
     static bool iconsLoaded;
-
+ 
+    void customBackBufferUpdate(Cairo::RefPtr<Cairo::Context> c) override;
+   
 public:
 
     static Glib::RefPtr<Gdk::Pixbuf> savedAsIcon;
@@ -52,6 +54,7 @@ public:
     SaveFormat saveFormat;
     bool forceFormatOpts;
     bool fast_pipeline;
+    bool use_batch_profile;
 
     BatchQueueEntry (rtengine::ProcessingJob* job, const rtengine::procparams::ProcParams& pparams, Glib::ustring fname, int prevw, int prevh, Thumbnail* thm = nullptr);
     ~BatchQueueEntry () override;

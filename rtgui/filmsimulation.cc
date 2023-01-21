@@ -86,12 +86,10 @@ void FilmSimulation::onClutSelected()
 {
     Glib::ustring currentClutFilename = m_clutComboBox->getSelectedClut();
 
-    if ( getEnabled() && !currentClutFilename.empty() && listener && currentClutFilename != m_oldClutFilename ) {
+    if (listener && getEnabled()) {
         Glib::ustring clutName, dummy;
         HaldCLUT::splitClutFilename( currentClutFilename, clutName, dummy, dummy );
         listener->panelChanged( EvFilmSimulationFilename, clutName );
-
-        m_oldClutFilename = currentClutFilename;
     }
 }
 
@@ -135,7 +133,6 @@ void FilmSimulation::read( const rtengine::procparams::ProcParams* pp)
                 ? Glib::ustring(Glib::build_filename(options.clutsDir, pp->filmSimulation.clutFilename))
                 : pp->filmSimulation.clutFilename
         );
-        m_oldClutFilename = m_clutComboBox->getSelectedClut();
     } else {
         m_clutComboBox->set_active(-1);
     }
@@ -345,7 +342,10 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
 
             extension = extension.casefold();
             if (extension.compare("tif") != 0 && extension.compare("png") != 0) {
-                continue;
+#ifdef ART_USE_OCIO
+                if (extension != "clf" && extension != "clfz")
+#endif // ART_USE_OCIO
+                    continue;
             }
 
             auto newRow = row ? *m_model->append(row.children()) : *m_model->append();

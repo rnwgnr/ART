@@ -1,20 +1,22 @@
-/*
-*  This file is part of RawTherapee.
+/* -*- C++ -*-
+*  
+*  This file is part of ART.
 *
+*  Copyright (c) 2021 Alberto Griggio <alberto.griggio@gmail.com>
 *  Copyright (c) 2012 Oliver Duis <www.oliverduis.de>
 *
-*  RawTherapee is free software: you can redistribute it and/or modify
+*  ART is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
 *  the Free Software Foundation, either version 3 of the License, or
 *  (at your option) any later version.
 *
-*  RawTherapee is distributed in the hope that it will be useful,
+*  ART is distributed in the hope that it will be useful,
 *  but WITHOUT ANY WARRANTY; without even the implied warranty of
 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *  GNU General Public License for more details.
 *
 *  You should have received a copy of the GNU General Public License
-*  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
+*  along with ART.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "extprog.h"
 
@@ -86,7 +88,7 @@ bool UserCommand::matches(const std::vector<Thumbnail *> &args) const
     }
 
     for (size_t i = 0; i < n; ++i) {
-        auto mdi = args[i]->getCacheImageData();//args[i]->getMetaData();
+        auto mdi = args[i]->getCacheImageData();
         if (i > 0) {
             if (match_camera && (md->getMake() != mdi->getMake() ||
                                  md->getModel() != mdi->getModel())) {
@@ -161,7 +163,6 @@ void UserCommand::execute(const std::vector<Thumbnail *> &args) const
 
     std::thread(doit, options.rtSettings.verbose).detach();
 }
-
 
 
 UserCommandStore *UserCommandStore::getInstance()
@@ -271,7 +272,7 @@ void UserCommandStore::init(const Glib::ustring &dirname)
             
                 commands_.push_back(cmd);
 
-                if (options.rtSettings.verbose) {
+                if (options.rtSettings.verbose > 1) {
                     std::cout << "Found user command \"" << S(cmd.label)
                               << "\": " << S(cmd.command) << std::endl;
                 }
@@ -308,9 +309,7 @@ namespace ExtProg {
 bool spawnCommandAsync(const Glib::ustring &cmd)
 {
     try {
-
-        const auto encodedCmd = Glib::filename_from_utf8 (cmd);
-        Glib::spawn_command_line_async (encodedCmd.c_str ());
+        Glib::spawn_async("", Glib::shell_parse_argv(cmd), rtengine::subprocess::get_env(), Glib::SPAWN_SEARCH_PATH_FROM_ENVP);
 
         return true;
 
@@ -331,9 +330,7 @@ bool spawnCommandSync(const Glib::ustring &cmd)
     auto exitStatus = -1;
 
     try {
-
-        Glib::spawn_command_line_sync (cmd, nullptr, nullptr, &exitStatus);
-
+        Glib::spawn_sync("", Glib::shell_parse_argv(cmd), rtengine::subprocess::get_env(), Glib::SPAWN_SEARCH_PATH_FROM_ENVP, {}, nullptr, nullptr, &exitStatus);
     } catch (const Glib::Exception& exception) {
 
         if (options.rtSettings.verbose) {
@@ -350,9 +347,10 @@ bool openInGimp(const Glib::ustring &fileName)
 {
 #if defined WIN32
 
-    auto executable = Glib::build_filename (options.gimpDir, "bin", "gimp-win-remote");
-    auto fn = '"' + fileName + '"';
-    auto success = ShellExecute( NULL, "open", executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
+    auto executable = rtengine::subprocess::to_wstr(Glib::build_filename (options.gimpDir, "bin", "gimp-win-remote"));
+    auto fn = rtengine::subprocess::quote(rtengine::subprocess::to_wstr(fileName)); //'"' + fileName + '"';
+    auto open = rtengine::subprocess::to_wstr("open");
+    auto success = ShellExecuteW( NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
 
 #elif defined __APPLE__
 
@@ -384,8 +382,8 @@ bool openInGimp(const Glib::ustring &fileName)
 
     for (auto ver = 12; ver >= 0; --ver) {
 
-        executable = Glib::build_filename (options.gimpDir, "bin", Glib::ustring::compose (Glib::ustring("gimp-2.%1.exe"), ver));
-        auto success = ShellExecute( NULL, "open", executable.c_str(), fileName.c_str(), NULL, SW_SHOWNORMAL );
+        executable = rtengine::subprocess::to_wstr(Glib::build_filename (options.gimpDir, "bin", Glib::ustring::compose (Glib::ustring("gimp-2.%1.exe"), ver)));
+        auto success = ShellExecuteW( NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
 
         if ((uintptr_t)success > 32) {
             return true;
@@ -395,12 +393,12 @@ bool openInGimp(const Glib::ustring &fileName)
 #elif defined __APPLE__
 
     cmdLine = Glib::ustring("open -a GIMP-dev \'") + fileName + Glib::ustring("\'");
-    success = spawnCommandAsync (cmdLine);
+    success = spawnCommandAsync(cmdLine);
 
 #else
 
     cmdLine = Glib::ustring("gimp-remote \"") + fileName + Glib::ustring("\"");
-    success = spawnCommandAsync (cmdLine);
+    success = spawnCommandAsync(cmdLine);
 
 #endif
 
@@ -412,20 +410,23 @@ bool openInPhotoshop(const Glib::ustring& fileName)
 {
 #if defined WIN32
 
-    const auto executable = Glib::build_filename(options.psDir, "Photoshop.exe");
-    const auto cmdLine = Glib::ustring("\"") + executable + Glib::ustring("\" \"") + fileName + Glib::ustring("\"");
+    const auto executable = rtengine::subprocess::to_wstr(Glib::build_filename(options.psDir, "Photoshop.exe"));
+    const auto fn = rtengine::subprocess::quote(rtengine::subprocess::to_wstr(fileName));
+    auto open = rtengine::subprocess::to_wstr("open");
+    auto success = ShellExecuteW(NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL);
+    return (uintptr_t)success > 32;
 
 #elif defined __APPLE__
 
     const auto cmdLine = Glib::ustring("open -a Photoshop \'") + fileName + Glib::ustring("\'");
+    return spawnCommandAsync (cmdLine);
 
 #else
 
     const auto cmdLine = Glib::ustring("\"") + Glib::build_filename(options.psDir, "Photoshop.exe") + Glib::ustring("\" \"") + fileName + Glib::ustring("\"");
-
-#endif
-
     return spawnCommandAsync (cmdLine);
+    
+#endif
 }
 
 
@@ -433,9 +434,10 @@ bool openInCustomEditor(const Glib::ustring& fileName)
 {
 #if defined WIN32
 
-    const auto cmdLine = Glib::ustring("\"") + options.customEditorProg + Glib::ustring("\"");
-    auto fn = '"' + fileName + '"';
-    auto success = ShellExecute( NULL, "open", cmdLine.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
+    const auto cmdLine = rtengine::subprocess::to_wstr(options.customEditorProg);
+    auto fn = rtengine::subprocess::quote(rtengine::subprocess::to_wstr(fileName));
+    auto open = rtengine::subprocess::to_wstr("open");
+    auto success = ShellExecuteW( NULL, open.c_str(), cmdLine.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
     return (uintptr_t)success > 32;
 
 #elif defined __APPLE__

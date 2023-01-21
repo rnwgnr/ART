@@ -30,6 +30,7 @@
 #include "color.h"
 #include "metadata.h"
 #include "perspectivecorrection.h"
+#include "threadpool.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -43,18 +44,6 @@ namespace {
 constexpr int VECTORSCOPE_SIZE = 128;
 
 using rtengine::Coord2D;
-
-Coord2D translateCoord(const rtengine::ImProcFunctions& ipf, int fw, int fh, int x, int y)
-{
-    const std::vector<Coord2D> points = {Coord2D(x, y)};
-
-    std::vector<Coord2D> red;
-    std::vector<Coord2D> green;
-    std::vector<Coord2D> blue;
-    const_cast<rtengine::ImProcFunctions &>(ipf).transCoord(fw, fh, points, red, green, blue);
-
-    return green[0];
-}
 
 } // namespace
 
@@ -74,7 +63,7 @@ ImProcCoordinator::ImProcCoordinator():
     ipf(&params, true),
     monitorIntent(RI_RELATIVE),
     softProof(false),
-    gamutCheck(false),
+    gamutCheck(GAMUT_CHECK_OFF),
     sharpMask(false),
     scale(10),
     highDetailPreprocessComputed(false),
@@ -131,13 +120,11 @@ ImProcCoordinator::ImProcCoordinator():
     lastOutputProfile("BADFOOD"),
     lastOutputIntent(RI__COUNT),
     lastOutputBPC(false),
-    thread(nullptr),
+    //thread(nullptr),
     changeSinceLast(0),
     updaterRunning(false),
     destroying(false),
-    highQualityComputed(false),
-    customTransformIn(nullptr),
-    customTransformOut(nullptr)
+    highQualityComputed(false)
 {
     for (int i = 0; i < 3; ++i) {
         bufs_[i] = nullptr;
@@ -150,25 +137,24 @@ ImProcCoordinator::ImProcCoordinator():
 void ImProcCoordinator::assign(ImageSource* imgsrc)
 {
     this->imgsrc = imgsrc;
+    denoiseInfoStore.valid = false;
 }
 
 ImProcCoordinator::~ImProcCoordinator()
 {
-
     destroying = true;
-    updaterThreadStart.lock();
+    // updaterThreadStart.lock();
 
-    if (updaterRunning && thread) {
-        thread->join();
-    }
+    wait_not_running();
 
-    mProcessing.lock();
-    mProcessing.unlock();
-    freeAll();
+    {
+        MyMutex::MyLock lock(mProcessing);
+        freeAll();
 
-    if (drcomp_11_dcrop_cache) {
-        delete drcomp_11_dcrop_cache;
-        drcomp_11_dcrop_cache = nullptr;
+        if (drcomp_11_dcrop_cache) {
+            delete drcomp_11_dcrop_cache;
+            drcomp_11_dcrop_cache = nullptr;
+        }
     }
 
     std::vector<Crop*> toDel = crops;
@@ -179,17 +165,7 @@ ImProcCoordinator::~ImProcCoordinator()
 
     imgsrc->decreaseRef();
 
-    if(customTransformIn) {
-        cmsDeleteTransform(customTransformIn);
-        customTransformIn = nullptr;
-    }
-
-    if(customTransformOut) {
-        cmsDeleteTransform(customTransformOut);
-        customTransformOut = nullptr;
-    }
-
-    updaterThreadStart.unlock();
+    // updaterThreadStart.unlock();
 }
 
 DetailedCrop* ImProcCoordinator::createCrop(::EditDataProvider *editDataProvider, bool isDetailWindow)
@@ -238,6 +214,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     bool highDetailNeeded_WB = highDetailNeeded;
     if ((todo & M_HIGHQUAL) || options.prevdemo == PD_Sidecar) {
         highDetailNeeded = true;
+        todo |= M_AUTOEXP;
     }
 
     ipf.setPipetteBuffer(nullptr);
@@ -284,32 +261,28 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
         }
         
-        if (params.filmNegative.enabled) {
-            preproc_wb = ColorTemp();
-        } else {
-            switch (options.wb_preview_mode) {
-            case Options::WB_BEFORE:
-                if (wb_todo) {
-                    preproc_wb = currWB;
-                    todo |= M_PREPROC | M_RAW;
-                }
-                break;
-            case Options::WB_BEFORE_HIGH_DETAIL:
-                if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
-                    preproc_wb = currWB;
-                    todo |= M_PREPROC | M_RAW;
-                    if (todo & M_HIGHQUAL) {
-                        todo |= M_AUTOEXP;
-                    }
-                }
-                break;
-            case Options::WB_AFTER:
-            default:
-                break;
-            }
-            if (todo & M_INIT) {
+        switch (options.wb_preview_mode) {
+        case Options::WB_BEFORE:
+            if (wb_todo) {
                 preproc_wb = currWB;
+                todo |= M_PREPROC | M_RAW;
             }
+            break;
+        case Options::WB_BEFORE_HIGH_DETAIL:
+            if ((wb_todo && highDetailNeeded_WB) || (todo & M_HIGHQUAL)) {
+                preproc_wb = currWB;
+                todo |= M_PREPROC | M_RAW;
+                if (todo & M_HIGHQUAL) {
+                    todo |= M_AUTOEXP;
+                }
+            }
+            break;
+        case Options::WB_AFTER:
+        default:
+            break;
+        }
+        if (todo & M_INIT) {
+            preproc_wb = currWB;
         }
         
         // raw auto CA is bypassed if no high detail is needed, so we have to compute it when high detail is needed
@@ -322,40 +295,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             hist_raw_dirty = !(hListener && hListener->updateHistogramRaw());
     
             highDetailPreprocessComputed = highDetailNeeded;
-
-            if (todo & M_RAW) {
-                std::array<float, 3> filmBaseValues = {
-                    static_cast<float>(params.filmNegative.redBase),
-                    static_cast<float>(params.filmNegative.greenBase),
-                    static_cast<float>(params.filmNegative.blueBase)
-                };
-                imgsrc->filmNegativeProcess(params.filmNegative, filmBaseValues);
-                if (params.filmNegative.enabled && filmNegListener && params.filmNegative.redBase <= 0.f) {
-                    filmNegListener->filmBaseValuesChanged(filmBaseValues);
-                }
-            }
         }
-    
-        /*
-        Demosaic is kicked off only when
-        Detail considerations:
-            accurate detail is not displayed yet needed based on preview specifics (driven via highDetailNeeded flag)
-        OR
-        HLR considerations:
-            Color HLR alters rgb output of demosaic, so re-demosaic is needed when Color HLR is being turned off;
-            if HLR is enabled and changing method *from* Color to any other method
-            OR HLR gets disabled when Color method was selected
-        */
-        // If high detail (=100%) is newly selected, do a demosaic update, since the last was just with FAST
     
         if (imageTypeListener) {
             imageTypeListener->imageTypeChanged(imgsrc->isRAW(), imgsrc->getSensorType() == ST_BAYER, imgsrc->getSensorType() == ST_FUJI_XTRANS, imgsrc->isMono());
         }
 
-        //const bool hrcolor = params.exposure.enabled && (params.exposure.hrmode == procparams::ExposureParams::HR_COLOR || params.exposure.hrmode == procparams::ExposureParams::HR_COLORSOFT);
-        //const bool hrcolor = false;
-        
-        if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded)) {// || (!hrcolor && imgsrc->isRGBSourceModified())) {
+        if ((todo & M_RAW) || (!highDetailRawComputed && highDetailNeeded)) {
             if (settings->verbose) {
                 if (imgsrc->getSensorType() == ST_BAYER) {
                     std::cout << "Demosaic Bayer image n." << rp.bayersensor.imageNum + 1 << " using method: " << RAWParams::BayerSensor::getMethodString(rp.bayersensor.method) << std::endl;
@@ -397,13 +343,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
         if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
             MyMutex::MyLock initLock(minit);  // Also used in crop window
     
-            //imgsrc->HLRecovery_Global(params.exposure);   // this handles Color HLRecovery
-    
-    
-            if (settings->verbose) {
-                printf("Applying white balance, color correction & sRBG conversion...\n");
-            }
-
             if (params.wb.method == WBParams::AUTO) {
                 if (lastAwbEqual != params.wb.equal) {
                     double rm, gm, bm;
@@ -431,8 +370,27 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
     
             //setScale(scale);
             imgsrc->getImage(currWB, tr, orig_prev, pp, params.exposure, params.raw);
-            denoiseInfoStore.valid = false;
-            imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
+            // if (todo & M_INIT) {
+            //     denoiseInfoStore.pparams = params;
+            //     denoiseInfoStore.valid = false;
+            // } else {
+                denoiseInfoStore.valid = denoiseInfoStore.update_pparams(params);
+            // }
+
+            bool converted = false;
+            if (params.filmNegative.colorSpace == FilmNegativeParams::ColorSpace::WORKING) {
+                converted = true;
+                imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
+            }            
+            // Perform negative inversion. If needed, upgrade filmNegative params for backwards compatibility with old profiles
+            if (params.filmNegative.enabled) {
+                if (ipf.filmNegativeProcess(orig_prev, orig_prev, params.filmNegative, params.raw, imgsrc, currWB) && filmNegListener) {
+                    filmNegListener->filmRefValuesChanged(params.filmNegative.refInput, params.filmNegative.refOutput);
+                }
+            }
+            if (!converted) {
+                imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
+            }
     
             ipf.firstAnalysis(orig_prev, params, vhist16);
         }
@@ -654,9 +612,16 @@ void ImProcCoordinator::updateWB()
         case WBParams::CUSTOM_TEMP:
             currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
             break;
-        case WBParams::CUSTOM_MULT:
+        case WBParams::CUSTOM_MULT_LEGACY:
             currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);            
             break;
+        case WBParams::CUSTOM_MULT: {
+            double rm = params.wb.mult[0];
+            double gm = params.wb.mult[1];
+            double bm = params.wb.mult[2];
+            imgsrc->wbCamera2Mul(rm, gm, bm);
+            currWB = ColorTemp(rm, gm, bm, 1.0);            
+        } break;
         case WBParams::AUTO:
         default:
             currWB = ColorTemp();
@@ -1296,41 +1261,6 @@ void ImProcCoordinator::getAutoCrop(double ratio, int &x, int &y, int &w, int &h
 }
 
 
-bool ImProcCoordinator::getFilmNegativeExponents(int xA, int yA, int xB, int yB, std::array<float, 3>& newExps)
-{
-    MyMutex::MyLock lock(mProcessing);
-
-    const auto xlate =
-        [this](int x, int y) -> Coord2D
-        {
-            const std::vector<Coord2D> points = {Coord2D(x, y)};
-
-            std::vector<Coord2D> red;
-            std::vector<Coord2D> green;
-            std::vector<Coord2D> blue;
-            ipf.transCoord(fw, fh, points, red, green, blue);
-
-            return green[0];
-        };
-
-    const int tr = getCoarseBitMask(params.coarse);
-
-    const Coord2D p1 = xlate(xA, yA);
-    const Coord2D p2 = xlate(xB, yB);
-
-    return imgsrc->getFilmNegativeExponents(p1, p2, tr, params.filmNegative, newExps);
-}
-
-
-bool ImProcCoordinator::getImageSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues)
-{
-    MyMutex::MyLock lock(mProcessing);
-
-    return imgsrc->getImageSpotValues(translateCoord(ipf, fw, fh, x, y), spotSize,
-        getCoarseBitMask(params.coarse), params.filmNegative, rawValues);
-}
-
-
 void ImProcCoordinator::setMonitorProfile(const Glib::ustring& profile, RenderingIntent intent)
 {
     monitorProfile = profile;
@@ -1343,16 +1273,10 @@ void ImProcCoordinator::getMonitorProfile(Glib::ustring& profile, RenderingInten
     intent = monitorIntent;
 }
 
-void ImProcCoordinator::setSoftProofing(bool softProof, bool gamutCheck)
+void ImProcCoordinator::setSoftProofing(bool softProof, GamutCheck gamutCheck)
 {
     this->softProof = softProof;
     this->gamutCheck = gamutCheck;
-}
-
-void ImProcCoordinator::getSoftProofing(bool &softProof, bool &gamutCheck)
-{
-    softProof = this->softProof;
-    gamutCheck = this->gamutCheck;
 }
 
 void ImProcCoordinator::setSharpMask (bool sharpMask)
@@ -1405,9 +1329,16 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
         case WBParams::CUSTOM_TEMP:
             currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
             break;
-        case WBParams::CUSTOM_MULT:
+        case WBParams::CUSTOM_MULT_LEGACY:
             currWB = ColorTemp(params.wb.mult[0], params.wb.mult[1], params.wb.mult[2], 1.0);
             break;
+        case WBParams::CUSTOM_MULT: {
+            double rm = params.wb.mult[0];
+            double gm = params.wb.mult[1];
+            double bm = params.wb.mult[2];
+            imgsrc->wbCamera2Mul(rm, gm, bm);
+            currWB = ColorTemp(rm, gm, bm, 1.0);
+        } break;
         }            
     }
 
@@ -1483,35 +1414,34 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
 void ImProcCoordinator::stopProcessing()
 {
 
-    updaterThreadStart.lock();
+    // updaterThreadStart.lock();
 
-    if (updaterRunning && thread) {
+    if (updaterRunning) {
         changeSinceLast = 0;
-        thread->join();
+        wait_not_running();
     }
+    // if (updaterRunning && thread) {
+    //     changeSinceLast = 0;
+    //     thread->join();
+    // }
 
-    updaterThreadStart.unlock();
+    // updaterThreadStart.unlock();
 }
+
 
 void ImProcCoordinator::startProcessing()
 {
-
-#undef THREAD_PRIORITY_NORMAL
-
     if (!destroying) {
         if (!updaterRunning) {
-            updaterThreadStart.lock();
-            thread = nullptr;
-            updaterRunning = true;
-            updaterThreadStart.unlock();
+            // updaterThreadStart.lock();
+            set_updater_running(true);
+            // updaterThreadStart.unlock();
 
-            //batchThread->yield(); //the running batch should wait other threads to avoid conflict
-
-            thread = Glib::Thread::create(sigc::mem_fun(*this, &ImProcCoordinator::process), 0, true, true, Glib::THREAD_PRIORITY_NORMAL);
-
+            rtengine::ThreadPool::add_task(rtengine::ThreadPool::Priority::HIGHEST, sigc::mem_fun(*this, &ImProcCoordinator::process));
         }
     }
 }
+
 
 void ImProcCoordinator::startProcessing(int changeCode)
 {
@@ -1563,7 +1493,8 @@ void ImProcCoordinator::process()
     }
 
     paramsUpdateMutex.unlock();
-    updaterRunning = false;
+
+    set_updater_running(false);
 
     if (plistener) {
         if (!changed) {
@@ -1629,9 +1560,10 @@ bool ImProcCoordinator::getDeltaELCH(EditUniqueID id, int x, int y, float &L, fl
     startProcessing(change);
 
     bool ret = false;
-    updaterThreadStart.lock();
-    if (updaterRunning && thread) {
-        thread->join();
+    // updaterThreadStart.lock();
+    if (updaterRunning) {// && thread) {
+        wait_not_running();
+        //thread->join();
         if (ipf.deltaE.ok) {
             ret = true;
             L = ipf.deltaE.L;
@@ -1640,7 +1572,7 @@ bool ImProcCoordinator::getDeltaELCH(EditUniqueID id, int x, int y, float &L, fl
         }
     }
     ipf.setDeltaEData(EUID_None, -1, -1);
-    updaterThreadStart.unlock();
+    // updaterThreadStart.unlock();
 
     return ret;
 }
@@ -1702,6 +1634,65 @@ void ImProcCoordinator::requestUpdateVectorscopeHS()
     if (updated) {
         notifyHistogramChanged();
     }
+}
+
+
+void ImProcCoordinator::wait_not_running()
+{
+    std::unique_lock<std::mutex> lck(updater_mutex_);
+    while (updaterRunning) {
+        updater_cond_.wait(lck);
+    }
+}
+
+
+void ImProcCoordinator::set_updater_running(bool val)
+{
+    std::unique_lock<std::mutex> lck(updater_mutex_);
+    if (val) {
+        while (updaterRunning) {
+            updater_cond_.wait(lck);
+        }
+        updaterRunning = true;
+    } else {
+        updaterRunning = false;
+        updater_cond_.notify_all();
+    }
+}
+
+
+bool ImProcCoordinator::is_running() const
+{
+    if (updaterRunning) {
+        return true;
+    }
+    for (auto c : crops) {
+        if (c->updating) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool ImProcCoordinator::is_mask_image() const
+{
+    if (sharpMask) {
+        return true;
+    }
+
+#define CHECK_MASK_(p) \
+    if (p.enabled && p.showMask >= 0 && size_t(p.showMask) < p.labmasks.size() && p.labmasks[p.showMask].enabled) { \
+        return true; \
+    }
+    
+    CHECK_MASK_(params.colorcorrection);
+    CHECK_MASK_(params.smoothing);
+    CHECK_MASK_(params.textureBoost);
+    CHECK_MASK_(params.localContrast);
+#undef CHECK_MASK_
+
+    return false;
 }
 
 } // namespace rtengine

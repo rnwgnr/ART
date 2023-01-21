@@ -26,8 +26,33 @@
 #include "../rtengine/procevents.h"
 #include "../rtengine/refreshmap.h"
 #include "../rtengine/perspectivecorrection.h"
+#include "../rtengine/improccoordinator.h"
 
 using namespace rtengine::procparams;
+
+
+namespace {
+
+class TPScrolledWindow: public MyScrolledWindow {
+public:
+    TPScrolledWindow(): mgr_(nullptr) {}
+    
+    void setToolShortcutManager(ToolShortcutManager *mgr) { mgr_ = mgr; }
+
+    bool on_scroll_event(GdkEventScroll *event) override
+    {
+        if (mgr_ && mgr_->shouldHandleScroll()) {
+            return true;
+        }
+        return MyScrolledWindow::on_scroll_event(event);
+    }
+
+private:
+    ToolShortcutManager *mgr_;
+};
+
+} // namespace
+
 
 ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favoritePanelSW(nullptr), hasChanged (false), editDataProvider (nullptr)
 {
@@ -55,7 +80,8 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     localContrast       = Gtk::manage(new LocalContrast());
     lcurve              = Gtk::manage (new LabCurve ());
     rgbcurves           = Gtk::manage (new RGBCurves ());
-    lensgeom            = Gtk::manage (new LensGeometry ());
+    geompanel            = Gtk::manage (new GeometryPanel());
+    lenspanel           = Gtk::manage(new LensPanel());
     lensProf            = Gtk::manage (new LensProfilePanel ());
     distortion          = Gtk::manage (new Distortion ());
     rotate              = Gtk::manage (new Rotate ());
@@ -153,13 +179,15 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     addfavoritePanel(transformPanel, resize);
     //addfavoritePanel(resize->getPackBox(), prsharpening, 2);
     addfavoritePanel(transformPanel, prsharpening, 2);
-    addfavoritePanel(transformPanel, lensgeom);
-    addfavoritePanel(lensgeom->getPackBox(), rotate, 2);
-    addfavoritePanel(lensgeom->getPackBox(), perspective, 2);
-    addfavoritePanel(lensgeom->getPackBox(), lensProf, 2);
-    addfavoritePanel(lensgeom->getPackBox(), distortion, 2);
-    addfavoritePanel(lensgeom->getPackBox(), cacorrection, 2);
-    addfavoritePanel(lensgeom->getPackBox(), vignetting, 2);
+    addfavoritePanel(transformPanel, geompanel);
+    addfavoritePanel(transformPanel, lenspanel);
+    toolPanels.pop_back();
+    addfavoritePanel(geompanel->getPackBox(), rotate, 2);
+    addfavoritePanel(geompanel->getPackBox(), perspective, 2);
+    addfavoritePanel(lenspanel->getPackBox(), lensProf, 2);
+    addfavoritePanel(lenspanel->getPackBox(), distortion, 2);
+    addfavoritePanel(lenspanel->getPackBox(), cacorrection, 2);
+    addfavoritePanel(lenspanel->getPackBox(), vignetting, 2);
 
     // raw
     addfavoritePanel(rawPanel, sensorbayer);
@@ -185,18 +213,19 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
 
     toolPanels.push_back (coarse);
     toolPanels.push_back(metadata);
+    toolPanels.push_back(lenspanel);
 
     toolPanelNotebook = new Gtk::Notebook ();
     toolPanelNotebook->set_name ("ToolPanelNotebook");
 
-    exposurePanelSW    = Gtk::manage (new MyScrolledWindow ());
-    detailsPanelSW     = Gtk::manage (new MyScrolledWindow ());
-    colorPanelSW       = Gtk::manage (new MyScrolledWindow ());
-    transformPanelSW   = Gtk::manage (new MyScrolledWindow ());
-    rawPanelSW         = Gtk::manage (new MyScrolledWindow ());
-    // advancedPanelSW    = Gtk::manage (new MyScrolledWindow ());
-    localPanelSW = Gtk::manage(new MyScrolledWindow());
-    effectsPanelSW = Gtk::manage(new MyScrolledWindow());
+    exposurePanelSW    = Gtk::manage (new TPScrolledWindow ());
+    detailsPanelSW     = Gtk::manage (new TPScrolledWindow ());
+    colorPanelSW       = Gtk::manage (new TPScrolledWindow ());
+    transformPanelSW   = Gtk::manage (new TPScrolledWindow ());
+    rawPanelSW         = Gtk::manage (new TPScrolledWindow ());
+    // advancedPanelSW    = Gtk::manage (new TPScrolledWindow ());
+    localPanelSW = Gtk::manage(new TPScrolledWindow());
+    effectsPanelSW = Gtk::manage(new TPScrolledWindow());
     updateVScrollbars (options.hideTPVScrollbar);
 
     // load panel endings
@@ -209,7 +238,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     }
 
     if(favoriteCount > 0) {
-        favoritePanelSW = Gtk::manage(new MyScrolledWindow());
+        favoritePanelSW = Gtk::manage(new TPScrolledWindow());
         favoritePanelSW->add(*favoritePanel);
         favoritePanel->pack_start(*Gtk::manage(new Gtk::HSeparator), Gtk::PACK_SHRINK, 0);
         favoritePanel->pack_start(*vbPanelEnd[0], Gtk::PACK_SHRINK, 4);
@@ -285,7 +314,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     whitebalance->setSpotWBListener (this);
     darkframe->setDFProvider (this);
     flatfield->setFFProvider (this);
-    lensgeom->setLensGeomListener (this);
+    geompanel->setLensGeomListener (this);
     rotate->setLensGeomListener (this);
     distortion->setLensGeomListener (this);
     perspective->setLensGeomListener(this);
@@ -320,14 +349,14 @@ void ToolPanelCoordinator::addPanel (Gtk::Box* where, FoldableToolPanel* panel, 
 
 void ToolPanelCoordinator::addfavoritePanel (Gtk::Box* where, FoldableToolPanel* panel, int level)
 {
-    auto name = panel->getToolName();
-    auto it = std::find(options.favorites.begin(), options.favorites.end(), name);
-    if (it != options.favorites.end()) {
-        int index = std::distance(options.favorites.begin(), it);
-        favorites[index] = panel;
-    } else {
+    // auto name = panel->getToolName();
+    // auto it = std::find(options.favorites.begin(), options.favorites.end(), name);
+    // if (it != options.favorites.end()) {
+    //     int index = std::distance(options.favorites.begin(), it);
+    //     favorites[index] = panel;
+    // } else {
         addPanel(where, panel, level);
-    }
+    // }
 }
 
 ToolPanelCoordinator::~ToolPanelCoordinator ()
@@ -631,18 +660,19 @@ void ToolPanelCoordinator::initImage (rtengine::StagedImageProcessor* ipc_, bool
         metadata->setImageData(pMetaData);
 
         ipc->setAutoExpListener(this);
-        ipc->setFrameCountListener (bayerprocess);
-        ipc->setFlatFieldAutoClipListener (flatfield);
-        ipc->setBayerAutoContrastListener (bayerprocess);
-        ipc->setXtransAutoContrastListener (xtransprocess);
-        ipc->setAutoWBListener (whitebalance);
-        ipc->setAutoChromaListener (denoise);
-        ipc->setSizeListener (crop);
-        ipc->setSizeListener (resize);
-        ipc->setImageTypeListener (this);
+        ipc->setFrameCountListener(bayerprocess);
+        ipc->setFlatFieldAutoClipListener(flatfield);
+        ipc->setBayerAutoContrastListener(bayerprocess);
+        ipc->setXtransAutoContrastListener(xtransprocess);
+        ipc->setAutoWBListener(whitebalance);
+        ipc->setAutoChromaListener(denoise);
+        ipc->setSizeListener(crop);
+        ipc->setSizeListener(resize);
+        ipc->setImageTypeListener(this);
         ipc->setAutoLogListener(logenc);
         ipc->setAutoDeconvRadiusListener(sharpening);
-        flatfield->setShortcutPath (Glib::path_get_dirname (ipc->getInitialImage()->getFileName()));
+        ipc->setFilmNegListener(filmNegative);
+        flatfield->setShortcutPath(Glib::path_get_dirname(ipc->getInitialImage()->getFileName()));
 
         icm->setRawMeta (raw, (const rtengine::FramesData*)pMetaData);
         lensProf->setRawMeta(raw, pMetaData);
@@ -1104,7 +1134,7 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
             break;
 
         case TMStraighten:
-            lensgeom->setExpanded (true);
+            geompanel->setExpanded (true);
             rotate->setExpanded (true);
             toolPanelNotebook->set_current_page (toolPanelNotebook->page_num (*transformPanelSW));
             break;
@@ -1112,7 +1142,7 @@ void ToolPanelCoordinator::toolSelected (ToolMode tool)
         case TMPerspective:
             perspective->setControlLineEditMode(true);
             perspective->setExpanded(true);
-            lensgeom->setExpanded(true);
+            geompanel->setExpanded(true);
             toolPanelNotebook->set_current_page(toolPanelNotebook->page_num(*transformPanelSW));
             break;
         default:
@@ -1203,18 +1233,6 @@ void ToolPanelCoordinator::autoMatchedToneCurveChanged(const std::vector<double>
 }
 
 
-bool ToolPanelCoordinator::getFilmNegativeExponents(rtengine::Coord spotA, rtengine::Coord spotB, std::array<float, 3>& newExps)
-{
-    return ipc && ipc->getFilmNegativeExponents(spotA.x, spotA.y, spotB.x, spotB.y, newExps);
-}
-
-
-bool ToolPanelCoordinator::getImageSpotValues(rtengine::Coord spot, int spotSize, std::array<float, 3>& rawValues)
-{
-    return ipc && ipc->getImageSpotValues(spot.x, spot.y, spotSize, rawValues);
-}
-
-
 void ToolPanelCoordinator::setAreaDrawListener(AreaDrawListener *listener)
 {
     colorcorrection->setAreaDrawListener(listener);
@@ -1226,11 +1244,38 @@ void ToolPanelCoordinator::setAreaDrawListener(AreaDrawListener *listener)
 
 bool ToolPanelCoordinator::getDeltaELCH(EditUniqueID id, rtengine::Coord pos, float &L, float &C, float &H)
 {
-    return ipc && ipc->getDeltaELCH(id, pos.x, pos.y, L, C, H);
+    if (ipc) {
+        GThreadUnLock unlock;
+        return ipc->getDeltaELCH(id, pos.x, pos.y, L, C, H);
+    }
+    return false;
 }
 
 
 void ToolPanelCoordinator::setProgressListener(rtengine::ProgressListener *pl)
 {
     metadata->setProgressListener(pl);
+}
+
+
+void ToolPanelCoordinator::setToolShortcutManager(ToolShortcutManager *mgr)
+{
+    for (auto p : toolPanels) {
+        p->registerShortcuts(mgr);
+    }
+
+    //static_cast<TPScrolledWindow *>(favoritePanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(exposurePanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(detailsPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(colorPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(transformPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(rawPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(localPanelSW)->setToolShortcutManager(mgr);
+    static_cast<TPScrolledWindow *>(effectsPanelSW)->setToolShortcutManager(mgr);
+}
+
+
+bool ToolPanelCoordinator::getFilmNegativeSpot(rtengine::Coord spot, int spotSize, RGB &refInput, RGB &refOutput)
+{
+    return ipc && static_cast<rtengine::ImProcCoordinator *>(ipc)->getFilmNegativeSpot(spot.x, spot.y, spotSize, refInput, refOutput);
 }

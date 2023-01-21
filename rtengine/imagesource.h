@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _IMAGESOURCE_
-#define _IMAGESOURCE_
+#pragma once
 
 #include <glibmm.h>
 #include <vector>
@@ -80,6 +79,7 @@ public:
     virtual int getFrameCount() = 0;
     virtual int getFlatFieldAutoClipValue() = 0;
 
+    virtual void getWBMults(const ColorTemp &ctemp, const procparams::RAWParams &raw, std::array<float, 4>& scale_mul, float &autoGainComp, float &rm, float &gm, float &bm) const = 0;
 
     // use right after demosaicing image, add coarse transformation and put the result in the provided Imagefloat*
     virtual void getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ExposureParams &hlp, const RAWParams &raw) = 0;
@@ -164,6 +164,9 @@ public:
     virtual void  filmNegativeProcess(const procparams::FilmNegativeParams &params, std::array<float, 3>& filmBaseValues) {}
     virtual bool getFilmNegativeExponents(Coord2D spotA, Coord2D spotB, int tran, const FilmNegativeParams& currentParams, std::array<float, 3>& newExps) { return false; }
     virtual bool getImageSpotValues (Coord2D spot, int spotSize, int tran, const procparams::FilmNegativeParams &params, std::array<float, 3>& rawValues) { return false; };
+
+    virtual void wbMul2Camera(double &rm, double &gm, double &bm) = 0;
+    virtual void wbCamera2Mul(double &rm, double &gm, double &bm) = 0;
 };
+
 } // namespace rtengine
-#endif

@@ -202,6 +202,7 @@ public:
     double H;
     double range;
     double decay;
+    int strength;
     int weight_L;
     int weight_C;
     int weight_H;
@@ -217,7 +218,7 @@ struct DrawnMask {
         double x; // [0,1], with 0 as leftmost point of the image
         double y; // [0,1]
         double radius; // [0,1], with 1 as 10% of the image smallest dimension
-        double hardness; // [0,1] with 1 as opaque (strongest)
+        double opacity; // [0,1] with 1 as opaque (strongest)
         bool erase;
         Stroke();
         bool operator==(const Stroke &other) const;
@@ -225,7 +226,7 @@ struct DrawnMask {
     };
     bool enabled;
     double feather; // [0,100]    
-    double transparency; // [0,1] (0 = opaque, 1 = fully transparent)
+    double opacity; // [0,1] (1 = opaque, 0 = fully transparent)
     double smoothness; // [0,1] (0 = harsh edges, 1 = fully blurred)
     std::vector<double> contrast; // curve
     std::vector<Stroke> strokes;
@@ -272,7 +273,8 @@ public:
     DrawnMask drawnMask;
     Glib::ustring name;
     std::vector<double> curve;
-    int regularization;
+    int posterization;
+    int smoothing;
 
     Mask();
     bool operator==(const Mask &other) const;
@@ -492,6 +494,7 @@ struct ExposureParams {
     HighlightReconstruction hrmode;
     double expcomp;
     double black;
+    int hrblur;
 
     ExposureParams();
 
@@ -523,7 +526,8 @@ struct ToneCurveParams {
         FILMLIKE,          // Film-like mode, as defined in Adobe's reference code
         SATANDVALBLENDING, // Modify the Saturation and Value channel
         LUMINANCE,         // Modify the Luminance channel with coefficients from Rec 709's
-        PERCEPTUAL         // Keep color appearance constant using perceptual modeling
+        PERCEPTUAL,        // Keep color appearance constant using perceptual modeling
+        NEUTRAL            // Neutral mode: Standard with JzAzBz hue preservation and ACES-inspired desaturation "sweetener"
     };
 
     int contrast;
@@ -534,6 +538,7 @@ struct ToneCurveParams {
     bool histmatching; // histogram matching
     bool fromHistMatching;
     std::vector<double> saturation;
+    std::vector<double> saturation2;
     int perceptualStrength;
     bool contrastLegacyMode;
     double whitePoint;
@@ -583,6 +588,7 @@ struct LocalContrastParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     LocalContrastParams();
 
@@ -627,6 +633,8 @@ struct SharpeningParams {
     bool deconvAutoRadius;
     double deconvCornerBoost;
     int deconvCornerLatitude;
+    Glib::ustring psf_kernel;
+    double psf_iterations;
 
     SharpeningParams();
 
@@ -641,7 +649,8 @@ struct WBParams {
         CAMERA,
         AUTO,
         CUSTOM_TEMP,
-        CUSTOM_MULT
+        CUSTOM_MULT,
+        CUSTOM_MULT_LEGACY
     };
     Type method;
     int temperature;
@@ -741,6 +750,7 @@ struct TextureBoostParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     TextureBoostParams();
 
@@ -758,6 +768,8 @@ struct LogEncodingParams {
     double blackEv;
     double whiteEv;
     int regularization;
+    bool satcontrol;
+    int highlightCompression;
 
     LogEncodingParams();
 
@@ -784,6 +796,7 @@ struct ToneEqualizerParams {
     std::array<int, 5> bands;
     int regularization;
     bool show_colormap;
+    double pivot;
 
     ToneEqualizerParams();
 
@@ -1122,6 +1135,7 @@ struct ColorManagementParams {
     Glib::ustring outputProfile;
     RenderingIntent outputIntent;
     bool outputBPC;
+    bool inputProfileCAT;
 
     static const Glib::ustring NoICMString;
     static const Glib::ustring NoProfileString;
@@ -1205,7 +1219,6 @@ struct GrainParams {
     bool enabled;
     int iso;
     int strength;
-    int scale;
 
     GrainParams();
 
@@ -1227,7 +1240,8 @@ struct SmoothingParams {
             GAUSSIAN_GLOW,
             NLMEANS,
             MOTION,
-            LENS
+            LENS,
+            NOISE
         };
         Mode mode;
         Channel channel;
@@ -1242,6 +1256,8 @@ struct SmoothingParams {
         double angle;
         double curvature;
         double offset;
+        int noise_strength;
+        int noise_coarseness;
 
         Region();
         bool operator==(const Region &other) const;
@@ -1251,6 +1267,7 @@ struct SmoothingParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     SmoothingParams();
 
@@ -1263,7 +1280,9 @@ struct ColorCorrectionParams {
     enum class Mode {
         YUV,
         RGB,
-        HSL
+        HSL,
+        JZAZBZ,
+        LUT
     };
     struct Region {
         double a;
@@ -1278,7 +1297,10 @@ struct ColorCorrectionParams {
         std::array<double, 3> hue;
         std::array<double, 3> sat;
         std::array<double, 3> factor;
+        std::array<double, 3> compression;
         bool rgbluminance;
+        double hueshift;
+        Glib::ustring lutFilename;
         Mode mode;
 
         Region();
@@ -1290,6 +1312,7 @@ struct ColorCorrectionParams {
     std::vector<Region> regions;
     std::vector<Mask> labmasks;
     int showMask;
+    int selectedRegion;
 
     ColorCorrectionParams();
     bool operator==(const ColorCorrectionParams &other) const;
@@ -1491,10 +1514,28 @@ struct FilmNegativeParams {
     double greenExp;
     double blueRatio;
 
-    double redBase;
-    double greenBase;
-    double blueBase;
-    
+    struct RGB {
+        float r, g, b;
+
+        bool operator ==(const RGB& other) const;
+        bool operator !=(const RGB& other) const;
+        RGB operator *(const RGB& other) const;
+    };
+
+    RGB refInput;
+    RGB refOutput;
+
+    enum class ColorSpace {
+        INPUT = 0,
+        WORKING
+        // TODO : add support for custom color profile
+    };
+
+    ColorSpace colorSpace;
+
+    enum class BackCompat { CURRENT = 0, V1, V2 };
+    BackCompat backCompat;
+
     FilmNegativeParams();
 
     bool operator ==(const FilmNegativeParams& other) const;
@@ -1652,6 +1693,7 @@ public:
 
 class FullPartialProfile: public PartialProfile {
 public:
+    FullPartialProfile();
     explicit FullPartialProfile(const ProcParams &pp);
     bool applyTo(ProcParams &pp) const override;
 
@@ -1662,14 +1704,15 @@ private:
 
 class FilePartialProfile: public PartialProfile {
 public:
-    FilePartialProfile(): pl_(nullptr), fname_(""), full_(true) {}
-    explicit FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool full=false);
+    FilePartialProfile(): pl_(nullptr), fname_(""), append_(false) {}
+    FilePartialProfile(ProgressListener *pl, const Glib::ustring &fname, bool append);
     bool applyTo(ProcParams &pp) const override;
+    const Glib::ustring &filename() const { return fname_; }
 
 private:
     ProgressListener *pl_;
     Glib::ustring fname_;
-    bool full_;
+    bool append_;
 };
 
 
@@ -1686,6 +1729,19 @@ private:
     ParamsEdited pe_;
 };
 
+
+class MultiPartialProfile: public PartialProfile {
+public:
+    MultiPartialProfile() {}
+    void add(const PartialProfile *p);
+    void clear();
+    bool applyTo(ProcParams &pp) const override;
+    operator bool() const { return !profiles_.empty(); }
+
+private:
+    std::vector<const PartialProfile *> profiles_;
+};
+    
 
 }} // namespace rtengine::procparams
 

@@ -41,6 +41,8 @@ LogEncoding::LogEncoding():
     EvBlackEv = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_BLACK_EV");
     EvWhiteEv = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_WHITE_EV");
     EvRegularization = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_REGULARIZATION");
+    EvSatControl = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_SATCONTROL");
+    EvHLCompression = m->newEvent(EVENT, "HISTORY_MSG_LOGENC_HLCOMPRESSION");
     EvToolReset.set_action(EVENT);
 
     autocompute = Gtk::manage(new Gtk::ToggleButton(M("TP_LOGENC_AUTO")));
@@ -50,19 +52,25 @@ LogEncoding::LogEncoding():
     gain->addAutoButton();
     targetGray = Gtk::manage(new Adjuster(M("TP_LOGENC_TARGET_GRAY"), 5.0, 80.0, 0.1, 18.0));
     blackEv = Gtk::manage(new Adjuster(M("TP_LOGENC_BLACK_EV"), -16.0, 0.0, 0.1, -13.5));
-    whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 1.0, 32.0, 0.1, 2.5));
+    whiteEv = Gtk::manage(new Adjuster(M("TP_LOGENC_WHITE_EV"), 1.0, 32.0, 0.01, 2.5));
     regularization = Gtk::manage(new Adjuster(M("TP_LOGENC_REGULARIZATION"), 0, 100, 1, 65));
+    satcontrol = Gtk::manage(new Gtk::CheckButton(M("TP_TM_FATTAL_SATCONTROL")));
+    satcontrol->signal_toggled().connect(sigc::mem_fun(*this, &LogEncoding::satcontrolChanged), true);
 
+    highlightCompression = Gtk::manage(new Adjuster(M("TP_LOGENC_HLCOMPRESSION"), 0, 100, 1, 0));
+    
     gain->delay = options.adjusterMaxDelay;
     blackEv->delay = options.adjusterMaxDelay;
     whiteEv->delay = options.adjusterMaxDelay;
     targetGray->delay = options.adjusterMaxDelay;
+    highlightCompression->delay = options.adjusterMaxDelay;
     
     whiteEv->setAdjusterListener(this);
     gain->setAdjusterListener(this);
     blackEv->setAdjusterListener(this);
     targetGray->setAdjusterListener(this);
     regularization->setAdjusterListener(this);
+    highlightCompression->setAdjusterListener(this);
 
     whiteEv->setLogScale(16, 0);
     blackEv->setLogScale(2, -8);
@@ -72,24 +80,20 @@ LogEncoding::LogEncoding():
     whiteEv->show();
     blackEv->show();
     targetGray->show();
+    satcontrol->show();
+    highlightCompression->show();
 
     //gain->setLogScale(10, 18, true);
+    gain->setLogScale(64, 0, true);
     targetGray->setLogScale(10, 18, true);
-
-    // Gtk::Frame *advanced = Gtk::manage(new Gtk::Frame(M("TP_LOGENC_ADVANCED")));
-    // advanced->set_label_align(0.025, 0.5);
-
-    // Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
-    // vb->set_border_width(2);
-    // vb->set_spacing(2);
-    // advanced->add(*vb);
 
     pack_start(*targetGray);
     pack_start(*gain);
     pack_start(*whiteEv);
     pack_start(*blackEv);
+    pack_start(*highlightCompression);
     pack_start(*regularization);
-    // pack_start(*advanced);
+    pack_start(*satcontrol);
     pack_start(*autocompute);
 }
 
@@ -108,6 +112,8 @@ void LogEncoding::read(const ProcParams *pp)
     whiteEv->setValue(pp->logenc.whiteEv);
     targetGray->setValue(pp->logenc.targetGray);
     regularization->setValue(pp->logenc.regularization);
+    satcontrol->set_active(pp->logenc.satcontrol);
+    highlightCompression->setValue(pp->logenc.highlightCompression);
 
     enableListener();
 }
@@ -122,6 +128,8 @@ void LogEncoding::write(ProcParams *pp)
     pp->logenc.whiteEv = whiteEv->getValue();
     pp->logenc.targetGray = targetGray->getValue();
     pp->logenc.regularization = regularization->getValue();
+    pp->logenc.satcontrol = satcontrol->get_active();
+    pp->logenc.highlightCompression = highlightCompression->getValue();
 }
 
 void LogEncoding::setDefaults(const ProcParams *defParams)
@@ -131,6 +139,7 @@ void LogEncoding::setDefaults(const ProcParams *defParams)
     whiteEv->setDefault(defParams->logenc.whiteEv);
     targetGray->setDefault(defParams->logenc.targetGray);
     regularization->setDefault(defParams->logenc.regularization);
+    highlightCompression->setDefault(defParams->logenc.highlightCompression);
 
     initial_params = defParams->logenc;
 }
@@ -153,6 +162,8 @@ void LogEncoding::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvTargetGray, a->getTextValue());
         } else if (a == regularization) {
             listener->panelChanged(EvRegularization, a->getTextValue());
+        } else if (a == highlightCompression) {
+            listener->panelChanged(EvHLCompression, a->getTextValue());
         }
     }
 }
@@ -220,6 +231,14 @@ void LogEncoding::logEncodingChanged(const LogEncodingParams &params)
 }
 
 
+void LogEncoding::satcontrolChanged()
+{
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvSatControl, satcontrol->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+    }
+}
+
+
 void LogEncoding::toolReset(bool to_initial)
 {
     ProcParams pp;
@@ -231,3 +250,11 @@ void LogEncoding::toolReset(bool to_initial)
 }
 
 
+void LogEncoding::registerShortcuts(ToolShortcutManager *mgr)
+{
+    mgr->addShortcut(GDK_KEY_g, this, gain);
+    mgr->addShortcut(GDK_KEY_b, this, targetGray);
+    mgr->addShortcut(GDK_KEY_w, this, whiteEv);
+    mgr->addShortcut(GDK_KEY_d, this, blackEv);
+    mgr->addShortcut(GDK_KEY_k, this, highlightCompression);
+}

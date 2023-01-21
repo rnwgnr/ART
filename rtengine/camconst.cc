@@ -874,7 +874,7 @@ CameraConstantsStore::parse_camera_constants_file(Glib::ustring filename_)
             const auto ret = mCameraConstants.emplace(make_model, cc);
 
             if(ret.second) { // entry inserted into map
-                if (settings->verbose) {
+                if (settings->verbose > 1) {
                     printf("Add camera constants for \"%s\"\n", make_model.c_str());
                 }
             } else {
@@ -893,7 +893,7 @@ CameraConstantsStore::parse_camera_constants_file(Glib::ustring filename_)
                     existingcc->update_globalGreenEquilibration(cc->get_globalGreenEquilibration());
                 }
 
-                if (settings->verbose) {
+                if (settings->verbose > 1) {
                     printf("Merging camera constants for \"%s\"\n", make_model.c_str());
                 }
 

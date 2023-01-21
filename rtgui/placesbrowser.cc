@@ -28,6 +28,8 @@
 #include "rtimage.h"
 #include "options.h"
 #include "toolpanel.h"
+#include "session.h"
+#include "multilangmgr.h"
 
 PlacesBrowser::PlacesBrowser ()
 {
@@ -89,12 +91,34 @@ PlacesBrowser::PlacesBrowser ()
     vm->signal_drive_disconnected().connect (sigc::mem_fun(*this, &PlacesBrowser::driveChanged));
     vm->signal_drive_changed().connect (sigc::mem_fun(*this, &PlacesBrowser::driveChanged));
 
-    treeView->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PlacesBrowser::selectionChanged));
+    selection_conn_ = treeView->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PlacesBrowser::selectionChanged));
     add->signal_clicked().connect(sigc::mem_fun(*this, &PlacesBrowser::addPressed));
     del->signal_clicked().connect(sigc::mem_fun(*this, &PlacesBrowser::delPressed));
 
+    session_monitor_ = Gio::File::create_for_path(art::session::filename())->monitor_file();
+    session_monitor_->signal_changed().connect(sigc::mem_fun(*this, &PlacesBrowser::on_session_changed));
+
     show_all ();
 }
+
+
+PlacesBrowser::~PlacesBrowser()
+{
+    if (session_monitor_) {
+        session_monitor_->cancel();
+    }
+}
+
+
+void PlacesBrowser::on_session_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type)
+{
+    bool is_session = art::session::check(lastSelectedDir);
+    refreshPlacesList();
+    if (is_session) {
+        dirSelected(lastSelectedDir, "");
+    }
+}
+
 
 // For drive letter comparison
 bool compareMountByRoot (Glib::RefPtr<Gio::Mount> a, Glib::RefPtr<Gio::Mount> b)
@@ -137,6 +161,15 @@ void PlacesBrowser::refreshPlacesList ()
             }
         } catch (Gio::Error&) {}
     }
+
+    // session
+    Gtk::TreeModel::Row newrow = *(placesModel->append());
+    newrow[placesColumns.label] = M("SESSION_LABEL") + " (" + std::to_string(art::session::list().size()) + ")";
+    newrow[placesColumns.icon] = Gio::ThemedIcon::create("document-open-recent");
+    newrow[placesColumns.root] = art::session::path();
+    newrow[placesColumns.type] = 4;
+    newrow[placesColumns.rowSeparator] = false;
+    
 
     // append favorites
     if (!placesModel->children().empty()) {
@@ -274,7 +307,6 @@ void PlacesBrowser::driveChanged (const Glib::RefPtr<Gio::Drive>& m)
 
 void PlacesBrowser::selectionChanged ()
 {
-
     Glib::RefPtr<Gtk::TreeSelection> selection = treeView->get_selection();
     Gtk::TreeModel::iterator iter = selection->get_selected();
 
@@ -301,16 +333,27 @@ void PlacesBrowser::selectionChanged ()
     }
 }
 
+
 void PlacesBrowser::dirSelected (const Glib::ustring& dirname, const Glib::ustring& openfile)
 {
-
     lastSelectedDir = dirname;
+    ConnectionBlocker b(selection_conn_);
+    auto selection = treeView->get_selection();
+    selection->unselect_all();
+    auto children = placesModel->children();
+    for (auto it = children.begin(), end = children.end(); it != end; ++it) {
+        if ((*it)[placesColumns.root] == dirname) {
+            selection->select(it);
+            break;
+        }
+    }
 }
+
 
 void PlacesBrowser::addPressed ()
 {
 
-    if (lastSelectedDir == "") {
+    if (lastSelectedDir == "" || art::session::check(lastSelectedDir)) {
         return;
     }
 
@@ -340,15 +383,15 @@ void PlacesBrowser::delPressed ()
     Glib::RefPtr<Gtk::TreeSelection> selection = treeView->get_selection();
     Gtk::TreeModel::iterator iter = selection->get_selected();
 
-    if (iter && iter->get_value (placesColumns.type) == 5) {
+    if (iter && iter->get_value(placesColumns.type) == 5) {
         std::vector<Glib::ustring>::iterator i = std::find (options.favoriteDirs.begin(), options.favoriteDirs.end(), iter->get_value (placesColumns.root));
 
         if (i != options.favoriteDirs.end()) {
             options.favoriteDirs.erase (i);
         }
-    }
 
-    refreshPlacesList ();
+        refreshPlacesList();
+    }
 }
 
 Glib::ustring PlacesBrowser::userHomeDir ()

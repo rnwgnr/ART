@@ -1,10 +1,36 @@
 #pragma once
 
-// This number has to be incremented whenever the PP3 file format is modified or the behaviour of a tool changes
-#define PPVERSION 1026
+// This number has to be incremented whenever the ARP file format is modified or the behaviour of a tool changes
+#define PPVERSION 1039
 
 /*
   Log of version changes
+  1039  2022-11-19
+        new film negative tool ported from RT5.9
+  1038  2022-08-12
+        brush mask: changed "hardness" and "transparency" to "opacity"
+  1037  2022-07-23
+        log encoding saturation control
+  1036  2022-05-01
+        color correction: changed behaviour of hueshift in HSL mode
+  1035  2022-04-30
+        changed behaviour of the compression slider in color correction
+  1034  2022-04-09
+        changed behaviour of the tone curve contrast slider
+  1033  2022-02-23
+        added compression sliders to the color correction tool
+  1032  2022-02-17
+        added noise option to the smoothing tool
+  1031  2022-01-27
+        added option to use CAT for standard matrix input profiles
+  1030  2022-01-25
+        changed balanced highlight recovery value from ColorBlend to Balanced
+  1029  2021-12-07
+        color correction power inversion
+  1028  2021-12-04
+        color correction wheel rescaling
+  1027  2021-11-09
+        white balance multipliers stored in camera space
   1026  2021-07-06
         tone curve mode refactoring/simplification
   1025  2021-06-10

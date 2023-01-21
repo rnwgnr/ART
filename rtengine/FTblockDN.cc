@@ -442,39 +442,39 @@ void Median_Denoise(float **src, float **dst, float upperBound, const int width,
 void Tile_calc(int tilesize, int overlap, int kall, int imwidth, int imheight, int &numtiles_W, int &numtiles_H, int &tilewidth, int &tileheight, int &tileWskip, int &tileHskip)
 
 {
-    if (kall == 2) {
+    // if (kall == 2) {
 
-        if (imwidth < tilesize) {
-            numtiles_W = 1;
-            tileWskip = imwidth;
-            tilewidth = imwidth;
-        } else {
-            numtiles_W = ceil((static_cast<float>(imwidth)) / (tilesize - overlap));
-            tilewidth  = ceil((static_cast<float>(imwidth)) / (numtiles_W)) + overlap;
-            tilewidth += (tilewidth & 1);
-            tileWskip = tilewidth - overlap;
-        }
+    //     if (imwidth < tilesize) {
+    //         numtiles_W = 1;
+    //         tileWskip = imwidth;
+    //         tilewidth = imwidth;
+    //     } else {
+    //         numtiles_W = ceil((static_cast<float>(imwidth)) / (tilesize - overlap));
+    //         tilewidth  = ceil((static_cast<float>(imwidth)) / (numtiles_W)) + overlap;
+    //         tilewidth += (tilewidth & 1);
+    //         tileWskip = tilewidth - overlap;
+    //     }
 
-        if (imheight < tilesize) {
-            numtiles_H = 1;
-            tileHskip = imheight;
-            tileheight = imheight;
-        } else {
-            numtiles_H = ceil((static_cast<float>(imheight)) / (tilesize - overlap));
-            tileheight = ceil((static_cast<float>(imheight)) / (numtiles_H)) + overlap;
-            tileheight += (tileheight & 1);
-            tileHskip = tileheight - overlap;
-        }
-    }
+    //     if (imheight < tilesize) {
+    //         numtiles_H = 1;
+    //         tileHskip = imheight;
+    //         tileheight = imheight;
+    //     } else {
+    //         numtiles_H = ceil((static_cast<float>(imheight)) / (tilesize - overlap));
+    //         tileheight = ceil((static_cast<float>(imheight)) / (numtiles_H)) + overlap;
+    //         tileheight += (tileheight & 1);
+    //         tileHskip = tileheight - overlap;
+    //     }
+    // }
 
-    if (kall == 0) {
+    // if (kall == 0) {
         numtiles_W = 1;
         tileWskip = imwidth;
         tilewidth = imwidth;
         numtiles_H = 1;
         tileHskip = imheight;
         tileheight = imheight;
-    }
+    // }
 
     //  printf("Nw=%d NH=%d tileW=%d tileH=%d\n",numtiles_W,numtiles_H,tileWskip,tileHskip);
 }
@@ -856,19 +856,19 @@ bool WaveletDenoiseAll_BiShrinkL(double scale, wavelet_decomposition &WaveletCoe
         }
     }
 
-    bool memoryAllocationFailed = false;
+    constexpr bool memoryAllocationFailed = false;
 #ifdef _OPENMP
     #pragma omp parallel num_threads(denoiseNestedLevels) if (denoiseNestedLevels>1)
 #endif
     {
         float *buffer[3];
-        buffer[0] = new (std::nothrow) float[maxWL * maxHL + 32];
-        buffer[1] = new (std::nothrow) float[maxWL * maxHL + 64];
-        buffer[2] = new (std::nothrow) float[maxWL * maxHL + 96];
+        buffer[0] = new /*(std::nothrow)*/ float[maxWL * maxHL + 32];
+        buffer[1] = new /*(std::nothrow)*/ float[maxWL * maxHL + 64];
+        buffer[2] = new /*(std::nothrow)*/ float[maxWL * maxHL + 96];
 
-        if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr) {
-            memoryAllocationFailed = true;
-        }
+        // if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr) {
+        //     memoryAllocationFailed = true;
+        // }
 
         if (!memoryAllocationFailed) {
 
@@ -996,19 +996,19 @@ bool WaveletDenoiseAll_BiShrinkAB(double scale, wavelet_decomposition &WaveletCo
         }
     }
 
-    bool memoryAllocationFailed = false;
+    constexpr bool memoryAllocationFailed = false;
 #ifdef _OPENMP
     #pragma omp parallel num_threads(denoiseNestedLevels) if (denoiseNestedLevels>1)
 #endif
     {
         float *buffer[3];
-        buffer[0] = new (std::nothrow) float[maxWL * maxHL + 32];
-        buffer[1] = new (std::nothrow) float[maxWL * maxHL + 64];
-        buffer[2] = new (std::nothrow) float[maxWL * maxHL + 96];
+        buffer[0] = new /*(std::nothrow)*/ float[maxWL * maxHL + 32];
+        buffer[1] = new /*(std::nothrow)*/ float[maxWL * maxHL + 64];
+        buffer[2] = new /*(std::nothrow)*/ float[maxWL * maxHL + 96];
 
-        if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr) {
-            memoryAllocationFailed = true;
-        }
+        // if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr) {
+        //     memoryAllocationFailed = true;
+        // }
 
         if (!memoryAllocationFailed) {
 
@@ -1130,20 +1130,20 @@ bool WaveletDenoiseAllL(double scale, wavelet_decomposition &WaveletCoeffs_L, fl
         }
     }
 
-    bool memoryAllocationFailed = false;
+    constexpr bool memoryAllocationFailed = false;
 #ifdef _OPENMP
     #pragma omp parallel num_threads(denoiseNestedLevels) if (denoiseNestedLevels>1)
 #endif
     {
         float *buffer[4];
-        buffer[0] = new (std::nothrow) float[maxWL * maxHL + 32];
-        buffer[1] = new (std::nothrow) float[maxWL * maxHL + 64];
-        buffer[2] = new (std::nothrow) float[maxWL * maxHL + 96];
-        buffer[3] = new (std::nothrow) float[maxWL * maxHL + 128];
+        buffer[0] = new /*(std::nothrow)*/ float[maxWL * maxHL + 32];
+        buffer[1] = new /*(std::nothrow)*/ float[maxWL * maxHL + 64];
+        buffer[2] = new /*(std::nothrow)*/ float[maxWL * maxHL + 96];
+        buffer[3] = new /*(std::nothrow)*/ float[maxWL * maxHL + 128];
 
-        if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr || buffer[3] == nullptr) {
-            memoryAllocationFailed = true;
-        }
+        // if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr || buffer[3] == nullptr) {
+        //     memoryAllocationFailed = true;
+        // }
 
         if (!memoryAllocationFailed) {
 #ifdef _OPENMP
@@ -1185,19 +1185,19 @@ bool WaveletDenoiseAllAB(double scale, wavelet_decomposition &WaveletCoeffs_L, w
         }
     }
 
-    bool memoryAllocationFailed = false;
+    constexpr bool memoryAllocationFailed = false;
 #ifdef _OPENMP
     #pragma omp parallel num_threads(denoiseNestedLevels) if (denoiseNestedLevels>1)
 #endif
     {
         float *buffer[3];
-        buffer[0] = new (std::nothrow) float[maxWL * maxHL + 32];
-        buffer[1] = new (std::nothrow) float[maxWL * maxHL + 64];
-        buffer[2] = new (std::nothrow) float[maxWL * maxHL + 96];
+        buffer[0] = new /*(std::nothrow)*/ float[maxWL * maxHL + 32];
+        buffer[1] = new /*(std::nothrow)*/ float[maxWL * maxHL + 64];
+        buffer[2] = new /*(std::nothrow)*/ float[maxWL * maxHL + 96];
 
-        if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr) {
-            memoryAllocationFailed = true;
-        }
+        // if (buffer[0] == nullptr || buffer[1] == nullptr || buffer[2] == nullptr) {
+        //     memoryAllocationFailed = true;
+        // }
 
         if (!memoryAllocationFailed) {
 #ifdef _OPENMP
@@ -1411,49 +1411,53 @@ void detail_mask(const array2D<float> &src, array2D<float> &mask, float scaling,
     const int H = src.height();
     mask(W, H);
 
-    array2D<float> L2(W/4, H/4, ARRAY2D_ALIGNED);
-    array2D<float> m2(W/4, H/4, ARRAY2D_ALIGNED);
-    rescaleBilinear(src, L2, multithread);
+    if (W < 8 || H < 8) {
+        mask.fill(1.f);
+    } else {
+        array2D<float> L2(W/4, H/4, ARRAY2D_ALIGNED);
+        array2D<float> m2(W/4, H/4, ARRAY2D_ALIGNED);
+        rescaleBilinear(src, L2, multithread);
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < H/4; ++y) {
-        for (int x = 0; x < W/4; ++x) {
-            L2[y][x] = xlin2log(L2[y][x]/scaling, 50.f);
+        for (int y = 0; y < H/4; ++y) {
+            for (int x = 0; x < W/4; ++x) {
+                L2[y][x] = xlin2log(L2[y][x]/scaling, 50.f);
+            }
         }
-    }
-    laplacian(L2, m2, threshold/scaling, ceiling/scaling, factor, multithread);
-    rescaleBilinear(m2, mask, multithread);
+        laplacian(L2, m2, threshold/scaling, ceiling/scaling, factor, multithread);
+        rescaleBilinear(m2, mask, multithread);
 
-    const auto scurve =
-        [](float x) -> float
-        {
-            constexpr float b = 101.f;
-            constexpr float a = 2.23f;
-            return xlin2log(pow_F(x, a), b);
-        };
+        const auto scurve =
+            [](float x) -> float
+            {
+                constexpr float b = 101.f;
+                constexpr float a = 2.23f;
+                return xlin2log(pow_F(x, a), b);
+            };
 
-    const float thr = 1.f - factor;
+        const float thr = 1.f - factor;
 #ifdef _OPENMP
 #   pragma omp parallel for if (multithread)
 #endif
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            mask[y][x] = scurve(LIM01(mask[y][x] + thr));
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                mask[y][x] = scurve(LIM01(mask[y][x] + thr));
+            }
         }
-    }
 
-    if (blur_type == BlurType::GAUSS) {
+        if (blur_type == BlurType::GAUSS) {
 #ifdef _OPENMP
 #       pragma omp parallel if (multithread)
 #endif
-        {
-            gaussianBlur(mask, mask, W, H, blur);
-        }
-    } else if (blur_type == BlurType::BOX) {
-        if (int(blur) > 0) {
-            for (int i = 0; i < 3; ++i) {
-                boxblur(mask, mask, blur, W, H, multithread);
+            {
+                gaussianBlur(mask, mask, W, H, blur);
+            }
+        } else if (blur_type == BlurType::BOX) {
+            if (int(blur) > 0) {
+                for (int i = 0; i < 3; ++i) {
+                    boxblur(mask, mask, blur, W, H, multithread);
+                }
             }
         }
     }
@@ -1499,7 +1503,7 @@ void detail_recovery(int width, int height, LabImage *labdn, array2D<float> *Lin
     if (detail_thresh > 0) {
         array2D<float> LL(width, height, labdn->L, ARRAY2D_BYREFERENCE);
         float amount = LIM01(float(detail_thresh)/100.f);
-        detail_mask(LL, mask, 65535.f, 25.f, 10000.f, amount, BlurType::BOX, 10.f / scale, false);
+        detail_mask(LL, mask, 65535.f, 25.f, 10000.f, amount, BlurType::GAUSS, 25.f / scale, false);
     }   
     
     if (numtiles == 1) {
@@ -1860,7 +1864,7 @@ BENCHFUN
         //     printf("Tiled denoise processing caused by Automatic Multizone mode\n");
         // }
 
-        bool memoryAllocationFailed = false;
+        constexpr bool memoryAllocationFailed = false;
 
         // do {
             // ++numTries;
@@ -1872,7 +1876,7 @@ BENCHFUN
             int numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip;
 
             Tile_calc(tilesize, overlap, 0/*(options.rgbDenoiseThreadLimit == 0 && !ponder) ? (numTries == 1 ? 0 : 2) : 2*/, imwidth, imheight, numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip);
-            memoryAllocationFailed = false;
+            //memoryAllocationFailed = false;
             const int numtiles = numtiles_W * numtiles_H;
 
             //output buffer
@@ -1929,24 +1933,26 @@ BENCHFUN
                 fftwf_free(fLbloxtmp);
             }
 
-#ifndef _OPENMP
-            int numthreads = 1;
-#else
+// #ifndef _OPENMP
+//             const int numthreads = 1;
+// #else
+            const int numthreads = 1;
+            
             // Calculate number of tiles. If less than omp_get_max_threads(), then limit num_threads to number of tiles
-            int numthreads = MIN(numtiles, omp_get_max_threads());
+            // int numthreads = MIN(numtiles, omp_get_max_threads());
 
-            if (options.rgbDenoiseThreadLimit > 0) {
-                numthreads = MIN(numthreads, options.rgbDenoiseThreadLimit);
-            }
+            // if (options.rgbDenoiseThreadLimit > 0) {
+            //     numthreads = MIN(numthreads, options.rgbDenoiseThreadLimit);
+            // }
 
 #ifdef _OPENMP
-            denoiseNestedLevels = omp_get_max_threads() / numthreads;
-            bool oldNested = omp_get_nested();
+            denoiseNestedLevels = omp_get_num_procs() / numthreads;
+            //bool oldNested = omp_get_nested();
 
             if (denoiseNestedLevels < 2) {
                 denoiseNestedLevels = 1;
-            } else {
-                omp_set_nested(true);
+            // } else {
+            //     omp_set_nested(true);
             }
 
             if (options.rgbDenoiseThreadLimit > 0)
@@ -1954,13 +1960,14 @@ BENCHFUN
                     denoiseNestedLevels--;
                 }
 
-#endif
+// #endif
 
             if (settings->verbose) {
-                printf("RGB_denoise uses %d main thread(s) and up to %d nested thread(s) for each main thread\n", numthreads, denoiseNestedLevels);
+                //printf("RGB_denoise uses %d main thread(s) and up to %d nested thread(s) for each main thread\n", numthreads, denoiseNestedLevels);
+                printf("RGB_denoise uses %d thread(s)\n", denoiseNestedLevels);
             }
 
-#endif
+#endif // _OPENMP
             const std::size_t blox_array_size = denoiseNestedLevels * numthreads;
 
             float *LbloxArray[blox_array_size];
@@ -1989,9 +1996,9 @@ BENCHFUN
             const bool lab_mode = dnparams.colorSpace == procparams::DenoiseParams::ColorSpace::LAB;
 
             // begin tile processing of image
-#ifdef _OPENMP
-            #pragma omp parallel num_threads(numthreads) if (numthreads>1)
-#endif
+// #ifdef _OPENMP
+//             #pragma omp parallel num_threads(numthreads) if (numthreads>1)
+// #endif
             {
                 int pos;
                 float* noisevarlum;
@@ -2280,9 +2287,9 @@ BENCHFUN
                             //  if (settings->verbose) printf("levwavelet=%i  noisevarA=%f noisevarB=%f \n",levwav, noisevarab_r, noisevarab_b);
                             Ldecomp = new wavelet_decomposition(labdn->L[0], labdn->W, labdn->H, levwav, 1, 1, max(1, denoiseNestedLevels));
 
-                            if (Ldecomp->memoryAllocationFailed) {
-                                memoryAllocationFailed = true;
-                            }
+                            // if (Ldecomp->memoryAllocationFailed) {
+                            //     memoryAllocationFailed = true;
+                            // }
 
                             float madL[8][3];
 
@@ -2312,23 +2319,23 @@ BENCHFUN
 
                             adecomp = new wavelet_decomposition(labdn->a[0], labdn->W, labdn->H, levwav, 1, 1, max(1, denoiseNestedLevels));
 
-                            if (adecomp->memoryAllocationFailed) {
-                                memoryAllocationFailed = true;
-                            }
+                            // if (adecomp->memoryAllocationFailed) {
+                            //     memoryAllocationFailed = true;
+                            // }
 
                             if (!memoryAllocationFailed) {
                                 if (nrQuality == QUALITY_STANDARD) {
                                     if (!WaveletDenoiseAllAB(scale, *Ldecomp, *adecomp, noisevarchrom, madL, noisevarab_r, useNoiseCCurve, autoch)) { //enhance mode
-                                        memoryAllocationFailed = true;
+                                        //memoryAllocationFailed = true;
                                     }
                                 } else { /*if (nrQuality==QUALITY_HIGH)*/
                                     if (!WaveletDenoiseAll_BiShrinkAB(scale, *Ldecomp, *adecomp, noisevarchrom, madL, noisevarab_r, useNoiseCCurve, autoch)) { //enhance mode
-                                        memoryAllocationFailed = true;
+                                        //memoryAllocationFailed = true;
                                     }
 
                                     if (!memoryAllocationFailed) {
                                         if (!WaveletDenoiseAllAB(scale, *Ldecomp, *adecomp, noisevarchrom, madL, noisevarab_r, useNoiseCCurve, autoch)) {
-                                            memoryAllocationFailed = true;
+                                            //memoryAllocationFailed = true;
                                         }
                                     }
                                 }
@@ -2349,23 +2356,23 @@ BENCHFUN
                             if (!memoryAllocationFailed) {
                                 wavelet_decomposition* bdecomp = new wavelet_decomposition(labdn->b[0], labdn->W, labdn->H, levwav, 1, 1, max(1, denoiseNestedLevels));
 
-                                if (bdecomp->memoryAllocationFailed) {
-                                    memoryAllocationFailed = true;
-                                }
+                                // if (bdecomp->memoryAllocationFailed) {
+                                //     memoryAllocationFailed = true;
+                                // }
 
                                 if (!memoryAllocationFailed) {
                                     if (nrQuality == QUALITY_STANDARD) {
                                         if (!WaveletDenoiseAllAB(scale, *Ldecomp, *bdecomp, noisevarchrom, madL, noisevarab_b, useNoiseCCurve, autoch)) { //enhance mode
-                                            memoryAllocationFailed = true;
+                                            //memoryAllocationFailed = true;
                                         }
                                     } else { /*if (nrQuality==QUALITY_HIGH)*/
                                         if (!WaveletDenoiseAll_BiShrinkAB(scale, *Ldecomp, *bdecomp, noisevarchrom, madL, noisevarab_b, useNoiseCCurve, autoch)) { //enhance mode
-                                            memoryAllocationFailed = true;
+                                            //memoryAllocationFailed = true;
                                         }
 
                                         if (!memoryAllocationFailed) {
                                             if (!WaveletDenoiseAllAB(scale, *Ldecomp, *bdecomp, noisevarchrom, madL, noisevarab_b, useNoiseCCurve, autoch)) {
-                                                memoryAllocationFailed = true;
+                                                //memoryAllocationFailed = true;
                                             }
                                         }
                                     }
@@ -2392,16 +2399,16 @@ BENCHFUN
 
                                         if (nrQuality == QUALITY_STANDARD) {
                                             if (!WaveletDenoiseAllL(scale, *Ldecomp, noisevarlum, madL, nullptr, edge)) { //enhance mode
-                                                memoryAllocationFailed = true;
+                                                //memoryAllocationFailed = true;
                                             }
                                         } else { /*if (nrQuality==QUALITY_HIGH)*/
                                             if (!WaveletDenoiseAll_BiShrinkL(scale, *Ldecomp, noisevarlum, madL)) { //enhance mode
-                                                memoryAllocationFailed = true;
+                                                //memoryAllocationFailed = true;
                                             }
 
                                             if (!memoryAllocationFailed) {
                                                 if (!WaveletDenoiseAllL(scale, *Ldecomp, noisevarlum, madL, nullptr, edge)) {
-                                                    memoryAllocationFailed = true;
+                                                    //memoryAllocationFailed = true;
                                                 }
                                             }
                                         }
@@ -2612,9 +2619,9 @@ BENCHFUN
                 }
             }
 
-#ifdef _OPENMP
-            omp_set_nested(oldNested);
-#endif
+// #ifdef _OPENMP
+//             omp_set_nested(oldNested);
+// #endif
 
             //copy denoised image to output
             if (numtiles > 1) {

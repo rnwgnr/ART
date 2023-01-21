@@ -109,6 +109,8 @@ public:
     /** @return the sample format based on MetaData */
     virtual IIOSampleFormat getSampleFormat() const = 0;
 
+    virtual std::string getSoftware() const = 0;
+
     /** Functions to convert between floating point and string representation of shutter and aperture */
     static std::string apertureToString (double aperture);
     /** Functions to convert between floating point and string representation of shutter and aperture */
@@ -403,7 +405,7 @@ class FilmNegListener
 {
 public:
     virtual ~FilmNegListener() = default;
-    virtual void filmBaseValuesChanged(std::array<float, 3> rgb) = 0;
+    virtual void filmRefValuesChanged(const procparams::FilmNegativeParams::RGB &refInput, const procparams::FilmNegativeParams::RGB &refOutput) = 0;
 };
 
 /** This class represents a detailed part of the image (looking through a kind of window).
@@ -427,6 +429,13 @@ public:
     virtual void setListener (DetailedCropListener* il) {}
     /** Destroys the crop. */
     virtual void destroy () {}
+};
+
+
+enum GamutCheck {
+    GAMUT_CHECK_OFF,
+    GAMUT_CHECK_OUTPUT,
+    GAMUT_CHECK_MONITOR
 };
 
 /** This is a staged, cached image processing manager with partial image update support.  */
@@ -498,8 +507,6 @@ public:
     virtual void        getCamWB    (double& temp, double& green) = 0;
     virtual void        getSpotWB  (int x, int y, int rectSize, double& temp, double& green) = 0;
     virtual void        getAutoCrop (double ratio, int &x, int &y, int &w, int &h) = 0;
-    virtual bool getFilmNegativeExponents(int xA, int yA, int xB, int yB, std::array<float, 3>& newExps) = 0;
-    virtual bool getImageSpotValues(int x, int y, int spotSize, std::array<float, 3>& rawValues) = 0;
 
     virtual bool getDeltaELCH(EditUniqueID id, int x, int y, float &L, float &C, float &H) = 0;
 
@@ -524,8 +531,7 @@ public:
 
     virtual void        setMonitorProfile       (const Glib::ustring& monitorProfile, RenderingIntent intent) = 0;
     virtual void        getMonitorProfile       (Glib::ustring& monitorProfile, RenderingIntent& intent) const = 0;
-    virtual void        setSoftProofing         (bool softProof, bool gamutCheck) = 0;
-    virtual void        getSoftProofing         (bool &softProof, bool &gamutCheck) = 0;
+    virtual void setSoftProofing(bool softProof, GamutCheck gamutCheck) = 0;
     virtual void        setSharpMask            (bool sharpMask) = 0;
 
     virtual ~StagedImageProcessor () {}

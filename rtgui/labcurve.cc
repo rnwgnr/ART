@@ -255,3 +255,8 @@ void LabCurve::toolReset(bool to_initial)
     pp.labCurve.enabled = getEnabled();
     read(&pp);
 }
+
+
+void LabCurve::registerShortcuts(ToolShortcutManager *mgr)
+{
+}

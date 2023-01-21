@@ -57,7 +57,7 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     fchooser->signal_file_activated().connect(sigc::mem_fun(*this, &SaveAsDialog::okPressed));
 
     auto filter_jpg = Gtk::FileFilter::create();
-    filter_jpg->set_name(M("SAVEDLG_JPGFILTER"));
+    filter_jpg->set_name("JPEG");//M("SAVEDLG_JPGFILTER"));
     filter_jpg->add_pattern("*.jpg");
     filter_jpg->add_pattern("*.JPG");
     filter_jpg->add_pattern("*.jpeg");
@@ -66,14 +66,14 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     filter_jpg->add_pattern("*.JPE");
 
     auto filter_tif = Gtk::FileFilter::create();
-    filter_tif->set_name(M("SAVEDLG_JPGFILTER"));
+    filter_tif->set_name("TIFF");//M("SAVEDLG_JPGFILTER"));
     filter_tif->add_pattern("*.tif");
     filter_tif->add_pattern("*.TIF");
     filter_tif->add_pattern("*.tiff");
     filter_tif->add_pattern("*.TIFF");
 
     auto filter_png = Gtk::FileFilter::create();
-    filter_png->set_name(M("SAVEDLG_JPGFILTER"));
+    filter_png->set_name("PNG");//M("SAVEDLG_JPGFILTER"));
     filter_png->add_pattern("*.png");
     filter_png->add_pattern("*.PNG");
 
@@ -83,19 +83,19 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
 
     for (auto &p : rtengine::ImageIOManager::getInstance()->getSaveFormats()) {
         auto f = Gtk::FileFilter::create();
-        f->set_name(p.second);
-        Glib::ustring e = p.first;
+        f->set_name(p.second.label);
+        Glib::ustring e = p.second.extension;
         f->add_pattern(Glib::ustring("*.") + e);
         f->add_pattern(Glib::ustring("*.") + e.uppercase());
+        filters_[p.first] = f;
     }
     
-    formatChanged(options.saveFormat.format);
+//    formatChanged(options.saveFormat.format);
 
 // Output Options
 // ~~~~~~~~~~~~~~
     formatOpts = Gtk::manage(new SaveFormatPanel());
     setExpandAlignProperties(formatOpts, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_START);
-    formatOpts->setListener(this);
 
 // queue/immediate
 // ~~~~~~~~~~~~~~~
@@ -154,8 +154,27 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
     vbox_bottomRight->pack_start (*forceFormatOpts, Gtk::PACK_SHRINK, 4);
     vbox_bottomRight->pack_start (*autoSuffix, Gtk::PACK_SHRINK, 4);
 
+    Gtk::VBox *vbox_bottom_left = Gtk::manage(new Gtk::VBox());
+    vbox_bottom_left->pack_start(*formatOpts, Gtk::PACK_EXPAND_WIDGET, 2);
+    {
+        apply_export_profile_ = Gtk::manage(new Gtk::CheckButton(M("QUEUE_APPLY_BATCH_PROFILE") + ": "));
+        apply_export_profile_->set_active(false);
+        profiles_cb_ = Gtk::manage(new ProfileStoreComboBox());
+        setExpandAlignProperties(profiles_cb_, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_START);
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        hb->pack_start(*apply_export_profile_, Gtk::PACK_SHRINK);
+        hb->pack_start(*profiles_cb_, Gtk::PACK_EXPAND_WIDGET);
+        vbox_bottom_left->pack_start(*hb, Gtk::PACK_SHRINK, 4);
+        profiles_cb_->updateProfileList();
+        auto &info = options.export_profile_map[options.saveFormat.getKey()];
+        apply_export_profile_->set_active(info.enabled);
+        if (!profiles_cb_->setActiveRowFromFullPath(info.profile)) {
+            profiles_cb_->unset_active();
+        }
+    }
+
     Gtk::HBox* hbox_bottom = Gtk::manage( new Gtk::HBox() );
-    hbox_bottom->pack_start (*formatOpts, Gtk::PACK_EXPAND_WIDGET, 2);
+    hbox_bottom->pack_start (*vbox_bottom_left, Gtk::PACK_EXPAND_WIDGET, 2);
     hbox_bottom->pack_start (*Gtk::manage(new Gtk::VSeparator ()), Gtk::PACK_SHRINK, 2);
     hbox_bottom->pack_start (*vbox_bottomRight, Gtk::PACK_EXPAND_WIDGET, 2);
 
@@ -167,10 +186,17 @@ SaveAsDialog::SaveAsDialog (const Glib::ustring &initialDir, Gtk::Window* parent
 
     show_all_children ();
 
-    formatOpts->init (options.saveFormat);
+    formatOpts->setListener(this);
+    formatOpts->init(options.saveFormat);
 
     signal_key_press_event().connect( sigc::mem_fun(*this, &SaveAsDialog::keyPressed) );
+
+    apply_export_profile_conn_ = apply_export_profile_->signal_toggled().connect(sigc::mem_fun(*this, &SaveAsDialog::exportProfileChanged));
+    profiles_cb_conn_ = profiles_cb_->signal_changed().connect(sigc::mem_fun(*this, &SaveAsDialog::exportProfileChanged));
+    
+    formatChanged(options.saveFormat.format);
 }
+
 
 void SaveAsDialog::saveImmediatlyClicked ()
 {
@@ -283,10 +309,12 @@ void SaveAsDialog::okPressed ()
         return;
     }
 
+    auto ext = formatOpts->getExtension();
+
     if (getExtension(fname).empty()) {
         // Extension is either empty or unfamiliar
-        fname += '.' + formatOpts->getFormat().format;
-    } else if (!has_good_extension(formatOpts->getFormat().format, fname)) {
+        fname += '.' + ext;
+    } else if (!has_good_extension(ext, fname)) {
         // Create dialog to warn user that the filename may have two extensions on the end
         Gtk::MessageDialog msgd(
             *this,
@@ -295,9 +323,9 @@ void SaveAsDialog::okPressed ()
                 + ": "
                 + M("SAVEDLG_WARNFILENAME")
                 + " \""
-                + Glib::path_get_basename (fname)
+                + Glib::path_get_basename(fname)
                 + '.'
-                + formatOpts->getFormat().format
+                + ext
                 + "\"</b>",
             true,
             Gtk::MESSAGE_WARNING,
@@ -306,7 +334,7 @@ void SaveAsDialog::okPressed ()
         );
 
         if (msgd.run() == Gtk::RESPONSE_OK) {
-            fname += "." + formatOpts->getFormat().format;
+            fname += "." + ext;
         } else {
             return;
         }
@@ -323,17 +351,33 @@ void SaveAsDialog::cancelPressed ()
 
 void SaveAsDialog::formatChanged(const Glib::ustring& format)
 {
-    fixExtension(getCurrentFilename(fchooser), format);
+    fixExtension(getCurrentFilename(fchooser));
+    ConnectionBlocker b1(apply_export_profile_conn_);
+    ConnectionBlocker b2(profiles_cb_conn_);
+    auto &info = options.export_profile_map[getFormat().getKey()];
+    if (!profiles_cb_->setActiveRowFromFullPath(info.profile)) {
+        profiles_cb_->unset_active();
+    }
+    apply_export_profile_->set_active(info.enabled);
 }
 
 
-void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& format)
+void SaveAsDialog::fixExtension(const Glib::ustring &name)
 {
+    auto format = getFormat().getKey();
+    auto ext = formatOpts->getExtension();
+
     const auto sanitize_suffix =
-        [this, name, format](const std::function<bool (const Glib::ustring&)>& has_suffix)
+        [this, name, ext](const std::function<bool (const Glib::ustring&)>& has_suffix)
         {
-            if (!name.empty() && !has_suffix(name)) {
-                fchooser->set_current_name(removeExtension(Glib::path_get_basename(name)) + '.' + format);
+            if (!name.empty()) {
+                auto basename = Glib::path_get_basename(name);
+                if (!has_suffix(name)) {
+                    auto newname = removeExtension(basename) + '.' + ext;
+                    fchooser->set_current_name(newname);
+                } else{
+                    fchooser->set_current_name(basename);
+                }
             }
         };
 
@@ -345,15 +389,15 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& 
                 return rtengine::hasJpegExtension(filename);
             }
         );
-    } else if (format == "png") {
-        fchooser->set_filter (filters_["png"]);
+    } else if (format.find("png") == 0) {
+        fchooser->set_filter(filters_["png"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
             {
                 return rtengine::hasPngExtension(filename);
             }
         );
-    } else if (format == "tif") {
+    } else if (format.find("tif") == 0) {
         fchooser->set_filter(filters_["tif"]);
         sanitize_suffix(
             [](const Glib::ustring& filename)
@@ -369,7 +413,7 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& 
         sanitize_suffix(
             [=](const Glib::ustring &filename)
             {
-                return rtengine::getFileExtension(filename).lowercase() == format;
+                return rtengine::getFileExtension(filename).lowercase() == ext;
             }
         ); 
     }
@@ -378,8 +422,7 @@ void SaveAsDialog::fixExtension(const Glib::ustring &name, const Glib::ustring& 
 void SaveAsDialog::setInitialFileName (const Glib::ustring& fname)
 {
     this->fname = fname;
-    //fchooser->set_current_name(fname);
-    fixExtension(fname, formatOpts->getFormat().format);
+    fixExtension(fname);
 }
 
 void SaveAsDialog::setImagePath (const Glib::ustring& imagePath)
@@ -407,4 +450,24 @@ bool SaveAsDialog::keyPressed (GdkEventKey* event)
     }
 
     return false;
+}
+
+
+const rtengine::procparams::PartialProfile *SaveAsDialog::getExportProfile()
+{
+    if (apply_export_profile_->get_active()) {
+        auto entry = profiles_cb_->getSelectedEntry();
+        if (entry) {
+            return ProfileStore::getInstance()->getProfile(entry);
+        }
+    }
+    return nullptr;
+}
+
+
+void SaveAsDialog::exportProfileChanged()
+{
+    auto &info = options.export_profile_map[getFormat().getKey()];
+    info.enabled = apply_export_profile_->get_active();
+    info.profile = profiles_cb_->getFullPathFromActiveRow();
 }

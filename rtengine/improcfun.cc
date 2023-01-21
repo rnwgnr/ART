@@ -88,7 +88,7 @@ void ImProcFunctions::setScale (double iscale)
 }
 
 
-void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, bool gamutCheck)
+void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, RenderingIntent monitorIntent, bool softProof, GamutCheck gamutCheck)
 {
     // set up monitor transform
     if (monitorTransform) {
@@ -111,17 +111,21 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
         MyMutex::MyLock lcmsLock (*lcmsMutex);
 
         cmsUInt32Number flags;
-        cmsHPROFILE iprof  = cmsCreateLab4Profile (nullptr);
+        //cmsHPROFILE iprof  = cmsCreateLab4Profile (nullptr);
+        cmsHPROFILE iprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
+        if (!iprof) {
+            iprof = ICCStore::getInstance()->getsRGBProfile();
+        }
+        
         cmsHPROFILE gamutprof = nullptr;
         cmsUInt32Number gamutbpc = 0;
         RenderingIntent gamutintent = RI_RELATIVE;
 
         bool softProofCreated = false;
+        cmsHPROFILE oprof = nullptr;
+        RenderingIntent outIntent;
 
         if (softProof) {
-            cmsHPROFILE oprof = nullptr;
-            RenderingIntent outIntent;
-            
             flags = cmsFLAGS_SOFTPROOFING | cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
 
             if (!settings->printerProfile.empty()) {
@@ -130,12 +134,12 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                     flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
                 }
                 outIntent = settings->printerIntent;
-            } else {
-                oprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
-                if (params->icm.outputBPC) {
-                    flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
-                }
-                outIntent = params->icm.outputIntent;
+            // } else {
+            //     oprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
+            //     if (params->icm.outputBPC) {
+            //         flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
+            //     }
+            //     outIntent = params->icm.outputIntent;
             }
 
             if (oprof) {
@@ -167,7 +171,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                 }
 
                 monitorTransform = cmsCreateProofingTransform (
-                                       iprof, TYPE_Lab_FLT,
+                    iprof, TYPE_RGB_FLT, //TYPE_Lab_FLT,
                                        monitor, TYPE_RGB_FLT,
                                        softproof,
                                        monitorIntent, outIntent,
@@ -182,20 +186,35 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                     softProofCreated = true;
                 }
 
-                if (gamutCheck) {
-                    gamutprof = oprof;
-                    if (params->icm.outputBPC) {
-                        gamutbpc = cmsFLAGS_BLACKPOINTCOMPENSATION;
-                    }
-                    gamutintent = outIntent;
-                }
+                // if (gamutCheck == GAMUT_CHECK_OUTPUT) {
+                //     gamutprof = oprof;
+                //     if (params->icm.outputBPC) {
+                //         gamutbpc = cmsFLAGS_BLACKPOINTCOMPENSATION;
+                //     }
+                //     gamutintent = outIntent;
+                // }
             }
-        } else if (gamutCheck) {
+        }
+
+        if (gamutCheck == GAMUT_CHECK_MONITOR) {
             gamutprof = monitor;
             if (settings->monitorBPC) {
                 gamutbpc = cmsFLAGS_BLACKPOINTCOMPENSATION;
             }
             gamutintent = monitorIntent;
+        } else if (gamutCheck == GAMUT_CHECK_OUTPUT) {
+            if (!oprof) {
+                oprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
+                if (params->icm.outputBPC) {
+                    flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
+                }
+                outIntent = params->icm.outputIntent;
+            }
+            gamutprof = oprof;
+            if (params->icm.outputBPC) {
+                gamutbpc = cmsFLAGS_BLACKPOINTCOMPENSATION;
+            }
+            gamutintent = outIntent;
         }
 
         if (!softProofCreated) {
@@ -205,14 +224,15 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                 flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
             }
 
-            monitorTransform = cmsCreateTransform (iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, monitorIntent, flags);
+            monitorTransform = cmsCreateTransform (iprof, TYPE_RGB_FLT, 
+                                                   monitor, TYPE_RGB_FLT, monitorIntent, flags);
         }
 
         if (gamutCheck && gamutprof) {
-            gamutWarning.reset(new GamutWarning(iprof, gamutprof, gamutintent, gamutbpc));
+            gamutWarning.reset(new GamutWarning(gamutprof, gamutintent, gamutbpc));
         }
 
-        cmsCloseProfile (iprof);
+//        cmsCloseProfile (iprof);
     }
 }
 
@@ -235,7 +255,7 @@ void ImProcFunctions::firstAnalysis (const Imagefloat* const original, const Pro
     if (multiThread) {
 
 #ifdef _OPENMP
-        const int numThreads = min (max (W * H / (int)histogram.getSize(), 1), omp_get_max_threads());
+        const int numThreads = min (max (W * H / (int)histogram.getSize(), 1), omp_get_num_procs());
         #pragma omp parallel num_threads(numThreads) if(numThreads>1)
 #endif
         {
@@ -883,6 +903,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
             STEP_(saturationVibrance);
             dcpProfile(img, dcpProf, dcpApplyState, multiThread);
             STEP_(toneCurve);
+            STEP_(filmSimulation);
             STEP_(rgbCurves);
             STEP_(labAdjustments);
             // stop = stop || STEP_s_(textureBoost);
@@ -890,7 +911,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
         }
         stop = stop || STEP_s_(localContrast);
         if (!stop) {
-            STEP_(filmSimulation);
+            // STEP_(filmSimulation);
             STEP_(blackAndWhite);
             STEP_(filmGrain);
         }

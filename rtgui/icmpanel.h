@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _ICMPANEL_
-#define _ICMPANEL_
+#pragma once
 
 #include <memory>
 #include <gtkmm.h>
@@ -60,18 +59,7 @@ protected:
     rtengine::procparams::ColorManagementParams initial_params;
 
 private:
-    rtengine::ProcEvent EvICMprimariMethod;
-    rtengine::ProcEvent EvICMprofileMethod;
-    rtengine::ProcEvent EvICMtempMethod;
-    rtengine::ProcEvent EvICMpredx;
-    rtengine::ProcEvent EvICMpredy;
-    rtengine::ProcEvent EvICMpgrex;
-    rtengine::ProcEvent EvICMpgrey;
-    rtengine::ProcEvent EvICMpblux;
-    rtengine::ProcEvent EvICMpbluy;
-    rtengine::ProcEvent EvICMgamm;
-    rtengine::ProcEvent EvICMslop;
-    rtengine::ProcEvent EvICMtrcinMethod;
+    rtengine::ProcEvent EvUseCAT;
 
     Gtk::VBox* iVBox;
 
@@ -92,6 +80,8 @@ private:
     MyComboBoxText* wProfNames;
     sigc::connection wprofnamesconn;
 
+    std::vector<Glib::ustring> out_profiles_;
+
     MyComboBoxText* oProfNames;
     sigc::connection oprofnamesconn;
     std::unique_ptr<PopUpButton> oRendIntent;
@@ -108,6 +98,9 @@ private:
     Glib::ustring lastRefFilename;
     Glib::ustring camName;
     Glib::ustring filename;
+
+    Gtk::CheckButton *use_CAT_;
+    
     void updateDCP(int dcpIlluminant, Glib::ustring dcp_name);
     void updateRenderingIntent(const Glib::ustring &profile);
 public:
@@ -143,4 +136,3 @@ public:
     void toolReset(bool to_initial) override;
 };
 
-#endif

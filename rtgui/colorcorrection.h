@@ -71,6 +71,8 @@ public:
     void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller *caller) override;
 
     void toolReset(bool to_initial) override;
+
+    void drawCurve(bool rgb, Cairo::RefPtr<Cairo::Context> cr, Glib::RefPtr<Gtk::StyleContext> style, int W, int H);
     
 private:
     void regionGet(int idx);
@@ -79,6 +81,7 @@ private:
     void syncSlidersToggled();
     void wheelChanged();
     void hslWheelChanged(int c);
+    void lutChanged();
     
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvColorWheel;
@@ -91,6 +94,9 @@ private:
     rtengine::ProcEvent EvPivot;    
     rtengine::ProcEvent EvMode;
     rtengine::ProcEvent EvRgbLuminance;
+    rtengine::ProcEvent EvHueShift;
+    rtengine::ProcEvent EvCompression;
+    rtengine::ProcEvent EvLUT;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -117,25 +123,37 @@ private:
     Gtk::VBox *box_combined;
     Gtk::VBox *box_rgb;
     Gtk::VBox *box_hsl;
+    Gtk::HBox *box_lut;
     
     ColorWheel *wheel;
     Adjuster *inSaturation;
     Adjuster *outSaturation;
+    Adjuster *hueshift;
+    Gtk::DrawingArea *hueshift_bar;
+    Gtk::Frame *hueframe;
+    Gtk::Frame *satframe;
+    MyFileChooserButton *lut_filename;
+    
     Adjuster *slope;
     Adjuster *offset;
     Adjuster *power;
     Adjuster *pivot;
+    Adjuster *compression;
 
     Adjuster *slope_rgb[3];
     Adjuster *offset_rgb[3];
     Adjuster *power_rgb[3];
     Adjuster *pivot_rgb[3];
+    Adjuster *compression_rgb[3];
     Gtk::CheckButton *rgbluminance;
     
     Gtk::CheckButton *sync_rgb_sliders;
     
     Adjuster *lfactor[3];
     HueSatColorWheel *huesat[3];
+
+    Gtk::DrawingArea *curve_lum;
+    Gtk::DrawingArea *curve_rgb;
 
     rtengine::procparams::ColorCorrectionParams initial_params;
 };
