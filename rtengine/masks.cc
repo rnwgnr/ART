@@ -69,7 +69,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 
     // first fill with background
     global_mask(guide.width(), guide.height());
-    std::fill(global_mask[0], global_mask[0] + (global_mask.width() * global_mask.height()), bgcolor);
+    global_mask.fill(bgcolor);
 
     float min_feather = RT_INFINITY;
     float global_min_feather = RT_INFINITY;
@@ -89,9 +89,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
         }
         if (area_->getType() != AreaMask::Shape::GRADIENT) {
             // GRADIENT will update the whole image, no need to initialize it here
-            std::fill(shape_mask[0],
-                      shape_mask[0] + (shape_mask.width() * shape_mask.height()),
-                      area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+            shape_mask.fill(area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
         }
         float color;
 
@@ -131,10 +129,13 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                     double r, a;
                     p.get(r, a);
                     p.set(r, a - area->angle);
-                    Coord ret(p);
+                    CoordD ret(p);
                     ret += center;
                     ret -= origin;
-                    return ret;
+                    //return ret;
+                    double rx, ry;
+                    ret.get(rx, ry);
+                    return Coord(int(rx + 0.5), int(ry + 0.5));
                 };
 
             // draw the (bounded) ellipse
