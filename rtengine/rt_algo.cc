@@ -38,6 +38,9 @@
 #include "../rtgui/threadutils.h"
 #include "imagefloat.h"
 
+#define BENCHMARK
+#include "StopWatch.h"
+
 namespace {
 
 float calcBlendFactor(float val, float threshold) {
@@ -969,6 +972,505 @@ void multiply(Imagefloat *img, const array2D<float> &num, const array2D<float> &
             }
         }
     }
+}
+
+
+//-----------------------------------------------------------------------------
+// Implementation of
+// "An Image Inpainting Technique Based on the Fast Marching Method"
+// by Alexandru Telea
+//
+// adapted from the Python version available at
+// https://github.com/olvb/pyheal
+//-----------------------------------------------------------------------------
+
+namespace {
+
+class Inpainting {
+private:
+    enum {
+        KNOWN = 0,
+        BAND = 1,
+        UNKNOWN = 2
+    };
+
+    struct BandElement {
+        float val;
+        int y;
+        int x;
+
+        BandElement(float v=0.f, int yy=0, int xx=0): val(v), y(yy), x(xx) {}
+
+        bool operator<(const BandElement &other) const
+        {
+            float dv = val - other.val;
+            if (dv == 0) {
+                if (y != other.y) {
+                    return y < other.y;
+                } else {
+                    return x < other.x;
+                }
+            } else {
+                return dv > 0;
+            }
+        }
+    };
+
+    static constexpr float INF = 1e6;
+    static constexpr float EPS = 1e-6;
+    
+public:
+    Inpainting(Imagefloat *img, const array2D<float> &mask, float threshold,
+               int radius, int border, int limit, bool multithread):
+        img_(img), W_(img->getWidth()), H_(img->getHeight()),
+        mask_(mask), threshold_(threshold),
+        radius_(radius), border_(border), limit_(limit),
+        multithread_(multithread)
+    {
+        invert_mask_ = (threshold_ < 0.f);
+        threshold_ = std::abs(threshold_);
+    }
+    
+    void operator()()
+    {
+        auto band = init();
+
+        float last_dist = 0.f;
+        // find next pixel to inpaint with FFM (Fast Marching Method)
+        // FFM advances the band of the mask towards its center,
+        // by sorting the area pixels by their distance to the initial contour
+        while (!band.empty()) {
+            if (limit_ > 0 && last_dist >= limit_) {
+                break;
+            }
+            
+            std::pop_heap(band.begin(), band.end());
+            auto e = band.back();
+            band.pop_back();
+            int y = e.y;
+            int x = e.x;
+            
+            flags_[y][x] = KNOWN;
+
+            // process his immediate neighbors (top/bottom/left/right)
+            int ny[4] = { y-1, y, y+1, y };
+            int nx[4] = { x, x-1, x, x+1 };
+            for (int i = 0; i < 4; ++i) {
+                int nb_y = ny[i];
+                int nb_x = nx[i];
+                // pixel out of frame
+                if (nb_y < 0 || nb_y >= H_ || nb_x < 0 || nb_x >= W_) {
+                    continue;
+                }
+
+                // neighbor outside of initial mask or already processed, nothing to do
+                if (flags_[nb_y][nb_x] != UNKNOWN) {
+                    continue;
+                }
+
+                // compute neighbor distance to inital mask contour
+                float d1 = solve_eikonal(nb_y - 1, nb_x, nb_y, nb_x - 1, flags_);
+                float d2 = solve_eikonal(nb_y + 1, nb_x, nb_y, nb_x + 1, flags_);
+                float d3 = solve_eikonal(nb_y - 1, nb_x, nb_y, nb_x + 1, flags_);
+                float d4 = solve_eikonal(nb_y + 1, nb_x, nb_y, nb_x - 1, flags_);
+                last_dist = min(d1, d2, d3, d4);
+                dists_[nb_y][nb_x] = last_dist;
+
+                // inpaint neighbor
+                inpaint_pixel(nb_y, nb_x);
+
+                // add neighbor to narrow band
+                flags_[nb_y][nb_x] = BAND;
+                // push neighbor on band
+                band.push_back(BandElement(last_dist, nb_y, nb_x));
+                std::push_heap(band.begin(), band.end());
+            }
+        }
+    }
+
+private:
+    float solve_eikonal(int y1, int x1, int y2, int x2, const array2D<char> &flags)
+    {
+        if (y1 < 0 || y1 >= H_ || x1 < 0 || x1 >= W_) {
+            return INF;
+        }
+
+        if (y2 < 0 || y2 >= H_ || x2 < 0 || x2 >= W_) {
+            return INF;
+        }
+
+        auto flag1 = flags[y1][x1];
+        auto flag2 = flags[y2][x2];
+
+        if (flag1 == KNOWN && flag2 == KNOWN) {
+            float dist1 = dists_[y1][x1];
+            float dist2 = dists_[y2][x2];
+            float d = 2.f - SQR(dist1 - dist2);
+            if (d > 0.f) {
+                float r = std::sqrt(d);
+                float s = (dist1 + dist2 - r) / 2.f;
+                if (s >= dist1 && s >= dist2) {
+                    return s;
+                }
+                s += r;
+                if (s >= dist1 && s >= dist2) {
+                    return s;
+                }
+                return INF;
+            }
+        }
+
+        if (flag1 == KNOWN) {
+            float dist1 = dists_[y1][x1];
+            return 1.f + dist1;
+        }
+
+        if (flag2 == KNOWN) {
+            float dist2 = dists_[y2][x2];
+            return 1.f + dist2;
+        }
+
+        return INF;
+    }
+
+    void pixel_gradient(int y, int x, float &grad_y, float &grad_x)
+    {
+        float val = dists_[y][x];
+
+        int prev_y = y - 1;
+        int next_y = y + 1;
+        if (prev_y < 0 || next_y >= H_) {
+            grad_y = INF;
+        } else {
+            auto flag_prev_y = flags_[prev_y][x];
+            auto flag_next_y = flags_[next_y][x];
+
+            if (flag_prev_y != UNKNOWN && flag_next_y != UNKNOWN) {
+                grad_y = (dists_[next_y][x] - dists_[prev_y][x]) / 2.f;
+            } else if (flag_prev_y != UNKNOWN) {
+                grad_y = val - dists_[prev_y][x];
+            } else if (flag_next_y != UNKNOWN) {
+                grad_y = dists_[next_y][x] - val;
+            } else {
+                grad_y = 0.f;
+            }
+        }
+
+        int prev_x = x - 1;
+        int next_x = x + 1;
+        if (prev_x < 0 || next_x >= W_) {
+            grad_x = INF;
+        } else {
+            auto flag_prev_x = flags_[y][prev_x];
+            auto flag_next_x = flags_[y][next_x];
+
+            if (flag_prev_x != UNKNOWN && flag_next_x != UNKNOWN) {
+                grad_x = (dists_[y][next_x] - dists_[y][prev_x]) / 2.f;
+            } else if (flag_prev_x != UNKNOWN) {
+                grad_x = val - dists_[y][prev_x];
+            } else if (flag_next_x != UNKNOWN) {
+                grad_x = dists_[y][next_x] - val;
+            } else {
+                grad_x = 0.f;
+            }
+        }
+    }
+
+    //  compute distances between initial mask contour and pixels outside
+    //  mask, using FMM (Fast Marching Method)
+    void compute_outside_dists(const std::vector<BandElement> &iband)
+    {
+        array2D<char> flags(flags_.width(), flags_.height());
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread_)
+#endif
+        for (int y = 0; y < H_; ++y) {
+            for (int x = 0; x < W_; ++x) {
+                flags[y][x] = flags_[y][x];
+                if (flags[y][x] == KNOWN) {
+                    flags[y][x] = UNKNOWN;
+                } else if (flags[y][x] == UNKNOWN) {
+                    flags[y][x] = KNOWN;
+                }
+            }
+        }
+
+        std::vector<BandElement> band(iband);
+
+        float last_dist = 0.f;
+        float double_radius = radius_ * 2.f;
+        while (!band.empty()) {
+            // reached radius limit, stop FFM
+            if (last_dist >= double_radius) {
+                break;
+            }
+
+            // pop BAND pixel closest to initial mask contour and flag it as KNOWN
+            std::pop_heap(band.begin(), band.end());
+            auto e = band.back();
+            band.pop_back();
+            int y = e.y;
+            int x = e.x;
+            flags[y][x] = KNOWN;
+
+            int ny[4] = { y-1, y, y+1, y };
+            int nx[4] = { x, x-1, x, x+1 };
+            // process immediate neighbors (top/bottom/left/right)
+            for (int i = 0; i < 4; ++i) {
+                int nb_y = ny[i];
+                int nb_x = nx[i];
+
+                if (nb_y < 0 || nb_y >= H_ || nb_x < 0 || nb_x >= W_) {
+                    continue;
+                }
+                    
+                // neighbor already processed, nothing to do
+                if (flags[nb_y][nb_x] != UNKNOWN) {
+                    continue;
+                }
+
+                auto d1 = solve_eikonal(nb_y - 1, nb_x, nb_y, nb_x - 1, flags);
+                auto d2 = solve_eikonal(nb_y + 1, nb_x, nb_y, nb_x + 1, flags);
+                auto d3 = solve_eikonal(nb_y - 1, nb_x, nb_y, nb_x + 1, flags);
+                auto d4 = solve_eikonal(nb_y + 1, nb_x, nb_y, nb_x - 1, flags);
+
+                // compute neighbor distance to inital mask contour
+                last_dist = min(d1, d2, d3, d4);
+                dists_[nb_y][nb_x] = last_dist;
+
+                // add neighbor to narrow band
+                flags[nb_y][nb_x] = BAND;
+                band.push_back(BandElement(last_dist, nb_y, nb_x));
+                std::push_heap(band.begin(), band.end());
+            }
+        }
+
+        // distances are opposite to actual FFM propagation direction, fix it
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread_)
+#endif
+        for (int y = 0; y < H_; ++y) {
+            for (int x = 0; x < W_; ++x) {
+                dists_[y][x] *= -1.f;
+            }
+        }
+    }
+
+    std::vector<BandElement> init()
+    {
+        init_mask();
+        
+        dists_(W_, H_);
+        dists_.fill(INF);
+
+        flags_(W_, H_);
+        flags_.fill(UNKNOWN);
+
+        std::vector<BandElement> band;
+        
+        for (int y = 0; y < H_; ++y) {
+            for (int x = 0; x < W_; ++x) {
+                if (!bmask_[y][x]) {
+                    flags_[y][x] = KNOWN;
+                    continue;
+                }
+                
+                int ny[4] = { y-1, y, y+1, y };
+                int nx[4] = { x, x-1, x, x+1 };
+                
+                for (int i = 0; i < 4; ++i) {
+                    int nb_y = ny[i];
+                    int nb_x = nx[i];
+
+                    // neighbor out of frame
+                    if (nb_y < 0 || nb_y >= H_ || nb_x < 0 || nb_x >= W_) {
+                        continue;
+                    }
+
+                    // neighbor already flagged as BAND
+                    if (flags_[nb_y][nb_x] == BAND) {
+                        continue;
+                    }
+
+                    // neighbor out of mask => mask contour
+                    if (!bmask_[nb_y][nb_x]) {
+                        flags_[nb_y][nb_x] = BAND;
+                        dists_[nb_y][nb_x] = 0.f;
+                        band.push_back(BandElement(0.f, nb_y, nb_x));
+                        std::push_heap(band.begin(), band.end());
+                    }
+                }
+            }
+        }
+
+        compute_outside_dists(band);
+        return band;
+    }
+
+    void compute_manhattan_distance(array2D<int> &dmask)
+    {
+        // compute the manhattan distance, see
+        // https://blog.ostermiller.org/efficiently-implementing-dilate-and-erode-image-functions/
+        dmask(W_, H_);
+
+        // init the mask
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread_)
+#endif
+        for (int y = 0; y < H_; ++y) {
+            for (int x = 0; x < W_; ++x) {
+                float m = invert_mask_ ? LIM01(1.f - mask_[y][x]) : mask_[y][x];
+                dmask[y][x] = (m > threshold_ ? 1 : 0);
+            }
+        }
+        
+        // traverse from top left to bottom right
+        for (int y = 0; y < H_; ++y) {
+            for (int x = 0; x < W_; ++x) {
+                if (dmask[y][x] == 1){
+                    // first pass and pixel was on, it gets a zero
+                    dmask[y][x] = 0;
+                } else {
+                    // pixel was off
+                    // It is at most the sum of the lengths of the array
+                    // away from a pixel that is on
+                    dmask[y][x] = W_ + H_;
+                    // or one more than the pixel to the north
+                    if (y > 0) {
+                        dmask[y][x] = std::min(dmask[y][x], dmask[y-1][x]+1);
+                    }
+                    // or one more than the pixel to the west
+                    if (x > 0) {
+                        dmask[y][x] = std::min(dmask[y][x], dmask[y][x-1]+1);
+                    }
+                }
+            }
+        }
+        // traverse from bottom right to top left
+        for (int y = H_-1; y >= 0; --y) {
+            for (int x = W_ - 1; x >= 0; --x) {
+                // either what we had on the first pass
+                // or one more than the pixel to the south
+                if (y+1 < H_) {
+                    dmask[y][x] = std::min(dmask[y][x], dmask[y+1][x]+1);
+                }
+                // or one more than the pixel to the east
+                if (x + 1< W_) {
+                    dmask[y][x] = std::min(dmask[y][x], dmask[y][x+1]+1);
+                }
+            }
+        }
+    }
+
+    void init_mask()
+    {
+        array2D<int> dmask;
+        compute_manhattan_distance(dmask);
+        bmask_(W_, H_);
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread_)
+#endif
+        for (int y = 0; y < H_; ++y) {
+            for (int x = 0; x < W_; ++x) {
+                bmask_[y][x] = (dmask[y][x] <= border_ ? 1 : 0);
+            }
+        }
+    }
+
+    void inpaint_pixel(int y, int x)
+    {
+        auto dist = dists_[y][x];
+        // normal to pixel, ie direction of propagation of the FFM
+        float dist_grad_y, dist_grad_x;
+        pixel_gradient(y, x, dist_grad_y, dist_grad_x);
+        float pixel_r = 0.f, pixel_g = 0.f, pixel_b = 0.f;
+        float weight_sum = 0.f;
+
+#ifdef _OPENMP
+#       pragma omp parallel for reduction(+:pixel_r,pixel_g,pixel_b,weight_sum) if (multithread_)
+#endif
+        // iterate on each pixel in neighborhood (nb stands for neighbor)
+        for (int nb_y = y - radius_; nb_y <= y + radius_; ++nb_y) {
+            // pixel out of frame
+            if (nb_y < 0 || nb_y >= H_) {
+                continue;
+            }
+
+            for (int nb_x = x - radius_; nb_x < x + radius_; ++nb_x) {
+                // pixel out of frame
+                if (nb_x < 0 || nb_x >= W_) {
+                    continue;
+                }
+
+                // skip unknown pixels (including pixel being inpainted)
+                if (flags_[nb_y][nb_x] == UNKNOWN) {
+                    continue;
+                }
+
+                // vector from point to neighbor
+                int dir_y = y - nb_y;
+                int dir_x = x - nb_x;
+                float dir_length_square = SQR(dir_y) + SQR(dir_x);
+                float dir_length = std::sqrt(dir_length_square);
+                // pixel out of neighborhood
+                if (dir_length > radius_) {
+                    continue;
+                }
+
+                // compute weight
+                // neighbor has same direction gradient => contributes more
+                float dir_factor = std::abs(dir_y * dist_grad_y + dir_x * dist_grad_x);
+                if (dir_factor == 0.f) {
+                    dir_factor = EPS;
+                }
+
+                // neighbor has same contour distance => contributes more
+                float nb_dist = dists_[nb_y][nb_x];
+                float level_factor = 1.f / (1.f + abs(nb_dist - dist));
+
+                // neighbor is distant => contributes less
+                float dist_factor = 1.f / (dir_length * dir_length_square);
+
+                float weight = std::abs(dir_factor * dist_factor * level_factor);
+
+                pixel_r += weight * img_->r(nb_y, nb_x);
+                pixel_g += weight * img_->g(nb_y, nb_x);
+                pixel_b += weight * img_->b(nb_y, nb_x);
+                weight_sum += weight;
+            }
+        }
+
+        if (weight_sum > 0.f) {
+            img_->r(y, x) = pixel_r / weight_sum;
+            img_->g(y, x) = pixel_g / weight_sum;
+            img_->b(y, x) = pixel_b / weight_sum;
+        }
+    }
+    
+    Imagefloat *img_;
+    const int W_;
+    const int H_;
+    const array2D<float> &mask_;
+    float threshold_;
+    bool invert_mask_;
+    int radius_;
+    int border_;
+    int limit_;
+    bool multithread_;
+    array2D<float> dists_;
+    array2D<char> flags_;
+    array2D<char> bmask_;
+};
+
+} // namespace
+
+void inpaint(Imagefloat *img, const array2D<float> &mask, float threshold, int radius, int border, int limit, bool multithread)
+{
+    BENCHFUN
+        
+    Inpainting op(img, mask, threshold, radius, border, limit, multithread);
+    op();
 }
 
 } // namespace rtengine
