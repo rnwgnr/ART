@@ -29,7 +29,7 @@
 #include "sleef.h"
 #include "coord.h"
 #include "gauss.h"
-#include "labmasks.h"
+#include "masks.h"
 #include "clutstore.hpp"
 #include "../rtgui/multilangmgr.h"
 
@@ -79,8 +79,8 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     }
 
     if (editWhatever) {
-        LabMasksEditID id = static_cast<LabMasksEditID>(int(eid) - EUID_LabMasks_H1);
-        fillPipetteLabMasks(rgb, editWhatever, id, multiThread);
+        MasksEditID id = static_cast<MasksEditID>(int(eid) - EUID_LabMasks_H1);
+        fillPipetteMasks(rgb, editWhatever, id, multiThread);
     }
     
     const auto abcoord =
@@ -231,7 +231,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     std::vector<array2D<float>> abmask(n);
     std::vector<array2D<float>> Lmask(n);
 
-    if (!generateLabMasks(rgb, params->colorcorrection.labmasks, offset_x, offset_y, full_width, full_height, scale, multiThread, show_mask_idx, &Lmask, &abmask, cur_pipeline == Pipeline::NAVIGATOR ? plistener : nullptr)) {
+    if (!generateMasks(rgb, params->colorcorrection.labmasks, offset_x, offset_y, full_width, full_height, scale, multiThread, show_mask_idx, &Lmask, &abmask, cur_pipeline == Pipeline::NAVIGATOR ? plistener : nullptr)) {
         return true; // show mask is active, nothing more to do
     }
     

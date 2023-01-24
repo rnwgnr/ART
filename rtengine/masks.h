@@ -28,10 +28,10 @@
 
 namespace rtengine {
 
-bool generateLabMasks(Imagefloat *rgb, const std::vector<procparams::Mask> &masks, int offset_x, int offset_y, int full_width, int full_height, double scale, bool multithread, int show_mask_idx, std::vector<array2D<float>> *Lmask, std::vector<array2D<float>> *abmask, ProgressListener *pl);
+bool generateMasks(Imagefloat *rgb, const std::vector<procparams::Mask> &masks, int offset_x, int offset_y, int full_width, int full_height, double scale, bool multithread, int show_mask_idx, std::vector<array2D<float>> *Lmask, std::vector<array2D<float>> *abmask, ProgressListener *pl);
 
-enum class LabMasksEditID { H = 0, C, L };
-void fillPipetteLabMasks(Imagefloat *rgb, PlanarWhateverData<float> *editWhatever, LabMasksEditID id, bool multithread);
+enum class MasksEditID { H = 0, C, L };
+void fillPipetteMasks(Imagefloat *rgb, PlanarWhateverData<float> *editWhatever, MasksEditID id, bool multithread);
 
 bool getDeltaEColor(Imagefloat *rgb, int x, int y, int offset_x, int offset_y, int full_width, int full_height, double scale, float &L, float &C, float &H);
 
