@@ -250,7 +250,7 @@ bool do_inpainting(const Imagefloat *src, Imagefloat *dst, const array2D<float> 
 {
     const auto &r = params.regions[region];
     int radius = std::ceil(r.radius / scale);
-    if (r.mode != SmoothingParams::Region::Mode::LENS || radius < 1) {
+    if (radius < 1) {
         return false;
     }
     
@@ -269,7 +269,8 @@ bool do_inpainting(const Imagefloat *src, Imagefloat *dst, const array2D<float> 
         }
     }
 
-    inpaint(dst, mask, -0.25f, 16.f / scale + 0.5, radius / 2, radius * 2, multithread);
+    float threshold = r.mode == SmoothingParams::Region::Mode::LENS ? 0.25f : 0.95f;
+    inpaint(dst, mask, -threshold, 16.f / scale + 0.5, radius / 2, radius * 2, multithread);
 
     return true;
 }
