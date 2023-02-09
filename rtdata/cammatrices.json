@@ -1653,7 +1653,7 @@ XIAOMI 12S ULTRA REAR WIDE CAMERA
         "dcraw_matrix" : [16212, -8423, -1583, -4336, 12583, 1937, -195, 726, 6199]
     },
     {
-        "make_model" : "FUJIFILM GFX 100S",
+        "make_model" : ["FUJIFILM GFX 100S", "FUJIFILM GFX100S"],
         "dcraw_matrix" : [16212, -8423, -1583, -4336, 12583, 1937, -195, 726, 6199]
     },
     {
