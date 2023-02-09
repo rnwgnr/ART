@@ -23,6 +23,7 @@
 #include "refreshmap.h"
 #include "rt_math.h"
 
+
 namespace {
 
 // "ceil" rounding
@@ -174,7 +175,7 @@ void Crop::update(int todo)
 
     Imagefloat* baseCrop = origCrop;
 
-    bool needstransform  = parent->ipf.needsTransform();
+    bool needstransform  = parent->ipf.needsTransform() && (todo & M_TRANSFORM);
     bool show_denoise = params.denoise.enabled && (skip == 1 || options.denoiseZoomedOut);
 
     const auto invert_negative =
