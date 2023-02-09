@@ -179,9 +179,13 @@ int processLineParams(int argc, char **argv)
             case 'S':
                 if (remote) {
                     Glib::setenv("ART_IS_SESSION", "1");
-                    if (currParam == "-S" && iArg < argc) {
-                        ++iArg;
-                        art::session::load(Glib::ustring(fname_to_utf8(argv[iArg])));
+                    if (currParam == "-S") {
+                        if (iArg+1 < argc && argv[iArg+1][0] != '-') {
+                            ++iArg;
+                            art::session::load(Glib::ustring(fname_to_utf8(argv[iArg])));
+                        } else {
+                            art::session::load(art::session::filename() + ".last");
+                        }
                         break;
                     } else if (currParam == "-Sc") {
                         art::session::clear();
@@ -286,7 +290,7 @@ public:
     {
         if (rtWindow) {
 //            delete rtWindow;
-
+            art::session::save(art::session::filename() + ".last");
             art::session::clear();
             cleanup_rt();
         }
