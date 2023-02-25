@@ -22,7 +22,7 @@
 #include <omp.h>
 #endif
 
-#include "labmasks.h"
+#include "masks.h"
 #include "guidedfilter.h"
 #include "sleef.h"
 #include "coord.h"
@@ -69,7 +69,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
 
     // first fill with background
     global_mask(guide.width(), guide.height());
-    std::fill(global_mask[0], global_mask[0] + (global_mask.width() * global_mask.height()), bgcolor);
+    global_mask.fill(bgcolor);
 
     float min_feather = RT_INFINITY;
     float global_min_feather = RT_INFINITY;
@@ -89,9 +89,7 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
         }
         if (area_->getType() != AreaMask::Shape::GRADIENT) {
             // GRADIENT will update the whole image, no need to initialize it here
-            std::fill(shape_mask[0],
-                      shape_mask[0] + (shape_mask.width() * shape_mask.height()),
-                      area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
+            shape_mask.fill(area_->mode == AreaMask::Shape::SUBTRACT ? fgcolor : bgcolor);
         }
         float color;
 
@@ -131,10 +129,13 @@ bool generate_area_mask(int ox, int oy, int width, int height, const array2D<flo
                     double r, a;
                     p.get(r, a);
                     p.set(r, a - area->angle);
-                    Coord ret(p);
+                    CoordD ret(p);
                     ret += center;
                     ret -= origin;
-                    return ret;
+                    //return ret;
+                    double rx, ry;
+                    ret.get(rx, ry);
+                    return Coord(int(rx + 0.5), int(ry + 0.5));
                 };
 
             // draw the (bounded) ellipse
@@ -385,9 +386,8 @@ bool generate_drawn_mask(int ox, int oy, int width, int height, const DrawnMask 
     const bool add = drawnMask.mode != DrawnMask::INTERSECT;
 
     mask(mask_w, mask_h);
-    float *maskdata = mask;
     const float bgcolor = 0.f;
-    std::fill(maskdata, maskdata + (mask.width() * mask.height()), bgcolor);
+    mask.fill(bgcolor);
 
     struct StrokeEval {
         StrokeEval(int ox, int oy, int width, int height,
@@ -803,7 +803,7 @@ bool mask_postprocess(int width, int height, float scale, const array2D<float> &
 } // namespace
 
 
-bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x, int offset_y, int full_width, int full_height, double scale, bool multithread, int show_mask_idx, std::vector<array2D<float>> *Lmask, std::vector<array2D<float>> *abmask, ProgressListener *plistener)
+bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x, int offset_y, int full_width, int full_height, double scale, bool multithread, int show_mask_idx, std::vector<array2D<float>> *Lmask, std::vector<array2D<float>> *abmask, ProgressListener *plistener)
 {
     int n = masks.size();
     if (show_mask_idx < 0 || show_mask_idx >= n || !masks[show_mask_idx].enabled) {
@@ -1219,7 +1219,7 @@ bool generateLabMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offse
 }
 
 
-void fillPipetteLabMasks(Imagefloat *rgb, PlanarWhateverData<float> *editWhatever, LabMasksEditID id, bool multithread)
+void fillPipetteMasks(Imagefloat *rgb, PlanarWhateverData<float> *editWhatever, MasksEditID id, bool multithread)
 {
     TMatrix ws = ICCStore::getInstance()->workingSpaceMatrix(rgb->colorSpace());
     float wp[3][3];
@@ -1241,13 +1241,13 @@ void fillPipetteLabMasks(Imagefloat *rgb, PlanarWhateverData<float> *editWhateve
             float l, a, b;
             rgb2lab(mode, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), l, a, b, wp);
             switch (id) {
-            case LabMasksEditID::H:
+            case MasksEditID::H:
                 v = Color::huelab_to_huehsv2(xatan2f(b, a));
                 break;
-            case LabMasksEditID::C:
+            case MasksEditID::C:
                 v = LIM01<float>(std::sqrt(SQR(a) + SQR(b) + 0.001f) / 48000.f);
                 break;
-            case LabMasksEditID::L:
+            case MasksEditID::L:
                 v = LIM01<float>(l / 32768.f);
                 break;
             }

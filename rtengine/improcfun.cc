@@ -920,7 +920,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
             int fw = full_width * s, fh = full_height * s;
             int imw, imh;
             double s2 = resizeScale(params, fw, fh, imw, imh);
-            scale = s * s2;
+            scale = std::max(s * s2, 1.0);
             STEP_s_(prsharpening);
             scale = s;
         }

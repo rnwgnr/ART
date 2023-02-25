@@ -142,7 +142,7 @@ set(RTENGINESOURCEFILES
     lj92.c
     ipsmoothing.cc
     iplogenc.cc
-    labmasks.cc
+    masks.cc
     ipgrain.cc
     ipdenoise.cc
     iptextureboost.cc

@@ -560,7 +560,9 @@ int SubprocessInfo::wait()
 
 void SubprocessInfo::kill()
 {
-    ::kill(D(impl_)->pid, SIGTERM);
+    if (live()) {
+        ::kill(D(impl_)->pid, SIGTERM);
+    }
 }
 
 
@@ -645,9 +647,9 @@ std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::v
         auto args = &args_vec[0];
         
         if (search_in_path) {
-            execvp(path, args);
+            exit(execvp(path, args));
         } else {
-            execv(path, args);
+            exit(execv(path, args));
         }
         return res;
     }

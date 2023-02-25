@@ -7185,9 +7185,11 @@ void CLASS apply_tiff()
                    // ------- RT -------
                    bool sony_arq = !strncmp(make,"SONY",4) &&
                        (!strncmp(model,"ILCE-7RM3",9) ||
-                        !strncmp(model,"ILCE-7RM4",9));
+                        !strncmp(model,"ILCE-7RM4",9) ||
+                        !strncmp(RT_software.c_str(), "make_arq", 8));
                    bool fuji_arq = !strncmp(make, "FUJIFILM", 8) &&
-                       !strncmp(model, "GFX 100", 7);
+                       (!strncmp(model, "GFX 100", 7) ||
+                        !strncmp(RT_software.c_str(), "make_arq", 8));
                    if ((sony_arq || fuji_arq) &&
                        tiff_samples == 4 &&
                        tiff_ifd[raw].bytes == raw_width*raw_height*tiff_samples*2) {

@@ -533,13 +533,15 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
         libraw_->imgdata.params.use_camera_wb = 1;
         
         int err = libraw_->open_buffer(ifp->data, ifp->size);
-        if (err != LIBRAW_SUCCESS && err != LIBRAW_FILE_UNSUPPORTED) {
-            return err;
-        } else if (err == LIBRAW_FILE_UNSUPPORTED) {
+        if (err == LIBRAW_FILE_UNSUPPORTED || err == LIBRAW_TOO_BIG) {
             // fallback to the internal one
             use_internal_decoder_ = true;
-        } else if (strncmp(libraw_->unpack_function_name(), "sony_arq_load_raw", 17) == 0 || strncmp(libraw_->imgdata.idata.software, "HDRMerge", 8) == 0) {
+        } else if (err != LIBRAW_SUCCESS && strncmp(libraw_->imgdata.idata.software, "make_arq", 8) == 0) {
             use_internal_decoder_ = true;
+        } else if (err == LIBRAW_FILE_UNSUPPORTED && (strncmp(libraw_->unpack_function_name(), "sony_arq_load_raw", 17) == 0 || strncmp(libraw_->imgdata.idata.software, "HDRMerge", 8) == 0)) {
+            use_internal_decoder_ = true;
+        } else if (err != LIBRAW_SUCCESS) {
+            return err;
         } else {
             auto &d = libraw_->imgdata.idata;
             is_raw = d.raw_count;

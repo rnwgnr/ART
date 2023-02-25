@@ -604,7 +604,10 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
     box_hsl->pack_start(*box_hsl_h);
 
-    lut_filename = Gtk::manage(new MyFileChooserButton(M("TP_COLORCORRECTION_LUT")));
+    lut_filename = Gtk::manage(new MyFileChooserButton(M("TP_COLORCORRECTION_LUT_SELECT")));
+    if (!options.clutsDir.empty()) {
+        lut_filename->set_current_folder(options.clutsDir);
+    }
     box_lut = Gtk::manage(new Gtk::HBox());
     box_lut->pack_start(*Gtk::manage(new Gtk::Label(M("TP_COLORCORRECTION_LUT_FILENAME") + ": ")), Gtk::PACK_SHRINK, 4);
     box_lut->pack_start(*lut_filename, Gtk::PACK_EXPAND_WIDGET, 4);

@@ -26,7 +26,7 @@
 #include "rt_math.h"
 #include "rt_algo.h"
 #include "curves.h"
-#include "labmasks.h"
+#include "masks.h"
 #include "sleef.h"
 #include "gauss.h"
 #include "alignedbuffer.h"
@@ -246,14 +246,64 @@ bool build_blur_kernel(array2D<float> &out, const SmoothingParams &params, int r
 }
 
 
-void lens_motion_blur(ImProcData &im, Imagefloat *rgb, int region)
+bool do_inpainting(const Imagefloat *src, Imagefloat *dst, const array2D<float> &mask, const SmoothingParams &params, int region, double scale, bool multithread)
 {
+    const auto &r = params.regions[region];
+    int radius = std::ceil(r.radius / scale);
+    if (radius < 1) {
+        return false;
+    }
+    
+    const int W = src->getWidth();
+    const int H = src->getHeight();
+
+    dst->allocate(W, H);
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            dst->r(y, x) = src->r(y, x);
+            dst->g(y, x) = src->g(y, x);
+            dst->b(y, x) = src->b(y, x);
+        }
+    }
+
+    float threshold = r.mode == SmoothingParams::Region::Mode::LENS ? 0.25f : 0.95f;
+    inpaint(dst, mask, -threshold, 16.f / scale + 0.5, radius / 2, radius * 2, multithread);
+
+    return true;
+}
+
+
+void lens_motion_blur(ImProcData &im, Imagefloat *rgb, const array2D<float> &mask, int region)
+{
+    Imagefloat tmp;
+    Imagefloat *src = rgb;
+    if (do_inpainting(rgb, &tmp, mask, im.params->smoothing, region, im.scale, im.multiThread)) {
+        rgb = &tmp;
+    }
+    
     array2D<float> kernel;
     if (build_blur_kernel(kernel, im.params->smoothing, region, im.scale)) {
         Convolution conv(kernel, rgb->getWidth(), rgb->getHeight(), im.multiThread);
         conv(rgb->r.ptrs, rgb->r.ptrs);
         conv(rgb->g.ptrs, rgb->g.ptrs);
         conv(rgb->b.ptrs, rgb->b.ptrs);
+    }
+
+    const int W = src->getWidth();
+    const int H = src->getHeight();
+#ifdef _OPENMP
+#   pragma omp parallel for if (im.multiThread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            const float b = LIM01(mask[y][x]);
+            src->r(y, x) = intp(b, rgb->r(y, x), src->r(y, x));
+            src->g(y, x) = intp(b, rgb->g(y, x), src->g(y, x));
+            src->b(y, x) = intp(b, rgb->b(y, x), src->b(y, x));
+        }
     }
 }
 
@@ -624,8 +674,8 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
         
     if (params->smoothing.enabled) {
         if (editWhatever) {
-            LabMasksEditID id = static_cast<LabMasksEditID>(int(eid) - EUID_LabMasks_H3);
-            fillPipetteLabMasks(rgb, editWhatever, id, multiThread);
+            MasksEditID id = static_cast<MasksEditID>(int(eid) - EUID_LabMasks_H3);
+            fillPipetteMasks(rgb, editWhatever, id, multiThread);
         }
         
         int n = params->smoothing.regions.size();
@@ -634,7 +684,7 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             show_mask_idx = -1;
         }
         std::vector<array2D<float>> mask(n);
-        if (!generateLabMasks(rgb, params->smoothing.labmasks, offset_x, offset_y, full_width, full_height, scale, multiThread, show_mask_idx, nullptr, &mask, cur_pipeline == Pipeline::NAVIGATOR ? plistener : nullptr)) {
+        if (!generateMasks(rgb, params->smoothing.labmasks, offset_x, offset_y, full_width, full_height, scale, multiThread, show_mask_idx, nullptr, &mask, cur_pipeline == Pipeline::NAVIGATOR ? plistener : nullptr)) {
             return true; // show mask is active, nothing more to do
         }
 
@@ -700,7 +750,7 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
             } else if (r.mode == SmoothingParams::Region::Mode::LENS || r.mode == SmoothingParams::Region::Mode::MOTION) {
                 ImProcData im(params, scale, multiThread);
-                lens_motion_blur(im, &working, i);
+                lens_motion_blur(im, &working, blend, i);
             } else if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;
