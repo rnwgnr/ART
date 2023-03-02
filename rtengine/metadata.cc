@@ -898,11 +898,12 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
     }
 
     cJSON_Delete(root);
+    ret.erase("SourceFile");
 
     if (jsoncache_ && finfo) {
         jsoncache_->set(fname, JSONCacheVal(ret, finfo->modification_time()));
     }
-    
+
     return ret;
 }
 

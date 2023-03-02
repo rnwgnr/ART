@@ -63,16 +63,31 @@ bool DynamicProfileRule::CustomMetadata::operator()(const FramesMetaData *m) con
 
     try {
         rtengine::Exiv2Metadata meta(m->getFileName());
+        std::unordered_map<std::string, std::string> mn;
+        bool mn_loaded = false;
         meta.load();
         auto &exif = meta.exifData();
+        Glib::ustring found;
         for (auto &p : value) {
-            auto pos = exif.findKey(Exiv2::ExifKey(p.first));
-            if (pos == exif.end()) {
-                return false;
-            }
-            Glib::ustring found = pos->print(&exif);
-            if (!found.validate()) {
-                return false;
+            if (p.first.find("ExifTool.MakerNotes.") == 0) {
+                if (!mn_loaded) {
+                    mn_loaded = true;
+                    mn = meta.getMakernotes();
+                }
+                auto it = mn.find(p.first.substr(20));
+                if (it == mn.end()) {
+                    return false;
+                }
+                found = it->second;
+            } else {
+                auto pos = exif.findKey(Exiv2::ExifKey(p.first));
+                if (pos == exif.end()) {
+                    return false;
+                }
+                found = pos->print(&exif);
+                if (!found.validate()) {
+                    return false;
+                }
             }
             auto &val = p.second;
             if (val.find("re:") == 0) {

@@ -269,7 +269,14 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     mtbl->attach(*mlbl, 0, 3, 1, 1);
     exiftoolPath = Gtk::manage(new Gtk::Entry());
     exiftoolPath->set_tooltip_text (M ("PREFERENCES_EXIFTOOL_PATH_TOOLTIP"));
-    mtbl->attach_next_to(*exiftoolPath, *mlbl, Gtk::POS_RIGHT, 1, 1);
+    {
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        hb->pack_start(*exiftoolPath, Gtk::PACK_EXPAND_WIDGET);
+        //mtbl->attach_next_to(*exiftoolPath, *mlbl, Gtk::POS_RIGHT, 1, 1);
+        mtbl->attach_next_to(*hb, *mlbl, Gtk::POS_RIGHT, 1, 1);
+        show_exiftool_makernotes = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES")));
+        hb->pack_start(*show_exiftool_makernotes, Gtk::PACK_SHRINK, 4);
+    }
     setExpandAlignProperties(mlbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     setExpandAlignProperties(exiftoolPath, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
 
@@ -1483,7 +1490,11 @@ Gtk::Widget* Preferences::getSoundsPanel ()
 
     sndEnableToggled();
 
-    swSounds->add(*vbSounds);
+    auto f = Gtk::manage(new Gtk::Frame(""));
+    f->add(*vbSounds);
+    //swSounds->add(*vbSounds);
+    swSounds->add(*f);
+    
     return swSounds;
 }
 
@@ -1853,6 +1864,7 @@ void Preferences::storePreferences ()
     moptions.rtSettings.metadata_xmp_sync = rtengine::Settings::MetadataXmpSync(metadataSyncCombo->get_active_row_number());
     moptions.rtSettings.xmp_sidecar_style = rtengine::Settings::XmpSidecarStyle(xmpSidecarCombo->get_active_row_number());
     moptions.rtSettings.exiftool_path = exiftoolPath->get_text();
+    moptions.show_exiftool_makernotes = show_exiftool_makernotes->get_active();
 
     moptions.toolpanels_disable = ckbTpDisable->get_active();
 
@@ -2145,6 +2157,7 @@ void Preferences::fillPreferences ()
     metadataSyncCombo->set_active(int(moptions.rtSettings.metadata_xmp_sync));
     xmpSidecarCombo->set_active(int(moptions.rtSettings.xmp_sidecar_style));
     exiftoolPath->set_text(moptions.rtSettings.exiftool_path);
+    show_exiftool_makernotes->set_active(moptions.show_exiftool_makernotes);
 
     ckbTpDisable->set_active(moptions.toolpanels_disable);
 

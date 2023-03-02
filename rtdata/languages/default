@@ -1131,6 +1131,7 @@ PREFERENCES_SHOWBASICEXIF;Show basic Exif info
 PREFERENCES_SHOWDATETIME;Show date and time
 PREFERENCES_SHOWEXPOSURECOMPENSATION;Append exposure compensation
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;Show Filmstrip toolbar
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;Use exiftool to extract makernotes
 PREFERENCES_SHTHRESHOLD;Threshold for clipped shadows
 PREFERENCES_SINGLETAB;Single Editor Tab Mode
 PREFERENCES_SINGLETABBOTTOM;Single Editor Tab Mode, Filmstrip below Editor

@@ -612,6 +612,7 @@ void Options::setDefaults()
     rtSettings.exiftool_path += ".exe";
 #endif
     rtSettings.thread_pool_size = 0;
+    show_exiftool_makernotes = true;
 
     browser_width_for_inspector = 0;
 
@@ -1699,6 +1700,9 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Metadata", "ExiftoolPath")) {
                     rtSettings.exiftool_path = keyFile.get_string("Metadata", "ExiftoolPath");
                 }
+                if (keyFile.has_key("Metadata", "ShowExiftoolMakernotes")) {
+                    show_exiftool_makernotes = keyFile.get_boolean("Metadata", "ShowExiftoolMakernotes");
+                }
             }
 
             if (keyFile.has_group("False Colors Map")) {
@@ -2159,6 +2163,7 @@ void Options::saveToFile(Glib::ustring fname)
         }
 
         keyFile.set_string("Metadata", "ExiftoolPath", rtSettings.exiftool_path);
+        keyFile.set_boolean("Metadata", "ShowExiftoolMakernotes", show_exiftool_makernotes);
 
         for (auto &p : falseColorsMap) {
             keyFile.set_string("False Colors Map", "IRE_" + std::to_string(p.first), p.second);

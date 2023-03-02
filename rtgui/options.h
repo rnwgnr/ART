@@ -465,6 +465,8 @@ public:
     bool remember_exif_filter_settings;
     ExifFilterSettings last_exif_filter_settings;
 
+    bool show_exiftool_makernotes;
+
     std::vector<int> theme_bg_color; // RGB in 0-255
     std::vector<int> theme_fg_color;
     std::vector<int> theme_hl_color;

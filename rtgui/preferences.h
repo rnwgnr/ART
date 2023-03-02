@@ -199,6 +199,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::ComboBoxText *metadataSyncCombo;
     Gtk::ComboBoxText *xmpSidecarCombo;
     Gtk::Entry *exiftoolPath;
+    Gtk::CheckButton *show_exiftool_makernotes;
     Gtk::ComboBoxText *wbpreview;
     Gtk::CheckButton *remember_metadata_filters;
     Gtk::CheckButton *dir_browser_single_click;

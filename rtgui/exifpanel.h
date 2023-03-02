@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _EXIFPANEL_
-#define _EXIFPANEL_
+#pragma once
 
 #include <gtkmm.h>
 #include <unordered_set>
@@ -32,10 +31,8 @@ private:
     rtengine::procparams::ExifPairs changeList;
     rtengine::procparams::ExifPairs defChangeList;
 
-    class ExifColumns : public Gtk::TreeModelColumnRecord
-    {
+    class ExifColumns : public Gtk::TreeModelColumnRecord {
     public:
-        // Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> expander_icon;
         Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> icon;
         Gtk::TreeModelColumn<std::string> key;
         Gtk::TreeModelColumn<Glib::ustring> label;
@@ -45,6 +42,7 @@ private:
         Gtk::TreeModelColumn<bool> edited;
         Gtk::TreeModelColumn<bool> active;
         Gtk::TreeModelColumn<bool> is_group;
+        Gtk::TreeModelColumn<bool> activatable;
 
         ExifColumns()
         {
@@ -57,10 +55,9 @@ private:
             add(editable);
             add(active);
             add(is_group);
-            // add(expander_icon);
+            add(activatable);
         }
     };
-    //Glib::RefPtr<Gdk::Pixbuf> keepicon;
     Glib::RefPtr<Gdk::Pixbuf> editicon;
     Glib::RefPtr<Gdk::Pixbuf> open_icon_;
     Glib::RefPtr<Gdk::Pixbuf> closed_icon_;
@@ -86,7 +83,7 @@ private:
 
     rtengine::ProgressListener *pl_;
 
-    void addTag(const std::string &key, const std::pair<Glib::ustring, Glib::ustring> &label, const Glib::ustring &value, bool editable, bool edited);
+    void addTag(const std::string &key, const std::pair<Glib::ustring, Glib::ustring> &label, const Glib::ustring &value, bool editable, bool edited, bool activatable=true);
     void refreshTags();
     void resetIt(Gtk::TreeModel::iterator iter);
     void resetPressed();
@@ -126,4 +123,3 @@ public:
     void setProgressListener(rtengine::ProgressListener *pl);
 };
 
-#endif
