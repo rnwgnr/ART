@@ -110,10 +110,10 @@ Spot::Spot() :
 
     auto m = ProcEventMapper::getInstance();
     EvSpotEnabled = m->newEvent(ALLNORAW, "TP_SPOT_LABEL");
-    EvSpotEnabledOPA = m->newAnonEvent(ALLNORAW);
-    EvSpotEntry = m->newEvent(ALLNORAW, "HISTORY_MSG_SPOT_ENTRY");
-    EvSpotEntryOPA = m->newEvent(ALLNORAW, "HISTORY_MSG_SPOT_ENTRY");
-    EvToolReset.set_action(ALLNORAW);
+    EvSpotEnabledOPA = m->newAnonEvent(SPOTADJUST);
+    EvSpotEntry = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
+    EvSpotEntryOPA = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
+    EvToolReset.set_action(SPOTADJUST);
 
     spot_frame = Gtk::manage(new Gtk::Frame(M("TP_SPOT_CUR_SPOT_LABEL")));
     Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
@@ -845,19 +845,24 @@ void Spot::tweakParams(procparams::ProcParams& pparams)
     // -> disabling standard crop
     pparams.crop.enabled = false;
 
-//     // -> disabling time consuming and unnecessary tool
-// //    pparams.sh.enabled = false;
-//     pparams.blackwhite.enabled = false;
-//     pparams.dehaze.enabled = false;
-// //    pparams.wavelet.enabled = false;
-//     pparams.filmSimulation.enabled = false;
-// //    pparams.sharpenEdge.enabled = false;
-// //    pparams.sharpenMicro.enabled = false;
-//     pparams.sharpening.enabled = false;
-//     pparams.softlight.enabled = false;
-//     pparams.gradient.enabled = false;
-//     pparams.pcvignette.enabled = false;
-// //    pparams.colorappearance.enabled = false;
+    // -> disabling time consuming and unnecessary tool
+    /*
+    pparams.colorcorrection.enabled = false;
+    pparams.localContrast.enabled = false;
+    pparams.smoothing.enabled = false;
+    pparams.textureBoost.enabled = false;
+    pparams.toneEqualizer.enabled = false;
+    pparams.fattal.enabled = false;
+    pparams.dehaze.enabled = false;
+    pparams.filmSimulation.enabled = false;
+//  pparams.blackwhite.enabled = false;
+    pparams.defringe.enabled = false;
+    pparams.sharpening.enabled = false;
+    pparams.impulseDenoise.enabled = false;
+    pparams.softlight.enabled = false;
+    pparams.gradient.enabled = false;
+    pparams.pcvignette.enabled = false;
+    */
 }
 
 
