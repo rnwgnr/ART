@@ -880,6 +880,26 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
         return ret;
     }
 
+    const auto tostr =
+        [](double d) -> std::string
+        {
+            if (d == int(d)) {
+                return std::to_string(int(d));
+            } else {
+                auto s = std::to_string(d);
+                auto p = s.rfind('.');
+                if (p != std::string::npos) {
+                    while (s.back() == '0') {
+                        s.pop_back();
+                    }
+                    if (s.back() == '.') {
+                        s.pop_back();
+                    }
+                }
+                return s;
+            }
+        };
+
     if (cJSON_IsArray(root) && cJSON_GetArraySize(root) == 1) {
         cJSON *obj = cJSON_GetArrayItem(root, 0);
         if (obj && cJSON_IsObject(obj)) {
@@ -887,7 +907,7 @@ std::unordered_map<std::string, std::string> Exiv2Metadata::getExiftoolMakernote
                 if (e->type & cJSON_String) {
                     ret[e->string] = e->valuestring;
                 } else if (e->type & cJSON_Number) {
-                    ret[e->string] = std::to_string(e->valuedouble);
+                    ret[e->string] = tostr(e->valuedouble);
                 } else if (e->type & cJSON_True) {
                     ret[e->string] = "true";
                 } else if (e->type & cJSON_False) {
