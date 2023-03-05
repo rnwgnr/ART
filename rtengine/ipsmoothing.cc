@@ -292,17 +292,19 @@ void lens_motion_blur(ImProcData &im, Imagefloat *rgb, const array2D<float> &mas
         conv(rgb->b.ptrs, rgb->b.ptrs);
     }
 
-    const int W = src->getWidth();
-    const int H = src->getHeight();
+    if (src != rgb) {
+        const int W = src->getWidth();
+        const int H = src->getHeight();
 #ifdef _OPENMP
-#   pragma omp parallel for if (im.multiThread)
+#       pragma omp parallel for if (im.multiThread)
 #endif
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            const float b = LIM01(mask[y][x]);
-            src->r(y, x) = intp(b, rgb->r(y, x), src->r(y, x));
-            src->g(y, x) = intp(b, rgb->g(y, x), src->g(y, x));
-            src->b(y, x) = intp(b, rgb->b(y, x), src->b(y, x));
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                const float b = LIM01(mask[y][x]);
+                src->r(y, x) = intp(b, rgb->r(y, x), src->r(y, x));
+                src->g(y, x) = intp(b, rgb->g(y, x), src->g(y, x));
+                src->b(y, x) = intp(b, rgb->b(y, x), src->b(y, x));
+            }
         }
     }
 }
@@ -710,7 +712,9 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             int ww = max_x - min_x;
             int hh = max_y - min_y;
 
-            if (ww * hh < (W * H) / 2) {
+            auto &r = params->smoothing.regions[i];
+            
+            if (ww * hh < (W * H) / 2 && !(r.mode == SmoothingParams::Region::Mode::LENS || r.mode == SmoothingParams::Region::Mode::MOTION)) {
                 working.allocate(ww, hh);
 #ifdef _OPENMP
 #               pragma omp parallel for if (multiThread)
@@ -735,7 +739,6 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 rgb->copyTo(&working);
             }
 
-            auto &r = params->smoothing.regions[i];
             array2D<float> R(ww, hh, working.r.ptrs, ARRAY2D_BYREFERENCE);
             array2D<float> G(ww, hh, working.g.ptrs, ARRAY2D_BYREFERENCE);
             array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
