@@ -297,6 +297,15 @@ public:
         return ok;
     }
 
+    void shutdown()
+    {
+        if (p_) {
+            p_->write("-stay_open\n0\n", 13);
+            p_->flush();
+        }
+        cleanup();
+    }
+
 private:
     Glib::ustring get_bin()
     {
@@ -792,6 +801,9 @@ void Exiv2Metadata::init(const Glib::ustring &base_dir, const Glib::ustring &use
 void Exiv2Metadata::cleanup()
 {
     Exiv2::XmpParser::terminate();
+    if (exiftool_) {
+        exiftool_->shutdown();
+    }
 }
 
 
