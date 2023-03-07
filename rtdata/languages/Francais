@@ -1907,6 +1907,7 @@ TP_SPOT_COUNTLABEL;%1 point(s)
 TP_SPOT_ENTRYCHANGED;Modification d'un point
 TP_SPOT_HINT;Cliquez sur ce bouton pour pouvoir opérer sur la zone de prévisualisation.\nPour ajouter un spot, pressez Ctrl et le bouton gauche de la souris, tirez le cercle (la touche Ctrl peut être relâchée) vers la position source, puis relâchez le bouton de la souris.\nPour éditer un spot, placez le curseur au-dessus de la marque blanche situant une zone éditée, faisant apparaître la géométrie d'édition.\nPour déplacer le spot source ou destination, placez le curseur en son centre et tirez le.\nLe cercle intérieur (zone d'effet maximum) et le cercle "d'adoucissement" peuvent être redimmensionné en plaçant le curseur dessus (le cercle devient orange) et en le tirant (le cercle devient rouge).\nQuand les changements sont terminés, un clic droit en dehors de tout spot termine le mode d'édition, ou cliquez à nouveau sur ce bouton
 TP_SPOT_LABEL;Retrait de taches
+TP_SPOT_LIGHTPIPELINE_HINT;Cliquez sur ce bouton pour modifier les taches en prévisualisant une image simplifiée en désactivant les outils consommant beaucoup de ressources (option de performance).\n\nN'a d'effet que lorsque la manipulation à l'écran est active.
 TP_SPOT_CUR_SPOT_LABEL;Tache en cours
 TP_SPOT_SOURCE_X;Source X
 TP_SPOT_SOURCE_Y;Source Y

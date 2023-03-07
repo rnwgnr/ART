@@ -79,7 +79,11 @@ private:
     Line link;                     // to show the link between the Source and Target position
     std::unique_ptr<Geometry> whole_area_rectangle; // dummy rectangle to always set a custom cursor
     
+    RTImage lightPipelineOnImage;
+    RTImage lightPipelineOffImage;
+
     OPIcon *getActiveSpotIcon ();
+    void lightPipelineToggled();
     void updateGeometry ();
     void createGeometry ();
     void addNewEntry ();
@@ -91,8 +95,9 @@ protected:
     Gtk::CheckButton* editedCheckBox;
     Gtk::Label* countLabel;
     Gtk::ToggleButton* edit;
+    Gtk::ToggleButton* lightPipeline;
     Gtk::Button* reset;
-    sigc::connection editConn, editedConn;
+    sigc::connection editConn, editedConn, lightPipelineConn;
 
     void editToggled ();
     void editedToggled ();
