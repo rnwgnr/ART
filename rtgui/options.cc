@@ -612,7 +612,7 @@ void Options::setDefaults()
     rtSettings.exiftool_path += ".exe";
 #endif
     rtSettings.thread_pool_size = 0;
-    show_exiftool_makernotes = true;
+    show_exiftool_makernotes = false;
 
     browser_width_for_inspector = 0;
 
