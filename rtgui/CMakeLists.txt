@@ -169,6 +169,7 @@ set(NONCLISOURCEFILES
     focusmask.cc
     shortcutmanager.cc
     session.cc
+    thumbimgcache.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")

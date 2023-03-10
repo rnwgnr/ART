@@ -36,6 +36,7 @@
 #include "halffloat.h"
 #include "base64.h"
 #include "iccstore.h"
+#include "compress.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -49,60 +50,6 @@ using namespace std;
 namespace rtengine { namespace procparams {
 
 namespace {
-
-std::vector<uint8_t> compress(const std::string &src)
-{
-    auto s = Gio::MemoryOutputStream::create(nullptr, 0, g_realloc, g_free);
-    auto c = Gio::ZlibCompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW, -1);
-    std::vector<uint8_t> res;
-    {
-        auto stream = Gio::ConverterOutputStream::create(s, c);
-        stream->set_close_base_stream(true);
-        gsize n;
-        if (!stream->write_all(src, n)) {
-            return res;
-        }
-    }
-    char *data = static_cast<char *>(s->get_data());
-    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
-        res.push_back(data[i]);
-    }
-    return res;
-}
-
-
-std::string decompress(const std::vector<uint8_t> &src)
-{
-    auto s = Gio::MemoryOutputStream::create(nullptr, 0, g_realloc, g_free);
-    auto c = Gio::ZlibDecompressor::create(Gio::ZLIB_COMPRESSOR_FORMAT_RAW);
-    std::vector<char> res;
-    {
-        auto stream = Gio::ConverterOutputStream::create(s, c);
-        stream->set_close_base_stream(true);
-        constexpr gsize chunk = 512;
-        size_t i = 0;
-        while (i < src.size()) {
-            gsize count = std::min(src.size() - i, chunk);
-            auto n = stream->write(&(src[i]), count);
-            if (n < 0) {
-                return "";
-            } else if (n == 0) {
-                break;
-            }
-            i += n;
-        }
-        // gsize n;
-        // if (!stream->write_all(&(src[0]), src.size(), n)) {
-        //     return "";
-        // }
-    }
-    char *data = static_cast<char *>(s->get_data());    
-    for (size_t i = 0, n = s->get_data_size(); i < n; ++i) {
-        res.push_back(data[i]);
-    }
-    res.push_back(0);
-    return std::string(&(res[0]));
-}
 
 class ConversionError: public std::exception {
     const char *what() const noexcept { return "base64 error"; }
@@ -557,7 +504,7 @@ bool saveToKeyfile(
 
 Glib::ustring filenameToUri(const Glib::ustring &fname, const Glib::ustring &basedir)
 {
-    if (fname.empty()) {
+    if (fname.empty() || basedir.empty()) {
         return fname;
     }
 
@@ -845,11 +792,20 @@ AreaMask::AreaMask():
 
 bool AreaMask::operator==(const AreaMask &other) const
 {
-    return enabled == other.enabled
+    if (enabled == other.enabled
         && feather == other.feather
         && blur == other.blur
         && contrast == other.contrast
-        && shapes == other.shapes;
+        && shapes.size() == other.shapes.size()) {
+        for (size_t i = 0, n = shapes.size(); i < n; ++i) {
+            if (*(shapes[i]) != *(other.shapes[i])) {
+                return false;
+            }
+        }
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
@@ -3255,6 +3211,7 @@ ProcParams::ProcParams()
 {
     setDefaults();
 }
+
 
 void ProcParams::setDefaults()
 {
@@ -5904,6 +5861,38 @@ int ProcParams::write(ProgressListener *pl,
     }
 
     return error;
+}
+
+
+bool ProcParams::from_data(const char *data)
+{
+    setlocale(LC_NUMERIC, "C");  // to set decimal point to "."
+    try {
+        KeyFile kf;
+        if (!kf.load_from_data(data)) {
+            return false;
+        }
+
+        return load(nullptr, kf, nullptr, true, "") == 0;
+    } catch (const Glib::Error& e) {
+        return false;
+    }
+}
+
+
+std::string ProcParams::to_data() const
+{
+    try {
+        KeyFile kf;
+        int ret = save(nullptr, kf, nullptr, "");
+        if (ret != 0) {
+            return "";
+        }
+
+        return kf.to_data();
+    } catch (Glib::KeyFileError &exc) {
+        return "";
+    }
 }
 
 

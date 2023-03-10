@@ -36,13 +36,14 @@
 #include "ppversion.h"
 #include "version.h"
 #include "../rtengine/metadata.h"
+#include "thumbimgcache.h"
 
 using namespace rtengine::procparams;
 
 Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf)
     : fname(fname), cfs(*cf), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr),
       pparamsValid(false), needsReProcessing(true), imageLoading(false), lastImg(nullptr),
-      lastW(0), lastH(0), lastScale(0), initial_(false)
+      lastW(0), lastH(0), lastScale(0), initial_(false), first_process_(true)
 {
     loadProcParams(false);
 
@@ -59,7 +60,7 @@ Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageDat
 Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::string& md5)
     : fname(fname), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr), pparamsValid(false),
       needsReProcessing(true), imageLoading(false), lastImg(nullptr),
-      lastW(0), lastH(0), lastScale(0.0), initial_(true)
+      lastW(0), lastH(0), lastScale(0.0), initial_(true), first_process_(true)
 {
 
 
@@ -99,6 +100,8 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache, bool info_only)
     cfs.supported = false;
     cfs.exifValid = false;
     cfs.timeValid = false;
+
+    first_process_ = true;
 
     if (ext.lowercase() == "jpg" || ext.lowercase() == "jpeg") {
         infoFromImage (fname);
@@ -687,9 +690,17 @@ rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::Pro
         // RAW internal thumbnail, no profile yet: just do some rotation etc.
         image = tpp->quickProcessImage (pparams, h, rtengine::TI_Nearest);
     } else {
-        // Full thumbnail: apply profile
-        // image = tpp->processImage (pparams, h, rtengine::TI_Bilinear, cfs.getCamera(), cfs.focalLen, cfs.focalLen35mm, cfs.focusDist, cfs.shutter, cfs.fnumber, cfs.iso, cfs.expcomp, scale );
-        image = tpp->processImage (pparams, static_cast<rtengine::eSensorType>(cfs.sensortype), h, rtengine::TI_Bilinear, &cfs, scale );
+        auto fn = getCacheFileName("images", "");
+        if (first_process_) {
+            image = art::thumbimgcache::load(fn, pparams, h);
+            first_process_ = false;
+        }
+        if (!image) {
+            // Full thumbnail: apply profile
+            // image = tpp->processImage (pparams, h, rtengine::TI_Bilinear, cfs.getCamera(), cfs.focalLen, cfs.focalLen35mm, cfs.focusDist, cfs.shutter, cfs.fnumber, cfs.iso, cfs.expcomp, scale );
+            image = tpp->processImage (pparams, static_cast<rtengine::eSensorType>(cfs.sensortype), h, rtengine::TI_Bilinear, &cfs, scale );
+            art::thumbimgcache::store(fn, pparams, image);
+        }
     }
 
     tpp->getDimensions(lastW, lastH, lastScale);
@@ -717,6 +728,7 @@ rtengine::IImage8* Thumbnail::upgradeThumbImage (const rtengine::procparams::Pro
     // rtengine::IImage8* image = tpp->processImage (pparams, h, rtengine::TI_Bilinear, cfs.getCamera(), cfs.focalLen, cfs.focalLen35mm, cfs.focusDist, cfs.shutter, cfs.fnumber, cfs.iso, cfs.expcomp,  scale );
     rtengine::IImage8* image = tpp->processImage (pparams, static_cast<rtengine::eSensorType>(cfs.sensortype), h, rtengine::TI_Bilinear, &cfs, scale );
     tpp->getDimensions(lastW, lastH, lastScale);
+    art::thumbimgcache::store(getCacheFileName("images", ""), pparams, image);
 
     delete tpp;
     tpp = nullptr;

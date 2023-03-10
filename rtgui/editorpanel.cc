@@ -157,6 +157,9 @@ private:
 #if !defined(__APPLE__) // monitor profile not supported on apple
     void prepareProfileBox ()
     {
+        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
+        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName());
+
         profileBox.setPreferredWidth (70, 200);
         setExpandAlignProperties (&profileBox, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
 
@@ -175,8 +178,6 @@ private:
         } else {
             profileBox.set_active (0);
         }
-
-        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
 
         for (const auto &profile : profiles) {
             profileBox.append(profile);

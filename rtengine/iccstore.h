@@ -98,6 +98,7 @@ public:
     static cmsHPROFILE createFromMatrix(const double matrix[3][3], bool gamma=false, const Glib::ustring &name=Glib::ustring());
 
     cmsHTRANSFORM getThumbnailMonitorTransform();
+    const std::string &getThumbnailMonitorHash() const;
 
     bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out);
     static bool getProfileMatrix(cmsHPROFILE prof, Mat33<float> &out);

@@ -461,6 +461,7 @@ void Options::setDefaults()
 #endif
     thumb_delay_update = false;
     thumb_lazy_caching = true;
+    thumb_cache_processed = false;
     profile_append_mode = false;
     maxInspectorBuffers = 2; //  a rather conservative value for low specced systems...
     inspectorDelay = 0;
@@ -1174,6 +1175,10 @@ void Options::readFromFile(Glib::ustring fname)
                 
                 if (keyFile.has_key("Performance", "ThumbLazyCaching")) {
                     thumb_lazy_caching = keyFile.get_boolean("Performance", "ThumbLazyCaching");
+                }
+
+                if (keyFile.has_key("Performance", "ThumbCacheProcessed")) {
+                    thumb_cache_processed = keyFile.get_boolean("Performance", "ThumbCacheProcessed");
                 }
             }
 
@@ -1949,6 +1954,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("Performance", "ThumbUpdateThreadLimit", rtSettings.thread_pool_size);
         keyFile.set_boolean("Performance", "ThumbDelayUpdate", thumb_delay_update);
         keyFile.set_boolean("Performance", "ThumbLazyCaching", thumb_lazy_caching);
+        keyFile.set_boolean("Performance", "ThumbCacheProcessed", thumb_cache_processed);
         
         keyFile.set_integer("Performance", "WBPreviewMode", wb_preview_mode);
         keyFile.set_integer("Inspector", "Mode", int(rtSettings.thumbnail_inspector_mode));

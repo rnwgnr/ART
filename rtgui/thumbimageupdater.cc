@@ -76,7 +76,6 @@ public:
     {
     }
 
-    bool slow_down_;
     std::mutex mutex_;
 
     JobList jobs_;
@@ -199,7 +198,7 @@ void ThumbImageUpdater::add(ThumbBrowserEntryBase* tbe, bool* priority, bool upg
         if ( i->tbe_ == tbe &&
                 i->listener_ == l &&
                 i->upgrade_ == upgrade ) {
-            DEBUG("updating job %s", tbe->shortname.c_str());
+            DEBUG("updating job %s", tbe->filename.c_str());
             // we have one, update queue entry, will be picked up by thread when processed
             /*i->pparams_ = params;
             i->height_ = height; */
@@ -209,12 +208,11 @@ void ThumbImageUpdater::add(ThumbBrowserEntryBase* tbe, bool* priority, bool upg
     }
 
     // create a new job and append to queue
-    DEBUG("queueing job %s", tbe->shortname.c_str());
+    DEBUG("queueing job %s", tbe->filename.c_str());
     impl_->jobs_.push_back(Impl::Job(tbe, priority, upgrade, l));
 
-    DEBUG("adding run request %s", tbe->shortname.c_str());
-    //impl_->threadPool_->push(sigc::mem_fun(*impl_, &ThumbImageUpdater::Impl::processNextJob));
-    rtengine::ThreadPool::add_task(/*impl_->slow_down_ ? rtengine::ThreadPool::Priority::LOWEST :*/ rtengine::ThreadPool::Priority::LOW, sigc::mem_fun(*impl_, &ThumbImageUpdater::Impl::processNextJob));
+    DEBUG("adding run request %s", tbe->filename.c_str());
+    rtengine::ThreadPool::add_task(rtengine::ThreadPool::Priority::LOW, sigc::mem_fun(*impl_, &ThumbImageUpdater::Impl::processNextJob));
 }
 
 

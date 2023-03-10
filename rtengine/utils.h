@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -21,8 +22,7 @@
 #include <type_traits>
 #include <glibmm/ustring.h>
 
-namespace rtengine
-{
+namespace rtengine {
 
 // Update a point of a Cairo::Surface by accessing the raw data
 void poke255_uc(unsigned char*& dest, unsigned char r, unsigned char g, unsigned char b);

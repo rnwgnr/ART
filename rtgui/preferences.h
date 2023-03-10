@@ -154,6 +154,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener {
     Gtk::SpinButton* thumbUpdateThreadLimit;
     Gtk::CheckButton *thumbDelayUpdate;
     Gtk::CheckButton *thumbLazyCaching;
+    Gtk::CheckButton *thumb_cache_processed_;
 
     // Gtk::CheckButton* ckbmenuGroupRank;
     // Gtk::CheckButton* ckbmenuGroupLabel;
