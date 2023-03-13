@@ -19,6 +19,7 @@
 #18 2022-11-23 mrleemon, update for 1.17
 #19 2022-12-01 mrleemon, update for 1.17.2
 #20 2022-12-27 mrleemon, update for 1.18
+#21 2023-03-11 mrleemon, update for 1.18.1
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -1154,6 +1155,7 @@ PREFERENCES_SHOWBASICEXIF;Mostra dades Exif bàsiques
 PREFERENCES_SHOWDATETIME;Mostra data i hora
 PREFERENCES_SHOWEXPOSURECOMPENSATION;Annexa la compensació d'exposició
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;Mostra la barra d'eines estil tira de pel·lícula
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;Utilitza exiftool per extreure notes del fabricant
 PREFERENCES_SHTHRESHOLD;Llindar per a les ombres retallades
 PREFERENCES_SINGLETAB;Mode de pestanyes d'un sol editor
 PREFERENCES_SINGLETABBOTTOM;Mode de pestanyes d'un sol editor, tira de pel·lícula a sota de l'editor
@@ -1173,6 +1175,7 @@ PREFERENCES_TAB_SOUND;Sons
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;Endarrereix l'actualització d'imatges en miniatura en obrir directoris
 PREFERENCES_THUMBNAIL_LAZY_CACHING;Emmagatzematge en memòria cau diferit d'imatges en miniatura
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navegueu i desplaceu-vos passant el cursor sobre les miniatures
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;Imatges en miniatura processades en memòria cau
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Vista prèvia de JPEG incrustat
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Imatge per mostrar
 PREFERENCES_THUMBNAIL_INSPECTOR_RAW;Renderitzat raw ràpid
@@ -1398,6 +1401,7 @@ TP_COLORCORRECTION_HUESAT;To/Saturació
 TP_COLORCORRECTION_HUESHIFT;Alteració de to
 TP_COLORCORRECTION_LUT_FILENAME;Fitxer LUT
 TP_COLORCORRECTION_MODE_LUT;LUT
+TP_COLORCORRECTION_LUT_SELECT;Seleccioneu fitxer LUT...
 TP_CROP_FIXRATIO;Bloqueja l'aspecte
 TP_CROP_GTDIAGONALS;Regla de diagonals
 TP_CROP_GTEPASSPORT;Passaport biomètric
@@ -1930,6 +1934,7 @@ TP_SPOT_COUNTLABEL;%1 punt(s)
 TP_SPOT_ENTRYCHANGED;Punt canviat
 TP_SPOT_HINT;Cliqueu aquest botó per poder operar a l'àrea de vista prèvia.\n\nPer editar un punt, passeu el cursor per la marca blanca que indica una àrea editada, fent aparèixer la geometria d'edició.\n\nPer afegir un punt, premeu Ctrl i el botó esquerre del ratolí, arrossegueu el cercle (podeu deixar anar la tecla Ctrl) a una ubicació d'origen, i tot seguit deixeu anar el botó del ratolí\n\nPer moure el punt d'origen o destí, passeu el cursor pel seu centre i arrossegueu-lo.\n\nEs pot canviar la mida del cercle interior (àrea d'efecte màxim) i el cercle de "difuminat" passant el cursor per sobre d'ells (el cercle es torna taronja) i arrossegant-los (el cercle es torna vermell).\n\nQuan els canvis estiguin fets, cliqueu amb el botó dret del ratolí fora de qualsevol punt per sortir del mode d'edició de punts, o cliqueu aquest botó de nou.
 TP_SPOT_LABEL;Eliminació de taques
+TP_SPOT_LIGHTPIPELINE_HINT;Feu clic en aquest botó per modificar els punts mentre previsualitzeu una imatge simplificada desactivant les eines que requereixen molts recursos (opció de rendiment).\n\nNomés té efecte quan l'edició de previsualització està activa.
 TP_SPOT_CUR_SPOT_LABEL;Punt actual
 TP_SPOT_SOURCE_X;Origen X
 TP_SPOT_SOURCE_Y;Origen Y

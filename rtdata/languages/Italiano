@@ -16,6 +16,7 @@
 #16 2022-11-23 v1.17 - alvaro
 #17 2022-12-03 alvaro
 #18 2022-12-12 alvaro
+#19 2023-03-08 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -1930,6 +1931,7 @@ TP_SPOT_ENTRYCHANGED;Punto cambiato
 TP_SPOT_FEATHER;Sfumatura
 TP_SPOT_HINT;Clicca su questo pulsante per lavorare sull'anteprima.\n\nPer editare un punto, passa con il mouse sul crocino bianco sull'area, facendo comparire la geometria di modifica.\n\nPer aggiungere un punto, premi Ctrl + tasto sinistro del mouse, trascina il cerchio (puoi lasciare Ctrl) sull'area di origine, quindi lascia il pulsante del mouse.\n\nPer spostare il punto sorgente o destinazione, passa sul suo centro e trascinalo.\n\nIl cerchio più interno (area di effetto massimo) e il cerchio di transizione possono essere ridimensionati passandoci sopra (il cerchio diventa arancione) e trascinandoli (il cerchio diventa rosso).\n\nQuando terminato, clicca col destro fuori qualunque punto per terminare la modalità di modifica, oppure ripremi questo pulsante.
 TP_SPOT_LABEL;Rimozione punti
+TP_SPOT_LIGHTPIPELINE_HINT;Clicca su questo pulsante per modificare i punti su una immagine semplificata ottenuta disabilitando gli strumenti che richiedono più risorse (opzione prestazioni).\n\nHa effetto solo quando è attiva l'anteprima di editing.
 TP_SPOT_OPACITY;Opacità
 TP_SPOT_RADIUS;Raggio
 TP_SPOT_SOURCE_X;X sorgente
@@ -1981,5 +1983,6 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
+
 
 

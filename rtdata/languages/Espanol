@@ -22,6 +22,7 @@
 #21 2022-11-23 mrleemon, update for 1.17
 #22 2022-12-01 mrleemon, update for 1.17.2
 #23 2022-12-27 mrleemon, update for 1.18
+#24 2023-03-11 mrleemon, update for 1.18.1
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -1157,6 +1158,7 @@ PREFERENCES_SHOWBASICEXIF;Mostrar datos Exif básicos
 PREFERENCES_SHOWDATETIME;Mostrar fecha y hora
 PREFERENCES_SHOWEXPOSURECOMPENSATION;Anexar la compensación de exposición
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;Mostrar barra de herramientas estilo tira de película
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;Usar exiftool para extraer notas del fabricante
 PREFERENCES_SHTHRESHOLD;Umbral para las sombras cortadas
 PREFERENCES_SINGLETAB;Modo de pestañas de un solo editor
 PREFERENCES_SINGLETABBOTTOM;Modo de pestañas de un solo editor, tira de película debajo del editor
@@ -1175,6 +1177,7 @@ PREFERENCES_TAB_PERFORMANCE;Rendimiento
 PREFERENCES_TAB_SOUND;Sonidos
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;Retrasar la actualización de imágenes en miniatura al abrir directorios
 PREFERENCES_THUMBNAIL_LAZY_CACHING;Almacenamiento en caché diferido de imágenes en miniatura
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;Imágenes en miniatura procesadas en caché
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Navegar y desplazarse pasando el cursor sobre las miniaturas
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Vista previa de JPEG incrustado
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Imagen para mostrar
@@ -1401,6 +1404,7 @@ TP_COLORCORRECTION_HUESAT;Tono/Saturación
 TP_COLORCORRECTION_HUESHIFT;Alteración de tono
 TP_COLORCORRECTION_LUT_FILENAME;Archivo LUT
 TP_COLORCORRECTION_MODE_LUT;LUT
+TP_COLORCORRECTION_LUT_SELECT;Seleccionar archivo LUT...
 TP_CROP_FIXRATIO;Bloquear aspecto
 TP_CROP_GTDIAGONALS;Regla de diagonales
 TP_CROP_GTEPASSPORT;Pasaporte biométrico
@@ -1933,6 +1937,7 @@ TP_SPOT_COUNTLABEL;%1 punto(s)
 TP_SPOT_ENTRYCHANGED;Punto cambiado
 TP_SPOT_HINT;Haga clic en este botón para poder operar en el área de vista previa.\n\nPara editar un punto, pase el cursor por la marca blanca que indica un área editada, haciendo aparecer la geometría de edición.\n\nPara añadir un punto, pulse Ctrl y el botón izquierdo del ratón, arrastre el círculo (puede soltar la tecla Ctrl) a una ubicación de origen, y a continuación suelte el botón del ratón\n\nPara mover el punto de origen o destino, pase el cursor por su centro y arrástrelo.\n\nSe puede cambiar el tamaño del círculo interior (área de efecto máximo) y el círculo de "difuminado" pasando el cursor por encima de ellos (el círculo se vuelve naranja) y arrastrándolos (el círculo se vuelve rojo).\n\nCuando los cambios estén hechos, haga clic con el botón derecho del ratón fuera de cualquier punto para salir del modo de edición de puntos, o haga clic en este botón de nuevo.
 TP_SPOT_LABEL;Eliminación de manchas
+TP_SPOT_LIGHTPIPELINE_HINT;Haga clic en este botón para modificar los puntos mientras obtiene una vista previa de una imagen simplificada al desactivar las herramientas que requieren muchos recursos (opción de rendimiento).\n\nTiene efecto solo cuando la edición en vista previa está activa.
 TP_SPOT_CUR_SPOT_LABEL;Punto actual
 TP_SPOT_SOURCE_X;Origen X
 TP_SPOT_SOURCE_Y;Origen Y

@@ -1131,6 +1131,7 @@ PREFERENCES_SHOWBASICEXIF;Afficher les infos EXIF basiques
 PREFERENCES_SHOWDATETIME;Afficher la date et l'heure
 PREFERENCES_SHOWEXPOSURECOMPENSATION;Ajouter la compensation d'exposition
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;Montrer la barre d'outil Pellicule ("filmstrip")
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;Utiliser exiftool pour extraire les notes du fabricant
 PREFERENCES_SHTHRESHOLD;Seuil pour l'écrêtage des ombres
 PREFERENCES_SINGLETAB;Mode Onglet Éditeur Unique
 PREFERENCES_SINGLETABBOTTOM;Mode Onglet Éditeur Unique, Éditeur Filmstrip ci-dessous
@@ -1149,6 +1150,7 @@ PREFERENCES_TAB_PERFORMANCE;Performance
 PREFERENCES_TAB_SOUND;Sons
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;Retarder la mise à jour des vignettes lors de l'ouverture des répertoires
 PREFERENCES_THUMBNAIL_LAZY_CACHING;Mise en cache des vignettes
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;Vignettes traitées en cache
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Naviguer et faire un panoramique en survolant les vignettes
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Prévisualisation de l'image JPEG incluse
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Image à montrer
@@ -1375,6 +1377,7 @@ TP_COLORCORRECTION_HUESAT;Teinte/Saturation
 TP_COLORCORRECTION_HUESHIFT;Modification de la teinte
 TP_COLORCORRECTION_LUT_FILENAME;Fichier LUT
 TP_COLORCORRECTION_MODE_LUT;LUT
+TP_COLORCORRECTION_LUT_SELECT;Sélectionnez le fichier LUT...
 TP_CROP_FIXRATIO;Rapport fixé
 TP_CROP_GTDIAGONALS;Règle des diagonales
 TP_CROP_GTEPASSPORT;Passeport biométrique
@@ -1962,4 +1965,4 @@ ZOOMPANEL_ZOOM100;Zoomer à 100%\nRaccourci : <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Ajuster l'image entière à l'écran\nRaccourci : <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoomer Avant\nRaccourci : <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoomer Arrière\nRaccourci : <b>-</b>
-SESSION_LABEL;Session
+

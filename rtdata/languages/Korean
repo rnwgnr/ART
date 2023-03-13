@@ -9,6 +9,7 @@
 #08 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 #09 2022-11-28 Ohnishi, Yasuo, updates for 1.17
 #10 2022-12-27 Ohnishi, Yasuo, updates for 1.18
+#11 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -1138,6 +1139,7 @@ PREFERENCES_SHOWBASICEXIF;가본 Exif 정보를 표시함
 PREFERENCES_SHOWDATETIME;날짜 표시
 PREFERENCES_SHOWEXPOSURECOMPENSATION;노출보정추가
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;화상 슬라이드에 도구 바를 표시함
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;카메라 제조업체 주석 해석에 exiftool 사용
 PREFERENCES_SHTHRESHOLD;어두운 클리핑 영역의 임계 값
 PREFERENCES_SINGLETAB;신글 탭 방식
 PREFERENCES_SINGLETABBOTTOM;싱글 편집 탭 모드, 피름 스트립은 편집화면 밑에 있슴
@@ -1156,6 +1158,7 @@ PREFERENCES_TAB_PERFORMANCE;퍼포먼스
 PREFERENCES_TAB_SOUND;소리
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;디렉토리를 열 때, 썸네일 화상 갱신을 지연함
 PREFERENCES_THUMBNAIL_LAZY_CACHING;썸네일 화상의 거친 캐시를 만들기 (Lazy caching)
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;처리된 썸네일 이미지 캐시
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;썸네일 위에 커서를 놓고, 네비게이션이나 팬 (pan) 을 함.
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;포함된 JPEG의 미리보기
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;표시할 화상
@@ -1382,6 +1385,7 @@ TP_COLORCORRECTION_HUESAT;색조 (Hue) /채도 (Saturation)
 TP_COLORCORRECTION_HUESHIFT;색조 (Hue) 옮기기 (Shift)
 TP_COLORCORRECTION_LUT_FILENAME;LUT 파일
 TP_COLORCORRECTION_MODE_LUT;LUT
+TP_COLORCORRECTION_LUT_SELECT;LUT 피일 선택...
 TP_CROP_FIXRATIO;가로세로비 고정
 TP_CROP_GTDIAGONALS; 대각선
 TP_CROP_GTEPASSPORT;얼굴인식 여권용
@@ -1914,6 +1918,7 @@ TP_SPOT_COUNTLABEL;%1 점
 TP_SPOT_ENTRYCHANGED;보수점 변경
 TP_SPOT_HINT;미리보기 영역을 조작하려면 이 버튼을 클릭합니다.\n\n스팟 (오점) 을 편집하려면 , 편집부분의 형태 (editing geometry) 가 보이도록 해서, 하양 십자 커서를 수정하고 싶은 부분 위에 놓습니다.\n\n수정할 스팟을  추가하려면 , Ctrl을 누르고 왼쪽 마우스 버튼을 클릭합니다. 그리고 그대로 드래그하고 , 편집부분을 메운 북사영역  장소의 커서를 이동시켜 (Ctrl키는 놓아도 됩니다) 마우스 버튼을 놓압니다.\n\n복사영역이나 수정부분을 이동하려면, 그 동그라미의 중심에 커서를 놓고 드래그합니다..\n\n수정부분의 안쪽 동그라미 (가앙 효과가 강한 부분) 및 "경계 흐림 (Feather) " (밖아쪽) 동그라미는 그 위에 커서를 놓고 (그러면 동그라미는 주황색으로 됩니다), 드래그하면 (그러면 동그라미는 빨간색으로 됩니다), 크기를 변화시킬 수 있습니다.\n\n수정이 끝나면 , 어누 스팟의 밖아쪽을 오른쪽 버튼으로 클릭하고나 이 버튼을 다시 클릭해서  스팟 편집 작업을 끝냅니다.
 TP_SPOT_LABEL;스팟 (오점) 제거
+TP_SPOT_LIGHTPIPELINE_HINT;간이 미리보기 사용 중 (퍼포먼스 옵션)은이 버튼을 눌러 스팟을 편집합니다.\n\n미리보기 편집 사용 중에만 유효합니다.
 TP_SPOT_CUR_SPOT_LABEL;현재의 스팟
 TP_SPOT_SOURCE_X;복사영역 X
 TP_SPOT_SOURCE_Y;복사영역 Y
