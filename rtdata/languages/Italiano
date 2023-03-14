@@ -1145,6 +1145,7 @@ PREFERENCES_SELECTLANG;Seleziona la lingua
 PREFERENCES_SERIALIZE_TIFF_READ;Impostazioni lettura TIFF
 PREFERENCES_SERIALIZE_TIFF_READ_LABEL;Serializza la lettura dei file TIFF
 PREFERENCES_SERIALIZE_TIFF_READ_TOOLTIP;Attivando questa opzione è possibile velocizzare la generazione delle miniature, quando si lavora con cartelle contenenti TIFF non compressi.
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;Usa exiftool per estrarre le note del costruttore
 PREFERENCES_SHOWBASICEXIF;Mostra dati Exif di base
 PREFERENCES_SHOWDATETIME;Mostra data e ora
 PREFERENCES_SHOWEXPOSURECOMPENSATION;Aggiungi compensazione dell'esposizione
@@ -1166,6 +1167,7 @@ PREFERENCES_TAB_GENERAL;Generale
 PREFERENCES_TAB_IMPROC;Elaborazione immagine
 PREFERENCES_TAB_PERFORMANCE;Prestazioni
 PREFERENCES_TAB_SOUND;Suoni
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;Metti in cache le miniature delle immagini elaborate
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;Ritarda l'aggiornamento delle miniature durante l'apertura delle cartelle
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Sfoglia e sposta passando sulle miniature
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Anteprima JPEG incorporato
@@ -1376,6 +1378,7 @@ TP_COLORCORRECTION_L;Luminosità
 TP_COLORCORRECTION_LABEL;Correzione Colore/Tono
 TP_COLORCORRECTION_LIST_TITLE;Correzione
 TP_COLORCORRECTION_LUT_FILENAME;File LUT
+TP_COLORCORRECTION_LUT_SELECT;Seleziona file LUT...
 TP_COLORCORRECTION_MODE;Modalità
 TP_COLORCORRECTION_MODE_COMBINED;Standard
 TP_COLORCORRECTION_MODE_HSL;Fattori HSL
@@ -1983,6 +1986,7 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
+
 
 
 
