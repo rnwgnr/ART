@@ -175,6 +175,7 @@ public:
         return collate_name < other.collate_name;
     }
 
+    virtual void forceRefreshImage() {}
     virtual void refreshThumbnailImage () = 0;
     virtual void refreshQuickThumbnailImage () {}
     virtual void calcThumbnailSize () = 0;

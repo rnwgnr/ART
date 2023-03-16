@@ -43,7 +43,7 @@ FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
     : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
 {
     refresh_status_ = RefreshStatus::PENDING;
-    refresh_disabled_ = true;
+    refresh_disabled_ = false;//true;
     thumbnail = thm;
 
     feih = new FileBrowserEntryIdleHelper;

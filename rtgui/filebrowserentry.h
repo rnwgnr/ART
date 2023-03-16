@@ -88,6 +88,7 @@ public:
 
     FileThumbnailButtonSet* getThumbButtonSet ();
 
+    void forceRefreshImage() override { refresh_status_ = RefreshStatus::PENDING; }
     void refreshThumbnailImage () override;
     void refreshQuickThumbnailImage () override;
     void calcThumbnailSize () override;

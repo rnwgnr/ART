@@ -70,12 +70,14 @@ rtengine::IImage8 *load(const Glib::ustring &cache_fname, const rtengine::procpa
     }
     buffer[33] = '\0';
     if (strcmp(buffer, rtengine::ICCStore::getInstance()->getThumbnailMonitorHash().c_str()) != 0) {
+        fclose(f);
         return nullptr;
     }
 
     // size of the profile data
     guint32 profsz = 0;
     if (fread(&profsz, 1, sizeof(guint32), f) < sizeof(guint32)) {
+        fclose(f);
         return nullptr;
     }
 
@@ -83,32 +85,39 @@ rtengine::IImage8 *load(const Glib::ustring &cache_fname, const rtengine::procpa
     {
         std::vector<uint8_t> profzdata(profsz);
         if (fread(&profzdata[0], sizeof(uint8_t), profsz, f) < profsz) {
+            fclose(f);
             return nullptr;
         }
         std::string profdata = rtengine::decompress(profzdata);
         if (!imgparams.from_data(profdata.c_str())) {
+            fclose(f);
             return nullptr;
         }
     }
     if (imgparams != pparams) {
+        fclose(f);
         return nullptr;
     }
 
     guint32 width = 0, height = 0;
 
     if (fread(&width, 1, sizeof(guint32), f) < sizeof(guint32)) {
+        fclose(f);
         return nullptr;
     }
 
     if (fread(&height, 1, sizeof(guint32), f) < sizeof(guint32)) {
+        fclose(f);
         return nullptr;
     }
 
     if (std::min(width , height) <= 0) {
+        fclose(f);
         return nullptr;
     }
 
-    if (guint32(h) > height) {
+    if (guint32(h) != height) {
+        fclose(f);
         return nullptr;
     }
 
@@ -116,13 +125,13 @@ rtengine::IImage8 *load(const Glib::ustring &cache_fname, const rtengine::procpa
     image->readData(f);
     fclose(f);
 
-    if (guint32(h) < height) {
-        int w = int(float(width) * float(guint32(h) / height));
-        rtengine::Image8 *resized = new rtengine::Image8(w, h);
-        image->resizeImgTo<>(w, h, rtengine::TI_Nearest, resized);
-        delete image;
-        image = resized;
-    }
+    // if (guint32(h) < height) {
+    //     int w = int(float(width) * float(guint32(h) / height));
+    //     rtengine::Image8 *resized = new rtengine::Image8(w, h);
+    //     image->resizeImgTo<>(w, h, rtengine::TI_Nearest, resized);
+    //     delete image;
+    //     image = resized;
+    // }
 
     if (options.rtSettings.verbose > 1) {
         std::cout << "read from cache: " << fname << " " << width << "x" << height << std::endl;

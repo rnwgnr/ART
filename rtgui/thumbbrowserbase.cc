@@ -1081,7 +1081,8 @@ void ThumbBrowserBase::zoomChanged (bool zoomIn)
         MYWRITERLOCK(l, entryRW);
 
         for (size_t i = 0; i < fd.size(); i++) {
-            fd[i]->resize (previewHeight);
+            fd[i]->forceRefreshImage();
+            fd[i]->resize(previewHeight);
         }
     }
 
