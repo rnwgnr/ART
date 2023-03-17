@@ -691,10 +691,10 @@ rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::Pro
         image = tpp->quickProcessImage (pparams, h, rtengine::TI_Nearest);
     } else {
         auto fn = getCacheFileName("images", "");
-        if (first_process_) {
+        // if (first_process_) {
             image = art::thumbimgcache::load(fn, pparams, h);
-            first_process_ = false;
-        }
+        //     first_process_ = false;
+        // }
         if (!image) {
             // Full thumbnail: apply profile
             // image = tpp->processImage (pparams, h, rtengine::TI_Bilinear, cfs.getCamera(), cfs.focalLen, cfs.focalLen35mm, cfs.focusDist, cfs.shutter, cfs.fnumber, cfs.iso, cfs.expcomp, scale );

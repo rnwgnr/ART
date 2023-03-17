@@ -42,8 +42,8 @@ Glib::RefPtr<Gdk::Pixbuf> FileBrowserEntry::ps;
 FileBrowserEntry::FileBrowserEntry (Thumbnail* thm, const Glib::ustring& fname)
     : ThumbBrowserEntryBase (fname), wasInside(false), press_x(0), press_y(0), action_x(0), action_y(0), rot_deg(0.0), coarse_rotate(0), cropgl(nullptr), state(SNormal), crop_custom_ratio(0.f)
 {
-    refresh_status_ = RefreshStatus::PENDING;
-    refresh_disabled_ = false;//true;
+    refresh_status_ = RefreshStatus::READY;
+    refresh_disabled_ = true;
     thumbnail = thm;
 
     feih = new FileBrowserEntryIdleHelper;
@@ -98,7 +98,7 @@ void FileBrowserEntry::refreshThumbnailImage ()
         return;
     }
 
-    if (refresh_status_ != RefreshStatus::READY) {
+    if (refresh_status_ != RefreshStatus::PENDING) {
         refresh_status_ = RefreshStatus::FULL;
         parent->redrawEntryNeeded(this);
     }
@@ -112,7 +112,7 @@ void FileBrowserEntry::refreshQuickThumbnailImage ()
         return;
     }
 
-    if (refresh_status_ != RefreshStatus::READY) {
+    if (refresh_status_ != RefreshStatus::PENDING) {
         refresh_status_ = RefreshStatus::QUICK;
         parent->redrawEntryNeeded(this);
     }
@@ -177,20 +177,17 @@ std::vector<Glib::RefPtr<Gdk::Pixbuf>> FileBrowserEntry::getSpecificityIconsOnIm
 
 void FileBrowserEntry::customBackBufferUpdate (Cairo::RefPtr<Cairo::Context> c)
 {
-    if (cropParams.enabled) { 
+    if(scale != 1.0 && cropParams.enabled) { // somewhere in pipeline customBackBufferUpdate is called when scale == 1.0, which is nonsense for a thumb
         int w, h;
         thumbnail->getOriginalSize(w, h, true);
         double cur_scale = scale;
         if (h > 0) {
             cur_scale = double(preh) / double(h);
         }
-        if (cur_scale == 1.0) { // somewhere in pipeline customBackBufferUpdate is called when scale == 1.0, which is nonsense for a thumb
-            return;
-        }
         if (state == SCropSelecting || state == SResizeH1 || state == SResizeH2 || state == SResizeW1 || state == SResizeW2 || state == SResizeTL || state == SResizeTR || state == SResizeBL || state == SResizeBR || state == SCropMove) {
             drawCrop (c, prex, prey, prew, preh, 0, 0, cur_scale, cropParams, true, false);
         } else {
-            rtengine::procparams::CropParams cparams = cropParams;
+            rtengine::procparams::CropParams cparams = cropParams; //thumbnail->getProcParams().crop;
             cparams.guide = "Frame";
             if (cparams.enabled && !thumbnail->isQuick()) { // Quick thumb have arbitrary sizes, so don't apply the crop
                 drawCrop (c, prex, prey, prew, preh, 0, 0, cur_scale, cparams, true, false);
@@ -218,8 +215,6 @@ void FileBrowserEntry::procParamsChanged (Thumbnail* thm, int whoChangedIt)
 
     preview.clear();
 
-    refresh_status_ = RefreshStatus::PENDING;
-    
     if ( thumbnail->isQuick() ) {
         refreshQuickThumbnailImage ();
     } else {
@@ -541,10 +536,14 @@ inline void FileBrowserEntry::update_refresh_status()
     switch (refresh_status_) {
     case RefreshStatus::QUICK:
     case RefreshStatus::FULL:
-        refresh_status_ = RefreshStatus::READY;
+        refresh_status_ = RefreshStatus::PENDING;
         // Only make a (slow) processed preview if the picture has been edited at all
         thumbImageUpdater->add(this, &updatepriority, upgrade, this);
         break;
+    // case RefreshStatus::FULL:
+    //     refresh_status_ = RefreshStatus::PENDING;
+    //     thumbImageUpdater->add (this, &updatepriority, false, this);
+    //     break;
     default:
         break;
     }
