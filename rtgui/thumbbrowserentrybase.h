@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -175,7 +176,6 @@ public:
         return collate_name < other.collate_name;
     }
 
-    virtual void forceRefreshImage() {}
     virtual void refreshThumbnailImage () = 0;
     virtual void refreshQuickThumbnailImage () {}
     virtual void calcThumbnailSize () = 0;
