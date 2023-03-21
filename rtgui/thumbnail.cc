@@ -691,15 +691,21 @@ rtengine::IImage8* Thumbnail::processThumbImage (const rtengine::procparams::Pro
         image = tpp->quickProcessImage (pparams, h, rtengine::TI_Nearest);
     } else {
         auto fn = getCacheFileName("images", "");
-        // if (first_process_) {
+        if (first_process_) {
             image = art::thumbimgcache::load(fn, pparams, h);
-        //     first_process_ = false;
-        // }
+            if (!image) {
+                first_process_ = false;
+            }
+        }
         if (!image) {
+            if (options.rtSettings.verbose) {
+                std::cout << "full thumb processing: " << fname << std::endl;
+            }
             // Full thumbnail: apply profile
-            // image = tpp->processImage (pparams, h, rtengine::TI_Bilinear, cfs.getCamera(), cfs.focalLen, cfs.focalLen35mm, cfs.focusDist, cfs.shutter, cfs.fnumber, cfs.iso, cfs.expcomp, scale );
-            image = tpp->processImage (pparams, static_cast<rtengine::eSensorType>(cfs.sensortype), h, rtengine::TI_Bilinear, &cfs, scale );
+            image = tpp->processImage(pparams, static_cast<rtengine::eSensorType>(cfs.sensortype), h, rtengine::TI_Bilinear, &cfs, scale );
             art::thumbimgcache::store(fn, pparams, image);
+        } else if (options.rtSettings.verbose) {
+            std::cout << "cached thumb image: " << fname << std::endl;
         }
     }
 
