@@ -9,7 +9,7 @@
 #include "toolpanel.h"
 #include "edit.h"
 
-class PCVignette: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel, public EditSubscriber {
+class PCVignette: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel, public EditSubscriber, public PParamsChangeListener {
 
 protected:
     Adjuster *strength;
@@ -25,9 +25,11 @@ protected:
     int lastObject;
     
     rtengine::procparams::PCVignetteParams initial_params;
+    rtengine::procparams::CropParams crop_;
 
     void editToggled();
     void updateGeometry(const int centerX, const int centerY);
+    void getDimensions(int &x, int &y, int &w, int &h);
     
 public:
     PCVignette();
@@ -51,4 +53,12 @@ public:
     bool button1Released() override;
     bool drag1(int modifierKey) override;
     void switchOffEditMode () override;
+
+    PParamsChangeListener *getPParamsChangeListener() override { return this; }
+    void procParamsChanged(
+        const rtengine::procparams::ProcParams* params,
+        const rtengine::ProcEvent& ev,
+        const Glib::ustring& descr,
+        const ParamsEdited* paramsEdited = nullptr) override;
+    void clearParamChanges() override {}    
 };

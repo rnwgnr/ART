@@ -84,7 +84,8 @@ PCVignette::~PCVignette()
 
 void PCVignette::read (const ProcParams* pp)
 {
-    disableListener ();
+    disableListener();
+    crop_ = pp->crop;
 
     setEnabled(pp->pcvignette.enabled);
     strength->setValue(pp->pcvignette.strength);
@@ -183,14 +184,15 @@ void PCVignette::updateGeometry(const int centerX, const int centerY)
         return;
     }
 
-    int imW=0;
-    int imH=0;
-    dataProvider->getImageSize(imW, imH);
+    int im_x = 0, im_y = 0;
+    int imW = 0, imH = 0;
+    getDimensions(im_x, im_y, imW, imH);
+    // dataProvider->getImageSize(imW, imH);
     if (!imW || !imH) {
         return;
     }
 
-    rtengine::Coord origin (imW / 2 + centerX * imW / 200, imH / 2 + centerY * imH / 200);
+    rtengine::Coord origin (im_x + imW / 2 + centerX * imW / 200, im_y + imH / 2 + centerY * imH / 200);
 
     const auto updateCircle = [&](Geometry* geometry)
     {
@@ -255,13 +257,15 @@ bool PCVignette::button1Pressed(int modifierKey)
         return false;
     }
 
-    EditDataProvider *provider = getEditProvider();
+    // EditDataProvider *provider = getEditProvider();
 
     if (!(modifierKey & GDK_CONTROL_MASK)) {
         // button press is valid (no modifier key)
         PolarCoord pCoord;
+        int im_x, im_y;
         int imW, imH;
-        provider->getImageSize(imW, imH);
+        getDimensions(im_x, im_y, imW, imH);
+        // provider->getImageSize(imW, imH);
         double halfSizeW = imW / 2.;
         double halfSizeH = imH / 2.;
         draggedCenter.set(int(halfSizeW + halfSizeW * (centerX->getValue() / 100.)), int(halfSizeH + halfSizeH * (centerY->getValue() / 100.)));
@@ -290,8 +294,10 @@ bool PCVignette::drag1(int modifierKey)
 {
     // compute the polar coordinate of the mouse position
     EditDataProvider *provider = getEditProvider();
+    int im_x, im_y;
     int imW, imH;
-    provider->getImageSize(imW, imH);
+    getDimensions(im_x, im_y, imW, imH);
+    // provider->getImageSize(imW, imH);
     double halfSizeW = imW / 2.;
     double halfSizeH = imH / 2.;
 
@@ -333,4 +339,34 @@ void PCVignette::switchOffEditMode ()
     }
 
     EditSubscriber::switchOffEditMode();  // disconnect
+}
+
+
+void PCVignette::procParamsChanged(
+    const rtengine::procparams::ProcParams* params,
+    const rtengine::ProcEvent& ev,
+    const Glib::ustring& descr,
+    const ParamsEdited* paramsEdited)
+{
+    crop_ = params->crop;
+    updateGeometry(params->pcvignette.centerX, params->pcvignette.centerY);
+}
+
+
+void PCVignette::getDimensions(int &x, int &y, int &w, int &h)
+{
+    x = y = w = h = 0;
+    EditDataProvider *p = getEditProvider();
+    if (!p) {
+        return;
+    }
+    
+    if (crop_.enabled) {
+        w = crop_.w;
+        h = crop_.h;
+        x = crop_.x;
+        y = crop_.y;
+    } else {
+        p->getImageSize(w, h);
+    }
 }
