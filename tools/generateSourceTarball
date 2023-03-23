@@ -6,7 +6,7 @@
 # annotated tag in git.
 # It is your job to checkout the tag before running this script.
 
-./tools/generateReleaseInfo
+./tools/generateReleaseInfo "$@"
 ret=$?
 if [[ $ret -ne 0 ]]; then
     printf '%s\n' "Something went wrong while running tools/generateReleaseInfo" "Aborting."
