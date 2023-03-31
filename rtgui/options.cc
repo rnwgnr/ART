@@ -436,8 +436,8 @@ void Options::setDefaults()
     filmStripShowFileNames = false;
     tabbedUI = false;
     multiDisplayMode = 0;
-    filmstripBottom = false;
-    histogramPosition = 1;
+    filmstripBottom = true;
+    histogramPosition = HISTOGRAM_POS_RIGHT;
     histogramRed = true;
     histogramGreen = true;
     histogramBlue = true;

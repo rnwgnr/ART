@@ -1837,7 +1837,7 @@ void Preferences::storePreferences ()
     moptions.filmstripBottom = editorMode == 1;
 
     moptions.curvebboxpos = curveBBoxPosC->get_active_row_number();
-    moptions.histogramPosition = ckbHistogramPositionLeft->get_active() ? 1 : 2;
+    moptions.histogramPosition = ckbHistogramPositionLeft->get_active() ? Options::HISTOGRAM_POS_LEFT : Options::HISTOGRAM_POS_RIGHT;
     moptions.FileBrowserToolbarSingleRow = ckbFileBrowserToolbarSingleRow->get_active();
     moptions.showFilmStripToolBar = ckbShowFilmStripToolBar->get_active();
     moptions.hideTPVScrollbar = ckbHideTPVScrollbar->get_active();
@@ -2103,7 +2103,7 @@ void Preferences::fillPreferences ()
     }
 
     curveBBoxPosC->set_active (moptions.curvebboxpos);
-    ckbHistogramPositionLeft->set_active (moptions.histogramPosition == 1);
+    ckbHistogramPositionLeft->set_active (moptions.histogramPosition == Options::HISTOGRAM_POS_LEFT);
     ckbFileBrowserToolbarSingleRow->set_active (moptions.FileBrowserToolbarSingleRow);
     ckbShowFilmStripToolBar->set_active (moptions.showFilmStripToolBar);
     ckbHideTPVScrollbar->set_active (moptions.hideTPVScrollbar);

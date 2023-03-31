@@ -323,6 +323,7 @@ public:
     double sndLngEditProcDoneSecs;  // Minimum processing time seconds till the sound is played
     bool sndEnable;
 
+    enum { HISTOGRAM_POS_OFF = 0, HISTOGRAM_POS_LEFT = 1, HISTOGRAM_POS_RIGHT = 2};
     int histogramPosition;  // 0=disabled, 1=left pane, 2=right pane
     bool histogramRed;
     bool histogramGreen;

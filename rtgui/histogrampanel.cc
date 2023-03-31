@@ -98,7 +98,7 @@ HistogramPanel::HistogramPanel () :
     gfxGrid->add(*histogramArea);
     gfxGrid->attach_next_to(
         *histogramRGBAreaVert, *histogramArea,
-        options.histogramPosition == 1 ? Gtk::POS_RIGHT : Gtk::POS_LEFT,
+        options.histogramPosition == Options::HISTOGRAM_POS_LEFT ? Gtk::POS_RIGHT : Gtk::POS_LEFT,
         1,
         1
     );
@@ -331,7 +331,7 @@ HistogramPanel::HistogramPanel () :
     persistentButtons->add(*scopeOptions);
 
     // Put the button vbox next to the window's border to be less disturbing
-    if (options.histogramPosition == 1) {
+    if (options.histogramPosition == Options::HISTOGRAM_POS_LEFT) {
         buttonGrid->add(*persistentButtons);
         buttonGrid->add(*optionButtons);
 
