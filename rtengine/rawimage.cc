@@ -907,7 +907,6 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                             height = iheight;
                         }
                     }
-                    std::cout << "DIMS: " << w << "x" << h << " | " << width << "x" << height << std::endl;
                 }
             }
 
