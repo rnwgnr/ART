@@ -859,10 +859,10 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
     bool has_lmask = false;
     for (int i = begin_idx; i < end_idx; ++i) {
         if (abmask) {
-            (*abmask)[i](W, H);
+            (*abmask)[i](W, H, ARRAY2D_CLEAR_DATA);
         }
         if (Lmask) {
-            (*Lmask)[i](W, H);
+            (*Lmask)[i](W, H, ARRAY2D_CLEAR_DATA);
             has_lmask = true;
         }
     }
@@ -1049,18 +1049,11 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
         }
     } else {
         for (int i = begin_idx; i < end_idx; ++i) {
-#ifdef _OPENMP
-#           pragma omp parallel for if (multithread)
-#endif
-            for (int y = 0; y < H; ++y) {
-                if (Lmask) {
-                    float *v = (*Lmask)[i][y];
-                    std::fill(v, v + W, 1.f);
-                }
-                if (abmask) {
-                    float *v = (*abmask)[i][y];
-                    std::fill(v, v + W, 1.f);
-                }
+            if (Lmask) {
+                (*Lmask)[i].fill(1.f);
+            }
+            if (abmask) {
+                (*abmask)[i].fill(1.f);
             }
         }
     }
