@@ -962,26 +962,26 @@ void DrawnMask::strokes_to_list(std::vector<double> &out) const
                 && a.opacity == b.opacity;
         };
 
-    auto cur = strokes[0];
     size_t pos = 0;
-    while (true) {
-        int n = 0;
-        while (pos + n < strokes.size() && same(strokes[pos + n], cur)) {
+    while (pos < strokes.size()) {
+        size_t n = 1;
+        while (n < 2048 // 2048 is the upper bound for integers that can be
+                        // represented precisely as HalfFloats. Anything
+                        // larger might be rounded up or down, leading to mask
+                        // corruption
+               && pos + n < strokes.size()
+               && same(strokes[pos + n], strokes[pos])) {
             ++n;
         }
+        assert(n > 0);
         out.push_back(n);
-        out.push_back(cur.radius);
-        out.push_back(int(!cur.erase));
-        out.push_back(cur.opacity);
-        for (int i = 0; i < n; ++i) {
+        out.push_back(strokes[pos].radius);
+        out.push_back(int(!strokes[pos].erase));
+        out.push_back(strokes[pos].opacity);
+        for (size_t i = 0; i < n; ++i) {
             out.push_back(strokes[pos].x);
             out.push_back(strokes[pos].y);
             ++pos;
-        }
-        if (pos >= strokes.size()) {
-            break;
-        } else {
-            cur = strokes[pos];
         }
     }
 }
