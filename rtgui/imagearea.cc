@@ -267,6 +267,10 @@ bool ImageArea::on_draw(const ::Cairo::RefPtr< Cairo::Context> &cr)
 
 bool ImageArea::on_motion_notify_event (GdkEventMotion* event)
 {
+    if (!ipc) {
+        return true;
+    }
+    
     auto device = gdk_event_get_source_device(reinterpret_cast<GdkEvent *>(event));
     double pressure = rtengine::RT_NAN;
     if (device && event->axes) {
@@ -302,6 +306,10 @@ bool ImageArea::on_motion_notify_event (GdkEventMotion* event)
 
 bool ImageArea::on_button_press_event (GdkEventButton* event)
 {
+    if (!ipc) {
+        return true;
+    }
+    
     auto device = gdk_event_get_source_device(reinterpret_cast<GdkEvent *>(event));
     double pressure = rtengine::RT_NAN;
     if (device && event->axes) {
@@ -325,6 +333,10 @@ bool ImageArea::on_button_press_event (GdkEventButton* event)
 
 bool ImageArea::on_scroll_event (GdkEventScroll* event)
 {
+    if (!ipc) {
+        return true;
+    }
+    
 //    printf("ImageArea::on_scroll_event / delta_x=%.5f, delta_y=%.5f, direction=%d, type=%d, send_event=%d\n",
 //            event->delta_x, event->delta_y, (int)event->direction, (int)event->type, event->send_event);
 
@@ -342,6 +354,9 @@ bool ImageArea::on_scroll_event (GdkEventScroll* event)
 
 bool ImageArea::on_button_release_event (GdkEventButton* event)
 {
+    if (!ipc) {
+        return true;
+    }
 
     if (focusGrabber) {
         focusGrabber->buttonRelease (event->button, event->type, event->state, event->x, event->y);
@@ -358,6 +373,10 @@ bool ImageArea::on_button_release_event (GdkEventButton* event)
 
 bool ImageArea::on_leave_notify_event  (GdkEventCrossing* event)
 {
+    if (!ipc) {
+        return true;
+    }
+    
     if (flawnOverWindow) {
         flawnOverWindow->flawnOver(false);
         flawnOverWindow = nullptr;
