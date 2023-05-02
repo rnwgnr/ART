@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2023-04-20 Bereczky Péter
+#03 2023-04-25 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -37,7 +37,7 @@ DIRBROWSER_FOLDERS;Mappák
 DONT_SHOW_AGAIN;Ne mutasd ezt az üzenetet újra.
 DYNPROFILEEDITOR_DELETE;Törlés
 DYNPROFILEEDITOR_EDIT;Szerkesztés
-DYNPROFILEEDITOR_EDIT_RULE;Dinamikus Profil szabály szerkesztése
+DYNPROFILEEDITOR_EDIT_RULE;Dinamikus profil szabály szerkesztése
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;Megkülönbözteti a kis- és nagybetűket.\nHasználja a "re:" előtagot\nreguláris kifejezés megadásakor.
 DYNPROFILEEDITOR_IMGTYPE_ANY;Mindegyik
 DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
@@ -46,7 +46,7 @@ DYNPROFILEEDITOR_IMGTYPE_STD;Standard
 DYNPROFILEEDITOR_MOVE_DOWN;Lefelé lép
 DYNPROFILEEDITOR_MOVE_UP;Fölfelé lép
 DYNPROFILEEDITOR_NEW;Új
-DYNPROFILEEDITOR_NEW_RULE;Új Dinamikus Profil szabály
+DYNPROFILEEDITOR_NEW_RULE;Új Dinamikus profil szabály
 DYNPROFILEEDITOR_PROFILE;Feldolgozási profil
 DYNPROFILEEDITOR_CUSTOMDATA;Egyéni címkék
 DYNPROFILEEDITOR_CUSTOMDATA_TAGS;Címkék
@@ -740,7 +740,7 @@ INSPECTOR_RAW_CLIP;Raw kivágott képpontok.\nGyorsbillentyű: <b>w</b>.
 INSPECTOR_RAW_SHADOW;Gyors Raw renderelés árnyéknövelő tónusgörbével.\nGyorsbillentyű: <b>s</b>.
 INSPECTOR_SPLIT;Osztott nézet.\nGyorsbillentyű: <b>y</b>.
 INSPECTOR_ZOOM_FIT;Ablakhoz illesztés.\nGyorsbillentyű: <b>x</b>.
-INSPECTOR_ZOOM_11;nagyítás 100%-ra.\nGyorsbillentyű: <b>z</b>.
+INSPECTOR_ZOOM_11;Nagyítás 100%-ra.\nGyorsbillentyű: <b>z</b>.
 IPTCPANEL_CATEGORY;Kategória
 IPTCPANEL_CATEGORYHINT;A szolgáltató véleménye alapján azonosítja a kép tárgyát.
 IPTCPANEL_CITY;Város
@@ -1144,7 +1144,7 @@ PREFERENCES_SND_THRESHOLDSECS;Másodpercek múlva
 PREFERENCES_STARTUPIMDIR;Képkönyvtár indításkor
 PREFERENCES_TAB_BROWSER;Fájlböngésző
 PREFERENCES_TAB_COLORMGR;Színkezelés
-PREFERENCES_TAB_DYNAMICPROFILE;Dinamikus Profil szabály
+PREFERENCES_TAB_DYNAMICPROFILE;Dinamikus profil szabály
 PREFERENCES_TAB_FASTEXPORT;Gyors exportálás
 PREFERENCES_TAB_GENERAL;Általános
 PREFERENCES_TAB_IMPROC;Képfeldolgozás
@@ -1223,7 +1223,7 @@ QUEUE_AUTOSTART_TOOLTIP;Automatikusan elkezdi a feldolgozást, ha új feladat é
 QUEUE_DESTFILENAME;Útvonal és fájlnév
 QUEUE_FORMAT_TITLE;Fájlformátum
 QUEUE_LOCATION_FOLDER;Mentés mappába
-QUEUE_LOCATION_TEMPLATE;Sblon használata
+QUEUE_LOCATION_TEMPLATE;Sablon használata
 QUEUE_LOCATION_TEMPLATE_TOOLTIP;Adja meg a kimeneti helyet a forrásfotó helye, rangja, a kuka állapota vagy a sorban elfoglalt helye alapján.\n\nPélda az elérési út használatára:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\na formázási karakterláncok jelentése a következő:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> helyébe a fotó értékelése kerül. Ha a fotó még nem értékelt, '<i>0</i>' lesz alkalmazva. Ha a fotó a kukában van, '<i>x</i>' lesz.\n\n<b>%s1</b>, ..., <b>%s9</b> helyettesítve lesz a képnek a sor indításakor a sorban elfoglalt pozíciójával. A számérték határozza meg a kitöltést, pl. <b>%s3</b> eredménye '<i>001</i>'.\n\nHa a kimeneti képet a forráskép mellé szeretné menteni, írja ezt:\n<b>%p1/%f</b>\n\nHa a kimeneti képet egy '<i>converted</i>' nevű mappába szeretné menteni, amely a forrásfotó mappájában található, írja be:\n<b>%p1/converted/%f</b>\n\nHa el akarja menteni a kimeneti képet a\n'<i>/home/tom/photos/converted/2010-10-31</i>' könyvtárba, írja ezt:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Kimenet helye
 QUEUE_STARTSTOP_TOOLTIP;Indítsa el vagy állítsa le a sorban lévő képek feldolgozását.\n\nGyorsbillentyű: <b>Ctrl</b>+<b>s</b>
@@ -1285,7 +1285,7 @@ THRESHOLDSELECTOR_T;Felső
 THRESHOLDSELECTOR_TL;Bal felső
 THRESHOLDSELECTOR_TR;Jobb felső
 TOOL_SHORTCUT_HELP_HEADER;Az eszköz gyorsbillentyűi:\n(tartsa lenyomva az adott billentyűt, és állítsa be a csúszkát a +/- gombbal vagy a görgővel)\n
-TOOLBAR_TOOLTIP_COLORPICKER;Zárolható színválasztó\n\nHa az eszköz aktív:\n- Kiválasztó hozzáadása: <b>bal gombbal</b>.\n- Kiválasztó húzása: <b>bal kattintás és húzás</b>. \n- Kiválasztó törlése: <b>jobb gombbal</b>.\n- Az összes kiválasztó törlése: <b>Ctrl</b>+<b>Shift</b>+<b>jobb gombbal kattintva< /b>.\n- Visszatérés a kézi eszközhöz: <b>kattintson a jobb gombbal</b> bármely választón kívül.
+TOOLBAR_TOOLTIP_COLORPICKER;Zárolható színválasztó\n\nHa az eszköz aktív:\n- Kiválasztó hozzáadása: <b>bal gombbal</b>.\n- Kiválasztó húzása: <b>bal kattintás és húzás</b>. \n- Kiválasztó törlése: <b>jobb gombbal</b>.\n- Az összes kiválasztó törlése: <b>Ctrl</b>+<b>Shift</b>+<b>jobb gombbal kattintva</b>.\n- Visszatérés a kéz eszközhöz: <b>kattintson a jobb gombbal</b> bármely választón kívül.
 TOOLBAR_TOOLTIP_CROP;<b>Kivágás</b> kijelölés.\nGyorsbillentyű: <b>Shift-c</b>\nMozgassa a kivágást az <b>egér húzásával</b>\nÁtméretezze a kivágást a kivágási szegélyek mozgatásával.
 TOOLBAR_TOOLTIP_HAND;Kéz eszköz.\nGyorsbillentyű: <b>h</b>
 TOOLBAR_TOOLTIP_PERSPECTIVE;<b>Perspektíva-korrekció</b>.\nGyorsbillentyű: <b>Shift-p</b>\n\nSzerkessze a vezérlővonalakat a perspektivikus torzítás javításához. Kattintson ismét erre a gombra a javítás alkalmazásához.
@@ -1667,7 +1667,7 @@ TP_LABMASKS_POSTPROCESS_CURVE;Tónusgörbe
 TP_LABMASKS_POSTPROCESS_POSTERIZATION;Poszterizáció
 TP_LABMASKS_POSTPROCESS_SMOOTHING;Simítás
 TP_LENSGEOM_AUTOCROP;Automatikus körbevágás
-TP_LENSGEOM_FILL;Automatikus-kitöltés
+TP_LENSGEOM_FILL;Automatikus kitöltés
 TP_GEOM_LABEL;Geometria
 TP_LENS_LABEL;Objektív
 TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatikusan adatbázisból
