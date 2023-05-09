@@ -1316,8 +1316,8 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, cons
     Mat33<float> om;
     if (ICCStore::getInstance()->getProfileMatrix(outprofile, om)) {
         auto iom = inverse(om);
-        to_out = dot_product(work, iom);
-        to_work = dot_product(om, iwork);
+        to_out = dot_product(iom, work);
+        to_work = dot_product(iwork, om);
     } else {
         to_out = identity<float>();
         to_work = identity<float>();
