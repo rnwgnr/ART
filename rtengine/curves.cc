@@ -1355,7 +1355,7 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
             return state.hcurve[h * 10.f];
         };
 
-    const float Lmax = whitept * 65535.f;
+    const float Lmax = whitept;
 
     // from https://github.com/jedypod/gamut-compress
 
