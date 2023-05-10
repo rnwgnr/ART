@@ -1323,18 +1323,18 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, cons
         to_work = identity<float>();
     }
 
-    hcurve(3600);
-    FlatCurve hc({
-            FCT_MinMaxCPoints,
-            0, 0, 0.35, 0.35,
-            0.09, 1.0, 0.35, 0.35,
-            0.18, 0, 0.35, 0.35
-        }, true);
-    for (int i = 0; i < 3600; ++i) {
-        float h = float(i)/3600.f;
-        float v = hc.getVal(h);
-        hcurve[i] = v;
-    }
+    // hcurve(3600);
+    // FlatCurve hc({
+    //         FCT_MinMaxCPoints,
+    //         0, 0, 0.35, 0.35,
+    //         0.09, 1.0, 0.35, 0.35,
+    //         0.18, 0, 0.35, 0.35
+    //     }, true);
+    // for (int i = 0; i < 3600; ++i) {
+    //     float h = float(i)/3600.f;
+    //     float v = hc.getVal(h);
+    //     hcurve[i] = v;
+    // }
 }
 
 
@@ -1343,17 +1343,17 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
     Vec3f rgb;
     Vec3f jch;
 
-    const auto hcurve =
-        [&](float h) -> float
-        {
-            h *= 180.f / RT_PI_F;
-            if (h < 0.f) {
-                h += 1.f;
-            } else if (h > 1.f) {
-                h -= 1.f;
-            }
-            return state.hcurve[h * 10.f];
-        };
+    // const auto hcurve =
+    //     [&](float h) -> float
+    //     {
+    //         h *= 180.f / RT_PI_F;
+    //         if (h < 0.f) {
+    //             h += 1.f;
+    //         } else if (h > 1.f) {
+    //             h -= 1.f;
+    //         }
+    //         return state.hcurve[h * 10.f];
+    //     };
 
     const float Lmax = whitept;
 
@@ -1460,13 +1460,13 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 
         float sat = jch[1];
         float olum = jch[0];
-        float ohue = jch[2];
+        // float ohue = jch[2];
 
         float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
         sat *= ccf;
 
-        float hueblend = LIM01(oY) * hcurve(hue);
-        hue = intp(hueblend, ohue, hue);
+        // float hueblend = LIM01(oY) * hcurve(hue);
+        // hue = intp(hueblend, ohue, hue);
 
         Color::jzczhz2rgb(jch[0], sat, hue, rgb[0], rgb[1], rgb[2], state.iws);
 
