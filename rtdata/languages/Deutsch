@@ -120,7 +120,7 @@ FILEBROWSER_CACHECLEARFROMFULL;Alle zwischengespeicherte Profile löschen
 FILEBROWSER_CACHECLEARFROMPARTIAL;Alle NICHT zwischengespeicherte Profile löschen
 FILEBROWSER_CACHE;Festplatten-Cache
 FILEBROWSER_CLEARPROFILE;Profil löschen
-FILEBROWSER_COLORLABEL_TOOLTIP;Farbmarkierung.\n\nBenutzen Sie die Dropdownliste oder folgende Taste:\n<b>Shift + Ctrl + 0</b>  Keine Farbe\n<b>Shift + Ctrl + 1</b>  Rot\n<b>Shift + Ctrl + 2</b>  Gelb\n<b>Shift + Ctrl + 3</b>  Grün\n<b>Shift + Ctrl + 4</b>  Blau\n<b>Shift + Ctrl + 5</b>  Violett
+FILEBROWSER_COLORLABEL_TOOLTIP;Farbmarkierung.\n\nBenutzen Sie die Dropdownliste oder folgende Tasten:\n<b>Shift + Strg + 0</b>  Keine Farbe\n<b>Shift + Strg + 1</b>  Rot\n<b>Shift + Strg + 2</b>  Gelb\n<b>Shift + Strg + 3</b>  Grün\n<b>Shift + Strg + 4</b>  Blau\n<b>Shift + Strg + 5</b>  Violett
 FILEBROWSER_COPYPROFILE;Profil kopieren
 FILEBROWSER_CURRENT_NAME;Aktueller Name:
 FILEBROWSER_DARKFRAME;Dunkelbild
