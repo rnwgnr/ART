@@ -1044,6 +1044,34 @@ XIAOMI 13 PRO REAR WIDE CAMERA
 XIAOMI 13 REAR TELEPHOTO CAMERA
 XIAOMI 13 REAR ULTRAWIDE CAMERA
 XIAOMI 13 REAR WIDE CAMERA
+
+Updated on Mon May 15 09:39:19 2023 (with Adobe DNG converter 15.3.0.1451):
+CANON EOS R50
+CANON EOS R8
+GOOGLE PIXEL 4A FRONT CAMERA
+GOOGLE PIXEL 4A REAR WIDE CAMERA
+GOOGLE PIXEL 5A FRONT CAMERA
+GOOGLE PIXEL 5A REAR MAIN CAMERA
+GOOGLE PIXEL 5A REAR ULTRA WIDE CAMERA
+GOOGLE PIXEL 6A FRONT CAMERA
+GOOGLE PIXEL 6A REAR MAIN CAMERA
+GOOGLE PIXEL 6A REAR ULTRAWIDE CAMERA
+PANASONIC DC-S5M2
+PANASONIC DC-S5M2X
+SAMSUNG GALAXY S23 FRONT CAMERA
+SAMSUNG GALAXY S23 REAR TELEPHOTO CAMERA
+SAMSUNG GALAXY S23 REAR ULTRAWIDE CAMERA
+SAMSUNG GALAXY S23 REAR WIDE CAMERA
+SAMSUNG GALAXY S23 ULTRA FRONT CAMERA
+SAMSUNG GALAXY S23 ULTRA REAR SUPER TELEPHOTO CAMERA
+SAMSUNG GALAXY S23 ULTRA REAR TELEPHOTO CAMERA
+SAMSUNG GALAXY S23 ULTRA REAR ULTRAWIDE CAMERA
+SAMSUNG GALAXY S23 ULTRA REAR WIDE CAMERA
+SAMSUNG GALAXY S23+ FRONT CAMERA
+SAMSUNG GALAXY S23+ REAR TELEPHOTO CAMERA
+SAMSUNG GALAXY S23+ REAR ULTRAWIDE CAMERA
+SAMSUNG GALAXY S23+ REAR WIDE CAMERA
+SONY ZV-E1
 */
 {"camera_constants": [
     {
@@ -1295,6 +1323,10 @@ XIAOMI 13 REAR WIDE CAMERA
         "dcraw_matrix" : [9766, -2953, -1254, -4276, 12116, 2433, -437, 1336, 5131]
     },
     {
+        "make_model" : "CANON EOS R50",
+        "dcraw_matrix" : [9269, -2012, -1107, -3990, 11762, 2527, -569, 2093, 4913]
+    },
+    {
         "make_model" : "CANON EOS R6",
         "dcraw_matrix" : [8293, -1611, -1132, -4759, 12710, 2275, -1013, 2415, 5508]
     },
@@ -1305,6 +1337,10 @@ XIAOMI 13 REAR WIDE CAMERA
     {
         "make_model" : "CANON EOS R7",
         "dcraw_matrix" : [10424, -3138, -1300, -4221, 11938, 2584, -547, 1658, 6183]
+    },
+    {
+        "make_model" : "CANON EOS R8",
+        "dcraw_matrix" : [9539, -2795, -1224, -4175, 11998, 2458, -465, 1755, 6048]
     },
     {
         "make_model" : "CANON EOS RA",
@@ -1927,6 +1963,14 @@ XIAOMI 13 REAR WIDE CAMERA
         "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
     },
     {
+        "make_model" : "GOOGLE PIXEL 4A FRONT CAMERA",
+        "dcraw_matrix" : [13685, -6773, -1451, -3965, 12730, 1325, -250, 1315, 5516]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 4A REAR WIDE CAMERA",
+        "dcraw_matrix" : [10626, -4466, -1116, -4205, 12766, 1562, -738, 2132, 5474]
+    },
+    {
         "make_model" : "GOOGLE PIXEL 5 FRONT CAMERA",
         "dcraw_matrix" : [11792, -5080, -1209, -2945, 11484, 1644, -23, 1398, 5238]
     },
@@ -1936,6 +1980,18 @@ XIAOMI 13 REAR WIDE CAMERA
     },
     {
         "make_model" : "GOOGLE PIXEL 5 REAR ULTRA WIDE CAMERA",
+        "dcraw_matrix" : [12830, -5866, -1132, -2862, 11341, 1719, -57, 1222, 5014]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 5A FRONT CAMERA",
+        "dcraw_matrix" : [11792, -5080, -1209, -2945, 11484, 1644, -23, 1398, 5238]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 5A REAR MAIN CAMERA",
+        "dcraw_matrix" : [10290, -4415, -947, -3350, 11782, 1754, -320, 1666, 5210]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 5A REAR ULTRA WIDE CAMERA",
         "dcraw_matrix" : [12830, -5866, -1132, -2862, 11341, 1719, -57, 1222, 5014]
     },
     {
@@ -1964,6 +2020,18 @@ XIAOMI 13 REAR WIDE CAMERA
     },
     {
         "make_model" : "GOOGLE PIXEL 6 REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [11497, -5273, -1023, -3356, 11811, 1727, -75, 1108, 4949]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 6A FRONT CAMERA",
+        "dcraw_matrix" : [11628, -4897, -1261, -3664, 12200, 1616, -104, 1437, 5194]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 6A REAR MAIN CAMERA",
+        "dcraw_matrix" : [10290, -4415, -947, -3350, 11782, 1754, -320, 1666, 5210]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 6A REAR ULTRAWIDE CAMERA",
         "dcraw_matrix" : [11497, -5273, -1023, -3356, 11811, 1727, -75, 1108, 4949]
     },
     {
@@ -3667,6 +3735,14 @@ XIAOMI 13 REAR WIDE CAMERA
         "dcraw_matrix" : [9744, -3905, -779, -4899, 12807, 2324, -798, 1630, 5827]
     },
     {
+        "make_model" : "PANASONIC DC-S5M2",
+        "dcraw_matrix" : [10308, -4206, -783, -4088, 12102, 2229, -125, 1051, 5911]
+    },
+    {
+        "make_model" : "PANASONIC DC-S5M2X",
+        "dcraw_matrix" : [10308, -4206, -783, -4088, 12102, 2229, -125, 1051, 5911]
+    },
+    {
         "make_model" : "PANASONIC DC-ZS200",
         "dcraw_matrix" : [7790, -2736, -755, -3452, 11870, 1769, -628, 1647, 4898]
     },
@@ -4363,6 +4439,58 @@ XIAOMI 13 REAR WIDE CAMERA
         "dcraw_matrix" : [13393, -6254, -1074, -2673, 11667, 1104, 323, 1205, 4716]
     },
     {
+        "make_model" : "SAMSUNG GALAXY S23 FRONT CAMERA",
+        "dcraw_matrix" : [12153, -5224, -1269, -3958, 13035, 949, -264, 1782, 4791]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [13452, -6398, -1475, -2936, 11843, 1197, 172, 1224, 5160]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [13071, -6132, -1293, -3200, 11774, 1591, -391, 1640, 5018]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 REAR WIDE CAMERA",
+        "dcraw_matrix" : [12215, -5250, -1044, -4599, 13507, 1125, -734, 2074, 4864]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 ULTRA FRONT CAMERA",
+        "dcraw_matrix" : [12159, -5231, -1247, -3898, 12897, 1045, -205, 1734, 4799]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 ULTRA REAR SUPER TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12908, -5808, -1315, -2430, 11251, 1324, 126, 1383, 4667]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 ULTRA REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12183, -5303, -1242, -2415, 11030, 1575, 235, 1251, 4937]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 ULTRA REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [13071, -6132, -1293, -3200, 11774, 1591, -391, 1640, 5018]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23 ULTRA REAR WIDE CAMERA",
+        "dcraw_matrix" : [10939, -4606, -816, -3630, 12543, 1160, -628, 2179, 5185]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23+ FRONT CAMERA",
+        "dcraw_matrix" : [12153, -5224, -1269, -3958, 13035, 949, -264, 1782, 4791]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23+ REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [13452, -6398, -1475, -2936, 11843, 1197, 172, 1224, 5160]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23+ REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [13071, -6132, -1293, -3200, 11774, 1591, -391, 1640, 5018]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S23+ REAR WIDE CAMERA",
+        "dcraw_matrix" : [12215, -5250, -1044, -4599, 13507, 1125, -734, 2074, 4864]
+    },
+    {
         "make_model" : "SAMSUNG GALAXY S6",
         "dcraw_matrix" : [13698, -5767, -1384, -4449, 13879, 499, -467, 1691, 5891]
     },
@@ -4997,6 +5125,10 @@ XIAOMI 13 REAR WIDE CAMERA
     {
         "make_model" : "SONY XPERIA PRO-I WIDE CAMERA",
         "dcraw_matrix" : [10926, -4363, -1006, -4257, 12273, 2220, -322, 1175, 5546]
+    },
+    {
+        "make_model" : "SONY ZV-E1",
+        "dcraw_matrix" : [6912, -2127, -469, -4470, 12175, 2587, -398, 1477, 6492]
     },
     {
         "make_model" : "SONY ZV-E10",
