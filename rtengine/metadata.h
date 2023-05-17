@@ -32,6 +32,8 @@ namespace rtengine {
 class ProgressListener;
 class Exiftool;
 
+long exiv2_to_long(const Exiv2::Metadatum &d);
+
 class Exiv2Metadata {
 public:
     Exiv2Metadata();

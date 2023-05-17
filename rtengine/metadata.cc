@@ -46,6 +46,19 @@ std::unique_ptr<Exiftool> Exiv2Metadata::exiftool_(nullptr);
 
 namespace {
 
+#if EXIV2_TEST_VERSION(0,28,0)
+
+class Error: public Exiv2::Error {
+public:
+    Error(const std::string &msg): Exiv2::Error(Exiv2::ErrorCode::kerGeneralError), msg_(msg) {}
+    const char *what() const throw() { return msg_.c_str(); }
+
+private:
+    std::string msg_;
+};
+
+#else // EXIV2_TEST_VERSION
+
 class Error: public Exiv2::AnyError {
 public:
     Error(const std::string &msg): msg_(msg) {}
@@ -56,6 +69,7 @@ private:
     std::string msg_;
 };
 
+#endif // EXIV2_TEST_VERSION
 
 constexpr size_t IMAGE_CACHE_SIZE = 200;
 
@@ -70,7 +84,9 @@ std::unique_ptr<Exiv2::Image> open_exiv2(const Glib::ustring &fname,
 #endif
     image->readMetadata();
     if (!image->good() || (check_exif && image->exifData().empty())) {
-#if EXIV2_TEST_VERSION(0,27,0)
+#if EXIV2_TEST_VERSION(0,28,0)
+        auto error_code = Exiv2::ErrorCode::kerErrorMessage;
+#elif EXIV2_TEST_VERSION(0,27,0)
         auto error_code = Exiv2::kerErrorMessage;
 #else
         auto error_code = 1;
@@ -515,7 +531,7 @@ void Exiv2Metadata::saveToImage(ProgressListener *pl, const Glib::ustring &path,
             dst->writeMetadata();
             return;
         } catch (Exiv2::Error &exc) {
-            if (exc.code() == 37) {
+            if (int(exc.code()) == 37) {
                 std::string msg = exc.what();
                 if (pl) {
                     pl->error(Glib::ustring::compose(M("METADATA_SAVE_ERROR"), path, "WARNING: " + msg));
@@ -740,8 +756,8 @@ void Exiv2Metadata::getDimensions(int &w, int &h) const
             auto itw = exif.findKey(Exiv2::ExifKey("Exif.Image.ImageWidth"));
             auto ith = exif.findKey(Exiv2::ExifKey("Exif.Image.ImageLength"));
             if (itw != exif.end() && ith != exif.end()) {
-                w = itw->toLong();
-                h = ith->toLong();
+                w = exiv2_to_long(*itw);
+                h = exiv2_to_long(*ith);
             } else {
                 w = h = -1;
             }
@@ -977,11 +993,21 @@ void Exiv2Metadata::setOutputRating(const rtengine::procparams::ProcParams &ppar
         auto xmp = getXmpSidecar(src_);
         auto it = xmp.findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
         if (it != xmp.end()) {
-            rating_ = it->toLong();
+            rating_ = exiv2_to_long(*it);
         }
     } else {
         rating_ = pparams.inTrash ? -1 : pparams.rank;
     }
+}
+
+
+long exiv2_to_long(const Exiv2::Metadatum &d)
+{
+#if EXIV2_TEST_VERSION(0,28,0)
+    return d.toInt64();
+#else
+    return d.toLong();
+#endif
 }
 
 

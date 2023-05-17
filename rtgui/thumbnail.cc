@@ -1238,7 +1238,7 @@ void Thumbnail::loadRating()
             auto xmp = rtengine::Exiv2Metadata::getXmpSidecar(fname);
             auto pos = xmp.findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
             if (pos != xmp.end()) {
-                int r = pos->toLong();
+                int r = rtengine::exiv2_to_long(*pos);
                 if (r < 0) {
                     rating_.trash.value = true;
                 } else {
