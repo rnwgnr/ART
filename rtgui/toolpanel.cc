@@ -24,6 +24,7 @@ using namespace rtengine::procparams;
 
 
 ToolVBox::ToolVBox() {
+    set_orientation(Gtk::ORIENTATION_VERTICAL);
 //GTK318
 #if GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 20
     set_spacing(1);       // Vertical space between tools
@@ -33,12 +34,18 @@ ToolVBox::ToolVBox() {
 }
 
 ToolParamBlock::ToolParamBlock() {
+    set_orientation(Gtk::ORIENTATION_VERTICAL);
 //GTK318
 #if GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 20
     set_spacing(2);       // Vertical space between parameters in a single tool
     set_border_width(5);  // Space separating the parameters of a tool and its surrounding frame
 #endif
 //GTK318
+}
+
+Gtk::SizeRequestMode ToolParamBlock::get_request_mode_vfunc () const
+{
+    return Gtk::SIZE_REQUEST_HEIGHT_FOR_WIDTH;
 }
 
 FoldableToolPanel::FoldableToolPanel(Gtk::Box *content, const Glib::ustring &toolName, const Glib::ustring &UILabel, bool need11, bool useEnabled, bool useReset):

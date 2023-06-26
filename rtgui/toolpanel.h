@@ -50,15 +50,16 @@ public:
 };
 
 /// @brief This class control the space around the group of tools inside a tab, as well as the space separating each tool. */
-class ToolVBox: public Gtk::VBox {
+class ToolVBox: public Gtk::Box {
 public:
     ToolVBox();
 };
 
 /// @brief This class control the space around a tool's block of parameter. */
-class ToolParamBlock: public Gtk::VBox {
+class ToolParamBlock: public Gtk::Box {
 public:
     ToolParamBlock();
+    Gtk::SizeRequestMode get_request_mode_vfunc () const override;
 };
 
 

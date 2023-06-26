@@ -186,11 +186,6 @@ void CurveEditorGroup::newLine()
 void CurveEditorGroup::attachCurve (Gtk::Grid* curve)
 {
     pack_start(*curve);
-    check_resize();
-    idle_register_.add([this]() -> bool {
-        queue_draw();
-        return false;
-    });
 }
 
 /*
