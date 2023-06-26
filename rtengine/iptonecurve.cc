@@ -480,11 +480,11 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             if (editImgFloat && (editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2)) {
                 fill_pipette(img, editImgFloat, multiThread);
             }
-            tc.Set(*tcurve, 65535.f * whitept);
+            tc.Set(*tcurve, whitept);
             apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
         } else {
             if (ccurve) {
-                tc.Set(*ccurve, 65535.f * whitept);
+                tc.Set(*ccurve, whitept);
                 apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, 100, whitept, multiThread);
             }
             
@@ -493,7 +493,7 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             }
         
             if (!tcurve1.isIdentity()) {
-                tc.Set(tcurve1, 65535.f * whitept);
+                tc.Set(tcurve1, whitept);
                 apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
             }
 
@@ -502,7 +502,7 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             }
 
             if (!tcurve2.isIdentity()) {
-                tc.Set(tcurve2, 65535.f * whitept);
+                tc.Set(tcurve2, whitept);
                 apply_tc(img, tc, params->toneCurve.curveMode2, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
             }
         }

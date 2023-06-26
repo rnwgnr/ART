@@ -348,7 +348,7 @@ private:
                     FileCatalog *filecatalog;
                 };
                 Data *d = new Data;
-                d->fname = fname_to_utf8(argv[1]);
+                d->fname = argv[1];
                 if (Glib::file_test(d->fname, Glib::FILE_TEST_IS_DIR)) {
                     d->dirname = d->fname;
                     d->fname = "";

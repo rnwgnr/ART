@@ -46,11 +46,6 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
         execute_process(COMMAND ${GIT_CMD} tag --merged HEAD OUTPUT_VARIABLE GIT_TAG WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
         # Replace newlines with semicolons so that it can be split:
         string(REPLACE "\n" ";" GIT_TAG_LIST "${GIT_TAG}")
-        execute_process(COMMAND ${GIT_CMD} rev-list --count HEAD --not ${GIT_TAG_LIST} OUTPUT_VARIABLE GIT_COMMITS_SINCE_TAG OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        # Get number of commits since branching.
-        # Works when checking out branch, tag or commit.
-        execute_process(COMMAND ${GIT_CMD} rev-list --count HEAD --not --tags OUTPUT_VARIABLE GIT_COMMITS_SINCE_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
     elseif(EXISTS "${PROJECT_SOURCE_DIR}/.hg")
         # a hg-git repo (i.e. Alberto's one :-)
 
@@ -95,28 +90,8 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
             OUTPUT_VARIABLE GIT_COMMIT_DATE
             OUTPUT_STRIP_TRAILING_WHITESPACE
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        execute_process(COMMAND 
-            ${HG_CMD} log -r . --template "{count(revset('ancestors(\".\") and descendants(last(tag(r\"re:^v?[0-9]+[.][0-9.]+(rc[0-9]+)?$\"), 1))'))-1}"
-            OUTPUT_VARIABLE GIT_COMMITS_SINCE_TAG
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        execute_process(COMMAND ${HG_CMD} log -r . --template "{count(revset('.::bookmark()'))-1}"
-            OUTPUT_VARIABLE GIT_COMMITS_SINCE_BRANCH
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
     else()
         message(WARNING "not inside a repository -- info will be bogus!")
-    endif()
-
-    # Create numeric version.
-    # This version is nonsense, either don't use it at all or use it only where you have no other choice, e.g. Inno Setup's VersionInfoVersion.
-    # Strip everything after hyphen, e.g. "5.0-gtk2" -> "5.0", "5.1-rc1" -> "5.1" (ergo BS).
-    if(GIT_DESCRIBE STREQUAL "")
-        set(GIT_NUMERIC_VERSION_BS "0.0.0")
-    else()
-        string(REGEX REPLACE "-.*" "" GIT_NUMERIC_VERSION_BS "${GIT_DESCRIBE}")
     endif()
 
     # If user checked-out something which is not a branch, use the description as branch name.
@@ -134,9 +109,6 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
     message(STATUS "    Branch: ${GIT_BRANCH}")
     message(STATUS "    Commit: ${GIT_COMMIT}")
     message(STATUS "    Commit date: ${GIT_COMMIT_DATE}")
-    message(STATUS "    Commits since tag: ${GIT_COMMITS_SINCE_TAG}")
-    message(STATUS "    Commits since branch: ${GIT_COMMITS_SINCE_BRANCH}")
-    message(STATUS "    Version (unreliable): ${GIT_NUMERIC_VERSION_BS}")
     message(STATUS "Build information:")
     message(STATUS "    Build OS: ${BUILDINFO_OS}")
     message(STATUS "    Build date: ${BUILDINFO_DATE}")
@@ -154,9 +126,6 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
 set(GIT_BRANCH \"${GIT_BRANCH}\")
 set(GIT_COMMIT \"${GIT_COMMIT}\")
 set(GIT_COMMIT_DATE \"${GIT_COMMIT_DATE}\")
-set(GIT_COMMITS_SINCE_TAG \"${GIT_COMMITS_SINCE_TAG}\")
-set(GIT_COMMITS_SINCE_BRANCH \"${GIT_COMMITS_SINCE_BRANCH}\")
-set(GIT_NUMERIC_VERSION_BS \"${GIT_NUMERIC_VERSION_BS}\")
 ")
 else()
     include(${REL_INFO_FILE})

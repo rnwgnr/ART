@@ -2568,6 +2568,9 @@ dialog frame > border {
 #FileCatalog:selected {
     background-color: @ART-bgDark01;
 }
+#FileCatalog:active {
+    color: mix(@ART-hl, black, 0.1);
+}
 
 popover {
     background-color: @ART-bg;

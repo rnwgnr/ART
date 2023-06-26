@@ -18,6 +18,7 @@
 #17 2022-08-24 Ohnishi, Yasuo, updates for 1.16
 #18 2022-11-28 Ohnishi, Yasuo, updates for 1.17
 #19 2022-12-27 Ohnishi, Yasuo, updates for 1.18
+#20 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -1147,6 +1148,7 @@ PREFERENCES_SHOWBASICEXIF;基本Exif情報を表示
 PREFERENCES_SHOWDATETIME;日付表示
 PREFERENCES_SHOWEXPOSURECOMPENSATION;露出補正追加
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;画像スライドにツールバーを表示する
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;メーカー注釈の解釈に exiftool を使う
 PREFERENCES_SHTHRESHOLD;シャドウ･クリッピング領域の閾値
 PREFERENCES_SINGLETAB;シングルタブモードモード
 PREFERENCES_SINGLETABBOTTOM;シングル編集タブモード, フィルムストリップは編集画面の下
@@ -1165,6 +1167,7 @@ PREFERENCES_TAB_PERFORMANCE;パフォーマンス
 PREFERENCES_TAB_SOUND;サウンド
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;ディレクトリを開く際 サムネイル画像の更新を遅らせる
 PREFERENCES_THUMBNAIL_LAZY_CACHING;サムネイル画像の粗いキャッシュを作る (Lazy caching)
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;処理されたサムネイル画像のキャッシュ
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;サムネイル上にカーソルを置き, ナビゲートやパンを行う
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;埋め込まれているJPEGのプレビュー
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;表示する画像
@@ -1391,6 +1394,7 @@ TP_COLORCORRECTION_HUESAT;色相/彩度 (Saturation)
 TP_COLORCORRECTION_HUESHIFT;色相のシフト
 TP_COLORCORRECTION_LUT_FILENAME;LUT ファイル
 TP_COLORCORRECTION_MODE_LUT;LUT
+TP_COLORCORRECTION_LUT_SELECT;LUT ファイルを選択...
 TP_CROP_FIXRATIO;縦横比固定
 TP_CROP_GTDIAGONALS;対角線
 TP_CROP_GTEPASSPORT;顔認証パスポート用
@@ -1923,6 +1927,8 @@ TP_SPOT_COUNTLABEL;%1 箇所
 TP_SPOT_ENTRYCHANGED;補修点変更
 TP_SPOT_HINT;プレビュー領域を操作するにはこのボタンをクリックします.\n\nスポットを編集するには, 編集部分の形 (editing geometry) が見えるようにした上で, 白い十字のカーソルを編集したい場所の上に置きます.\n\n編集スポットの追加には, Ctrlを押して左マウスボタンをクリックします. そしてそのままドラッグし, 編集部分を穴埋めするコピー元の場所にカーソルを移動させ (Ctrlキーは放しても良い) マウスボタンを放します.\n\nコピー元や編集部分を移動するには, その円の中心にカーソルを置いてドラッグします.\n\n編集部分の内側の円 (もっとも効果が強い部分) および "境界のぼかし (Feather) " (外側の) 円は その上にカーソルを置いて (すると円はオレンジになる), ドラッグする (すると円は赤になる) ことにより, サイズを変えられます.\n\n修正が終わったら, 任意のスポットの外側を右クリックするかこのボタンを再度クリックして, スポット編集モードを終わらせます.
 TP_SPOT_LABEL;スポット除去
+TP_SPOT_LIGHTPIPELINE_HINT;簡易プレビュー使用中(パフォーマンスオプション)は このボタンを押してスポットを編集します.\n\nプレビュー編集使用中のみ有効です.
+スポットの編集にこのボタンをクリック
 TP_SPOT_CUR_SPOT_LABEL;現在のスポット
 TP_SPOT_SOURCE_X;適用元 X
 TP_SPOT_SOURCE_Y;適用元 Y

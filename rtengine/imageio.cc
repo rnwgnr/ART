@@ -1257,7 +1257,7 @@ int ImageIO::saveTIFF (const Glib::ustring &fname, int bps, bool isFloat, bool u
         }
         it = exif.findKey(Exiv2::ExifKey("Exif.Image.ResolutionUnit"));
         if (it != exif.end()) {
-            res_unit = it->toLong();
+            res_unit = exiv2_to_long(*it);
         }
     }
     TIFFSetField(out, TIFFTAG_XRESOLUTION, x_res);

@@ -1465,7 +1465,7 @@ Camera constants:
     },
 
     { // Quality C
-        "make_model" : "Fujifilm X-H2",
+        "make_model" : ["Fujifilm X-H2", "Fujifilm X-T5"],
         "raw_crop" : [ 60, 6, 7692, 5184 ]
     },
     

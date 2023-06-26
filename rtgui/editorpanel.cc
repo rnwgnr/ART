@@ -99,6 +99,19 @@ bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, G
 
         if (p) {
             defprofname = "from GDK";
+            {
+                auto mlu = static_cast<const cmsMLU *>(cmsReadTag(p, cmsSigProfileDescriptionTag));
+                if (mlu) {
+                    auto sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
+                    if (sz > 0) {
+                        std::vector<char> buf(sz);
+                        cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
+                        buf.back() = 0; // sanity
+                        defprofname = std::string(&buf[0]);
+                    }
+                }
+            }
+            
             defprof = Glib::build_filename (Options::rtdir, "GDK_ICC_PROFILE.icc");
 
             if (cmsSaveProfileToFile (p, defprof.c_str())) {
@@ -144,6 +157,9 @@ private:
 #if !defined(__APPLE__) // monitor profile not supported on apple
     void prepareProfileBox ()
     {
+        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
+        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName());
+
         profileBox.setPreferredWidth (70, 200);
         setExpandAlignProperties (&profileBox, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
 
@@ -162,8 +178,6 @@ private:
         } else {
             profileBox.set_active (0);
         }
-
-        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
 
         for (const auto &profile : profiles) {
             profileBox.append(profile);

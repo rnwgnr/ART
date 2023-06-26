@@ -244,8 +244,71 @@ FramesData::FramesData(const Glib::ustring &fname):
             focal_len35mm = pos->toFloat();
         }
 
-        if (find_tag(Exiv2::subjectDistance)) {
-            focus_dist = (0.01 * pow(10, pos->toFloat() / 40));
+        // if (find_tag(Exiv2::subjectDistance)) {
+        //     focus_dist = pos->toFloat();
+        // }
+        /*
+         * Get the focus distance in meters.
+         */
+        if (find_exif_tag("Exif.NikonLd2.FocusDistance")
+            || find_exif_tag("Exif.NikonLd3.FocusDistance")
+            || (Exiv2::testVersion(0, 27, 4)
+                && find_exif_tag("Exif.NikonLd4.FocusDistance"))) {
+            float value = pos->toFloat();
+            focus_dist = (0.01 * std::pow(10, value / 40));
+        } else if (find_exif_tag("Exif.OlympusFi.FocusDistance")) {
+            /* the distance is stored as a rational (fraction). according to
+             * http://www.dpreview.com/forums/thread/1173960?page=4
+
+             * some Olympus cameras have a wrong denominator of 10 in there
+             * while the nominator is always in mm.  thus we ignore the
+             * denominator and divide with 1000.
+
+             * "I've checked a number of E-1 and E-300 images, and I agree
+             * that the FocusDistance looks like it is in mm for the
+             * E-1. However, it looks more like cm for the E-300.
+
+             * For both cameras, this value is stored as a rational. With
+             * the E-1, the denominator is always 1, while for the E-300 it
+             * is 10.
+
+             * Therefore, it looks like the numerator in both cases is in mm
+             * (which makes a bit of sense, in an odd sort of way). So I
+             * think what I will do in ExifTool is to take the numerator and
+             * divide by 1000 to display the focus distance in meters."  --
+             * Boardhead, dpreview forums in 2005
+             */
+            int nominator = pos->toRational(0).first;
+            focus_dist = std::max(0.0, (0.001 * nominator));
+        } else if (find_exif_tag("Exif.CanonFi.FocusDistanceUpper")) {
+            const float FocusDistanceUpper = pos->toFloat();
+            if (FocusDistanceUpper <= 0.0f
+                || (int)FocusDistanceUpper >= 0xffff) {
+                focus_dist = 0.0f;
+            } else {
+                focus_dist = FocusDistanceUpper / 100.0;
+                if (find_exif_tag("Exif.CanonFi.FocusDistanceLower")) {
+                    const float FocusDistanceLower = pos->toFloat();
+                    if (FocusDistanceLower > 0.0f && (int)FocusDistanceLower < 0xffff) {
+                        focus_dist += FocusDistanceLower / 100.0;
+                        focus_dist /= 2.0;
+                    }
+                }
+            }
+        } else if (find_exif_tag("Exif.CanonSi.SubjectDistance")) {
+            focus_dist = pos->toFloat() / 100.0;
+        } else if (find_tag(Exiv2::subjectDistance)) {
+            focus_dist = pos->toFloat();
+        } else if (Exiv2::testVersion(0,27,2) && find_exif_tag("Exif.Sony2Fp.FocusPosition2")) {
+            const float focus_position = pos->toFloat();
+
+            if (focus_position && find_exif_tag("Exif.Photo.FocalLengthIn35mmFilm")) {
+                const float focal_length_35mm = pos->toFloat();
+
+                /* http://u88.n24.queensu.ca/exiftool/forum/index.php/topic,3688.msg29653.html#msg29653 */
+                focus_dist =
+                    (std::pow(2, focus_position / 16 - 5) + 1) * focal_length_35mm / 1000;
+            }
         }
         
         if (find_tag(Exiv2::orientation)) {
@@ -261,7 +324,7 @@ FramesData::FramesData(const Glib::ustring &fname):
                 "Rotate 270 CW",
                 "Unknown"
             };
-            auto idx = pos->toLong();
+            auto idx = exiv2_to_long(*pos);
             if (idx >= 0 && idx < long(ormap.size())) {
                 orientation = ormap[idx];
             }
@@ -274,7 +337,7 @@ FramesData::FramesData(const Glib::ustring &fname):
             std::string lenstmp;
             if (find_exif_tag("Exif.CanonFi.RFLensType") && find_exif_tag("Exif.Canon.LensModel") && (lenstmp = pos->print(&exif)).size() > 0) {
                 lens = lenstmp;
-            } else if (p->count() == 1 && lens == std::to_string(p->toLong())) {
+            } else if (p->count() == 1 && lens == std::to_string(exiv2_to_long(*p))) {
                 if (find_exif_tag("Exif.Canon.LensModel")) {
                     lens = pos->print(&exif);
                 } else if (find_exif_tag("Exif.Photo.LensModel")) {
@@ -329,11 +392,11 @@ FramesData::FramesData(const Glib::ustring &fname):
         }
 
         if (find_exif_tag("Exif.Image.Rating")) {
-            rating_ = pos->toLong();
+            rating_ = exiv2_to_long(*pos);
         } else {
             auto it = meta.xmpData().findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
             if (it != meta.xmpData().end() && it->size()) {
-                rating_ = it->toLong();
+                rating_ = exiv2_to_long(*it);
             }
         }
 
@@ -393,7 +456,7 @@ FramesData::FramesData(const Glib::ustring &fname):
         auto c = exif.findKey(Exiv2::ExifKey("Exif.Image.Compression"));
 
         if ((!make.compare (0, 6, "PENTAX") || (!make.compare (0, 5, "RICOH") && !model.compare (0, 6, "PENTAX")))) {
-//             if (find_exif_tag("Exif.Pentax.HDR") && pos->toLong() > 0) {
+//             if (find_exif_tag("Exif.Pentax.HDR") && exiv2_to_long(*pos) > 0) {
 //                 isHDR = true;
 // #if PRINT_HDR_PS_DETECTION
 //                 printf("HDR detected ! -> \"HDR\" tag found\n");
@@ -411,7 +474,7 @@ FramesData::FramesData(const Glib::ustring &fname):
 
             if (!isHDR && (find_exif_tag("Exif.Pentax.Quality") ||
                            find_exif_tag("Exif.PentaxDng.Quality")) &&
-                (pos->toLong() == 7 || pos->toLong() == 8)) {
+                (exiv2_to_long(*pos) == 7 || exiv2_to_long(*pos) == 8)) {
                 isPixelShift = true;
 #if PRINT_HDR_PS_DETECTION
                 printf("PixelShift detected ! -> \"Quality\" = 7\n");
@@ -420,23 +483,23 @@ FramesData::FramesData(const Glib::ustring &fname):
         }
 
         if (make == "SONY") {
-            if (find_exif_tag("Exif.SubImage1.BitsPerSample") && pos->toLong() == 14) {
-                if (find_exif_tag("Exif.SubImage1.SamplesPerPixel") && pos->toLong() == 4 &&
-                    find_exif_tag("Exif.SubImage1.PhotometricInterpretation") && pos->toLong() == 32892 &&
-                    find_exif_tag("Exif.SubImage1.Compression") && pos->toLong() == 1) {
+            if (find_exif_tag("Exif.SubImage1.BitsPerSample") && exiv2_to_long(*pos) == 14) {
+                if (find_exif_tag("Exif.SubImage1.SamplesPerPixel") && exiv2_to_long(*pos) == 4 &&
+                    find_exif_tag("Exif.SubImage1.PhotometricInterpretation") && exiv2_to_long(*pos) == 32892 &&
+                    find_exif_tag("Exif.SubImage1.Compression") && exiv2_to_long(*pos) == 1) {
                     isPixelShift = true;
                 }
-            } else if (bps != exif.end() && (bps->toLong() == 14 || bps->toLong() == 16) &&
-                       spp != exif.end() && spp->toLong() == 4 &&
-                       c != exif.end() && c->toLong() == 1 &&
+            } else if (bps != exif.end() && (exiv2_to_long(*bps) == 14 || exiv2_to_long(*bps) == 16) &&
+                       spp != exif.end() && exiv2_to_long(*spp) == 4 &&
+                       c != exif.end() && exiv2_to_long(*c) == 1 &&
                        find_exif_tag("Exif.Image.Software") &&
                        pos->toString() == "make_arq") {
                 isPixelShift = true;
             }
         } else if (make == "FUJIFILM") {
-            if (bps != exif.end() && bps->toLong() == 16 &&
-                spp != exif.end() && spp->toLong() == 4 &&
-                c != exif.end() && c->toLong() == 1 &&
+            if (bps != exif.end() && exiv2_to_long(*bps) == 16 &&
+                spp != exif.end() && exiv2_to_long(*spp) == 4 &&
+                c != exif.end() && exiv2_to_long(*c) == 1 &&
                 find_exif_tag("Exif.Image.Software") &&
                 pos->toString() == "make_arq") {
                 isPixelShift = true;
@@ -496,22 +559,22 @@ FramesData::FramesData(const Glib::ustring &fname):
             {
                 sampleformat = SAMPLEFORMAT_UINT;
             } else {
-                sampleformat = sf->toLong();
+                sampleformat = exiv2_to_long(*sf);
             }
 
             if (bps == exif.end() || spp == exif.end() || pi == exif.end()) {
                 return;
             }
 
-            bitspersample = bps->toLong();
-            samplesperpixel = spp->toLong();
+            bitspersample = exiv2_to_long(*bps);
+            samplesperpixel = exiv2_to_long(*spp);
 
-            photometric = pi->toLong();
+            photometric = exiv2_to_long(*pi);
             if (photometric == PHOTOMETRIC_LOGLUV) {
                 if (c == exif.end()) {
                     compression = COMPRESSION_NONE;
                 } else {
-                    compression = c->toLong();
+                    compression = exiv2_to_long(*c);
                 }
             }
         }

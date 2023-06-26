@@ -35,6 +35,7 @@
 #34 24-08-2022 update to ART v1.16 by pm
 #35 24-11-2022 update to ART v1.17 by pm
 #36 27-12-2022 update to ART v1.18 door pm
+#37 14-03-2023 update to ART v1.18.1 door pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -1149,6 +1150,7 @@ PREFERENCES_SHOWBASICEXIF;Toon standaard Exif-info
 PREFERENCES_SHOWDATETIME;Toon datum en tijd
 PREFERENCES_SHOWEXPOSURECOMPENSATION;Toon belichtingscompensatie
 PREFERENCES_SHOWFILMSTRIPTOOLBAR;Toon filmstripwerkbalk
+PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES;Gebruik exiftool om Exif-'makernotes' te tonen
 PREFERENCES_SHTHRESHOLD;Grenswaarde onderbelichting
 PREFERENCES_SINGLETAB;Enkel-tab modus
 PREFERENCES_SINGLETABBOTTOM;Enkel-tab modus, Filmstrip onder Fotobewerker
@@ -1168,6 +1170,7 @@ PREFERENCES_TAB_PERFORMANCE;Prestaties
 PREFERENCES_TAB_SOUND;Geluiden
 PREFERENCES_THUMBNAIL_DELAY_UPDATE;Vertraag verversen van miniaturen tijdens het openen van mappen
 PREFERENCES_THUMBNAIL_LAZY_CACHING;Miniaturen 'lui' in de cache plaatsen
+PREFERENCES_THUMBNAIL_CACHE_PROCESSED;Plaats verwerkte miniatuurafbeeldingen in de cache
 PREFERENCES_THUMBNAIL_INSPECTOR_HOVER;Bekijk afbeeldingen door de muis over de miniaturen te bewegen
 PREFERENCES_THUMBNAIL_INSPECTOR_JPEG;Ingebed JPEG-voorbeeld
 PREFERENCES_THUMBNAIL_INSPECTOR_MODE;Te tonen foto
@@ -1389,6 +1392,7 @@ TP_COLORCORRECTION_S;Verzadiging
 TP_COLORCORRECTION_HUESHIFT;Kleurverschuiving
 TP_COLORCORRECTION_LUT_FILENAME;LUT-bestand
 TP_COLORCORRECTION_MODE_LUT;LUT
+TP_COLORCORRECTION_LUT_SELECT;Kies LUT-bestand...
 TP_COLORCORRECTION_SYNC_SLIDERS;Koppel corresponderende schuiven
 TP_CROP_DONE;Gereed
 TP_CROP_FIXRATIO;Verhouding:
@@ -1941,8 +1945,9 @@ TP_SPOT_CUR_SPOT_LABEL;Huidige plek
 TP_SPOT_DETAIL;Detailbescherming
 TP_SPOT_ENTRYCHANGED;Punt veranderd
 TP_SPOT_FEATHER;Verzachten
-TP_SPOT_HINT;Klik op deze knop om te kunnen werken in het voorbeeldvenster.\n\nOm een plek te bewerken schuift u de muis over het witte kruis dat een plek markeert, waarna de geometrie ervan verschijnt.\n\nOm een plek toe te voegen klik Ctrl+linkermuisklik, sleep de cirkel (u kunt Ctrl loslaten nu) naar een bronbestemming en laat dan de muisknop los.\n\nOm een bron of bestemming te verplaatsen, ga met de muis naar het centrum en sleep dit ergens heen.\n\nDe binnenste cirkel (gebied met maximaal effect) en de 'verzachtingscirkel' kunnen worden geschaald door er met de muis over te gaan (de cirkel wordt oranje) en ze te verslepen (de cirkel wordt rood).\n\nAls u klaar bent met de veranderingen volstaat een rechtsklik met de muis buiten een plek om de Vlekverwijdermodus te verlaten, of klik opnieuw op deze knop. 
+TP_SPOT_HINT;Klik op deze knop om te kunnen werken in het voorbeeldvenster.\n\nOm een plek te bewerken schuift u de muis over het witte kruis dat een plek markeert, waarna de geometrie ervan verschijnt.\n\nVoeg een plek toe met Ctrl+linkermuisklik, sleep de cirkel (u kunt Ctrl loslaten nu) naar een bronbestemming en laat dan de muisknop los.\n\nOm een bron of bestemming te verplaatsen: klik met de muis op het centrum en sleep dit ergens heen.\n\nDe binnenste cirkel (gebied met maximaal effect) en de 'verzachtingscirkel' kunnen worden geschaald door de muis er op te plaatsen (de cirkel wordt oranje) en ze te verslepen (de cirkel wordt rood).\n\nAls u klaar bent met de veranderingen volstaat een rechtsklik met de muis buiten een plek om de Vlekverwijdermodus te verlaten, of klik opnieuw op deze knop. 
 TP_SPOT_LABEL;Vlekken verwijderen
+TP_SPOT_LIGHTPIPELINE_HINT;Klik op deze knop om punten te wijzigen terwijl u een vereenvoudigd voorbeeld ziet; rekenintensieve tools worden zo voor het voorbeeld uitgeschakeld met een snellere beeldopbouw als gevolg.\n\nHeeft alleen effect als de voorbeeldweergave actief is (het potloodicoon links).
 TP_SPOT_OPACITY;Doorzichtigheid
 TP_SPOT_RADIUS;Straal
 TP_SPOT_SOURCE_X;Bron X

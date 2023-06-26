@@ -1437,7 +1437,8 @@ static INLINE vfloat vintpf(vfloat a, vfloat b, vfloat c) {
     // following is valid:
     // vintpf(a, b+x, c+x) = vintpf(a, b, c) + x
     // vintpf(a, b*x, c*x) = vintpf(a, b, c) * x
-    return a * (b-c) + c;
+    //return a * (b-c) + c;
+    return a * b + (F2V(1)-a) * c;
 }
 
 static INLINE vfloat vdup(vfloat a){

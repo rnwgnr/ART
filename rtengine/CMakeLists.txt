@@ -169,6 +169,7 @@ set(RTENGINESOURCEFILES
     lensexif.cc
     nlmeans.cc
     newdelete.cc
+    compress.cc
     )
 
 

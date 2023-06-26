@@ -246,14 +246,16 @@ void Crop::update(int todo)
 
     // Apply Spot removal
     if ((todo & M_SPOT) && !spotsDone) {
-        if (params.spot.enabled && !params.spot.entries.empty()) {
+        if (params.spot.enabled) {
             if (!spotCrop) {
                 spotCrop = new Imagefloat(cropw, croph);
             }
             baseCrop->copyTo(spotCrop);
-            PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            int tr = getCoarseBitMask(params.coarse);
-            parent->ipf.removeSpots(spotCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, &params.icm, tr);
+            if (!params.spot.entries.empty()) {
+                PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
+                int tr = getCoarseBitMask(params.coarse);
+                parent->ipf.removeSpots(spotCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, &params.icm, tr);
+            }
         } else {
             if (spotCrop) {
                 delete spotCrop;

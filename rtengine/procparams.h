@@ -1652,6 +1652,9 @@ public:
     bool operator ==(const ProcParams& other) const;
     bool operator !=(const ProcParams& other) const;
 
+    bool from_data(const char *data);
+    std::string to_data() const;
+
 private:
     /** Write the ProcParams's text in the file of the given name.
     * @param fname the name of the file

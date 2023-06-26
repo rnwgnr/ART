@@ -113,7 +113,8 @@ constexpr T intp(T a, T b, T c)
     // following is valid:
     // intp(a, b+x, c+x) = intp(a, b, c) + x
     // intp(a, b*x, c*x) = intp(a, b, c) * x
-    return a * (b - c) + c;
+    //return a * (b - c) + c;
+    return a * b + (T(1) - a) * c;
 }
 
 template<typename T>

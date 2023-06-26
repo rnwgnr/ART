@@ -269,7 +269,14 @@ Gtk::Widget* Preferences::getImageProcessingPanel ()
     mtbl->attach(*mlbl, 0, 3, 1, 1);
     exiftoolPath = Gtk::manage(new Gtk::Entry());
     exiftoolPath->set_tooltip_text (M ("PREFERENCES_EXIFTOOL_PATH_TOOLTIP"));
-    mtbl->attach_next_to(*exiftoolPath, *mlbl, Gtk::POS_RIGHT, 1, 1);
+    {
+        Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+        hb->pack_start(*exiftoolPath, Gtk::PACK_EXPAND_WIDGET);
+        //mtbl->attach_next_to(*exiftoolPath, *mlbl, Gtk::POS_RIGHT, 1, 1);
+        mtbl->attach_next_to(*hb, *mlbl, Gtk::POS_RIGHT, 1, 1);
+        show_exiftool_makernotes = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_SHOW_EXIFTOOL_MAKERNOTES")));
+        hb->pack_start(*show_exiftool_makernotes, Gtk::PACK_SHRINK, 4);
+    }
     setExpandAlignProperties(mlbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     setExpandAlignProperties(exiftoolPath, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
 
@@ -475,10 +482,12 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     Gtk::Frame *thumbFrame = Gtk::manage(new Gtk::Frame(M("MAIN_FRAME_FILEBROWSER")));
     thumbDelayUpdate = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_DELAY_UPDATE")));
     thumbLazyCaching = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_LAZY_CACHING")));
+    thumb_cache_processed_ = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_CACHE_PROCESSED")));
     {
         Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
         vb->pack_start(*thumbDelayUpdate);
         vb->pack_start(*thumbLazyCaching);
+        vb->pack_start(*thumb_cache_processed_);
         thumbFrame->add(*vb);
     }
     vbPerformance->pack_start(*thumbFrame, Gtk::PACK_SHRINK, 4);
@@ -1483,7 +1492,11 @@ Gtk::Widget* Preferences::getSoundsPanel ()
 
     sndEnableToggled();
 
-    swSounds->add(*vbSounds);
+    auto f = Gtk::manage(new Gtk::Frame(""));
+    f->add(*vbSounds);
+    //swSounds->add(*vbSounds);
+    swSounds->add(*f);
+    
     return swSounds;
 }
 
@@ -1824,7 +1837,7 @@ void Preferences::storePreferences ()
     moptions.filmstripBottom = editorMode == 1;
 
     moptions.curvebboxpos = curveBBoxPosC->get_active_row_number();
-    moptions.histogramPosition = ckbHistogramPositionLeft->get_active() ? 1 : 2;
+    moptions.histogramPosition = ckbHistogramPositionLeft->get_active() ? Options::HISTOGRAM_POS_LEFT : Options::HISTOGRAM_POS_RIGHT;
     moptions.FileBrowserToolbarSingleRow = ckbFileBrowserToolbarSingleRow->get_active();
     moptions.showFilmStripToolBar = ckbShowFilmStripToolBar->get_active();
     moptions.hideTPVScrollbar = ckbHideTPVScrollbar->get_active();
@@ -1840,6 +1853,7 @@ void Preferences::storePreferences ()
     moptions.rtSettings.thread_pool_size = thumbUpdateThreadLimit->get_value_as_int();
     moptions.thumb_delay_update = thumbDelayUpdate->get_active();
     moptions.thumb_lazy_caching = thumbLazyCaching->get_active();
+    moptions.thumb_cache_processed = thumb_cache_processed_->get_active();
 
 // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
@@ -1853,6 +1867,7 @@ void Preferences::storePreferences ()
     moptions.rtSettings.metadata_xmp_sync = rtengine::Settings::MetadataXmpSync(metadataSyncCombo->get_active_row_number());
     moptions.rtSettings.xmp_sidecar_style = rtengine::Settings::XmpSidecarStyle(xmpSidecarCombo->get_active_row_number());
     moptions.rtSettings.exiftool_path = exiftoolPath->get_text();
+    moptions.show_exiftool_makernotes = show_exiftool_makernotes->get_active();
 
     moptions.toolpanels_disable = ckbTpDisable->get_active();
 
@@ -2088,7 +2103,7 @@ void Preferences::fillPreferences ()
     }
 
     curveBBoxPosC->set_active (moptions.curvebboxpos);
-    ckbHistogramPositionLeft->set_active (moptions.histogramPosition == 1);
+    ckbHistogramPositionLeft->set_active (moptions.histogramPosition == Options::HISTOGRAM_POS_LEFT);
     ckbFileBrowserToolbarSingleRow->set_active (moptions.FileBrowserToolbarSingleRow);
     ckbShowFilmStripToolBar->set_active (moptions.showFilmStripToolBar);
     ckbHideTPVScrollbar->set_active (moptions.hideTPVScrollbar);
@@ -2102,6 +2117,7 @@ void Preferences::fillPreferences ()
     thumbUpdateThreadLimit->set_value(moptions.rtSettings.thread_pool_size);
     thumbDelayUpdate->set_active(moptions.thumb_delay_update);
     thumbLazyCaching->set_active(moptions.thumb_lazy_caching);
+    thumb_cache_processed_->set_active(moptions.thumb_cache_processed);
 
     if (!moptions.rtSettings.darkFramesPath.empty()) {
         darkFrameDir->set_current_folder(moptions.rtSettings.darkFramesPath);
@@ -2145,6 +2161,7 @@ void Preferences::fillPreferences ()
     metadataSyncCombo->set_active(int(moptions.rtSettings.metadata_xmp_sync));
     xmpSidecarCombo->set_active(int(moptions.rtSettings.xmp_sidecar_style));
     exiftoolPath->set_text(moptions.rtSettings.exiftool_path);
+    show_exiftool_makernotes->set_active(moptions.show_exiftool_makernotes);
 
     ckbTpDisable->set_active(moptions.toolpanels_disable);
 

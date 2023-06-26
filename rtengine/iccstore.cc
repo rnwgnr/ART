@@ -370,7 +370,8 @@ public:
         loadAll(true),
         xyz(createXYZProfile()),
         srgb(cmsCreate_sRGBProfile()),
-        thumb_monitor_xform_(nullptr)
+        thumb_monitor_xform_(nullptr),
+        monitor_profile_hash_("000000000000000000000000000000000")
     {
         //cmsErrorAction(LCMS_ERROR_SHOW);
 
@@ -706,6 +707,10 @@ public:
         return thumb_monitor_xform_;
     }
 
+    const std::string &getThumbnailMonitorHash() const
+    {
+        return monitor_profile_hash_;
+    }
 
     bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
     {
@@ -743,10 +748,21 @@ private:
 #endif
 
         if (monitor) {
+            monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, ProfileContent(monitor).getData());
+            switch (settings->monitorIntent) {
+            case RI_PERCEPTUAL: monitor_profile_hash_.push_back('0'); break;
+            case RI_RELATIVE: monitor_profile_hash_.push_back('1'); break;
+            case RI_SATURATION: monitor_profile_hash_.push_back('2'); break;
+            case RI_ABSOLUTE: monitor_profile_hash_.push_back('3'); break;
+            default: monitor_profile_hash_.push_back('0'); break;
+            }
+            
             cmsHPROFILE iprof = cmsCreateLab4Profile(nullptr);
             cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
             thumb_monitor_xform_ = cmsCreateTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, settings->monitorIntent, flags);
             cmsCloseProfile(iprof);
+        } else {
+            monitor_profile_hash_ = "000000000000000000000000000000000";
         }
     }
 
@@ -1067,6 +1083,7 @@ parse_error:
     mutable MyMutex mutex;
 
     cmsHTRANSFORM thumb_monitor_xform_;
+    std::string monitor_profile_hash_;
 };
 
 ICCStore* ICCStore::getInstance()
@@ -1194,6 +1211,12 @@ std::uint8_t ICCStore::getProofIntents(const Glib::ustring& name) const
 cmsHTRANSFORM ICCStore::getThumbnailMonitorTransform()
 {
     return implementation->getThumbnailMonitorTransform();
+}
+
+
+const std::string &ICCStore::getThumbnailMonitorHash() const
+{
+    return implementation->getThumbnailMonitorHash();
 }
 
 

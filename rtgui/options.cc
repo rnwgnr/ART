@@ -436,8 +436,8 @@ void Options::setDefaults()
     filmStripShowFileNames = false;
     tabbedUI = false;
     multiDisplayMode = 0;
-    filmstripBottom = false;
-    histogramPosition = 1;
+    filmstripBottom = true;
+    histogramPosition = HISTOGRAM_POS_RIGHT;
     histogramRed = true;
     histogramGreen = true;
     histogramBlue = true;
@@ -461,6 +461,7 @@ void Options::setDefaults()
 #endif
     thumb_delay_update = false;
     thumb_lazy_caching = true;
+    thumb_cache_processed = false;
     profile_append_mode = false;
     maxInspectorBuffers = 2; //  a rather conservative value for low specced systems...
     inspectorDelay = 0;
@@ -612,6 +613,7 @@ void Options::setDefaults()
     rtSettings.exiftool_path += ".exe";
 #endif
     rtSettings.thread_pool_size = 0;
+    show_exiftool_makernotes = false;
 
     browser_width_for_inspector = 0;
 
@@ -1174,6 +1176,10 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Performance", "ThumbLazyCaching")) {
                     thumb_lazy_caching = keyFile.get_boolean("Performance", "ThumbLazyCaching");
                 }
+
+                if (keyFile.has_key("Performance", "ThumbCacheProcessed")) {
+                    thumb_cache_processed = keyFile.get_boolean("Performance", "ThumbCacheProcessed");
+                }
             }
 
             if (keyFile.has_group("Inspector")) {
@@ -1699,6 +1705,9 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Metadata", "ExiftoolPath")) {
                     rtSettings.exiftool_path = keyFile.get_string("Metadata", "ExiftoolPath");
                 }
+                if (keyFile.has_key("Metadata", "ShowExiftoolMakernotes")) {
+                    show_exiftool_makernotes = keyFile.get_boolean("Metadata", "ShowExiftoolMakernotes");
+                }
             }
 
             if (keyFile.has_group("False Colors Map")) {
@@ -1945,6 +1954,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_integer("Performance", "ThumbUpdateThreadLimit", rtSettings.thread_pool_size);
         keyFile.set_boolean("Performance", "ThumbDelayUpdate", thumb_delay_update);
         keyFile.set_boolean("Performance", "ThumbLazyCaching", thumb_lazy_caching);
+        keyFile.set_boolean("Performance", "ThumbCacheProcessed", thumb_cache_processed);
         
         keyFile.set_integer("Performance", "WBPreviewMode", wb_preview_mode);
         keyFile.set_integer("Inspector", "Mode", int(rtSettings.thumbnail_inspector_mode));
@@ -2159,6 +2169,7 @@ void Options::saveToFile(Glib::ustring fname)
         }
 
         keyFile.set_string("Metadata", "ExiftoolPath", rtSettings.exiftool_path);
+        keyFile.set_boolean("Metadata", "ShowExiftoolMakernotes", show_exiftool_makernotes);
 
         for (auto &p : falseColorsMap) {
             keyFile.set_string("False Colors Map", "IRE_" + std::to_string(p.first), p.second);

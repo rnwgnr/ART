@@ -20,7 +20,6 @@
 
 #define MyAppName "ART"
 #define MyAppVersion "${GIT_DESCRIBE}"
-#define MyAppVersionNumeric "${GIT_NUMERIC_VERSION_BS}"
 #define MyAppPublisher "ART"
 #define MyAppURL "http://bitbucket.org/agriggio/ART/"
 #define MyAppExeName "ART.exe"
@@ -39,7 +38,6 @@
 AppId={#MyAppName}{#MyAppVersion}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;VersionInfoVersion={#MyAppVersionNumeric}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}

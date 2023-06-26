@@ -47,6 +47,7 @@ class ThumbBrowserBase  :  public Gtk::Grid
         Gdk::RGBA bgn;
         Gdk::RGBA bgs;
         Gdk::RGBA bgp;
+        Gdk::RGBA hl;
 
     public:
         Internal ();
@@ -87,6 +88,7 @@ class ThumbBrowserBase  :  public Gtk::Grid
             return bgs;
         }
         Gdk::RGBA getPrelightBgColor() { return bgp; }
+        Gdk::RGBA getHighlightColor() { return hl; }
 
         void setDirty ()
         {
@@ -260,6 +262,7 @@ public:
         return internal.getSelectedBgColor();
     }
     Gdk::RGBA getPrelightBgColor() { return internal.getPrelightBgColor(); }
+    Gdk::RGBA getHighlightColor() { return internal.getHighlightColor(); }
 
 };
 

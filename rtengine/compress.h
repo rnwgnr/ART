@@ -2,7 +2,7 @@
  *
  *  This file is part of ART.
  *
- *  Copyright 2020 Alberto Griggio <alberto.griggio@gmail.com>
+ *  Copyright 2023 Alberto Griggio <alberto.griggio@gmail.com>
  *
  *  ART is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,11 +26,7 @@
 
 namespace rtengine {
 
-// code taken from
-// https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64,
-// released under public domain
-
-std::string base64encode(const std::vector<uint8_t> &input);
-std::vector<uint8_t> base64decode(const std::string &input);
+std::vector<uint8_t> compress(const std::string &src, int level=-1);
+std::string decompress(const std::vector<uint8_t> &src);
 
 } // namespace rtengine

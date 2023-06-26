@@ -48,6 +48,8 @@ Spot::Spot() :
     activeSpot(-1),
     sourceIcon("spot-normal.png", "spot-active.png", "spot-prelight.png", "", "", Geometry::DP_CENTERCENTER),
     targetIcon("spot-normal-target.png", "spot-active-target.png", "spot-prelight-target.png", "", "", Geometry::DP_CENTERCENTER),
+	lightPipelineOnImage("light_pipeline_on.png"),
+	lightPipelineOffImage("light_pipeline_off.png"),
     editedCheckBox(nullptr)
 {
     countLabel = Gtk::manage (new Gtk::Label (Glib::ustring::compose (M ("TP_SPOT_COUNTLABEL"), 0)));
@@ -56,6 +58,11 @@ Spot::Spot() :
     edit->add (*Gtk::manage (new RTImage ("edit-point.png")));
     editConn = edit->signal_toggled().connect ( sigc::mem_fun (*this, &Spot::editToggled) );
     edit->set_tooltip_text(M("TP_SPOT_HINT"));
+
+    lightPipeline = Gtk::manage (new Gtk::ToggleButton());
+    lightPipeline->add (*Gtk::manage (new RTImage (lightPipelineOffImage)));
+    lightPipelineConn = lightPipeline->signal_toggled().connect ( sigc::mem_fun (*this, &Spot::lightPipelineToggled) );
+    lightPipeline->set_tooltip_text(M("TP_SPOT_LIGHTPIPELINE_HINT"));
 
     reset = Gtk::manage (new Gtk::Button ());
     reset->add (*Gtk::manage (new RTImage ("undo-small.png")));
@@ -66,6 +73,7 @@ Spot::Spot() :
     labelBox = Gtk::manage (new Gtk::HBox());
     labelBox->set_spacing (2);
     labelBox->pack_start (*countLabel, false, false, 0);
+    labelBox->pack_end (*lightPipeline, false, false, 0);
     labelBox->pack_end (*edit, false, false, 0);
     labelBox->pack_end (*reset, false, false, 0);
     pack_start (*labelBox);
@@ -110,10 +118,10 @@ Spot::Spot() :
 
     auto m = ProcEventMapper::getInstance();
     EvSpotEnabled = m->newEvent(ALLNORAW, "TP_SPOT_LABEL");
-    EvSpotEnabledOPA = m->newAnonEvent(ALLNORAW);
-    EvSpotEntry = m->newEvent(ALLNORAW, "HISTORY_MSG_SPOT_ENTRY");
-    EvSpotEntryOPA = m->newEvent(ALLNORAW, "HISTORY_MSG_SPOT_ENTRY");
-    EvToolReset.set_action(ALLNORAW);
+    EvSpotEnabledOPA = m->newAnonEvent(SPOTADJUST);
+    EvSpotEntry = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
+    EvSpotEntryOPA = m->newEvent(SPOTADJUST, "HISTORY_MSG_SPOT_ENTRY");
+    EvToolReset.set_action(SPOTADJUST);
 
     spot_frame = Gtk::manage(new Gtk::Frame(M("TP_SPOT_CUR_SPOT_LABEL")));
     Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
@@ -243,7 +251,8 @@ void Spot::setEditProvider(EditDataProvider* provider)
     }
 }
 
-void Spot::editToggled ()
+
+void Spot::editToggled()
 {
     if (listener) {
         if (edit->get_active()) {
@@ -259,7 +268,18 @@ void Spot::editToggled ()
     }
 }
 
-Geometry* Spot::getVisibleGeometryFromMO (int MOID)
+
+void Spot::lightPipelineToggled()
+{
+    if (listener && edit->get_active()) {
+        listener->refreshPreview(EvSpotEnabledOPA); // reprocess the preview w/o creating History entry
+        //NOTE: an option need to be created if we want to make this button state persistent across session
+    }
+    lightPipeline->set_image(lightPipeline->get_active() ? lightPipelineOnImage : lightPipelineOffImage);
+}
+
+
+Geometry* Spot::getVisibleGeometryFromMO(int MOID)
 {
     if (MOID == -1) {
         return nullptr;
@@ -845,19 +865,27 @@ void Spot::tweakParams(procparams::ProcParams& pparams)
     // -> disabling standard crop
     pparams.crop.enabled = false;
 
-//     // -> disabling time consuming and unnecessary tool
-// //    pparams.sh.enabled = false;
-//     pparams.blackwhite.enabled = false;
-//     pparams.dehaze.enabled = false;
-// //    pparams.wavelet.enabled = false;
-//     pparams.filmSimulation.enabled = false;
-// //    pparams.sharpenEdge.enabled = false;
-// //    pparams.sharpenMicro.enabled = false;
-//     pparams.sharpening.enabled = false;
-//     pparams.softlight.enabled = false;
-//     pparams.gradient.enabled = false;
-//     pparams.pcvignette.enabled = false;
-// //    pparams.colorappearance.enabled = false;
+    // -> disabling time consuming and unnecessary tool
+    if (lightPipeline->get_active()) {
+        pparams.colorcorrection.enabled = false;
+        pparams.localContrast.enabled = false;
+        pparams.smoothing.enabled = false;
+        pparams.textureBoost.enabled = false;
+        pparams.toneEqualizer.enabled = false;
+        pparams.fattal.enabled = false;
+        pparams.dehaze.enabled = false;
+        pparams.filmSimulation.enabled = false;
+        pparams.blackwhite.enabled = false;
+        pparams.defringe.enabled = false;
+        pparams.sharpening.enabled = false;
+        pparams.impulseDenoise.enabled = false;
+        pparams.softlight.enabled = false;
+        pparams.gradient.enabled = false;
+        pparams.pcvignette.enabled = false;
+
+        //users might want to edit on a denoised image, no problem to preview it since it doesn't seem to slow things down
+        //pparams.denoise = false;
+    }
 }
 
 

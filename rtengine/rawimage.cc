@@ -682,7 +682,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
     // in case dcraw didn't handle the above mentioned case...
     shot_select = std::min(shot_select, std::max(is_raw, 1u) - 1);
 
-    if (!is_raw) {
+    if (!is_raw || (colors != 1 && colors != 3)) {
         fclose(ifp);
         ifp = nullptr;
 
@@ -907,7 +907,6 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                             height = iheight;
                         }
                     }
-                    std::cout << "DIMS: " << w << "x" << h << " | " << width << "x" << height << std::endl;
                 }
             }
 
