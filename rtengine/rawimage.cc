@@ -682,7 +682,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
     // in case dcraw didn't handle the above mentioned case...
     shot_select = std::min(shot_select, std::max(is_raw, 1u) - 1);
 
-    if (!is_raw || (colors != 1 && colors != 3)) {
+    const auto is_mosaic = isBayer() || isXtrans();
+    if (!is_raw || (colors != 1 && colors != 3 &&
+                    !(!is_mosaic && colors == 4 && !use_internal_decoder_))) {
         fclose(ifp);
         ifp = nullptr;
 
