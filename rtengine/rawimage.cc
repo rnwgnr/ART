@@ -352,7 +352,7 @@ skip_block:
     } else {
         memset(sum, 0, sizeof sum);
 
-        for (size_t row = 0; row < 8; row++)
+        for (size_t row = 0; row < 8; row++) {
             for (size_t col = 0; col < 8; col++) {
                 int c = FC(row, col);
 
@@ -362,16 +362,22 @@ skip_block:
 
                 sum[c + 4]++;
             }
+        }
 
-        if (sum[0] && sum[1] && sum[2] && sum[3])
+        if (sum[0] && sum[1] && sum[2] && sum[3]) {
             for (int c = 0; c < 4; c++) {
                 pre_mul_[c] = (float) sum[c + 4] / sum[c];
             }
-        else if (this->get_cam_mul(0) && this->get_cam_mul(2)) {
+        } else if (this->get_cam_mul(0) && this->get_cam_mul(2)) {
             pre_mul_[0] = this->get_cam_mul(0);
             pre_mul_[1] = this->get_cam_mul(1);
             pre_mul_[2] = this->get_cam_mul(2);
             pre_mul_[3] = this->get_cam_mul(3);
+        } else if (colors == 1) {
+            auto p = max(pre_mul_[0], pre_mul_[1], pre_mul_[2], pre_mul_[3]);
+            for (int i = 0; i < 4; ++i) {
+                pre_mul_[i] = p;
+            }
         } else {
             // try getting from makernotes
             bool ok = true;
