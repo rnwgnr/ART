@@ -782,6 +782,8 @@ void ThumbBrowserBase::Internal::on_realize()
     texts = style->get_color(Gtk::STATE_FLAG_SELECTED);
     bgn = style->get_background_color(Gtk::STATE_FLAG_NORMAL);
     bgs = style->get_background_color(Gtk::STATE_FLAG_SELECTED);
+    bgp = style->get_background_color(Gtk::STATE_FLAG_PRELIGHT);
+    hl = style->get_color(Gtk::STATE_FLAG_ACTIVE);
 
     set_can_focus(true);
     add_events(Gdk::EXPOSURE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK | Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK | Gdk::KEY_PRESS_MASK);
