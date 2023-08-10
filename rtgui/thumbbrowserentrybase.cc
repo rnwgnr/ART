@@ -231,7 +231,7 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
 
     cc->set_antialias(Cairo::ANTIALIAS_SUBPIXEL);
 
-    drawFrame(cc, selected ? bgs : bgp, bgn, selected ? &hl : nullptr);
+    drawFrame(cc, selected ? bgs : bgp, bgn);
 
     // calculate height of button set
     int bsHeight = 0;
@@ -426,6 +426,16 @@ void ThumbBrowserEntryBase::updateBackBuffer ()
         }
     }
 
+    if (selected) {
+        constexpr int radius = 4;
+        cc->set_source_rgb(hl.get_red(), hl.get_green(), hl.get_blue());
+        const auto r = 2.5 * radius * RTScalable::getScale();
+        cc->move_to(exp_width-2, exp_height-2 - r);
+        cc->line_to(exp_width-2, exp_height-2);
+        cc->line_to(exp_width-2 - r, exp_height-2);
+        cc->fill_preserve();
+    }        
+
     backBuffer->setDirty(false);
 }
 
@@ -568,7 +578,7 @@ void ThumbBrowserEntryBase::resize (int h)
     drawable = true;
 }
 
-void ThumbBrowserEntryBase::drawFrame(Cairo::RefPtr<Cairo::Context> cc, const Gdk::RGBA &bg, const Gdk::RGBA &fg, const Gdk::RGBA *hl)
+void ThumbBrowserEntryBase::drawFrame(Cairo::RefPtr<Cairo::Context> cc, const Gdk::RGBA &bg, const Gdk::RGBA &fg)
 {
     int radius = 4;
 
@@ -596,17 +606,6 @@ void ThumbBrowserEntryBase::drawFrame(Cairo::RefPtr<Cairo::Context> cc, const Gd
         cc->set_source_rgb (fg.get_red(), fg.get_green(), fg.get_blue());
         cc->set_line_width (2.0);
         cc->stroke ();
-    }
-
-    if (hl) {
-        cc->set_source_rgb(hl->get_red(), hl->get_green(), hl->get_blue());
-        const auto r = 2.5 * radius * RTScalable::getScale();
-        cc->move_to(exp_width-2, exp_height-2 - r);
-        cc->line_to(exp_width-2, exp_height-2);
-        cc->line_to(exp_width-2 - r, exp_height-2);
-        // cc->move_to(exp_width-2 - 3*radius, exp_height-2 - 3*radius);
-        // cc->arc(exp_width-2 - 2*radius, exp_height-2 - 2*radius, 1.2*radius, 0, 2 * rtengine::RT_PI);
-        cc->fill_preserve();
     }
 }
 
