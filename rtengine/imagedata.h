@@ -30,8 +30,7 @@
 #include "metadata.h"
 #include "gainmap.h"
 
-namespace rtengine
-{
+namespace rtengine {
 
 class FramesData : public FramesMetaData {
 private:
@@ -58,6 +57,7 @@ private:
     int w_;
     int h_;
     bool dng_;
+    std::string internal_make_model_;
     
 public:
     FramesData (const Glib::ustring& fname);
@@ -99,8 +99,11 @@ public:
     void setDimensions(int w, int h);
     void setDNG(bool yes) { dng_ = yes; }
     bool isDNG() const override { return dng_; }
+
+    void setInternalMakeModel(const std::string &m);
+    std::string getInternalMakeModel() const { return internal_make_model_; }
 };
 
 
-}
+} // namespace rtengine
 #endif

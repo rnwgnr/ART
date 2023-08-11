@@ -21,30 +21,14 @@
 #include "toolpanelcoord.h"
 #include "../rtengine/rawimagesource.h"
 
-namespace {
-
-inline std::string upcase(const std::string &s)
-{
-    std::string ret(s);
-    for (auto &c : ret) {
-        c = std::toupper(c);
-    }
-    return ret;
-}
-
-} // namespace
-
-
 std::vector<WBPreset> ToolPanelCoordinator::getWBPresets() const
 {
     std::vector<WBPreset> ret;
     if (ipc) {
-        const rtengine::FramesMetaData *md = ipc->getInitialImage()->getMetaData();
+        const rtengine::FramesData *md = dynamic_cast<const rtengine::FramesData *>(ipc->getInitialImage()->getMetaData());
         rtengine::RawImageSource *src = dynamic_cast<rtengine::RawImageSource *>(ipc->getInitialImage());
         if (md && src) {
-            std::string make = upcase(md->getMake());
-            std::string model = upcase(md->getModel());
-            std::string key = make + " " + model;
+            std::string key = md->getInternalMakeModel();
 
             const auto &presets = wb_presets::getPresets();
             auto it = presets.find(key);

@@ -680,6 +680,10 @@ FramesData::FramesData(const Glib::ustring &fname):
         }
         ok_ = false;
     }
+
+    if (ok_) {
+        setInternalMakeModel(make + " " + model);
+    }
 }
 
 
@@ -942,4 +946,20 @@ void FramesData::setDimensions(int w, int h)
 {
     w_ = w;
     h_ = h;
+}
+
+
+void FramesData::setInternalMakeModel(const std::string &s)
+{
+    const auto upcase =
+        [](const std::string &s)
+        {
+            std::string ret(s);
+            for (auto &c : ret) {
+                c = std::toupper(c);
+            }
+            return ret;
+        };
+        
+    internal_make_model_ = upcase(s);
 }

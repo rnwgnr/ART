@@ -1443,6 +1443,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
         getFullSize(ww, hh);
         idata->setDimensions(ww, hh);
     }
+    idata->setInternalMakeModel(ri->get_maker() + " " + ri->get_model());
 
     green(W, H);
     red(W, H);
