@@ -176,7 +176,7 @@ TextureBoost::TextureBoost(): FoldableToolPanel(this, "epd", M("TP_EPD_LABEL"), 
 
     strength = Gtk::manage(new Adjuster (M("TP_EPD_STRENGTH"), -2.0, 2.0, 0.01, 0));
     strength->setLogScale(2, 0, true);
-    detailThreshold = Gtk::manage(new Adjuster (M("TP_EPD_DETAIL_THRESHOLD"), 0.01, 2.0, 0.01, 1.0));
+    detailThreshold = Gtk::manage(new Adjuster (M("TP_EPD_DETAIL_THRESHOLD"), 0.01, 2.0, 0.01, 0.2));
     detailThreshold->setLogScale(10, 1, true);
     iterations = Gtk::manage(new Adjuster(M("TP_EPD_ITERATIONS"), 1, 5, 1, 1));
 

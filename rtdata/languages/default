@@ -295,7 +295,7 @@ HISTORY_MSG_11;Tone Curve - Curve 1
 HISTORY_MSG_14;L*a*b* - Lightness
 HISTORY_MSG_15;L*a*b* - Contrast
 HISTORY_MSG_19;L*a*b* - L* curve
-HISTORY_MSG_20;Sharpening
+HISTORY_MSG_20;Capture Sharpening
 HISTORY_MSG_21;USM - Radius
 HISTORY_MSG_22;USM - Amount
 HISTORY_MSG_23;USM - Threshold
@@ -304,7 +304,7 @@ HISTORY_MSG_25;USM - Edge detection radius
 HISTORY_MSG_26;USM - Edge tolerance
 HISTORY_MSG_27;USM - Halo control
 HISTORY_MSG_28;USM - Halo control amount
-HISTORY_MSG_29;Sharpening - Method
+HISTORY_MSG_29;Capture Sharpening - Method
 HISTORY_MSG_30;RLD - Radius
 HISTORY_MSG_31;RLD - Amount
 HISTORY_MSG_32;RLD - Damping
@@ -393,7 +393,7 @@ HISTORY_MSG_140;Black level - Green 2
 HISTORY_MSG_141;Black level - Link greens
 HISTORY_MSG_158;TB - Strength
 HISTORY_MSG_160;TB - Scale
-HISTORY_MSG_162;Texture Boost
+HISTORY_MSG_162;Texture Boost/Sharpening
 HISTORY_MSG_163;RGB Curves - Red
 HISTORY_MSG_164;RGB Curves - Green
 HISTORY_MSG_165;RGB Curves - Blue
@@ -629,13 +629,13 @@ HISTORY_MSG_RAW_BORDER;Raw border
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Resize - Allow upscaling
 HISTORY_MSG_RESIZE_PPI;Resize - PPI
 HISTORY_MSG_RESIZE_UNIT;Resize - Unit
-HISTORY_MSG_SHARPENING_AUTORADIUS;Sharpening - Auto RLD radius
-HISTORY_MSG_SHARPENING_BLUR;Sharpening - Blur radius
-HISTORY_MSG_SHARPENING_CONTRAST;Sharpening - Contrast threshold
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Sharpening - RLD corner latitude
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Sharpening - RLD corner radius increase
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Sharpening - PSF file
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Sharpening - PSF iterations
+HISTORY_MSG_SHARPENING_AUTORADIUS;Capture Sharpening - Auto RLD radius
+HISTORY_MSG_SHARPENING_BLUR;Capture Sharpening - Blur radius
+HISTORY_MSG_SHARPENING_CONTRAST;Capture Sharpening - Contrast threshold
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Capture Sharpening - RLD corner latitude
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Capture Sharpening - RLD corner radius increase
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Capture Sharpening - PSF file
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Capture Sharpening - PSF iterations
 HISTORY_MSG_SH_COLORSPACE;S/H - Colorspace
 HISTORY_MSG_SMOOTHING_ENABLED;Smoothing
 HISTORY_MSG_SMOOTHING_FALLOFF;Smoothing - falloff
@@ -910,7 +910,7 @@ PARTIALPASTE_DIALOGLABEL;Partial paste processing profile
 PARTIALPASTE_DIRPYRDENOISE;Noise reduction
 PARTIALPASTE_DIRPYREQUALIZER;Contrast by detail levels
 PARTIALPASTE_DISTORTION;Distortion correction
-PARTIALPASTE_TEXTUREBOOST;Texture boost
+PARTIALPASTE_TEXTUREBOOST;Texture boost/Sharpening
 PARTIALPASTE_EQUALIZER;Wavelet levels
 PARTIALPASTE_EVERYTHING;Everything
 PARTIALPASTE_EXIFCHANGES;Exif
@@ -958,7 +958,7 @@ PARTIALPASTE_RGBCURVES;RGB curves
 PARTIALPASTE_ROTATION;Rotation
 PARTIALPASTE_SHADOWSHIGHLIGHTS;Shadows/highlights
 PARTIALPASTE_SHARPENEDGE;Edges
-PARTIALPASTE_SHARPENING;Sharpening
+PARTIALPASTE_SHARPENING;Capture sharpening
 PARTIALPASTE_SHARPENMICRO;Microcontrast
 PARTIALPASTE_SMOOTHING;Smoothing
 PARTIALPASTE_SOFTLIGHT;Soft light
@@ -1461,7 +1461,7 @@ TP_DISTORTION_AMOUNT;Amount
 TP_DISTORTION_AUTO_TIP;Automatically corrects lens distortion in raw files by matching it against the embedded JPEG image if one exists and has had its lens disortion auto-corrected by the camera.
 TP_DISTORTION_LABEL;Distortion Correction
 TP_EPD_DETAIL_THRESHOLD;Detail scale
-TP_EPD_LABEL;Texture Boost
+TP_EPD_LABEL;Texture Boost/Sharpening
 TP_EPD_LIST_TITLE;Parameters
 TP_EPD_SCALE;Scale
 TP_EPD_ITERATIONS;Iterations
@@ -1863,7 +1863,7 @@ TP_SHARPENING_EDRADIUS;Radius
 TP_SHARPENING_EDTOLERANCE;Edge tolerance
 TP_SHARPENING_HALOCONTROL;Halo control
 TP_SHARPENING_HCAMOUNT;Amount
-TP_SHARPENING_LABEL;Sharpening
+TP_SHARPENING_LABEL;Capture Sharpening
 TP_SHARPENING_METHOD;Method
 TP_SHARPENING_ONLYEDGES;Sharpen only edges
 TP_SHARPENING_RADIUS;Radius

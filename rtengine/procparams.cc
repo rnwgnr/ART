@@ -1848,7 +1848,7 @@ bool DenoiseParams::operator !=(const DenoiseParams& other) const
 
 TextureBoostParams::Region::Region():
     strength(0),
-    detailThreshold(1.0),
+    detailThreshold(0.2),
     iterations(1)
 {
 }
