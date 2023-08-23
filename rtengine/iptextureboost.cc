@@ -112,6 +112,10 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
     }
 
     for (int i = 0; i < pp.iterations; ++i) {
+        float blend = 1.f / std::pow(2.f, i);
+#ifdef __SSE2__
+        vfloat vblend = F2V(blend);
+#endif
         if (isguided) {
             guidedFilter(mid, mid, mid, radius, epsilon, multithread);
         } else {
@@ -138,7 +142,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 vfloat vb = LVFU(base[y][x]);
                 vfloat d = (vy - vm) * vstrength;
                 vfloat d2 = (vm - vb) * vstrength2;
-                STVFU((*src)[y][x], vmaxf(vb + d + d2, vminval));
+                STVFU((*src)[y][x], vintpf(vblend, vmaxf(vb + d + d2, vminval), vy));
             }
 #endif
             for (; x < W; ++x) {
@@ -147,7 +151,7 @@ void texture_boost(array2D<float> &Y, const rtengine::procparams::TextureBoostPa
                 d *= strength;
                 float d2 = mid[y][x] - base[y][x];
                 d2 *= strength2;
-                (*src)[y][x] = std::max(base[y][x] + d + d2, minval);
+                (*src)[y][x] = intp(blend, std::max(base[y][x] + d + d2, minval), v);
             }
         }
     }
