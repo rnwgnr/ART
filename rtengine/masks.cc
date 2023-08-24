@@ -1010,17 +1010,21 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
                 return vminf(vmaxf(v, F2V(0)), F2V(1));
             };
 #endif
+
+        static constexpr float NO_BLUR = -10.f;
         
         for (int i = begin_idx; i < end_idx; ++i) {
             float blur = masks[i].parametricMask.enabled ? masks[i].parametricMask.blur : 0.f;
-            blur = blur < 0.f ? -1.f/blur : 1.f + blur;
-            int r1 = max(int(4 / scale * blur + 0.5), 1);
-            int r2 = max(int(25 / scale * blur + 0.5), 1);
-            if (abmask) {
-                rtengine::guidedFilter(guide, (*abmask)[i], (*abmask)[i], r1, 0.001, multithread);
-            }
-            if (Lmask) {
-                rtengine::guidedFilter(guide, (*Lmask)[i], (*Lmask)[i], r2, 0.0001, multithread);
+            if (blur > NO_BLUR) {
+                blur = blur < 0.f ? -1.f/blur : 1.f + blur;
+                int r1 = max(int(4 / scale * blur + 0.5), 1);
+                int r2 = max(int(25 / scale * blur + 0.5), 1);
+                if (abmask) {
+                    rtengine::guidedFilter(guide, (*abmask)[i], (*abmask)[i], r1, 0.001, multithread);
+                }
+                if (Lmask) {
+                    rtengine::guidedFilter(guide, (*Lmask)[i], (*Lmask)[i], r2, 0.0001, multithread);
+                }
             }
 #ifdef _OPENMP
 #           pragma omp parallel for if (multithread)
