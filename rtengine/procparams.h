@@ -1181,6 +1181,7 @@ struct FilmSimulationParams {
     bool enabled;
     Glib::ustring clutFilename;
     int strength;
+    bool after_tone_curve;
 
     FilmSimulationParams();
 

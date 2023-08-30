@@ -2547,7 +2547,8 @@ bool ColorManagementParams::operator !=(const ColorManagementParams& other) cons
 
 FilmSimulationParams::FilmSimulationParams() :
     enabled(false),
-    strength(100)
+    strength(100),
+    after_tone_curve(false)
 {
 }
 
@@ -2556,7 +2557,8 @@ bool FilmSimulationParams::operator ==(const FilmSimulationParams& other) const
     return
         enabled == other.enabled
         && clutFilename == other.clutFilename
-        && strength == other.strength;
+        && strength == other.strength
+        && after_tone_curve == other.after_tone_curve;
 }
 
 bool FilmSimulationParams::operator !=(const FilmSimulationParams& other) const
@@ -3828,6 +3830,9 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             auto filename = filenameToUri(filmSimulation.clutFilename, basedir);
             saveToKeyfile("Film Simulation", "ClutFilename", filename, keyFile);
             saveToKeyfile("Film Simulation", "Strength", filmSimulation.strength, keyFile);
+            if (filmSimulation.after_tone_curve) {
+                saveToKeyfile("Film Simulation", "AfterToneCurve", filmSimulation.after_tone_curve, keyFile);
+            }
         }
 
 // RGB curves        
@@ -5065,6 +5070,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 } else {
                     filmSimulation.strength = keyFile.get_integer("Film Simulation", "Strength");
                 }
+            }
+
+            if (!assignFromKeyfile(keyFile, "Film Simulation", "AfterToneCurve", filmSimulation.after_tone_curve)) {
+                filmSimulation.after_tone_curve = (ppVersion < 1040);
             }
         }
 

@@ -28,8 +28,7 @@
 #include "guiutils.h"
 #include "adjuster.h"
 
-class ClutComboBox : public MyComboBox
-{
+class ClutComboBox: public MyComboBox {
 public:
     explicit ClutComboBox(const Glib::ustring &path);
     //int fillFromDir (const Glib::ustring& path);
@@ -42,8 +41,7 @@ public:
 private:
     void updateUnchangedEntry(); // in batchMode we need to add an extra entry "(Unchanged)". We do this whenever the widget is mapped (connecting to signal_map()), unless options.multiDisplayMode (see the comment below about cm2 in this case)
 
-    class ClutColumns : public Gtk::TreeModel::ColumnRecord
-    {
+    class ClutColumns: public Gtk::TreeModel::ColumnRecord {
     public:
         Gtk::TreeModelColumn<Glib::ustring> label;
         Gtk::TreeModelColumn<Glib::ustring> clutFilename;
@@ -68,8 +66,8 @@ private:
     static std::unique_ptr<ClutModel> cm2; // ... except when options.multiDisplayMode (i.e. editors in their own window), where we need two. This is because we might have two combo boxes displayed at the same time in this case
 };
 
-class FilmSimulation : public ToolParamBlock, public AdjusterListener, public FoldableToolPanel
-{
+
+class FilmSimulation: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel {
 public:
     FilmSimulation();
 
@@ -85,16 +83,20 @@ public:
 private:
     void onClutSelected();
     void enabledChanged() override;
-
-    void updateDisable( bool value );
+    void updateDisable(bool value);
+    void afterToneCurveToggled();
 
     ClutComboBox *m_clutComboBox;
     sigc::connection m_clutComboBoxConn;
     //Glib::ustring m_oldClutFilename;
 
     Adjuster *m_strength;
+    Gtk::CheckButton *after_tone_curve_;
+    Gtk::HBox *after_tone_curve_box_;
 
     rtengine::procparams::FilmSimulationParams initial_params;
+
+    rtengine::ProcEvent EvAfterToneCurve;
 };
 
 #endif

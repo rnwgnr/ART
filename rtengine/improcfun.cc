@@ -902,8 +902,13 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
             STEP_(logEncoding);
             STEP_(saturationVibrance);
             dcpProfile(img, dcpProf, dcpApplyState, multiThread);
+            if (!params->filmSimulation.after_tone_curve) {
+                STEP_(filmSimulation);
+            }
             STEP_(toneCurve);
-            STEP_(filmSimulation);
+            if (params->filmSimulation.after_tone_curve) {
+                STEP_(filmSimulation);
+            }
             STEP_(rgbCurves);
             STEP_(labAdjustments);
             // stop = stop || STEP_s_(textureBoost);

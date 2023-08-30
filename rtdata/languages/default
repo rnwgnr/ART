@@ -577,6 +577,7 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Negative
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base color
 HISTORY_MSG_FILMNEGATIVE_VALUES;Film negative values
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Reference input
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Film Simulation - After tone curve
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field embedded
 HISTORY_MSG_GRAIN_ENABLED;Film Grain
 HISTORY_MSG_GRAIN_ISO;Film Grain - ISO
@@ -1509,6 +1510,7 @@ TP_FILMSIMULATION_LABEL;Film Simulation
 TP_FILMSIMULATION_SLOWPARSEDIR;ART is configured to look for Hald CLUT images, which are used for the Film Simulation tool, in a folder which is taking too long to load.\nGo to Preferences > Image Processing > Film Simulation\nto see which folder is being used. You should either point ART to a folder which contains only Hald CLUT images and nothing more, or to an empty folder if you don't want to use the Film Simulation tool.\n\nRead the Film Simulation article in RawPedia for more information.\n\nDo you want to cancel the scan now?
 TP_FILMSIMULATION_STRENGTH;Strength
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Set HaldCLUT directory in Preferences
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Apply after Tone Curve
 TP_FLATFIELD_AUTOSELECT;Auto-selection
 TP_FLATFIELD_BLURRADIUS;Blur radius
 TP_FLATFIELD_BLURTYPE;Blur type

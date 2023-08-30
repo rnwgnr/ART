@@ -1,10 +1,13 @@
 #pragma once
 
 // This number has to be incremented whenever the ARP file format is modified or the behaviour of a tool changes
-#define PPVERSION 1039
+#define PPVERSION 1040
 
 /*
   Log of version changes
+  1040  2023-08-30
+        changed position of the film simulation tool in the pipeline
+        (with "after_tone_curve" param to keep backwards compatibility)
   1039  2022-11-19
         new film negative tool ported from RT5.9
   1038  2022-08-12

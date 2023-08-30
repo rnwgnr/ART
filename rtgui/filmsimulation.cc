@@ -64,6 +64,7 @@ FilmSimulation::FilmSimulation():
     FoldableToolPanel(this, "filmsimulation", M("TP_FILMSIMULATION_LABEL"), false, true, true)
 {
     EvToolEnabled.set_action(RGBCURVE);
+    EvAfterToneCurve = ProcEventMapper::getInstance()->newEvent(RGBCURVE, "HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE");
     
     m_clutComboBox = Gtk::manage( new ClutComboBox(options.clutsDir) );
     int foundClutsCount = m_clutComboBox->foundClutsCount();
@@ -80,7 +81,18 @@ FilmSimulation::FilmSimulation():
 
     pack_start( *m_strength, Gtk::PACK_SHRINK, 0 );
 
+    after_tone_curve_ = Gtk::manage(new Gtk::CheckButton(M("TP_FILMSIMULATION_AFTER_TONE_CURVE")));
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    after_tone_curve_box_ = hb;
+    Gtk::Image *w = Gtk::manage(new RTImage("warning-small.png"));
+    w->set_tooltip_markup(M("GENERAL_DEPRECATED_TOOLTIP"));
+    hb->pack_start(*after_tone_curve_, Gtk::PACK_EXPAND_WIDGET, 4);
+    hb->pack_start(*w, Gtk::PACK_SHRINK);
+    setExpandAlignProperties(after_tone_curve_, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+    pack_start(*hb, Gtk::PACK_SHRINK, 0);
+    after_tone_curve_->signal_toggled().connect(sigc::mem_fun(this, &FilmSimulation::afterToneCurveToggled));
 }
+
 
 void FilmSimulation::onClutSelected()
 {
@@ -92,6 +104,7 @@ void FilmSimulation::onClutSelected()
         listener->panelChanged( EvFilmSimulationFilename, clutName );
     }
 }
+
 
 void FilmSimulation::enabledChanged ()
 {
@@ -145,6 +158,9 @@ void FilmSimulation::read( const rtengine::procparams::ProcParams* pp)
         }
     }
 
+    after_tone_curve_->set_active(pp->filmSimulation.after_tone_curve);
+    after_tone_curve_box_->set_visible(after_tone_curve_->get_active());
+
     updateDisable(false);
     enableListener();
 }
@@ -164,6 +180,7 @@ void FilmSimulation::write( rtengine::procparams::ProcParams* pp)
     }
 
     pp->filmSimulation.strength = m_strength->getValue();
+    pp->filmSimulation.after_tone_curve = after_tone_curve_->get_active();
 }
 
 void FilmSimulation::trimValues( rtengine::procparams::ProcParams* pp )
@@ -427,4 +444,12 @@ void FilmSimulation::toolReset(bool to_initial)
     }
     pp.filmSimulation.enabled = getEnabled();
     read(&pp);
+}
+
+
+void FilmSimulation::afterToneCurveToggled()
+{
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvAfterToneCurve, after_tone_curve_->get_active() ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+    }
 }
