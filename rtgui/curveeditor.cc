@@ -71,7 +71,10 @@ bool CurveEditor::reset()
     return subGroup->curveReset(this);
 }
 
-DiagonalCurveEditor::DiagonalCurveEditor (Glib::ustring text, CurveEditorGroup* ceGroup, CurveEditorSubGroup* ceSubGroup) : CurveEditor::CurveEditor(text, static_cast<CurveEditorGroup*>(ceGroup), ceSubGroup)
+DiagonalCurveEditor::DiagonalCurveEditor (Glib::ustring text, CurveEditorGroup* ceGroup, CurveEditorSubGroup* ceSubGroup) :
+    CurveEditor::CurveEditor(text, static_cast<CurveEditorGroup*>(ceGroup), ceSubGroup),
+    bp_(nullptr),
+    bp_id_(-1)
 {
 
     curveType->addEntry("curve-linear-small.png", M("CURVEEDITOR_LINEAR")); // 0 Linear

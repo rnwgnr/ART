@@ -18,6 +18,7 @@
  */
 #include "rgbcurves.h"
 #include "eventmapper.h"
+#include "../rtengine/curves.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -52,6 +53,10 @@ RGBCurves::RGBCurves () : FoldableToolPanel(this, "rgbcurves", M("TP_RGBCURVES_L
     Bshape->setBottomBarBgGradient(milestones);
     Bshape->setLeftBarBgGradient(milestones);
 
+    Rshape->setBackgroundProvider(this, 0);
+    Gshape->setBackgroundProvider(this, 1);
+    Bshape->setBackgroundProvider(this, 2);
+
     // This will add the reset button at the end of the curveType buttons
     curveEditorG->curveListComplete();
 
@@ -59,7 +64,7 @@ RGBCurves::RGBCurves () : FoldableToolPanel(this, "rgbcurves", M("TP_RGBCURVES_L
 
 }
 
-RGBCurves::~RGBCurves ()
+RGBCurves::~RGBCurves()
 {
     delete curveEditorG;
 }
@@ -68,23 +73,23 @@ void RGBCurves::read(const ProcParams* pp)
 {
     disableListener ();
 
-    Rshape->setCurve         (pp->rgbCurves.rcurve);
-    Gshape->setCurve         (pp->rgbCurves.gcurve);
-    Bshape->setCurve         (pp->rgbCurves.bcurve);
+    Rshape->setCurve(pp->rgbCurves.rcurve);
+    Gshape->setCurve(pp->rgbCurves.gcurve);
+    Bshape->setCurve(pp->rgbCurves.bcurve);
 
     setEnabled(pp->rgbCurves.enabled);
 
-    enableListener ();
+    enableListener();
 }
 
-void RGBCurves::setEditProvider (EditDataProvider *provider)
+void RGBCurves::setEditProvider(EditDataProvider *provider)
 {
     Rshape->setEditProvider(provider);
     Gshape->setEditProvider(provider);
     Bshape->setEditProvider(provider);
 }
 
-void RGBCurves::autoOpenCurve  ()
+void RGBCurves::autoOpenCurve()
 {
     // Open up the first curve if selected
     bool active = Rshape->openIfNonlinear();
@@ -98,12 +103,12 @@ void RGBCurves::autoOpenCurve  ()
     }
 }
 
-void RGBCurves::write(ProcParams* pp)
+void RGBCurves::write(ProcParams *pp)
 {
     pp->rgbCurves.enabled = getEnabled();
-    pp->rgbCurves.rcurve         = Rshape->getCurve ();
-    pp->rgbCurves.gcurve         = Gshape->getCurve ();
-    pp->rgbCurves.bcurve         = Bshape->getCurve ();
+    pp->rgbCurves.rcurve = Rshape->getCurve();
+    pp->rgbCurves.gcurve = Gshape->getCurve();
+    pp->rgbCurves.bcurve = Bshape->getCurve();
 }
 
 
@@ -113,20 +118,20 @@ void RGBCurves::write(ProcParams* pp)
  * If more than one curve has been added, the curve listener is automatically
  * set to 'multi=true', and send a pointer of the modified curve in a parameter
  */
-void RGBCurves::curveChanged (CurveEditor* ce)
+void RGBCurves::curveChanged(CurveEditor *ce)
 {
 
     if (listener && getEnabled()) {
         if (ce == Rshape) {
-            listener->panelChanged (EvRGBrCurve, M("HISTORY_CUSTOMCURVE"));
+            listener->panelChanged(EvRGBrCurve, M("HISTORY_CUSTOMCURVE"));
         }
 
         if (ce == Gshape) {
-            listener->panelChanged (EvRGBgCurve, M("HISTORY_CUSTOMCURVE"));
+            listener->panelChanged(EvRGBgCurve, M("HISTORY_CUSTOMCURVE"));
         }
 
         if (ce == Bshape) {
-            listener->panelChanged (EvRGBbCurve, M("HISTORY_CUSTOMCURVE"));
+            listener->panelChanged(EvRGBbCurve, M("HISTORY_CUSTOMCURVE"));
         }
     }
 }
@@ -176,4 +181,30 @@ void RGBCurves::toolReset(bool to_initial)
     }
     pp.rgbCurves.enabled = getEnabled();
     read(&pp);
+}
+
+
+void RGBCurves::renderCurveBackground(int caller_id, Glib::RefPtr<Gtk::StyleContext> style, Cairo::RefPtr<Cairo::Context> cr, double x, double y, double w, double h)
+{
+    const double s = RTScalable::getScale();
+    cr->set_line_width(1.0 * s);
+
+    DiagonalCurveEditor *curves[3] = { Rshape, Gshape, Bshape };
+    auto mine = curves[caller_id]->getCurve();
+    for (int i = 0; i < 3; ++i) {
+        if (i != caller_id) {
+            auto ci = curves[i]->getCurve();
+            if (ci != mine) {
+                rtengine::DiagonalCurve curve(ci);
+                constexpr double v = 0.5;
+                cr->set_source_rgb(i == 0 ? v : 0.0, i == 1 ? v : 0.0, i == 2 ? v : 0.0);
+                cr->move_to(x, curve.getVal(0) * -h + y);
+                for (int i = 1; i < w; ++i) {
+                    cr->line_to(double(i) + x, curve.getVal(double(i)/double(w)) * -h + y);
+                }
+            
+                cr->stroke ();
+            }
+        }
+    }
 }

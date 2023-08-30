@@ -33,7 +33,9 @@ MyDiagonalCurve::MyDiagonalCurve () :
     ugpX(0.0),
     ugpY(0.0),
     activeParam(-1),
-    bghistvalid(false)
+    bghistvalid(false),
+    bp_(nullptr),
+    bp_id_(-1)
 {
 
     grab_point = -1;
@@ -212,6 +214,13 @@ void MyDiagonalCurve::interpolate ()
     curveIsDirty = false;
 }
 
+void MyDiagonalCurve::setBackgroundProvider(CurveBackgroundProvider *bp, int caller_id)
+{
+    bp_ = bp;
+    bp_id_ = caller_id;
+}
+
+
 void MyDiagonalCurve::draw (int handle)
 {
     if (!isDirty()) {
@@ -363,6 +372,11 @@ void MyDiagonalCurve::draw (int handle)
         }
 
         cr->fill ();
+    }
+
+    // draw the custom background if present
+    if (bp_) {
+        bp_->renderCurveBackground(bp_id_, style, cr, graphX, graphY, graphW, graphH);
     }
 
     // draw the pipette values

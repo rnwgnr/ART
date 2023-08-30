@@ -715,6 +715,7 @@ void DiagonalCurveEditorSubGroup::switchGUI()
         case (DCT_CatmullRom):
             customCurve->setPoints(tp == DCT_Spline ? dCurve->customCurveEd : dCurve->catmullRomCurveEd);
             customCurve->setColorProvider(dCurve->getCurveColorProvider(), dCurve->getCurveCallerId());
+            customCurve->setBackgroundProvider(dCurve->getBackgroundProvider(), dCurve->getBackgroundCallerId());
             customCurve->setColoredBar(leftBar, bottomBar);
             customCurve->queue_resize_no_redraw();
             updateEditButton(dCurve, editCustom, editCustomConn);
@@ -728,6 +729,7 @@ void DiagonalCurveEditorSubGroup::switchGUI()
             double mileStone[3];
             dCurve->getRangeDefaultMilestones(mileStone[0], mileStone[1], mileStone[2]);
             paramCurve->setPoints (dCurve->paramCurveEd);
+            paramCurve->setBackgroundProvider(dCurve->getBackgroundProvider(), dCurve->getBackgroundCallerId());
             shcSelector->setDefaults(mileStone[0], mileStone[1], mileStone[2]);
             shcSelector->setPositions (
                 dCurve->paramCurveEd.at(1),
@@ -760,6 +762,7 @@ void DiagonalCurveEditorSubGroup::switchGUI()
         case (DCT_NURBS):
             NURBSCurve->setPoints (dCurve->NURBSCurveEd);
             NURBSCurve->setColorProvider(dCurve->getCurveColorProvider(), dCurve->getCurveCallerId());
+            NURBSCurve->setBackgroundProvider(dCurve->getBackgroundProvider(), dCurve->getBackgroundCallerId());
             NURBSCurve->setColoredBar(leftBar, bottomBar);
             NURBSCurve->queue_resize_no_redraw();
             updateEditButton(dCurve, editNURBS, editNURBSConn);

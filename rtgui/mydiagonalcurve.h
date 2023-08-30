@@ -47,8 +47,14 @@ public:
     std::vector<double> x, y;   // in case of parametric curves the curve parameters are stored in vector x. In other cases these vectors store the coordinates of the bullets.
 };
 
-class MyDiagonalCurve : public MyCurve
-{
+class CurveBackgroundProvider {
+public:
+    virtual ~CurveBackgroundProvider() = default;
+    virtual void renderCurveBackground(int caller_id, Glib::RefPtr<Gtk::StyleContext> style, Cairo::RefPtr<Cairo::Context> cr, double x, double y, double w, double h) = 0;
+};
+
+
+class MyDiagonalCurve: public MyCurve {
 private:
     IdleRegister idle_register;
 
@@ -68,6 +74,8 @@ protected:
     int activeParam;
     unsigned int* bghist;   // histogram values
     bool bghistvalid;
+    CurveBackgroundProvider *bp_;
+    int bp_id_;
 
     void draw (int handle);
     void interpolate ();
@@ -100,5 +108,7 @@ public:
 
     void setPos(double pos, int chanIdx) override;
     void stopNumericalAdjustment() override;
+
+    void setBackgroundProvider(CurveBackgroundProvider *bp, int caller_id);
 };
 
