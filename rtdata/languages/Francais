@@ -392,7 +392,7 @@ HISTORY_MSG_140;Niveau de noir - Vert 2
 HISTORY_MSG_141;Niveau de noir - Verts liés
 HISTORY_MSG_158;RT - Force
 HISTORY_MSG_160;RT - Échelle
-HISTORY_MSG_162;Amplification de la texture
+HISTORY_MSG_162;Amplification de la texture/netteté
 HISTORY_MSG_163;Courbes RVB - Rouge
 HISTORY_MSG_164;Courbes RVB - Vert
 HISTORY_MSG_165;Courbes RVB - Bleu
@@ -577,6 +577,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base couleur
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valeurs du Film Négatif
 HISTORY_MSG_FLATFIELD_EMBEDDED;Champ uniforme intégré
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Référence en entrée
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Film Simulation - After tone curve
 HISTORY_MSG_GRAIN_ENABLED;Grain d'émulsion
 HISTORY_MSG_GRAIN_ISO;Grain d'émulsion - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Grain d'émulsion - Force
@@ -910,7 +911,7 @@ PARTIALPASTE_DIALOGLABEL;Collage partiel de profil de traitement
 PARTIALPASTE_DIRPYRDENOISE;Réduction du Bruit
 PARTIALPASTE_DIRPYREQUALIZER;Contraste par Niveaux de Détail
 PARTIALPASTE_DISTORTION;Correction de distorsion
-PARTIALPASTE_TEXTUREBOOST;Renforcer la Texture
+PARTIALPASTE_TEXTUREBOOST;Renforcer la Texture/netteté
 PARTIALPASTE_EQUALIZER;Niveaux d'Ondelettes
 PARTIALPASTE_EVERYTHING;Tout
 PARTIALPASTE_EXIFCHANGES;Modification des données Exif
@@ -1509,6 +1510,7 @@ TP_FILMSIMULATION_LABEL;Simulation de Film
 TP_FILMSIMULATION_SLOWPARSEDIR;ART est configuré pour rechercher les images HaldCLUT, qui sont utilisées pour l'outil Simulation de Film, dans un dossier qui prend trop de temps à se charger.\nAllez dans Préférences > Traitement de l'image > Simulation de Film\npour voir quel dossier est utilisé. Vous devriez soit pointer ART vers un dossier qui ne contient que les images HaldCLUT et rien d'autre, ou vers un dossier vide si vous ne voulez pas utiliser l'outil Simulation de Film.\n\nLisez l'article Simulation de Film dans RawPedia pour plus d'information.\n\nVoulez-vous abandonner la recherche maintenant ?
 TP_FILMSIMULATION_STRENGTH;Force
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Veuillez préciser le dossier contenant\nles fichiers HaldCLUT dans les Préférences
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Apply after Tone Curve
 TP_FLATFIELD_AUTOSELECT;Sélection automatique
 TP_FLATFIELD_BLURRADIUS;Rayon de floutage
 TP_FLATFIELD_BLURTYPE;Type de floutage
