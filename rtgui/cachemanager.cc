@@ -32,6 +32,7 @@
 #include "options.h"
 #include "procparamchangers.h"
 #include "thumbnail.h"
+#include "../rtengine/utils.h"
 
 namespace {
 
@@ -312,38 +313,7 @@ void CacheManager::deleteFiles(const Glib::ustring& fname, const std::string& md
 
 std::string CacheManager::getMD5(const Glib::ustring& fname)
 {
-
-#ifdef WIN32
-
-    std::unique_ptr<wchar_t, GFreeFunc> wfname(reinterpret_cast<wchar_t*>(g_utf8_to_utf16(fname.c_str(), -1, NULL, NULL, NULL)), g_free);
-
-    WIN32_FILE_ATTRIBUTE_DATA fileAttr;
-    if (GetFileAttributesExW(wfname.get(), GetFileExInfoStandard, &fileAttr)) {
-        // We use name, size and creation time to identify a file.
-        const auto identifier = Glib::ustring::compose("%1-%2-%3-%4", fileAttr.nFileSizeLow, fileAttr.ftCreationTime.dwHighDateTime, fileAttr.ftCreationTime.dwLowDateTime, fname);
-        return Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, identifier);
-    }
-
-#else
-
-    const auto file = Gio::File::create_for_path(fname);
-    if (file) {
-
-        try
-        {
-            const auto info = file->query_info("standard::*");
-            if (info) {
-                // We only use name and size to identify a file.
-                const auto identifier = Glib::ustring::compose("%1%2", fname, info->get_size());
-                return Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, identifier);
-            }
-
-        } catch(Gio::Error&) {}
-    }
-
-#endif
-
-    return {};
+    return rtengine::getMD5(fname);
 }
 
 

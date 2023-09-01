@@ -91,7 +91,8 @@ private:
 
     mutable Cache<Glib::ustring, std::shared_ptr<HaldCLUT>> cache;
 #ifdef ART_USE_OCIO
-    mutable Cache<Glib::ustring, OCIO::ConstProcessorRcPtr> ocio_cache_;
+    typedef std::pair<OCIO::ConstProcessorRcPtr, std::string> OCIOCacheEntry;
+    mutable Cache<Glib::ustring, OCIOCacheEntry> ocio_cache_;
 #endif // ART_USE_OCIO
     mutable MyMutex mutex_;
 };

@@ -384,20 +384,64 @@ std::string decompress_to_temp(const Glib::ustring &fname)
     return templ;
 }
 
+
+std::string copy_to_temp(const Glib::ustring &fname)
+{
+    std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-ocio-clf-%1-XXXXXX", Glib::path_get_basename(fname)));
+    int fd = Glib::mkstemp(templ);
+    if (fd < 0) {
+        throw "error";
+    }
+
+    close(fd);
+    bool err = false;
+
+    auto f = Gio::File::create_for_path(templ);
+    {
+        auto stream = f->append_to();
+        constexpr gsize chunk = 512;
+        char buffer[chunk];
+        auto src_fname = Glib::filename_from_utf8(fname);
+        FILE *src = g_fopen(src_fname.c_str(), "rb");
+        if (!src) {
+            err = true; 
+        } else {
+            try {
+                size_t n = 0;
+                while ((n = fread(buffer, 1, chunk, src)) > 0) {
+                    stream->write(buffer, n);
+                }
+            } catch (...) {
+                err = true;
+            }
+            fclose(src);
+        }
+    }
+
+    if (err) {
+        g_remove(templ.c_str());
+        throw "error";
+    }
+    return templ;
+}
+
 } // namespace
 
 OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& filename) const
 {
     MyMutex::MyLock lock(mutex_);
     
-    OCIO::ConstProcessorRcPtr result;
-
+    OCIOCacheEntry result;
+    OCIO::ConstProcessorRcPtr retval;
+    
     const Glib::ustring full_filename =
         !Glib::path_is_absolute(filename)
             ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
             : filename;
+    const auto md5 = getMD5(full_filename);
 
-    if (!ocio_cache_.get(full_filename, result)) {
+    bool found = ocio_cache_.get(full_filename, result);
+    if (!found || result.second != md5) {
         std::string fn = "";
         bool del_fn = false;
         try {
@@ -406,21 +450,27 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
             if (getFileExtension(full_filename) == "clfz") {
                 fn = decompress_to_temp(full_filename);
                 del_fn = true;
+            // } else if (!found) {
+            //     fn = Glib::filename_from_utf8(full_filename);
             } else {
-                fn = Glib::filename_from_utf8(full_filename);
+                fn = copy_to_temp(full_filename);
+                del_fn = true;
             }
             t->setSrc(fn.c_str());
             t->setInterpolation(OCIO::INTERP_BEST);
-            result = config->getProcessor(t);
-            ocio_cache_.insert(full_filename, result);
+            retval = config->getProcessor(t);
+            result = std::make_pair(retval, md5);
+            ocio_cache_.set(full_filename, result);
         } catch (...) {
         }
         if (del_fn && !fn.empty()) {
             g_remove(fn.c_str());
         }
+    } else {
+        retval = result.first;
     }
 
-    return result;
+    return retval;
 }
 
 #endif // ART_USE_OCIO
