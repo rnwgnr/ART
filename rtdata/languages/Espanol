@@ -23,6 +23,7 @@
 #22 2022-12-01 mrleemon, update for 1.17.2
 #23 2022-12-27 mrleemon, update for 1.18
 #24 2023-03-11 mrleemon, update for 1.18.1
+#25 2023-08-01 mrleemon, update for 1.21
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -317,7 +318,7 @@ HISTORY_MSG_11;Curva tonal - Curva 1
 HISTORY_MSG_14;L*a*b* - Claridad
 HISTORY_MSG_15;L*a*b* - Contraste
 HISTORY_MSG_19;L*a*b* - Curva L*
-HISTORY_MSG_20;Enfoque
+HISTORY_MSG_20;Enfoque de la captura
 HISTORY_MSG_21;Enfoque - Radio
 HISTORY_MSG_22;Enfoque - Cantidad
 HISTORY_MSG_23;Enfoque - Umbral
@@ -326,7 +327,7 @@ HISTORY_MSG_25;Enfoque - Radio de detección de bordes
 HISTORY_MSG_26;Enfoque - Tolerancia de bordes
 HISTORY_MSG_27;Enfoque - Control de halos
 HISTORY_MSG_28;Enfoque - Cantidad de control de halos
-HISTORY_MSG_29;Enfoque - Método
+HISTORY_MSG_29;Enfoque de la captura - Método
 HISTORY_MSG_30;Deconvolución - Radio
 HISTORY_MSG_31;Deconvolución - Cantidad
 HISTORY_MSG_32;Deconvolución - Amortiguación
@@ -415,7 +416,7 @@ HISTORY_MSG_140;Nivel de negro - Verde 2
 HISTORY_MSG_141;Nivel de negro - Vincular verdes
 HISTORY_MSG_158;AT - Intensidad
 HISTORY_MSG_160;AT - Escala
-HISTORY_MSG_162;Amplificación de la textura
+HISTORY_MSG_162;Amplificación/Enfoque de la textura
 HISTORY_MSG_163;Curvas RGB - Rojo
 HISTORY_MSG_164;Curvas RGB - Verde
 HISTORY_MSG_165;Curvas RGB - Azul
@@ -604,6 +605,7 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Negativo de película
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la película
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valores del negativo de película
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;NP - Entrada de referencia
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulación de película - Después de la curva tonal
 HISTORY_MSG_FLATFIELD_EMBEDDED;Campo plano incrustado
 HISTORY_MSG_GRAIN_ENABLED;Grano de película
 HISTORY_MSG_GRAIN_ISO;Grano de película - ISO
@@ -656,13 +658,13 @@ HISTORY_MSG_RAW_BORDER;Borde raw
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Cambiar tamaño - Permitir ampliación
 HISTORY_MSG_RESIZE_PPI;Cambiar tamaño - PPP
 HISTORY_MSG_RESIZE_UNIT;Cambiar tamaño - Unidad
-HISTORY_MSG_SHARPENING_AUTORADIUS;Enfoque - Radio RLD automático
-HISTORY_MSG_SHARPENING_BLUR;Enfoque - Radio de desenfoque
-HISTORY_MSG_SHARPENING_CONTRAST;Enfoque - Umbral de contraste
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfoque - Latitud de las esquinas RLD
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfoque - Aumento del radio de las esquinas RLD
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Enfoque - archivo PSF
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Enfoque - iteraciones PSF
+HISTORY_MSG_SHARPENING_AUTORADIUS;Enfoque de la captura - Radio RLD automático
+HISTORY_MSG_SHARPENING_BLUR;Enfoque de la captura - Radio de desenfoque
+HISTORY_MSG_SHARPENING_CONTRAST;Enfoque de la captura - Umbral de contraste
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfoque de la captura - Latitud de las esquinas RLD
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfoque de la captura - Aumento del radio de las esquinas RLD
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Enfoque de la captura - archivo PSF
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Enfoque de la captura - iteraciones PSF
 HISTORY_MSG_SH_COLORSPACE;S/AL - Espacio de color
 HISTORY_MSG_SMOOTHING_ENABLED;Suavizado
 HISTORY_MSG_SMOOTHING_FALLOFF;Suavizado - difuminación
@@ -937,7 +939,7 @@ PARTIALPASTE_DIALOGLABEL;Pegar perfil de procesamiento parcialmente
 PARTIALPASTE_DIRPYRDENOISE;Reducción de ruido
 PARTIALPASTE_DIRPYREQUALIZER;Contraste por niveles de detalle
 PARTIALPASTE_DISTORTION;Corrección de distorsión
-PARTIALPASTE_TEXTUREBOOST;Amplificación de la textura
+PARTIALPASTE_TEXTUREBOOST;Amplificación/Enfoque de la textura
 PARTIALPASTE_EQUALIZER;Niveles de ondícula
 PARTIALPASTE_EVERYTHING;Todo
 PARTIALPASTE_EXIFCHANGES;Exif
@@ -985,7 +987,7 @@ PARTIALPASTE_RGBCURVES;Curvas RGB
 PARTIALPASTE_ROTATION;Rotación
 PARTIALPASTE_SHADOWSHIGHLIGHTS;Sombras/Altas luces
 PARTIALPASTE_SHARPENEDGE;Bordes
-PARTIALPASTE_SHARPENING;Enfoque
+PARTIALPASTE_SHARPENING;Enfoque de la captura
 PARTIALPASTE_SHARPENMICRO;Micro-contraste
 PARTIALPASTE_SMOOTHING;Suavizado
 PARTIALPASTE_SOFTLIGHT;Luz tenue
@@ -1488,7 +1490,7 @@ TP_DISTORTION_AMOUNT;Cantidad
 TP_DISTORTION_AUTO_TIP;Corrige automáticamente la distorsión de la lente en archivos raw al compararla con la imagen JPEG incrustada, si existe y la cámara ha corregido automáticamente la distorsión de la lente en ella.
 TP_DISTORTION_LABEL;Corrección de distorsión
 TP_EPD_DETAIL_THRESHOLD;Escala del detalle
-TP_EPD_LABEL;Amplificación de la textura
+TP_EPD_LABEL;Amplificación/Enfoque de la textura
 TP_EPD_LIST_TITLE;Parámetros
 TP_EPD_SCALE;Escala
 TP_EPD_ITERATIONS;Iteraciones
@@ -1536,6 +1538,7 @@ TP_FILMSIMULATION_LABEL;Simulación de película
 TP_FILMSIMULATION_SLOWPARSEDIR;ART está configurado para buscar imágenes Hald CLUT, que se usan en la herramienta de simulación de película, en una carpeta que está tardando demasiado en cargarse.\nVaya a Preferencias > Procesamiento de imágenes > Simulación de película\npara ver qué carpeta se está usando. Debería apuntar ART a una carpeta que contenga sólo imágenes Hald CLUT y nada más, o a una carpeta vacía si no desea usar la herramienta de simulación de película.\n\nLea el artículo sobre simulación de película en RawPedia para obtener más información.\n\n¿Desea cancelar la exploración ahora?
 TP_FILMSIMULATION_STRENGTH;Intensidad
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Establezca la carpeta HaldCLUT en Preferencias
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Aplicar después de la curva tonal
 TP_FLATFIELD_AUTOSELECT;Selección automática
 TP_FLATFIELD_BLURRADIUS;Radio de desenfoque
 TP_FLATFIELD_BLURTYPE;Tipo de desenfoque
@@ -1890,7 +1893,7 @@ TP_SHARPENING_EDRADIUS;Radio
 TP_SHARPENING_EDTOLERANCE;Tolerancia de bordes
 TP_SHARPENING_HALOCONTROL;Control de halos
 TP_SHARPENING_HCAMOUNT;Cantidad
-TP_SHARPENING_LABEL;Enfoque
+TP_SHARPENING_LABEL;Enfoque de la captura
 TP_SHARPENING_METHOD;Método
 TP_SHARPENING_ONLYEDGES;Enfocar solo bordes
 TP_SHARPENING_RADIUS;Radio

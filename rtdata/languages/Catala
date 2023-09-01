@@ -20,6 +20,7 @@
 #19 2022-12-01 mrleemon, update for 1.17.2
 #20 2022-12-27 mrleemon, update for 1.18
 #21 2023-03-11 mrleemon, update for 1.18.1
+#22 2023-08-01 mrleemon, update for 1.21
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -314,7 +315,7 @@ HISTORY_MSG_11;Corba tonal: Corba 1
 HISTORY_MSG_14;L*a*b* - Claredat
 HISTORY_MSG_15;L*a*b* - Contrast
 HISTORY_MSG_19;L*a*b* - Corba L*
-HISTORY_MSG_20;Enfocament
+HISTORY_MSG_20;Enfocament de la captura
 HISTORY_MSG_21;Enfocament - Radi
 HISTORY_MSG_22;Enfocament - Quantitat
 HISTORY_MSG_23;Enfocament - Llindar
@@ -323,7 +324,7 @@ HISTORY_MSG_25;Enfocament - Radi de detecció de vores
 HISTORY_MSG_26;Enfocament - Tolerància de vores
 HISTORY_MSG_27;Enfocament - Control d'halos
 HISTORY_MSG_28;Enfocament - Quantitat de control d'halos
-HISTORY_MSG_29;Enfocament - Mètode
+HISTORY_MSG_29;Enfocament de la captura - Mètode
 HISTORY_MSG_30;Desconvolució - Radi
 HISTORY_MSG_31;Desconvolució - Quantitat
 HISTORY_MSG_32;Desconvolució - Amortiment
@@ -412,7 +413,7 @@ HISTORY_MSG_140;Nivell de negre - Verd 2
 HISTORY_MSG_141;Nivell de negre - Vincular verds
 HISTORY_MSG_158;AT - Intensitat
 HISTORY_MSG_160;AT - Escala
-HISTORY_MSG_162;Amplificació de la textura
+HISTORY_MSG_162;Amplificació/Enfocament de la textura
 HISTORY_MSG_163;Corbes RGB - Vermell
 HISTORY_MSG_164;Corbes RGB - Verd
 HISTORY_MSG_165;Corbes RGB - Blau
@@ -601,6 +602,7 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Negatiu de pel·lícula
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la pel·lícula
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valors del negatiu de pel·lícula
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Entrada de referència
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulació de pel·lícula - Després de la corba tonal
 HISTORY_MSG_FLATFIELD_EMBEDDED;Camp pla incrustat
 HISTORY_MSG_GRAIN_ENABLED;Gra de pel·lícula
 HISTORY_MSG_GRAIN_ISO;Gra de pel·lícula - ISO
@@ -653,13 +655,13 @@ HISTORY_MSG_RAW_BORDER;Vora raw
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Canvia mida - Permet l'ampliació
 HISTORY_MSG_RESIZE_PPI;Canvia mida - PPP
 HISTORY_MSG_RESIZE_UNIT;Canvia mida - Unitat
-HISTORY_MSG_SHARPENING_AUTORADIUS;Enfocament - Radi RLD automàtic
-HISTORY_MSG_SHARPENING_BLUR;Enfocament - Radi de desenfocament
-HISTORY_MSG_SHARPENING_CONTRAST;Enfocament - Llindar de contrast
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfocament - Latitud de les cantonades RLD
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfocament - Augment del radi de les cantonades RLD
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Enfocament - Fitxer PSF
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Enfocament - Iteracions PSF
+HISTORY_MSG_SHARPENING_AUTORADIUS;Enfocament de la captura - Radi RLD automàtic
+HISTORY_MSG_SHARPENING_BLUR;Enfocament de la captura - Radi de desenfocament
+HISTORY_MSG_SHARPENING_CONTRAST;Enfocament de la captura - Llindar de contrast
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Enfocament de la captura - Latitud de les cantonades RLD
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Enfocament de la captura - Augment del radi de les cantonades RLD
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Enfocament de la captura - Fitxer PSF
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Enfocament de la captura - Iteracions PSF
 HISTORY_MSG_SH_COLORSPACE;O/AL - Espai de color
 HISTORY_MSG_SMOOTHING_ENABLED;Suavitzat
 HISTORY_MSG_SMOOTHING_FALLOFF;Suavitzat - difuminat
@@ -934,7 +936,7 @@ PARTIALPASTE_DIALOGLABEL;Enganxa el perfil de processament parcialment
 PARTIALPASTE_DIRPYRDENOISE;Reducció de soroll
 PARTIALPASTE_DIRPYREQUALIZER;Contrast per nivells de detall
 PARTIALPASTE_DISTORTION;Correcció de distorsió
-PARTIALPASTE_TEXTUREBOOST;Amplificació de la textura
+PARTIALPASTE_TEXTUREBOOST;Amplificació/Enfocament de la textura
 PARTIALPASTE_EQUALIZER;Nivells d'ondeta
 PARTIALPASTE_EVERYTHING;Tot
 PARTIALPASTE_EXIFCHANGES;Exif
@@ -982,7 +984,7 @@ PARTIALPASTE_RGBCURVES;Corbes RGB
 PARTIALPASTE_ROTATION;Rotació
 PARTIALPASTE_SHADOWSHIGHLIGHTS;Ombres/Altes llums
 PARTIALPASTE_SHARPENEDGE;Vores
-PARTIALPASTE_SHARPENING;Enfocament
+PARTIALPASTE_SHARPENING;Enfocament de la captura
 PARTIALPASTE_SHARPENMICRO;Micro-contrast
 PARTIALPASTE_SMOOTHING;Suavitzat
 PARTIALPASTE_SOFTLIGHT;Llum tènue
@@ -1485,7 +1487,7 @@ TP_DISTORTION_AMOUNT;Quantitat
 TP_DISTORTION_AUTO_TIP;Corregeix automàticament la distorsió de la lent en fitxers raw en comparar-la amb la imatge JPEG incrustada, si existeix i la càmera ha corregit automàticament la distorsió de la lent en ella.
 TP_DISTORTION_LABEL;Correcció de distorsió
 TP_EPD_DETAIL_THRESHOLD;Escala del detall
-TP_EPD_LABEL;Amplificació de la textura
+TP_EPD_LABEL;Amplificació/Enfocament de la textura
 TP_EPD_LIST_TITLE;Paràmetres
 TP_EPD_SCALE;Escala
 TP_EPD_ITERATIONS;Iteracions
@@ -1533,6 +1535,7 @@ TP_FILMSIMULATION_LABEL;Simulació de pel·lícula
 TP_FILMSIMULATION_SLOWPARSEDIR;ART està configurat per cercar imatges Hald CLUT, que s'utilitzen a l'eina de simulació de pel·lícula, en una carpeta que està trigant massa a carregar.\nAneu a Preferències > Processament d'imatges > Simulació de pel·lícula\nper veure quina carpeta s'està utilitzant. Hauríeu d'apuntar ART a una carpeta que contingui només imatges Hald CLUT i res més, o a una carpeta buida si no voleu utilitzar l'eina de simulació de pel·lícula.\n\nLlegiu l'article sobre simulació de pel·lícula a RawPedia per obtenir més informació.\n\nVoleu cancel·lar l'exploració ara?
 TP_FILMSIMULATION_STRENGTH;Intensitat
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Establiu la carpeta HaldCLUT a Preferències
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Aplica després de la corba tonal
 TP_FLATFIELD_AUTOSELECT;Selecció automàtica
 TP_FLATFIELD_BLURRADIUS;Radi de desenfocament
 TP_FLATFIELD_BLURTYPE;Tipus de desenfocament
@@ -1887,7 +1890,7 @@ TP_SHARPENING_EDRADIUS;Radi
 TP_SHARPENING_EDTOLERANCE;Tolerància de vores
 TP_SHARPENING_HALOCONTROL;Control d'halos
 TP_SHARPENING_HCAMOUNT;Quantitat
-TP_SHARPENING_LABEL;Enfocament
+TP_SHARPENING_LABEL;Enfocament de la captura
 TP_SHARPENING_METHOD;Mètode
 TP_SHARPENING_ONLYEDGES;Enfoca només vores
 TP_SHARPENING_RADIUS;Radi
