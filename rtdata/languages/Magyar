@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2023-04-25 Bereczky Péter
+#03 2023-08-29 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -577,6 +577,7 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatív (FN)
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film alapszín
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatív értékek
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Referencia bemenet
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmszimuláció - Tónusgörbe után
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field beágyazott
 HISTORY_MSG_GRAIN_ENABLED;Filmszemcse
 HISTORY_MSG_GRAIN_ISO;Filmszemcse - ISO
@@ -912,7 +913,7 @@ PARTIALPASTE_DIALOGLABEL;Feldolgozási profil részleges beillesztése
 PARTIALPASTE_DIRPYRDENOISE;Zajcsökkentés
 PARTIALPASTE_DIRPYREQUALIZER;Kontraszt részletek szerint
 PARTIALPASTE_DISTORTION;Torzítás korrekció
-PARTIALPASTE_TEXTUREBOOST;Textúra kiemelése
+PARTIALPASTE_TEXTUREBOOST;Textúra kiemelése/élesítés
 PARTIALPASTE_EQUALIZER;Wavelet szintek
 PARTIALPASTE_EVERYTHING;Minden
 PARTIALPASTE_EXIFCHANGES;Exif
@@ -1365,8 +1366,8 @@ TP_COLORCORRECTION_CHANNEL_R;Piros
 TP_COLORCORRECTION_LABEL;Szín/Tónus korrekció
 TP_COLORCORRECTION_LIST_TITLE;Korrekció
 TP_COLORCORRECTION_OFFSET;Árnyékok/kiemelés
-TP_COLORCORRECTION_PIVOT;Pivot
-TP_COLORCORRECTION_POWER;Középtónusoks/Gamma
+TP_COLORCORRECTION_PIVOT;Pivot (középtónusok eltolása)
+TP_COLORCORRECTION_POWER;Középtónusok/Gamma
 TP_COLORCORRECTION_COMPRESSION;Tömörítés
 TP_COLORCORRECTION_RGBLUMINANCE;Fényerő mód
 TP_COLORCORRECTION_SATURATION;Telítettség
@@ -1463,7 +1464,7 @@ TP_DISTORTION_AMOUNT;Erősség
 TP_DISTORTION_AUTO_TIP;Automatikusan korrigálja az objektív torzítását a nyers fájlokban azáltal, hogy a beágyazott JPEG-képhez igazítja, ha létezik ilyen, és ha a fényképezőgép automatikusan korrigálta az objektív torzítását.
 TP_DISTORTION_LABEL;Torzítás korrekció
 TP_EPD_DETAIL_THRESHOLD;Részletek
-TP_EPD_LABEL;Textúra kiemelése
+TP_EPD_LABEL;Textúra kiemelése/Élesítés
 TP_EPD_LIST_TITLE;Paraméterek
 TP_EPD_SCALE;Skála
 TP_EPD_ITERATIONS;Iterációk
@@ -1511,6 +1512,7 @@ TP_FILMSIMULATION_LABEL;Filmszimuláció
 TP_FILMSIMULATION_SLOWPARSEDIR;Az ART úgy van beállítva, hogy a Filmszimulációs eszközhöz használt Hald CLUT képeket egy olyan mappában keresse, amelynek betöltése túl sokáig tart.\nNyissa meg a Beállítások > Képfeldolgozás > Filmszimuláció\nmappát a használt mappa megtekintéséhez. Az ART-t egy olyan mappára kell irányítania, amely csak Hald CLUT képeket tartalmaz, és semmi többet, vagy egy üres mappára, ha nem szeretné használni a Filmszimulációs eszközt.\n\nTovábbi információért olvassa el a RawPedia Filmszimuláció című cikkét. \n\nSzeretné most megszakítani a vizsgálatot?
 TP_FILMSIMULATION_STRENGTH;Erősség
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Állítsa be a HaldCLUT könyvtárat a Beállításokban
+TP_FILMSIMULATION_AFTER_TONE_CURVE;A tónusgörbe után kell alkalmazni
 TP_FLATFIELD_AUTOSELECT;Automatikus kiválasztás
 TP_FLATFIELD_BLURRADIUS;Elmosási sugár
 TP_FLATFIELD_BLURTYPE;Elmosás típusa
@@ -1940,7 +1942,7 @@ TP_TONE_EQUALIZER_BAND_4;Fehérek
 TP_TONE_EQUALIZER_DETAIL;Zónák közötti átmenetek simítása
 TP_TONE_EQUALIZER_LABEL;Tónuskiegyenlítő
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Tónustérkép mutatása
-TP_TONE_EQUALIZER_PIVOT;Pivot (Fé)
+TP_TONE_EQUALIZER_PIVOT;Pivot (középtónusok eltolása) (Fé)
 TP_VIGNETTING_AMOUNT;Mérték
 TP_VIGNETTING_CENTER_X;Középpont X
 TP_VIGNETTING_CENTER_Y;Középpont Y
