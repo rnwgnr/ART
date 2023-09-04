@@ -448,12 +448,21 @@ FramesData::FramesData(const Glib::ustring &fname):
         // -----------------------
         // Special file type detection (HDR, PixelShift)
         // ------------------------
+        std::array<std::string, 3> images = { "Image", "SubImage1" , "SubImage2" };
+        std::string mainimage = images[0];
+        for (size_t i = 0; i < images.size(); ++i) {
+            if (find_exif_tag("Exif." + images[i] + ".NewSubfileType") && exiv2_to_long(*pos) == 0) {
+                mainimage = images[i];
+                break;
+            }
+        }
+        
         uint16 bitspersample = 0, samplesperpixel = 0, sampleformat = 0, photometric = 0, compression = 0;
-        auto bps = exif.findKey(Exiv2::ExifKey("Exif.Image.BitsPerSample"));
-        auto spp = exif.findKey(Exiv2::ExifKey("Exif.Image.SamplesPerPixel"));
-        auto sf = exif.findKey(Exiv2::ExifKey("Exif.Image.SampleFormat"));
-        auto pi = exif.findKey(Exiv2::ExifKey("Exif.Image.PhotometricInterpretation"));
-        auto c = exif.findKey(Exiv2::ExifKey("Exif.Image.Compression"));
+        auto bps = exif.findKey(Exiv2::ExifKey("Exif." + mainimage + ".BitsPerSample"));
+        auto spp = exif.findKey(Exiv2::ExifKey("Exif." + mainimage + ".SamplesPerPixel"));
+        auto sf = exif.findKey(Exiv2::ExifKey("Exif." + mainimage + ".SampleFormat"));
+        auto pi = exif.findKey(Exiv2::ExifKey("Exif." + mainimage + ".PhotometricInterpretation"));
+        auto c = exif.findKey(Exiv2::ExifKey("Exif." + mainimage + ".Compression"));
 
         if ((!make.compare (0, 6, "PENTAX") || (!make.compare (0, 5, "RICOH") && !model.compare (0, 6, "PENTAX")))) {
 //             if (find_exif_tag("Exif.Pentax.HDR") && exiv2_to_long(*pos) > 0) {

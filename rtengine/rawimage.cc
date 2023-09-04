@@ -548,6 +548,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             use_internal_decoder_ = true;
         } else if (err != LIBRAW_SUCCESS) {
             return err;
+        } else if (libraw_->is_floating_point() && libraw_->imgdata.idata.dng_version) {
+            use_internal_decoder_ = true;
         } else {
             auto &d = libraw_->imgdata.idata;
             is_raw = d.raw_count;
@@ -959,7 +961,7 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 free(raw_image);
             }
             raw_image = nullptr;
-            adjust_margins = true;
+            adjust_margins = !float_raw_image; //true;
         } else {
             if (get_maker() == "Sigma" && cc && cc->has_rawCrop(width, height) && use_internal_decoder_) { // foveon images
                 raw_crop_cc = true;
