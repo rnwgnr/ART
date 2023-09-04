@@ -17,6 +17,7 @@
 #17 2022-12-03 alvaro
 #18 2022-12-12 alvaro
 #19 2023-03-08 alvaro
+#20 2023-09-01 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -312,7 +313,7 @@ HISTORY_MSG_11;Curva Tono 1
 HISTORY_MSG_14;Lab - Luminosità
 HISTORY_MSG_15;Lab - Contrasto
 HISTORY_MSG_19;Curva per 'L'
-HISTORY_MSG_20;Nitidezza
+HISTORY_MSG_20;Nitidezza di cattura
 HISTORY_MSG_21;MdC - Raggio
 HISTORY_MSG_22;MdC - Quantità
 HISTORY_MSG_23;MdC - Soglia
@@ -321,7 +322,7 @@ HISTORY_MSG_25;MdC - Raggio di rilevamento bordi
 HISTORY_MSG_26;MdC - Tolleranza bordi
 HISTORY_MSG_27;MdC - Controllo alone
 HISTORY_MSG_28;MdC - Quantità controllo alone
-HISTORY_MSG_29;Nitidezza - Metodo
+HISTORY_MSG_29;Nitidezza di cattura - Metodo
 HISTORY_MSG_30;RLD - Raggio
 HISTORY_MSG_31;RLD - Quantità
 HISTORY_MSG_32;RLD - Smorzamento
@@ -411,7 +412,7 @@ HISTORY_MSG_140;Punto del Nero - Verde 2
 HISTORY_MSG_141;Punto del Nero - Verdi uniti
 HISTORY_MSG_158;TM - Intensità
 HISTORY_MSG_160;TM - Scala
-HISTORY_MSG_162;Evidenzia trama
+HISTORY_MSG_162;Evidenzia trama/Nitidezza
 HISTORY_MSG_163;Curve RGB - R (Rosso)
 HISTORY_MSG_164;Curve RGB - G (Verde)
 HISTORY_MSG_165;Curve RGB - B (Blu)
@@ -587,6 +588,7 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Pellicola negativa
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Colore base pellicola
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;PN - Ingresso di riferimento
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valori pellicola negativa
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulaz. pellicola - Dopo curva tonale
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field incorporato
 HISTORY_MSG_GRAIN_ENABLED;Grana pellicola
 HISTORY_MSG_GRAIN_ISO;Grana pellicola - ISO
@@ -647,13 +649,13 @@ HISTORY_MSG_RESIZE_ALLOWUPSCALING;Ridimensiona - Permetti ingrandimento
 HISTORY_MSG_RESIZE_PPI;Ridimensiona - PPI
 HISTORY_MSG_RESIZE_UNIT;Ridimensiona - Unità
 HISTORY_MSG_SATURATION_VIBRANCE;S/V - Vividezza
-HISTORY_MSG_SHARPENING_AUTORADIUS;Nitidezza - Raggio Auto RLD
-HISTORY_MSG_SHARPENING_BLUR;Nitidezza - Raggio sfocatura
-HISTORY_MSG_SHARPENING_CONTRAST;Nitidezza - Soglia di contrasto
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Nitidezza - Iterazioni PSF
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Nitidezza - File PSF
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Nitidezza - Latitudine angolo RLD
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Nitidezza - Incremento raggio angolo RLD
+HISTORY_MSG_SHARPENING_AUTORADIUS;Nitidezza di cattura - Raggio Auto RLD
+HISTORY_MSG_SHARPENING_BLUR;Nitidezza di cattura - Raggio sfocatura
+HISTORY_MSG_SHARPENING_CONTRAST;Nitidezza di cattura - Soglia di contrasto
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Nitidezza di cattura - Iterazioni PSF
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Nitidezza di cattura - File PSF
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Nitidezza di cattura - Latitudine angolo RLD
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Nitidezza di cattura - Incremento raggio angolo RLD
 HISTORY_MSG_SH_COLORSPACE;S/H - Spazio colore
 HISTORY_MSG_SMOOTHING_ANGLE;Levigatura - angolo
 HISTORY_MSG_SMOOTHING_AREAMASK;Levigatura - maschera area
@@ -974,12 +976,12 @@ PARTIALPASTE_ROTATION;Rotazione
 PARTIALPASTE_SATURATION;Saturazione/Vividezza
 PARTIALPASTE_SHADOWSHIGHLIGHTS;Ombre/Alte luci
 PARTIALPASTE_SHARPENEDGE;Bordi
-PARTIALPASTE_SHARPENING;Nitidezza (MdC/RL)
+PARTIALPASTE_SHARPENING;Nitidezza di cattura
 PARTIALPASTE_SHARPENMICRO;Microcontrasto
 PARTIALPASTE_SMOOTHING;Levigatura
 PARTIALPASTE_SOFTLIGHT;Luce morbida
 PARTIALPASTE_SPOT;Rimozione punti
-PARTIALPASTE_TEXTUREBOOST;Evidenzia trama
+PARTIALPASTE_TEXTUREBOOST;Evidenzia trama/Nitidezza
 PARTIALPASTE_TM_FATTAL;Compressione range dinamico
 PARTIALPASTE_TM_LOG;Log tone mapping
 PARTIALPASTE_TONECURVE;Curve di tono
@@ -1478,7 +1480,7 @@ TP_DISTORTION_AUTO_TIP;Corregge automaticamente la distorsione dell'obiettivo ne
 TP_DISTORTION_LABEL;Distorsione
 TP_EPD_DETAIL_THRESHOLD;Scala di dettaglio
 TP_EPD_ITERATIONS;Iterazioni
-TP_EPD_LABEL;Evidenzia trama
+TP_EPD_LABEL;Evidenzia trama/Nitidezza
 TP_EPD_LIST_TITLE;Parametri
 TP_EPD_SCALE;Scala
 TP_EPD_STRENGTH;intensità
@@ -1522,6 +1524,7 @@ TP_FILMNEGATIVE_OUT_LEVEL;Livello di uscita
 TP_FILMNEGATIVE_REF_LABEL;Ingresso RGB: %1
 TP_FILMNEGATIVE_REF_PICK;Preleva un punto per bilanciamento del bianco
 TP_FILMNEGATIVE_REF_TOOLTIP;Seleziona una zona grigia per il bilanciamento del bianco dell'uscita, immagine positiva.
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Applica dopo curva tonale
 TP_FILMSIMULATION_LABEL;Simulazione della pellicola
 TP_FILMSIMULATION_SLOWPARSEDIR;ART è configurato per cercare immagini Hald CLUT (usate per la Simulazione Pellicola) in una cartella che impiega troppo tempo per caricarsi.\nVai a Preferenze > Elaborazione Immagine > Simulazione pellicola\nper vedere quale cartella è usata. Dovresti configurare una cartella che contiene solo immagini Hald CLUT e nient'altro, oppure una cartella vuota se non vuoi usare lo strumento Simulazione Pellicola.\n\nLeggi l'articolo della Simulazione Pellicola su Rawpedia per ulteriori informazioni.\n\nVuoi annullare la scansione adesso?
 TP_FILMSIMULATION_STRENGTH;intensità

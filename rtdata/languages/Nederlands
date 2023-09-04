@@ -36,6 +36,7 @@
 #35 24-11-2022 update to ART v1.17 by pm
 #36 27-12-2022 update to ART v1.18 door pm
 #37 14-03-2023 update to ART v1.18.1 door pm
+#38 04-09-2023 update to ART v1.next door pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -356,7 +357,7 @@ HISTORY_MSG_14;Lab - Helderheid
 HISTORY_MSG_158;TK - Sterkte
 HISTORY_MSG_15;Lab - Contrast
 HISTORY_MSG_160;TK - Schaal
-HISTORY_MSG_162;Tekstuurversterking
+HISTORY_MSG_162;Textuurversterking/Verscherping
 HISTORY_MSG_163;RGB-curven - Rood
 HISTORY_MSG_164;RGB-curven - Groen
 HISTORY_MSG_165;RGB-curven - Blauw
@@ -371,7 +372,7 @@ HISTORY_MSG_203;RO - kleurruimte
 HISTORY_MSG_204;LMMSE verbeterstappen
 HISTORY_MSG_207;Verzachten - tintcurve
 HISTORY_MSG_208;WB - Blauw/Rood-balans
-HISTORY_MSG_20;Verscherpen
+HISTORY_MSG_20;Opnameverscherping
 HISTORY_MSG_210;GF - Hoek
 HISTORY_MSG_211;Grijsverloopfilter
 HISTORY_MSG_212;VF - Kracht
@@ -425,7 +426,7 @@ HISTORY_MSG_294;Filmsimulatie - Sterkte
 HISTORY_MSG_295;Filmsimulatie - Film
 HISTORY_MSG_297;RO - Modus
 HISTORY_MSG_298;Dodepixelsfilter
-HISTORY_MSG_29;Verscherpingsmethode
+HISTORY_MSG_29;Opnameverscherping - methode
 HISTORY_MSG_2;arp-profiel geladen
 HISTORY_MSG_302;RO - Chromamethode
 HISTORY_MSG_303;RO - Chromamethode
@@ -602,6 +603,7 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatief
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Basiskleur film
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Referentie invoer
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmsimulatie - Na tooncurve
 HISTORY_MSG_FLATFIELD_EMBEDDED;Ingebed vlakveld
 HISTORY_MSG_GRAIN_ENABLED;Filmkorrel
 HISTORY_MSG_GRAIN_ISO;Filmkorrel - ISO
@@ -654,14 +656,14 @@ HISTORY_MSG_RAWCACORR_COLORSHIFT;Raw CA-correctie - Vermijd kleurverschuiving
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Schalen - sta vergroting toe
 HISTORY_MSG_RESIZE_PPI;Schalen - PPI
 HISTORY_MSG_RESIZE_UNIT;Schalen - Eenheid
+HISTORY_MSG_SHARPENING_AUTORADIUS;Opnameverscherping - Auto RLD-radius
 HISTORY_MSG_SATURATION_VIBRANCE;Levendigheid
-HISTORY_MSG_SHARPENING_AUTORADIUS;Verscherpen - Auto RLD-radius
-HISTORY_MSG_SHARPENING_BLUR;Verscherpen - Vervagingsradius
-HISTORY_MSG_SHARPENING_CONTRAST;RLV - Contrastdrempel
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Hoekversterking - bereik
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Hoekversterking - straal
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Verscherpen - PSF-bestand
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Verscherpen - PSF herhalingen
+HISTORY_MSG_SHARPENING_BLUR;Opnameverscherping - Vervagingsradius
+HISTORY_MSG_SHARPENING_CONTRAST;Opnameverscherping - Contrastdrempel
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Opnameverscherping - RLD hoek
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Opnameverscherping - Toename hoekstraal
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Opnameverscherping - PSF-bestand
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Opnameverscherping - PSF-herhalingen
 HISTORY_MSG_SH_COLORSPACE;S/H - Kleurruimte
 HISTORY_MSG_SMOOTHING_AREAMASK;Gebiedsmasker
 HISTORY_MSG_SMOOTHING_CHANNEL;Begeleid - kanaal
@@ -976,11 +978,11 @@ PARTIALPASTE_RGBCURVES;RGB-curven
 PARTIALPASTE_ROTATION;Roteren
 PARTIALPASTE_SATURATION;Verzadiging en levendigheid
 PARTIALPASTE_SATURATION;Verzadiging/levendigheid
-PARTIALPASTE_SHARPENING;Verscherpen
+PARTIALPASTE_SHARPENING;Opnameverscherping
 PARTIALPASTE_SMOOTHING;Verzachten
 PARTIALPASTE_SOFTLIGHT;Zacht licht
 PARTIALPASTE_SPOT;Vlekken verwijderen
-PARTIALPASTE_TEXTUREBOOST;Textuurversterking
+PARTIALPASTE_TEXTUREBOOST;Textuurversterking/verscherping
 PARTIALPASTE_TM_FATTAL;Compressie dynamisch bereik
 PARTIALPASTE_TM_LOG;Log toonmapping
 PARTIALPASTE_TONECURVE;Tooncurves
@@ -1478,7 +1480,7 @@ TP_DISTORTION_AUTO_TIP;Corrigeert automatisch de lensvervorming in raw-bestanden
 TP_DISTORTION_LABEL;Vervormingscorrectie
 TP_EPD_DETAIL_THRESHOLD;Schaal details
 TP_EPD_ITERATIONS;Herhaling
-TP_EPD_LABEL;Textuurversterking
+TP_EPD_LABEL;Textuurversterking/Verscherping
 TP_EPD_LIST_TITLE;Parameters
 TP_EPD_SCALE;Schaal
 TP_EPD_STRENGTH;Kracht
@@ -1525,6 +1527,7 @@ TP_FILMSIMULATION_LABEL;Filmsimulatie
 TP_FILMSIMULATION_SLOWPARSEDIR;ART is ingesteld om naar Hald CLUT-afbeeldingen te zoeken die gebruikt worden voor het Filmsimulatie-gereedschap, in een map die teveel tijd vraagt om te laden.\nGa naar Voorkeuren > Beeldverwerking > Filmsimulatie\nom te zien welke map hiervoor gebruikt wordt. U moet ART naar een map verwijzen die alleen Hald CLUT-afbeeldingen bevat en verder niets, of naar een lege map verwijzen als u Filmsimulatie niet wilt gebruiken.\n\nLees het artikel over Filmsimulatie in RawPedia voor meer informatie.\n\nWilt u de scan nu afbreken?
 TP_FILMSIMULATION_STRENGTH;Kracht
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Specificeer HaldCLUT-map in Voorkeuren
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Pas toe na de tooncurve
 TP_FLATFIELD_AUTOSELECT;Automatische selectie
 TP_FLATFIELD_BLURRADIUS;Verzachten, straal
 TP_FLATFIELD_BLURTYPE;Verzachten, type
@@ -1897,7 +1900,7 @@ TP_SHARPENING_EDRADIUS;Straal
 TP_SHARPENING_EDTOLERANCE;Randtolerantie
 TP_SHARPENING_HALOCONTROL;Halo-controle
 TP_SHARPENING_HCAMOUNT;Hoeveelheid
-TP_SHARPENING_LABEL;Verscherpen
+TP_SHARPENING_LABEL;Opnameverscherping
 TP_SHARPENING_METHOD;Methode
 TP_SHARPENING_ONLYEDGES;Alleen randen verscherpen
 TP_SHARPENING_RADIUS;Straal
