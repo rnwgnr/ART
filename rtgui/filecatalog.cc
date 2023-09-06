@@ -878,7 +878,7 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
     return names;
 }
 
-void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring& openfile)
+void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring &openfile)
 {
     try {
         bool is_session = art::session::check(dirname);
@@ -899,7 +899,7 @@ void FileCatalog::dirSelected (const Glib::ustring& dirname, const Glib::ustring
 
         // if openfile exists, we have to open it first (it is a command line argument)
         if (!openfile.empty()) {
-            addAndOpenFile (openfile);
+            addAndOpenFile(openfile, true);
         }
 
         if (!is_session) {
@@ -1905,7 +1905,7 @@ void FileCatalog::addFile (const Glib::ustring& fName)
     }
 }
 
-void FileCatalog::addAndOpenFile (const Glib::ustring& fname)
+void FileCatalog::addAndOpenFile(const Glib::ustring& fname, bool force)
 {
     auto file = Gio::File::create_for_path(fname);
 
@@ -1925,26 +1925,32 @@ void FileCatalog::addAndOpenFile (const Glib::ustring& fname)
             return;
         }
 
+        bool in_catalog = true;
         const auto lastdot = info->get_name().find_last_of('.');
         if (lastdot != Glib::ustring::npos) {
             if (!options.is_extention_enabled(info->get_name().substr(lastdot + 1))) {
-                return;
+                in_catalog = false;
             }
         } else {
+            in_catalog = false;
+        }
+
+        if (!in_catalog && !force) {
             return;
         }
 
-
         // if supported, load thumbnail first
-        const auto tmb = cacheMgr->getEntry(file->get_parse_name());
+        const auto tmb = cacheMgr->getEntry(fname);//file->get_parse_name());
 
         if (!tmb) {
             return;
         }
 
-        FileBrowserEntry* entry = new FileBrowserEntry(tmb, file->get_parse_name());
-        previewReady(selectedDirectoryId, entry);
-        // open the file
+        if (in_catalog) {
+            FileBrowserEntry *entry = new FileBrowserEntry(tmb, file->get_parse_name());
+            previewReady(selectedDirectoryId, entry);
+            // open the file
+        }
         tmb->increaseRef();
         to_open_ = {tmb};
         idle_register.add(

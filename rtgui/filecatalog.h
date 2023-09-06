@@ -156,11 +156,11 @@ private:
     BatchQueue *bqueue_;    
     std::vector<Thumbnail *> to_open_;
     
-    void addAndOpenFile (const Glib::ustring& fname);
-    void addFile (const Glib::ustring& fName);
-    std::vector<Glib::ustring> getFileList ();
-    BrowserFilter getFilter ();
-    void trashChanged ();
+    void addAndOpenFile(const Glib::ustring &fname, bool force=false);
+    void addFile(const Glib::ustring& fName);
+    std::vector<Glib::ustring> getFileList();
+    BrowserFilter getFilter();
+    void trashChanged();
 
     void onBrowsePathChanged();
     Glib::ustring getBrowsePath();
