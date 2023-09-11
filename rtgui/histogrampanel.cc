@@ -981,7 +981,7 @@ void HistogramRGBArea::factorChanged (double newFactor)
 void HistogramRGBAreaHori::drawBar(Cairo::RefPtr<Cairo::Context> cc, double value, double max_value, int winw, int winh, double scale)
 {
     double pos;
-    if (options.histogramDrawMode < 2) {
+    if (options.histogramDrawMode == 0) {
         pos = padding + value * (winw - padding * 2.0) / max_value + 0.5 * scale;
     } else {
         pos = padding + HistogramScaling::log (max_value, value) * (winw - padding * 2.0) / max_value + 0.5 * scale;
@@ -1019,7 +1019,7 @@ void HistogramRGBAreaHori::get_preferred_width_for_height_vfunc (int height, int
 void HistogramRGBAreaVert::drawBar(Cairo::RefPtr<Cairo::Context> cc, double value, double max_value, int winw, int winh, double scale)
 {
     double pos;
-    if (options.histogramDrawMode < 2 || options.histogramScopeType == ScopeType::PARADE || options.histogramScopeType == ScopeType::WAVEFORM) {
+    if (options.histogramDrawMode == 0 || options.histogramScopeType == ScopeType::PARADE || options.histogramScopeType == ScopeType::WAVEFORM) {
         pos = padding + value * (winh - padding * 2.0 - 1) / max_value + 0.5 * scale;
     } else {
         pos = padding + HistogramScaling::log (max_value, value) * (winh - padding * 2.0) / max_value + 0.5 * scale;
