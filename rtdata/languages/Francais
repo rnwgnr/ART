@@ -294,7 +294,7 @@ HISTORY_MSG_11;Courbe Tonale - Courbe 1
 HISTORY_MSG_14;L*a*b* - Luminosité
 HISTORY_MSG_15;L*a*b* - Contraste
 HISTORY_MSG_19;L*a*b* - Courbe L*
-HISTORY_MSG_20;Netteté
+HISTORY_MSG_20;Netteté de capture
 HISTORY_MSG_21;Netteté (USM) - Rayon
 HISTORY_MSG_22;Netteté (USM) - Quantité
 HISTORY_MSG_23;Netteté (USM) - Seuil
@@ -303,7 +303,7 @@ HISTORY_MSG_25;Netteté (USM) - Rayon de détection des bords
 HISTORY_MSG_26;Netteté (USM) - Tolérance de détection des bords
 HISTORY_MSG_27;Netteté (USM) - Contrôle du halo
 HISTORY_MSG_28;Netteté (USM) - Quantité de réduction du halo
-HISTORY_MSG_29;Netteté - Méthode
+HISTORY_MSG_29;Netteté de capture- Méthode
 HISTORY_MSG_30;Déconvolution (RL) - Rayon
 HISTORY_MSG_31;Déconvolution (RL) - Quantité
 HISTORY_MSG_32;Déconvolution (RL) - Amortissement
@@ -629,13 +629,13 @@ HISTORY_MSG_RAW_BORDER;Bordure raw
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Redim. - Autoriser l'agrandissement
 HISTORY_MSG_RESIZE_PPI;Redim. - PPI
 HISTORY_MSG_RESIZE_UNIT;Redim. - Unité
-HISTORY_MSG_SHARPENING_AUTORADIUS;Netteté - RLD rayon auto.
-HISTORY_MSG_SHARPENING_BLUR;Netteté - Rayon de floutage
-HISTORY_MSG_SHARPENING_CONTRAST;Netteté - Seuil de contraste
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Netteté - RLD Echelle
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Netteté - RLD Augmentation du rayon 
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Netteté - fichier PSF
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Netteté - itérations PSF
+HISTORY_MSG_SHARPENING_AUTORADIUS;Netteté de capture - RLD rayon auto.
+HISTORY_MSG_SHARPENING_BLUR;Netteté de capture - Rayon de floutage
+HISTORY_MSG_SHARPENING_CONTRAST;Netteté de capture- Seuil de contraste
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Netteté de capture - RLD Echelle
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Netteté de capture - RLD Augmentation du rayon
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Netteté de capture - fichier PSF
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Netteté de capture - itérations PSF
 HISTORY_MSG_SH_COLORSPACE;O/HL - Espace colorimétrique
 HISTORY_MSG_SMOOTHING_ENABLED;Lissage 
 HISTORY_MSG_SMOOTHING_FALLOFF;Lissage - atténuation
@@ -1865,7 +1865,7 @@ TP_SHARPENING_EDRADIUS;Rayon
 TP_SHARPENING_EDTOLERANCE;Tolérance des bords
 TP_SHARPENING_HALOCONTROL;Contrôle du halo
 TP_SHARPENING_HCAMOUNT;Quantité
-TP_SHARPENING_LABEL;Netteté
+TP_SHARPENING_LABEL;Netteté de capture
 TP_SHARPENING_METHOD;Méthode
 TP_SHARPENING_ONLYEDGES;Améliorer seulement les bords
 TP_SHARPENING_RADIUS;Rayon
