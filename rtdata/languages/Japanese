@@ -1,3 +1,25 @@
+#00 Japan - Japanese
+#01 2021-08-29 Ohnishi, Yasuo, initial translation for 1.9.3
+#02 2021-08-30 Ohnishi, Yasuo, some fixes
+#03 2021-08-31 Ohnishi, Yasuo, some fixes
+#04 2021-09-01 Ohnishi, Yasuo, some fixes
+#05 2021-09-05 Ohnishi, Yasuo, some fixes
+#06 2021-09-09 Ohnishi, Yasuo, some fixes
+#07 2021-10-06 Ohnishi, Yasuo, some fixes
+#08 2021-10-07 Ohnishi, Yasuo, updated for 1.10
+#09 2021-10-11 Ohnishi, Yasuo, updated
+#10 2021-10-18 Ohnishi, Yasuo, some fixes and updated for New Keys
+#11 2021-12-01 Ohnishi, Yasuo, some fixes and updated for 1.11
+#12 2021-12-23 Ohnishi, Yasuo, updated for 1.12
+#13 2022-01-30 Ohnishi, Yasuo, updated for 1.12.1
+#14 2022-03-31 Ohnishi, Yasuo, some fixes and updates for 1.13
+#15 2022-05-27 Ohnishi, Yasuo, updates for 1.14
+#16 2022-07-14 Ohnishi, Yasuo, updates for 1.15
+#17 2022-08-24 Ohnishi, Yasuo, updates for 1.16
+#18 2022-11-28 Ohnishi, Yasuo, updates for 1.17
+#19 2022-12-27 Ohnishi, Yasuo, updates for 1.18
+#20 2023-03-12 Ohnishi, Yasuo, updates for 1.19
+#21 2023-09-19 Ohnishi, Yasuo, updates for 1.20.2
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -291,7 +313,7 @@ HISTORY_MSG_11;トーンカーブ 1
 HISTORY_MSG_14;L*a*b* - 明度
 HISTORY_MSG_15;L*a*b* - コントラスト
 HISTORY_MSG_19;L*a*b* - L*カーブ
-HISTORY_MSG_20;キャプチャ・シャープニング
+HISTORY_MSG_20;入力画像シャープニング
 HISTORY_MSG_21;シャープニング 半径
 HISTORY_MSG_22;シャープニング 適用量
 HISTORY_MSG_23;シャープニング 閾値
@@ -300,7 +322,7 @@ HISTORY_MSG_25;シャープニング エッジ検出 半径
 HISTORY_MSG_26;シャープニング エッジ許容
 HISTORY_MSG_27;シャープニング 光背効果(ハロ)抑制
 HISTORY_MSG_28;光背効果(ハロ)抑制 適用量
-HISTORY_MSG_29;キャプチャ・シャープニング 方式
+HISTORY_MSG_29;入力画像シャープニング 方式
 HISTORY_MSG_30;デコンボリューション 半径
 HISTORY_MSG_31;デコンボリューション 適用量
 HISTORY_MSG_32;デコンボリューション 減衰
@@ -626,13 +648,13 @@ HISTORY_MSG_RAW_BORDER;Rawの境界
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;リサイズ - アップスケーリングを可能にする
 HISTORY_MSG_RESIZE_PPI;リサイズ - PPI
 HISTORY_MSG_RESIZE_UNIT;リサイズ - 単位
-HISTORY_MSG_SHARPENING_AUTORADIUS;キャプチャ・シャープニング - 自動 RLD 半径
-HISTORY_MSG_SHARPENING_BLUR;キャプチャ・シャープニング - ぼかしの半径
-HISTORY_MSG_SHARPENING_CONTRAST;キャプチャ・シャープニング - コントラストの閾値
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;キャプチャ・シャープニング - RLD 角のラチチュード
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;キャプチャ・シャープニング - RLD 角の半径を増加
-HISTORY_MSG_SHARPENING_PSF_KERNEL;キャプチャ・シャープニング - PSFファイル
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;キャプチャ・シャープニング - PSF反復
+HISTORY_MSG_SHARPENING_AUTORADIUS;入力画像シャープニング - 自動 RLD 半径
+HISTORY_MSG_SHARPENING_BLUR;入力画像シャープニング - ぼかしの半径
+HISTORY_MSG_SHARPENING_CONTRAST;入力画像シャープニング - コントラストの閾値
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;入力画像シャープニング - RLD 角のラチチュード
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;入力画像シャープニング - RLD 角の半径を増加
+HISTORY_MSG_SHARPENING_PSF_KERNEL;入力画像シャープニング - PSFファイル
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;入力画像シャープニング - PSF反復
 HISTORY_MSG_SH_COLORSPACE;S/H - 色空間
 HISTORY_MSG_SMOOTHING_ENABLED;スムージング
 HISTORY_MSG_SMOOTHING_FALLOFF;スムージング - 効果減衰
@@ -955,7 +977,7 @@ PARTIALPASTE_RGBCURVES;RGB カーブ
 PARTIALPASTE_ROTATION;回転
 PARTIALPASTE_SHADOWSHIGHLIGHTS;シャドウ/ハイライト
 PARTIALPASTE_SHARPENEDGE;エッジ
-PARTIALPASTE_SHARPENING;キャプチャ・シャープニング
+PARTIALPASTE_SHARPENING;入力画像シャープニング
 PARTIALPASTE_SHARPENMICRO;マイクロコントラスト
 PARTIALPASTE_SMOOTHING;スムージング
 PARTIALPASTE_SOFTLIGHT;ソフトな明るさ
@@ -1458,7 +1480,7 @@ TP_DISTORTION_AMOUNT;適用量
 TP_DISTORTION_AUTO_TIP;rawファイルの歪曲収差を 埋め込まれたJPEG画像とカメラによる自動歪曲収差補正と合わせることで自動的に補正します
 TP_DISTORTION_LABEL;歪曲収差補正
 TP_EPD_DETAIL_THRESHOLD;ディテールの尺度 (scale)
-TP_EPD_LABEL;テクスチャ増幅
+TP_EPD_LABEL;テクスチャ増幅 / シャープニング
 TP_EPD_LIST_TITLE;パラメータ
 TP_EPD_SCALE;スケール
 TP_EPD_ITERATIONS;反復
@@ -1861,11 +1883,11 @@ TP_SHARPENING_EDRADIUS;半径
 TP_SHARPENING_EDTOLERANCE;エッジ許容
 TP_SHARPENING_HALOCONTROL;光背効果(ハロ)抑制
 TP_SHARPENING_HCAMOUNT;適用量
-TP_SHARPENING_LABEL;キャプチャ・シャープニング (回析補正)
+TP_SHARPENING_LABEL;入力画像シャープニング
 TP_SHARPENING_METHOD;方式
 TP_SHARPENING_ONLYEDGES;エッジのみシャープニング
 TP_SHARPENING_RADIUS;半径
-TP_SHARPENING_RLD;RL デコンボリューション
+TP_SHARPENING_RLD;RL デコンボリューション (回析補正)
 TP_SHARPENING_RLD_AMOUNT;適用量
 TP_SHARPENING_RLD_AUTORADIUS_TOOLTIP;Rawデータから自動計算
 TP_SHARPENING_RLD_CORNERBOOST;角の増幅
