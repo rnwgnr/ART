@@ -208,7 +208,6 @@ public:
     void updateCache(bool updatePParams = true, bool updateCacheImageData = true);
     void saveThumbnail();
 
-    bool openDefaultViewer(int destination);
     bool imageLoad(bool loading);
 
     std::shared_ptr<rtengine::FramesMetaData> getMetaData();

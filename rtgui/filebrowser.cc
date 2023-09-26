@@ -389,8 +389,6 @@ void FileBrowser::build_menu()
         p++;
         submenuFileOperations->attach (*Gtk::manage(remove = new Gtk::MenuItem (M("FILEBROWSER_POPUPREMOVE"))), 0, 1, p, p + 1);
         p++;
-        submenuFileOperations->attach (*Gtk::manage(removeInclProc = new Gtk::MenuItem (M("FILEBROWSER_POPUPREMOVEINCLPROC"))), 0, 1, p, p + 1);
-        p++;
         submenuFileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
         submenuFileOperations->attach (*Gtk::manage(copyTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPCOPYTO"))), 0, 1, p, p + 1);
@@ -412,8 +410,6 @@ void FileBrowser::build_menu()
         pmenu->attach (*Gtk::manage(rename = new Gtk::MenuItem (M("FILEBROWSER_POPUPRENAME"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(remove = new Gtk::MenuItem (M("FILEBROWSER_POPUPREMOVE"))), 0, 1, p, p + 1);
-        p++;
-        pmenu->attach (*Gtk::manage(removeInclProc = new Gtk::MenuItem (M("FILEBROWSER_POPUPREMOVEINCLPROC"))), 0, 1, p, p + 1);
         p++;
         pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
         p++;
@@ -518,7 +514,6 @@ void FileBrowser::build_menu()
     developfast->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), developfast));
     rename->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), rename));
     remove->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), remove));
-    removeInclProc->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), removeInclProc));
     selall->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), selall));
     copyTo->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), copyTo));
     moveTo->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), moveTo));
@@ -829,39 +824,14 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         }
     }
 
-    // for (size_t j = 0; j < mMenuExtProgs.size(); j++) {
-    //     if (m == amiExtProg[j]) {
-    //         const auto pAct = mMenuExtProgs[m->get_label()];
-
-    //         // Build vector of all file names
-    //         std::vector<Glib::ustring> selFileNames;
-
-    //         for (size_t i = 0; i < mselected.size(); i++) {
-    //             Glib::ustring fn = mselected[i]->thumbnail->getFileName();
-
-    //             // Maybe batch processed version
-    //             if (pAct->target == 2) {
-    //                 fn = Glib::ustring::compose ("%1.%2", BatchQueue::calcAutoFileNameBase(fn), options.saveFormatBatch.format);
-    //             }
-
-    //             selFileNames.push_back(fn);
-    //         }
-
-    //         pAct->execute (selFileNames);
-    //         return;
-    //     }
-    // }
-
     if (m == open) {
         openRequested(mselected);
     } else if (m == remove) {
-        tbl->deleteRequested (mselected, false, true);
-    } else if (m == removeInclProc) {
-        tbl->deleteRequested (mselected, true, true);
+        tbl->deleteRequested(mselected, true);
     } else if (m == trash) {
-        toTrashRequested (mselected);
+        toTrashRequested(mselected);
     } else if (m == untrash) {
-        fromTrashRequested (mselected);
+        fromTrashRequested(mselected);
     } else if (m == add_to_session_) {
         addToSessionRequested(mselected);
     }
@@ -1149,25 +1119,6 @@ void FileBrowser::partPasteProfile ()
     }
 }
 
-#ifdef WIN32
-void FileBrowser::openDefaultViewer (int destination)
-{
-    bool success = true;
-
-    {
-        MYREADERLOCK(l, entryRW);
-
-        if (selected.size() == 1) {
-            success = (static_cast<FileBrowserEntry*>(selected[0]))->thumbnail->openDefaultViewer(destination);
-        }
-    }
-
-    if (!success) {
-        Gtk::MessageDialog msgd(getToplevelWindow(this), M("MAIN_MSG_IMAGEUNPROCESSED"), true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
-        msgd.run ();
-    }
-}
-#endif
 
 bool FileBrowser::keyPressed (GdkEventKey* event)
 {

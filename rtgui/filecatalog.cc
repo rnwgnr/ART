@@ -1976,7 +1976,7 @@ void FileCatalog::emptyTrash ()
         }
     }
     if (toDel.size() > 0) {
-        deleteRequested(toDel, false, false);
+        deleteRequested(toDel, false);
         trashChanged();
     }
 }

@@ -908,7 +908,7 @@ void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
 }
     
 
-void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, bool inclBatchProcessed, bool onlySelected)
+void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, bool onlySelected)
 {
     if (tbe.empty()) {
         return;
@@ -928,7 +928,7 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
     msd.show_all_children();
 
     if (onlySelected) {
-        msd.set_secondary_text(Glib::ustring::compose (inclBatchProcessed ? M("FILEBROWSER_DELETEDIALOG_SELECTEDINCLPROC") : M("FILEBROWSER_DELETEDIALOG_SELECTED"), tbe.size()), true);
+        msd.set_secondary_text(Glib::ustring::compose (M("FILEBROWSER_DELETEDIALOG_SELECTED"), tbe.size()), true);
     } else {
         msd.set_secondary_text(Glib::ustring::compose (M("FILEBROWSER_DELETEDIALOG_ALL"), tbe.size()), true);
     }
@@ -973,14 +973,6 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
                             ::g_remove(sidename.c_str());
                         }
                     }
-                }
-
-                if (inclBatchProcessed) {
-                    Glib::ustring procfName = Glib::ustring::compose ("%1.%2", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format);
-                    ::g_remove (procfName.c_str ());
-
-                    Glib::ustring procfNameParamFile = Glib::ustring::compose ("%1.%2.out%3", BatchQueue::calcAutoFileNameBase(fname), options.saveFormatBatch.format, paramFileExtension);
-                    ::g_remove (procfNameParamFile.c_str ());
                 }
 
                 previewsLoaded--;

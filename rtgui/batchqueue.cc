@@ -695,6 +695,176 @@ void BatchQueue::error(const Glib::ustring& descr)
     }
 }
 
+
+namespace {
+
+// Calculates automatic filename of processed batch entry, but just the base name
+// example output: "c:\out\converted\dsc0121"
+Glib::ustring calcAutoFileNameBase(const Glib::ustring& origFileName, rtengine::ProcParams &params, int sequence)
+{
+
+    std::vector<Glib::ustring> pa;
+    std::vector<Glib::ustring> da;
+
+    for (size_t i = 0; i < origFileName.size(); i++) {
+        while ((i < origFileName.size()) && (origFileName[i] == '\\' || origFileName[i] == '/')) {
+            i++;
+        }
+
+        if (i >= origFileName.size()) {
+            break;
+        }
+
+        Glib::ustring tok = "";
+
+        while ((i < origFileName.size()) && !(origFileName[i] == '\\' || origFileName[i] == '/')) {
+            tok = tok + origFileName[i++];
+        }
+
+        da.push_back (tok);
+    }
+
+    if (origFileName[0] == '/') {
+        pa.push_back ("/" + da[0]);
+    } else if (origFileName[0] == '\\') {
+        if (origFileName.size() > 1 && origFileName[1] == '\\') {
+            pa.push_back ("\\\\" + da[0]);
+        } else {
+            pa.push_back ("/" + da[0]);
+        }
+    } else {
+        pa.push_back (da[0]);
+    }
+
+    for (size_t i = 1; i < da.size(); i++) {
+        pa.push_back (pa[i - 1] + "/" + da[i]);
+    }
+
+//    for (int i=0; i<da.size(); i++)
+//        printf ("da: %s\n", da[i].c_str());
+//    for (int i=0; i<pa.size(); i++)
+//        printf ("pa: %s\n", pa[i].c_str());
+
+    // extracting filebase
+    Glib::ustring filename;
+
+    int extpos = origFileName.size() - 1;
+
+    for (; extpos >= 0 && origFileName[extpos] != '.'; extpos--);
+
+    for (int k = extpos - 1; k >= 0 && origFileName[k] != '/' && origFileName[k] != '\\'; k--) {
+        filename = origFileName[k] + filename;
+    }
+
+//    printf ("%d, |%s|\n", extpos, filename.c_str());
+
+    // constructing full output path
+//    printf ("path=|%s|\n", options.savePath.c_str());
+
+    Glib::ustring path = "";
+
+    if (options.saveUsePathTemplate) {
+        unsigned int ix = 0;
+
+        while (ix < options.savePathTemplate.size()) {
+            if (options.savePathTemplate[ix] == '%') {
+                ix++;
+
+                if (options.savePathTemplate[ix] == 'p') {
+                    ix++;
+                    unsigned int i = options.savePathTemplate[ix] - '0';
+
+                    if (i < pa.size()) {
+                        path = path + pa[pa.size() - i - 1] + '/';
+                    }
+
+                    ix++;
+                } else if (options.savePathTemplate[ix] == 'd') {
+                    ix++;
+                    unsigned i = options.savePathTemplate[ix] - '0';
+
+                    if (i < da.size()) {
+                        path = path + da[da.size() - i - 1];
+                    }
+                } else if (options.savePathTemplate[ix] == 'f') {
+                    path = path + filename;
+                } else if (options.savePathTemplate[ix] == 'r') { // rank from pparams
+                    auto thm = CacheManager::getInstance()->getEntry(origFileName);
+                    char rank = '0';
+                    if (thm) {
+                        if (thm->getInTrash()) {
+                            rank = 'x';
+                        } else if (thm->getRank() >= 0) {
+                            rank = '0' + thm->getRank();
+                        }
+                        thm->decreaseRef();
+                    }
+                    // rtengine::procparams::ProcParams pparams;
+
+                    // if( pparams.load(nullptr, options.getParamFile(origFileName)) == 0 ) {
+                    //     if (!pparams.inTrash) {
+                    //         rank = pparams.rank + '0';
+                    //     } else {
+                    //         rank = 'x';
+                    //     }
+                    // } else {
+                    //     rank = '0';    // if param file not loaded (e.g. does not exist), default to rank=0
+                    // }
+
+                    path += rank;
+                } else if (options.savePathTemplate[ix] == 's') { // sequence
+                    std::ostringstream seqstr;
+
+                    int w = options.savePathTemplate[ix + 1] - '0';
+
+                    if (w >= 1 && w <= 9) {
+                        ix++;
+                        seqstr << std::setw (w) << std::setfill ('0');
+                    }
+
+                    seqstr << sequence;
+                    path += seqstr.str ();
+                } else if (options.savePathTemplate[ix] == 'n' || options.savePathTemplate[ix] == 'u') { // snapshot name
+                    auto thm = CacheManager::getInstance()->getEntry(origFileName);
+                    if (thm && thm->hasProcParams()) {
+                        const auto &sn = thm->getProcParamsSnapshots();
+                        for (auto &p : sn) {
+                            if (p.second == params) {
+                                auto name = p.first;
+                                if (options.savePathTemplate[ix] == 'u') {
+                                    name = "";
+                                    for (auto c : p.first) {
+                                        if (std::isspace(c)) {
+                                            c = '_';
+                                        }
+                                        name.push_back(c);
+                                    }
+                                }
+                                path += name;
+                                break;
+                            }
+                        }
+                        thm->decreaseRef();
+                    }
+                }
+            }
+
+            else {
+                path = path + options.savePathTemplate[ix];
+            }
+
+            ix++;
+        }
+    } else {
+        path = Glib::build_filename (options.savePathFolder, filename);
+    }
+
+    return path;
+}
+
+} // namespace
+
+
 rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
 {
     // save image img
@@ -702,9 +872,9 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
     SaveFormat saveFormat;
 
     if (processing->outFileName == "") { // auto file name
-        Glib::ustring s = calcAutoFileNameBase (processing->filename, processing->sequence);
+        Glib::ustring s = calcAutoFileNameBase(processing->filename, processing->params, processing->sequence);
         saveFormat = options.saveFormatBatch;
-        fname = autoCompleteFileName (s, saveFormat.format);
+        fname = autoCompleteFileName(s, saveFormat.format);
     } else { // use the save-as filename with automatic completion for uniqueness
         if (processing->forceFormatOpts) {
             saveFormat = processing->saveFormat;
@@ -842,138 +1012,6 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
     return processing ? processing->job : nullptr;
 }
 
-// Calculates automatic filename of processed batch entry, but just the base name
-// example output: "c:\out\converted\dsc0121"
-Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileName, int sequence)
-{
-
-    std::vector<Glib::ustring> pa;
-    std::vector<Glib::ustring> da;
-
-    for (size_t i = 0; i < origFileName.size(); i++) {
-        while ((i < origFileName.size()) && (origFileName[i] == '\\' || origFileName[i] == '/')) {
-            i++;
-        }
-
-        if (i >= origFileName.size()) {
-            break;
-        }
-
-        Glib::ustring tok = "";
-
-        while ((i < origFileName.size()) && !(origFileName[i] == '\\' || origFileName[i] == '/')) {
-            tok = tok + origFileName[i++];
-        }
-
-        da.push_back (tok);
-    }
-
-    if (origFileName[0] == '/') {
-        pa.push_back ("/" + da[0]);
-    } else if (origFileName[0] == '\\') {
-        if (origFileName.size() > 1 && origFileName[1] == '\\') {
-            pa.push_back ("\\\\" + da[0]);
-        } else {
-            pa.push_back ("/" + da[0]);
-        }
-    } else {
-        pa.push_back (da[0]);
-    }
-
-    for (size_t i = 1; i < da.size(); i++) {
-        pa.push_back (pa[i - 1] + "/" + da[i]);
-    }
-
-//    for (int i=0; i<da.size(); i++)
-//        printf ("da: %s\n", da[i].c_str());
-//    for (int i=0; i<pa.size(); i++)
-//        printf ("pa: %s\n", pa[i].c_str());
-
-    // extracting filebase
-    Glib::ustring filename;
-
-    int extpos = origFileName.size() - 1;
-
-    for (; extpos >= 0 && origFileName[extpos] != '.'; extpos--);
-
-    for (int k = extpos - 1; k >= 0 && origFileName[k] != '/' && origFileName[k] != '\\'; k--) {
-        filename = origFileName[k] + filename;
-    }
-
-//    printf ("%d, |%s|\n", extpos, filename.c_str());
-
-    // constructing full output path
-//    printf ("path=|%s|\n", options.savePath.c_str());
-
-    Glib::ustring path = "";
-
-    if (options.saveUsePathTemplate) {
-        unsigned int ix = 0;
-
-        while (ix < options.savePathTemplate.size()) {
-            if (options.savePathTemplate[ix] == '%') {
-                ix++;
-
-                if (options.savePathTemplate[ix] == 'p') {
-                    ix++;
-                    unsigned int i = options.savePathTemplate[ix] - '0';
-
-                    if (i < pa.size()) {
-                        path = path + pa[pa.size() - i - 1] + '/';
-                    }
-
-                    ix++;
-                } else if (options.savePathTemplate[ix] == 'd') {
-                    ix++;
-                    unsigned i = options.savePathTemplate[ix] - '0';
-
-                    if (i < da.size()) {
-                        path = path + da[da.size() - i - 1];
-                    }
-                } else if (options.savePathTemplate[ix] == 'f') {
-                    path = path + filename;
-                } else if (options.savePathTemplate[ix] == 'r') { // rank from pparams
-                    char rank;
-                    rtengine::procparams::ProcParams pparams;
-
-                    if( pparams.load(nullptr, options.getParamFile(origFileName)) == 0 ) {
-                        if (!pparams.inTrash) {
-                            rank = pparams.rank + '0';
-                        } else {
-                            rank = 'x';
-                        }
-                    } else {
-                        rank = '0';    // if param file not loaded (e.g. does not exist), default to rank=0
-                    }
-
-                    path += rank;
-                } else if (options.savePathTemplate[ix] == 's') { // sequence
-                    std::ostringstream seqstr;
-
-                    int w = options.savePathTemplate[ix + 1] - '0';
-
-                    if (w >= 1 && w <= 9) {
-                        ix++;
-                        seqstr << std::setw (w) << std::setfill ('0');
-                    }
-
-                    seqstr << sequence;
-                    path += seqstr.str ();
-                }
-            }
-
-            else {
-                path = path + options.savePathTemplate[ix];
-            }
-
-            ix++;
-        }
-    } else {
-        path = Glib::build_filename (options.savePathFolder, filename);
-    }
-
-    return path;
-}
 
 Glib::ustring BatchQueue::autoCompleteFileName (const Glib::ustring& fileName, const Glib::ustring& format)
 {

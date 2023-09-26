@@ -88,7 +88,6 @@ public:
     bool loadBatchQueue ();
     void resizeLoadedQueue();
 
-    static Glib::ustring calcAutoFileNameBase (const Glib::ustring& origFileName, int sequence = 0);
     static int calcMaxThumbnailHeight();
 
     void setBatchProfile(const rtengine::procparams::PartialProfile *bp);
