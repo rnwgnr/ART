@@ -661,7 +661,7 @@ public:
     }
 };
 
-void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsrc, const std::vector<SpotEntry> &entries, const PreviewProps &pp, const ColorTemp &currWB, const ColorManagementParams *cmp, int tr)
+void ImProcFunctions::removeSpots(rtengine::Imagefloat* img, ImageSource* imgsrc, const std::vector<SpotEntry> &entries, const PreviewProps &pp, const ColorTemp &currWB, const ColorManagementParams *cmp, int tr)
 {
     //Get the clipped image areas (src & dst) from the source image
 
@@ -677,6 +677,23 @@ void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsr
 
     std::set<int> visibleSpots;   // list of dest spots intersecting the preview's crop
     int i = 0;
+
+    const auto convert =
+        [&](Imagefloat *img) -> void
+        {
+            bool converted = false;            
+            if (params->filmNegative.colorSpace == FilmNegativeParams::ColorSpace::WORKING) {
+                converted = true;
+                imgsrc->convertColorSpace(img, *cmp, currWB);
+            }
+            if (params->filmNegative.enabled) {
+                auto fnp = params->filmNegative;
+                filmNegativeProcess(img, img, fnp, params->raw, imgsrc, currWB);
+            }
+            if (!converted) {
+                imgsrc->convertColorSpace(img, *cmp, currWB);
+            }            
+        };
 
     for (auto entry : params->spot.entries) {
         std::shared_ptr<SpotBox> srcSpotBox(new SpotBox(entry,  SpotBox::Type::SOURCE));
@@ -704,17 +721,10 @@ void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsr
         *srcSpotBox /= pp.getSkip();
         srcSpotBox->allocImage();
         Imagefloat *srcImage = srcSpotBox->getImage();
-        // for (int y = 0; y < (int)srcImage->getHeight(); ++y) {
-        //     for (int x = 0; x < (int)srcImage->getWidth(); ++x) {
-        //         srcImage->r(y, x) = 60000.f;
-        //         srcImage->g(y, x) = 500.f;
-        //         srcImage->b(y, x) = 500.f;
-        //     }
-        // }
 
         imgsrc->getImage(currWB, tr, srcSpotBox->getImage(), spp, params->exposure, params->raw);
         if (cmp) {
-            imgsrc->convertColorSpace(srcImage, *cmp, currWB);
+            convert(srcImage);
         }
         assert(srcSpotBox->checkImageSize());
 
@@ -725,16 +735,9 @@ void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsr
         *dstSpotBox /= pp.getSkip();
         dstSpotBox->allocImage();
         Imagefloat *dstImage = dstSpotBox->getImage();
-        // for (int y = 0; y < (int)dstImage->getHeight(); ++y) {
-        //     for (int x = 0; x < (int)dstImage->getWidth(); ++x) {
-        //         dstImage->r(y, x) = 500.f;
-        //         dstImage->g(y, x) = 500.f;
-        //         dstImage->b(y, x) = 60000.f;
-        //     }
-        // }
         imgsrc->getImage(currWB, tr, dstSpotBox->getImage(), spp, params->exposure, params->raw);
         if (cmp) {
-            imgsrc->convertColorSpace(dstImage, *cmp, currWB);
+            convert(dstImage);
         }
         assert(dstSpotBox->checkImageSize());
 
@@ -795,5 +798,4 @@ void ImProcFunctions::removeSpots (rtengine::Imagefloat* img, ImageSource* imgsr
     }
 }
 
-}
-
+} // namespace rtengine
