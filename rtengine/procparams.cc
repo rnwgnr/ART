@@ -1956,10 +1956,10 @@ bool LogEncodingParams::operator ==(const LogEncodingParams& other) const
         enabled == other.enabled
         && autocompute == other.autocompute
         && autogain == other.autogain
-        && gain == other.gain
+        && targetGray == other.targetGray
         && (autocompute || (blackEv == other.blackEv))
         && (autocompute || (whiteEv == other.whiteEv))
-        && (autogain || (targetGray == other.targetGray))
+        && (autogain || (gain == other.gain))
         && regularization == other.regularization
         && satcontrol == other.satcontrol
         && highlightCompression == other.highlightCompression;
@@ -3022,10 +3022,10 @@ bool RAWParams::operator ==(const RAWParams& other) const
     return
         bayersensor == other.bayersensor
         && xtranssensor == other.xtranssensor
-        && dark_frame == other.dark_frame
         && df_autoselect == other.df_autoselect
-        && ff_file == other.ff_file
+        && (df_autoselect || (dark_frame == other.dark_frame))
         && ff_AutoSelect == other.ff_AutoSelect
+        && (ff_AutoSelect || (ff_file == other.ff_file))
         && ff_BlurRadius == other.ff_BlurRadius
         && ff_BlurType == other.ff_BlurType
         && ff_AutoClipControl == other.ff_AutoClipControl
@@ -3034,8 +3034,8 @@ bool RAWParams::operator ==(const RAWParams& other) const
         && ca_autocorrect == other.ca_autocorrect
         && ca_avoidcolourshift == other.ca_avoidcolourshift
         && caautoiterations == other.caautoiterations
-        && cared == other.cared
-        && cablue == other.cablue
+        && (ca_autocorrect || (cared == other.cared))
+        && (ca_autocorrect || (cablue == other.cablue))
         && expos == other.expos
         && hotPixelFilter == other.hotPixelFilter
         && deadPixelFilter == other.deadPixelFilter
