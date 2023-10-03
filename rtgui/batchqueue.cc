@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include "thumbnail.h"
 #include "batchqueue.h"
@@ -829,7 +830,11 @@ Glib::ustring calcAutoFileNameBase(const Glib::ustring& origFileName, rtengine::
                     if (thm && thm->hasProcParams()) {
                         const auto &sn = thm->getProcParamsSnapshots();
                         for (auto &p : sn) {
-                            if (p.second == params) {
+                            bool ok = (p.second == params);
+                            if (options.rtSettings.verbose) {
+                                std::cout << "comparing params with snapshot " << p.first << ": " << (ok ? "YES" : "NO") << std::endl;
+                            }
+                            if (ok) {
                                 auto name = p.first;
                                 if (options.savePathTemplate[ix] == 'u') {
                                     name = "";

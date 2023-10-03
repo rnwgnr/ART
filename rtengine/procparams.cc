@@ -1690,8 +1690,8 @@ bool SharpeningParams::operator ==(const SharpeningParams& other) const
         && halocontrol_amount == other.halocontrol_amount
         && method == other.method
         && deconvamount == other.deconvamount
-        && deconvradius == other.deconvradius
         && deconvAutoRadius == other.deconvAutoRadius
+        && (deconvAutoRadius || (deconvradius == other.deconvradius))
         && deconvCornerBoost == other.deconvCornerBoost
         && deconvCornerLatitude == other.deconvCornerLatitude
         && psf_kernel == other.psf_kernel
@@ -1719,10 +1719,10 @@ bool WBParams::operator ==(const WBParams& other) const
     return
         enabled == other.enabled
         && method == other.method
-        && temperature == other.temperature
-        && green == other.green
-        && equal == other.equal
-        && mult == other.mult;
+        && ((method == Type::AUTO) || (temperature == other.temperature))
+        && ((method == Type::AUTO) || (green == other.green))
+        && ((method == Type::AUTO) || (equal == other.equal))
+        && ((method == Type::AUTO) || (mult == other.mult));
 }
 
 bool WBParams::operator !=(const WBParams& other) const
@@ -1830,9 +1830,9 @@ bool DenoiseParams::operator ==(const DenoiseParams& other) const
         && luminanceDetailThreshold == other.luminanceDetailThreshold
         && chrominanceMethod == other.chrominanceMethod
         && chrominanceAutoFactor == other.chrominanceAutoFactor
-        && chrominance == other.chrominance
-        && chrominanceRedGreen == other.chrominanceRedGreen
-        && chrominanceBlueYellow == other.chrominanceBlueYellow
+        && ((chrominanceMethod == ChrominanceMethod::AUTOMATIC) || (chrominance == other.chrominance))
+        && ((chrominanceMethod == ChrominanceMethod::AUTOMATIC) || (chrominanceRedGreen == other.chrominanceRedGreen))
+        && ((chrominanceMethod == ChrominanceMethod::AUTOMATIC) || (chrominanceBlueYellow == other.chrominanceBlueYellow))
         && smoothingEnabled == other.smoothingEnabled
         && guidedChromaRadius == other.guidedChromaRadius
         && nlDetail == other.nlDetail
@@ -1956,9 +1956,9 @@ bool LogEncodingParams::operator ==(const LogEncodingParams& other) const
         && autocompute == other.autocompute
         && autogain == other.autogain
         && gain == other.gain
-        && blackEv == other.blackEv
-        && whiteEv == other.whiteEv
-        && targetGray == other.targetGray
+        && (autocompute || (blackEv == other.blackEv))
+        && (autocompute || (whiteEv == other.whiteEv))
+        && (autogain || (targetGray == other.targetGray))
         && regularization == other.regularization
         && satcontrol == other.satcontrol
         && highlightCompression == other.highlightCompression;
@@ -2124,8 +2124,9 @@ DistortionParams::DistortionParams() :
 
 bool DistortionParams::operator ==(const DistortionParams& other) const
 {
-    return enabled == other.enabled && amount == other.amount
-        && autocompute == other.autocompute;
+    return enabled == other.enabled
+        && autocompute == other.autocompute
+        && (autocompute || (amount == other.amount));
 }
 
 bool DistortionParams::operator !=(const DistortionParams& other) const
@@ -2147,9 +2148,9 @@ bool LensProfParams::operator ==(const LensProfParams& other) const
         lcMode == other.lcMode
         && lcpFile == other.lcpFile
         && useCA == other.useCA
-        && lfCameraMake == other.lfCameraMake
-        && lfCameraModel == other.lfCameraModel
-        && lfLens == other.lfLens;
+        && ((lcMode == LcMode::LENSFUNAUTOMATCH || lcMode == LcMode::EXIF) || (lfCameraMake == other.lfCameraMake))
+        && ((lcMode == LcMode::LENSFUNAUTOMATCH || lcMode == LcMode::EXIF) || (lfCameraModel == other.lfCameraModel))
+        && ((lcMode == LcMode::LENSFUNAUTOMATCH || lcMode == LcMode::EXIF) || (lfLens == other.lfLens));
 }
 
 bool LensProfParams::operator !=(const LensProfParams& other) const
@@ -5791,49 +5792,58 @@ void ProcParams::destroy(ProcParams* pp)
 
 bool ProcParams::operator ==(const ProcParams& other) const
 {
+    const auto d =
+        [](const char *name) -> bool
+        {
+            //std::cout << "ProcParams differ in " << name << std::endl;
+            return false;
+        };
+    
+#define ppEQ_(name) (name == other . name || d(#name))
     return
-        exposure == other.exposure
-        && saturation == other.saturation
-        && toneCurve == other.toneCurve
-        && localContrast == other.localContrast
-        && labCurve == other.labCurve
-        && sharpening == other.sharpening
-        && prsharpening == other.prsharpening
-        && wb == other.wb
-        && impulseDenoise == other.impulseDenoise
-        && denoise == other.denoise
-        && textureBoost == other.textureBoost
-        && fattal == other.fattal
-        && logenc == other.logenc
-        && defringe == other.defringe
-        && toneEqualizer == other.toneEqualizer
-        && crop == other.crop
-        && coarse == other.coarse
-        && rotate == other.rotate
-        && commonTrans == other.commonTrans
-        && distortion == other.distortion
-        && lensProf == other.lensProf
-        && perspective == other.perspective
-        && gradient == other.gradient
-        && pcvignette == other.pcvignette
-        && cacorrection == other.cacorrection
-        && vignetting == other.vignetting
-        && chmixer == other.chmixer
-        && blackwhite == other.blackwhite
-        && hsl == other.hsl
-        && resize == other.resize
-        && raw == other.raw
-        && icm == other.icm
-        && filmSimulation == other.filmSimulation
-        && softlight == other.softlight
-        && rgbCurves == other.rgbCurves
-        && metadata == other.metadata
-        && dehaze == other.dehaze
-        && grain == other.grain
-        && smoothing == other.smoothing
-        && colorcorrection == other.colorcorrection
-        && filmNegative == other.filmNegative
-        && spot == other.spot;
+        ppEQ_(exposure)
+        && ppEQ_(saturation)
+        && ppEQ_(toneCurve)
+        && ppEQ_(localContrast)
+        && ppEQ_(labCurve)
+        && ppEQ_(sharpening)
+        && ppEQ_(prsharpening)
+        && ppEQ_(wb)
+        && ppEQ_(impulseDenoise)
+        && ppEQ_(denoise)
+        && ppEQ_(textureBoost)
+        && ppEQ_(fattal)
+        && ppEQ_(logenc)
+        && ppEQ_(defringe)
+        && ppEQ_(toneEqualizer)
+        && ppEQ_(crop)
+        && ppEQ_(coarse)
+        && ppEQ_(rotate)
+        && ppEQ_(commonTrans)
+        && ppEQ_(distortion)
+        && ppEQ_(lensProf)
+        && ppEQ_(perspective)
+        && ppEQ_(gradient)
+        && ppEQ_(pcvignette)
+        && ppEQ_(cacorrection)
+        && ppEQ_(vignetting)
+        && ppEQ_(chmixer)
+        && ppEQ_(blackwhite)
+        && ppEQ_(hsl)
+        && ppEQ_(resize)
+        && ppEQ_(raw)
+        && ppEQ_(icm)
+        && ppEQ_(filmSimulation)
+        && ppEQ_(softlight)
+        && ppEQ_(rgbCurves)
+        && ppEQ_(metadata)
+        && ppEQ_(dehaze)
+        && ppEQ_(grain)
+        && ppEQ_(smoothing)
+        && ppEQ_(colorcorrection)
+        && ppEQ_(filmNegative)
+        && ppEQ_(spot);
+#undef ppEQ_
 }
 
 bool ProcParams::operator !=(const ProcParams& other) const
