@@ -1500,12 +1500,12 @@ bool ToneCurveParams::operator ==(const ToneCurveParams& other) const
 {
     return enabled == other.enabled
         && contrast == other.contrast
-        && curve == other.curve
-        && curve2 == other.curve2
+        && histmatching == other.histmatching
+        && (histmatching || (curve == other.curve))
+        && (histmatching || (curve2 == other.curve2))
         && curveMode == other.curveMode
         && curveMode2 == other.curveMode2
-        && histmatching == other.histmatching
-        && fromHistMatching == other.fromHistMatching
+        //&& fromHistMatching == other.fromHistMatching
         && saturation == other.saturation
         && saturation2 == other.saturation2
         && perceptualStrength == other.perceptualStrength
@@ -1716,13 +1716,14 @@ WBParams::WBParams() :
 
 bool WBParams::operator ==(const WBParams& other) const
 {
+    const bool m = (method == Type::AUTO || method == Type::CAMERA);
     return
         enabled == other.enabled
         && method == other.method
-        && ((method == Type::AUTO) || (temperature == other.temperature))
-        && ((method == Type::AUTO) || (green == other.green))
-        && ((method == Type::AUTO) || (equal == other.equal))
-        && ((method == Type::AUTO) || (mult == other.mult));
+        && (m || (temperature == other.temperature))
+        && (m || (green == other.green))
+        && (m || (equal == other.equal))
+        && (m || (mult == other.mult));
 }
 
 bool WBParams::operator !=(const WBParams& other) const
