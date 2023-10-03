@@ -479,6 +479,8 @@ int RawImageSource::findHotDeadPixels(PixelsMap &bpMap, const float thresh, cons
     BENCHFUN
     const float varthresh = (20.f * (thresh / 100.f) + 1.f) / 24.f;
 
+    const bool is_xtrans = ri->getSensorType() == ST_FUJI_XTRANS;
+
     // counter for dead or hot pixels
     int counter = 0;
 
@@ -489,6 +491,32 @@ int RawImageSource::findHotDeadPixels(PixelsMap &bpMap, const float thresh, cons
         array2D<float> cfablur(W, 5, ARRAY2D_CLEAR_DATA);
         int firstRow = -1;
         int lastRow = -1;
+
+        std::array<float, 25> medbuf;
+        
+        const auto med_xt =
+            [&](unsigned int c, int y0, int x0) -> float
+            {
+                size_t n = 0;
+                for (int y = y0; y < y0+5; ++y) {
+                    for (int x = x0; x < x0+5; ++x) {
+                        if (ri->XTRANSFC(y, x) == c) {
+                            medbuf[n++] = rawData[y][x];
+                        }
+                    }
+                }
+                if (n >= 9) {
+                    return median(medbuf[0], medbuf[1], medbuf[2], medbuf[3], medbuf[4], medbuf[5], medbuf[6], medbuf[7], medbuf[8]);
+                } else if (n >= 7) {
+                    return median(medbuf[0], medbuf[1], medbuf[2], medbuf[3], medbuf[4], medbuf[5], medbuf[6]);
+                } else if (n >= 5) {
+                    return median(medbuf[0], medbuf[1], medbuf[2], medbuf[3], medbuf[4]);
+                } else if (n >= 3) {
+                    return median(medbuf[0], medbuf[1], medbuf[2]);
+                } else {
+                    return medbuf[0];
+                }
+            };
 
 #ifdef _OPENMP
         // note, static scheduling is important in this implementation
@@ -502,7 +530,9 @@ int RawImageSource::findHotDeadPixels(PixelsMap &bpMap, const float thresh, cons
                     for (int row = firstRow - 2; row < firstRow; ++row) {
                         const int destRow = row % 5;
                         for (int j = 2; j < W - 2; ++j) {
-                            const float temp = median(rawData[row - 2][j - 2], rawData[row - 2][j], rawData[row - 2][j + 2],
+                            const float temp = is_xtrans ?
+                                med_xt(ri->XTRANSFC(row, j), row-2, j-2) :
+                                median(rawData[row - 2][j - 2], rawData[row - 2][j], rawData[row - 2][j + 2],
                                                       rawData[row][j - 2], rawData[row][j], rawData[row][j + 2],
                                                       rawData[row + 2][j - 2], rawData[row + 2][j], rawData[row + 2][j + 2]);
                             cfablur[destRow][j] = rawData[row][j] - temp;
@@ -513,7 +543,9 @@ int RawImageSource::findHotDeadPixels(PixelsMap &bpMap, const float thresh, cons
             lastRow = i;
             const int destRow = i % 5;
             for (int j = 2; j < W - 2; ++j) {
-                const float temp = median(rawData[i - 2][j - 2], rawData[i - 2][j], rawData[i - 2][j + 2],
+                const float temp = is_xtrans ?
+                    med_xt(ri->XTRANSFC(i, j), i-2, j-2) :
+                    median(rawData[i - 2][j - 2], rawData[i - 2][j], rawData[i - 2][j + 2],
                                           rawData[i][j - 2], rawData[i][j], rawData[i][j + 2],
                                           rawData[i + 2][j - 2], rawData[i + 2][j], rawData[i + 2][j + 2]);
                 cfablur[destRow][j] = rawData[i][j] - temp;
@@ -557,7 +589,9 @@ int RawImageSource::findHotDeadPixels(PixelsMap &bpMap, const float thresh, cons
                     }
                 } else {
                     for (int j = 2; j < W - 2; ++j) {
-                        const float temp = median(rawData[i - 2][j - 2], rawData[i - 2][j], rawData[i - 2][j + 2],
+                        const float temp = is_xtrans ?
+                            med_xt(ri->XTRANSFC(i, j), i-2, j-2) :
+                            median(rawData[i - 2][j - 2], rawData[i - 2][j], rawData[i - 2][j + 2],
                                                   rawData[i][j - 2], rawData[i][j], rawData[i][j + 2],
                                                   rawData[i + 2][j - 2], rawData[i + 2][j], rawData[i + 2][j + 2]);
                         cfablur[destRow][j] = rawData[i][j] - temp;

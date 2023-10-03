@@ -1626,7 +1626,7 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
     }
 
-    if ( ri->getSensorType() == ST_BAYER && (raw.hotPixelFilter > 0 || raw.deadPixelFilter > 0) && raw.enable_hotdeadpix) {
+    if ( (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS) && (raw.hotPixelFilter > 0 || raw.deadPixelFilter > 0) && raw.enable_hotdeadpix) {
         if (plistener) {
             plistener->setProgressStr ("Hot/Dead Pixel Filter...");
             plistener->setProgress (0.0);
