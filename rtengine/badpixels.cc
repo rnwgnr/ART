@@ -477,9 +477,8 @@ int RawImageSource::interpolateBadPixelsXtrans(const PixelsMap &bitmapBads)
 int RawImageSource::findHotDeadPixels(PixelsMap &bpMap, const float thresh, const bool findHotPixels, const bool findDeadPixels) const
 {
     BENCHFUN
-    const float varthresh = (20.f * (thresh / 100.f) + 1.f) / 24.f;
-
     const bool is_xtrans = ri->getSensorType() == ST_FUJI_XTRANS;
+    const float varthresh = (20.f * (thresh / 100.f) + 1.f) / 24.f * (is_xtrans ? 0.25f : 1.f);
 
     // counter for dead or hot pixels
     int counter = 0;
