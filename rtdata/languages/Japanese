@@ -20,6 +20,7 @@
 #19 2022-12-27 Ohnishi, Yasuo, updates for 1.18
 #20 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 #21 2023-09-19 Ohnishi, Yasuo, updates for 1.20.2
+#22 2023-11-11 Ohnishi, Yasuo, updates for next version
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -180,7 +181,6 @@ FILEBROWSER_POPUPRANK3;ランク 3 ***
 FILEBROWSER_POPUPRANK4;ランク 4 ****
 FILEBROWSER_POPUPRANK5;ランク 5 *****
 FILEBROWSER_POPUPREMOVE;削除
-FILEBROWSER_POPUPREMOVEINCLPROC;キュー処理に保持されているファイルを含めて削除
 FILEBROWSER_POPUPRENAME;名前変更
 FILEBROWSER_POPUPSELECTALL;全選択
 FILEBROWSER_POPUPTRASH;ゴミ箱へ移動
@@ -1241,7 +1241,7 @@ QUEUE_DESTFILENAME;パスとファイル名
 QUEUE_FORMAT_TITLE;ファイル形式
 QUEUE_LOCATION_FOLDER;フォルダに保存
 QUEUE_LOCATION_TEMPLATE;テンプレートを使う
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;次の書式文字を使用することができます:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ...<b>%r</b>\n\nこれらの書式文字は画像パス名の各部分 画像の属性を示します\n\n例えば 次の画像を処理中の場合は:\n\n<b><i>/home/tom/photos/2010-10-31/dsc0042.nef</i></b>\n書式文字の意味するものは:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b>は写真のランクに置き換えられます. 評価なしは％rは'0 'に置換されます. 画像がごみ箱にある場合 ％rは'X'に置換されます\n\n元画像と同じ場所に出力したい場合はこのように書きます:\n<b>%p1/%f</b>\n\n処理画像のディレクトリ下 "<i>converted</i>" という名前のディレクトリに出力画像を保存したい場合このように書きます:\n<b>%p1/converted/%f</b>\n\n"<i>/home/tom/photos/converted/2010-10-31</i>" という名前のディレクトリに出力画像を保存したい場合はこのように書きます:\n<b>%p2/converted/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;元の写真の場所、評価、ゴミ箱内かどうか、またはキュー内の位置に基づいて出力場所を指定します。\n\n例えば次のパス名を使う場合...:\n<b>/home/tom/photos/2010-10-31/ photo1.raw</b>\n書式設定文字列の意味は次のとおりです:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</ i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</ i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> は写真の評価に置き換えられます。写真に評価がない場合は、「<i>0</i>」が使用されます。写真がゴミ箱にある場合は、「<i>x</i>」が使われます。\n\n<b>%s1</b>, ..., <b>%s9</b> はキューが開始されたときのキュー内の写真の最初の位置に置き換えられます。数値はパディングを意味します。 例えば<b>%s3</b> の結果は「<i>001</i>」になります。\n\n<b>%n</b> は、現在適用されているスナップショットの名前に置き換えられます。スナップショットが存在しない場合、またはスナップショットが選択されている場合は、空の文字列が使用されます。 <b>%n</b> の代わりに <b>%u</b> を使用すると、スナップショット名のスペースをアンダースコアに置き換えることができます。\n\n出力イメージを元のイメージと一緒に保存する場合は、次のように書きます:\n<b>%p1/%f</b>\n\nソース写真のフォルダ内にある '<i>converted</i>' という名前のフォルダに出力画像を保存する場合は、次のように書きます:\ n<b>%p1/converted/%f</b>\n\n出力イメージを \n'<i>/home/tom/photos/converted/2010-10-31</i>' に保存する場合、次のように書きます:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;出力の場所
 QUEUE_STARTSTOP_TOOLTIP;キューにある画像の現像を始める 或いは中止する\n\nショートカット: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;基本ディレクトリ
@@ -1388,7 +1388,7 @@ TP_COLORCORRECTION_COMPRESSION;シャドウ/ハイライト圧縮
 TP_COLORCORRECTION_RGBLUMINANCE;輝度モード
 TP_COLORCORRECTION_SATURATION;彩度 (Saturation)
 TP_COLORCORRECTION_SLOPE;ハイライト/増幅 (Gain)
-TP_COLORCORRECTION_SYNC_SLIDERS;リンク (Link) に対応するスライダー
+TP_COLORCORRECTION_SYNC_SLIDERS;スライダーでRGBを等しく調整
 TP_COLORCORRECTION_L;明度
 TP_COLORCORRECTION_H;色相
 TP_COLORCORRECTION_S;彩度 (Saturation)
