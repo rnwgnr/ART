@@ -393,7 +393,7 @@ HISTORY_MSG_140;Feketeszint - Zöld 2
 HISTORY_MSG_141;Feketeszint - Zöld csúszkák összekapcsolása
 HISTORY_MSG_158;TB - Erősség
 HISTORY_MSG_160;TB - Részletek mértéke
-HISTORY_MSG_162;Textúra kiemelése (TB)
+HISTORY_MSG_162;Textúra kiemelése/Élesítés
 HISTORY_MSG_163;RGB Görbék - Piros
 HISTORY_MSG_164;RGB Görbék - Zöld
 HISTORY_MSG_165;RGB Görbék - Kék
@@ -633,8 +633,8 @@ HISTORY_MSG_RESIZE_UNIT;Átméretezés - Mértékegység
 HISTORY_MSG_SHARPENING_AUTORADIUS;Élesítés - Auto RLD sugár
 HISTORY_MSG_SHARPENING_BLUR;Élesítés - Elmosási sugár
 HISTORY_MSG_SHARPENING_CONTRAST;Élesítés - Kontrasztküszöb
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Élesítés - RLD sarok szélesség
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Élesítés - RLD sarok sugár növelése
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Élesítés - RLD sarokszélesség
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Élesítés - RLD saroksugár növelése
 HISTORY_MSG_SHARPENING_PSF_KERNEL;Élesítés - PSF fájl
 HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Élesítés - PSF iterációk
 HISTORY_MSG_SH_COLORSPACE;S/H - Színtér
