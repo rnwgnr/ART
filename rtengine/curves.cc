@@ -1407,7 +1407,6 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 
         Color::rgb2jzczhz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
 
-
         float ilum = jch[0];
         float hue = jch[2];
 
@@ -1460,13 +1459,16 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 
         float sat = jch[1];
         float olum = jch[0];
-        // float ohue = jch[2];
 
         float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
         sat *= ccf;
 
-        // float hueblend = LIM01(oY) * hcurve(hue);
-        // hue = intp(hueblend, ohue, hue);
+        float red_dist = LIM01(std::sqrt(SQR(rgb[0]-whitecoeff) + SQR(rgb[1]) + SQR(rgb[2])));
+        float blue_dist = LIM01(std::sqrt(SQR(rgb[0]) + SQR(rgb[1]) + SQR(rgb[2]-whitecoeff)));
+        float hue_shift = 15.f * RT_PI_F_180 * (1.f - red_dist);
+        hue_shift += -15.f * RT_PI_F_180 * (1.f - blue_dist);
+        hue_shift *= LIM01((rgb[0] + rgb[1] + rgb[2]) / (3.f * whitecoeff));
+        hue += hue_shift;
 
         Color::jzczhz2rgb(jch[0], sat, hue, rgb[0], rgb[1], rgb[2], state.iws);
 
