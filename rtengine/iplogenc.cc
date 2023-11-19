@@ -148,13 +148,35 @@ void log_encode(Imagefloat *rgb, const ProcParams *params, float scale, int full
     const bool hlcompr = params->logenc.highlightCompression > 0;
     const float hlcompr_factor = LIM01(float(params->logenc.highlightCompression) / 100.f);
 
+    // power function from https://www.desmos.com/calculator/nvhp63hmtj
+    constexpr float compr_l = 1.01f;
+    constexpr float compr_t = 0.8f;
+    const float compr_p = std::max(hlcompr_factor, 0.1f);
+    const float compr_s = (compr_l - compr_t) / std::pow(std::pow((1.f - compr_t) / (compr_l - compr_t), -compr_p) - 1.f, 1.f / compr_p);
+    const auto compr =
+        [&](float x) -> float
+        {
+            if (x < compr_t) {
+                return x;
+            } else {
+                float n = (x - compr_t) / compr_s;
+                float d = std::pow(1.f + std::pow((x - compr_t)/compr_s, compr_p), 1.f/compr_p);
+                float res = compr_t + compr_s * n / d;
+                if (hlcompr_factor < 0.1f) {
+                    res = intp(hlcompr_factor * 10.f, res, x);
+                }
+                return res;
+            }
+        };
+
     const auto apply =
         [=](float x) -> float
         {
             x = max(x, noise);
             x = max(x / gray, noise);
-            if (hlcompr && x >= 1.f) {
-                x = intp(hlcompr_factor, std::tanh(x-1.f)+1.f, x);
+            if (hlcompr) {// && x >= 1.f) {
+                //x = intp(hlcompr_factor, std::tanh(x-1.f)+1.f, x);
+                x = compr(x);
             }
             x = max((xlogf(x)/log2 - shadows_range) / dynamic_range, noise);
             assert(x == x);
