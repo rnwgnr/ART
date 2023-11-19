@@ -1323,18 +1323,15 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, cons
         to_work = identity<float>();
     }
 
-    // hcurve(3600);
-    // FlatCurve hc({
-    //         FCT_MinMaxCPoints,
-    //         0, 0, 0.35, 0.35,
-    //         0.09, 1.0, 0.35, 0.35,
-    //         0.18, 0, 0.35, 0.35
-    //     }, true);
-    // for (int i = 0; i < 3600; ++i) {
-    //     float h = float(i)/3600.f;
-    //     float v = hc.getVal(h);
-    //     hcurve[i] = v;
-    // }
+    float j, c;
+    Color::rgb2jzczhz(1, 0, 0, j, c, rhue, ws);
+    Color::rgb2jzczhz(0, 0, 1, j, c, bhue, ws);
+    Color::rgb2jzczhz(1, 1, 0, j, c, yhue, ws);
+    float ohue;
+    Color::rgb2jzczhz(1, 0.5, 0, j, c, ohue, ws);
+    yrange = std::abs(ohue - yhue) * 0.8f;
+    rrange = std::abs(ohue - rhue);
+    brange = rrange;
 }
 
 
@@ -1343,28 +1340,16 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
     Vec3f rgb;
     Vec3f jch;
 
-    // const auto hcurve =
-    //     [&](float h) -> float
-    //     {
-    //         h *= 180.f / RT_PI_F;
-    //         if (h < 0.f) {
-    //             h += 1.f;
-    //         } else if (h > 1.f) {
-    //             h -= 1.f;
-    //         }
-    //         return state.hcurve[h * 10.f];
-    //     };
-
     const float Lmax = whitept;
 
     // from https://github.com/jedypod/gamut-compress
 
     // Distance limit: How far beyond the gamut boundary to compress
     //const Vec3<float> dl(1.147f, 1.264f, 1.312f); // original ACES values
-    const Vec3<float> dl(1.1f, 1.2f, 1.5f); // hand-tuned
+    static const Vec3<float> dl(1.1f, 1.2f, 1.5f); // hand-tuned
     // Amount of outer gamut to affect
     //const Vec3<float> th(0.815f, 0.803f, 0.88f); // original ACES values
-    const Vec3<float> th(0.85f, 0.75f, 0.95f); // hand-tuned
+    static const Vec3<float> th(0.85f, 0.75f, 0.95f); // hand-tuned
 
     // Power or Parabolic compression functions: https://www.desmos.com/calculator/nvhp63hmtj
 #if 0 // power compression
@@ -1374,10 +1359,9 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         {
             return (l - t) / std::pow(std::pow((1.f - t)/(l - t), -p) - 1.f, 1.f/p);
         };
-    const Vec3<float> s(scale(dl[0], th[0], p),
-                        scale(dl[1], th[1], p),
-                        scale(dl[2], th[2], p));
-
+    static const Vec3<float> s(scale(dl[0], th[0], p),
+                               scale(dl[1], th[1], p),
+                               scale(dl[2], th[2], p));
 
     const auto compr =
         [&](float x, int i) -> float
@@ -1391,7 +1375,7 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         {
             return (1.f - t) / std::sqrt(l-1.f);
         };
-    Vec3<float> s(scale(dl[0], th[0]), scale(dl[1], th[1]), scale(dl[2], th[2]));
+    static const Vec3<float> s(scale(dl[0], th[0]), scale(dl[1], th[1]), scale(dl[2], th[2]));
 
     const auto compr =
         [&](float x, int i) -> float
@@ -1399,6 +1383,12 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
             return s[i] * std::sqrt(x - th[i] + SQR(s[i])/4.0f) - s[i] * std::sqrt(SQR(s[i]) / 4.0f) + th[i];            
         };
 #endif // power/parabolic compression
+
+    const auto gauss =
+        [](float x, float b, float c) -> float
+        {
+            return xexpf(-SQR(x-b)/(2*SQR(c)));
+        };
 
     for (size_t i = start; i < end; ++i) {
         rgb[0] = std::max(rc[i] / 65535.f, 0.f);
@@ -1457,19 +1447,32 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 
         Color::rgb2jzczhz(rgb[0], rgb[1], rgb[2], jch[0], jch[1], jch[2], state.ws);
 
-        float sat = jch[1];
-        float olum = jch[0];
-
-        float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
-        sat *= ccf;
-
+#if 0
         float red_dist = LIM01(std::sqrt(SQR(rgb[0]-whitecoeff) + SQR(rgb[1]) + SQR(rgb[2])));
         float blue_dist = LIM01(std::sqrt(SQR(rgb[0]) + SQR(rgb[1]) + SQR(rgb[2]-whitecoeff)));
         float hue_shift = 15.f * RT_PI_F_180 * (1.f - red_dist);
         hue_shift += -15.f * RT_PI_F_180 * (1.f - blue_dist);
         hue_shift *= LIM01((rgb[0] + rgb[1] + rgb[2]) / (3.f * whitecoeff));
         hue += hue_shift;
+#else
+        float hue_shift = 5.f * RT_PI_F_180 * gauss(hue, state.rhue, state.rrange);
+        hue_shift += -5.f * RT_PI_F_180 * gauss(hue, state.bhue, state.brange);
+        hue_shift *= LIM01((rgb[0] + rgb[1] + rgb[2]) / (3.f * whitecoeff));
+        hue += hue_shift;
+#endif
 
+        float sat = jch[1];
+        float olum = jch[0];
+
+        float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
+#if 1
+        // float yellow_dist = gauss(hue, yhue, yrange);
+        // ccf = LIM01(intp(yellow_dist, ccf, ccf + 0.5f));
+        ccf = LIM01(ccf + 0.5f * gauss(hue, state.yhue, state.yrange));
+#endif
+        
+        sat *= ccf;
+        
         Color::jzczhz2rgb(jch[0], sat, hue, rgb[0], rgb[1], rgb[2], state.iws);
 
         rc[i] = LIM(rgb[0] * 65535.f, 0.f, whitept);
@@ -1477,6 +1480,5 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         bc[i] = LIM(rgb[2] * 65535.f, 0.f, whitept);
     }
 }
-
 
 } // namespace rtengine

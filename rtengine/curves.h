@@ -600,7 +600,13 @@ public:
         float iws[3][3];
         Mat33<float> to_work;
         Mat33<float> to_out;
-        LUTf hcurve;
+        // huw twists and desaturation parameters
+        float rhue;
+        float bhue;
+        float yhue;
+        float rrange;
+        float brange;
+        float yrange;        
         
         explicit ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile);
     };
