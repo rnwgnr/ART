@@ -1455,7 +1455,7 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         hue_shift *= LIM01((rgb[0] + rgb[1] + rgb[2]) / (3.f * whitecoeff));
         hue += hue_shift;
 #else
-        float hue_shift = 5.f * RT_PI_F_180 * gauss(hue, state.rhue, state.rrange);
+        float hue_shift = 15.f * RT_PI_F_180 * gauss(hue, state.rhue, state.rrange);
         hue_shift += -5.f * RT_PI_F_180 * gauss(hue, state.bhue, state.brange);
         hue_shift *= LIM01((rgb[0] + rgb[1] + rgb[2]) / (3.f * whitecoeff));
         hue += hue_shift;
