@@ -1324,11 +1324,12 @@ NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, cons
     }
 
     float j, c;
-    Color::rgb2jzczhz(1, 0, 0, j, c, rhue, ws);
-    Color::rgb2jzczhz(0, 0, 1, j, c, bhue, ws);
-    Color::rgb2jzczhz(1, 1, 0, j, c, yhue, ws);
+    const auto hws = xyz_rec2020;
+    Color::rgb2jzczhz(1, 0, 0, j, c, rhue, hws);
+    Color::rgb2jzczhz(0, 0, 1, j, c, bhue, hws);
+    Color::rgb2jzczhz(1, 1, 0, j, c, yhue, hws);
     float ohue;
-    Color::rgb2jzczhz(1, 0.5, 0, j, c, ohue, ws);
+    Color::rgb2jzczhz(1, 0.5, 0, j, c, ohue, hws);
     yrange = std::abs(ohue - yhue) * 0.8f;
     rrange = std::abs(ohue - rhue);
     brange = rrange;
