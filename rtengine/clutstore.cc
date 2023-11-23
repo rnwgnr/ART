@@ -488,15 +488,6 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
 
 #ifdef ART_USE_CTL
 
-class CTLException: public std::exception {
-public:
-    CTLException(const std::string &msg): msg_(msg) {}
-    const char *what() const noexcept { return msg_.c_str(); }
-private:
-    std::string msg_;
-};
-
-
 std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size) const
 {
     MyMutex::MyLock lock(mutex_);
