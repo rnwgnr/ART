@@ -8,10 +8,18 @@
 #include "rt_math.h"
 #include "stdimagesource.h"
 #include "linalgebra.h"
+#include "settings.h"
 
 #include "../rtgui/options.h"
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
+
 namespace rtengine {
+
+extern const Settings *settings;
+
 namespace {
 
 bool loadFile(
@@ -291,7 +299,10 @@ void rtengine::HaldCLUT::splitClutFilename(
     bool search_profile_name = true;
 #ifdef ART_USE_OCIO
     search_profile_name = !(extension.casefold().find("clf") == 0);
-#endif
+#endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    search_profile_name = search_profile_name && !(extension.casefold().find("ctl") == 0);
+#endif // ART_USE_CTL
     if (search_profile_name && !name.empty()) {
         for (const auto& working_profile : rtengine::ICCStore::getInstance()->getWorkingProfiles()) {
             if (
@@ -475,6 +486,93 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
 
 #endif // ART_USE_OCIO
 
+#ifdef ART_USE_CTL
+
+class CTLException: public std::exception {
+public:
+    CTLException(const std::string &msg): msg_(msg) {}
+    const char *what() const noexcept { return msg_.c_str(); }
+private:
+    std::string msg_;
+};
+
+
+std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size) const
+{
+    MyMutex::MyLock lock(mutex_);
+    
+    CTLCacheEntry result;
+    std::vector<Ctl::FunctionCallPtr> retval;
+    std::shared_ptr<Ctl::Interpreter> intp;
+    
+    const Glib::ustring full_filename =
+        !Glib::path_is_absolute(filename)
+            ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
+            : filename;
+    if (!Glib::file_test(full_filename, Glib::FILE_TEST_IS_REGULAR)) {
+        return retval;
+    }
+    const auto md5 = getMD5(full_filename);
+
+    const auto err =
+        [&](const char *msg) -> std::vector<Ctl::FunctionCallPtr>
+        {
+            if (settings->verbose) {
+                std::cout << "error in CTL script from " << full_filename << ": "
+                          << msg << std::endl;
+            }
+            retval.clear();
+            return retval;
+        };
+
+    try {
+        bool found = ctl_cache_.get(full_filename, result);
+        if (!found || result.second != md5) {
+            intp = std::make_shared<Ctl::SimdInterpreter>();
+            intp->loadFile(full_filename);
+            result = std::make_pair(intp, md5);
+            ctl_cache_.set(full_filename, result);
+        } else {
+            intp = result.first;
+        }
+
+        if (intp) {
+            auto f = intp->newFunctionCall("ART_main");
+            if (f->numInputArgs() != 3) {
+                return err("wrong number of input arguments to ART_main");
+            } else {
+                for (int i = 0; i < 3; ++i) {
+                    auto a = f->inputArg(i);
+                    if (!a->type().cast<Ctl::FloatType>() || !a->isVarying()) {
+                        return err("bad input arg type");
+                    }
+                }
+            }
+            if (f->numOutputArgs() != 3) {
+                return err("wrong number of output arguments");
+            } else {
+                for (int i = 0; i < 3; ++i) {
+                    auto a = f->outputArg(i);
+                    if (!a->type().cast<Ctl::FloatType>() || !a->isVarying()) {
+                        return err("bad output arg type");
+                    }
+                }
+            }
+            retval.push_back(f);
+            for (int i = 1; i < num_threads; ++i) {
+                retval.push_back(intp->newFunctionCall("ART_main"));
+            }
+            chunk_size = intp->maxSamples();
+        }
+    } catch (std::exception &exc) {
+        return err(exc.what());
+    }
+
+    return retval;
+}
+
+#endif // ART_USE_CTL
+
 
 void rtengine::CLUTStore::clearCache()
 {
@@ -484,13 +582,19 @@ void rtengine::CLUTStore::clearCache()
 #ifdef ART_USE_OCIO
     ocio_cache_.clear();
 #endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    ctl_cache_.clear();
+#endif // ART_USE_CTL
 }
 
 rtengine::CLUTStore::CLUTStore() :
     cache(options.clutCacheSize)
 #ifdef ART_USE_OCIO
     , ocio_cache_(options.clutCacheSize)
-#endif
+#endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    , ctl_cache_(options.clutCacheSize)
+#endif // ART_USE_CTL
 {
 }
 
@@ -499,25 +603,28 @@ rtengine::CLUTStore::CLUTStore() :
 // HaldCLUTApplication
 //-----------------------------------------------------------------------------
 
-HaldCLUTApplication::HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, bool multiThread):
+HaldCLUTApplication::HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads):
     clut_filename_(clut_filename),
     working_profile_(working_profile),
     ok_(false),
     clut_and_working_profiles_are_same_(false),
-    multiThread_(multiThread),
+    multiThread_(num_threads > 1),
     strength_(strength)
 {
-    init();
+    init(num_threads);
 }
 
 
-void HaldCLUTApplication::init()
+void HaldCLUTApplication::init(int num_threads)
 {
     hald_clut_ = CLUTStore::getInstance().getClut(clut_filename_);
     if (!hald_clut_) {
 #ifdef ART_USE_OCIO
         if (!OCIO_init())
 #endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+        if (!CTL_init(num_threads))
+#endif // ART_USE_CTL
             ok_ = false;
         return;
     }
@@ -563,18 +670,7 @@ bool HaldCLUTApplication::OCIO_init()
         ocio_processor_ = proc->getOptimizedCPUProcessor(OCIO::BIT_DEPTH_F32, 
                                                          OCIO::BIT_DEPTH_F32,
                                                          OCIO::OPTIMIZATION_DEFAULT);
-        wprof_ = ICCStore::getInstance()->workingSpaceMatrix(working_profile_);
-        wiprof_ = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile_);
-        auto ws = dot_product(ACESp0_xyz, wprof_);
-        auto iws = dot_product(wiprof_, xyz_ACESp0);
-
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                conv_[i][j] = ws[i][j];
-                iconv_[i][j] = iws[i][j] * 65535.f;
-            }
-        }
-        
+        init_matrices();
         return true;
     } catch (...) {
         ok_ = false;
@@ -583,6 +679,44 @@ bool HaldCLUTApplication::OCIO_init()
 }
 #endif // ART_USE_OCIO
 
+
+#ifdef ART_USE_CTL
+
+bool HaldCLUTApplication::CTL_init(int num_threads)
+{
+    try {
+        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_);
+        if (func.empty()) {
+            ok_ = false;
+            return false;
+        } else {
+            ctl_func_ = std::move(func);
+            init_matrices();
+            ok_ = true;
+            return true;
+        }
+    } catch (...) {
+        ok_ = false;
+        return false;
+    }
+}
+#endif // ART_USE_CTL
+
+
+void HaldCLUTApplication::init_matrices()
+{
+    wprof_ = ICCStore::getInstance()->workingSpaceMatrix(working_profile_);
+    wiprof_ = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile_);
+    auto ws = dot_product(ACESp0_xyz, wprof_);
+    auto iws = dot_product(wiprof_, xyz_ACESp0);
+
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            conv_[i][j] = ws[i][j];
+            iconv_[i][j] = iws[i][j] * 65535.f;
+        }
+    }        
+}
 
 
 void HaldCLUTApplication::operator()(Imagefloat *img)
@@ -597,6 +731,13 @@ void HaldCLUTApplication::operator()(Imagefloat *img)
         return;
     }
 #endif // ART_USE_OCIO
+
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        CTL_apply(img);
+        return;
+    }
+#endif // ART_USE_CTL
 
 #ifdef _OPENMP
 #   pragma omp parallel for if (multiThread_)
@@ -779,5 +920,73 @@ void HaldCLUTApplication::OCIO_apply(Imagefloat *img)
 }
 
 #endif // ART_USE_OCIO
+
+
+#ifdef ART_USE_CTL
+
+void HaldCLUTApplication::CTL_apply(Imagefloat *img)
+{
+    const int W = img->getWidth();
+    const int H = img->getHeight();
+
+    const bool blend = strength_ < 1.f;
+
+#ifdef _OPENMP
+#   pragma omp parallel for num_threads(ctl_func_.size()) if (multiThread_)
+#endif
+    for (int y = 0; y < H; ++y) {
+#ifdef _OPENMP
+        auto func = ctl_func_[multiThread_ ? omp_get_thread_num() : 0];
+#else
+        auto func = ctl_func_[0];
+#endif
+        
+        Vec3<float> v;
+        std::vector<float> rgb[3];
+        for (int i = 0; i < 3; ++i) {
+            rgb[i].resize(W);
+        }
+        
+        for (int x = 0; x < W; ++x) {
+            v[0] = img->r(y, x) / 65535.f;
+            v[1] = img->g(y, x) / 65535.f;
+            v[2] = img->b(y, x) / 65535.f;
+            v = dot_product(conv_, v);
+            rgb[0][x] = v[0];
+            rgb[1][x] = v[1];
+            rgb[2][x] = v[2];
+        }
+
+        for (int x = 0; x < W; x += ctl_chunk_size_) {
+            const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
+            for (int i = 0; i < 3; ++i) {
+                memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
+            }
+            func->callFunction(n);
+            for (int i = 0; i < 3; ++i) {
+                memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+            }
+        }
+        
+        for (int x = 0; x < W; ++x) {
+            v[0] = rgb[0][x];
+            v[1] = rgb[1][x];
+            v[2] = rgb[2][x];
+            v = dot_product(iconv_, v);
+            // no need to renormalize to 65535 as this is already done in iconv_
+            if (blend) {
+                img->r(y, x) = intp(strength_, v[0], img->r(y, x));
+                img->g(y, x) = intp(strength_, v[1], img->g(y, x));
+                img->b(y, x) = intp(strength_, v[2], img->b(y, x));
+            } else {
+                img->r(y, x) = v[0];
+                img->g(y, x) = v[1];
+                img->b(y, x) = v[2];
+            }
+        }
+    }
+}
+
+#endif // ART_USE_CTL
 
 } // namespace rtengine

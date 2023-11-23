@@ -146,11 +146,12 @@ option(WITH_BENCHMARK "Build with benchmark code" OFF)
 option(WITH_LTO "Build with link-time optimizations" OFF)
 option(WITH_SAN "Build with run-time sanitizer" OFF)
 option(WITH_PROF "Build with profiling instrumentation" OFF)
-option(WITH_SYSTEM_KLT "Build using system KLT library." OFF)
+option(WITH_SYSTEM_KLT "Build using system KLT library" OFF)
 option(OPTION_OMP "Build with OpenMP support" ON)
 #option(ENABLE_MIMALLOC "Use the mimalloc library if available" ON)
 option(ENABLE_LIBRAW "Use libraw for decoding" ON)
 option(ENABLE_OCIO "Use OpenColorIOv2 for LUT application" ON)
+option(ENABLE_CTL "Enable support for the ACES Color Transformation Language" OFF)
 
 # Set installation directories:
 if(WIN32 OR APPLE)
@@ -626,8 +627,41 @@ if(ENABLE_OCIO)
         message(STATUS "using OpenColorIO library ${OCIO_VERSION}")
         add_definitions(-DART_USE_OCIO)
     else()
-        message(STATUS "libraw not found")
+        message(STATUS "OpenColorIO not found")
     endif()
+endif()
+
+if(ENABLE_CTL)
+    find_path(CTL_INCLUDE_DIR NAMES "CtlInterpeter.h" PATH_SUFFIXES "CTL")
+    pkg_check_modules(OPENEXR OpenEXR>=3)
+    #find_path(_openexr_half OpenEXR/half.h)
+    find_library(_ctl_lib IlmCtl)
+    find_library(_ctl_math_lib IlmCtlMath)
+    find_library(_ctl_simd_lib IlmCtlSimd)
+    if(NOT OPENEXR_FOUND)
+        pkg_check_modules(OPENEXR IlmBase)
+    endif()
+    if(NOT (OPENEXR_FOUND AND CTL_INCLUDE_DIR AND _ctl_lib AND _ctl_math_lib AND _ctl_simd_lib))
+        message(STATUS "CTL interpreter not found")
+    else()
+        set(CTL_INCLUDE_DIRS)
+        list(APPEND CTL_INCLUDE_DIRS "${CTL_INCLUDE_DIR}" ${OPENEXR_INCLUDE_DIRS})
+        message(STATUS "CTL lib found with headers at ${CTL_INCLUDE_DIR}")
+        set(CTL_LIBRARIES)
+        set(CTL_LIBRARY_DIRS ${OPENEXR_LIBRARY_DIRS})
+        list(APPEND CTL_LIBRARIES "${_ctl_simd_lib}" "${_ctl_math_lib}" "${_ctl_lib}")
+        list(APPEND CTL_LIBRARIES ${OPENEXR_LIBRARIES})
+        add_definitions(-DART_USE_CTL)
+        set(CTL_FOUND 1)
+        file(STRINGS "${CTL_INCLUDE_DIR}/CtlVersion.h"
+            _ctl_version_line REGEX "#define +CURRENT_CTL_VERSION[ \t]+")
+        string(REGEX REPLACE "#define +CURRENT_CTL_VERSION[ \t]+" "version "
+            _ctl_version_string "${_ctl_version_line}")
+        string(STRIP "${_ctl_version_string}" ART_CTL_VERSION_INFO)
+        message(STATUS "Found CTL interpreter, ${ART_CTL_VERSION_INFO}")
+    endif()
+else()
+    set(ART_CTL_VERSION_INFO "N/A")
 endif()
 
 
@@ -685,15 +719,15 @@ set(LFLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${UPPER_CMAKE_BUI
 set(ABOUT_COMMAND_WITH_ARGS ${CMAKE_COMMAND}
     -DPROJECT_SOURCE_DIR:STRING=${PROJECT_SOURCE_DIR}
     -DCACHE_NAME_SUFFIX:STRING=${CACHE_NAME_SUFFIX}
-    -DPROC_LABEL:STRING="${PROC_LABEL}"
-    -DPROC_BIT_DEPTH:STRING="${PROC_BIT_DEPTH}"
+    -DPROC_LABEL:STRING=${PROC_LABEL}
+    -DPROC_BIT_DEPTH:STRING=${PROC_BIT_DEPTH}
     -DBUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DGTKMM_VERSION:STRING=${GTKMM_VERSION}
     -DOPTION_OMP:STRING=${OPTION_OMP}
     -DLENSFUN_VERSION:STRING=${LENSFUN_VERSION}
     -DEXIV2_VERSION:STRING=${EXIV2_VERSION}
-    -DLCMS_VERSION_INFO:STRING="${ART_LCMS_VERSION_INFO}"
-    -DART_MIMALLOC_VERSION_INFO:STRING="${ART_MIMALLOC_VERSION_INFO}"
+    -DLCMS_VERSION_INFO:STRING=${ART_LCMS_VERSION_INFO}
+    -DART_MIMALLOC_VERSION_INFO:STRING=${ART_MIMALLOC_VERSION_INFO}
     )
 
 if(WIN32)
@@ -744,11 +778,20 @@ else()
         -DART_OCIO_VERSION_INFO:STRING="N/A")
 endif()
 
+if(ENABLE_CTL AND CTL_FOUND)
+    list(APPEND ABOUT_COMMAND_WITH_ARGS
+        -DART_CTL_VERSION_INFO:STRING=${ART_CTL_VERSION_INFO})
+else()
+    list(APPEND ABOUT_COMMAND_WITH_ARGS
+        -DART_CTL_VERSION_INFO:STRING="N/A")
+endif()
+
 list(APPEND ABOUT_COMMAND_WITH_ARGS "-DBUILDINFO_OS:STRING=${CMAKE_HOST_SYSTEM_NAME}" -P "${PROJECT_SOURCE_DIR}/UpdateInfo.cmake")
 
 add_custom_target(UpdateInfo ALL
     COMMAND ${ABOUT_COMMAND_WITH_ARGS}
-    COMMENT "Creating AboutThisBuild.txt and other version-dependent files")
+    COMMENT "Creating AboutThisBuild.txt and other version-dependent files"
+    )
 
 ### End generating AboutThisBuild.txt
 

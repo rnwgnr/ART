@@ -362,6 +362,9 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
 #ifdef ART_USE_OCIO
                 if (extension != "clf" && extension != "clfz")
 #endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+                if (extension != "ctl")
+#endif // ART_USE_CTL
                     continue;
             }
 

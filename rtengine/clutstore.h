@@ -34,6 +34,10 @@
 namespace OCIO = OCIO_NAMESPACE;
 #endif // ART_USE_OCIO
 
+#ifdef ART_USE_CTL
+#  include <CtlSimdInterpreter.h>
+#endif
+
 
 namespace rtengine {
 
@@ -83,6 +87,9 @@ public:
 #ifdef ART_USE_OCIO
     OCIO::ConstProcessorRcPtr getOCIOLut(const Glib::ustring &filename) const;
 #endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size) const;
+#endif // ART_USE_CTL
 
     void clearCache();
 
@@ -94,19 +101,26 @@ private:
     typedef std::pair<OCIO::ConstProcessorRcPtr, std::string> OCIOCacheEntry;
     mutable Cache<Glib::ustring, OCIOCacheEntry> ocio_cache_;
 #endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    typedef std::pair<std::shared_ptr<Ctl::Interpreter>, std::string> CTLCacheEntry;
+    mutable Cache<Glib::ustring, CTLCacheEntry> ctl_cache_;
+#endif // ART_USE_CTL
     mutable MyMutex mutex_;
 };
 
 
 class HaldCLUTApplication {
 public:
-    HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, bool multiThread);
+    HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads);
     void operator()(Imagefloat *img);
-    void apply_single(float &r, float &g, float &b);
+    void apply_single(int thread_id, float &r, float &g, float &b);
+#ifdef __SSE2__
+    void apply_vec(int thread_id, vfloat &r, vfloat &g, vfloat &b);
+#endif // __SSE2__
     operator bool() const { return ok_; }
 
 private:
-    void init();
+    void init(int num_threads);
     void apply_tile(float *r, float *g, float *b, int istart, int jstart, int tW, int tH);
     Glib::ustring clut_filename_;
     Glib::ustring working_profile_;
@@ -131,9 +145,18 @@ private:
     void OCIO_apply(Imagefloat *img);
 
     OCIO::ConstCPUProcessorRcPtr ocio_processor_;
+#endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    bool CTL_init(int num_threads);
+    void CTL_apply(Imagefloat *img);
+    std::vector<Ctl::FunctionCallPtr> ctl_func_;
+    int ctl_chunk_size_;
+#endif // ART_USE_CTL
+
+    void init_matrices();
+    
     float conv_[3][3];
     float iconv_[3][3];
-#endif // ART_USE_OCIO
 };
 
 } // namespace rtengine

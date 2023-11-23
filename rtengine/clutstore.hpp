@@ -24,7 +24,7 @@
 
 namespace rtengine {
 
-inline void HaldCLUTApplication::apply_single(float &r, float &g, float &b)
+inline void HaldCLUTApplication::apply_single(int thread_id, float &r, float &g, float &b)
 {
     if (!ok_) {
         return;
@@ -44,6 +44,29 @@ inline void HaldCLUTApplication::apply_single(float &r, float &g, float &b)
         b = v[2];
     } else
 #endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        auto func = ctl_func_[thread_id];
+        
+        Vec3<float> v(r / 65535.f, g / 65535.f, b / 65535.f);
+        v = dot_product(conv_, v);
+
+        for (int i = 0; i < 3; ++i) {
+            *reinterpret_cast<float *>(func->inputArg(i)->data()) = v[i];
+        }
+
+        func->callFunction(1);
+
+        for (int i = 0; i < 3; ++i) {
+            v[i] = *reinterpret_cast<float *>(func->outputArg(i)->data());
+        }
+
+        v = dot_product(iconv_, v);
+        r = v[0];
+        g = v[1];
+        b = v[2];
+    } else
+#endif // ART_USE_CTL
     {
         float out_rgbx[4] ALIGNED16; // Line buffer for CLUT
         float clutr[1] = {r};
@@ -81,5 +104,88 @@ inline void HaldCLUTApplication::apply_single(float &r, float &g, float &b)
         b = clutb[0];
     }
 }    
+
+
+#ifdef __SSE2__
+
+inline void HaldCLUTApplication::apply_vec(int thread_id, vfloat &r, vfloat &g, vfloat &b)
+{
+    if (!ok_) {
+        return;
+    }
+
+#ifdef ART_USE_OCIO
+    if (ocio_processor_) {
+        Vec3<float> v;
+        std::vector<float> data(4 * 3);
+        for (int k = 0, i = 0; k < 4; ++k) {
+            v[0] = r[k] / 65535.f;
+            v[1] = g[k] / 65535.f;
+            v[2] = b[k] / 65535.f;
+            v = dot_product(conv_, v);
+            data[i++] = v[0];
+            data[i++] = v[1];
+            data[i++] = v[2];
+        }
+        OCIO::PackedImageDesc pd(&data[0], 4, 1, 3);
+        ocio_processor_->apply(pd);
+
+        for (int k = 0, i = 0; k < 4; ++k) {
+            v[0] = data[i++];
+            v[1] = data[i++];
+            v[2] = data[i++];
+            v = dot_product(iconv_, v);
+            r[k] = v[0];
+            g[k] = v[1];
+            b[k] = v[2];
+        }
+    } else
+#endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        auto func = ctl_func_[thread_id];
+        
+        Vec3<float> v;
+
+        for (int k = 0; k < 4; ++k) {
+            v[0] = r[k] / 65535.f;
+            v[1] = g[k] / 65535.f;
+            v[2] = b[k] / 65535.f;
+            
+            v = dot_product(conv_, v);
+
+            for (int i = 0; i < 3; ++i) {
+                reinterpret_cast<float *>(func->inputArg(i)->data())[k] = v[i];
+            }
+        }
+
+        func->callFunction(4);
+
+        for (int k = 0; k < 4; ++k) {
+            for (int i = 0; i < 3; ++i) {
+                v[i] = reinterpret_cast<float *>(func->outputArg(i)->data())[k];
+            }
+
+            v = dot_product(iconv_, v);
+            r[k] = v[0];
+            g[k] = v[1];
+            b[k] = v[2];
+        }
+    } else
+#endif // ART_USE_CTL
+    {
+        for (int k = 0; k < 4; ++k) {
+            float rk = r[k];
+            float gk = g[k];
+            float bk = b[k];
+            apply_single(thread_id, rk, gk, bk);
+            r[k] = rk;
+            g[k] = gk;
+            b[k] = bk;
+        }
+    }
+}    
+
+#endif // __SSE2__
 
 } // namespace rtengine

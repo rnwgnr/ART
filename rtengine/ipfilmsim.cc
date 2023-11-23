@@ -24,6 +24,10 @@
 #include "clutstore.h"
 #include "../rtgui/multilangmgr.h"
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
+
 namespace rtengine {
 
 void ImProcFunctions::filmSimulation(Imagefloat *img)
@@ -34,7 +38,12 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
 
     img->setMode(Imagefloat::Mode::RGB, multiThread);
 
-    HaldCLUTApplication hald_clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, multiThread);
+#ifdef _OPENMP
+    int num_threads = multiThread ? omp_get_max_threads() : 1;
+#else
+    int num_threads = 1;
+#endif
+    HaldCLUTApplication hald_clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads);
 
     if (hald_clut) {
         hald_clut(img);

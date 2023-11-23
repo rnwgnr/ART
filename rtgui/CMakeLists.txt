@@ -258,6 +258,9 @@ if(OCIO_FOUND)
     include_directories(${OCIO_INCLUDE_DIRS})
     link_directories(${OCIO_LIBRARY_DIRS})
 endif()
+if(CTL_FOUND)
+    include_directories(${CTL_INCLUDE_DIRS})
+endif()
 
 # Create new executables targets
 add_executable(art ${EXTRA_SRC_NONCLI} ${NONCLISOURCEFILES})

@@ -624,7 +624,11 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         filter_lut->add_pattern("*.CLF");
         filter_lut->add_pattern("*.clfz");
         filter_lut->add_pattern("*.CLFZ");
-#endif
+#endif // ART_USE_OCIO
+#ifdef ART_USE_CTL
+        filter_lut->add_pattern("*.ctl");
+        filter_lut->add_pattern("*.CTL");
+#endif // ART_USE_CTL
         Glib::RefPtr<Gtk::FileFilter> filter_any = Gtk::FileFilter::create();
         filter_any->set_name(M("FILECHOOSER_FILTER_ANY"));
         filter_any->add_pattern("*");

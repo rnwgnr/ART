@@ -340,7 +340,12 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
         lut[i].reset(nullptr);
         if (r.mode == ColorCorrectionParams::Mode::LUT) {
-            lut[i].reset(new HaldCLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, false));
+#ifdef _OPENMP
+            int num_threads = multiThread ? omp_get_max_threads() : 1;
+#else
+            int num_threads = 1;
+#endif
+            lut[i].reset(new HaldCLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads));
             if (!(*lut[i])) {
                 lut[i].reset(nullptr);
                 if (plistener) {
@@ -360,7 +365,12 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         {
             float R, G, B;
             Color::yuv2rgb(Y, u, v, R, G, B, ws);
-            lut[region]->apply_single(R, G, B);
+#ifdef _OPENMP
+            int thread_id = omp_get_thread_num();
+#else
+            int thread_id = 0;
+#endif
+            lut[region]->apply_single(thread_id, R, G, B);
             Color::rgb2yuv(R, G, B, Y, u, v, ws);
         };
 
@@ -560,16 +570,12 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         {
             vfloat R, G, B;
             Color::yuv2rgb(Y, u, v, R, G, B, vws);
-            float Rk, Gk, Bk;
-            for (int k = 0; k < 4; ++k) {
-                Rk = R[k];
-                Gk = G[k];
-                Bk = B[k];
-                lut[region]->apply_single(Rk, Gk, Bk);
-                R[k] = Rk;
-                B[k] = Bk;
-                G[k] = Gk;
-            }
+#ifdef _OPENMP
+            int thread_id = omp_get_thread_num();
+#else
+            int thread_id = 0;
+#endif
+            lut[region]->apply_vec(thread_id, R, G, B);
             Color::rgb2yuv(R, G, B, Y, u, v, vws);
         };
     
