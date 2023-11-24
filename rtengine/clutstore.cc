@@ -121,7 +121,7 @@ constexpr int TS = 112;
 
 } // namespace
 
-rtengine::HaldCLUT::HaldCLUT() :
+rtengine::CLUT::CLUT() :
     clut_level(0),
     flevel_minus_one(0.0f),
     flevel_minus_two(0.0f),
@@ -129,11 +129,11 @@ rtengine::HaldCLUT::HaldCLUT() :
 {
 }
 
-rtengine::HaldCLUT::~HaldCLUT()
+rtengine::CLUT::~CLUT()
 {
 }
 
-bool rtengine::HaldCLUT::load(const Glib::ustring& filename)
+bool rtengine::CLUT::load(const Glib::ustring& filename)
 {
     if (loadFile(filename, "", clut_image, clut_level)) {
         Glib::ustring name, ext;
@@ -149,22 +149,22 @@ bool rtengine::HaldCLUT::load(const Glib::ustring& filename)
     return false;
 }
 
-rtengine::HaldCLUT::operator bool() const
+rtengine::CLUT::operator bool() const
 {
     return !clut_image.isEmpty();
 }
 
-Glib::ustring rtengine::HaldCLUT::getFilename() const
+Glib::ustring rtengine::CLUT::getFilename() const
 {
     return clut_filename;
 }
 
-Glib::ustring rtengine::HaldCLUT::getProfile() const
+Glib::ustring rtengine::CLUT::getProfile() const
 {
     return clut_profile;
 }
 
-void rtengine::HaldCLUT::getRGB(
+void rtengine::CLUT::getRGB(
     float strength,
     std::size_t line_size,
     const float* r,
@@ -276,7 +276,7 @@ void rtengine::HaldCLUT::getRGB(
     }
 }
 
-void rtengine::HaldCLUT::splitClutFilename(
+void rtengine::CLUT::splitClutFilename(
     const Glib::ustring& filename,
     Glib::ustring& name,
     Glib::ustring& extension,
@@ -325,10 +325,10 @@ rtengine::CLUTStore& rtengine::CLUTStore::getInstance()
     return instance;
 }
 
-std::shared_ptr<rtengine::HaldCLUT> rtengine::CLUTStore::getClut(const Glib::ustring& filename) const
+std::shared_ptr<rtengine::CLUT> rtengine::CLUTStore::getClut(const Glib::ustring& filename) const
 {
     MyMutex::MyLock lock(mutex_);
-    std::shared_ptr<rtengine::HaldCLUT> result;
+    std::shared_ptr<rtengine::CLUT> result;
 
     const Glib::ustring full_filename =
         !Glib::path_is_absolute(filename)
@@ -336,7 +336,7 @@ std::shared_ptr<rtengine::HaldCLUT> rtengine::CLUTStore::getClut(const Glib::ust
             : filename;
 
     if (!cache.get(full_filename, result)) {
-        std::unique_ptr<rtengine::HaldCLUT> clut(new rtengine::HaldCLUT);
+        std::unique_ptr<rtengine::CLUT> clut(new rtengine::CLUT);
 
         if (clut->load(full_filename)) {
             result = std::move(clut);
@@ -591,10 +591,10 @@ rtengine::CLUTStore::CLUTStore() :
 
 
 //-----------------------------------------------------------------------------
-// HaldCLUTApplication
+// CLUTApplication
 //-----------------------------------------------------------------------------
 
-HaldCLUTApplication::HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads):
+CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads):
     clut_filename_(clut_filename),
     working_profile_(working_profile),
     ok_(false),
@@ -606,7 +606,7 @@ HaldCLUTApplication::HaldCLUTApplication(const Glib::ustring &clut_filename, con
 }
 
 
-void HaldCLUTApplication::init(int num_threads)
+void CLUTApplication::init(int num_threads)
 {
     hald_clut_ = CLUTStore::getInstance().getClut(clut_filename_);
     if (!hald_clut_) {
@@ -647,7 +647,7 @@ void HaldCLUTApplication::init(int num_threads)
 
 #ifdef ART_USE_OCIO
 
-bool HaldCLUTApplication::OCIO_init()
+bool CLUTApplication::OCIO_init()
 {
     auto proc = CLUTStore::getInstance().getOCIOLut(clut_filename_);
     if (!proc) {
@@ -673,7 +673,7 @@ bool HaldCLUTApplication::OCIO_init()
 
 #ifdef ART_USE_CTL
 
-bool HaldCLUTApplication::CTL_init(int num_threads)
+bool CLUTApplication::CTL_init(int num_threads)
 {
     try {
         auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_);
@@ -694,7 +694,7 @@ bool HaldCLUTApplication::CTL_init(int num_threads)
 #endif // ART_USE_CTL
 
 
-void HaldCLUTApplication::init_matrices()
+void CLUTApplication::init_matrices()
 {
     wprof_ = ICCStore::getInstance()->workingSpaceMatrix(working_profile_);
     wiprof_ = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile_);
@@ -710,7 +710,7 @@ void HaldCLUTApplication::init_matrices()
 }
 
 
-void HaldCLUTApplication::operator()(Imagefloat *img)
+void CLUTApplication::operator()(Imagefloat *img)
 {
     if (!ok_) {
         return;
@@ -746,7 +746,7 @@ void HaldCLUTApplication::operator()(Imagefloat *img)
 }
 
 
-inline void HaldCLUTApplication::apply_tile(float *r, float *g, float *b, int istart, int jstart, int tW, int tH)
+inline void CLUTApplication::apply_tile(float *r, float *g, float *b, int istart, int jstart, int tW, int tH)
 {
     float out_rgbx[4 * TS] ALIGNED16; // Line buffer for CLUT
     float clutr[TS] ALIGNED16;
@@ -864,7 +864,7 @@ inline void HaldCLUTApplication::apply_tile(float *r, float *g, float *b, int is
 
 #ifdef ART_USE_OCIO
 
-void HaldCLUTApplication::OCIO_apply(Imagefloat *img)
+void CLUTApplication::OCIO_apply(Imagefloat *img)
 {
     const int W = img->getWidth();
     const int H = img->getHeight();
@@ -915,7 +915,7 @@ void HaldCLUTApplication::OCIO_apply(Imagefloat *img)
 
 #ifdef ART_USE_CTL
 
-void HaldCLUTApplication::CTL_apply(Imagefloat *img)
+void CLUTApplication::CTL_apply(Imagefloat *img)
 {
     const int W = img->getWidth();
     const int H = img->getHeight();

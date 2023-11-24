@@ -41,10 +41,10 @@ namespace OCIO = OCIO_NAMESPACE;
 
 namespace rtengine {
 
-class HaldCLUT final: public NonCopyable {
+class CLUT final: public NonCopyable {
 public:
-    HaldCLUT();
-    ~HaldCLUT();
+    CLUT();
+    ~CLUT();
 
     bool load(const Glib::ustring& filename);
 
@@ -83,7 +83,7 @@ class CLUTStore final: public NonCopyable {
 public:
     static CLUTStore& getInstance();
 
-    std::shared_ptr<HaldCLUT> getClut(const Glib::ustring& filename) const;
+    std::shared_ptr<CLUT> getClut(const Glib::ustring& filename) const;
 #ifdef ART_USE_OCIO
     OCIO::ConstProcessorRcPtr getOCIOLut(const Glib::ustring &filename) const;
 #endif // ART_USE_OCIO
@@ -96,7 +96,7 @@ public:
 private:
     CLUTStore();
 
-    mutable Cache<Glib::ustring, std::shared_ptr<HaldCLUT>> cache;
+    mutable Cache<Glib::ustring, std::shared_ptr<CLUT>> cache;
 #ifdef ART_USE_OCIO
     typedef std::pair<OCIO::ConstProcessorRcPtr, std::string> OCIOCacheEntry;
     mutable Cache<Glib::ustring, OCIOCacheEntry> ocio_cache_;
@@ -109,9 +109,9 @@ private:
 };
 
 
-class HaldCLUTApplication {
+class CLUTApplication {
 public:
-    HaldCLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads);
+    CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads);
     void operator()(Imagefloat *img);
     void apply_single(int thread_id, float &r, float &g, float &b);
 #ifdef __SSE2__
@@ -128,7 +128,7 @@ private:
     bool clut_and_working_profiles_are_same_;
     bool multiThread_;
     float strength_;
-    std::shared_ptr<HaldCLUT> hald_clut_;
+    std::shared_ptr<CLUT> hald_clut_;
     TMatrix wprof_;
     TMatrix wiprof_;
     TMatrix xyz2clut_;

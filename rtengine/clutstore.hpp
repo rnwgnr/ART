@@ -24,7 +24,7 @@
 
 namespace rtengine {
 
-inline void HaldCLUTApplication::apply_single(int thread_id, float &r, float &g, float &b)
+inline void CLUTApplication::apply_single(int thread_id, float &r, float &g, float &b)
 {
     if (!ok_) {
         return;
@@ -108,7 +108,7 @@ inline void HaldCLUTApplication::apply_single(int thread_id, float &r, float &g,
 
 #ifdef __SSE2__
 
-inline void HaldCLUTApplication::apply_vec(int thread_id, vfloat &r, vfloat &g, vfloat &b)
+inline void CLUTApplication::apply_vec(int thread_id, vfloat &r, vfloat &g, vfloat &b)
 {
     if (!ok_) {
         return;

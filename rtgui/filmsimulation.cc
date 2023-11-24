@@ -100,7 +100,7 @@ void FilmSimulation::onClutSelected()
 
     if (listener && getEnabled()) {
         Glib::ustring clutName, dummy;
-        HaldCLUT::splitClutFilename( currentClutFilename, clutName, dummy, dummy );
+        CLUT::splitClutFilename( currentClutFilename, clutName, dummy, dummy );
         listener->panelChanged( EvFilmSimulationFilename, clutName );
     }
 }
@@ -355,7 +355,7 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
             Glib::ustring name;
             Glib::ustring extension;
             Glib::ustring profileName;
-            HaldCLUT::splitClutFilename (entry, name, extension, profileName);
+            CLUT::splitClutFilename (entry, name, extension, profileName);
 
             extension = extension.casefold();
             if (extension.compare("tif") != 0 && extension.compare("png") != 0) {

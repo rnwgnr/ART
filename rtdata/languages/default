@@ -996,9 +996,9 @@ PREFERENCES_CACHEMAXENTRIES;Maximum number of cache entries
 PREFERENCES_CACHEOPTS;Cache Options
 PREFERENCES_CACHETHUMBHEIGHT;Maximum thumbnail height
 PREFERENCES_CLIPPINGIND;Clipping Indication
-PREFERENCES_CLUTSCACHE;HaldCLUT Cache
+PREFERENCES_CLUTSCACHE;CLUT Cache
 PREFERENCES_CLUTSCACHE_LABEL;Maximum number of cached CLUTs
-PREFERENCES_CLUTSDIR;HaldCLUT directory
+PREFERENCES_CLUTSDIR;CLUT directory
 PREFERENCES_CMMBPC;Black point compensation
 PREFERENCES_CURVEBBOXPOS;Position of curve copy & paste buttons
 PREFERENCES_CURVEBBOXPOS_ABOVE;Above
@@ -1508,7 +1508,7 @@ TP_FILMNEGATIVE_REF_TOOLTIP;Pick a gray patch for white-balancing the output, po
 TP_FILMSIMULATION_LABEL;Film Simulation
 TP_FILMSIMULATION_SLOWPARSEDIR;ART is configured to look for Hald CLUT images, which are used for the Film Simulation tool, in a folder which is taking too long to load.\nGo to Preferences > Image Processing > Film Simulation\nto see which folder is being used. You should either point ART to a folder which contains only Hald CLUT images and nothing more, or to an empty folder if you don't want to use the Film Simulation tool.\n\nRead the Film Simulation article in RawPedia for more information.\n\nDo you want to cancel the scan now?
 TP_FILMSIMULATION_STRENGTH;Strength
-TP_FILMSIMULATION_ZEROCLUTSFOUND;Set HaldCLUT directory in Preferences
+TP_FILMSIMULATION_ZEROCLUTSFOUND;Set CLUT directory in Preferences
 TP_FILMSIMULATION_AFTER_TONE_CURVE;Apply after Tone Curve
 TP_FLATFIELD_AUTOSELECT;Auto-selection
 TP_FLATFIELD_BLURRADIUS;Blur radius

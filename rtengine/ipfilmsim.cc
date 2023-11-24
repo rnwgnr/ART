@@ -43,10 +43,10 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
 #else
     int num_threads = 1;
 #endif
-    HaldCLUTApplication hald_clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads);
+    CLUTApplication clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads);
 
-    if (hald_clut) {
-        hald_clut(img);
+    if (clut) {
+        clut(img);
     } else if (plistener) {
         plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), params->filmSimulation.clutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : params->filmSimulation.clutFilename));
     }
