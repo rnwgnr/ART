@@ -1182,6 +1182,7 @@ struct FilmSimulationParams {
     Glib::ustring clutFilename;
     int strength;
     bool after_tone_curve;
+    std::vector<double> lut_params;
 
     FilmSimulationParams();
 
@@ -1302,6 +1303,7 @@ struct ColorCorrectionParams {
         bool rgbluminance;
         double hueshift;
         Glib::ustring lutFilename;
+        std::vector<double> lut_params;
         Mode mode;
 
         Region();

@@ -65,6 +65,7 @@ FilmSimulation::FilmSimulation():
 {
     EvToolEnabled.set_action(RGBCURVE);
     EvAfterToneCurve = ProcEventMapper::getInstance()->newEvent(RGBCURVE, "HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE");
+    EvClutParams = ProcEventMapper::getInstance()->newEvent(RGBCURVE, "HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS");
     
     m_clutComboBox = Gtk::manage( new ClutComboBox(options.clutsDir) );
     int foundClutsCount = m_clutComboBox->foundClutsCount();
@@ -91,17 +92,31 @@ FilmSimulation::FilmSimulation():
     setExpandAlignProperties(after_tone_curve_, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
     pack_start(*hb, Gtk::PACK_SHRINK, 0);
     after_tone_curve_->signal_toggled().connect(sigc::mem_fun(this, &FilmSimulation::afterToneCurveToggled));
+
+    lut_params_ = Gtk::manage(new CLUTParamsPanel());
+    lut_params_->signal_changed().connect(sigc::mem_fun(this, &FilmSimulation::onClutParamsChanged));
+    pack_start(*lut_params_);
 }
 
 
 void FilmSimulation::onClutSelected()
 {
     Glib::ustring currentClutFilename = m_clutComboBox->getSelectedClut();
+    lut_params_->setParams(rtengine::CLUTApplication::get_param_descriptors(currentClutFilename));
+    lut_params_->setValue({});
 
     if (listener && getEnabled()) {
         Glib::ustring clutName, dummy;
-        CLUT::splitClutFilename( currentClutFilename, clutName, dummy, dummy );
-        listener->panelChanged( EvFilmSimulationFilename, clutName );
+        CLUTStore::splitClutFilename(currentClutFilename, clutName, dummy, dummy);
+        listener->panelChanged(EvFilmSimulationFilename, clutName);
+    }
+}
+
+
+void FilmSimulation::onClutParamsChanged()
+{
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvClutParams, M("GENERAL_CHANGED"));
     }
 }
 
@@ -140,12 +155,12 @@ void FilmSimulation::read( const rtengine::procparams::ProcParams* pp)
 
     setEnabled(pp->filmSimulation.enabled);
 
+    Glib::ustring fname;
     if (!pp->filmSimulation.clutFilename.empty()) {
-        m_clutComboBox->setSelectedClut(
-            !Glib::path_is_absolute(pp->filmSimulation.clutFilename)
-                ? Glib::ustring(Glib::build_filename(options.clutsDir, pp->filmSimulation.clutFilename))
-                : pp->filmSimulation.clutFilename
-        );
+        fname = !Glib::path_is_absolute(pp->filmSimulation.clutFilename)
+            ? Glib::ustring(Glib::build_filename(options.clutsDir, pp->filmSimulation.clutFilename))
+            : pp->filmSimulation.clutFilename;
+        m_clutComboBox->setSelectedClut(fname);
     } else {
         m_clutComboBox->set_active(-1);
     }
@@ -160,6 +175,9 @@ void FilmSimulation::read( const rtengine::procparams::ProcParams* pp)
 
     after_tone_curve_->set_active(pp->filmSimulation.after_tone_curve);
     after_tone_curve_box_->set_visible(after_tone_curve_->get_active());
+
+    lut_params_->setParams(rtengine::CLUTApplication::get_param_descriptors(fname));
+    lut_params_->setValue(pp->filmSimulation.lut_params);
 
     updateDisable(false);
     enableListener();
@@ -181,6 +199,7 @@ void FilmSimulation::write( rtengine::procparams::ProcParams* pp)
 
     pp->filmSimulation.strength = m_strength->getValue();
     pp->filmSimulation.after_tone_curve = after_tone_curve_->get_active();
+    pp->filmSimulation.lut_params = lut_params_->getValue();
 }
 
 void FilmSimulation::trimValues( rtengine::procparams::ProcParams* pp )
@@ -355,7 +374,7 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
             Glib::ustring name;
             Glib::ustring extension;
             Glib::ustring profileName;
-            CLUT::splitClutFilename (entry, name, extension, profileName);
+            CLUTStore::splitClutFilename(entry, name, extension, profileName);
 
             extension = extension.casefold();
             if (extension.compare("tif") != 0 && extension.compare("png") != 0) {

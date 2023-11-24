@@ -20,6 +20,7 @@
 #include "colorcorrection.h"
 #include "eventmapper.h"
 #include "mycurve.h"
+#include "../rtengine/clutstore.h"
 #include <iomanip>
 #include <cmath>
 
@@ -407,6 +408,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvHueShift = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_HUESHIFT");
     EvCompression = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_COMPRESSION");
     EvLUT = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LUT");
+    EvLUTParams = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LUT_PARAMS");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK");
@@ -608,9 +610,14 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     if (!options.clutsDir.empty()) {
         lut_filename->set_current_folder(options.clutsDir);
     }
-    box_lut = Gtk::manage(new Gtk::HBox());
-    box_lut->pack_start(*Gtk::manage(new Gtk::Label(M("TP_COLORCORRECTION_LUT_FILENAME") + ": ")), Gtk::PACK_SHRINK, 4);
-    box_lut->pack_start(*lut_filename, Gtk::PACK_EXPAND_WIDGET, 4);
+    box_lut = Gtk::manage(new Gtk::VBox());
+    Gtk::HBox *hbox_lut = Gtk::manage(new Gtk::HBox());
+    hbox_lut->pack_start(*Gtk::manage(new Gtk::Label(M("TP_COLORCORRECTION_LUT_FILENAME") + ": ")), Gtk::PACK_SHRINK, 4);
+    hbox_lut->pack_start(*lut_filename, Gtk::PACK_EXPAND_WIDGET, 4);
+    box_lut->pack_start(*hbox_lut);
+
+    lut_params = Gtk::manage(new CLUTParamsPanel());
+    box_lut->pack_start(*lut_params);
 
     {
         Glib::RefPtr<Gtk::FileFilter> filter_lut = Gtk::FileFilter::create();
@@ -637,6 +644,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         lut_filename->add_filter(filter_any);
     }
     lut_filename->signal_selection_changed().connect(sigc::mem_fun(*this, &ColorCorrection::lutChanged));
+    lut_params->signal_changed().connect(sigc::mem_fun(*this, &ColorCorrection::lutParamsChanged));
 
     hueshift->delay = options.adjusterMaxDelay;
     inSaturation->delay = options.adjusterMaxDelay;
@@ -918,6 +926,7 @@ void ColorCorrection::regionGet(int idx)
     }
     r.rgbluminance = rgbluminance->get_active();
     r.lutFilename = Glib::filename_to_utf8(lut_filename->get_filename());
+    r.lut_params = lut_params->getValue();
 }
 
 
@@ -970,6 +979,8 @@ void ColorCorrection::regionShow(int idx)
     }
     rgbluminance->set_active(r.rgbluminance);
     lut_filename->set_filename(Glib::filename_from_utf8(r.lutFilename));
+    lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(r.lutFilename));
+    lut_params->setValue(r.lut_params);
     modeChanged();
     if (disable) {
         enableListener();
@@ -1258,6 +1269,18 @@ void ColorCorrection::lutChanged()
 {
     if (listener) {
         auto fn = Glib::filename_to_utf8(lut_filename->get_filename());
+
+        lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(fn));
+        lut_params->setValue({});
+        
         listener->panelChanged(EvLUT, Glib::path_get_basename(fn));
+    }
+}
+
+
+void ColorCorrection::lutParamsChanged()
+{
+    if (listener) {
+        listener->panelChanged(EvLUTParams, M("GENERAL_CHANGED"));
     }
 }

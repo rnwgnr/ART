@@ -46,7 +46,11 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
     CLUTApplication clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads);
 
     if (clut) {
-        clut(img);
+        if (clut.set_param_values(params->filmSimulation.lut_params)) {
+            clut(img);
+        } else if (plistener) {
+            plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_LUT_PARAMS"), params->filmSimulation.clutFilename));
+        }
     } else if (plistener) {
         plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), params->filmSimulation.clutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : params->filmSimulation.clutFilename));
     }

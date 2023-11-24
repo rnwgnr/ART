@@ -170,6 +170,7 @@ set(NONCLISOURCEFILES
     shortcutmanager.cc
     session.cc
     thumbimgcache.cc
+    clutparamspanel.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")

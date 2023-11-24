@@ -26,17 +26,10 @@
 #include "colorwheel.h"
 #include "colorprovider.h"
 #include "thresholdadjuster.h"
+#include "clutparamspanel.h"
 
-class ColorCorrection:
-    public ToolParamBlock,
-    public AdjusterListener,
-    public FoldableToolPanel,
-    public PParamsChangeListener,
-    public ThresholdAdjusterListener,
-    public ColorProvider
-{
+class ColorCorrection: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel, public PParamsChangeListener, public ThresholdAdjusterListener, public ColorProvider {
 public:
-
     ColorCorrection();
 
     void read(const rtengine::procparams::ProcParams *pp) override;
@@ -82,6 +75,7 @@ private:
     void wheelChanged();
     void hslWheelChanged(int c);
     void lutChanged();
+    void lutParamsChanged();
     
     rtengine::ProcEvent EvEnabled;
     rtengine::ProcEvent EvColorWheel;
@@ -97,6 +91,7 @@ private:
     rtengine::ProcEvent EvHueShift;
     rtengine::ProcEvent EvCompression;
     rtengine::ProcEvent EvLUT;
+    rtengine::ProcEvent EvLUTParams;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -123,7 +118,7 @@ private:
     Gtk::VBox *box_combined;
     Gtk::VBox *box_rgb;
     Gtk::VBox *box_hsl;
-    Gtk::HBox *box_lut;
+    Gtk::VBox *box_lut;
     
     ColorWheel *wheel;
     Adjuster *inSaturation;
@@ -133,6 +128,7 @@ private:
     Gtk::Frame *hueframe;
     Gtk::Frame *satframe;
     MyFileChooserButton *lut_filename;
+    CLUTParamsPanel *lut_params;
     
     Adjuster *slope;
     Adjuster *offset;

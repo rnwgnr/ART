@@ -537,6 +537,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - brush mask
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametric mask
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - mask post-processing
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - LUT parameters
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Color correction
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - auto chroma strength
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Fin. smooth. C
@@ -577,6 +578,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base color
 HISTORY_MSG_FILMNEGATIVE_VALUES;Film negative values
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Reference input
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Film Simulation - After tone curve
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Film Simulation - LUT parameters
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field embedded
 HISTORY_MSG_GRAIN_ENABLED;Film Grain
 HISTORY_MSG_GRAIN_ISO;Film Grain - ISO
@@ -782,6 +784,7 @@ IPTCPANEL_TITLEHINT;Enter a short verbal and human readable name for the image, 
 IPTCPANEL_TRANSREFERENCE;Job ID
 IPTCPANEL_TRANSREFERENCEHINT;Enter a number or identifier needed for workflow control or tracking.
 LABMASKS_AREA_MASK_EMPTY_WARNING;Warning: the current combination of area shapes results in an empty mask
+LUT_PARAMS_TITLE;LUT parameters
 MAIN_BUTTON_FULLSCREEN;Fullscreen
 MAIN_BUTTON_ICCPROFCREATOR;ICC Profile Creator
 MAIN_BUTTON_NAVNEXT_TOOLTIP;Navigate to the next image relative to image opened in the Editor.\nShortcut: <b>Shift-F4</b>\n\nTo navigate to the next image relative to the currently selected thumbnail in the File Browser or Filmstrip:\nShortcut: <b>F4</b>

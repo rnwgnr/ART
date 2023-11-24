@@ -2560,7 +2560,8 @@ bool FilmSimulationParams::operator ==(const FilmSimulationParams& other) const
         enabled == other.enabled
         && clutFilename == other.clutFilename
         && strength == other.strength
-        && after_tone_curve == other.after_tone_curve;
+        && after_tone_curve == other.after_tone_curve
+        && lut_params == other.lut_params;
 }
 
 bool FilmSimulationParams::operator !=(const FilmSimulationParams& other) const
@@ -2733,6 +2734,7 @@ ColorCorrectionParams::Region::Region():
     rgbluminance(false),
     hueshift(0),
     lutFilename(""),
+    lut_params{},
     mode(ColorCorrectionParams::Mode::JZAZBZ)
 {
 }
@@ -2756,6 +2758,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
         && rgbluminance == other.rgbluminance
         && hueshift == other.hueshift
         && lutFilename == other.lutFilename
+        && lut_params == other.lut_params
         && mode == other.mode;
 }
 
@@ -3835,6 +3838,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             if (filmSimulation.after_tone_curve) {
                 saveToKeyfile("Film Simulation", "AfterToneCurve", filmSimulation.after_tone_curve, keyFile);
             }
+            saveToKeyfile("Film Simulation", "ClutParams", filmSimulation.lut_params, keyFile);
         }
 
 // RGB curves        
@@ -3938,6 +3942,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("HueShift_") + n, l.hueshift, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("LUTFilename_") + n, filenameToUri(l.lutFilename, basedir), keyFile);
+                    putToKeyfile("ColorCorrection", Glib::ustring("LUTParams_") + n, l.lut_params, keyFile);
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
@@ -5077,6 +5082,14 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             if (!assignFromKeyfile(keyFile, "Film Simulation", "AfterToneCurve", filmSimulation.after_tone_curve)) {
                 filmSimulation.after_tone_curve = (ppVersion < 1040);
             }
+
+            std::vector<float> tmpparams;
+            if (assignFromKeyfile(keyFile, "Film Simulation", "ClutParams", tmpparams)) {
+                filmSimulation.lut_params.clear();
+                for (auto v : tmpparams) {
+                    filmSimulation.lut_params.push_back(v);
+                }
+            }
         }
 
         if (keyFile.has_group("RGB Curves") && RELEVANT_(rgbCurves)) {
@@ -5380,6 +5393,15 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 get("HueShift_", cur.hueshift);
                 if (assignFromKeyfile(keyFile, ccgroup, prefix + "LUTFilename_" + n, cur.lutFilename)) {
                     cur.lutFilename = filenameFromUri(cur.lutFilename, basedir);
+                    found = true;
+                    done = false;
+                }
+                std::vector<float> tmpparams;
+                if (assignFromKeyfile(keyFile, ccgroup, prefix + "LUTParams_" + n, tmpparams)) {
+                    cur.lut_params.clear();
+                    for (auto v : tmpparams) {
+                        cur.lut_params.push_back(v);
+                    }
                     found = true;
                     done = false;
                 }

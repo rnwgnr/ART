@@ -351,6 +351,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 if (plistener) {
                     plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), r.lutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : r.lutFilename));
                 }
+            } else if (!lut[i]->set_param_values(r.lut_params)) {
+                lut[i].reset(nullptr);
+                if (plistener) {
+                    plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_LUT_PARAMS"), r.lutFilename));
+                }
             }
         }
     }

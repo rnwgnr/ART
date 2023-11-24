@@ -28,6 +28,7 @@
 #include "noncopyable.h"
 #include "iccstore.h"
 #include "imagefloat.h"
+#include "clutparams.h"
 
 #ifdef ART_USE_OCIO
 #  include <OpenColorIO/OpenColorIO.h>
@@ -41,10 +42,10 @@ namespace OCIO = OCIO_NAMESPACE;
 
 namespace rtengine {
 
-class CLUT final: public NonCopyable {
+class HaldCLUT final: public NonCopyable {
 public:
-    CLUT();
-    ~CLUT();
+    HaldCLUT();
+    ~HaldCLUT();
 
     bool load(const Glib::ustring& filename);
 
@@ -62,13 +63,6 @@ public:
         float* out_rgbx
     ) const;
 
-    static void splitClutFilename(
-        const Glib::ustring& filename,
-        Glib::ustring& name,
-        Glib::ustring& extension,
-        Glib::ustring& profile_name
-    );
-
 private:
     AlignedBuffer<std::uint16_t> clut_image;
     unsigned int clut_level;
@@ -83,26 +77,37 @@ class CLUTStore final: public NonCopyable {
 public:
     static CLUTStore& getInstance();
 
-    std::shared_ptr<CLUT> getClut(const Glib::ustring& filename) const;
+    std::shared_ptr<HaldCLUT> getHaldClut(const Glib::ustring& filename) const;
 #ifdef ART_USE_OCIO
     OCIO::ConstProcessorRcPtr getOCIOLut(const Glib::ustring &filename) const;
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
-    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size) const;
+    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params) const;
 #endif // ART_USE_CTL
 
     void clearCache();
 
+    static void splitClutFilename(
+        const Glib::ustring& filename,
+        Glib::ustring& name,
+        Glib::ustring& extension,
+        Glib::ustring& profile_name
+    );
+
 private:
     CLUTStore();
 
-    mutable Cache<Glib::ustring, std::shared_ptr<CLUT>> cache;
+    mutable Cache<Glib::ustring, std::shared_ptr<HaldCLUT>> cache;
 #ifdef ART_USE_OCIO
     typedef std::pair<OCIO::ConstProcessorRcPtr, std::string> OCIOCacheEntry;
     mutable Cache<Glib::ustring, OCIOCacheEntry> ocio_cache_;
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
-    typedef std::pair<std::shared_ptr<Ctl::Interpreter>, std::string> CTLCacheEntry;
+    struct CTLCacheEntry {
+        std::shared_ptr<Ctl::Interpreter> intp;
+        std::string md5;
+        std::vector<CLUTParamDescriptor> params;
+    };
     mutable Cache<Glib::ustring, CTLCacheEntry> ctl_cache_;
 #endif // ART_USE_CTL
     mutable MyMutex mutex_;
@@ -111,7 +116,7 @@ private:
 
 class CLUTApplication {
 public:
-    CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads);
+    CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile="", float strength=1.f, int num_threads=1);
     void operator()(Imagefloat *img);
     void apply_single(int thread_id, float &r, float &g, float &b);
 #ifdef __SSE2__
@@ -119,16 +124,22 @@ public:
 #endif // __SSE2__
     operator bool() const { return ok_; }
 
+    std::vector<CLUTParamDescriptor> get_param_descriptors() const;
+    bool set_param_values(const std::vector<double> &values);
+
+    static std::vector<CLUTParamDescriptor> get_param_descriptors(const Glib::ustring &filename);
+
 private:
     void init(int num_threads);
     void apply_tile(float *r, float *g, float *b, int istart, int jstart, int tW, int tH);
+    ProgressListener *plistener_;
     Glib::ustring clut_filename_;
     Glib::ustring working_profile_;
     bool ok_;
     bool clut_and_working_profiles_are_same_;
     bool multiThread_;
     float strength_;
-    std::shared_ptr<CLUT> hald_clut_;
+    std::shared_ptr<HaldCLUT> hald_clut_;
     TMatrix wprof_;
     TMatrix wiprof_;
     TMatrix xyz2clut_;
@@ -149,8 +160,10 @@ private:
 #ifdef ART_USE_CTL
     bool CTL_init(int num_threads);
     void CTL_apply(Imagefloat *img);
+    bool CTL_set_params(const std::vector<double> &values);
     std::vector<Ctl::FunctionCallPtr> ctl_func_;
     int ctl_chunk_size_;
+    std::vector<CLUTParamDescriptor> ctl_params_;
 #endif // ART_USE_CTL
 
     void init_matrices();

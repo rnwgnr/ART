@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <unordered_map>
 
 #include "clutstore.h"
 
@@ -10,7 +11,13 @@
 #include "linalgebra.h"
 #include "settings.h"
 
+#include <giomm.h>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+
 #include "../rtgui/options.h"
+#include "cJSON.h"
 
 #ifdef _OPENMP
 # include <omp.h>
@@ -121,7 +128,7 @@ constexpr int TS = 112;
 
 } // namespace
 
-rtengine::CLUT::CLUT() :
+rtengine::HaldCLUT::HaldCLUT() :
     clut_level(0),
     flevel_minus_one(0.0f),
     flevel_minus_two(0.0f),
@@ -129,15 +136,15 @@ rtengine::CLUT::CLUT() :
 {
 }
 
-rtengine::CLUT::~CLUT()
+rtengine::HaldCLUT::~HaldCLUT()
 {
 }
 
-bool rtengine::CLUT::load(const Glib::ustring& filename)
+bool rtengine::HaldCLUT::load(const Glib::ustring& filename)
 {
     if (loadFile(filename, "", clut_image, clut_level)) {
         Glib::ustring name, ext;
-        splitClutFilename(filename, name, ext, clut_profile);
+        rtengine::CLUTStore::splitClutFilename(filename, name, ext, clut_profile);
 
         clut_filename = filename;
         clut_level *= clut_level;
@@ -149,22 +156,22 @@ bool rtengine::CLUT::load(const Glib::ustring& filename)
     return false;
 }
 
-rtengine::CLUT::operator bool() const
+rtengine::HaldCLUT::operator bool() const
 {
     return !clut_image.isEmpty();
 }
 
-Glib::ustring rtengine::CLUT::getFilename() const
+Glib::ustring rtengine::HaldCLUT::getFilename() const
 {
     return clut_filename;
 }
 
-Glib::ustring rtengine::CLUT::getProfile() const
+Glib::ustring rtengine::HaldCLUT::getProfile() const
 {
     return clut_profile;
 }
 
-void rtengine::CLUT::getRGB(
+void rtengine::HaldCLUT::getRGB(
     float strength,
     std::size_t line_size,
     const float* r,
@@ -276,7 +283,7 @@ void rtengine::CLUT::getRGB(
     }
 }
 
-void rtengine::CLUT::splitClutFilename(
+void rtengine::CLUTStore::splitClutFilename(
     const Glib::ustring& filename,
     Glib::ustring& name,
     Glib::ustring& extension,
@@ -325,10 +332,10 @@ rtengine::CLUTStore& rtengine::CLUTStore::getInstance()
     return instance;
 }
 
-std::shared_ptr<rtengine::CLUT> rtengine::CLUTStore::getClut(const Glib::ustring& filename) const
+std::shared_ptr<rtengine::HaldCLUT> rtengine::CLUTStore::getHaldClut(const Glib::ustring& filename) const
 {
     MyMutex::MyLock lock(mutex_);
-    std::shared_ptr<rtengine::CLUT> result;
+    std::shared_ptr<rtengine::HaldCLUT> result;
 
     const Glib::ustring full_filename =
         !Glib::path_is_absolute(filename)
@@ -336,7 +343,7 @@ std::shared_ptr<rtengine::CLUT> rtengine::CLUTStore::getClut(const Glib::ustring
             : filename;
 
     if (!cache.get(full_filename, result)) {
-        std::unique_ptr<rtengine::CLUT> clut(new rtengine::CLUT);
+        std::unique_ptr<rtengine::HaldCLUT> clut(new rtengine::HaldCLUT);
 
         if (clut->load(full_filename)) {
             result = std::move(clut);
@@ -488,7 +495,245 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
 
 #ifdef ART_USE_CTL
 
-std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size) const
+namespace {
+
+bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<CLUTParamDescriptor> &params, cJSON *root)
+{
+    if (!cJSON_IsArray(root)) {
+        return false;
+    }
+    
+    auto sz = cJSON_GetArraySize(root);
+    if (sz < 2) {
+        return false;
+    }
+    
+    auto n = cJSON_GetArrayItem(root, 0);
+    if (!cJSON_IsString(n)) {
+        return false;
+    }
+    std::string name = cJSON_GetStringValue(n);
+    auto it = name2pos.find(name);
+    if (it == name2pos.end()) {
+        return false;
+    }
+    auto &desc = params[it->second];
+
+    name2pos.erase(it);
+
+    n = cJSON_GetArrayItem(root, 1);
+    if (!cJSON_IsString(n)) {
+        return false;
+    }
+    desc.gui_name = cJSON_GetStringValue(n);
+    desc.gui_help = "";
+    desc.gui_step = 1;
+
+    const auto set_help =
+        [&](int i) -> bool
+        {
+            auto n = cJSON_GetArrayItem(root, i);
+            if (!cJSON_IsString(n)) {
+                return false;
+            }
+            desc.gui_help = cJSON_GetStringValue(n);
+            return true;
+        };
+
+    switch (desc.type) {
+    case CLUTParamType::PT_BOOL:
+        if (sz == 2) {
+            return true;
+        } else if (sz == 3 || sz == 4) {
+            n = cJSON_GetArrayItem(root, 2);
+            if (cJSON_IsBool(n)) {
+                desc.value_default = cJSON_IsTrue(n);
+            }
+            if (sz == 4) {
+                return set_help(3);
+            } else {
+                return true;
+            }
+        }
+        break;
+    case CLUTParamType::PT_FLOAT:
+        if (sz >= 4 && sz <= 7) {
+            n = cJSON_GetArrayItem(root, 2);
+            if (cJSON_IsNumber(n)) {
+                desc.value_min = n->valuedouble;
+            } else {
+                return false;
+            }
+            n = cJSON_GetArrayItem(root, 3);
+            if (cJSON_IsNumber(n)) {
+                desc.value_max = n->valuedouble;
+            } else {
+                return false;
+            }
+            if (sz >= 5) {
+                n = cJSON_GetArrayItem(root, 4);
+                if (cJSON_IsNumber(n)) {
+                    desc.value_default = n->valuedouble;
+                } else {
+                    return false;
+                }
+                if (sz >= 6) {
+                    n = cJSON_GetArrayItem(root, 5);
+                    if (cJSON_IsNumber(n)) {
+                        desc.gui_step = n->valuedouble;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    desc.gui_step = (desc.value_max - desc.value_min) / 100.0;
+                }
+                if (sz == 7) {
+                    return set_help(6);
+                }
+            }
+            return true;
+        }
+        break;
+    case CLUTParamType::PT_INT:
+        if (sz >= 3 && sz <= 6) {
+            n = cJSON_GetArrayItem(root, 2);
+            if (cJSON_IsArray(n)) {
+                for (int i = 0, k = cJSON_GetArraySize(n); i < k; ++i) {
+                    auto v = cJSON_GetArrayItem(n, i);
+                    if (!cJSON_IsString(v)) {
+                        return false;
+                    }
+                    desc.choices.push_back(cJSON_GetStringValue(v));
+                }
+                desc.type = CLUTParamType::PT_CHOICE;
+                if (sz == 4) {
+                    return set_help(3);
+                } else {
+                    return (sz == 3);
+                }
+            } else if (sz >= 4) {
+                if (cJSON_IsNumber(n)) {
+                    desc.value_min = n->valuedouble;
+                } else {
+                    return false;
+                }
+                n = cJSON_GetArrayItem(root, 3);
+                if (cJSON_IsNumber(n)) {
+                    desc.value_max = n->valuedouble;
+                } else {
+                    return false;
+                }
+                if (sz >= 5) {
+                    n = cJSON_GetArrayItem(root, 4);
+                    if (cJSON_IsNumber(n)) {
+                        desc.value_default = n->valuedouble;
+                    } else {
+                        return false;
+                    }
+                    if (sz == 6) {
+                        return set_help(5);
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+        break;
+    default:
+        return false;
+    }
+
+    return false;
+}
+
+
+bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out)
+{
+    std::unordered_map<std::string, int> name2pos;
+    
+    for (size_t i = 3, n = func->numInputArgs(); i < n; ++i) {
+        auto a = func->inputArg(i);
+        if (a->isVarying()) {
+            return false;
+        }
+        CLUTParamType tp = CLUTParamType::PT_INT;
+        switch (a->type()->cDataType()) {
+        case Ctl::BoolTypeEnum: tp = CLUTParamType::PT_BOOL; break;
+        case Ctl::IntTypeEnum: tp = CLUTParamType::PT_INT; break;
+        case Ctl::FloatTypeEnum: tp = CLUTParamType::PT_FLOAT; break;
+        default: return false;
+        }
+
+        std::string name = a->name();
+        name2pos[name] = out.size();
+        
+        out.emplace_back();
+        auto &desc = out.back();
+        desc.name = name;
+        desc.type = tp;
+
+        desc.value_min = 0;
+        desc.value_max = 1;
+
+        if (a->hasDefaultValue()) {
+            switch (tp) {
+            case CLUTParamType::PT_BOOL:
+                desc.value_default = *reinterpret_cast<bool *>(a->data());
+                break;
+            case CLUTParamType::PT_FLOAT:
+                desc.value_default = *reinterpret_cast<float *>(a->data());
+                break;
+            case CLUTParamType::PT_INT:
+                desc.value_default = *reinterpret_cast<int *>(a->data());
+            default:
+                break;
+            }
+        }
+    }
+
+    if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+        auto fn = Glib::filename_from_utf8(filename);
+        std::ifstream src(fn.c_str());
+        std::string line;
+        while (src && std::getline(src, line)) {
+            size_t s = 0;
+            while (s < line.size() && std::isspace(line[s])) {
+                ++s;
+            }
+            if (s+1 < line.size() && line[s] == '/' && line[s+1] == '/') {
+                s += 2;
+            }
+            while (s < line.size() && std::isspace(line[s])) {
+                ++s;
+            }
+            if (line.find("@ART-param:", s) == s) {
+                line = line.substr(11+s);
+                cJSON *root = cJSON_Parse(line.c_str());
+                if (!root) {
+                    return false;
+                }
+                bool ok = fill_from_json(name2pos, out, root);
+                cJSON_Delete(root);
+                if (!ok) {
+                    return false;
+                }
+            }
+        }
+    } else {
+        return false;
+    }
+
+    if (!name2pos.empty() && !out.empty()) {
+        return false;
+    }
+    
+    return true;
+}
+
+} // namespace
+
+std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params) const
 {
     MyMutex::MyLock lock(mutex_);
     
@@ -518,18 +763,12 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
 
     try {
         bool found = ctl_cache_.get(full_filename, result);
-        if (!found || result.second != md5) {
+        if (!found || result.md5 != md5) {
             intp = std::make_shared<Ctl::SimdInterpreter>();
             intp->loadFile(full_filename);
-            result = std::make_pair(intp, md5);
-            ctl_cache_.set(full_filename, result);
-        } else {
-            intp = result.first;
-        }
 
-        if (intp) {
             auto f = intp->newFunctionCall("ART_main");
-            if (f->numInputArgs() != 3) {
+            if (f->numInputArgs() < 3) {
                 return err("wrong number of input arguments to ART_main");
             } else {
                 for (int i = 0; i < 3; ++i) {
@@ -549,8 +788,22 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
                     }
                 }
             }
-            retval.push_back(f);
-            for (int i = 1; i < num_threads; ++i) {
+
+            params.clear();
+            if (!get_CTL_params(full_filename, intp, f, params)) {
+                return err("error in parsing CTL parameters");
+            }
+
+            result.intp = intp;
+            result.md5 = md5;
+            result.params = params;
+            ctl_cache_.set(full_filename, result);
+        } else {
+            intp = result.intp;
+            params = result.params;
+        }
+        if (intp) {
+            for (int i = 0; i < num_threads; ++i) {
                 retval.push_back(intp->newFunctionCall("ART_main"));
             }
             chunk_size = intp->maxSamples();
@@ -608,7 +861,7 @@ CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib:
 
 void CLUTApplication::init(int num_threads)
 {
-    hald_clut_ = CLUTStore::getInstance().getClut(clut_filename_);
+    hald_clut_ = CLUTStore::getInstance().getHaldClut(clut_filename_);
     if (!hald_clut_) {
 #ifdef ART_USE_OCIO
         if (!OCIO_init())
@@ -676,7 +929,7 @@ bool CLUTApplication::OCIO_init()
 bool CLUTApplication::CTL_init(int num_threads)
 {
     try {
-        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_);
+        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_);
         if (func.empty()) {
             ok_ = false;
             return false;
@@ -691,7 +944,82 @@ bool CLUTApplication::CTL_init(int num_threads)
         return false;
     }
 }
+
+
+bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
+{
+    try {
+        if (values.size() != ctl_params_.size() && !values.empty()) {
+            return false;
+        }
+        for (size_t i = 0; i < ctl_params_.size(); ++i) {
+            auto &desc = ctl_params_[i];
+            auto v = i < values.size() ? values[i] : desc.value_default;
+            switch (desc.type) {
+            case CLUTParamType::PT_BOOL:
+                for (auto f : ctl_func_) {
+                    *reinterpret_cast<bool *>(f->inputArg(i+3)->data()) = v;
+                }
+                break;
+            case CLUTParamType::PT_FLOAT:
+                for (auto f : ctl_func_) {
+                    *reinterpret_cast<float *>(f->inputArg(i+3)->data()) = v;
+                }
+                break;
+            case CLUTParamType::PT_INT:
+            case CLUTParamType::PT_CHOICE:
+            default:
+                for (auto f : ctl_func_) {
+                    *reinterpret_cast<int *>(f->inputArg(i+3)->data()) = v;
+                }
+                break;
+            }
+        }
+    } catch (...) {
+        ok_ = false;
+        return false;
+    }
+
+    return true;
+}
+
 #endif // ART_USE_CTL
+
+
+std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors() const
+{
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        return ctl_params_;
+    }
+#endif // ART_USE_CTL
+    return {};
+}
+
+
+bool CLUTApplication::set_param_values(const std::vector<double> &values)
+{
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        return CTL_set_params(values);
+    }
+#endif // ART_USE_CTL
+    return values.empty();
+}
+
+
+std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Glib::ustring &filename)
+{
+#ifdef ART_USE_CTL
+    try {
+        std::vector<CLUTParamDescriptor> params;
+        int n;
+        auto func = CLUTStore::getInstance().getCTLLut(filename, 1, n, params);
+        return params;
+    } catch (...) {}
+#endif // ART_USE_CTL
+    return {};
+}
 
 
 void CLUTApplication::init_matrices()

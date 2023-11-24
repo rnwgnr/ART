@@ -27,6 +27,8 @@
 #include "toolpanel.h"
 #include "guiutils.h"
 #include "adjuster.h"
+#include "clutparamspanel.h"
+
 
 class ClutComboBox: public MyComboBox {
 public:
@@ -82,6 +84,7 @@ public:
 
 private:
     void onClutSelected();
+    void onClutParamsChanged();
     void enabledChanged() override;
     void updateDisable(bool value);
     void afterToneCurveToggled();
@@ -94,9 +97,12 @@ private:
     Gtk::CheckButton *after_tone_curve_;
     Gtk::HBox *after_tone_curve_box_;
 
+    CLUTParamsPanel *lut_params_;
+    
     rtengine::procparams::FilmSimulationParams initial_params;
 
     rtengine::ProcEvent EvAfterToneCurve;
+    rtengine::ProcEvent EvClutParams;
 };
 
 #endif
