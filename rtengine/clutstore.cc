@@ -449,7 +449,7 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
         !Glib::path_is_absolute(filename)
             ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
             : filename;
-    const auto md5 = getMD5(full_filename);
+    const auto md5 = getMD5(full_filename, true);
 
     bool found = ocio_cache_.get(full_filename, result);
     if (!found || result.second != md5) {
@@ -503,7 +503,7 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
     if (!Glib::file_test(full_filename, Glib::FILE_TEST_IS_REGULAR)) {
         return retval;
     }
-    const auto md5 = getMD5(full_filename);
+    const auto md5 = getMD5(full_filename, true);
 
     const auto err =
         [&](const char *msg) -> std::vector<Ctl::FunctionCallPtr>

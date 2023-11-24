@@ -54,7 +54,7 @@ bool hasPngExtension(const Glib::ustring& filename);
 
 void swab(const void* from, void* to, ssize_t n);
 
-std::string getMD5(const Glib::ustring &fname);
+std::string getMD5(const Glib::ustring &fname, bool extended=false);
 
 } // namespace rtengine
 

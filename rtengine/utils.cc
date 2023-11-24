@@ -271,7 +271,7 @@ void swab(const void* from, void* to, ssize_t n)
 }
 
 
-std::string getMD5(const Glib::ustring& fname)
+std::string getMD5(const Glib::ustring& fname, bool extended)
 {
 
 #ifdef WIN32
@@ -292,10 +292,16 @@ std::string getMD5(const Glib::ustring& fname)
 
         try
         {
-            const auto info = file->query_info("standard::*");
+            const auto info = file->query_info("standard::*," G_FILE_ATTRIBUTE_TIME_MODIFIED);
             if (info) {
                 // We only use name and size to identify a file.
-                const auto identifier = Glib::ustring::compose("%1%2", fname, info->get_size());
+                Glib::ustring identifier;
+                if (!extended) {
+                    identifier = Glib::ustring::compose("%1%2", fname, info->get_size());
+                } else {
+                    auto tv = info->modification_time();
+                    identifier = Glib::ustring::compose("%1%2-%3%4", fname, tv.tv_sec, tv.tv_usec);
+                }
                 return Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, identifier);
             }
 
