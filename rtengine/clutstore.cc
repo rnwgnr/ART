@@ -675,8 +675,9 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  *   If the 3rd parameter is an array of strings, it is interpreted as a list
  *   of options in a choice menu, with values corresponding to their index in
  *   the array (i.e. the 1st option will give a value of 0, the 2nd a value of
- *   1, etc.). In this case, the array can contain at most one other element
- *   which is the optional tooltip string for the GUI.
+ *   1, etc.). In this case, the array can contain at most 2 other elements,
+ *   which are respectively the default value and the optional tooltip string
+ *   for the GUI.
  *   If the 3rd parameter is not an array of strings, then the array size must
  *   be at least 4, with the 3rd and 4th elements corresponding to the minimum
  *   and maximum values for the GUI slider. The optional 5th element is the
@@ -691,7 +692,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  * // @ART-param: ["param_float", "A float slider", -1.0, 1.0, 0.5, 0.1]
  * // @ART-param: ["param_int", "An int slider", -10, 10]
  * // @ART-param: ["param_bool", "A checkbox", true]
- * // @ART-param: ["param_choice", "A combo box", ["Option A", "Option B"], "Select between option A (value 0) and option B (value 1)"]
+ * // @ART-param: ["param_choice", "A combo box", ["Option A", "Option B"], 1, "Select between option A (value 0) and option B (value 1)"]
  * 
  * void ART_main(varying float r, varying float g, varying float b,
  *               output varying float or, output varying float og, output varying float ob,
