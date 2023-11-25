@@ -59,6 +59,7 @@ ERROR_MSG_MAXERRORS;... (%1 previous error(s) not shown)
 ERROR_MSG_METADATA_VALUE;Metadata: error setting %1 to %2
 ERROR_MSG_INVALID_PROFILE;Invalid profile: %1
 ERROR_MSG_INVALID_PSF;Invalid PSF file: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Invalid LUT parameters for: %1
 EXIFFILTER_APERTURE;Aperture
 EXIFFILTER_CAMERA;Camera
 EXIFFILTER_DATE;Date

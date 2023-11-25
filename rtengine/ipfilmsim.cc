@@ -49,7 +49,7 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
         if (clut.set_param_values(params->filmSimulation.lut_params)) {
             clut(img);
         } else if (plistener) {
-            plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_LUT_PARAMS"), params->filmSimulation.clutFilename));
+            plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_INVALID_LUT_PARAMS"), params->filmSimulation.clutFilename));
         }
     } else if (plistener) {
         plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), params->filmSimulation.clutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : params->filmSimulation.clutFilename));

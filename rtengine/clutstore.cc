@@ -647,22 +647,94 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
     return false;
 }
 
-
+/**
+ * ART-compatible CTL scripts can contain parameters as additional uniform
+ * input parameters to ART_main. Currently, only parameters of type "bool",
+ * "int" or "float" are supported. Each such parameter must come with an
+ * associated ART parameter definition in the CTL script. ART parameter
+ * definitions are special comment lines of the following form:
+ *
+ *  // @ART-param: <param-def>
+ *
+ * where <param-def> is an array in JSON format, whose content depends on the
+ * parameter type. The array must be at least of size 2; the first element is
+ * a string containing the name of the parameter (which must mach the name
+ * used in ART_main), and the second element is its GUI label. The rest of the
+ * array has the following structure:
+ *
+ * - for "bool" parameters, the 3rd optional element specifies the default
+ *   value, and the 4th optional element is a tooltip string for the GUI;
+ *
+ * - for "float" parameters, the array size must be at least 4 and at most 7.
+ *   The 3rd and 4th elements are the minimum and maximum values for the
+ *   GUI slider. The optional 5th element is the default value, the optional
+ *   6th element the precision to use in the GUI (e.g. 0.01 will use 2 decimal
+ *   digits in the GUI), and the optional last element is a tooltip string;
+ *
+ * - for "int" parameters, the array size must be at least 3 and at most 6.
+ *   If the 3rd parameter is an array of strings, it is interpreted as a list
+ *   of options in a choice menu, with values corresponding to their index in
+ *   the array (i.e. the 1st option will give a value of 0, the 2nd a value of
+ *   1, etc.). In this case, the array can contain at most one other element
+ *   which is the optional tooltip string for the GUI.
+ *   If the 3rd parameter is not an array of strings, then the array size must
+ *   be at least 4, with the 3rd and 4th elements corresponding to the minimum
+ *   and maximum values for the GUI slider. The optional 5th element is the
+ *   default value, and the optional last element a tooltip string.
+ *
+ * If default values are not given in the ART parameter definition, they are
+ * taken from the definition of the ART_main function. If no default is given,
+ * zero is used.
+ *
+ * Example:
+ *
+ * // @ART-param: ["param_float", "A float slider", -1.0, 1.0, 0.5, 0.1]
+ * // @ART-param: ["param_int", "An int slider", -10, 10]
+ * // @ART-param: ["param_bool", "A checkbox", true]
+ * // @ART-param: ["param_choice", "A combo box", ["Option A", "Option B"], "Select between option A (value 0) and option B (value 1)"]
+ * 
+ * void ART_main(varying float r, varying float g, varying float b,
+ *               output varying float or, output varying float og, output varying float ob,
+ *               float param_float,
+ *               int param_int,
+ *               bool param_bool,
+ *               int param_choice)
+ * {
+ *    // ...
+ * }
+ */ 
 bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out)
 {
+    out.clear();
     std::unordered_map<std::string, int> name2pos;
+
+    const auto err =
+        [&](const std::string &msg) -> bool
+        {
+            if (settings->verbose) {
+                std::cout << "Error in CTL script from " << filename << ": "
+                          << msg << std::endl;
+            }
+            return false;
+        };
     
     for (size_t i = 3, n = func->numInputArgs(); i < n; ++i) {
         auto a = func->inputArg(i);
         if (a->isVarying()) {
-            return false;
+            return err("varying parameter " + a->name());
         }
         CLUTParamType tp = CLUTParamType::PT_INT;
         switch (a->type()->cDataType()) {
-        case Ctl::BoolTypeEnum: tp = CLUTParamType::PT_BOOL; break;
-        case Ctl::IntTypeEnum: tp = CLUTParamType::PT_INT; break;
-        case Ctl::FloatTypeEnum: tp = CLUTParamType::PT_FLOAT; break;
-        default: return false;
+        case Ctl::BoolTypeEnum:
+            tp = CLUTParamType::PT_BOOL;
+            break;
+        case Ctl::IntTypeEnum:
+            tp = a->type().cast<Ctl::BoolType>() ? CLUTParamType::PT_BOOL : CLUTParamType::PT_INT;
+            break;
+        case Ctl::FloatTypeEnum:
+            tp = CLUTParamType::PT_FLOAT;
+            break;
+        default: return err("parameter " + a->name() + " is of unsupported type");
         }
 
         std::string name = a->name();
@@ -675,6 +747,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
 
         desc.value_min = 0;
         desc.value_max = 1;
+        desc.value_default = 0;
 
         if (a->hasDefaultValue()) {
             switch (tp) {
@@ -711,21 +784,27 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 line = line.substr(11+s);
                 cJSON *root = cJSON_Parse(line.c_str());
                 if (!root) {
-                    return false;
+                    return err("bad parameter definition: " + line);
                 }
                 bool ok = fill_from_json(name2pos, out, root);
                 cJSON_Delete(root);
                 if (!ok) {
-                    return false;
+                    return err("bad parameter definition: " + line);
                 }
             }
         }
     } else {
-        return false;
+        return err("file reading error");
     }
 
     if (!name2pos.empty() && !out.empty()) {
-        return false;
+        std::string msg = "missing parameter definitions: ";
+        const char *sep = "";
+        for (auto &p : name2pos) {
+            msg += sep + p.first;
+            sep = ", ";
+        }
+        return err(msg);
     }
     
     return true;
@@ -754,7 +833,7 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
         [&](const char *msg) -> std::vector<Ctl::FunctionCallPtr>
         {
             if (settings->verbose) {
-                std::cout << "error in CTL script from " << full_filename << ": "
+                std::cout << "Error in CTL script from " << full_filename << ": "
                           << msg << std::endl;
             }
             retval.clear();
@@ -789,8 +868,8 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
                 }
             }
 
-            params.clear();
             if (!get_CTL_params(full_filename, intp, f, params)) {
+                params.clear();
                 return err("error in parsing CTL parameters");
             }
 
@@ -950,6 +1029,9 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
 {
     try {
         if (values.size() != ctl_params_.size() && !values.empty()) {
+            if (settings->verbose) {
+                std::cout << "Error in setting parameters for LUT " << clut_filename_ << ": " << (values.size() < ctl_params_.size() ? "not enough values" : "too many values") << std::endl;
+            }
             return false;
         }
         for (size_t i = 0; i < ctl_params_.size(); ++i) {
@@ -975,8 +1057,12 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
                 break;
             }
         }
+    } catch (std::exception &exc) {
+        if (settings->verbose) {
+            std::cout << "Error in setting parameters for LUT " << clut_filename_ << ": " << exc.what() << std::endl;
+        }
+        return false;
     } catch (...) {
-        ok_ = false;
         return false;
     }
 

@@ -354,7 +354,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             } else if (!lut[i]->set_param_values(r.lut_params)) {
                 lut[i].reset(nullptr);
                 if (plistener) {
-                    plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_LUT_PARAMS"), r.lutFilename));
+                    plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_INVALID_LUT_PARAMS"), r.lutFilename));
                 }
             }
         }
