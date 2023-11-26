@@ -927,7 +927,8 @@ rtengine::CLUTStore::CLUTStore() :
 // CLUTApplication
 //-----------------------------------------------------------------------------
 
-CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads):
+CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads, Quality q):
+    quality_(q),
     clut_filename_(clut_filename),
     working_profile_(working_profile),
     ok_(false),
@@ -1009,6 +1010,9 @@ bool CLUTApplication::OCIO_init()
 bool CLUTApplication::CTL_init(int num_threads)
 {
     try {
+        ctl_lut_.clear();
+        ctl_lut_dim_ = 0;
+        
         auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_);
         if (func.empty()) {
             ok_ = false;
@@ -1065,6 +1069,20 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
         return false;
     } catch (...) {
         return false;
+    }
+
+    switch (quality_) {
+    case Quality::LOW:
+        CTL_init_lut(32);
+        break;
+    case Quality::MEDIUM:
+        CTL_init_lut(96);
+        break;
+    case Quality::HIGH:
+        CTL_init_lut(144);
+        break;
+    default:
+        break;
     }
 
     return true;
@@ -1363,14 +1381,30 @@ void CLUTApplication::CTL_apply(Imagefloat *img)
             rgb[2][x] = v[2];
         }
 
-        for (int x = 0; x < W; x += ctl_chunk_size_) {
-            const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
-            for (int i = 0; i < 3; ++i) {
-                memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
-            }
-            func->callFunction(n);
-            for (int i = 0; i < 3; ++i) {
-                memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+        if (!ctl_lut_.empty()) {
+            const int d = ctl_lut_dim_;
+            
+            for (int x = 0; x < W; ++x) {
+                Imath::V3f p(CTL_shaper(rgb[0][x], false),
+                             CTL_shaper(rgb[1][x], false),
+                             CTL_shaper(rgb[2][x], false));
+                p = Ctl::lookup3D(&ctl_lut_[0], Imath::V3i(d, d, d),
+                                  Imath::V3f(0, 0, 0), Imath::V3f(1, 1, 1),
+                                  p);
+                rgb[0][x] = p.x;
+                rgb[1][x] = p.y;
+                rgb[2][x] = p.z;
+            }            
+        } else {
+            for (int x = 0; x < W; x += ctl_chunk_size_) {
+                const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
+                for (int i = 0; i < 3; ++i) {
+                    memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
+                }
+                func->callFunction(n);
+                for (int i = 0; i < 3; ++i) {
+                    memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+                }
             }
         }
         
@@ -1391,6 +1425,93 @@ void CLUTApplication::CTL_apply(Imagefloat *img)
             }
         }
     }
+}
+
+
+void CLUTApplication::CTL_init_lut(int dim)
+{
+    ctl_lut_.clear();
+    ctl_lut_dim_ = 0;
+    
+    std::vector<float> rgb[3];
+
+    int sz = SQR(dim) * dim;
+    for (int i = 0; i < 3; ++i) {
+        rgb[i].reserve(sz);
+    }
+    
+    for (int i = 0; i < dim; ++i) {
+        float r = float(i)/(dim-1);
+        for (int j = 0; j < dim; ++j) {
+            float g = float(j)/(dim-1);
+            for (int k = 0; k < dim; ++k) {
+                float b = float(k)/(dim-1);
+                rgb[0].push_back(CTL_shaper(r, true));
+                rgb[1].push_back(CTL_shaper(g, true));
+                rgb[2].push_back(CTL_shaper(b, true));
+            }
+        }
+    }
+
+    auto func = ctl_func_[0];
+
+    for (int x = 0; x < sz; x += ctl_chunk_size_) {
+        const auto n = (x + ctl_chunk_size_ < sz ? ctl_chunk_size_ : sz - x);
+        for (int i = 0; i < 3; ++i) {
+            memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
+        }
+        func->callFunction(n);
+        for (int i = 0; i < 3; ++i) {
+            memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+        }
+    }
+
+    ctl_lut_.reserve(sz);
+    for (int i = 0; i < sz; ++i) {
+        ctl_lut_.emplace_back(rgb[0][i], rgb[1][i], rgb[2][i]);
+    }
+    ctl_lut_dim_ = dim;
+}
+
+
+float CLUTApplication::CTL_shaper(float a, bool inv)
+{
+#if 1
+    constexpr float m1 = 2610.0 / 16384.0;
+    constexpr float m2 = 2523.0 / 32.0;
+    constexpr float c1 = 107.0 / 128.0;
+    constexpr float c2 = 2413.0 / 128.0;
+    constexpr float c3 = 2392.0 / 128.0;
+    constexpr float scale = 100.0;
+
+    if (a <= 0.f) {
+        return 0.f;
+    }
+    
+    if (!inv) {
+        a /= scale;
+        float aa = pow_F(a, m1);
+        return pow_F((c1 + c2 * aa)/(1.f + c3 * aa), m2);
+    } else {
+        float p = pow_F(a, 1.f/m2);
+        float aa = std::max(p - c1, 0.f) / (c2 - c3 * p);
+        return pow_F(aa, 1.f/m1) * scale;
+    }
+#else
+    constexpr float lb = -16;
+    constexpr float ub = 12;
+    constexpr float eps = 1.175494e-38;
+    constexpr float scale = 0.18;
+    static const float log2 = xlogf(2.f);
+
+    if (!inv) {
+        float y = xlogf(std::max(a / scale, eps)) / log2;
+        return (y - lb) / (ub - lb);
+    } else {
+        float y = lb + a * (ub - lb);
+        return pow_F(2.f, y) * scale;
+    }
+#endif // if 1
 }
 
 #endif // ART_USE_CTL

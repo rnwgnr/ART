@@ -46,19 +46,32 @@ inline void CLUTApplication::apply_single(int thread_id, float &r, float &g, flo
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     if (!ctl_func_.empty()) {
-        auto func = ctl_func_[thread_id];
-        
         Vec3<float> v(r / 65535.f, g / 65535.f, b / 65535.f);
         v = dot_product(conv_, v);
 
-        for (int i = 0; i < 3; ++i) {
-            *reinterpret_cast<float *>(func->inputArg(i)->data()) = v[i];
-        }
+        if (!ctl_lut_.empty()) {
+            const int d = ctl_lut_dim_;
+            Imath::V3f p(CTL_shaper(v[0], false),
+                         CTL_shaper(v[1], false),
+                         CTL_shaper(v[2], false));
+            p = Ctl::lookup3D(&ctl_lut_[0], Imath::V3i(d, d, d),
+                              Imath::V3f(0, 0, 0), Imath::V3f(1, 1, 1),
+                              p);
+            v[0] = p.x;
+            v[1] = p.y;
+            v[2] = p.z;
+        } else {
+            auto func = ctl_func_[thread_id];
+        
+            for (int i = 0; i < 3; ++i) {
+                *reinterpret_cast<float *>(func->inputArg(i)->data()) = v[i];
+            }
 
-        func->callFunction(1);
+            func->callFunction(1);
 
-        for (int i = 0; i < 3; ++i) {
-            v[i] = *reinterpret_cast<float *>(func->outputArg(i)->data());
+            for (int i = 0; i < 3; ++i) {
+                v[i] = *reinterpret_cast<float *>(func->outputArg(i)->data());
+            }
         }
 
         v = dot_product(iconv_, v);
@@ -147,29 +160,55 @@ inline void CLUTApplication::apply_vec(int thread_id, vfloat &r, vfloat &g, vflo
         
         Vec3<float> v;
 
-        for (int k = 0; k < 4; ++k) {
-            v[0] = r[k] / 65535.f;
-            v[1] = g[k] / 65535.f;
-            v[2] = b[k] / 65535.f;
+        if (!ctl_lut_.empty()) {
+            const int d = ctl_lut_dim_;
+            for (int k = 0; k < 4; ++k) {
+                v[0] = r[k] / 65535.f;
+                v[1] = g[k] / 65535.f;
+                v[2] = b[k] / 65535.f;
             
-            v = dot_product(conv_, v);
+                v = dot_product(conv_, v);
 
-            for (int i = 0; i < 3; ++i) {
-                reinterpret_cast<float *>(func->inputArg(i)->data())[k] = v[i];
+                Imath::V3f p(CTL_shaper(v[0], false),
+                             CTL_shaper(v[1], false),
+                             CTL_shaper(v[2], false));
+                p = Ctl::lookup3D(&ctl_lut_[0], Imath::V3i(d, d, d),
+                                  Imath::V3f(0, 0, 0), Imath::V3f(1, 1, 1),
+                                  p);
+                v[0] = p.x;
+                v[1] = p.y;
+                v[2] = p.z;
+                
+                v = dot_product(iconv_, v);
+                r[k] = v[0];
+                g[k] = v[1];
+                b[k] = v[2];
             }
-        }
+        } else {
+            for (int k = 0; k < 4; ++k) {
+                v[0] = r[k] / 65535.f;
+                v[1] = g[k] / 65535.f;
+                v[2] = b[k] / 65535.f;
+            
+                v = dot_product(conv_, v);
 
-        func->callFunction(4);
-
-        for (int k = 0; k < 4; ++k) {
-            for (int i = 0; i < 3; ++i) {
-                v[i] = reinterpret_cast<float *>(func->outputArg(i)->data())[k];
+                for (int i = 0; i < 3; ++i) {
+                    reinterpret_cast<float *>(func->inputArg(i)->data())[k] = v[i];
+                }
             }
 
-            v = dot_product(iconv_, v);
-            r[k] = v[0];
-            g[k] = v[1];
-            b[k] = v[2];
+            func->callFunction(4);
+
+            for (int k = 0; k < 4; ++k) {
+                for (int i = 0; i < 3; ++i) {
+                    v[i] = reinterpret_cast<float *>(func->outputArg(i)->data())[k];
+                }
+
+                v = dot_product(iconv_, v);
+                r[k] = v[0];
+                g[k] = v[1];
+                b[k] = v[2];
+            }
         }
     } else
 #endif // ART_USE_CTL

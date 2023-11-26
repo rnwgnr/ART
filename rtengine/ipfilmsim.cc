@@ -43,7 +43,22 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
 #else
     int num_threads = 1;
 #endif
-    CLUTApplication clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads);
+    CLUTApplication::Quality q = CLUTApplication::Quality::HIGH;
+    switch (cur_pipeline) {
+    case Pipeline::THUMBNAIL:
+        q = CLUTApplication::Quality::LOW;
+        break;
+    case Pipeline::NAVIGATOR:
+        q = CLUTApplication::Quality::MEDIUM;
+        break;
+    case Pipeline::PREVIEW:
+        q = (scale > 1) ? CLUTApplication::Quality::MEDIUM : CLUTApplication::Quality::HIGH;
+        break;
+    case Pipeline::OUTPUT:
+        q = CLUTApplication::Quality::HIGHEST;
+        break;
+    }
+    CLUTApplication clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads, q);
 
     if (clut) {
         if (clut.set_param_values(params->filmSimulation.lut_params)) {

@@ -345,7 +345,22 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 #else
             int num_threads = 1;
 #endif
-            lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads));
+            CLUTApplication::Quality q = CLUTApplication::Quality::HIGH;
+            switch (cur_pipeline) {
+            case Pipeline::THUMBNAIL:
+                q = CLUTApplication::Quality::LOW;
+                break;
+            case Pipeline::NAVIGATOR:
+                q = CLUTApplication::Quality::MEDIUM;
+                break;
+            case Pipeline::PREVIEW:
+                q = (scale > 1) ? CLUTApplication::Quality::MEDIUM : CLUTApplication::Quality::HIGH;
+                break;
+            case Pipeline::OUTPUT:
+                q = CLUTApplication::Quality::HIGH;
+                break;
+            }
+            lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads, q));
             if (!(*lut[i])) {
                 lut[i].reset(nullptr);
                 if (plistener) {

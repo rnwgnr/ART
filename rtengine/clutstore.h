@@ -37,6 +37,7 @@ namespace OCIO = OCIO_NAMESPACE;
 
 #ifdef ART_USE_CTL
 #  include <CtlSimdInterpreter.h>
+#  include <CtlLookupTable.h>
 #endif
 
 
@@ -116,7 +117,13 @@ private:
 
 class CLUTApplication {
 public:
-    CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile="", float strength=1.f, int num_threads=1);
+    enum class Quality {
+        LOW,
+        MEDIUM,
+        HIGH,
+        HIGHEST
+    };
+    CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile="", float strength=1.f, int num_threads=1, Quality q=Quality::HIGH);
     void operator()(Imagefloat *img);
     void apply_single(int thread_id, float &r, float &g, float &b);
 #ifdef __SSE2__
@@ -132,7 +139,7 @@ public:
 private:
     void init(int num_threads);
     void apply_tile(float *r, float *g, float *b, int istart, int jstart, int tW, int tH);
-    ProgressListener *plistener_;
+    Quality quality_;
     Glib::ustring clut_filename_;
     Glib::ustring working_profile_;
     bool ok_;
@@ -161,9 +168,13 @@ private:
     bool CTL_init(int num_threads);
     void CTL_apply(Imagefloat *img);
     bool CTL_set_params(const std::vector<double> &values);
+    void CTL_init_lut(int dim);
+    static float CTL_shaper(float a, bool inv);
     std::vector<Ctl::FunctionCallPtr> ctl_func_;
     int ctl_chunk_size_;
     std::vector<CLUTParamDescriptor> ctl_params_;
+    std::vector<Imath::V3f> ctl_lut_;
+    int ctl_lut_dim_;
 #endif // ART_USE_CTL
 
     void init_matrices();
