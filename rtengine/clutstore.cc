@@ -1516,4 +1516,66 @@ float CLUTApplication::CTL_shaper(float a, bool inv)
 
 #endif // ART_USE_CTL
 
+
+void CLUTApplication::apply(int thread_id, int W, float *r, float *g, float *b)
+{
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        auto func = ctl_func_[thread_id];
+        Vec3<float> v;
+        std::vector<float> rgb[3];
+        for (int i = 0; i < 3; ++i) {
+            rgb[i].resize(W);
+        }
+        
+        for (int x = 0; x < W; ++x) {
+            v[0] = r[x] / 65535.f;
+            v[1] = g[x] / 65535.f;
+            v[2] = b[x] / 65535.f;
+            v = dot_product(conv_, v);
+            rgb[0][x] = v[0];
+            rgb[1][x] = v[1];
+            rgb[2][x] = v[2];
+        }
+
+        for (int x = 0; x < W; x += ctl_chunk_size_) {
+            const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
+            for (int i = 0; i < 3; ++i) {
+                memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
+            }
+            func->callFunction(n);
+            for (int i = 0; i < 3; ++i) {
+                memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+            }
+        }
+        
+        const bool blend = strength_ < 1.f;
+        
+        for (int x = 0; x < W; ++x) {
+            v[0] = rgb[0][x];
+            v[1] = rgb[1][x];
+            v[2] = rgb[2][x];
+            v = dot_product(iconv_, v);
+            // no need to renormalize to 65535 as this is already done in iconv_
+            if (blend) {
+                r[x] = intp(strength_, v[0], r[x]);
+                g[x] = intp(strength_, v[1], g[x]);
+                b[x] = intp(strength_, v[2], b[x]);
+            } else {
+                r[x] = v[0];
+                g[x] = v[1];
+                b[x] = v[2];
+            }
+        }
+
+        return;
+    }
+#endif
+
+    for (int x = 0; x < W; ++x) {
+        apply_single(thread_id, r[x], g[x], b[x]);
+    }
+}
+
+
 } // namespace rtengine

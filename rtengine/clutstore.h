@@ -129,6 +129,7 @@ public:
 #ifdef __SSE2__
     void apply_vec(int thread_id, vfloat &r, vfloat &g, vfloat &b);
 #endif // __SSE2__
+    void apply(int thread_id, int W, float *r, float *g, float *b);
     operator bool() const { return ok_; }
 
     std::vector<CLUTParamDescriptor> get_param_descriptors() const;
