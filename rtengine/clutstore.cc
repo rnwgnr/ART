@@ -927,8 +927,7 @@ rtengine::CLUTStore::CLUTStore() :
 // CLUTApplication
 //-----------------------------------------------------------------------------
 
-CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads, Quality q):
-    quality_(q),
+CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile, float strength, int num_threads):
     clut_filename_(clut_filename),
     working_profile_(working_profile),
     ok_(false),
@@ -1010,9 +1009,6 @@ bool CLUTApplication::OCIO_init()
 bool CLUTApplication::CTL_init(int num_threads)
 {
     try {
-        ctl_lut_.clear();
-        ctl_lut_dim_ = 0;
-        
         auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_);
         if (func.empty()) {
             ok_ = false;
@@ -1069,20 +1065,6 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
         return false;
     } catch (...) {
         return false;
-    }
-
-    switch (quality_) {
-    case Quality::LOW:
-        CTL_init_lut(32);
-        break;
-    case Quality::MEDIUM:
-        CTL_init_lut(96);
-        break;
-    case Quality::HIGH:
-        CTL_init_lut(144);
-        break;
-    default:
-        break;
     }
 
     return true;
@@ -1149,198 +1131,176 @@ void CLUTApplication::operator()(Imagefloat *img)
         return;
     }
 
-#ifdef ART_USE_OCIO
-    if (ocio_processor_) {
-        OCIO_apply(img);
-        return;
-    }
-#endif // ART_USE_OCIO
-
-#ifdef ART_USE_CTL
-    if (!ctl_func_.empty()) {
-        CTL_apply(img);
-        return;
-    }
-#endif // ART_USE_CTL
-
-#ifdef _OPENMP
-#   pragma omp parallel for if (multiThread_)
-#endif
-    for (int y = 0; y < img->getHeight(); ++y) {
-        for (int jj = 0; jj < img->getWidth(); jj += TS) {
-            int jstart = jj;
-            float *r = img->r(y)+jstart;
-            float *g = img->g(y)+jstart;
-            float *b = img->b(y)+jstart;
-            int tW = min(jj + TS, img->getWidth());
-            apply_tile(r, g, b, 0, jstart, tW, 1);
-        }
-    }
-}
-
-
-inline void CLUTApplication::apply_tile(float *r, float *g, float *b, int istart, int jstart, int tW, int tH)
-{
-    float out_rgbx[4 * TS] ALIGNED16; // Line buffer for CLUT
-    float clutr[TS] ALIGNED16;
-    float clutg[TS] ALIGNED16;
-    float clutb[TS] ALIGNED16;
-    
-    for (int i = istart, ti = 0; i < tH; i++, ti++) {
-        if (!clut_and_working_profiles_are_same_) {
-            // Convert from working to clut profile
-            int j = jstart;
-            int tj = 0;
-
-#ifdef __SSE2__
-            for (; j < tW - 3; j += 4, tj += 4) {
-                vfloat sourceR = LVF(r[ti * TS + tj]);
-                vfloat sourceG = LVF(g[ti * TS + tj]);
-                vfloat sourceB = LVF(b[ti * TS + tj]);
-
-                vfloat x;
-                vfloat y;
-                vfloat z;
-                Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, v_work2xyz_);
-                Color::xyz2rgb(x, y, z, sourceR, sourceG, sourceB, v_xyz2clut_);
-
-                STVF(clutr[tj], sourceR);
-                STVF(clutg[tj], sourceG);
-                STVF(clutb[tj], sourceB);
-            }
-
-#endif
-
-            for (; j < tW; j++, tj++) {
-                float sourceR = r[ti * TS + tj];
-                float sourceG = g[ti * TS + tj];
-                float sourceB = b[ti * TS + tj];
-
-                float x, y, z;
-                Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, wprof_);
-                Color::xyz2rgb(x, y, z, clutr[tj], clutg[tj], clutb[tj], xyz2clut_);
-            }
-        } else {
-            memcpy(clutr, &r[ti * TS], sizeof(float) * TS);
-            memcpy(clutg, &g[ti * TS], sizeof(float) * TS);
-            memcpy(clutb, &b[ti * TS], sizeof(float) * TS);
-        }
-
-        for (int j = jstart, tj = 0; j < tW; j++, tj++) {
-            float &sourceR = clutr[tj];
-            float &sourceG = clutg[tj];
-            float &sourceB = clutb[tj];
-
-            // Apply gamma sRGB (default RT)
-            sourceR = Color::gamma_srgbclipped(sourceR);
-            sourceG = Color::gamma_srgbclipped(sourceG);
-            sourceB = Color::gamma_srgbclipped(sourceB);
-        }
-
-        hald_clut_->getRGB(strength_, std::min(TS, tW - jstart), clutr, clutg, clutb, out_rgbx);
-
-        for (int j = jstart, tj = 0; j < tW; j++, tj++) {
-            float &sourceR = clutr[tj];
-            float &sourceG = clutg[tj];
-            float &sourceB = clutb[tj];
-
-            // Apply inverse gamma sRGB
-            sourceR = Color::igamma_srgb(out_rgbx[tj * 4 + 0]);
-            sourceG = Color::igamma_srgb(out_rgbx[tj * 4 + 1]);
-            sourceB = Color::igamma_srgb(out_rgbx[tj * 4 + 2]);
-        }
-
-        if (!clut_and_working_profiles_are_same_) {
-            // Convert from clut to working profile
-            int j = jstart;
-            int tj = 0;
-
-#ifdef __SSE2__
-
-            for (; j < tW - 3; j += 4, tj += 4) {
-                vfloat sourceR = LVF(clutr[tj]);
-                vfloat sourceG = LVF(clutg[tj]);
-                vfloat sourceB = LVF(clutb[tj]);
-
-                vfloat x;
-                vfloat y;
-                vfloat z;
-                Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, v_clut2xyz_);
-                Color::xyz2rgb(x, y, z, sourceR, sourceG, sourceB, v_xyz2work_);
-
-                STVF(clutr[tj], sourceR);
-                STVF(clutg[tj], sourceG);
-                STVF(clutb[tj], sourceB);
-            }
-
-#endif
-
-            for (; j < tW; j++, tj++) {
-                float &sourceR = clutr[tj];
-                float &sourceG = clutg[tj];
-                float &sourceB = clutb[tj];
-
-                float x, y, z;
-                Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, clut2xyz_);
-                Color::xyz2rgb(x, y, z, sourceR, sourceG, sourceB, wiprof_);
-            }
-        }
-
-        for (int j = jstart, tj = 0; j < tW; j++, tj++) {
-            r[ti * TS + tj] = clutr[tj];
-            g[ti * TS + tj] = clutg[tj];
-            b[ti * TS + tj] = clutb[tj];
-        }
-    }    
-}
-
-
-#ifdef ART_USE_OCIO
-
-void CLUTApplication::OCIO_apply(Imagefloat *img)
-{
     const int W = img->getWidth();
     const int H = img->getHeight();
-
-    const bool blend = strength_ < 1.f;
 
 #ifdef _OPENMP
 #   pragma omp parallel for if (multiThread_)
 #endif
     for (int y = 0; y < H; ++y) {
-        Vec3<float> v;
-        std::vector<float> data(W * 3);
-        for (int x = 0, i = 0; x < W; ++x) {
-            v[0] = img->r(y, x) / 65535.f;
-            v[1] = img->g(y, x) / 65535.f;
-            v[2] = img->b(y, x) / 65535.f;
-            v = dot_product(conv_, v);
-            data[i++] = v[0];
-            data[i++] = v[1];
-            data[i++] = v[2];
+#ifdef _OPENMP
+        int thread_id = omp_get_thread_num();
+#else
+        int thread_id = 0;
+#endif
+        apply(thread_id, W, img->r(y), img->g(y), img->b(y));
+    }
+}
+
+
+inline void CLUTApplication::do_apply(int W, float *r, float *g, float *b)
+{
+    AlignedBuffer<float> buf_out_rgbx(4 * W); // Line buffer for CLUT
+    AlignedBuffer<float> buf_clutr(W);
+    AlignedBuffer<float> buf_clutg(W);
+    AlignedBuffer<float> buf_clutb(W);
+    float *out_rgbx = buf_out_rgbx.data;
+    float *clutr = buf_clutr.data;
+    float *clutg = buf_clutg.data;
+    float *clutb = buf_clutb.data;
+    
+    if (!clut_and_working_profiles_are_same_) {
+        // Convert from working to clut profile
+        int j = 0;
+
+#ifdef __SSE2__
+        for (; j < W - 3; j += 4) {
+            vfloat sourceR = LVF(r[j]);
+            vfloat sourceG = LVF(g[j]);
+            vfloat sourceB = LVF(b[j]);
+
+            vfloat x;
+            vfloat y;
+            vfloat z;
+            Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, v_work2xyz_);
+            Color::xyz2rgb(x, y, z, sourceR, sourceG, sourceB, v_xyz2clut_);
+
+            STVF(clutr[j], sourceR);
+            STVF(clutg[j], sourceG);
+            STVF(clutb[j], sourceB);
         }
 
-        OCIO::PackedImageDesc pd(&data[0], W, 1, 3);
-        ocio_processor_->apply(pd);
-            
-        for (int x = 0, i = 0; x < W; ++x) {
-            v[0] = data[i++];
-            v[1] = data[i++];
-            v[2] = data[i++];
-            v = dot_product(iconv_, v);
-            // no need to renormalize to 65535 as this is already done in iconv_
-            if (blend) {
-                img->r(y, x) = intp(strength_, v[0], img->r(y, x));
-                img->g(y, x) = intp(strength_, v[1], img->g(y, x));
-                img->b(y, x) = intp(strength_, v[2], img->b(y, x));
-            } else {
-                img->r(y, x) = v[0];
-                img->g(y, x) = v[1];
-                img->b(y, x) = v[2];
-            }
+#endif
+
+        for (; j < W; j++) {
+            float sourceR = r[j];
+            float sourceG = g[j];
+            float sourceB = b[j];
+
+            float x, y, z;
+            Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, wprof_);
+            Color::xyz2rgb(x, y, z, clutr[j], clutg[j], clutb[j], xyz2clut_);
+        }
+    } else {
+        memcpy(clutr, r, sizeof(float) * W);
+        memcpy(clutg, g, sizeof(float) * W);
+        memcpy(clutb, b, sizeof(float) * W);
+    }
+
+    for (int j = 0; j < W; j++) {
+        float &sourceR = clutr[j];
+        float &sourceG = clutg[j];
+        float &sourceB = clutb[j];
+
+        // Apply gamma sRGB (default RT)
+        sourceR = Color::gamma_srgbclipped(sourceR);
+        sourceG = Color::gamma_srgbclipped(sourceG);
+        sourceB = Color::gamma_srgbclipped(sourceB);
+    }
+
+    hald_clut_->getRGB(strength_, W, clutr, clutg, clutb, out_rgbx);
+
+    for (int j = 0; j < W; j++) {
+        float &sourceR = clutr[j];
+        float &sourceG = clutg[j];
+        float &sourceB = clutb[j];
+
+        // Apply inverse gamma sRGB
+        sourceR = Color::igamma_srgb(out_rgbx[j * 4 + 0]);
+        sourceG = Color::igamma_srgb(out_rgbx[j * 4 + 1]);
+        sourceB = Color::igamma_srgb(out_rgbx[j * 4 + 2]);
+    }
+
+    if (!clut_and_working_profiles_are_same_) {
+        // Convert from clut to working profile
+        int j = 0;
+
+#ifdef __SSE2__
+
+        for (; j < W - 3; j += 4) {
+            vfloat sourceR = LVF(clutr[j]);
+            vfloat sourceG = LVF(clutg[j]);
+            vfloat sourceB = LVF(clutb[j]);
+
+            vfloat x;
+            vfloat y;
+            vfloat z;
+            Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, v_clut2xyz_);
+            Color::xyz2rgb(x, y, z, sourceR, sourceG, sourceB, v_xyz2work_);
+
+            STVF(clutr[j], sourceR);
+            STVF(clutg[j], sourceG);
+            STVF(clutb[j], sourceB);
+        }
+
+#endif
+
+        for (; j < W; j++) {
+            float &sourceR = clutr[j];
+            float &sourceG = clutg[j];
+            float &sourceB = clutb[j];
+
+            float x, y, z;
+            Color::rgbxyz(sourceR, sourceG, sourceB, x, y, z, clut2xyz_);
+            Color::xyz2rgb(x, y, z, sourceR, sourceG, sourceB, wiprof_);
         }
     }
 
+    for (int j = 0; j < W; j++) {
+        r[j] = clutr[j];
+        g[j] = clutg[j];
+        b[j] = clutb[j];
+    }
+}
+
+
+#ifdef ART_USE_OCIO
+
+inline void CLUTApplication::OCIO_apply(int W, float *r, float *g, float *b)
+{
+    const bool blend = strength_ < 1.f;
+
+    Vec3<float> v;
+    std::vector<float> data(W * 3);
+    for (int x = 0, i = 0; x < W; ++x) {
+        v[0] = r[x] / 65535.f;
+        v[1] = g[x] / 65535.f;
+        v[2] = b[x] / 65535.f;
+        v = dot_product(conv_, v);
+        data[i++] = v[0];
+        data[i++] = v[1];
+        data[i++] = v[2];
+    }
+
+    OCIO::PackedImageDesc pd(&data[0], W, 1, 3);
+    ocio_processor_->apply(pd);
+            
+    for (int x = 0, i = 0; x < W; ++x) {
+        v[0] = data[i++];
+        v[1] = data[i++];
+        v[2] = data[i++];
+        v = dot_product(iconv_, v);
+        // no need to renormalize to 65535 as this is already done in iconv_
+        if (blend) {
+            r[x] = intp(strength_, v[0], r[x]);
+            g[x] = intp(strength_, v[1], g[x]);
+            b[x] = intp(strength_, v[2], b[x]);
+        } else {
+            r[x] = v[0];
+            g[x] = v[1];
+            b[x] = v[2];
+        }
+    }
 }
 
 #endif // ART_USE_OCIO
@@ -1348,178 +1308,8 @@ void CLUTApplication::OCIO_apply(Imagefloat *img)
 
 #ifdef ART_USE_CTL
 
-void CLUTApplication::CTL_apply(Imagefloat *img)
+inline void CLUTApplication::CTL_apply(int thread_id, int W, float *r, float *g, float *b)
 {
-    const int W = img->getWidth();
-    const int H = img->getHeight();
-
-    const bool blend = strength_ < 1.f;
-
-#ifdef _OPENMP
-#   pragma omp parallel for num_threads(ctl_func_.size()) if (multiThread_)
-#endif
-    for (int y = 0; y < H; ++y) {
-#ifdef _OPENMP
-        auto func = ctl_func_[multiThread_ ? omp_get_thread_num() : 0];
-#else
-        auto func = ctl_func_[0];
-#endif
-        
-        Vec3<float> v;
-        std::vector<float> rgb[3];
-        for (int i = 0; i < 3; ++i) {
-            rgb[i].resize(W);
-        }
-        
-        for (int x = 0; x < W; ++x) {
-            v[0] = img->r(y, x) / 65535.f;
-            v[1] = img->g(y, x) / 65535.f;
-            v[2] = img->b(y, x) / 65535.f;
-            v = dot_product(conv_, v);
-            rgb[0][x] = v[0];
-            rgb[1][x] = v[1];
-            rgb[2][x] = v[2];
-        }
-
-        if (!ctl_lut_.empty()) {
-            const int d = ctl_lut_dim_;
-            
-            for (int x = 0; x < W; ++x) {
-                Imath::V3f p(CTL_shaper(rgb[0][x], false),
-                             CTL_shaper(rgb[1][x], false),
-                             CTL_shaper(rgb[2][x], false));
-                p = Ctl::lookup3D(&ctl_lut_[0], Imath::V3i(d, d, d),
-                                  Imath::V3f(0, 0, 0), Imath::V3f(1, 1, 1),
-                                  p);
-                rgb[0][x] = p.x;
-                rgb[1][x] = p.y;
-                rgb[2][x] = p.z;
-            }            
-        } else {
-            for (int x = 0; x < W; x += ctl_chunk_size_) {
-                const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
-                for (int i = 0; i < 3; ++i) {
-                    memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
-                }
-                func->callFunction(n);
-                for (int i = 0; i < 3; ++i) {
-                    memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
-                }
-            }
-        }
-        
-        for (int x = 0; x < W; ++x) {
-            v[0] = rgb[0][x];
-            v[1] = rgb[1][x];
-            v[2] = rgb[2][x];
-            v = dot_product(iconv_, v);
-            // no need to renormalize to 65535 as this is already done in iconv_
-            if (blend) {
-                img->r(y, x) = intp(strength_, v[0], img->r(y, x));
-                img->g(y, x) = intp(strength_, v[1], img->g(y, x));
-                img->b(y, x) = intp(strength_, v[2], img->b(y, x));
-            } else {
-                img->r(y, x) = v[0];
-                img->g(y, x) = v[1];
-                img->b(y, x) = v[2];
-            }
-        }
-    }
-}
-
-
-void CLUTApplication::CTL_init_lut(int dim)
-{
-    ctl_lut_.clear();
-    ctl_lut_dim_ = 0;
-    
-    std::vector<float> rgb[3];
-
-    int sz = SQR(dim) * dim;
-    for (int i = 0; i < 3; ++i) {
-        rgb[i].reserve(sz);
-    }
-    
-    for (int i = 0; i < dim; ++i) {
-        float r = float(i)/(dim-1);
-        for (int j = 0; j < dim; ++j) {
-            float g = float(j)/(dim-1);
-            for (int k = 0; k < dim; ++k) {
-                float b = float(k)/(dim-1);
-                rgb[0].push_back(CTL_shaper(r, true));
-                rgb[1].push_back(CTL_shaper(g, true));
-                rgb[2].push_back(CTL_shaper(b, true));
-            }
-        }
-    }
-
-    auto func = ctl_func_[0];
-
-    for (int x = 0; x < sz; x += ctl_chunk_size_) {
-        const auto n = (x + ctl_chunk_size_ < sz ? ctl_chunk_size_ : sz - x);
-        for (int i = 0; i < 3; ++i) {
-            memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
-        }
-        func->callFunction(n);
-        for (int i = 0; i < 3; ++i) {
-            memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
-        }
-    }
-
-    ctl_lut_.reserve(sz);
-    for (int i = 0; i < sz; ++i) {
-        ctl_lut_.emplace_back(rgb[0][i], rgb[1][i], rgb[2][i]);
-    }
-    ctl_lut_dim_ = dim;
-}
-
-
-float CLUTApplication::CTL_shaper(float a, bool inv)
-{
-#if 1
-    constexpr float m1 = 2610.0 / 16384.0;
-    constexpr float m2 = 2523.0 / 32.0;
-    constexpr float c1 = 107.0 / 128.0;
-    constexpr float c2 = 2413.0 / 128.0;
-    constexpr float c3 = 2392.0 / 128.0;
-    constexpr float scale = 100.0;
-
-    if (a <= 0.f) {
-        return 0.f;
-    }
-    
-    if (!inv) {
-        a /= scale;
-        float aa = pow_F(a, m1);
-        return pow_F((c1 + c2 * aa)/(1.f + c3 * aa), m2);
-    } else {
-        float p = pow_F(a, 1.f/m2);
-        float aa = std::max(p - c1, 0.f) / (c2 - c3 * p);
-        return pow_F(aa, 1.f/m1) * scale;
-    }
-#else
-    constexpr float lb = -16;
-    constexpr float ub = 12;
-    constexpr float eps = 1.175494e-38;
-    constexpr float scale = 0.18;
-    static const float log2 = xlogf(2.f);
-
-    if (!inv) {
-        float y = xlogf(std::max(a / scale, eps)) / log2;
-        return (y - lb) / (ub - lb);
-    } else {
-        float y = lb + a * (ub - lb);
-        return pow_F(2.f, y) * scale;
-    }
-#endif // if 1
-}
-
-#endif // ART_USE_CTL
-
-
-void CLUTApplication::apply(int thread_id, int W, float *r, float *g, float *b)
-{
-#ifdef ART_USE_CTL
     if (!ctl_func_.empty()) {
         auto func = ctl_func_[thread_id];
         Vec3<float> v;
@@ -1568,14 +1358,32 @@ void CLUTApplication::apply(int thread_id, int W, float *r, float *g, float *b)
             }
         }
 
+    }
+}
+
+#endif // ART_USE_CTL
+
+
+void CLUTApplication::apply(int thread_id, int W, float *r, float *g, float *b)
+{
+    if (!ok_) {
+        return;
+    }
+
+#ifdef ART_USE_OCIO
+    if (ocio_processor_) {
+        OCIO_apply(W, r, g, b);
+        return;
+    }
+#endif
+#ifdef ART_USE_CTL
+    if (!ctl_func_.empty()) {
+        CTL_apply(thread_id, W, r, g, b);
         return;
     }
 #endif
 
-    for (int x = 0; x < W; ++x) {
-        apply_single(thread_id, r[x], g[x], b[x]);
-    }
+    do_apply(W, r, g, b);
 }
-
 
 } // namespace rtengine

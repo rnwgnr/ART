@@ -30,7 +30,7 @@
 #include "coord.h"
 #include "gauss.h"
 #include "masks.h"
-#include "clutstore.hpp"
+#include "clutstore.h"
 #include "../rtgui/multilangmgr.h"
 
 
@@ -347,22 +347,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 #else
             int num_threads = 1;
 #endif
-            CLUTApplication::Quality q = CLUTApplication::Quality::HIGH;
-            switch (cur_pipeline) {
-            case Pipeline::THUMBNAIL:
-                q = CLUTApplication::Quality::LOW;
-                break;
-            case Pipeline::NAVIGATOR:
-                q = CLUTApplication::Quality::MEDIUM;
-                break;
-            case Pipeline::PREVIEW:
-                q = (scale > 1) ? CLUTApplication::Quality::MEDIUM : CLUTApplication::Quality::HIGH;
-                break;
-            case Pipeline::OUTPUT:
-                q = CLUTApplication::Quality::HIGH;
-                break;
-            }
-            lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads, q));
+            lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads));
             if (!(*lut[i])) {
                 lut[i].reset(nullptr);
                 if (plistener) {
@@ -382,28 +367,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     const float fG = max_ws / ws[1][1];
     const float fB = max_ws / ws[1][2];
 
-    const auto apply_lut =
-        [&](int region, float &Y, float &u, float &v) -> void
-        {
-            float R, G, B;
-            Color::yuv2rgb(Y, u, v, R, G, B, ws);
-#ifdef _OPENMP
-            int thread_id = omp_get_thread_num();
-#else
-            int thread_id = 0;
-#endif
-            lut[region]->apply_single(thread_id, R, G, B);
-            Color::rgb2yuv(R, G, B, Y, u, v, ws);
-        };
-
     const auto CDL = 
         [&](int region, float &Y, float &u, float &v) -> void
         {
-            if (lut[region]) {
-                apply_lut(region, Y, u, v);
-                return;
-            }
-            
             const float *slope = rslope[region];
             const float *offset = roffset[region];
             const float *power = rpower[region];
@@ -587,28 +553,9 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     vfloat v65535 = F2V(65535.f);
     vfloat v1 = F2V(1.f);
     
-    const auto apply_lut_v =
-        [&](int region, vfloat &Y, vfloat &u, vfloat &v) -> void
-        {
-            vfloat R, G, B;
-            Color::yuv2rgb(Y, u, v, R, G, B, vws);
-#ifdef _OPENMP
-            int thread_id = omp_get_thread_num();
-#else
-            int thread_id = 0;
-#endif
-            lut[region]->apply_vec(thread_id, R, G, B);
-            Color::rgb2yuv(R, G, B, Y, u, v, vws);
-        };
-    
     const auto CDL_v =
         [&](int region, vfloat &Y, vfloat &u, vfloat &v) -> void
         {
-            if (lut[region]) {
-                apply_lut_v(region, Y, u, v);
-                return;
-            }
-            
             const float *slope = rslope[region];
             const float *offset = roffset[region];
             const float *power = rpower[region];
@@ -757,27 +704,48 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
     rgb->setMode(Imagefloat::Mode::YUV, multiThread);
 
-    const bool do_NxW = getenv("ART_NXW") && atoi(getenv("ART_NXW"));
-    std::cout << "COLOR CORRECTION MODE: " << (do_NxW ? "NxW" : "WxN") << std::endl;
-
 #ifdef _OPENMP
     #pragma omp parallel if (multiThread)
 #endif
     {
-        const auto process_WxN =
-            [&](int y) -> void
-            {
-                int x = 0;
+        AlignedBuffer<float> rbuf(W);
+        AlignedBuffer<float> gbuf(W);
+        AlignedBuffer<float> bbuf(W);
+        
+#ifdef _OPENMP
+        #pragma omp for
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int i = 0; i < n; ++i) {
+                if (!params->colorcorrection.labmasks[i].enabled) {
+                    continue;
+                }
+                if (lut[i]) {
+                    for (int x = 0; x < W; ++x) {
+                        Color::yuv2rgb(rgb->g(y, x), rgb->b(y, x), rgb->r(y, x), rbuf.data[x], gbuf.data[x], bbuf.data[x], ws);
+                    }
+#ifdef _OPENMP
+                    int thread_id = omp_get_thread_num();
+#else
+                    int thread_id = 0;
+#endif
+                    lut[i]->apply(thread_id, W, rbuf.data, gbuf.data, bbuf.data);
+                    for (int x = 0; x < W; ++x) {
+                        float Y, u, v;
+                        Color::rgb2yuv(rbuf.data[x], gbuf.data[x], bbuf.data[x], Y, u, v, ws);
+                        float blend = abmask[i][y][x];
+                        float lblend = Lmask[i][y][x];
+                        rgb->g(y, x) = intp(lblend, Y, rgb->g(y, x));
+                        rgb->b(y, x) = intp(blend, u, rgb->b(y, x));
+                        rgb->r(y, x) = intp(blend, v, rgb->r(y, x));
+                    }
+                } else {
+                    int x = 0;
 #ifdef __SSE2__
-                for (; x < W - 3; x += 4) {
-                    vfloat Yv = LVF(rgb->g(y, x));
-                    vfloat uv = LVF(rgb->b(y, x));
-                    vfloat vv = LVF(rgb->r(y, x));
-
-                    for (int i = 0; i < n; ++i) {
-                        if (!params->colorcorrection.labmasks[i].enabled) {
-                            continue;
-                        }
+                    for (; x < W - 3; x += 4) {
+                        vfloat Yv = LVF(rgb->g(y, x));
+                        vfloat uv = LVF(rgb->b(y, x));
+                        vfloat vv = LVF(rgb->r(y, x));
 
                         vfloat blendv = LVFU(abmask[i][y][x]);
                         vfloat lblendv = LVFU(Lmask[i][y][x]);
@@ -795,21 +763,15 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                             uv = vintpf(blendv, u_newv, uv);
                             vv = vintpf(blendv, v_newv, vv);
                         }
+                        STVF(rgb->g(y, x), Yv);
+                        STVF(rgb->b(y, x), uv);
+                        STVF(rgb->r(y, x), vv);
                     }
-                    STVF(rgb->g(y, x), Yv);
-                    STVF(rgb->b(y, x), uv);
-                    STVF(rgb->r(y, x), vv);
-                }
 #endif // __SSE2__
-                for (; x < W; ++x) {
-                    float Y = rgb->g(y, x);
-                    float u = rgb->b(y, x);
-                    float v = rgb->r(y, x);
-
-                    for (int i = 0; i < n; ++i) {
-                        if (!params->colorcorrection.labmasks[i].enabled) {
-                            continue;
-                        }
+                    for (; x < W; ++x) {
+                        float Y = rgb->g(y, x);
+                        float u = rgb->b(y, x);
+                        float v = rgb->r(y, x);
 
                         float blend = abmask[i][y][x];
                         float lblend = Lmask[i][y][x];
@@ -825,175 +787,13 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                             u = intp(blend, u_new, u);
                             v = intp(blend, v_new, v);
                         }
-                    }
 
-                    rgb->g(y, x) = Y;
-                    rgb->b(y, x) = u;
-                    rgb->r(y, x) = v;
-                }
-            };
-
-        AlignedBuffer<float> rbuf(W);
-        AlignedBuffer<float> gbuf(W);
-        AlignedBuffer<float> bbuf(W);
-        
-        const auto process_NxW =
-            [&](int y) -> void
-            {
-                for (int i = 0; i < n; ++i) {
-                    if (!params->colorcorrection.labmasks[i].enabled) {
-                        continue;
-                    }
-                    if (lut[i]) {
-                        for (int x = 0; x < W; ++x) {
-                            Color::yuv2rgb(rgb->g(y, x), rgb->b(y, x), rgb->r(y, x), rbuf.data[x], gbuf.data[x], bbuf.data[x], ws);
-                        }
-#ifdef _OPENMP
-                        int thread_id = omp_get_thread_num();
-#else
-                        int thread_id = 0;
-#endif
-                        lut[i]->apply(thread_id, W, rbuf.data, gbuf.data, bbuf.data);
-                        for (int x = 0; x < W; ++x) {
-                            float Y, u, v;
-                            Color::rgb2yuv(rbuf.data[x], gbuf.data[x], bbuf.data[x], Y, u, v, ws);
-                            float blend = abmask[i][y][x];
-                            float lblend = Lmask[i][y][x];
-                            rgb->g(y, x) = intp(lblend, Y, rgb->g(y, x));
-                            rgb->b(y, x) = intp(blend, u, rgb->b(y, x));
-                            rgb->r(y, x) = intp(blend, v, rgb->r(y, x));
-                        }
-                    } else {
-                        int x = 0;
-#ifdef __SSE2__
-                        for (; x < W - 3; x += 4) {
-                            vfloat Yv = LVF(rgb->g(y, x));
-                            vfloat uv = LVF(rgb->b(y, x));
-                            vfloat vv = LVF(rgb->r(y, x));
-
-                            vfloat blendv = LVFU(abmask[i][y][x]);
-                            vfloat lblendv = LVFU(Lmask[i][y][x]);
-
-                            vmask some_blend = vmaskf_gt(blendv, ZEROV);
-                            vmask some_lblend = vmaskf_gt(lblendv, ZEROV);
-                            if (_mm_movemask_ps((vfloat)some_blend) || _mm_movemask_ps((vfloat)some_lblend)) {
-                                vfloat Y_newv = Yv;
-                                vfloat u_newv = uv;
-                                vfloat v_newv = vv;
-
-                                CDL_v(i, Y_newv, u_newv, v_newv);
-                    
-                                Yv = vintpf(lblendv, Y_newv, Yv);
-                                uv = vintpf(blendv, u_newv, uv);
-                                vv = vintpf(blendv, v_newv, vv);
-                            }
-                            STVF(rgb->g(y, x), Yv);
-                            STVF(rgb->b(y, x), uv);
-                            STVF(rgb->r(y, x), vv);
-                        }
-#endif // __SSE2__
-                        for (; x < W; ++x) {
-                            float Y = rgb->g(y, x);
-                            float u = rgb->b(y, x);
-                            float v = rgb->r(y, x);
-
-                            float blend = abmask[i][y][x];
-                            float lblend = Lmask[i][y][x];
-
-                            if (blend > 0.f || lblend > 0.f) {
-                                float Y_new = Y;
-                                float u_new = u;
-                                float v_new = v;
-
-                                CDL(i, Y_new, u_new, v_new);
-                    
-                                Y = intp(lblend, Y_new, Y);
-                                u = intp(blend, u_new, u);
-                                v = intp(blend, v_new, v);
-                            }
-
-                            rgb->g(y, x) = Y;
-                            rgb->b(y, x) = u;
-                            rgb->r(y, x) = v;
-                        }
+                        rgb->g(y, x) = Y;
+                        rgb->b(y, x) = u;
+                        rgb->r(y, x) = v;
                     }
                 }
-            };
-        
-        
-#ifdef _OPENMP
-        #pragma omp for
-#endif
-        for (int y = 0; y < H; ++y) {
-            if (do_NxW) {
-                process_NxW(y);
-            } else {
-                process_WxN(y);
             }
-//             int x = 0;
-// #ifdef __SSE2__
-//             for (; x < W - 3; x += 4) {
-//                 vfloat Yv = LVF(rgb->g(y, x));
-//                 vfloat uv = LVF(rgb->b(y, x));
-//                 vfloat vv = LVF(rgb->r(y, x));
-
-//                 for (int i = 0; i < n; ++i) {
-//                     if (!params->colorcorrection.labmasks[i].enabled) {
-//                         continue;
-//                     }
-
-//                     vfloat blendv = LVFU(abmask[i][y][x]);
-//                     vfloat lblendv = LVFU(Lmask[i][y][x]);
-
-//                     vmask some_blend = vmaskf_gt(blendv, ZEROV);
-//                     vmask some_lblend = vmaskf_gt(lblendv, ZEROV);
-//                     if (_mm_movemask_ps((vfloat)some_blend) || _mm_movemask_ps((vfloat)some_lblend)) {
-//                         vfloat Y_newv = Yv;
-//                         vfloat u_newv = uv;
-//                         vfloat v_newv = vv;
-
-//                         CDL_v(i, Y_newv, u_newv, v_newv);
-                    
-//                         Yv = vintpf(lblendv, Y_newv, Yv);
-//                         uv = vintpf(blendv, u_newv, uv);
-//                         vv = vintpf(blendv, v_newv, vv);
-//                     }
-//                 }
-//                 STVF(rgb->g(y, x), Yv);
-//                 STVF(rgb->b(y, x), uv);
-//                 STVF(rgb->r(y, x), vv);
-//             }
-// #endif // __SSE2__
-//             for (; x < W; ++x) {
-//                 float Y = rgb->g(y, x);
-//                 float u = rgb->b(y, x);
-//                 float v = rgb->r(y, x);
-
-//                 for (int i = 0; i < n; ++i) {
-//                     if (!params->colorcorrection.labmasks[i].enabled) {
-//                         continue;
-//                     }
-
-//                     float blend = abmask[i][y][x];
-//                     float lblend = Lmask[i][y][x];
-
-//                     if (blend > 0.f || lblend > 0.f) {
-//                         float Y_new = Y;
-//                         float u_new = u;
-//                         float v_new = v;
-
-//                         CDL(i, Y_new, u_new, v_new);
-                    
-//                         Y = intp(lblend, Y_new, Y);
-//                         u = intp(blend, u_new, u);
-//                         v = intp(blend, v_new, v);
-//                     }
-//                 }
-
-//                 rgb->g(y, x) = Y;
-//                 rgb->b(y, x) = u;
-//                 rgb->r(y, x) = v;
-//             }
         }
     }
 
