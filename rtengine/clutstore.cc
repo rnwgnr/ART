@@ -17,6 +17,7 @@
 #include <fstream>
 
 #include "../rtgui/options.h"
+#include "../rtgui/multilangmgr.h"
 #include "cJSON.h"
 
 #ifdef _OPENMP
@@ -283,6 +284,62 @@ void rtengine::HaldCLUT::getRGB(
     }
 }
 
+
+Glib::ustring rtengine::CLUTStore::getClutDisplayName(const Glib::ustring &filename)
+{
+    Glib::ustring name;
+    
+#ifdef ART_USE_CTL
+    if (getFileExtension(filename) == "ctl") {
+        const Glib::ustring full_filename =
+            !Glib::path_is_absolute(filename)
+            ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
+            : filename;
+        if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+            auto fn = Glib::filename_from_utf8(filename);
+            std::ifstream src(fn.c_str());
+            std::string line;
+            bool found = false;
+            while (src && std::getline(src, line) && !found) {
+                size_t s = 0;
+                while (s < line.size() && std::isspace(line[s])) {
+                    ++s;
+                }
+                if (s+1 < line.size() && line[s] == '/' && line[s+1] == '/') {
+                    s += 2;
+                }
+                while (s < line.size() && std::isspace(line[s])) {
+                    ++s;
+                }
+                if (line.find("@ART-label:", s) == s) {
+                    line = line.substr(11+s);
+                    cJSON *root = cJSON_Parse(line.c_str());
+                    if (root) {
+                        if (cJSON_IsString(root)) {
+                            name = cJSON_GetStringValue(root);
+                            if (!name.empty() && name[0] == '$') {
+                                name = M(name.c_str()+1);
+                            }
+                            found = !name.empty();
+                        }
+                        cJSON_Delete(root);
+                    }
+                    break;
+                }
+            }
+            if (found) {
+                return name;
+            }
+        }
+    }
+#endif
+    
+    Glib::ustring dummy;
+    splitClutFilename(filename, name, dummy, dummy);
+    return name;
+}
+
+
 void rtengine::CLUTStore::splitClutFilename(
     const Glib::ustring& filename,
     Glib::ustring& name,
@@ -448,14 +505,21 @@ std::string copy_to_temp(const Glib::ustring &fname)
 OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& filename) const
 {
     MyMutex::MyLock lock(mutex_);
+
     
     OCIOCacheEntry result;
     OCIO::ConstProcessorRcPtr retval;
-    
+
     const Glib::ustring full_filename =
         !Glib::path_is_absolute(filename)
             ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
             : filename;
+
+    auto ext = getFileExtension(full_filename);
+    if (ext != "clf" && ext != "clfz") {
+        return retval;
+    }
+    
     const auto md5 = getMD5(full_filename, true);
 
     bool found = ocio_cache_.get(full_filename, result);
@@ -465,11 +529,9 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
         try {
             OCIO::ConstConfigRcPtr config = OCIO::Config::CreateRaw();
             OCIO::FileTransformRcPtr t = OCIO::FileTransform::Create();
-            if (getFileExtension(full_filename) == "clfz") {
+            if (ext == "clfz") {
                 fn = decompress_to_temp(full_filename);
                 del_fn = true;
-            // } else if (!found) {
-            //     fn = Glib::filename_from_utf8(full_filename);
             } else {
                 fn = copy_to_temp(full_filename);
                 del_fn = true;
@@ -526,17 +588,17 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
         return false;
     }
     desc.gui_name = cJSON_GetStringValue(n);
-    desc.gui_help = "";
+    desc.gui_group = "";
     desc.gui_step = 1;
 
-    const auto set_help =
+    const auto set_group =
         [&](int i) -> bool
         {
             auto n = cJSON_GetArrayItem(root, i);
             if (!cJSON_IsString(n)) {
                 return false;
             }
-            desc.gui_help = cJSON_GetStringValue(n);
+            desc.gui_group = cJSON_GetStringValue(n);
             return true;
         };
 
@@ -550,7 +612,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                 desc.value_default = cJSON_IsTrue(n);
             }
             if (sz == 4) {
-                return set_help(3);
+                return set_group(3);
             } else {
                 return true;
             }
@@ -588,7 +650,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                     desc.gui_step = (desc.value_max - desc.value_min) / 100.0;
                 }
                 if (sz == 7) {
-                    return set_help(6);
+                    return set_group(6);
                 }
             }
             return true;
@@ -607,7 +669,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                 }
                 desc.type = CLUTParamType::PT_CHOICE;
                 if (sz == 4) {
-                    return set_help(3);
+                    return set_group(3);
                 } else {
                     return (sz == 3);
                 }
@@ -631,7 +693,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                         return false;
                     }
                     if (sz == 6) {
-                        return set_help(5);
+                        return set_group(5);
                     }
                 }
                 return true;
@@ -663,25 +725,26 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  * array has the following structure:
  *
  * - for "bool" parameters, the 3rd optional element specifies the default
- *   value, and the 4th optional element is a tooltip string for the GUI;
+ *   value; the 4th optional element instead is a "group name" for the GUI: if
+ *   set, this will cause the control to appear under a collapsible panel with
+ *   the given name in the GUI;
  *
  * - for "float" parameters, the array size must be at least 4 and at most 7.
  *   The 3rd and 4th elements are the minimum and maximum values for the
  *   GUI slider. The optional 5th element is the default value, the optional
  *   6th element the precision to use in the GUI (e.g. 0.01 will use 2 decimal
- *   digits in the GUI), and the optional last element is a tooltip string;
+ *   digits in the GUI), and the optional last element is the GUI group name;
  *
  * - for "int" parameters, the array size must be at least 3 and at most 6.
  *   If the 3rd parameter is an array of strings, it is interpreted as a list
  *   of options in a choice menu, with values corresponding to their index in
  *   the array (i.e. the 1st option will give a value of 0, the 2nd a value of
  *   1, etc.). In this case, the array can contain at most 2 other elements,
- *   which are respectively the default value and the optional tooltip string
- *   for the GUI.
+ *   which are respectively the default value and the optional GUI group name.
  *   If the 3rd parameter is not an array of strings, then the array size must
  *   be at least 4, with the 3rd and 4th elements corresponding to the minimum
  *   and maximum values for the GUI slider. The optional 5th element is the
- *   default value, and the optional last element a tooltip string.
+ *   default value, and the optional last element the GUI group name.
  *
  * If default values are not given in the ART parameter definition, they are
  * taken from the definition of the ART_main function. If no default is given,
@@ -704,10 +767,23 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  *    // ...
  * }
  */ 
-bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out)
+bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out, Glib::ustring &colorspace)
 {
     out.clear();
     std::unordered_map<std::string, int> name2pos;
+
+    colorspace = "ACESp0";
+
+    static std::unordered_map<std::string, std::string> profilemap = {
+        {"aces2065-1", "ACESp0"},
+        {"acescg", "ACESp1"},
+        {"rec2020", "Rec2020"},
+        {"prophoto", "ProPhoto"},
+        {"rec709", "sRGB"},
+        {"srgb", "sRGB"},
+        {"adobergb", "Adobe RGB"},
+        {"adobe", "Adobe RGB"}
+    };
 
     const auto err =
         [&](const std::string &msg) -> bool
@@ -792,7 +868,21 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 if (!ok) {
                     return err("bad parameter definition: " + line);
                 }
-            }
+            } else if (line.find("@ART-colorspace:", s) == s) {
+                line = line.substr(16+s);
+                cJSON *root = cJSON_Parse(line.c_str());
+                if (!root || !cJSON_IsString(root)) {
+                    return err("invalid colorspace definition: " + line);
+                }
+                std::string name = Glib::ustring(cJSON_GetStringValue(root)).casefold();
+                cJSON_Delete(root);
+                auto it = profilemap.find(name);
+                if (it != profilemap.end()) {
+                    colorspace = it->second;
+                } else {
+                    return err("invalid colorspace definition: " + line);
+                }
+            }            
         }
     } else {
         return err("file reading error");
@@ -813,7 +903,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
 
 } // namespace
 
-std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params) const
+std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace) const
 {
     MyMutex::MyLock lock(mutex_);
     
@@ -825,7 +915,7 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
         !Glib::path_is_absolute(filename)
             ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
             : filename;
-    if (!Glib::file_test(full_filename, Glib::FILE_TEST_IS_REGULAR)) {
+    if (!Glib::file_test(full_filename, Glib::FILE_TEST_IS_REGULAR) || getFileExtension(full_filename) != "ctl") {
         return retval;
     }
     const auto md5 = getMD5(full_filename, true);
@@ -869,7 +959,7 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
                 }
             }
 
-            if (!get_CTL_params(full_filename, intp, f, params)) {
+            if (!get_CTL_params(full_filename, intp, f, params, colorspace)) {
                 params.clear();
                 return err("error in parsing CTL parameters");
             }
@@ -877,10 +967,12 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
             result.intp = intp;
             result.md5 = md5;
             result.params = params;
+            result.colorspace = colorspace;
             ctl_cache_.set(full_filename, result);
         } else {
             intp = result.intp;
             params = result.params;
+            colorspace = result.colorspace;
         }
         if (intp) {
             for (int i = 0; i < num_threads; ++i) {
@@ -994,7 +1086,7 @@ bool CLUTApplication::OCIO_init()
         ocio_processor_ = proc->getOptimizedCPUProcessor(OCIO::BIT_DEPTH_F32, 
                                                          OCIO::BIT_DEPTH_F32,
                                                          OCIO::OPTIMIZATION_DEFAULT);
-        init_matrices();
+        init_matrices("ACESp0");
         return true;
     } catch (...) {
         ok_ = false;
@@ -1009,13 +1101,15 @@ bool CLUTApplication::OCIO_init()
 bool CLUTApplication::CTL_init(int num_threads)
 {
     try {
-        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_);
+        Glib::ustring colorspace = "ACESp0";
+        Glib::ustring lbl;
+        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_, colorspace);
         if (func.empty()) {
             ok_ = false;
             return false;
         } else {
             ctl_func_ = std::move(func);
-            init_matrices();
+            init_matrices(colorspace);
             ok_ = true;
             return true;
         }
@@ -1101,7 +1195,8 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
     try {
         std::vector<CLUTParamDescriptor> params;
         int n;
-        auto func = CLUTStore::getInstance().getCTLLut(filename, 1, n, params);
+        Glib::ustring colorspace;
+        auto func = CLUTStore::getInstance().getCTLLut(filename, 1, n, params, colorspace);
         return params;
     } catch (...) {}
 #endif // ART_USE_CTL
@@ -1109,12 +1204,15 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
 }
 
 
-void CLUTApplication::init_matrices()
+void CLUTApplication::init_matrices(const Glib::ustring &lut_profile)
 {
     wprof_ = ICCStore::getInstance()->workingSpaceMatrix(working_profile_);
     wiprof_ = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile_);
-    auto ws = dot_product(ACESp0_xyz, wprof_);
-    auto iws = dot_product(wiprof_, xyz_ACESp0);
+    auto lprof = ICCStore::getInstance()->workingSpaceMatrix(lut_profile);
+    auto liprof = ICCStore::getInstance()->workingSpaceInverseMatrix(lut_profile);
+    
+    auto ws = dot_product(liprof, wprof_);
+    auto iws = dot_product(wiprof_, lprof);
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {

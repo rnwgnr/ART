@@ -41,48 +41,81 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
     if (params.empty()) {
         return;
     }
-    
-    Gtk::Frame *frame = Gtk::manage(new Gtk::Frame(M("LUT_PARAMS_TITLE")));
-    pack_start(*frame);
-    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
-    frame->add(*vb);
+
+    const auto lbl =
+        [](const Glib::ustring &l) -> Glib::ustring
+        {
+            if (!l.empty() && l[0] == '$') {
+                return M(l.c_str()+1);
+            } else {
+                return l;
+            }
+        };
+
+    Gtk::VBox *vb = this;
+
+    std::vector<std::pair<Glib::ustring, Gtk::Box *>> groups;
+    std::vector<MyExpander *> expanders;
 
     for (auto &d : params) {
         Gtk::Widget *w = nullptr;
+        Gtk::Box *box = nullptr;
+        if (!d.gui_group.empty()) {
+            for (auto &p : groups) {
+                if (p.first == d.gui_group) {
+                    box = p.second;
+                    break;
+                }
+            }
+            if (!box) {
+                MyExpander *e = Gtk::manage(new MyExpander(false, lbl(d.gui_group)));
+                ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
+                e->add(*tb, false);
+                e->setLevel(1);
+                vb->pack_start(*e);
+                e->set_expanded(false);
+                box = tb;
+                groups.emplace_back(d.gui_group, tb);
+                expanders.push_back(e);
+            }
+        }
+        if (!box) {
+            box = vb;
+        }
         switch (d.type) {
         case rtengine::CLUTParamType::PT_BOOL: {
-            Gtk::CheckButton *b = Gtk::manage(new Gtk::CheckButton(d.gui_name));
+            Gtk::CheckButton *b = Gtk::manage(new Gtk::CheckButton(lbl(d.gui_name)));
             b->signal_toggled().connect(sigc::mem_fun(*this, &CLUTParamsPanel::emit_signal));
             w = b;
-            vb->pack_start(*b);
+            box->pack_start(*b);
         }   break;
         case rtengine::CLUTParamType::PT_CHOICE: {
             MyComboBoxText *c = Gtk::manage(new MyComboBoxText());
             for (auto l : d.choices) {
-                c->append(l);
+                c->append(lbl(l));
             }
             Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
-            hb->pack_start(*Gtk::manage(new Gtk::Label(d.gui_name + ": ")), Gtk::PACK_SHRINK);
+            hb->pack_start(*Gtk::manage(new Gtk::Label(lbl(d.gui_name) + ": ")), Gtk::PACK_SHRINK);
             hb->pack_start(*c);
             c->signal_changed().connect(sigc::mem_fun(*this, &CLUTParamsPanel::emit_signal));
             w = c;
-            vb->pack_start(*hb);
+            box->pack_start(*hb);
         }   break;
         case rtengine::CLUTParamType::PT_INT:
         case rtengine::CLUTParamType::PT_FLOAT:
         default: {
-            Adjuster *a = Gtk::manage(new Adjuster(d.gui_name, d.value_min, d.value_max, d.gui_step, d.value_default));
+            Adjuster *a = Gtk::manage(new Adjuster(lbl(d.gui_name), d.value_min, d.value_max, d.gui_step, d.value_default));
             a->setAdjusterListener(this);
-            vb->pack_start(*a);
+            box->pack_start(*a);
             w = a;
         }   break;
-        }
-        if (!d.gui_help.empty()) {
-            w->set_tooltip_text(d.gui_help);
         }
         widgets_.push_back(w);
     }
     show_all_children();
+    for (auto e : expanders) {
+        e->set_expanded(false);
+    }
 }
 
 

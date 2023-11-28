@@ -32,11 +32,11 @@
 
 class ClutComboBox: public MyComboBox {
 public:
-    explicit ClutComboBox(const Glib::ustring &path);
+    explicit ClutComboBox(const std::vector<Glib::ustring> &paths);
     //int fillFromDir (const Glib::ustring& path);
     int foundClutsCount() const;
-    Glib::ustring getSelectedClut();
-    void setSelectedClut( Glib::ustring filename );
+    std::pair<Glib::ustring, Glib::ustring> getSelectedClut();
+    void setSelectedClut(Glib::ustring filename);
 
     static void cleanup();
 
@@ -55,8 +55,8 @@ private:
         Glib::RefPtr<Gtk::TreeStore> m_model;
         ClutColumns m_columns;
         int count;
-        explicit ClutModel(const Glib::ustring &path);
-        int parseDir (const Glib::ustring& path);
+        explicit ClutModel(const std::vector<Glib::ustring> &paths);
+        int parseDir(const std::vector<Glib::ustring> &paths);
     };
 
     Glib::RefPtr<Gtk::TreeStore> &m_model();

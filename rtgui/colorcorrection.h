@@ -129,6 +129,7 @@ private:
     Gtk::Frame *satframe;
     MyFileChooserButton *lut_filename;
     CLUTParamsPanel *lut_params;
+    Gtk::HBox *lut_filename_box;
     
     Adjuster *slope;
     Adjuster *offset;

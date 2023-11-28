@@ -83,11 +83,13 @@ public:
     OCIO::ConstProcessorRcPtr getOCIOLut(const Glib::ustring &filename) const;
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
-    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params) const;
+    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace) const;
 #endif // ART_USE_CTL
 
     void clearCache();
 
+    static Glib::ustring getClutDisplayName(const Glib::ustring &filename);
+    
     static void splitClutFilename(
         const Glib::ustring& filename,
         Glib::ustring& name,
@@ -108,6 +110,7 @@ private:
         std::shared_ptr<Ctl::Interpreter> intp;
         std::string md5;
         std::vector<CLUTParamDescriptor> params;
+        Glib::ustring colorspace;
     };
     mutable Cache<Glib::ustring, CTLCacheEntry> ctl_cache_;
 #endif // ART_USE_CTL
@@ -154,6 +157,7 @@ private:
 
     OCIO::ConstCPUProcessorRcPtr ocio_processor_;
 #endif // ART_USE_OCIO
+
 #ifdef ART_USE_CTL
     bool CTL_init(int num_threads);
     void CTL_apply(int thread_id, int W, float *r, float *g, float *b);
@@ -163,10 +167,12 @@ private:
     std::vector<CLUTParamDescriptor> ctl_params_;
 #endif // ART_USE_CTL
 
-    void init_matrices();
+#if defined ART_USE_OCIO || defined ART_USE_CTL
+    void init_matrices(const Glib::ustring &lut_profile);
     
     float conv_[3][3];
     float iconv_[3][3];
+#endif
 };
 
 } // namespace rtengine

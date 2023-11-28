@@ -23,10 +23,72 @@
 #include "../rtengine/clutstore.h"
 #include <iomanip>
 #include <cmath>
+#include <unordered_map>
+#include <map>
 
 using namespace rtengine;
 using namespace rtengine::procparams;
 
+
+namespace {
+
+std::map<Glib::ustring, int> builtin_lut_to_idx;
+std::map<int, std::pair<Glib::ustring, std::string>> builtin_luts;
+
+void get_builtin_luts()
+{
+#ifdef ART_USE_CTL
+    static bool done = false;
+
+    if (!done) {
+        done = true;
+        std::vector<Glib::ustring> dirs = {
+            Glib::build_filename(options.rtdir, "ctlscripts"),
+            Glib::build_filename(argv0, "ctlscripts")
+        };
+
+        std::map<Glib::ustring, Glib::ustring> order;
+
+        for (auto &dir : dirs) {
+            try {
+                if (Glib::file_test(dir, Glib::FILE_TEST_IS_DIR)) {
+                    for (const auto &n : Glib::Dir(dir)) {
+                        const std::string full_path = Glib::build_filename(dir, n);
+
+                        if (!Glib::file_test(full_path, Glib::FILE_TEST_IS_DIR) &&
+                            getExtension(full_path) == "ctl") {
+                            auto name = CLUTStore::getClutDisplayName(full_path);
+                            if (order.find(name) == order.end()) {
+                                order[name] = full_path;
+                                if (options.rtSettings.verbose > 1) {
+                                    std::cout << "Found user CTL script: " << full_path << std::endl;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Glib::Exception &exc) {
+                if (options.rtSettings.verbose) {
+                    std::cout << "ERROR in parsing user CTL scripts from " << dir << ": " << exc.what() << std::endl;
+                }
+            }
+        }
+
+        int idx = 5;
+        for (auto &p : order) {
+            builtin_lut_to_idx[p.second] = idx;
+            builtin_luts[idx] = std::make_pair(p.first, Glib::filename_from_utf8(p.second));
+            ++idx;
+        }
+        if (options.rtSettings.verbose) {
+            std::cout << "Loaded " << builtin_luts.size() << " user CTL scripts"
+                      << std::endl;
+        }
+    }
+#endif // ART_USE_CTL
+}
+
+} // namespace
 
 //-----------------------------------------------------------------------------
 // ColorCorrectionMasksContentProvider
@@ -151,7 +213,11 @@ public:
             return Glib::ustring::compose("HSL S=%4 So=%5 h=%6\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation, r.hueshift);
         }   break;
         case rtengine::procparams::ColorCorrectionParams::Mode::LUT:
-            return Glib::ustring::compose("LUT %1", Glib::path_get_basename(r.lutFilename));
+            if (builtin_lut_to_idx.find(r.lutFilename) != builtin_lut_to_idx.end()) {
+                return rtengine::CLUTStore::getClutDisplayName(r.lutFilename);
+            } else {
+                return Glib::ustring::compose("LUT %1", Glib::path_get_basename(r.lutFilename));
+            }
             break;
         default: {
             const auto round_ab = [](float v) -> float
@@ -434,6 +500,12 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     mode->append(M("TP_COLORCORRECTION_MODE_RGBCHANNELS"));
     mode->append(M("TP_COLORCORRECTION_MODE_HSL"));
     mode->append(M("TP_COLORCORRECTION_MODE_LUT"));
+
+    get_builtin_luts();
+    for (auto &p : builtin_luts) {
+        mode->append(p.second.first);
+    }
+    
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &ColorCorrection::modeChanged));
     
@@ -615,6 +687,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     hbox_lut->pack_start(*Gtk::manage(new Gtk::Label(M("TP_COLORCORRECTION_LUT_FILENAME") + ": ")), Gtk::PACK_SHRINK, 4);
     hbox_lut->pack_start(*lut_filename, Gtk::PACK_EXPAND_WIDGET, 4);
     box_lut->pack_start(*hbox_lut);
+    lut_filename_box = hbox_lut;
 
     lut_params = Gtk::manage(new CLUTParamsPanel());
     box_lut->pack_start(*lut_params);
@@ -877,20 +950,22 @@ void ColorCorrection::regionGet(int idx)
     
     auto &r = data[idx];
     switch (mode->get_active_row_number()) {
+    case 0:
+        r.mode = rtengine::procparams::ColorCorrectionParams::Mode::YUV;
+        break;
+    case 1:
+        r.mode = rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ;
+        break;
     case 2:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::RGB;
         break;
     case 3:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::HSL;
         break;
-    case 1:
-        r.mode = rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ;
-        break;
     case 4:
+    default:
         r.mode = rtengine::procparams::ColorCorrectionParams::Mode::LUT;
         break;
-    default:
-        r.mode = rtengine::procparams::ColorCorrectionParams::Mode::YUV;
     }
     r.inSaturation = inSaturation->getValue();
     r.outSaturation = outSaturation->getValue();
@@ -947,9 +1022,14 @@ void ColorCorrection::regionShow(int idx)
     case rtengine::procparams::ColorCorrectionParams::Mode::HSL:
         mode->set_active(3);
         break;
-    case rtengine::procparams::ColorCorrectionParams::Mode::LUT:
-        mode->set_active(4);
-        break;
+    case rtengine::procparams::ColorCorrectionParams::Mode::LUT: {
+        auto it = builtin_lut_to_idx.find(r.lutFilename);
+        if (it != builtin_lut_to_idx.end()) {
+            mode->set_active(it->second);
+        } else {
+            mode->set_active(4);
+        }
+    }   break;
     default:
         mode->set_active(0);
     }
@@ -999,13 +1079,22 @@ void ColorCorrection::modeChanged()
         box->pack_start(*box_combined);
     } else if (row == 2) {
         box->pack_start(*box_rgb);
-    } else if (row == 4) {
-        box->pack_start(*box_lut);
-    } else {
+    } else if (row == 3) {
         box->pack_start(*box_hsl);
+    } else {
+        box->pack_start(*box_lut);
+        lut_filename_box->set_visible(row == 4);
+        if (row > 4) {
+            auto fn = builtin_luts[row].second;
+            if (lut_filename->get_filename() != fn) {
+                lut_filename->set_filename(fn);
+                lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(fn));
+                lut_params->setValue({});
+            }
+        }
     }
-    satframe->set_visible(mode->get_active_row_number() != 4);
-    hueframe->set_visible(mode->get_active_row_number() != 2 && mode->get_active_row_number() != 4);
+    satframe->set_visible(mode->get_active_row_number() < 4);
+    hueframe->set_visible(mode->get_active_row_number() != 2 && mode->get_active_row_number() < 4);
     if (listener && getEnabled()) {
         labMasks->setEdited(true);        
         listener->panelChanged(EvMode, mode->get_active_text());
@@ -1017,7 +1106,7 @@ void ColorCorrection::modeChanged()
     curve_rgb->queue_draw();
 
     static_cast<CurveDisplay *>(curve_lum)->setDirty(true);
-    curve_lum->queue_draw();    
+    curve_lum->queue_draw();
 }
 
 
@@ -1270,10 +1359,15 @@ void ColorCorrection::lutChanged()
     if (listener) {
         auto fn = Glib::filename_to_utf8(lut_filename->get_filename());
 
+        bool lut_is_builtin = builtin_lut_to_idx.find(fn) != builtin_lut_to_idx.end();
         lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(fn));
         lut_params->setValue({});
-        
-        listener->panelChanged(EvLUT, Glib::path_get_basename(fn));
+
+        if (lut_is_builtin) {
+            listener->panelChanged(EvMode, mode->get_active_text());
+        } else {
+            listener->panelChanged(EvLUT, Glib::path_get_basename(fn));
+        }
     }
 }
 

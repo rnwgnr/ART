@@ -40,7 +40,7 @@ struct CLUTParamDescriptor {
     double value_default;
     std::vector<Glib::ustring> choices;
     Glib::ustring gui_name;
-    Glib::ustring gui_help;
+    Glib::ustring gui_group;
     double gui_step;
 };
 

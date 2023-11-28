@@ -24,7 +24,7 @@
 
 #include "improcfun.h"
 #include "guidedfilter.h"
-#define BENCHMARK
+//#define BENCHMARK
 #include "StopWatch.h"
 #include "sleef.h"
 #include "coord.h"
