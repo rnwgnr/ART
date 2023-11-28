@@ -1083,6 +1083,9 @@ void ColorCorrection::modeChanged()
         box->pack_start(*box_hsl);
     } else {
         box->pack_start(*box_lut);
+        if (!lut_filename_box->is_visible()) {
+            lut_filename->set_filename("");
+        }
         lut_filename_box->set_visible(row == 4);
         if (row > 4) {
             auto fn = builtin_luts[row].second;
@@ -1091,6 +1094,9 @@ void ColorCorrection::modeChanged()
                 lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(fn));
                 lut_params->setValue({});
             }
+        } else {
+            lut_params->setParams({});
+            lut_params->setValue({});
         }
     }
     satframe->set_visible(mode->get_active_row_number() < 4);
