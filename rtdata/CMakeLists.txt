@@ -8,6 +8,10 @@ file(GLOB FONTS "fonts/*")
 set(PROFILESDIR "profiles")
 set(THEMEDIR "themes")
 
+set(CTLSCRIPTSDIR "ctlscripts")
+set(LUTSDIR "luts")
+
+
 file(GLOB IMG_SVG LIST_DIRECTORIES false "images/svg/*")
 file(GLOB IMG_PNG LIST_DIRECTORIES false "images/png/*")
 file(GLOB IMG_ICO LIST_DIRECTORIES false "images/*")
@@ -56,6 +60,9 @@ install(DIRECTORY ${THEMEDIR} DESTINATION "${DATADIR}")
 install(FILES ${IMG_SVG} DESTINATION "${DATADIR}/images")
 install(FILES ${IMG_PNG} DESTINATION "${DATADIR}/images")
 install(FILES ${IMG_ICO} DESTINATION "${DATADIR}/images")
+
+install(DIRECTORY ${CTLSCRIPTSDIR} DESTINATION "${DATADIR}")
+install(DIRECTORY ${LUTSDIR} DESTINATION "${DATADIR}")
 
 if(APPLE)
     # CMake escapes first item quote character. Do not remove 'DUMMY_VARIABLE='

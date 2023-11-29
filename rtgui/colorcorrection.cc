@@ -55,9 +55,7 @@ void get_builtin_luts()
                     for (const auto &n : Glib::Dir(dir)) {
                         const std::string full_path = Glib::build_filename(dir, n);
 
-                        if (!Glib::file_test(full_path, Glib::FILE_TEST_IS_DIR) &&
-                            getExtension(full_path) == "ctl"
-                            && full_path[0] != '_') {
+                        if (!Glib::file_test(full_path, Glib::FILE_TEST_IS_DIR) && getExtension(full_path) == "ctl" && n[0] != '_') {
                             auto name = CLUTStore::getClutDisplayName(full_path);
                             if (order.find(name) == order.end()) {
                                 order[name] = full_path;
