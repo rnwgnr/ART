@@ -56,7 +56,8 @@ void get_builtin_luts()
                         const std::string full_path = Glib::build_filename(dir, n);
 
                         if (!Glib::file_test(full_path, Glib::FILE_TEST_IS_DIR) &&
-                            getExtension(full_path) == "ctl") {
+                            getExtension(full_path) == "ctl"
+                            && full_path[0] != '_') {
                             auto name = CLUTStore::getClutDisplayName(full_path);
                             if (order.find(name) == order.end()) {
                                 order[name] = full_path;
@@ -1058,10 +1059,10 @@ void ColorCorrection::regionShow(int idx)
         lfactor[c]->setValue(r.factor[c]);
     }
     rgbluminance->set_active(r.rgbluminance);
+    modeChanged();
     lut_filename->set_filename(Glib::filename_from_utf8(r.lutFilename));
     lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(r.lutFilename));
     lut_params->setValue(r.lut_params);
-    modeChanged();
     if (disable) {
         enableListener();
     }
@@ -1085,6 +1086,8 @@ void ColorCorrection::modeChanged()
         box->pack_start(*box_lut);
         if (!lut_filename_box->is_visible()) {
             lut_filename->set_filename("");
+            lut_params->setParams({});
+            lut_params->setValue({});
         }
         lut_filename_box->set_visible(row == 4);
         if (row > 4) {
@@ -1094,9 +1097,6 @@ void ColorCorrection::modeChanged()
                 lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(fn));
                 lut_params->setValue({});
             }
-        } else {
-            lut_params->setParams({});
-            lut_params->setValue({});
         }
     }
     satframe->set_visible(mode->get_active_row_number() < 4);

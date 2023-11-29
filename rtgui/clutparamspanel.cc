@@ -55,7 +55,6 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
     Gtk::VBox *vb = this;
 
     std::vector<std::pair<Glib::ustring, Gtk::Box *>> groups;
-    std::vector<MyExpander *> expanders;
 
     for (auto &d : params) {
         Gtk::Widget *w = nullptr;
@@ -68,15 +67,12 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
                 }
             }
             if (!box) {
-                MyExpander *e = Gtk::manage(new MyExpander(false, lbl(d.gui_group)));
-                ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
-                e->add(*tb, false);
-                e->setLevel(1);
+                Gtk::Frame *e = Gtk::manage(new Gtk::Frame(lbl(d.gui_group)));
+                Gtk::VBox *tb = Gtk::manage(new Gtk::VBox());
+                e->add(*tb);
                 vb->pack_start(*e);
-                e->set_expanded(false);
                 box = tb;
                 groups.emplace_back(d.gui_group, tb);
-                expanders.push_back(e);
             }
         }
         if (!box) {
@@ -113,9 +109,6 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
         widgets_.push_back(w);
     }
     show_all_children();
-    for (auto e : expanders) {
-        e->set_expanded(false);
-    }
 }
 
 
