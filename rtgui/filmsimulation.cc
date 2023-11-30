@@ -81,6 +81,7 @@ FilmSimulation::FilmSimulation():
     lut_params_->signal_changed().connect(sigc::mem_fun(this, &FilmSimulation::onClutParamsChanged));
     pack_start(*lut_params_);
 
+    pack_start(*Gtk::manage(new Gtk::HSeparator()));
     m_strength = Gtk::manage( new Adjuster( M("TP_FILMSIMULATION_STRENGTH"), 0., 100, 1., 100 ) );
     m_strength->setAdjusterListener( this );
 
