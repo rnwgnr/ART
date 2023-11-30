@@ -1011,31 +1011,9 @@ void ColorCorrection::regionShow(int idx)
         disableListener();
     }
     auto &r = data[idx];
-    switch (r.mode) {
-    case rtengine::procparams::ColorCorrectionParams::Mode::RGB:
-        mode->set_active(2);
-        break;
-    case rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ:
-        mode->set_active(1);
-        break;
-    case rtengine::procparams::ColorCorrectionParams::Mode::HSL:
-        mode->set_active(3);
-        break;
-    case rtengine::procparams::ColorCorrectionParams::Mode::LUT: {
-        auto it = builtin_lut_to_idx.find(r.lutFilename);
-        if (it != builtin_lut_to_idx.end()) {
-            mode->set_active(it->second);
-        } else {
-            mode->set_active(4);
-        }
-    }   break;
-    default:
-        mode->set_active(0);
-    }
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
     hueshift->setValue(r.hueshift);
-    // hueshift->setValue(0.0, r.hueshift);
     if (wheel->isCurrentSubscriber()) {
         wheel->unsubscribe();
     }
@@ -1057,10 +1035,33 @@ void ColorCorrection::regionShow(int idx)
         lfactor[c]->setValue(r.factor[c]);
     }
     rgbluminance->set_active(r.rgbluminance);
-    modeChanged();
+    //modeChanged();
     lut_filename->set_filename(Glib::filename_from_utf8(r.lutFilename));
     lut_params->setParams(rtengine::CLUTApplication::get_param_descriptors(r.lutFilename));
     lut_params->setValue(r.lut_params);
+
+    switch (r.mode) {
+    case rtengine::procparams::ColorCorrectionParams::Mode::RGB:
+        mode->set_active(2);
+        break;
+    case rtengine::procparams::ColorCorrectionParams::Mode::JZAZBZ:
+        mode->set_active(1);
+        break;
+    case rtengine::procparams::ColorCorrectionParams::Mode::HSL:
+        mode->set_active(3);
+        break;
+    case rtengine::procparams::ColorCorrectionParams::Mode::LUT: {
+        auto it = builtin_lut_to_idx.find(r.lutFilename);
+        if (it != builtin_lut_to_idx.end()) {
+            mode->set_active(it->second);
+        } else {
+            mode->set_active(4);
+        }
+    }   break;
+    default:
+        mode->set_active(0);
+    }
+    
     if (disable) {
         enableListener();
     }
@@ -1082,11 +1083,11 @@ void ColorCorrection::modeChanged()
         box->pack_start(*box_hsl);
     } else {
         box->pack_start(*box_lut);
-        if (!lut_filename_box->is_visible()) {
-            lut_filename->set_filename("");
-            lut_params->setParams({});
-            lut_params->setValue({});
-        }
+        // if (!lut_filename_box->is_visible()) {
+        //     lut_filename->set_filename("");
+        //     lut_params->setParams({});
+        //     lut_params->setValue({});
+        // }
         lut_filename_box->set_visible(row == 4);
         if (row > 4) {
             auto fn = builtin_luts[row].second;
