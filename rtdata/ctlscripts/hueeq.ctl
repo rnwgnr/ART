@@ -1,4 +1,23 @@
-// @ART-label: "Equalizer by Hue"
+/**
+ *  This file is part of ART.
+ *
+ *  Copyright 2023 Alberto Griggio <alberto.griggio@gmail.com>
+ *
+ *  ART is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  ART is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// @ART-label: "$CTL_EQUALIZER_H"
 // @ART-colorspace: "rec2020"
 
 import "_artlib";
@@ -44,13 +63,13 @@ float get_factor(float h, int red, int magenta, int blue,
 
 const float noise = pow(2, -16);
 
-// @ART-param: ["mode", "Target", ["Hue", "Saturation", "Lightness"]]
-// @ART-param: ["red", "Red", -100, 100, 0]
-// @ART-param: ["magenta", "Magenta", -100, 100, 0]
-// @ART-param: ["blue", "Blue", -100, 100, 0]
-// @ART-param: ["cyan", "Cyan", -100, 100, 0]
-// @ART-param: ["green", "Green", -100, 100, 0]
-// @ART-param: ["yellow", "Yellow", -100, 100, 0]
+// @ART-param: ["mode", "$CTL_TARGET", ["$TP_COLORCORRECTION_H", "$TP_COLORCORRECTION_S", "$TP_COLORCORRECTION_L"]]
+// @ART-param: ["red", "$TP_COLORCORRECTION_CHANNEL_R", -100, 100, 0]
+// @ART-param: ["magenta", "$CTL_MAGENTA", -100, 100, 0]
+// @ART-param: ["blue", "$TP_COLORCORRECTION_CHANNEL_B", -100, 100, 0]
+// @ART-param: ["cyan", "$CTL_CYAN", -100, 100, 0]
+// @ART-param: ["green", "$TP_COLORCORRECTION_CHANNEL_G", -100, 100, 0]
+// @ART-param: ["yellow", "$CTL_YELLOW", -100, 100, 0]
 
 void ART_main(varying float r, varying float g, varying float b,
               output varying float rout,

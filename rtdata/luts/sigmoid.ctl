@@ -21,7 +21,7 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// @ART-label: "Sigmoid Tone Mapper"
+// @ART-label: "$CTL_SIGMOID"
 // @ART-colorspace: "rec2020"
 
 //-----------------------------------------------------------------------------
@@ -298,15 +298,15 @@ void calculate_adjusted_primaries(float inset[3], float rotation[3],
 // script entry point and parameters definition
 //-----------------------------------------------------------------------------
 
-// @ART-param: ["middle_grey_contrast", "Contrast", 0.7, 3, 1.5, 0.1]
-// @ART-param: ["contrast_skewness", "Skew", -1, 1, -0.2, 0.01]
-// @ART-param: ["custom_primaries", "Use custom primaries", true, "Custom primaries"]
-// @ART-param: ["r_inset", "Red attenuation", 0, 50, 10, 0.1, "Custom primaries"]
-// @ART-param: ["r_rotation", "Red rotation", -22.9, 22.9, 2, 0.1, "Custom primaries"]
-// @ART-param: ["g_inset", "Green attenuation", 0, 50, 10, 0.1, "Custom primaries"]
-// @ART-param: ["g_rotation", "Green rotation", -22.9, 22.9, -1, 0.1, "Custom primaries"]
-// @ART-param: ["b_inset", "Blue attenuation", 0, 50, 15, 0.1, "Custom primaries"]
-// @ART-param: ["b_rotation", "Blue rotation", -22.9, 22.9, -3, 0.1, "Custom primaries"]
+// @ART-param: ["middle_grey_contrast", "$TP_LABCURVE_CONTRAST", 0.7, 3, 1.5, 0.1]
+// @ART-param: ["contrast_skewness", "$CTL_SIGMOID_SKEW", -1, 1, -0.2, 0.01]
+// @ART-param: ["custom_primaries", "$CTL_SIGMOID_USE_PRIMARIES", true]
+// @ART-param: ["r_inset", "$CTL_SIGMOID_INSET", 0, 50, 10, 0.1, "$TP_CHMIXER_PRIMARY_R"]
+// @ART-param: ["r_rotation", "$CTL_SIGMOID_ROTATION", -22.9, 22.9, 2, 0.1, "$TP_CHMIXER_PRIMARY_R"]
+// @ART-param: ["g_inset", "$CTL_SIGMOID_INSET", 0, 50, 10, 0.1, "$TP_CHMIXER_PRIMARY_G"]
+// @ART-param: ["g_rotation", "$CTL_SIGMOID_ROTATION", -22.9, 22.9, -1, 0.1, "$TP_CHMIXER_PRIMARY_G"]
+// @ART-param: ["b_inset", "$CTL_SIGMOID_INSET", 0, 50, 15, 0.1, "$TP_CHMIXER_PRIMARY_B"]
+// @ART-param: ["b_rotation", "$CTL_SIGMOID_ROTATION", -22.9, 22.9, -3, 0.1, "$TP_CHMIXER_PRIMARY_B"]
 
 void ART_main(varying float r,
               varying float g,

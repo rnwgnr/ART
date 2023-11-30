@@ -1,4 +1,23 @@
-// @ART-label: "Temperature/Primaries Correction"
+/**
+ *  This file is part of ART.
+ *
+ *  Copyright 2023 Alberto Griggio <alberto.griggio@gmail.com>
+ *
+ *  ART is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  ART is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// @ART-label: "$CTL_CORRECTION_MATRIX"
 // @ART-colorspace: "rec2020"
 
 import "_artlib";
@@ -108,14 +127,14 @@ float[3][3] get_matrix(float rhue, float rsat, float ghue, float gsat,
 }
 
 
-// @ART-param: ["temp", "$TP_WBALANCE_TEMPERATURE", -100, 100, 0, 0.1]
-// @ART-param: ["tint", "$TP_WBALANCE_GREEN", -100, 100, 0, 0.1]
-// @ART-param: ["rhue", "Red hue", -100, 100, 0, 1, "$TP_CHMIXER_MODE_PRIMARIES_CHROMA"]
-// @ART-param: ["rsat", "Red saturation", -100, 100, 0, 1, "$TP_CHMIXER_MODE_PRIMARIES_CHROMA"]
-// @ART-param: ["ghue", "Green hue", -100, 100, 0, 1, "$TP_CHMIXER_MODE_PRIMARIES_CHROMA"]
-// @ART-param: ["gsat", "Green saturation", -100, 100, 0, 1, "$TP_CHMIXER_MODE_PRIMARIES_CHROMA"]
-// @ART-param: ["bhue", "Blue hue", -100, 100, 0, 1, "$TP_CHMIXER_MODE_PRIMARIES_CHROMA"]
-// @ART-param: ["bsat", "Blue saturation", -100, 100, 0, 1, "$TP_CHMIXER_MODE_PRIMARIES_CHROMA"]
+// @ART-param: ["temp", "$TP_WBALANCE_TEMPERATURE", -100, 100, 0, 0.1, "$TP_WBALANCE_LABEL"]
+// @ART-param: ["tint", "$TP_WBALANCE_GREEN", -100, 100, 0, 0.1, "$TP_WBALANCE_LABEL"]
+// @ART-param: ["rhue", "$TP_CHMIXER_HUE", -100, 100, 0, 1, "$TP_CHMIXER_PRIMARY_R"]
+// @ART-param: ["rsat", "$TP_CHMIXER_SAT", -100, 100, 0, 1, "$TP_CHMIXER_PRIMARY_R"]
+// @ART-param: ["ghue", "$TP_CHMIXER_HUE", -100, 100, 0, 1, "$TP_CHMIXER_PRIMARY_G"]
+// @ART-param: ["gsat", "$TP_CHMIXER_SAT", -100, 100, 0, 1, "$TP_CHMIXER_PRIMARY_G"]
+// @ART-param: ["bhue", "$TP_CHMIXER_HUE", -100, 100, 0, 1, "$TP_CHMIXER_PRIMARY_B"]
+// @ART-param: ["bsat", "$TP_CHMIXER_SAT", -100, 100, 0, 1, "$TP_CHMIXER_PRIMARY_B"]
 
 void ART_main(varying float r, varying float g, varying float b,
               output varying float rout,

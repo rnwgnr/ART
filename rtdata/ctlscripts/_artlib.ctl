@@ -1,3 +1,23 @@
+/**
+ *
+ *  This file is part of ART.
+ *
+ *  Copyright 2023 Alberto Griggio <alberto.griggio@gmail.com>
+ *
+ *  ART is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  ART is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 const float xyz_rec2020[3][3] = {
     {0.6734241,  0.1656411,  0.1251286},
     {0.2790177,  0.6753402,  0.0456377},

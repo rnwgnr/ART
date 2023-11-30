@@ -1,4 +1,23 @@
-// @ART-label: "Equalizer by Luminance"
+/**
+ *  This file is part of ART.
+ *
+ *  Copyright 2023 Alberto Griggio <alberto.griggio@gmail.com>
+ *
+ *  ART is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  ART is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// @ART-label: "$CTL_EQUALIZER_L"
 // @ART-colorspace: "rec2020"
 
 import "_artlib";
@@ -112,7 +131,7 @@ float apply_vibrance(float x, float vib)
 }
 
 
-// @ART-param: ["mode", "Target", ["Luminance", "Saturation", "Vibrance"]]
+// @ART-param: ["mode", "$CTL_TARGET", ["$TP_COLORCORRECTION_L", "$TP_COLORCORRECTION_S", "$TP_SATURATION_VIBRANCE"]]
 // @ART-param: ["blacks", "$TP_TONE_EQUALIZER_BAND_0", -100, 100, 0]
 // @ART-param: ["shadows", "$TP_TONE_EQUALIZER_BAND_1", -100, 100, 0]
 // @ART-param: ["midtones", "$TP_TONE_EQUALIZER_BAND_2", -100, 100, 0]
