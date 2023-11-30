@@ -69,6 +69,7 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
             if (!box) {
                 Gtk::Frame *e = Gtk::manage(new Gtk::Frame(lbl(d.gui_group)));
                 Gtk::VBox *tb = Gtk::manage(new Gtk::VBox());
+                e->set_name("ExpanderBox2");
                 e->add(*tb);
                 vb->pack_start(*e);
                 box = tb;
