@@ -34,11 +34,11 @@ const float centers[6] = {
     hue(0, 1, 1), hue(0, 1, 0), hue(1, 1, 0)
 };
 
+const float sigma2 = M_PI / 6;
 
 float gauss_sum()
 {
     float res = 0;
-    const float sigma2 = M_PI / 6;
     for (int i = 0; i < 6; i = i+1) {
         res = res + gauss(centers[i], sigma2, 0);
     }
@@ -53,7 +53,6 @@ float get_factor(float h, int red, int magenta, int blue,
 {
     const float f[6] = { red, magenta, blue, cyan, green, yellow };
     float res = 0;
-    const float sigma2 = M_PI / 6;
     for (int i = 0; i < 6; i = i+1) {
         res = res + f[i]/100 * gauss(centers[i], sigma2, h);
     }

@@ -55,30 +55,29 @@ float[3] temp_to_xy(float temp)
 }
 
 
+float get_normal_slope(float temp)
+{
+    float xy[3] = temp_to_xy(temp);
+    float hi[3] = temp_to_xy(temp-100);
+    float slope = 0;
+    float t = (hi[1] - xy[1]) / (hi[0] - xy[0]);
+    float m = -1.0 / t;
+    float q = xy[1] - m * xy[0];
+    return m;
+}
+
+
 float[3] temp_tint_to_xy(float temp, float tint)
 {
     float xy[3] = temp_to_xy(temp);
     float x = xy[0];
     float y = xy[1];
-    const float x2 = x * x;
-    float f;
-    if (temp <= 2222) {
-        f = -1.1063814 * 3 * x2 - 1.34811020 * 2 * x + 2.18555832;
-    } else if (temp <= 4000) {
-        f = -0.9549476 * 3 * x2 - 1.37418593 * 2 * x + 2.09137015;
-    } else {
-        f = 3.0817580 * 3 * x2 - 5.87338670 * 2 * x + 3.75112997;
-    }
-    if (f == 0) {
-        y = y + tint;
-    } else {
-        const float m = -1.0 / f;
-        const float q = y - m * x;
-        const float angle = atan(m);
-        x = x + cos(angle) * tint;
-        y = y + sin(angle) * tint;
-    }
     
+    float m = get_normal_slope(temp);
+    const float angle = atan(m);
+    x = x + cos(angle) * tint;
+    y = y + sin(angle) * tint;
+
     float res[3] = { x, y, 1.0 - x - y };
     return res;
 }
@@ -110,11 +109,12 @@ float[3][3] get_matrix(float rhue, float rsat, float ghue, float gsat,
 {
     float temp_k = 5000;
     if (temp > 0) {
-        temp_k = temp_k + 100 * temp;
+        temp_k = temp_k + 50 * temp;
     } else {
-        temp_k = temp_k + 32 * temp;
+        temp_k = temp_k + 20 * temp;
     }
     const float white[3] = temp_tint_to_xy(temp_k, tint / 1000);
+
     const float M[3][3] =
         matrix_from_primaries(red_xy, green_xy, blue_xy, white);
     const float N[3][3] = matrix_from_primaries(
