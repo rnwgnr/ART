@@ -56,8 +56,29 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
 
     std::vector<std::pair<Glib::ustring, Gtk::Box *>> groups;
 
-    vb->pack_start(*Gtk::manage(new Gtk::HSeparator()));
-
+    const auto reset =
+        [this]() -> void
+        {
+            setValue({});
+            emit_signal();
+        };
+    Gtk::Button *r = Gtk::manage(new Gtk::Button());
+    r->set_tooltip_markup(M("ADJUSTER_RESET_TO_DEFAULT"));
+    r->add(*Gtk::manage(new RTImage("undo-small.png", "redo-small.png")));
+    r->signal_clicked().connect(sigc::slot<void>(reset));
+    setExpandAlignProperties(r, false, false, Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+    r->set_relief(Gtk::RELIEF_NONE);
+    r->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
+    r->set_can_focus(false);
+    r->set_size_request(-1, 20);
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    auto sep = Gtk::manage(new Gtk::HSeparator());
+    sep->set_vexpand(false);
+    sep->set_valign(Gtk::ALIGN_CENTER);
+    hb->pack_start(*sep);
+    hb->pack_start(*r, Gtk::PACK_SHRINK, 2);
+    vb->pack_start(*hb);
+    
     for (auto &d : params) {
         Gtk::Widget *w = nullptr;
         Gtk::Box *box = nullptr;
