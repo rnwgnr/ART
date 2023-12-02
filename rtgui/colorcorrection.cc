@@ -215,7 +215,7 @@ public:
             if (builtin_lut_to_idx.find(r.lutFilename) != builtin_lut_to_idx.end()) {
                 return rtengine::CLUTStore::getClutDisplayName(r.lutFilename);
             } else {
-                return Glib::ustring::compose("LUT %1", Glib::path_get_basename(r.lutFilename));
+                return Glib::ustring::compose("LUT %1", rtengine::CLUTStore::getClutDisplayName(r.lutFilename));
             }
             break;
         default: {

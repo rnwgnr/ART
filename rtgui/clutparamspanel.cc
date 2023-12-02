@@ -56,9 +56,7 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
 
     std::vector<std::pair<Glib::ustring, Gtk::Box *>> groups;
 
-    if (!params.empty()) {
-        vb->pack_start(*Gtk::manage(new Gtk::HSeparator()));
-    }
+    vb->pack_start(*Gtk::manage(new Gtk::HSeparator()));
 
     for (auto &d : params) {
         Gtk::Widget *w = nullptr;
