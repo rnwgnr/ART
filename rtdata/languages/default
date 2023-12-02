@@ -8,11 +8,6 @@ ABOUT_TAB_LICENSE;License
 ABOUT_TAB_RELEASENOTES;Release Notes
 ABOUT_TAB_SPLASH;Splash
 ADJUSTER_RESET_TO_DEFAULT;<b>Click</b> - reset to default value.\n<b>Ctrl</b>+<b>click</b> - reset to last saved value.
-CTL_CORRECTION_MATRIX;WB and primaries correction
-CTL_CYAN;Cyan
-CTL_EQUALIZER_H;Equalizer by hue
-CTL_EQUALIZER_L;Equalizer by luminance
-CTL_MAGENTA;Magenta
 CTL_SIGMOID;Sigmoid tone mapper
 CTL_SIGMOID_BASE_PRIMARIES;Base primaries
 CTL_SIGMOID_INSET;Attenuation
@@ -20,8 +15,6 @@ CTL_SIGMOID_PURITY;Recover purity
 CTL_SIGMOID_ROTATION;Rotation
 CTL_SIGMOID_SKEW;Skew
 CTL_SIGMOID_USE_PRIMARIES;Use custom primaries
-CTL_TARGET;Target
-CTL_YELLOW;Yellow
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
