@@ -2518,7 +2518,7 @@ ColorManagementParams::ColorManagementParams() :
     applyHueSatMap(true),
     dcpIlluminant(0),
     workingProfile("Rec2020"),
-    outputProfile(options.rtSettings.srgb),
+    outputProfile("RTv4_sRGB"),
     outputIntent(RI_RELATIVE),
     outputBPC(true),
     inputProfileCAT(false)

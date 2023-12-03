@@ -84,6 +84,7 @@ public:
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace) const;
+    float CTL_shaper(float a, bool inv);
 #endif // ART_USE_CTL
 
     void clearCache();
@@ -113,6 +114,8 @@ private:
         Glib::ustring colorspace;
     };
     mutable Cache<Glib::ustring, CTLCacheEntry> ctl_cache_;
+    LUTf ctl_pq_;
+    LUTf ctl_pq_inv_;
 #endif // ART_USE_CTL
     mutable MyMutex mutex_;
 };
@@ -120,13 +123,18 @@ private:
 
 class CLUTApplication {
 public:
+    enum class Quality {
+        LOW,
+        MEDIUM,
+        HIGH
+    };
     CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile="", float strength=1.f, int num_threads=1);
     void operator()(Imagefloat *img);
     void apply(int thread_id, int W, float *r, float *g, float *b);
     operator bool() const { return ok_; }
 
     std::vector<CLUTParamDescriptor> get_param_descriptors() const;
-    bool set_param_values(const std::vector<double> &values);
+    bool set_param_values(const std::vector<double> &values, Quality q=Quality::HIGH);
 
     static std::vector<CLUTParamDescriptor> get_param_descriptors(const Glib::ustring &filename);
 
@@ -161,10 +169,13 @@ private:
 #ifdef ART_USE_CTL
     bool CTL_init(int num_threads);
     void CTL_apply(int thread_id, int W, float *r, float *g, float *b);
-    bool CTL_set_params(const std::vector<double> &values);
+    bool CTL_set_params(const std::vector<double> &values, Quality q);
+    void CTL_init_lut(int dim);
     std::vector<Ctl::FunctionCallPtr> ctl_func_;
     int ctl_chunk_size_;
     std::vector<CLUTParamDescriptor> ctl_params_;
+    std::vector<Imath::V3f> ctl_lut_;
+    int ctl_lut_dim_;
 #endif // ART_USE_CTL
 
 #if defined ART_USE_OCIO || defined ART_USE_CTL

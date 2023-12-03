@@ -543,30 +543,8 @@ void Options::setDefaults()
     rtSettings.monitorIntent = rtengine::RI_RELATIVE;
     rtSettings.monitorBPC = true;
     rtSettings.autoMonitorProfile = false;
-    rtSettings.adobe = "RTv2_Medium"; // put the name of yours profiles (here windows)
-    rtSettings.prophoto = "RTv2_Large"; // these names appear in the menu "output profile"
-    rtSettings.widegamut = "RTv2_Wide";
-    rtSettings.srgb = "RTv4_sRGB";
-    rtSettings.bruce = "RTv2_Bruce";
-    rtSettings.beta = "RTv2_Beta";
-    rtSettings.best = "RTv2_Best";
-    rtSettings.rec2020 = "RTv2_Rec2020";
-    rtSettings.ACESp0 = "RTv2_ACES-AP0";
-    rtSettings.ACESp1 = "RTv2_ACES-AP1";
     rtSettings.verbose = 0;
-
     rtSettings.HistogramWorking = false;
-
-    // #4327 - Noise Reduction settings removed from Preferences
-    rtSettings.nrauto = 10; // between 2 and 20
-    rtSettings.nrautomax = 40; // between 5 and 100
-    rtSettings.nrhigh = 0.9;//0.45; // between 0.1 and 0.9
-    rtSettings.nrwavlevel = 2;//1; // integer between 0 and 2
-    rtSettings.leveldnv = 2;
-    rtSettings.leveldnti = 0;
-    rtSettings.leveldnaut = 0;
-    rtSettings.leveldnliss = 0;
-    rtSettings.leveldnautsimpl = 0;
 
     lastIccDir = rtSettings.iccDirectory;
     lastDarkframeDir = rtSettings.darkFramesPath;
@@ -613,6 +591,7 @@ void Options::setDefaults()
     rtSettings.exiftool_path += ".exe";
 #endif
     rtSettings.thread_pool_size = 0;
+    rtSettings.ctl_scripts_fast_preview = true;
     show_exiftool_makernotes = false;
 
     browser_width_for_inspector = 0;
@@ -1179,6 +1158,10 @@ void Options::readFromFile(Glib::ustring fname)
 
                 if (keyFile.has_key("Performance", "ThumbCacheProcessed")) {
                     thumb_cache_processed = keyFile.get_boolean("Performance", "ThumbCacheProcessed");
+                }
+
+                if (keyFile.has_key("Performance", "CTLScriptsFastPreview")) {
+                    rtSettings.ctl_scripts_fast_preview = keyFile.get_boolean("Performance", "CTLScriptsFastPreview");
                 }
             }
 
@@ -1955,6 +1938,7 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Performance", "ThumbDelayUpdate", thumb_delay_update);
         keyFile.set_boolean("Performance", "ThumbLazyCaching", thumb_lazy_caching);
         keyFile.set_boolean("Performance", "ThumbCacheProcessed", thumb_cache_processed);
+        keyFile.set_boolean("Performance", "CTLScriptsFastPreview", rtSettings.ctl_scripts_fast_preview);
         
         keyFile.set_integer("Performance", "WBPreviewMode", wb_preview_mode);
         keyFile.set_integer("Inspector", "Mode", int(rtSettings.thumbnail_inspector_mode));

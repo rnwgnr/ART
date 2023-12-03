@@ -347,13 +347,26 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 #else
             int num_threads = 1;
 #endif
+            CLUTApplication::Quality q = CLUTApplication::Quality::HIGH;
+            switch (cur_pipeline) {
+            case Pipeline::THUMBNAIL:
+                q = CLUTApplication::Quality::LOW;
+                break;
+            case Pipeline::PREVIEW:
+                if (scale > 1) {
+                    q = CLUTApplication::Quality::MEDIUM;
+                }
+                break;
+            default:
+                break;
+            }
             lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads));
             if (!(*lut[i])) {
                 lut[i].reset(nullptr);
                 if (plistener) {
                     plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), r.lutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : r.lutFilename));
                 }
-            } else if (!lut[i]->set_param_values(r.lut_params)) {
+            } else if (!lut[i]->set_param_values(r.lut_params, q)) {
                 lut[i].reset(nullptr);
                 if (plistener) {
                     plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_INVALID_LUT_PARAMS"), r.lutFilename));

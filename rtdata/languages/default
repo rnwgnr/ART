@@ -1010,6 +1010,7 @@ PREFERENCES_CLUTSCACHE;CLUT Cache
 PREFERENCES_CLUTSCACHE_LABEL;Maximum number of cached CLUTs
 PREFERENCES_CLUTSDIR;CLUT directory
 PREFERENCES_CMMBPC;Black point compensation
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Use faster but less accurate renderer for CTL scripts in the preview at <100% zoom
 PREFERENCES_CURVEBBOXPOS;Position of curve copy & paste buttons
 PREFERENCES_CURVEBBOXPOS_ABOVE;Above
 PREFERENCES_CURVEBBOXPOS_BELOW;Below

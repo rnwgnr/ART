@@ -1287,7 +1287,7 @@ void ShrinkAll_info(float ** WavCoeffs_a, float ** WavCoeffs_b,
         }
     }
 
-    const float reduc = (schoice == 2) ? static_cast<float>(settings->nrhigh) : 1.f;
+    const float reduc = (schoice == 2) ? static_cast<float>(0.9/*settings->nrhigh*/) : 1.f;
 
     for (int dir = 1; dir < 4; ++dir) {
         float mada, madb;
@@ -1669,7 +1669,7 @@ BENCHFUN
     MyMutex::MyLock lock(*fftwMutex);
 
     const nrquality nrQuality = (!dnparams.aggressive) ? QUALITY_STANDARD : QUALITY_HIGH;//shrink method
-    const float qhighFactor = (nrQuality == QUALITY_HIGH) ? 1.f / static_cast<float>(settings->nrhigh) : 1.0f;
+    const float qhighFactor = (nrQuality == QUALITY_HIGH) ? 1.f / static_cast<float>(0.9/*settings->nrhigh*/) : 1.0f;
     const bool useNoiseCCurve = (noiseCCurve && noiseCCurve.getSum() > 5.f);
     const bool useNoiseLCurve = (noiseLCurve && noiseLCurve.getSum() >= 7.f);
     const bool autoch = dnparams.chrominanceMethod == procparams::DenoiseParams::ChrominanceMethod::AUTOMATIC;
@@ -1848,15 +1848,15 @@ BENCHFUN
         int tilesize;
         int overlap;
 
-        if (settings->leveldnti == 0) {
+        // if (settings->leveldnti == 0) {
             tilesize = 1024;
             overlap = 128;
-        }
+        // }
 
-        if (settings->leveldnti == 1) {
-            tilesize = 768;
-            overlap = 96;
-        }
+        // if (settings->leveldnti == 1) {
+        //     tilesize = 768;
+        //     overlap = 96;
+        // }
 
         // int numTries = 0;
 
@@ -2258,7 +2258,7 @@ BENCHFUN
                             }
 
                             if (nrQuality == QUALITY_HIGH) {
-                                levwav += settings->nrwavlevel;    //increase level for enhanced mode
+                                levwav += 2; //settings->nrwavlevel;    //increase level for enhanced mode
                             }
 
                             if (levwav > 8) {

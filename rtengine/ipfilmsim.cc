@@ -46,7 +46,20 @@ void ImProcFunctions::filmSimulation(Imagefloat *img)
     CLUTApplication clut(params->filmSimulation.clutFilename, params->icm.workingProfile, float(params->filmSimulation.strength)/100.f, num_threads);
 
     if (clut) {
-        if (clut.set_param_values(params->filmSimulation.lut_params)) {
+        CLUTApplication::Quality q = CLUTApplication::Quality::HIGH;
+        switch (cur_pipeline) {
+        case Pipeline::THUMBNAIL:
+            q = CLUTApplication::Quality::LOW;
+            break;
+        case Pipeline::PREVIEW:
+            if (scale > 1) {
+                q = CLUTApplication::Quality::MEDIUM;
+            }
+            break;
+        default:
+            break;
+        }
+        if (clut.set_param_values(params->filmSimulation.lut_params, q)) {
             clut(img);
         } else if (plistener) {
             plistener->error(Glib::ustring::compose(M("TP_FILMSIMULATION_LABEL") + " - " + M("ERROR_MSG_INVALID_LUT_PARAMS"), params->filmSimulation.clutFilename));

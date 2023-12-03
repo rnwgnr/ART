@@ -28,14 +28,6 @@ class Settings {
 public:
     Glib::ustring   iccDirectory;           ///< The directory containing the possible output icc profiles
     Glib::ustring monitorIccDirectory;
-    int             viewingdevice;          // white of output device (D50...D65..)
-    int             viewingdevicegrey;      // level of grey output device
-    int             viewinggreySc;          // level of grey Scene
-    int             leveldnv;               // level of crop denoise
-    int             leveldnti;              // size of tiles denoise
-    int             leveldnaut;             // level of auto denoise
-    int             leveldnliss;            // level of auto multi zone
-    int             leveldnautsimpl;        // STD or EXPERT
 
     Glib::ustring   printerProfile;         ///< ICC profile name used for soft-proofing a printer output
     RenderingIntent printerIntent;          ///< Colorimetric intent used with the above profile
@@ -48,23 +40,8 @@ public:
     Glib::ustring   darkFramesPath;         ///< The default directory for dark frames
     Glib::ustring   flatFieldsPath;         ///< The default directory for flat fields
 
-    Glib::ustring   adobe;                  // filename of AdobeRGB1998 profile (default to the bundled one)
-    Glib::ustring   prophoto;               // filename of Prophoto     profile (default to the bundled one)
-    Glib::ustring   widegamut;              // filename of WidegamutRGB profile (default to the bundled one)
-    Glib::ustring   beta;                   // filename of BetaRGB      profile (default to the bundled one)
-    Glib::ustring   best;                   // filename of BestRGB      profile (default to the bundled one)
-    Glib::ustring   bruce;                  // filename of BruceRGB     profile (default to the bundled one)
-    Glib::ustring   srgb;                   // filename of sRGB         profile (default to the bundled one)
-    Glib::ustring   rec2020;                // filename of Rec2020      profile (default to the bundled one)
-    Glib::ustring   ACESp0;                 // filename of ACES P0      profile (default to the bundled one)
-    Glib::ustring   ACESp1;                 // filename of ACES P1      profile (default to the bundled one)
-
     bool            HistogramWorking;       // true: histogram is display the value of the image computed in the Working profile
                                             // false: histogram is display the value of the image computed in the Output profile
-    double          nrauto;
-    double          nrautomax;
-    double          nrhigh;
-    int             nrwavlevel;
     Glib::ustring   lensfunDbDirectory; ///< The directory containing the lensfun database. If empty, the system defaults will be used (as described in http://lensfun.sourceforge.net/manual/dbsearch.html)
 
     enum class ThumbnailInspectorMode {
@@ -96,6 +73,8 @@ public:
     Glib::ustring exiftool_path;
 
     int thread_pool_size;
+
+    bool ctl_scripts_fast_preview;
 
     /** Creates a new instance of Settings.
       * @return a pointer to the new Settings instance. */

@@ -395,6 +395,10 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     denoiseZoomedOut = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_DENOISE_ZOOM_OUT")));
     denoiseZoomedOut->set_tooltip_text(M("PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP"));
     vb->pack_start(*denoiseZoomedOut);
+    ctl_scripts_fast_preview_ = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW")));
+#ifdef ART_USE_CTL
+    vb->pack_start(*ctl_scripts_fast_preview_);
+#endif
     fprevdemo->add(*vb);
     vbPerformance->pack_start (*fprevdemo, Gtk::PACK_SHRINK, 4);
 
@@ -1854,6 +1858,7 @@ void Preferences::storePreferences ()
     moptions.thumb_delay_update = thumbDelayUpdate->get_active();
     moptions.thumb_lazy_caching = thumbLazyCaching->get_active();
     moptions.thumb_cache_processed = thumb_cache_processed_->get_active();
+    moptions.rtSettings.ctl_scripts_fast_preview = ctl_scripts_fast_preview_->get_active();
 
 // Sounds only on Windows and Linux
 #if defined(WIN32) || defined(__linux__)
@@ -2118,6 +2123,7 @@ void Preferences::fillPreferences ()
     thumbDelayUpdate->set_active(moptions.thumb_delay_update);
     thumbLazyCaching->set_active(moptions.thumb_lazy_caching);
     thumb_cache_processed_->set_active(moptions.thumb_cache_processed);
+    ctl_scripts_fast_preview_->set_active(moptions.rtSettings.ctl_scripts_fast_preview);
 
     if (!moptions.rtSettings.darkFramesPath.empty()) {
         darkFrameDir->set_current_folder(moptions.rtSettings.darkFramesPath);

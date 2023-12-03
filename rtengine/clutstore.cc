@@ -1004,6 +1004,36 @@ void rtengine::CLUTStore::clearCache()
 #endif // ART_USE_CTL
 }
 
+
+namespace {
+
+inline float CTL_shaper_pq(float a, bool inv)
+{
+    constexpr float m1 = 2610.0 / 16384.0;
+    constexpr float m2 = 2523.0 / 32.0;
+    constexpr float c1 = 107.0 / 128.0;
+    constexpr float c2 = 2413.0 / 128.0;
+    constexpr float c3 = 2392.0 / 128.0;
+    constexpr float scale = 100.0;
+
+    if (a <= 0.f) {
+        return 0.f;
+    }
+    
+    if (!inv) {
+        a /= scale;
+        float aa = pow_F(a, m1);
+        return pow_F((c1 + c2 * aa)/(1.f + c3 * aa), m2);
+    } else {
+        float p = pow_F(a, 1.f/m2);
+        float aa = std::max(p - c1, 0.f) / (c2 - c3 * p);
+        return pow_F(aa, 1.f/m1) * scale;
+    }
+}
+
+} // namespace
+
+
 rtengine::CLUTStore::CLUTStore() :
     cache(options.clutCacheSize)
 #ifdef ART_USE_OCIO
@@ -1013,6 +1043,24 @@ rtengine::CLUTStore::CLUTStore() :
     , ctl_cache_(options.clutCacheSize)
 #endif // ART_USE_CTL
 {
+#ifdef ART_USE_CTL
+    ctl_pq_(65536);
+    ctl_pq_inv_(65536);
+    for (int i = 0; i < 65536; ++i) {
+        float x = float(i) / 65535.f;
+        ctl_pq_[i] = CTL_shaper_pq(x, false);
+        ctl_pq_inv_[i] = CTL_shaper_pq(x, true);
+    }    
+#endif
+}
+
+
+float CLUTStore::CTL_shaper(float a, bool inv)
+{
+    if (a >= 0.f && a <= 1.f) {
+        return inv ? ctl_pq_inv_[a * 65535.f] : ctl_pq_[a * 65535.f];
+    }
+    return CTL_shaper_pq(a, inv);
 }
 
 
@@ -1101,6 +1149,7 @@ bool CLUTApplication::OCIO_init()
 
 bool CLUTApplication::CTL_init(int num_threads)
 {
+    ctl_lut_dim_ = 0;
     try {
         Glib::ustring colorspace = "ACESp0";
         Glib::ustring lbl;
@@ -1121,7 +1170,7 @@ bool CLUTApplication::CTL_init(int num_threads)
 }
 
 
-bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
+bool CLUTApplication::CTL_set_params(const std::vector<double> &values, Quality q)
 {
     try {
         if (values.size() != ctl_params_.size() && !values.empty()) {
@@ -1162,7 +1211,76 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values)
         return false;
     }
 
+    if (settings->ctl_scripts_fast_preview) {
+        switch (q) {
+        case Quality::LOW:
+            CTL_init_lut(20);
+            break;
+        case Quality::MEDIUM:
+            CTL_init_lut(64);
+            break;
+        default:
+            break;
+        }
+    }
+
     return true;
+}
+
+namespace {
+
+inline float CTL_shaper(float a, bool inv)
+{
+    return CLUTStore::getInstance().CTL_shaper(a, inv);
+}
+
+
+} // namespace
+
+
+void CLUTApplication::CTL_init_lut(int dim)
+{
+    ctl_lut_.clear();
+    ctl_lut_dim_ = 0;
+    
+    std::vector<float> rgb[3];
+
+    int sz = SQR(dim) * dim;
+    for (int i = 0; i < 3; ++i) {
+        rgb[i].reserve(sz);
+    }
+    
+    for (int i = 0; i < dim; ++i) {
+        float r = float(i)/(dim-1);
+        for (int j = 0; j < dim; ++j) {
+            float g = float(j)/(dim-1);
+            for (int k = 0; k < dim; ++k) {
+                float b = float(k)/(dim-1);
+                rgb[0].push_back(CTL_shaper(r, true));
+                rgb[1].push_back(CTL_shaper(g, true));
+                rgb[2].push_back(CTL_shaper(b, true));
+            }
+        }
+    }
+
+    auto func = ctl_func_[0];
+
+    for (int x = 0; x < sz; x += ctl_chunk_size_) {
+        const auto n = (x + ctl_chunk_size_ < sz ? ctl_chunk_size_ : sz - x);
+        for (int i = 0; i < 3; ++i) {
+            memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
+        }
+        func->callFunction(n);
+        for (int i = 0; i < 3; ++i) {
+            memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+        }
+    }
+
+    ctl_lut_.reserve(sz);
+    for (int i = 0; i < sz; ++i) {
+        ctl_lut_.emplace_back(rgb[0][i], rgb[1][i], rgb[2][i]);
+    }
+    ctl_lut_dim_ = dim;
 }
 
 #endif // ART_USE_CTL
@@ -1179,11 +1297,11 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors() const
 }
 
 
-bool CLUTApplication::set_param_values(const std::vector<double> &values)
+bool CLUTApplication::set_param_values(const std::vector<double> &values, Quality q)
 {
 #ifdef ART_USE_CTL
     if (!ctl_func_.empty()) {
-        return CTL_set_params(values);
+        return CTL_set_params(values, q);
     }
 #endif // ART_USE_CTL
     return values.empty();
@@ -1427,14 +1545,31 @@ inline void CLUTApplication::CTL_apply(int thread_id, int W, float *r, float *g,
             rgb[2][x] = v[2];
         }
 
-        for (int x = 0; x < W; x += ctl_chunk_size_) {
-            const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
-            for (int i = 0; i < 3; ++i) {
-                memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
-            }
-            func->callFunction(n);
-            for (int i = 0; i < 3; ++i) {
-                memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+        if (!ctl_lut_.empty()) {
+            const int d = ctl_lut_dim_;
+            const auto vd = Imath::V3i(d, d, d);
+            const auto vl = Imath::V3f(0, 0, 0);
+            const auto vh = Imath::V3f(1, 1, 1);
+            
+            for (int x = 0; x < W; ++x) {
+                Imath::V3f p(CTL_shaper(rgb[0][x], false),
+                             CTL_shaper(rgb[1][x], false),
+                             CTL_shaper(rgb[2][x], false));
+                p = Ctl::lookup3D(&ctl_lut_[0], vd, vl, vh, p);
+                rgb[0][x] = p.x;
+                rgb[1][x] = p.y;
+                rgb[2][x] = p.z;
+            }            
+        } else {
+            for (int x = 0; x < W; x += ctl_chunk_size_) {
+                const auto n = (x + ctl_chunk_size_ < W ? ctl_chunk_size_ : W - x);
+                for (int i = 0; i < 3; ++i) {
+                    memcpy(func->inputArg(i)->data(), &(rgb[i][x]), sizeof(float) * n);
+                }
+                func->callFunction(n);
+                for (int i = 0; i < 3; ++i) {
+                    memcpy(&(rgb[i][x]), func->outputArg(i)->data(), sizeof(float) * n);
+                }
             }
         }
         

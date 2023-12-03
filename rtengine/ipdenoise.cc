@@ -69,7 +69,7 @@ void calcautodn_info(const ProcParams *params, float &chaut, float &delta, int N
     float reducdelta = 1.f;
 
     if (params->denoise.aggressive) {
-        reducdelta = static_cast<float>(settings->nrhigh);
+        reducdelta = static_cast<float>(0.9/*settings->nrhigh*/);
     }
 
     chaut = (chaut * Nb - maxmax) / (Nb - 1); //suppress maximum for chaut calcul
@@ -295,15 +295,15 @@ void RGB_denoise_info(ImProcData &im, Imagefloat * src, Imagefloat * provicalc, 
     int tilesize;
     int overlap;
 
-    if (settings->leveldnti == 0) {
+    // if (settings->leveldnti == 0) {
         tilesize = 1024;
         overlap = 128;
-    }
+    // }
 
-    if (settings->leveldnti == 1) {
-        tilesize = 768;
-        overlap = 96;
-    }
+    // if (settings->leveldnti == 1) {
+    //     tilesize = 768;
+    //     overlap = 96;
+    // }
 
     int numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip;
 
@@ -763,21 +763,21 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
         std::cout << "Denoise: computing auto chrominance params..." << std::endl;
     }
     
-    float autoNR = settings->nrauto;
-    float autoNRmax = settings->nrautomax;
+    float autoNR = 10;//settings->nrauto;
+    float autoNRmax = 40;//settings->nrautomax;
 
     int tilesize;
     int overlap;
 
-    if (settings->leveldnti == 0) {
+    // if (settings->leveldnti == 0) {
         tilesize = 1024;
         overlap = 128;
-    }
+    // }
 
-    if (settings->leveldnti == 1) {
-        tilesize = 768;
-        overlap = 96;
-    }
+    // if (settings->leveldnti == 1) {
+    //     tilesize = 768;
+    //     overlap = 96;
+    // }
     
     int numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip;
     int kall = 2;
@@ -807,8 +807,6 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
         centerTile_Y[cY] = tileHskip / 2 + tileHskip * cY;
     }
 
-    assert(settings->leveldnautsimpl == 0);
-    
     if (!store.valid && dnparams.chrominanceMethod == procparams::DenoiseParams::ChrominanceMethod::AUTOMATIC) {
         MyTime t1aue, t2aue;
         t1aue.set();
@@ -818,28 +816,28 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
         int crW = 100; // settings->leveldnv == 0
         int crH = 100; // settings->leveldnv == 0
 
-        if (settings->leveldnv == 1) {
-            crW = 250;
-            crH = 250;
-        }
+        // if (settings->leveldnv == 1) {
+        //     crW = 250;
+        //     crH = 250;
+        // }
 
-        //  if(settings->leveldnv ==2) {crW=int(tileWskip/2);crH=int((tileWskip/2));}//adapted to scale of preview
-        if (settings->leveldnv == 2) {
+        // //  if(settings->leveldnv ==2) {crW=int(tileWskip/2);crH=int((tileWskip/2));}//adapted to scale of preview
+        // if (settings->leveldnv == 2) {
             crW = int (tileWskip / 2);
             crH = int (tileHskip / 2);
-        }
+        // }
 
-        if (settings->leveldnv == 3) {
-            crW = tileWskip - 10;
-            crH = tileHskip - 10;
-        }
+        // if (settings->leveldnv == 3) {
+        //     crW = tileWskip - 10;
+        //     crH = tileHskip - 10;
+        // }
 
         float lowdenoise = 1.f;
-        int levaut = settings->leveldnaut;
+        int levaut = 0;
 
-        if (levaut == 1) { //Standard
-            lowdenoise = 0.7f;
-        }
+        // if (levaut == 1) { //Standard
+        //     lowdenoise = 0.7f;
+        // }
 
         LUTf gamcurve(65536, 0);
         float gam, gamthresh, gamslope;
@@ -953,7 +951,7 @@ void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp 
 
         float delta[9];
         int mode = 1;
-        int lissage = settings->leveldnliss;
+        int lissage = 0;//settings->leveldnliss;
 
         for (int k = 0; k < 9; k++) {
             float maxmax = max(store.max_r[k], store.max_b[k]);
