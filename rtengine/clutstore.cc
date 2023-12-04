@@ -1055,6 +1055,8 @@ rtengine::CLUTStore::CLUTStore() :
 }
 
 
+#ifdef ART_USE_CTL
+
 float CLUTStore::CTL_shaper(float a, bool inv)
 {
     if (a >= 0.f && a <= 1.f) {
@@ -1062,6 +1064,8 @@ float CLUTStore::CTL_shaper(float a, bool inv)
     }
     return CTL_shaper_pq(a, inv);
 }
+
+#endif // ART_USE_CTL
 
 
 //-----------------------------------------------------------------------------
@@ -1323,6 +1327,8 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
 }
 
 
+#if defined ART_USE_OCIO || defined ART_USE_CTL
+
 void CLUTApplication::init_matrices(const Glib::ustring &lut_profile)
 {
     wprof_ = ICCStore::getInstance()->workingSpaceMatrix(working_profile_);
@@ -1340,6 +1346,8 @@ void CLUTApplication::init_matrices(const Glib::ustring &lut_profile)
         }
     }        
 }
+
+#endif // ART_USE_OCIO || ART_USE_CTL
 
 
 void CLUTApplication::operator()(Imagefloat *img)
