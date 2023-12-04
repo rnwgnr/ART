@@ -175,6 +175,7 @@ set(RTENGINESOURCEFILES
     nlmeans.cc
     newdelete.cc
     compress.cc
+    LUT3D.cc
     )
 
 

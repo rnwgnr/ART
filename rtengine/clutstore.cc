@@ -1153,7 +1153,6 @@ bool CLUTApplication::OCIO_init()
 
 bool CLUTApplication::CTL_init(int num_threads)
 {
-    ctl_lut_dim_ = 0;
     try {
         Glib::ustring colorspace = "ACESp0";
         Glib::ustring lbl;
@@ -1239,14 +1238,29 @@ inline float CTL_shaper(float a, bool inv)
 }
 
 
+class CTLLutInitializer: public LUT3D::initializer {
+public:
+    CTLLutInitializer(const std::vector<float> *rgb):
+        rgb_(rgb), i_(0) {}
+    
+    void operator()(float &r, float &g, float &b) override
+    {
+        r = rgb_[0][i_];
+        g = rgb_[1][i_];
+        b = rgb_[2][i_];
+        ++i_;
+    }
+
+private:
+    const std::vector<float> *rgb_;
+    int i_;
+};
+
 } // namespace
 
 
 void CLUTApplication::CTL_init_lut(int dim)
 {
-    ctl_lut_.clear();
-    ctl_lut_dim_ = 0;
-    
     std::vector<float> rgb[3];
 
     int sz = SQR(dim) * dim;
@@ -1280,11 +1294,8 @@ void CLUTApplication::CTL_init_lut(int dim)
         }
     }
 
-    ctl_lut_.reserve(sz);
-    for (int i = 0; i < sz; ++i) {
-        ctl_lut_.emplace_back(rgb[0][i], rgb[1][i], rgb[2][i]);
-    }
-    ctl_lut_dim_ = dim;
+    CTLLutInitializer f(rgb);
+    ctl_lut_.init(dim, f);
 }
 
 #endif // ART_USE_CTL
@@ -1553,20 +1564,15 @@ inline void CLUTApplication::CTL_apply(int thread_id, int W, float *r, float *g,
             rgb[2][x] = v[2];
         }
 
-        if (!ctl_lut_.empty()) {
-            const int d = ctl_lut_dim_;
-            const auto vd = Imath::V3i(d, d, d);
-            const auto vl = Imath::V3f(0, 0, 0);
-            const auto vh = Imath::V3f(1, 1, 1);
-            
+        if (ctl_lut_) {
             for (int x = 0; x < W; ++x) {
-                Imath::V3f p(CTL_shaper(rgb[0][x], false),
-                             CTL_shaper(rgb[1][x], false),
-                             CTL_shaper(rgb[2][x], false));
-                p = Ctl::lookup3D(&ctl_lut_[0], vd, vl, vh, p);
-                rgb[0][x] = p.x;
-                rgb[1][x] = p.y;
-                rgb[2][x] = p.z;
+                float r = CTL_shaper(rgb[0][x], false);
+                float g = CTL_shaper(rgb[1][x], false);
+                float b = CTL_shaper(rgb[2][x], false);
+                ctl_lut_(r, g, b);
+                rgb[0][x] = r;
+                rgb[1][x] = g;
+                rgb[2][x] = b;
             }            
         } else {
             for (int x = 0; x < W; x += ctl_chunk_size_) {

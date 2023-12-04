@@ -37,7 +37,7 @@ namespace OCIO = OCIO_NAMESPACE;
 
 #ifdef ART_USE_CTL
 #  include <CtlSimdInterpreter.h>
-#  include <CtlLookupTable.h>
+#  include "LUT3D.h"
 #endif
 
 
@@ -174,8 +174,7 @@ private:
     std::vector<Ctl::FunctionCallPtr> ctl_func_;
     int ctl_chunk_size_;
     std::vector<CLUTParamDescriptor> ctl_params_;
-    std::vector<Imath::V3f> ctl_lut_;
-    int ctl_lut_dim_;
+    LUT3D ctl_lut_;
 #endif // ART_USE_CTL
 
 #if defined ART_USE_OCIO || defined ART_USE_CTL
