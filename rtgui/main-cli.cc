@@ -42,6 +42,7 @@
 #include "../rtengine/imgiomanager.h"
 #include "fastexport.h"
 #include "makeicc.h"
+#include "../rtengine/clutstore.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -101,6 +102,24 @@ int processLineParams ( int argc, char **argv );
 
 std::pair<bool, int> dontLoadCache(int argc, char **argv);
 
+int check_lut(int argc, char **argv)
+{
+    Gio::init();
+    
+    if (argc == 3) {
+        rtengine::CLUTApplication lut(argv[2]);
+        if (!lut) {
+            std::cerr << "Invalid LUT file: " << argv[2] << std::endl;
+            return 1;
+        } else {
+            return 0;
+        }
+    } else {
+        std::cerr << "invalid arguments to --check-lut" << std::endl;
+        return 1;
+    }
+}
+
 int main (int argc, char **argv)
 {
 #ifdef WITH_MIMALLOC
@@ -110,12 +129,14 @@ int main (int argc, char **argv)
     setlocale (LC_ALL, "");
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
-    if (argc > 1 && std::string(argv[1]) == "--make-icc") {
+    if (argc > 1 && strcmp(argv[1], "--make-icc") == 0) {
         std::vector<std::string> args;
         for (int i = 2; i < argc; ++i) {
             args.push_back(argv[i]);
         }
         return ART_makeicc_main(std::cout, args);
+    } else if (argc > 1 && strcmp(argv[1], "--check-lut") == 0) {
+        return check_lut(argc, argv);
     }
 
     Gio::init ();
