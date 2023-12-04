@@ -9,6 +9,9 @@ Enabled=true
 HistogramMatching=true
 CurveMode=Neutral
 Curve2=0;
+Saturation=0;
+Saturation2=0;
+WhitePoint=1
 
 [LensProfile]
 LcMode=exif
