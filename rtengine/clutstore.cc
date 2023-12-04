@@ -1217,10 +1217,10 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values, Quality 
     if (settings->ctl_scripts_fast_preview) {
         switch (q) {
         case Quality::LOW:
-            CTL_init_lut(20);
+            CTL_init_lut(16);
             break;
         case Quality::MEDIUM:
-            CTL_init_lut(64);
+            CTL_init_lut(50);
             break;
         default:
             break;
