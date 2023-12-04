@@ -7,6 +7,13 @@ ABOUT_TAB_LICENSE;Licence
 ABOUT_TAB_RELEASENOTES;Notes de version
 ABOUT_TAB_SPLASH;Splash
 ADJUSTER_RESET_TO_DEFAULT;<b>Clic</b> - réinitialise à la valeur par défaut.\n<b>Ctrl</b>+<b>clic</b> - réinitialise à la dernière valeur sauvegardée.
+CTL_SIGMOID;Mappeur de tonalité sigmoïde
+CTL_SIGMOID_BASE_PRIMARIES;Primaires de base
+CTL_SIGMOID_INSET;Attenuation
+CTL_SIGMOID_PURITY;Récupérer la pureté
+CTL_SIGMOID_ROTATION;Rotation
+CTL_SIGMOID_SKEW;Fausser
+CTL_SIGMOID_USE_PRIMARIES;Utiliser des primaires personnalisées
 CURVEEDITOR_AXIS_IN;E :
 CURVEEDITOR_AXIS_LEFT_TAN;TG :
 CURVEEDITOR_AXIS_OUT;S :
@@ -58,6 +65,7 @@ ERROR_MSG_MAXERRORS;... (%1 erreur(s) précédente(s) non montrée(s))
 ERROR_MSG_METADATA_VALUE;Metadata: réglage de l'erreur %1 à %2
 ERROR_MSG_INVALID_PSF;Fichier PSF invalide: %1
 ERROR_MSG_INVALID_PROFILE; Profile invalide: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Paramètres LUT non valides pour : %1
 EXIFFILTER_APERTURE;Diaphragme
 EXIFFILTER_CAMERA;Appareil photo
 EXIFFILTER_DATE;Date
@@ -294,7 +302,7 @@ HISTORY_MSG_11;Courbe Tonale - Courbe 1
 HISTORY_MSG_14;L*a*b* - Luminosité
 HISTORY_MSG_15;L*a*b* - Contraste
 HISTORY_MSG_19;L*a*b* - Courbe L*
-HISTORY_MSG_20;Netteté de capture
+HISTORY_MSG_20;Netteté
 HISTORY_MSG_21;Netteté (USM) - Rayon
 HISTORY_MSG_22;Netteté (USM) - Quantité
 HISTORY_MSG_23;Netteté (USM) - Seuil
@@ -303,7 +311,7 @@ HISTORY_MSG_25;Netteté (USM) - Rayon de détection des bords
 HISTORY_MSG_26;Netteté (USM) - Tolérance de détection des bords
 HISTORY_MSG_27;Netteté (USM) - Contrôle du halo
 HISTORY_MSG_28;Netteté (USM) - Quantité de réduction du halo
-HISTORY_MSG_29;Netteté de capture- Méthode
+HISTORY_MSG_29;Netteté - Méthode
 HISTORY_MSG_30;Déconvolution (RL) - Rayon
 HISTORY_MSG_31;Déconvolution (RL) - Quantité
 HISTORY_MSG_32;Déconvolution (RL) - Amortissement
@@ -537,6 +545,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - Masque au pinceau
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - Masque paramétrique
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - Post-traitement du masque
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - LUT paramétres
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correction de Couleur
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RdB - Force Chroma auto.
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Lissage final C
@@ -575,9 +584,9 @@ HISTORY_MSG_FILMNEGATIVE_ENABLED;Film Négatif
 HISTORY_MSG_FILMNEGATIVE_BALANCE;FN - Référence en sortie
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film base couleur
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valeurs du Film Négatif
-HISTORY_MSG_FLATFIELD_EMBEDDED;Champ uniforme intégré
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Référence en entrée
-HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulation de Film - Après la courbe tonale
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulation de film - Après la courbe de tonalité
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Simulation de film - Paramètres LUT
 HISTORY_MSG_GRAIN_ENABLED;Grain d'émulsion
 HISTORY_MSG_GRAIN_ISO;Grain d'émulsion - ISO
 HISTORY_MSG_GRAIN_STRENGTH;Grain d'émulsion - Force
@@ -629,13 +638,13 @@ HISTORY_MSG_RAW_BORDER;Bordure raw
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Redim. - Autoriser l'agrandissement
 HISTORY_MSG_RESIZE_PPI;Redim. - PPI
 HISTORY_MSG_RESIZE_UNIT;Redim. - Unité
-HISTORY_MSG_SHARPENING_AUTORADIUS;Netteté de capture - RLD rayon auto.
-HISTORY_MSG_SHARPENING_BLUR;Netteté de capture - Rayon de floutage
-HISTORY_MSG_SHARPENING_CONTRAST;Netteté de capture- Seuil de contraste
-HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Netteté de capture - RLD Echelle
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Netteté de capture - RLD Augmentation du rayon
-HISTORY_MSG_SHARPENING_PSF_KERNEL;Netteté de capture - fichier PSF
-HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Netteté de capture - itérations PSF
+HISTORY_MSG_SHARPENING_AUTORADIUS;Netteté - RLD rayon auto.
+HISTORY_MSG_SHARPENING_BLUR;Netteté - Rayon de floutage
+HISTORY_MSG_SHARPENING_CONTRAST;Netteté - Seuil de contraste
+HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Netteté - RLD Echelle
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Netteté - RLD Augmentation du rayon 
+HISTORY_MSG_SHARPENING_PSF_KERNEL;Netteté - fichier PSF
+HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Netteté - itérations PSF
 HISTORY_MSG_SH_COLORSPACE;O/HL - Espace colorimétrique
 HISTORY_MSG_SMOOTHING_ENABLED;Lissage 
 HISTORY_MSG_SMOOTHING_FALLOFF;Lissage - atténuation
@@ -997,10 +1006,11 @@ PREFERENCES_CACHEMAXENTRIES;Nombre maximal d'éléments dans le Cache
 PREFERENCES_CACHEOPTS;Options du Cache
 PREFERENCES_CACHETHUMBHEIGHT;Hauteur maximale des vignettes
 PREFERENCES_CLIPPINGIND;Indication de l'écrêtage
-PREFERENCES_CLUTSCACHE;Cache HaldCLUT
+PREFERENCES_CLUTSCACHE;Cache CLUT
 PREFERENCES_CLUTSCACHE_LABEL;Nombre maximum de CLUTs dans le cache
-PREFERENCES_CLUTSDIR;Dossier HaldCLUT
+PREFERENCES_CLUTSDIR;Dossier CLUT
 PREFERENCES_CMMBPC;Compensation du point noir
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Utilisez un moteur de rendu plus rapide mais moins précis pour les scripts CTL dans l'aperçu avec un zoom <100 %
 PREFERENCES_CURVEBBOXPOS;Position des boutons copier/coller des courbes
 PREFERENCES_CURVEBBOXPOS_ABOVE;Au-dessus
 PREFERENCES_CURVEBBOXPOS_BELOW;En-dessous
@@ -1223,8 +1233,8 @@ QUEUE_DESTFILENAME;Chemin et nom du fichier
 QUEUE_FORMAT_TITLE;Format du fichier
 QUEUE_LOCATION_FOLDER;Enregistrer dans le dossier
 QUEUE_LOCATION_TEMPLATE;Utiliser le modèle
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Indiquez la destination du fichier de sortie en fonction de la localisation, du classement, du statut d'affacement ou de la position dans la file de traitement de l'image source. Utilisant par exemple le nom chemin suivant :\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nla signification des chaînes de formatage est la suivante :\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> sera remplacé par le classement de l'image. Si l'image n'a pas de classement, '<i>0</i>' est utilisé. Si l'image est dans la corbeille, '<i>x</i>' est utilisé.\n\n<b>%s1</b>, ..., <b>%s9</b> sera remplacé par la position initiale de l'image dans la file de traitement au moment où celle-ci est lancée. Le numéro indique le décalage, par exemple <b>%s3</b> résulte en '<i>001</i>'.\n\nSi vous voulez enregistrer l'image de sortie au côté de l'image source, écrivez :\n<b>%p1/%f</b>\n\nSi vous voulez enregistrer l'image de sortie dans un dossier nommé '<i>converted</i>' situé au sein du dossier contenant l'image source, écrivez :\n<b>%p1/converted/%f</b>\n\nSi vous voulez enregistrer l'image de sortie dans un dossier nommé \n'<i>/home/tom/photos/converted/2010-10-31</i>', écrivez :\n<b>%p2/converted/%d1/%f</b>.
-QUEUE_LOCATION_TITLE;Emplacement de sortie
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Spécifiez l'emplacement de sortie en fonction de l'emplacement, du classement, de l'état de la corbeille ou de la position dans la file d'attente de la photo source.\n\nEn utilisant le chemin d'accès suivant comme exemple :\n<b>/home/tom/photos/2010-10-31/ photo1.raw</b>\nla signification des chaînes de formatage est la suivante :\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>31/10/2010</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</ i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</ i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> sera remplacé par le classement de la photo. Si la photo n'est pas classée, '<i>0</i>' est utilisé. Si la photo est dans la corbeille, '<i>x</i>' est utilisé.\n\n<b>%s1</b>, ..., <b>%s9</b> sera remplacé par la position initiale de la photo dans la file d'attente au moment du démarrage de la file d'attente. Le nombre spécifie le remplissage, par ex. <b>%s3</b> donne '<i>001</i>'.\n\n<b>%n</b> sera remplacé par le nom de l'instantané actuellement appliqué. Si aucun instantané n’existe ou n’est sélectionné, la chaîne vide sera utilisée. <b>%u</b> peut être utilisé à la place de <b>%n</b> pour remplacer les espaces par des traits de soulignement dans le nom de l'instantané.\n\nSi vous souhaitez enregistrer l'image de sortie à côté de l'image source, écrivez :\n<b>%p1/%f</b>\n\nSi vous souhaitez enregistrer l'image de sortie dans un dossier nommé '<i>converti</i>' situé dans le dossier de la photo source, écrivez :\ n<b>%p1/converted/%f</b>\n\nSi vous souhaitez enregistrer l'image de sortie dans\n'<i>/home/tom/photos/converted/2010-10-31</i >', écrivez :\n<b>%p2/converted/%d1/%f</b>
+​QUEUE_LOCATION_TITLE;Emplacement de sortie
 QUEUE_STARTSTOP_TOOLTIP;Démarre ou arrête le traitement des images dans la file.\n\nRaccourci : <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Répertoire
 RENAME_DIALOG_PATTERN;Modèle de nom de fichier
@@ -1509,8 +1519,8 @@ TP_FILMNEGATIVE_REF_TOOLTIP;Choisissez un patch de gris pour équilibrer les bla
 TP_FILMSIMULATION_LABEL;Simulation de Film
 TP_FILMSIMULATION_SLOWPARSEDIR;ART est configuré pour rechercher les images HaldCLUT, qui sont utilisées pour l'outil Simulation de Film, dans un dossier qui prend trop de temps à se charger.\nAllez dans Préférences > Traitement de l'image > Simulation de Film\npour voir quel dossier est utilisé. Vous devriez soit pointer ART vers un dossier qui ne contient que les images HaldCLUT et rien d'autre, ou vers un dossier vide si vous ne voulez pas utiliser l'outil Simulation de Film.\n\nLisez l'article Simulation de Film dans RawPedia pour plus d'information.\n\nVoulez-vous abandonner la recherche maintenant ?
 TP_FILMSIMULATION_STRENGTH;Force
-TP_FILMSIMULATION_ZEROCLUTSFOUND;Veuillez préciser le dossier contenant\nles fichiers HaldCLUT dans les Préférences
-TP_FILMSIMULATION_AFTER_TONE_CURVE;Apply after Tone Curve
+TP_FILMSIMULATION_ZEROCLUTSFOUND;Définir le répertoire CLUT dans les Préférences
+TP_FILMSIMULATION_AFTER_TONE_CURVE;Appliquer après la courbe de tonalité
 TP_FLATFIELD_AUTOSELECT;Sélection automatique
 TP_FLATFIELD_BLURRADIUS;Rayon de floutage
 TP_FLATFIELD_BLURTYPE;Type de floutage
@@ -1865,7 +1875,7 @@ TP_SHARPENING_EDRADIUS;Rayon
 TP_SHARPENING_EDTOLERANCE;Tolérance des bords
 TP_SHARPENING_HALOCONTROL;Contrôle du halo
 TP_SHARPENING_HCAMOUNT;Quantité
-TP_SHARPENING_LABEL;Netteté de capture
+TP_SHARPENING_LABEL;Netteté
 TP_SHARPENING_METHOD;Méthode
 TP_SHARPENING_ONLYEDGES;Améliorer seulement les bords
 TP_SHARPENING_RADIUS;Rayon

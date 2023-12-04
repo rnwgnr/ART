@@ -1,13 +1,20 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2023-08-29 Bereczky Péter
+#03 2023-12-04 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
 ABOUT_TAB_RELEASENOTES;Kiadási megjegyzések
 ABOUT_TAB_SPLASH;Splash
 ADJUSTER_RESET_TO_DEFAULT;<b>Kattintás</b> - visszaállítja az alapértelmezett értékre.\n<b>Ctrl</b>+<b>kattintás</b> - visszaállítja az utoljára mentett értékre.
+CTL_SIGMOID;Szigmoid tonusleképező
+CTL_SIGMOID_BASE_PRIMARIES;Alap elsődlegesek
+CTL_SIGMOID_INSET;Csillapítás
+CTL_SIGMOID_PURITY;Tisztaság helyreállítása
+CTL_SIGMOID_ROTATION;Forgatás
+CTL_SIGMOID_SKEW;Ferdeség
+CTL_SIGMOID_USE_PRIMARIES;Egyedi elsődlegesek használata
 CURVEEDITOR_AXIS_IN;Be:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;Ki:
@@ -59,6 +66,7 @@ ERROR_MSG_MAXERRORS;... (%1 előző hibák nem láthatók)
 ERROR_MSG_METADATA_VALUE;Metaadat: hiba a %1 -nek %2 -re történő állításakor
 ERROR_MSG_INVALID_PROFILE;Érvénytelen profil: %1
 ERROR_MSG_INVALID_PSF;Érvénytelen PSF fájl: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Érvénytelen LUT paraméterek ehhez: %1
 EXIFFILTER_APERTURE;Rekeszérték
 EXIFFILTER_CAMERA;Fényképezőgép
 EXIFFILTER_DATE;Dátum
@@ -538,6 +546,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - ecsetmaszk
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametrikus maszk
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - maszk utófeldolgozás
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - LUT paraméterek
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Színkorrekció (CC)
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - auto erősség (színzaj)
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Végső simítás C
@@ -578,6 +587,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Film alapszín
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatív értékek
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Referencia bemenet
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmszimuláció - Tónusgörbe után
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Filmszimuláció - LUT paraméterek
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field beágyazott
 HISTORY_MSG_GRAIN_ENABLED;Filmszemcse
 HISTORY_MSG_GRAIN_ISO;Filmszemcse - ISO
@@ -999,10 +1009,11 @@ PREFERENCES_CACHEMAXENTRIES;A gyorsítótár bejegyzéseinek maximális száma
 PREFERENCES_CACHEOPTS;Gyorsítótár beállításai
 PREFERENCES_CACHETHUMBHEIGHT;Bélyegképek maximális magassága
 PREFERENCES_CLIPPINGIND;Vágás jelzése
-PREFERENCES_CLUTSCACHE;HaldCLUT gyorsítótár
+PREFERENCES_CLUTSCACHE;CLUT gyorsítótár
 PREFERENCES_CLUTSCACHE_LABEL;A gyorsítótárazott CLUT-ok maximális száma
-PREFERENCES_CLUTSDIR;HaldCLUT könyvtár
+PREFERENCES_CLUTSDIR;CLUT könyvtár
 PREFERENCES_CMMBPC;feketepont-kompenzáció
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Alkalmazzon gyorsabb, de kevésbé pontos renderelést a CTL-szkriptekhez ha az előnézeti kép nagyítása <100%
 PREFERENCES_CURVEBBOXPOS;A görbe másolása és beillesztése gombok helyzete
 PREFERENCES_CURVEBBOXPOS_ABOVE;Fent
 PREFERENCES_CURVEBBOXPOS_BELOW;Lent
@@ -1225,7 +1236,7 @@ QUEUE_DESTFILENAME;Útvonal és fájlnév
 QUEUE_FORMAT_TITLE;Fájlformátum
 QUEUE_LOCATION_FOLDER;Mentés mappába
 QUEUE_LOCATION_TEMPLATE;Sablon használata
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Adja meg a kimeneti helyet a forrásfotó helye, rangja, a kuka állapota vagy a sorban elfoglalt helye alapján.\n\nPélda az elérési út használatára:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\na formázási karakterláncok jelentése a következő:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> helyébe a fotó értékelése kerül. Ha a fotó még nem értékelt, '<i>0</i>' lesz alkalmazva. Ha a fotó a kukában van, '<i>x</i>' lesz.\n\n<b>%s1</b>, ..., <b>%s9</b> helyettesítve lesz a képnek a sor indításakor a sorban elfoglalt pozíciójával. A számérték határozza meg a kitöltést, pl. <b>%s3</b> eredménye '<i>001</i>'.\n\nHa a kimeneti képet a forráskép mellé szeretné menteni, írja ezt:\n<b>%p1/%f</b>\n\nHa a kimeneti képet egy '<i>converted</i>' nevű mappába szeretné menteni, amely a forrásfotó mappájában található, írja be:\n<b>%p1/converted/%f</b>\n\nHa el akarja menteni a kimeneti képet a\n'<i>/home/tom/photos/converted/2010-10-31</i>' könyvtárba, írja ezt:\n<b>%p2/converted/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Adja meg a kimeneti helyet a forrásfotó helye, értékelése, a kuka állapota, vagy a sorban elfoglalt helye alapján.\n\nPélda az elérési út használatára:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\na formázási karakterláncok jelentése a következő:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> helyébe a fotó értékelése kerül. Ha a fotó még nem értékelt, '<i>0</i>' lesz alkalmazva. Ha a fotó a kukában van, '<i>x</i>' lesz alkalmazva.\n\n<b>%s1</b>, ..., <b>%s9</b> helyettesítve lesz a képnek a sor indításakor a sorban elfoglalt pozíciójával. A számérték határozza meg a kitöltést, pl. <b>%s3</b> eredménye '<i>001</i>'.\n\n<b>%n</b> helyébe az aktuálisan alkalmazott pillanatkép neve kerül. Ha nem létezik a pillanatkép, vagy nincs kiválasztva, akkor üres karakterlánc kerül alkalmazásra. <b>%u</b> alkalmazható <b>%n</b> helyett, amely aláhúzásra cseréli a szóközöket a pillanatkép nevében.\n\nHa a kimeneti képet a forráskép mellé szeretné menteni, írja ezt:\n<b>%p1/%f</b>\n\nHa a kimeneti képet egy '<i>converted</i>' nevű mappába szeretné menteni, amely a forrásfotó mappájában található, írja be:\n<b>%p1/converted/%f</b>\n\nHa el szeretné menteni a kimeneti képet a\n'<i>/home/tom/photos/converted/2010-10-31</i>' könyvtárba, írja ezt:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Kimenet helye
 QUEUE_STARTSTOP_TOOLTIP;Indítsa el vagy állítsa le a sorban lévő képek feldolgozását.\n\nGyorsbillentyű: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Alapkönyvtár
@@ -1511,7 +1522,7 @@ TP_FILMNEGATIVE_REF_TOOLTIP;Válasszon egy szürke foltot a kimeneti pozitív k�
 TP_FILMSIMULATION_LABEL;Filmszimuláció
 TP_FILMSIMULATION_SLOWPARSEDIR;Az ART úgy van beállítva, hogy a Filmszimulációs eszközhöz használt Hald CLUT képeket egy olyan mappában keresse, amelynek betöltése túl sokáig tart.\nNyissa meg a Beállítások > Képfeldolgozás > Filmszimuláció\nmappát a használt mappa megtekintéséhez. Az ART-t egy olyan mappára kell irányítania, amely csak Hald CLUT képeket tartalmaz, és semmi többet, vagy egy üres mappára, ha nem szeretné használni a Filmszimulációs eszközt.\n\nTovábbi információért olvassa el a RawPedia Filmszimuláció című cikkét. \n\nSzeretné most megszakítani a vizsgálatot?
 TP_FILMSIMULATION_STRENGTH;Erősség
-TP_FILMSIMULATION_ZEROCLUTSFOUND;Állítsa be a HaldCLUT könyvtárat a Beállításokban
+TP_FILMSIMULATION_ZEROCLUTSFOUND;Állítsa be a CLUT könyvtárat a Beállításokban
 TP_FILMSIMULATION_AFTER_TONE_CURVE;A tónusgörbe után kell alkalmazni
 TP_FLATFIELD_AUTOSELECT;Automatikus kiválasztás
 TP_FLATFIELD_BLURRADIUS;Elmosási sugár

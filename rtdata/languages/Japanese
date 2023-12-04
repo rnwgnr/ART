@@ -20,13 +20,20 @@
 #19 2022-12-27 Ohnishi, Yasuo, updates for 1.18
 #20 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 #21 2023-09-19 Ohnishi, Yasuo, updates for 1.20.2
-#22 2023-11-11 Ohnishi, Yasuo, updates for next version
+#22 2023-12-03 Ohnishi, Yasuo, updates for 1.21
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
 ABOUT_TAB_RELEASENOTES;リリースノート
 ABOUT_TAB_SPLASH;スプラッシュ
 ADJUSTER_RESET_TO_DEFAULT;<b>クリック</b> - デフォルト値にリセット\n<b>Ctrl</b>+<b>クリック</b> - 最後に保存した値にリセット
+CTL_SIGMOID;シグモイド・トーンマッパー
+CTL_SIGMOID_BASE_PRIMARIES;基本原色
+CTL_SIGMOID_INSET;減衰
+CTL_SIGMOID_PURITY;純色に戻す
+CTL_SIGMOID_ROTATION;回転
+CTL_SIGMOID_SKEW;傾き(Skew)
+CTL_SIGMOID_USE_PRIMARIES;調整した原色を使用
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
@@ -78,6 +85,7 @@ ERROR_MSG_MAXERRORS;... (%1 以前のエラーは表示されません)
 ERROR_MSG_METADATA_VALUE;メタデータ: エラー setting %1 to %2
 ERROR_MSG_INVALID_PROFILE;不適切なプロファイルです: %1
 ERROR_MSG_INVALID_PSF;不適切なPSFファイルです: %1
+ERROR_MSG_INVALID_LUT_PARAMS;次の値は誤った LUT パラメータです: %1
 EXIFFILTER_APERTURE;絞り
 EXIFFILTER_CAMERA;カメラ
 EXIFFILTER_DATE;日時
@@ -556,6 +564,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;色補正 - ブラシマスク
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;色補正 - パラメータ指定マスク
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;色補正 - マスク追加処理
 HISTORY_MSG_COLORCORRECTION_LUT;色補正 - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;色補正 - LUT パラメータ
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;色補正 - カラー補正
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - 自動彩度 (chroma) 伸長
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - 最終スムージング C
@@ -596,6 +605,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;フィルムベースカラー
 HISTORY_MSG_FILMNEGATIVE_VALUES;ネガフィルムの値
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;ネガフィルム - 基準入力
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;フィルムシミュレーション - トーンカーブ補正後
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;フィルムシミュレーション - LUT パラメータ
 HISTORY_MSG_FLATFIELD_EMBEDDED;フラットフィールド メタデータに埋込み
 HISTORY_MSG_GRAIN_ENABLED;フィルム粒状効果
 HISTORY_MSG_GRAIN_ISO;フィルム粒状効果 - ISO
@@ -1015,10 +1025,11 @@ PREFERENCES_CACHEMAXENTRIES;cacheに入れるファイルの最大数
 PREFERENCES_CACHEOPTS;cache オプション
 PREFERENCES_CACHETHUMBHEIGHT;サムネイル縦の最大値
 PREFERENCES_CLIPPINGIND;クリッピング領域の表示
-PREFERENCES_CLUTSCACHE;HaldCLUT cache
-PREFERENCES_CLUTSCACHE_LABEL;cacheに入れるHaldCLUTの最大数
-PREFERENCES_CLUTSDIR;HaldCLUTのディレクトリ
+PREFERENCES_CLUTSCACHE;カラーLUT キャッシュ
+PREFERENCES_CLUTSCACHE_LABEL;キャッシュに入れるカラーLUTの最大数
+PREFERENCES_CLUTSDIR;カラーLUTのディレクトリ
 PREFERENCES_CMMBPC;ブラックポイントの補正
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;CTLスクリプトに対し 100%未満のズームで 高速だが不正確なレンダリングを行う
 PREFERENCES_CURVEBBOXPOS;カーブのコピーペイストボタンの位置
 PREFERENCES_CURVEBBOXPOS_ABOVE;上
 PREFERENCES_CURVEBBOXPOS_BELOW;下
@@ -1241,7 +1252,7 @@ QUEUE_DESTFILENAME;パスとファイル名
 QUEUE_FORMAT_TITLE;ファイル形式
 QUEUE_LOCATION_FOLDER;フォルダに保存
 QUEUE_LOCATION_TEMPLATE;テンプレートを使う
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;元の写真の場所、評価、ゴミ箱内かどうか、またはキュー内の位置に基づいて出力場所を指定します。\n\n例えば次のパス名を使う場合...:\n<b>/home/tom/photos/2010-10-31/ photo1.raw</b>\n書式設定文字列の意味は次のとおりです:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</ i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</ i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> は写真の評価に置き換えられます。写真に評価がない場合は、「<i>0</i>」が使用されます。写真がゴミ箱にある場合は、「<i>x</i>」が使われます。\n\n<b>%s1</b>, ..., <b>%s9</b> はキューが開始されたときのキュー内の写真の最初の位置に置き換えられます。数値はパディングを意味します。 例えば<b>%s3</b> の結果は「<i>001</i>」になります。\n\n<b>%n</b> は、現在適用されているスナップショットの名前に置き換えられます。スナップショットが存在しない場合、またはスナップショットが選択されている場合は、空の文字列が使用されます。 <b>%n</b> の代わりに <b>%u</b> を使用すると、スナップショット名のスペースをアンダースコアに置き換えることができます。\n\n出力イメージを元のイメージと一緒に保存する場合は、次のように書きます:\n<b>%p1/%f</b>\n\nソース写真のフォルダ内にある '<i>converted</i>' という名前のフォルダに出力画像を保存する場合は、次のように書きます:\ n<b>%p1/converted/%f</b>\n\n出力イメージを \n'<i>/home/tom/photos/converted/2010-10-31</i>' に保存する場合、次のように書きます:\n<b>%p2/converted/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;元の写真の場所、評価、ゴミ箱内かどうか、またはキュー内の位置に基づいて出力場所を指定します。\n\n例えば次のパス名を使う場合...:\n<b>/home/tom/photos/2010-10-31/ photo1.raw</b>\n書式設定文字列の意味は次のとおりです:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> は写真の評価に置き換えられます。写真に評価がない場合は、「<i>0</i>」が使用されます。写真がゴミ箱にある場合は、「<i>x</i>」が使われます。\n\n<b>%s1</b>, ..., <b>%s9</b> はキューが開始されたときのキュー内の写真の最初の位置に置き換えられます。数値はパディングを意味します。 例えば<b>%s3</b> の結果は「<i>001</i>」になります。\n\n<b>%n</b> は、現在適用されているスナップショットの名前に置き換えられます。スナップショットが存在しない場合、またはスナップショットが選択されている場合は、空の文字列が使用されます。 <b>%n</b> の代わりに <b>%u</b> を使用すると、スナップショット名のスペースをアンダースコアに置き換えることができます。\n\n出力イメージを元のイメージと一緒に保存する場合は、次のように書きます:\n<b>%p1/%f</b>\n\nソース写真のフォルダ内にある '<i>converted</i>' という名前のフォルダに出力画像を保存する場合は、次のように書きます:\ n<b>%p1/converted/%f</b>\n\n出力イメージを \n'<i>/home/tom/photos/converted/2010-10-31</i>' に保存する場合、次のように書きます:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;出力の場所
 QUEUE_STARTSTOP_TOOLTIP;キューにある画像の現像を始める 或いは中止する\n\nショートカット: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;基本ディレクトリ
@@ -1525,9 +1536,9 @@ TP_FILMNEGATIVE_REF_LABEL;入力 RGB: %1
 TP_FILMNEGATIVE_REF_PICK;ホワイトバランス点の指定
 TP_FILMNEGATIVE_REF_TOOLTIP;ポジ画像ホワイトバランス出力のための無彩色点を指定します
 TP_FILMSIMULATION_LABEL;フィルムシミュレーション
-TP_FILMSIMULATION_SLOWPARSEDIR;ARTはフィルムシミュレーション機能に使う画像をHald CLUTフォルダーの中から探すよう設計されています（プログラムに組み込むにはフォルダーが大き過ぎるため）. \n変更するには 環境設定 > 画像処理 > フィルムシミュレーションと進み\nどのフォルダーが使われているか確認します. 機能を利用する場合は Hald CLUTだけが入っているフォルダーを指定するか  この機能を使わない場合はそのフォルダーを空にしておきます. \n\n詳しくはRawPediaを参照して下さい. \n\nフィルム画像のスキャンを止めますか？
+TP_FILMSIMULATION_SLOWPARSEDIR;ARTはフィルムシミュレーション機能に使う画像をカラーLUTフォルダーの中から探すよう設計されています（プログラムに組み込むにはフォルダーが大き過ぎるため）. \n変更するには 環境設定 > 画像処理 > フィルムシミュレーションと進み\nどのフォルダーが使われているか確認します. 機能を利用する場合は カラーLUTだけが入っているフォルダーを指定するか  この機能を使わない場合はそのフォルダーを空にしておきます. \n\n詳しくはRawPediaを参照して下さい. \n\nフィルム画像のスキャンを止めますか？
 TP_FILMSIMULATION_STRENGTH;強さ
-TP_FILMSIMULATION_ZEROCLUTSFOUND;HaldCLUTのディレクトリを環境設定で指定して下さい
+TP_FILMSIMULATION_ZEROCLUTSFOUND;カラーLUTのディレクトリを環境設定で指定して下さい
 TP_FILMSIMULATION_AFTER_TONE_CURVE;トーンカーブ調整後適用
 TP_FLATFIELD_AUTOSELECT;自動選択
 TP_FLATFIELD_BLURRADIUS;ぼかし (Blur) 半径

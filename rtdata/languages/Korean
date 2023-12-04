@@ -11,13 +11,20 @@
 #10 2022-12-27 Ohnishi, Yasuo, updates for 1.18
 #11 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 #12 2023-09-19 Ohnishi, Yasuo, updates for 1.20.2
-#13 2023-11-11 Ohnishi, Yasuo, updates for next version
+#13 2023-12-03 Ohnishi, Yasuo, updates for 1.21
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
 ABOUT_TAB_RELEASENOTES;릴리스 노트
 ABOUT_TAB_SPLASH;Splash
 ADJUSTER_RESET_TO_DEFAULT;<b>클릭</b> - 초기 설정 값으로 리셋함\n<b>Ctrl</b>+<b>클릭</b> - 마지막에 보존한 값으로 리셋함
+CTL_SIGMOID;시그모이드 톤 매퍼
+CTL_SIGMOID_BASE_PRIMARIES;기본 원색
+CTL_SIGMOID_INSET;감쇠 (Attenuation)
+CTL_SIGMOID_PURITY;순색 회복
+CTL_SIGMOID_ROTATION;회전
+CTL_SIGMOID_SKEW;기울기 (Skew)
+CTL_SIGMOID_USE_PRIMARIES;조정된 원색 사용
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
@@ -33,7 +40,7 @@ CURVEEDITOR_LIGHTS;라이트
 CURVEEDITOR_LINEAR;무효
 CURVEEDITOR_LOADDLGLABEL;커브 불러오기...
 CURVEEDITOR_MINMAXCPOINTS;이퀄라이저
-CURVEEDITOR_NURBS;Control cage
+CURVEEDITOR_NURBS;제어 케이지
 CURVEEDITOR_PARAMETRIC;매개 변수
 CURVEEDITOR_SAVEDLGLABEL;커브보존...
 CURVEEDITOR_SHADOWS;어두움 영역
@@ -69,6 +76,7 @@ ERROR_MSG_MAXERRORS;... (%1 이전의 착오는 표시되지 않습니다.)
 ERROR_MSG_METADATA_VALUE;메타데이터: 착오 setting %1 to %2
 ERROR_MSG_INVALID_PROFILE;잘 못한 프로파일 입니다: %1
 ERROR_MSG_INVALID_PSF;잘 못한 PSF 파일: %1
+ERROR_MSG_INVALID_LUT_PARAMS;이 LUT 매개변수는 잘못된 변수입니다 : %1
 EXIFFILTER_APERTURE;조리개 값
 EXIFFILTER_CAMERA;사진기
 EXIFFILTER_DATE;날짜/시간
@@ -547,6 +555,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;색보정 - 브러시마스크
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;색보정 - 매개 변수 지정 마스크
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;색보정 - 마스크추가처리
 HISTORY_MSG_COLORCORRECTION_LUT;색보정 - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;색보정 - LUT 매개 변수
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;색보정 - 색 보정
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - 자동 채도 (Chroma) 높임
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - 최종 매끄럽게 하기 C
@@ -587,6 +596,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;필름 기본색
 HISTORY_MSG_FILMNEGATIVE_VALUES;네가필름값
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;필름 시뮬레이션 - 기준입력
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;필름 시뮬레이션 - 톤 곡선 조정 후
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;필름 시뮬레이션 - LUT 매개 변수
 HISTORY_MSG_FLATFIELD_EMBEDDED;센서의 오점 그늘 제거- 메타데이터에 포함
 HISTORY_MSG_GRAIN_ENABLED;필름 효과
 HISTORY_MSG_GRAIN_ISO;필름 효과 - ISO
@@ -1006,10 +1016,11 @@ PREFERENCES_CACHEMAXENTRIES;캐시에 놓을 수 있는 파일 최대수
 PREFERENCES_CACHEOPTS;캐시  옵션
 PREFERENCES_CACHETHUMBHEIGHT;썸네일 최대 높이
 PREFERENCES_CLIPPINGIND;클리핑 영역 표시
-PREFERENCES_CLUTSCACHE;HaldCLUT 캐시
-PREFERENCES_CLUTSCACHE_LABEL;캐시에 놓을 수 있는 HaldCLUT 파일 최대수
-PREFERENCES_CLUTSDIR;HaldCLUT 디렉토리
+PREFERENCES_CLUTSCACHE;색 CLUT 캐시
+PREFERENCES_CLUTSCACHE_LABEL;캐시에 놓을 수 있는 색LUT 파일 최대수
+PREFERENCES_CLUTSDIR;색LUT 디렉토리
 PREFERENCES_CMMBPC;블랙 포인트 보정
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;CTL 스크립트에 대해 100% 미만의 줌화면에서 빠르지만 부정확한 렌더링 적용
 PREFERENCES_CURVEBBOXPOS;커브희 복사/붙이기 버튼의 위치
 PREFERENCES_CURVEBBOXPOS_ABOVE;위
 PREFERENCES_CURVEBBOXPOS_BELOW;아래
@@ -1232,7 +1243,7 @@ QUEUE_DESTFILENAME;패스와 파일명
 QUEUE_FORMAT_TITLE;파일형식
 QUEUE_LOCATION_FOLDER;폴더에 보존
 QUEUE_LOCATION_TEMPLATE;템플릿 쓰기
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;원본 사진의 위치, 평가, 휴지통 또는 큐의 위치를 ​​기준으로 출력 위치를 지정합니다. \n\n예를 들면 다음의 패스명을 사용하는 경우...:\n<b>/home/tom/photos/2010-10-31/ 다음과 같습니다.:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</ i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</ i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b>은 사진 등급으로 대체됩니다. 사진에 등급이 없는 경우 '<i>0</i>'가 사용됩니다. 사진이 휴지통에 있는 경우 '<i>x</i>'가 사용됩니다. \n\n<b>%s1</b>, ..., <b>%s9</b>는 대기열이 시작될 때 대기열의 사진의 첫 번째 위치로 바뀝니다. 숫자는 패딩을 의미합니다. 예를 들어 <b>%s3</b>의 결과는 <i>001</i>입니다. \n\n<b>%n</b>은 현재 적용된 스냅샷의 이름으로 바뀝니다. 스냅샷이 없거나 스냅샷이 선택되면 빈 문자열이 사용됩니다.<b>%n</b> 대신 <b>%u</b>를 사용하여 스냅샷 이름의 공백을 밑줄로 바꿀 수 있습니다. \n\n출력 이미지를 원본 이미지와 함께 저장하려면 다음과 같이 작성하십시오.\n<b>%p1/%f</b>\n\n 원본 사진 폴더에 '<i>converted</i>'라는 폴더에 출력 이미지를 저장하려면 다음과 같이 작성하십시오.\n<b>%p1/converted/%f</b>\n \n출력 이미지를 \n'<i>/home/tom/photos/converted/2010-10-31</i>'에 저장하려는 경우, 다음과 같이 씁니다:\n<b>%p2/ converted/%d1/%f
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;원본 사진의 위치, 평가, 휴지통 또는 큐의 위치를 ​​기준으로 출력 위치를 지정합니다. \n\n예를 들면 다음의 패스명을 사용하는 경우...:\n<b>/home/tom/photos/2010-10-31/ 다음과 같습니다.:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b>은 사진 등급으로 대체됩니다. 사진에 등급이 없는 경우 '<i>0</i>'가 사용됩니다. 사진이 휴지통에 있는 경우 '<i>x</i>'가 사용됩니다. \n\n<b>%s1</b>, ..., <b>%s9</b>는 대기열이 시작될 때 대기열의 사진의 첫 번째 위치로 바뀝니다. 숫자는 패딩을 의미합니다. 예를 들어 <b>%s3</b>의 결과는 <i>001</i>입니다. \n\n<b>%n</b>은 현재 적용된 스냅샷의 이름으로 바뀝니다. 스냅샷이 없거나 스냅샷이 선택되면 빈 문자열이 사용됩니다.<b>%n</b> 대신 <b>%u</b>를 사용하여 스냅샷 이름의 공백을 밑줄로 바꿀 수 있습니다. \n\n출력 이미지를 원본 이미지와 함께 저장하려면 다음과 같이 작성하십시오.\n<b>%p1/%f</b>\n\n 원본 사진 폴더에 '<i>converted</i>'라는 폴더에 출력 이미지를 저장하려면 다음과 같이 작성하십시오.\n<b>%p1/converted/%f</b>\n \n출력 이미지를 \n'<i>/home/tom/photos/converted/2010-10-31</i>'에 저장하려는 경우, 다음과 같이 씁니다:\n<b>%p2/ converted/%d1/%f
 QUEUE_LOCATION_TITLE;출력장소
 QUEUE_STARTSTOP_TOOLTIP;큐에 있는 화상의 현상 시작/ 중지\n\n단축키: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;기본 디렉토리
@@ -1516,9 +1527,9 @@ TP_FILMNEGATIVE_REF_LABEL;입력 RGB: %1
 TP_FILMNEGATIVE_REF_PICK;화이트 밸런스 채취 점을 지정함
 TP_FILMNEGATIVE_REF_TOOLTIP;양화 화이트 밸런스 출력에 위한 무채색 점을 지정합니다.
 TP_FILMSIMULATION_LABEL;필름 시뮬레이션
-TP_FILMSIMULATION_SLOWPARSEDIR;ART는 필름 시뮬레이션 기능에 사용하는 화상을 Hald CLUT 디렉토리 속에서 찾도록 있게 설계됩니다.（프로그램에 포함하려면 디렉토리가 너무 크기 때문에）。\n변경하려면 환경 설정 > 화상처리 > 필름 시뮬레이션을 선택하고 \n어느 디렉토리가 사용되는 지 확인합니다. 이 기능을 사용할 경우 Hald CLUT 파일만 있는 디렉토리를 지정하고, 이 기능을 사용하지 않는 경우 그 디렉토리를 비웁니다.\n\n자세한 것은  RawPedia를 참조하세요.\n\n필름화상의 스캔을 정지합니까?
+TP_FILMSIMULATION_SLOWPARSEDIR;ART는 필름 시뮬레이션 기능에 사용하는 화상을 색LUT 디렉토리 속에서 찾도록 있게 설계됩니다.（프로그램에 포함하려면 디렉토리가 너무 크기 때문에）。\n변경하려면 환경 설정 > 화상처리 > 필름 시뮬레이션을 선택하고 \n어느 디렉토리가 사용되는 지 확인합니다. 이 기능을 사용할 경우 색LUT 파일만 있는 디렉토리를 지정하고, 이 기능을 사용하지 않는 경우 그 디렉토리를 비웁니다.\n\n자세한 것은  RawPedia를 참조하세요.\n\n필름화상의 스캔을 정지합니까?
 TP_FILMSIMULATION_STRENGTH;강도
-TP_FILMSIMULATION_ZEROCLUTSFOUND;HaldCLUT 디렉토리를 환경설정에서 지정하세요.
+TP_FILMSIMULATION_ZEROCLUTSFOUND;색LUT 디렉토리를 환경설정에서 지정하세요.
 TP_FILMSIMULATION_AFTER_TONE_CURVE;톤 곡선 조정 후
 TP_FLATFIELD_AUTOSELECT;자동선택
 TP_FLATFIELD_BLURRADIUS;흐림 (Blur) 크기
