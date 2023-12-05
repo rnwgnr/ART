@@ -43,6 +43,7 @@
 #include "fastexport.h"
 #include "makeicc.h"
 #include "../rtengine/clutstore.h"
+#include "../rtengine/settings.h"
 
 #ifndef WIN32
 #include <glibmm/fileutils.h>
@@ -102,21 +103,25 @@ int processLineParams ( int argc, char **argv );
 
 std::pair<bool, int> dontLoadCache(int argc, char **argv);
 
+namespace rtengine { extern const Settings *settings; } 
+
 int check_lut(int argc, char **argv)
 {
     Gio::init();
+    options.rtSettings.verbose = 1;
+    rtengine::settings = &options.rtSettings;
     
     if (argc == 3) {
         rtengine::CLUTApplication lut(argv[2]);
         if (!lut) {
-            std::cerr << "Invalid LUT file: " << argv[2] << std::endl;
+            std::cout << "Invalid LUT file: " << argv[2] << std::endl;
             return 1;
         } else {
             return 0;
         }
     } else {
-        std::cerr << "invalid arguments to --check-lut" << std::endl;
-        return 1;
+        std::cout << "invalid arguments to --check-lut" << std::endl;
+        return 2;
     }
 }
 
