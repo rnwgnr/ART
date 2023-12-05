@@ -1099,13 +1099,6 @@ void CropWindow::pointerMoved(int bstate, int x, int y, double pressure)
 
         if (!onArea (CropImage, x, y) || !cropHandler.cropPixbuftrue) {
             cropHandler.getFullImageSize(mx, my);
-            //    pmlistener->pointerMoved (false, cropHandler.colorParams.working, mx, my, -1, -1, -1);
-            //   if (pmhlistener) pmhlistener->pointerMoved (false, cropHandler.colorParams.working, mx, my, -1, -1, -1);
-            /*    Glib::ustring outputProfile;
-                outputProfile =cropHandler.colorParams.output ;
-                printf("Using \"%s\" output\n", outputProfile.c_str());
-                if(outputProfile==options.rtSettings.srgb) printf("OK SRGB2");
-            */
             pmlistener->pointerMoved (false, cropHandler.colorParams.outputProfile, cropHandler.colorParams.workingProfile, mx, my, -1, -1, -1);
 
             if (pmhlistener) {
@@ -1113,16 +1106,6 @@ void CropWindow::pointerMoved(int bstate, int x, int y, double pressure)
             }
 
         } else {
-            /*
-
-            int vx = x - xpos - imgX;
-            int vy = y - ypos - imgY;
-            guint8* pix = cropHandler.cropPixbuf->get_pixels() + vy*cropHandler.cropPixbuf->get_rowstride() + vx*3;
-            if (vx < cropHandler.cropPixbuf->get_width() && vy < cropHandler.cropPixbuf->get_height())
-            pmlistener->pointerMoved (true, mx, my, pix[0], pix[1], pix[2]);
-
-            */
-
             int vx = x - xpos - imgX;
             int vy = y - ypos - imgY;
 
@@ -1131,9 +1114,6 @@ void CropWindow::pointerMoved(int bstate, int x, int y, double pressure)
                 vy -= (titleHeight + upperBorderWidth + sepWidth);
             }
 
-//          guint8* pix = cropHandler.cropPixbuf->get_pixels() + vy*cropHandler.cropPixbuf->get_rowstride() + vx*3;
-//          if (vx < cropHandler.cropPixbuf->get_width() && vy < cropHandler.cropPixbuf->get_height())
-//              pmlistener->pointerMoved (true, mx, my, pix[0], pix[1], pix[2]);
             int imwidth = cropHandler.cropPixbuftrue->get_width();
             int imheight = cropHandler.cropPixbuftrue->get_height();
 
