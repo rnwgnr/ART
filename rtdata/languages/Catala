@@ -21,6 +21,7 @@
 #20 2022-12-27 mrleemon, update for 1.18
 #21 2023-03-11 mrleemon, update for 1.18.1
 #22 2023-08-01 mrleemon, update for 1.21
+#23 2023-12-04 mrleemon, update for 1.22
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -28,6 +29,13 @@ ABOUT_TAB_LICENSE;Llicència
 ABOUT_TAB_RELEASENOTES;Notes de la versió
 ABOUT_TAB_SPLASH;Splash
 ADJUSTER_RESET_TO_DEFAULT;<b>Clic</b> - restableix al valor predeterminat.\n<b>Ctrl</b>+<b>clic</b> - restableix a l'últim valor desat.
+CTL_SIGMOID;Mapejador de tons sigmoide
+CTL_SIGMOID_BASE_PRIMARIES;Primaris base
+CTL_SIGMOID_INSET;Atenuació
+CTL_SIGMOID_PURITY;Recupera la puresa
+CTL_SIGMOID_ROTATION;Rotació
+CTL_SIGMOID_SKEW;Distorsió
+CTL_SIGMOID_USE_PRIMARIES;Utilitza primaris personalitzats
 CURVEEDITOR_AXIS_IN;E:
 CURVEEDITOR_AXIS_LEFT_TAN;TE:
 CURVEEDITOR_AXIS_OUT;S:
@@ -79,6 +87,7 @@ ERROR_MSG_MAXERRORS;... (%1 error(s) anterior(s) no mostrat(s))
 ERROR_MSG_METADATA_VALUE;Metadades: error en establir %1 a %2
 ERROR_MSG_INVALID_PROFILE;Perfil no vàlid: %1
 ERROR_MSG_INVALID_PSF;Fitxer PSF no vàlid: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Paràmetres LUT no vàlids per a: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Càmera
 EXIFFILTER_DATE;Data
@@ -558,6 +567,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - màscara de pinzell
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - màscara paramètrica
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - post-processament de màscara
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - Paràmetres LUT
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correcció de color
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RS - intensitat de crominància automàtica
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RS - Suavitzat final C
@@ -603,6 +613,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la pel·lícula
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valors del negatiu de pel·lícula
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Entrada de referència
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulació de pel·lícula - Després de la corba tonal
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Simulació de pel·lícula - Paràmetres LUT
 HISTORY_MSG_FLATFIELD_EMBEDDED;Camp pla incrustat
 HISTORY_MSG_GRAIN_ENABLED;Gra de pel·lícula
 HISTORY_MSG_GRAIN_ISO;Gra de pel·lícula - ISO
@@ -1022,10 +1033,11 @@ PREFERENCES_CACHEMAXENTRIES;Nombre màxim d'entrades a la memòria cau
 PREFERENCES_CACHEOPTS;Opcions de memòria cau
 PREFERENCES_CACHETHUMBHEIGHT;Alçada màxima de les miniatures
 PREFERENCES_CLIPPINGIND;Indicació de retallada
-PREFERENCES_CLUTSCACHE;Memòria cau HaldCLUT
+PREFERENCES_CLUTSCACHE;Memòria cau CLUT
 PREFERENCES_CLUTSCACHE_LABEL;Nombre màxim de CLUTs a la memòria cau
-PREFERENCES_CLUTSDIR;Carpeta HaldCLUT
+PREFERENCES_CLUTSDIR;Carpeta CLUT
 PREFERENCES_CMMBPC;Compensació de punt negre
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Utilitza un renderitzador més ràpid però menys precís per als scripts CTL a la vista prèvia amb un zoom <100%
 PREFERENCES_CURVEBBOXPOS;Posició dels botons de copiar i enganxar corbes
 PREFERENCES_CURVEBBOXPOS_ABOVE;Damunt
 PREFERENCES_CURVEBBOXPOS_BELOW;Sota
@@ -1248,7 +1260,7 @@ QUEUE_DESTFILENAME;Ruta i nom del fitxer
 QUEUE_FORMAT_TITLE;Format de fitxer
 QUEUE_LOCATION_FOLDER;Desa en carpeta
 QUEUE_LOCATION_TEMPLATE;Utilitza plantilla
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Especifiqueu la ubicació de sortida en funció de la ubicació, la puntuació, l'estat de paperera o la posició a la cua de la foto d'origen.\n\nUtilitzant la següent ruta com a exemple:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nel significat de les cadenes de format és:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/<i>\n\n<b>%r</b> es reemplaçarà per la puntuació de la foto. Si la foto no está puntuada, s'utilitza '<i>0</i>'. Si la foto és a la paperera, s'utilitza '<i>x</i>'.\n\n<b>%s1</b>, ..., <b>%s9</b> es reemplaçarà per la posició inicial de la foto a la cua en el moment d'iniciar-se la cua. El nombre especifica l'emplenat, p. ex. <b>%s3</b> resulta en '<i>001</i>'.\n\nSi voleu desar la imatge de sortida juntament amb la imatge d'origen, escriviu:\n<b>%p1/%f</b>\n\n Si voleu desar la imatge de sortida en una carpeta anomenada '<i>converted</i>' ubicada a la carpeta de la foto d'origen, escriviu:\n<b>%p1/converted/%f</b>\n\nSi voleu desar la imatge de sortida a\n'<i>/home/tom/photos/converted/2010-10-31</i>', escriviu:\n<b>%p2/converted/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Especifiqueu la ubicació de sortida en funció de la ubicació, la puntuació, l'estat de paperera o la posició a la cua.\n\nUtilitzant la següent ruta com a exemple:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nel significat de les cadenes de format és:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/<i>\n\n<b>%r</b> es reemplaçarà per la puntuació de la foto. Si la foto no está puntuada, s'utilitza '<i>0</i>'. Si la foto és a la paperera, s'utilitza '<i>x</i>'.\n\n<b>%s1</b>, ..., <b>%s9</b> es reemplaçarà per la posició inicial de la foto a la cua en el moment d'iniciar-se la cua. El nombre especifica l'emplenat, p. ex. <b>%s3</b> resulta en '<i>001</i>'.\n\n<b>%n</b> es reemplaçarà pel nom de la instantània aplicada actualment. Si no existeix ni se selecciona cap instantània, s'utilitzarà una cadena buida. Es pot utilitzar <b>%u</b> en comptes de <b>%n</b> per reemplaçar espais amb guions baixos al nom de la instantània.\n\nSi voleu desar la imatge de sortida juntament amb la imatge d'origen, escriviu:\n<b>%p1/%f</b>\n\n Si voleu desar la imatge de sortida en una carpeta anomenada '<i>converted</i>' ubicada a la carpeta de la foto d'origen, escriviu:\n<b>%p1/converted/%f</b>\n\nSi voleu desar la imatge de sortida a\n'<i>/home/tom/photos/converted/2010-10-31</i>', escriviu:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Ubicació de sortida
 QUEUE_STARTSTOP_TOOLTIP;Inicia o atura el processament de les imatges a la cua.\n\nDrecera: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Directori base
@@ -1534,7 +1546,7 @@ TP_FILMNEGATIVE_REF_TOOLTIP;Trieu un punt gris per al balanç de blancs de la im
 TP_FILMSIMULATION_LABEL;Simulació de pel·lícula
 TP_FILMSIMULATION_SLOWPARSEDIR;ART està configurat per cercar imatges Hald CLUT, que s'utilitzen a l'eina de simulació de pel·lícula, en una carpeta que està trigant massa a carregar.\nAneu a Preferències > Processament d'imatges > Simulació de pel·lícula\nper veure quina carpeta s'està utilitzant. Hauríeu d'apuntar ART a una carpeta que contingui només imatges Hald CLUT i res més, o a una carpeta buida si no voleu utilitzar l'eina de simulació de pel·lícula.\n\nLlegiu l'article sobre simulació de pel·lícula a RawPedia per obtenir més informació.\n\nVoleu cancel·lar l'exploració ara?
 TP_FILMSIMULATION_STRENGTH;Intensitat
-TP_FILMSIMULATION_ZEROCLUTSFOUND;Establiu la carpeta HaldCLUT a Preferències
+TP_FILMSIMULATION_ZEROCLUTSFOUND;Establiu la carpeta CLUT a Preferències
 TP_FILMSIMULATION_AFTER_TONE_CURVE;Aplica després de la corba tonal
 TP_FLATFIELD_AUTOSELECT;Selecció automàtica
 TP_FLATFIELD_BLURRADIUS;Radi de desenfocament

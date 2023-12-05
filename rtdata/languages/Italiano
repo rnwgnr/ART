@@ -19,6 +19,7 @@
 #19 2023-03-08 alvaro
 #20 2023-09-01 alvaro
 #21 2023-09-27 alvaro
+#22 2023-12-04 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -27,6 +28,13 @@ ABOUT_TAB_LICENSE;Licenza
 ABOUT_TAB_RELEASENOTES;Note di rilascio
 ABOUT_TAB_SPLASH;Logo
 ADJUSTER_RESET_TO_DEFAULT;<b>Click</b> - reimposta il valore di default.\n<b>Ctrl</b>+<b>click</b> - reimposta l'ultimo valore salvato.
+CTL_SIGMOID;Tone mapper sigmoide
+CTL_SIGMOID_BASE_PRIMARIES;Primari base
+CTL_SIGMOID_INSET;Attenuazione
+CTL_SIGMOID_PURITY;Recupero della purezza
+CTL_SIGMOID_ROTATION;Rotazione
+CTL_SIGMOID_SKEW;Distorto
+CTL_SIGMOID_USE_PRIMARIES;Usa primari personalizzati
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
@@ -78,6 +86,7 @@ ERROR_MSG_INVALID_PROFILE;Profilo non valido: %1
 ERROR_MSG_INVALID_PSF;File PSF non valido: %1
 ERROR_MSG_MAXERRORS;... (%1 errori precedenti non mostrati)
 ERROR_MSG_METADATA_VALUE;Metadati: errore impostazione %1 in %2
+ERROR_MSG_INVALID_LUT_PARAMS;Parametri LUT non validi per: %1
 EXIFFILTER_APERTURE;Diaframma
 EXIFFILTER_CAMERA;Fotocamera
 EXIFFILTER_DATE;Data
@@ -539,6 +548,7 @@ HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - luminosità
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - Maschera regione L
 HISTORY_MSG_COLORCORRECTION_LIST;CC - regioni
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - Parametri LUT
 HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - sfocatura maschera regioni
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - post-elaborazione maschera
 HISTORY_MSG_COLORCORRECTION_MODE;CC - Modalità
@@ -590,6 +600,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Colore base pellicola
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;PN - Ingresso di riferimento
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valori pellicola negativa
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulaz. pellicola - Dopo curva tonale
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Simulaz. pellicola - Parametri LUT
 HISTORY_MSG_FLATFIELD_EMBEDDED;Flat-field incorporato
 HISTORY_MSG_GRAIN_ENABLED;Grana pellicola
 HISTORY_MSG_GRAIN_ISO;Grana pellicola - ISO
@@ -1021,6 +1032,7 @@ PREFERENCES_CLUTSCACHE;HaldCLUT Cache
 PREFERENCES_CLUTSCACHE_LABEL;Numero massimo di CLUT in cache
 PREFERENCES_CLUTSDIR;Cartella HaldCLUT
 PREFERENCES_CMMBPC;Compensazione punto del nero
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Usa una resa degli script CTL più veloce ma meno accurata nell'anteprima con zoom < 100%
 PREFERENCES_CURVEBBOXPOS;Posizione dei pulsanti copia & incolla curve
 PREFERENCES_CURVEBBOXPOS_ABOVE;Sopra
 PREFERENCES_CURVEBBOXPOS_BELOW;Sotto

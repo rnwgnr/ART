@@ -24,6 +24,7 @@
 #23 2022-12-27 mrleemon, update for 1.18
 #24 2023-03-11 mrleemon, update for 1.18.1
 #25 2023-08-01 mrleemon, update for 1.21
+#26 2023-12-04 mrleemon, update for 1.22
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -31,6 +32,13 @@ ABOUT_TAB_LICENSE;Licencia
 ABOUT_TAB_RELEASENOTES;Notas de la versión
 ABOUT_TAB_SPLASH;Splash
 ADJUSTER_RESET_TO_DEFAULT;<b>Clic</b> - restablecer al valor predeterminado.\n<b>Ctrl</b>+<b>clic</b> - restablecer al último valor guardado.
+CTL_SIGMOID;Mapeador de tonos sigmoide
+CTL_SIGMOID_BASE_PRIMARIES;Primarios base
+CTL_SIGMOID_INSET;Atenuación
+CTL_SIGMOID_PURITY;Recuperar la pureza
+CTL_SIGMOID_ROTATION;Rotación
+CTL_SIGMOID_SKEW;Distorsión
+CTL_SIGMOID_USE_PRIMARIES;Usar primarios personalizados
 CURVEEDITOR_AXIS_IN;E:
 CURVEEDITOR_AXIS_LEFT_TAN;TI:
 CURVEEDITOR_AXIS_OUT;S:
@@ -82,6 +90,7 @@ ERROR_MSG_MAXERRORS;... (%1 error(es) anterior(es) no mostrado(s))
 ERROR_MSG_METADATA_VALUE;Metadatos: error al establecer %1 a %2
 ERROR_MSG_INVALID_PROFILE;Perfil no válido: %1
 ERROR_MSG_INVALID_PSF;Archivo PSF no válido: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Parámetros LUT no válidos para: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Cámara
 EXIFFILTER_DATE;Fecha
@@ -561,6 +570,7 @@ HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - máscara de pincel
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - máscara paramétrica
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - post-procesamiento de máscara
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - Parámetros LUT
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Corrección de color
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RR - intensidad de crominancia automática
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RR - Suavizado final C
@@ -606,6 +616,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Color base de la película
 HISTORY_MSG_FILMNEGATIVE_VALUES;Valores del negativo de película
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;NP - Entrada de referencia
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Simulación de película - Después de la curva tonal
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Simulación de película - Parámetros LUT
 HISTORY_MSG_FLATFIELD_EMBEDDED;Campo plano incrustado
 HISTORY_MSG_GRAIN_ENABLED;Grano de película
 HISTORY_MSG_GRAIN_ISO;Grano de película - ISO
@@ -1025,10 +1036,11 @@ PREFERENCES_CACHEMAXENTRIES;Número máximo de entradas en la caché
 PREFERENCES_CACHEOPTS;Opciones de caché
 PREFERENCES_CACHETHUMBHEIGHT;Altura máxima de las miniaturas
 PREFERENCES_CLIPPINGIND;Indicación de recorte
-PREFERENCES_CLUTSCACHE;Caché HaldCLUT
+PREFERENCES_CLUTSCACHE;Caché CLUT
 PREFERENCES_CLUTSCACHE_LABEL;Número máximo de CLUTs en caché
-PREFERENCES_CLUTSDIR;Carpeta HaldCLUT
+PREFERENCES_CLUTSDIR;Carpeta CLUT
 PREFERENCES_CMMBPC;Compensación de punto negro
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Usar un renderizador más rápido pero menos preciso para los scripts CTL en la vista previa con un zoom <100%
 PREFERENCES_CURVEBBOXPOS;Posición de los botones de copiar y pegar curvas
 PREFERENCES_CURVEBBOXPOS_ABOVE;Encima
 PREFERENCES_CURVEBBOXPOS_BELOW;Debajo
@@ -1251,7 +1263,7 @@ QUEUE_DESTFILENAME;Ruta y nombre del archivo
 QUEUE_FORMAT_TITLE;Formato de archivo
 QUEUE_LOCATION_FOLDER;Guardar en carpeta
 QUEUE_LOCATION_TEMPLATE;Usar plantilla
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Especifique la ubicación de salida en función de la ubicación, la puntuación, el estado de papelera o la posición en la cola de la foto de origen.\n\nUsando la siguiente ruta como ejemplo:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nel significado de las cadenas de formato es:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/<i>\n\n<b>%r</b> se reemplazará por la puntuación de la foto. Si la foto no está puntuada, se usa '<i>0</i>'. Si la foto está en la papelera, se usa '<i>x</i>'.\n\n<b>%s1</b>, ..., <b>%s9</b> se reemplazará por la posición inicial de la foto en la cola en el momento de iniciarse la cola. El número especifica el relleno, p. ej. <b>%s3</b> resulta en '<i>001</i>'.\n\nSi desea guardar la imagen de salida junto con la imagen de origen, escriba:\n<b>%p1/%f</b>\n\n Si desea guardar la imagen de salida en una carpeta llamada '<i>converted</i>' ubicada en la carpeta de la foto de origen, escriba:\n<b>%p1/converted/%f</b>\n\nSi desea guardar la imagen de salida en\n'<i>/home/tom/photos/converted/2010-10-31</i>', escriba:\n<b>%p2/converted/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Especifique la ubicación de salida en función de la ubicación, la puntuación, el estado de papelera o la posición en la cola.\n\nUsando la siguiente ruta como ejemplo:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nel significado de las cadenas de formato es:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/<i>\n\n<b>%r</b> se reemplazará por la puntuación de la foto. Si la foto no está puntuada, se usa '<i>0</i>'. Si la foto está en la papelera, se usa '<i>x</i>'.\n\n<b>%s1</b>, ..., <b>%s9</b> se reemplazará por la posición inicial de la foto en la cola en el momento de iniciarse la cola. El número especifica el relleno, p. ej. <b>%s3</b> resulta en '<i>001</i>'.\n\n<b>%n</b> se reemplazará por el nombre de la instantánea aplicada actualmente. Si no existe ni se selecciona ninguna instantánea, se usará la cadena vacía. Se puede usar <b>%u</b> en lugar de <b>%n</b> para reemplazar espacios con guiones bajos en el nombre de la instantánea.\n\nSi desea guardar la imagen de salida junto con la imagen de origen, escriba:\n<b>%p1/%f</b>\n\n Si desea guardar la imagen de salida en una carpeta llamada '<i>converted</i>' ubicada en la carpeta de la foto de origen, escriba:\n<b>%p1/converted/%f</b>\n\nSi desea guardar la imagen de salida en\n'<i>/home/tom/photos/converted/2010-10-31</i>', escriba:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Ubicación de salida
 QUEUE_STARTSTOP_TOOLTIP;Iniciar o detener el procesamiento de las imágenes en la cola.\n\nAtajo: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;Directorio base
@@ -1537,7 +1549,7 @@ TP_FILMNEGATIVE_REF_TOOLTIP;Elija un punto gris para el balance de blancos de la
 TP_FILMSIMULATION_LABEL;Simulación de película
 TP_FILMSIMULATION_SLOWPARSEDIR;ART está configurado para buscar imágenes Hald CLUT, que se usan en la herramienta de simulación de película, en una carpeta que está tardando demasiado en cargarse.\nVaya a Preferencias > Procesamiento de imágenes > Simulación de película\npara ver qué carpeta se está usando. Debería apuntar ART a una carpeta que contenga sólo imágenes Hald CLUT y nada más, o a una carpeta vacía si no desea usar la herramienta de simulación de película.\n\nLea el artículo sobre simulación de película en RawPedia para obtener más información.\n\n¿Desea cancelar la exploración ahora?
 TP_FILMSIMULATION_STRENGTH;Intensidad
-TP_FILMSIMULATION_ZEROCLUTSFOUND;Establezca la carpeta HaldCLUT en Preferencias
+TP_FILMSIMULATION_ZEROCLUTSFOUND;Establezca la carpeta CLUT en Preferencias
 TP_FILMSIMULATION_AFTER_TONE_CURVE;Aplicar después de la curva tonal
 TP_FLATFIELD_AUTOSELECT;Selección automática
 TP_FLATFIELD_BLURRADIUS;Radio de desenfoque

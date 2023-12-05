@@ -4,12 +4,20 @@
 #03 27.12.2022 Übersetzung für 1.18 (apostel338)
 #04 11.03.2023 Update für neue Version (apostel338)
 #05 01.09.2023 Update für neue Version (apostel338)
+#06 04.12.2023 Update für neue Version (apostel338)
 ABOUT_TAB_BUILD;Version
 ABOUT_TAB_CREDITS;Danksagungen
 ABOUT_TAB_LICENSE;Lizenz
 ABOUT_TAB_RELEASENOTES;Versionshinweise
 ABOUT_TAB_SPLASH;Startbild
 ADJUSTER_RESET_TO_DEFAULT;<b>Linksklick</b> - Auf Standardwert zurücksetzen.\n<b>Strg + Linksklick</b> - Auf zuletzt gespeicherten Wert zurücksetzen.
+CTL_SIGMOID;Sigmoid Tone-Tonemapper
+CTL_SIGMOID_BASE_PRIMARIES;RGB Primärfarben
+CTL_SIGMOID_INSET;Dämpfung
+CTL_SIGMOID_PURITY;Reinheit wiederherstellen
+CTL_SIGMOID_ROTATION;Rotation
+CTL_SIGMOID_SKEW;Steigung
+CTL_SIGMOID_USE_PRIMARIES;Benutzerdefinierte Primärfarben
 CURVEEDITOR_AXIS_IN;x:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;y:
@@ -57,6 +65,7 @@ EDITWINDOW_TITLE;Bildbearbeitung
 EDIT_OBJECT_TOOLTIP;Schaltet das Einstellungswerkzeug im Vorschaubild ein/aus.
 EDIT_PIPETTE_TOOLTIP;Punkte übers Vorschaubild hinzufügen:\nStrg gedrückt halten und Linksklick, um im gewünschten Farb- oder Helligkeitsbereich einen Punkt auf der Kurve hinzuzufügen. Bei gedrückter Strg- und linker Taste die Maus hoch oder runter bewegen, um Feinjustierungen vorzunehmen. Für gröbere Anpassungen Strg loslassen.
 ERROR_MSG_FILE_READ;Fehler beim Lesen der Datei: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Ungültige LUT-Parameter für: %1
 ERROR_MSG_INVALID_PROFILE;Ungültiges Profil: %1
 ERROR_MSG_INVALID_PSF;Ungültige PSF Datei: %1
 ERROR_MSG_MAXERRORS;... (%1 vorherige(r) Fehler nicht angezeigt)
@@ -521,6 +530,7 @@ HISTORY_MSG_COLORCORRECTION_LIGHTNESS;Farb-/Tonkorrektur - Helligkeit
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;Farb-/Tonkorrektur - L-Maske
 HISTORY_MSG_COLORCORRECTION_LIST;Farb-/Tonkorrektur - Ebenen
 HISTORY_MSG_COLORCORRECTION_LUT;Farb-/Tonkorrektur - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;Farb-/Tonkorrektur - LUT-Parameter
 HISTORY_MSG_COLORCORRECTION_MASKBLUR;Farb-/Tonkorrektur - Maske weichzeichnen
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;Farb-/Tonkorrektur - Maske Nachbearbeitung
 HISTORY_MSG_COLORCORRECTION_MODE;Farb-/Tonkorrektur - Modus
@@ -572,6 +582,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Grundfarbe des Filmmaterials
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;Negativfilm - Referenz-Eingabe
 HISTORY_MSG_FILMNEGATIVE_VALUES;Negativfilm - Werte
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmsimulation - Nach Tonwertkurve
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Filmsimulation - LUT-Parameters
 HISTORY_MSG_FLATFIELD_EMBEDDED;Weißbild eingebettet
 HISTORY_MSG_GRAIN_ENABLED;Filmkörnung
 HISTORY_MSG_GRAIN_ISO;Filmkörnung - ISO
@@ -999,10 +1010,13 @@ PREFERENCES_CACHEMAXENTRIES;Maximale Anzahl der Miniaturbilder im Festplatten-Ca
 PREFERENCES_CACHEOPTS;Einstellungen des Festplatten-Cache für Miniaturbilder
 PREFERENCES_CACHETHUMBHEIGHT;Maximale Höhe der Miniaturbilder
 PREFERENCES_CLIPPINGIND;Anzeige zu heller/dunkler Bereiche
+PREFERENCES_CLUTSCACHE;CLUT-Cache
 PREFERENCES_CLUTSCACHE;HaldCLUT-Zwischenspeicher
 PREFERENCES_CLUTSCACHE_LABEL;Maximale Anzahl CLUTs im Zwischenspeicher
+PREFERENCES_CLUTSDIR;CLUT-Verzeichnis
 PREFERENCES_CLUTSDIR;HaldCLUT-Verzeichnis
 PREFERENCES_CMMBPC;Schwarzpunkt-Kompensation
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Verwende schnellere, jedoch weniger akkurate Vorschau für CTL-Skripte bei Zoomstufen <100%
 PREFERENCES_CURVEBBOXPOS;Position der Kurven-Schaltflächen
 PREFERENCES_CURVEBBOXPOS_ABOVE;Oben
 PREFERENCES_CURVEBBOXPOS_BELOW;Unten
@@ -1226,6 +1240,7 @@ QUEUE_FORMAT_TITLE;Dateiformat
 QUEUE_LOCATION_FOLDER;In Ordner speichern
 QUEUE_LOCATION_TEMPLATE;Dynamisches Verzeichnis verwenden
 QUEUE_LOCATION_TEMPLATE_TOOLTIP;Die folgenden Variablen können verwendet werden:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ..., <b>%r</b>, <b>%s1</b>, <b>%s2</b>, ...\n\nDiese Variablen beinhalten bestimmte Teile des Verzeichnispfades, in welchem sich das Bild befindet, oder Attribute des Bildes.\n\nWenn zum Beispiel <b><i>/home/tom/photos/2010-10-31/dsc0042.nef</i></b> geöffnet wurde, dann haben die Variablen den folgenden Inhalt:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31</i>\n<b>%p2</b> = <i>/home/tom/photos</i>\n<b>%p3</b> = <i>/home/tom</i>\n<b>%p4</b> = <i>/home</i>\n\nWenn Sie die Ausgabedatei in dasselbe Verzeichnis wie das Originalbild speichern wollen, dann wählen Sie:\n<b>%p1/%f</b>\n\nWenn Sie die Ausgabedatei in ein Unterverzeichnis mit dem Namen '<i>converted</i>' schreiben wollen, dann wählen Sie:\n<b>%p1/converted/%f</b>\n\nWenn Sie die Ausgabedatei im Verzeichnispfad '<i>/home/tom/photos/converted</i>' speichern wollen, dort jedoch in einem mit dem Namen des Ursprungsverzeichnisses betitelten Unterverzeichnis, dann wählen Sie:\n<b>%p2/converted/%d1/%f</b>\n\nDie Variable <b>%r</b> enthält die Bewertung des Bildes.\n\nDie Variablen <b>%s3, %s4</b> etc. entsprechen der Position in der Warteschlange zu dem Zeitpunkt, wenn die Verarbeitung gestartet wird. Die Ziffer gibt die Anzahl der Stellen an, z.B. <b>%s3</b> = 001
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Legt das Zeilverzeichnis anhand des Quellverzeichnisses des Fotos, der Bewertung, des Papierkorb-Statuses oder der Position in der Warteschlange fest.\n\nBeispiel anhand des folgenden Pfades:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\nDie Bedeutung der Variablen ist wie folgt:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wird durch die Bewertung des Fotos ersetzt. Ist das Foto unbewertet, wird '<i>0</i>' verwendet. Ist das Foto im Papierkorb, wird '<i>x</i>' verwendet.\n\n<b>%s1</b>, ..., <b>%s9</b> wird durch die Anfangsposition des Fotos in der Warteschlange zum Zeitpunkt des Starts der Verarbeitung ersetzt. Die Ziffer gibt die Anzahl der Stellen an, z.B. <b>%s3</b> ergibt '<i>001</i>'.\n\n<b>%n</b> wird durch den Namen des aktuell angewendeten Schnappschusses ersetzt. Existiert kein Schnappschuss, wird der leere String verwendet. <b>%u</b> kann anstelle von <b>%n</b> verwendet werden, um Leerstellen im Schnappschussnamen durch Unterstriche zu ersetzen.\n\nWenn Sie das exportierte Bild im Ordner des Urpsrungsfotos speichern möchten, verwenden Sie:\n<b>%p1/%f</b>\n\nWenn Sie das exportierte Bild in einem Ordner namens '<i>converted</i>' innerhalb vom Ordner des Ursprungsfotos speichern möchten, verwenden Sie:\n<b>%p1/converted/%f</b>\n\nWenn Sie das exportierte Bild in\n'<i>/home/tom/photos/converted/2010-10-31</i>'\nspeichern möchten, verwenden Sie:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Ausgabeverzeichnis
 QUEUE_STARTSTOP_TOOLTIP;Startet/Stoppt die Verarbeitung\nder Warteschlange.\n\nTaste: <b>Strg + s</b>
 RENAME_DIALOG_ALLOW_WHITESPACE;Leerzeichen in Ausgabenamen erlauben
@@ -1508,6 +1523,7 @@ TP_FILMSIMULATION_AFTER_TONE_CURVE;Nach Tonwertkurve anwenden
 TP_FILMSIMULATION_LABEL;Filmsimulation
 TP_FILMSIMULATION_SLOWPARSEDIR;ART sucht nach Hald-CLUT-Bildern, die für die Filmsimulation benötigt werden, in einem Ordner, der zu viel Zeit zum Laden benötigt.\nGehen Sie zu\nEinstellungen > Bildbearbeitung > Verzeichnisse - HaldCLUT-Verzeichnis\nund prüfen Sie, welcher Order benutzt wird. Wählen Sie den Ordner aus, der nur die Hald-CLUT-Bilder beinhaltet oder einen leeren Ordner, wenn Sie die Filmsimulation nicht verwenden möchten.\n\nWeitere Informationen über die Filmsimulation finden Sie auf RawPedia.\n\nMöchten Sie die Suche beenden?
 TP_FILMSIMULATION_STRENGTH;Intensität
+TP_FILMSIMULATION_ZEROCLUTSFOUND;CLUT-Verzeichnis in den Einstellungen festlegen
 TP_FILMSIMULATION_ZEROCLUTSFOUND;HaldCLUT-Verzeichnis in den Einstellungen festlegen
 TP_FLATFIELD_AUTOSELECT;Automatische Auswahl
 TP_FLATFIELD_BLURRADIUS;Unschärferadius
