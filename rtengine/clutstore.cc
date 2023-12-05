@@ -18,6 +18,7 @@
 
 #include "../rtgui/options.h"
 #include "../rtgui/multilangmgr.h"
+#include "../rtgui/pathutils.h"
 #include "cJSON.h"
 
 #ifdef _OPENMP
@@ -785,12 +786,17 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
         {"adobe", "Adobe RGB"}
     };
 
+    int cur_line = 0;
+    
     const auto err =
         [&](const std::string &msg) -> bool
         {
             if (settings->verbose) {
-                std::cout << "Error in CTL script from " << filename << ": "
-                          << msg << std::endl;
+                std::cout << filename << ":";
+                if (cur_line > 0) {
+                    std::cout << cur_line << ":";
+                }
+                std::cout << " Error: " << msg << "\n" << std::endl;
             }
             return false;
         };
@@ -798,7 +804,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
     for (size_t i = 3, n = func->numInputArgs(); i < n; ++i) {
         auto a = func->inputArg(i);
         if (a->isVarying()) {
-            return err("varying parameter " + a->name());
+            return err("parameter " + a->name() + " is varying");
         }
         CLUTParamType tp = CLUTParamType::PT_INT;
         switch (a->type()->cDataType()) {
@@ -847,6 +853,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
         std::ifstream src(fn.c_str());
         std::string line;
         while (src && std::getline(src, line)) {
+            ++cur_line;
             size_t s = 0;
             while (s < line.size() && std::isspace(line[s])) {
                 ++s;
@@ -861,18 +868,18 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 line = line.substr(11+s);
                 cJSON *root = cJSON_Parse(line.c_str());
                 if (!root) {
-                    return err("bad parameter definition: " + line);
+                    return err("bad parameter definition:\n  " + line);
                 }
                 bool ok = fill_from_json(name2pos, out, root);
                 cJSON_Delete(root);
                 if (!ok) {
-                    return err("bad parameter definition: " + line);
+                    return err("bad parameter definition:\n  " + line);
                 }
             } else if (line.find("@ART-colorspace:", s) == s) {
                 line = line.substr(16+s);
                 cJSON *root = cJSON_Parse(line.c_str());
                 if (!root || !cJSON_IsString(root)) {
-                    return err("invalid colorspace definition: " + line);
+                    return err("invalid colorspace definition:\n  " + line);
                 }
                 std::string name = Glib::ustring(cJSON_GetStringValue(root)).casefold();
                 cJSON_Delete(root);
@@ -880,7 +887,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 if (it != profilemap.end()) {
                     colorspace = it->second;
                 } else {
-                    return err("invalid colorspace definition: " + line);
+                    return err("invalid colorspace definition:\n  " + line);
                 }
             }            
         }
@@ -888,8 +895,9 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
         return err("file reading error");
     }
 
+    cur_line = 0;
     if (!name2pos.empty() && !out.empty()) {
-        std::string msg = "missing parameter definitions: ";
+        std::string msg = "the following parameter definitions are missing:\n  ";
         const char *sep = "";
         for (auto &p : name2pos) {
             msg += sep + p.first;
@@ -936,7 +944,7 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
         if (!found || result.md5 != md5) {
             intp = std::make_shared<Ctl::SimdInterpreter>();
             intp->setModulePaths({ Glib::path_get_dirname(full_filename) });
-            intp->loadFile(full_filename);
+            intp->loadFile(full_filename, removeExtension(Glib::path_get_basename(full_filename)));
 
             auto f = intp->newFunctionCall("ART_main");
             if (f->numInputArgs() < 3) {
