@@ -701,7 +701,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                 }
                 if (sz >= 5) {
                     n = cJSON_GetArrayItem(root, 4);
-                    if (!set_int(n, desc.value_max)) {
+                    if (!set_int(n, desc.value_default)) {
                         return false;
                     }
                     if (sz == 6) {
