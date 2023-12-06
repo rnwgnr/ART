@@ -44,6 +44,13 @@ ABOUT_TAB_LICENSE;Licentie
 ABOUT_TAB_RELEASENOTES;Uitgave-opmerkingen
 ABOUT_TAB_SPLASH;Welkom
 ADJUSTER_RESET_TO_DEFAULT;<b>Klik</b> - terug naar standaardwaarde.\n<b>Ctrl+klik</b> - terug naar laatst opgeslagen waarde.
+CTL_SIGMOID;Sigmoid toonmapper
+CTL_SIGMOID_BASE_PRIMARIES;Basis primaries
+CTL_SIGMOID_INSET;Versterking
+CTL_SIGMOID_PURITY;Herstel puurheid
+CTL_SIGMOID_ROTATION;Roteer
+CTL_SIGMOID_SKEW;Scheef
+CTL_SIGMOID_USE_PRIMARIES;Gebruik eigen primaries
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
 CURVEEDITOR_AXIS_OUT;O:
@@ -95,6 +102,7 @@ ERROR_MSG_MAXERRORS;... (%1 vorige fout(en) niet getoond)
 ERROR_MSG_METADATA_VALUE;Metadata: fout veranderen %1 in %2
 ERROR_MSG_INVALID_PROFILE;Ongeldig profiel: %1
 ERROR_MSG_INVALID_PSF;Ongeldig PSF-bestand: %1
+ERROR_MSG_INVALID_LUT_PARAMS;Ongeldige LUT-parameters voor: %1
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Camera
 EXIFFILTER_DATE;Datum
@@ -558,6 +566,7 @@ HISTORY_MSG_COLORCORRECTION_OUTSATURATION;K/Tc - verzadiging uitvoer
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;K/Tc - parametrisch masker
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;K/Tc - nabewerking masker
 HISTORY_MSG_COLORCORRECTION_LUT;K/Tc - LUT
+HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;K/Tc - LUT-parameters
 HISTORY_MSG_COLORCORRECTION_PIVOT;K/Tc - kantelpunt
 HISTORY_MSG_COLORCORRECTION_POWER;K/Tc - middentonen/gamma
 HISTORY_MSG_COLORCORRECTION_COMPRESSION;K/Tc - compressie
@@ -604,6 +613,7 @@ HISTORY_MSG_FILMNEGATIVE_FILMBASE;Basiskleur film
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
 HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Referentie invoer
 HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmsimulatie - Na tooncurve
+HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Filmsimulatie - LUT-parameters
 HISTORY_MSG_FLATFIELD_EMBEDDED;Ingebed vlakveld
 HISTORY_MSG_GRAIN_ENABLED;Filmkorrel
 HISTORY_MSG_GRAIN_ISO;Filmkorrel - ISO
@@ -1017,10 +1027,11 @@ PREFERENCES_CACHEMAXENTRIES;Maximaal aantal elementen in de cache
 PREFERENCES_CACHEOPTS;Cache-opties
 PREFERENCES_CACHETHUMBHEIGHT;Maximale hoogte miniaturen
 PREFERENCES_CLIPPINGIND;Indicatie over-/onderbelichting
-PREFERENCES_CLUTSCACHE;HaldCLUT-cache
+PREFERENCES_CLUTSCACHE;CLUT-cache
 PREFERENCES_CLUTSCACHE_LABEL;Maximum aantal Cluts in de cache
-PREFERENCES_CLUTSDIR;HaldCLUT-map
+PREFERENCES_CLUTSDIR;CLUT-map
 PREFERENCES_CMMBPC;Zwartpuntcompensatie
+PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Gebruik snellere maar minder accurate beeldopbouw voor CTL-scripts in het voorbeeld bij <100% zoom
 PREFERENCES_CURVEBBOXPOS_ABOVE;Boven
 PREFERENCES_CURVEBBOXPOS_BELOW;Onder
 PREFERENCES_CURVEBBOXPOS_LEFT;Links
@@ -1244,7 +1255,7 @@ QUEUE_DESTFILENAME;Pad en bestandsnaam
 QUEUE_FORMAT_TITLE;Bestandsformaat
 QUEUE_LOCATION_FOLDER;Sla op in map
 QUEUE_LOCATION_TEMPLATE;Gebruik sjabloon
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op  locatie, waardering, prullenbakpositie of positie in de verwerkingsrij.\n\nAls voorbeeld nemen we de volgende padnaam:\n<b>/home/tom/fotoos/2020-10-31/foto1.raw</b>\nDe betekenis van de formatteeropties zijn als volgt:\n\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>fotoos</i>\n<b>%d1</b> = <i>2020-10-31</i>\n<b>%f</b> = <i>foto1</i>\n<b>%p1</b> = <i>/home/tom/fotoos/2020-10-31/</i>\n<b>%p2</b> = <i>/home/tom/fotoos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wordt vervangen door de waardering van de foto. Heeft de foto geen waardering, dan wordt'0' gebruikt. Als de foto in de prullenbak zit wordt 'x' gebruikt.\n\n<b>%s1 ... %s9</b> wordt vervangen door de initiële plek van de foto in de verwerkingsrij wanneer deze gestart wordt. Het getal bepaalt de getalruimte: <b>%s3</b> resulteert in <i>001</i>.\n\nWilt u het uitvoerbestand naast het oorspronkelijke bestand bewaren, schrijf dan:\n<b>%p1/%f</b>\n\nAls u de uitvoer in een map genaamd <i>geconverteerd</i> wilt bewaren die in dezelfde map staat als de oorspronkelijke foto, zegt u :\n<b>%p1/geconverteerd/%f</b>\n\nAls u het resulterende bestand wilt bewaren in \n<i>/home/tom/fotoos/geconverteerd/2020-10-31</i>, schrijft u:\n<b>%p2/geconverteerd/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op  locatie, waardering, prullenbakpositie of positie in de verwerkingsrij.\n\nAls voorbeeld nemen we de volgende padnaam:\n<b>/home/tom/fotoos/2020-10-31/foto1.raw</b>\nDe betekenis van de formatteeropties zijn als volgt:\n\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>fotoos</i>\n<b>%d1</b> = <i>2020-10-31</i>\n<b>%f</b> = <i>foto1</i>\n<b>%p1</b> = <i>/home/tom/fotoos/2020-10-31/</i>\n<b>%p2</b> = <i>/home/tom/fotoos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wordt vervangen door de waardering van de foto. Heeft de foto geen waardering, dan wordt '<i>0</i>' gebruikt. Als de foto in de prullenbak zit wordt 'x' gebruikt.\n\n<b>%s1 ... %s9</b> wordt vervangen door de initiële plek van de foto in de verwerkingsrij wanneer deze gestart wordt. Het getal bepaalt de getalruimte: <b>%s3</b> resulteert in <i>001</i>.\n\n<b>%n</b> wordt vervangen door de naam van het huidige snapshot. Als er geen snapshot bestaat, wordt een lege tekenreeks gebruikt. U kunt <b>%u</b> gebruiken in plaats van <b>%n</b> om spaties in de snapshot-naam te vervangen door underscores.\n\nWilt u het uitvoerbestand naast het oorspronkelijke bestand bewaren, schrijf dan:\n<b>%p1/%f</b>\n\nAls u de uitvoer in een map genaamd <i>geconverteerd</i> wilt bewaren die in dezelfde map staat als de oorspronkelijke foto, zegt u :\n<b>%p1/geconverteerd/%f</b>\n\nAls u het resulterende bestand wilt bewaren in \n<i>/home/tom/fotoos/geconverteerd/2020-10-31</i>, schrijft u:\n<b>%p2/geconverteerd/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Uitvoerlocatie
 QUEUE_STARTSTOP_TOOLTIP;Start of stop de verwerking van foto's in de rij.\n\nSneltoets: <b>Ctrl+s</b>
 RENAME_DIALOG_ALLOW_WHITESPACE;Sta spaties in nieuwe naam toe
@@ -1349,7 +1360,7 @@ TP_BWMIX_SET_RGBREL;Relatief RGB
 TP_BWMIX_SETTING_TOOLTIP;Verschillende voorinstellingen zoals portret, landschap, infrarood, etc.
 TP_BWMIX_SETTING;Voorinstellingen
 TP_CACORRECTION_BLUE;Blauw
-TP_CACORRECTION_LABEL;Corrigeer chromatische aberratie
+TP_CACORRECTION_LABEL;Corrigeer chromatische afwijking
 TP_CACORRECTION_RED;Rood
 TP_CHMIXER_BLUE;Blauwkanaal
 TP_CHMIXER_GREEN;Groenkanaal
@@ -1526,7 +1537,7 @@ TP_FILMNEGATIVE_REF_TOOLTIP;Kies een grijs vlak om de kleurbalans van de uitvoer
 TP_FILMSIMULATION_LABEL;Filmsimulatie
 TP_FILMSIMULATION_SLOWPARSEDIR;ART is ingesteld om naar Hald CLUT-afbeeldingen te zoeken die gebruikt worden voor het Filmsimulatie-gereedschap, in een map die teveel tijd vraagt om te laden.\nGa naar Voorkeuren > Beeldverwerking > Filmsimulatie\nom te zien welke map hiervoor gebruikt wordt. U moet ART naar een map verwijzen die alleen Hald CLUT-afbeeldingen bevat en verder niets, of naar een lege map verwijzen als u Filmsimulatie niet wilt gebruiken.\n\nLees het artikel over Filmsimulatie in RawPedia voor meer informatie.\n\nWilt u de scan nu afbreken?
 TP_FILMSIMULATION_STRENGTH;Kracht
-TP_FILMSIMULATION_ZEROCLUTSFOUND;Specificeer HaldCLUT-map in Voorkeuren
+TP_FILMSIMULATION_ZEROCLUTSFOUND;Geef CLUT-map op in Voorkeuren
 TP_FILMSIMULATION_AFTER_TONE_CURVE;Pas toe na de tooncurve
 TP_FLATFIELD_AUTOSELECT;Automatische selectie
 TP_FLATFIELD_BLURRADIUS;Verzachten, straal
@@ -1699,7 +1710,7 @@ TP_LENSPROFILE_CORRECTION_MANUAL;Handmatig via database
 TP_LENSPROFILE_LABEL;Lenscorrectieprofielen
 TP_LENSPROFILE_LENS_WARNING;Waarschuwing: de bijsnijfactor voor lensprofielen is groter dan de bijsnijfactor van de camera, resultaten kunnen verkeerd zijn.
 TP_LENSPROFILE_MODE_HEADER;Lensprofiel
-TP_LENSPROFILE_USE_CA;Chromatische aberratie
+TP_LENSPROFILE_USE_CA;Chromatische afwijking
 TP_LENSPROFILE_USE_GEOMETRIC;Geometrie
 TP_LENSPROFILE_USE_HEADER;Te corrigeren vervormingen:
 TP_LENSPROFILE_USE_VIGNETTING;Vignettering
@@ -1780,11 +1791,11 @@ TP_RAW_BILINEAR;Bilineair
 TP_RAW_BORDER;Rand
 TP_RAWCACORR_AUTO;Automatische CA-correctie
 TP_RAWCACORR_AUTOIT;Herhalen
-TP_RAWCACORR_AUTOIT_TOOLTIP;Deze schuif is alleen actief als Automatische CA-correctie is aangevinkt.\nAuto-correctie werkt conservatief en corrigeert meestal niet alle chromatische aberratie.\nOm de resterende CA te corrigeren, kunt u dit proces tot vijf keer herhalen.\nElke herhaling vermindert de CA van de vorige herhaling, maar gaat wel ten koste van extra rekentijd. 
+TP_RAWCACORR_AUTOIT_TOOLTIP;Deze schuif is alleen actief als Automatische CA-correctie is aangevinkt.\nAuto-correctie werkt conservatief en corrigeert meestal niet alle chromatische afwijking.\nOm de resterende CA te corrigeren, kunt u dit proces tot vijf keer herhalen.\nElke herhaling vermindert de CA van de vorige herhaling, maar gaat wel ten koste van extra rekentijd. 
 TP_RAWCACORR_AVOIDCOLORSHIFT;Vermijd kleurverschuiving
 TP_RAWCACORR_CABLUE;Blauw
 TP_RAWCACORR_CARED;Rood
-TP_RAWCACORR_LABEL;Corrigeer chromatische aberratie
+TP_RAWCACORR_LABEL;Corrigeer chromatische afwijking
 TP_RAW_DCB;DCB
 TP_RAW_DCBENHANCE;DCB-verbetering
 TP_RAW_DCBITERATIONS;Aantal DCB-herhalingen
