@@ -603,6 +603,19 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
             return true;
         };
 
+    const auto set_int =
+        [&](cJSON *n, double &out) -> bool
+        {
+            if (cJSON_IsNumber(n)) {
+                int v = n->valuedouble;
+                if (v == n->valuedouble) {
+                    out = v;
+                    return true;
+                }
+            }
+            return false;
+        };
+
     switch (desc.type) {
     case CLUTParamType::PT_BOOL:
         if (sz == 2) {
@@ -669,28 +682,26 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                     desc.choices.push_back(cJSON_GetStringValue(v));
                 }
                 desc.type = CLUTParamType::PT_CHOICE;
-                if (sz == 4) {
-                    return set_group(3);
+                if (sz >= 4) {
+                    n = cJSON_GetArrayItem(root, 3);
+                    if (!set_int(n, desc.value_default)) {
+                        return false;
+                    }
+                    return (sz == 4) || set_group(4);
                 } else {
                     return (sz == 3);
                 }
             } else if (sz >= 4) {
-                if (cJSON_IsNumber(n)) {
-                    desc.value_min = n->valuedouble;
-                } else {
+                if (!set_int(n, desc.value_min)) {
                     return false;
                 }
                 n = cJSON_GetArrayItem(root, 3);
-                if (cJSON_IsNumber(n)) {
-                    desc.value_max = n->valuedouble;
-                } else {
+                if (!set_int(n, desc.value_max)) {
                     return false;
                 }
                 if (sz >= 5) {
                     n = cJSON_GetArrayItem(root, 4);
-                    if (cJSON_IsNumber(n)) {
-                        desc.value_default = n->valuedouble;
-                    } else {
+                    if (!set_int(n, desc.value_max)) {
                         return false;
                     }
                     if (sz == 6) {
