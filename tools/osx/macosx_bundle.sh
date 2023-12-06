@@ -377,27 +377,7 @@ if [[ -n $NOTARY ]]; then
     msg "Notarizing the application:"
     ditto -c -k --sequesterRsrc --keepParent "${APP}" "${APP}.zip"
     echo "Uploading..."
-    uuid=`xcrun altool --notarize-app --primary-bundle-id "us.pixls.art.ART" ${NOTARY} --file "${APP}.zip" 2>&1 | grep 'RequestUUID' | awk '{ print $3 }'`
-    echo "Result= $uuid" # Display identifier string
-    sleep 15
-    while :
-    do
-        fullstatus=`xcrun altool --notarization-info "$uuid" ${NOTARY}  2>&1`  # get the status
-        status1=`echo "$fullstatus" | grep 'Status\:' | awk '{ print $2 }'`
-        if [[ $status1 = "success" ]]; then
-            xcrun stapler staple *app   #  staple the ticket
-            xcrun stapler validate -v *app
-            echo "Notarization success"
-            break
-            elif [[ $status1 = "in" ]]; then
-            echo "Notarization still in progress, sleeping for 15 seconds and trying again"
-            sleep 15
-        else
-            echo "Notarization failed fullstatus below"
-            echo "$fullstatus"
-            exit 1
-        fi
-    done
+    sudo xcrun notarytool submit "${APP}.zip" ${NOTARY} --wait
 fi
 
 function CreateDmg {
@@ -405,8 +385,8 @@ function CreateDmg {
     
     msg "Preparing disk image sources at ${srcDir}:"
     cp -R "${APP}" "${srcDir}"
-    cp "${RESOURCES}"/LICENSE.txt "${srcDir}"
-    ln -s /Applications "${srcDir}"
+    cp ${RESOURCES}/LICENSE.txt ${srcDir}/LICENSE
+    ln -s /Applications ${srcDir}
     
     # Web bookmarks
     function CreateWebloc {
@@ -429,20 +409,31 @@ function CreateDmg {
     fi
     
     msg "Creating disk image:"
-    if [[ ! -z $FANCY_DMG ]]; then
+    if [[ $FANCY_DMG == "ON" ]]; then
         echo "Building Fancy .dmg"
-        mkdir "${srcDir}/.background"
-        cp -R "${PROJECT_SOURCE_DATA_DIR}/artdmg.icns" "${srcDir}/.VolumeIcon.icns"
-        cp -R "${PROJECT_SOURCE_DATA_DIR}/artdmg-bkgd.png" "${srcDir}/.background/background.png"
-        SetFile -c incC "${srcDir}/.VolumeIcon.icns"
-        create-dmg "${dmg_name}.dmg" "${srcDir}" \
-        --volname "${PROJECT_NAME}_${PROJECT_FULL_VERSION}" \
-        --volicon "${srcDir}/.VolumeIcon.icns" \
-        --sandbox-safe \
+        create-dmg \
+        --background ${PROJECT_SOURCE_DATA_DIR}/artdmg-bkgd.png \
+        --volname ${PROJECT_NAME}_${PROJECT_FULL_VERSION} \
+        --volicon ${PROJECT_SOURCE_DATA_DIR}/artdmg.icns \
+        --window-pos 90 90 \
+        --window-size 1000 689 \
+        --text-size 16 \
+        --icon-size 80 \
+        --icon LICENSE 810 0 \
+        --icon ART.app 250 184 \
+        --icon Applications 700 180 \
+        --icon Website.webloc 300 427 \
+        --icon Forum.webloc 420 427 \
+        --icon Report\ Bug.webloc 540 427 \
+        --icon Documentation.webloc 680 427 \
         --no-internet-enable \
-        --eula LICENSE.txt \
         --hdiutil-verbose \
-        --rez /Library/Developer/CommandLineTools/usr/bin/Rez
+        --hide-extension Website.webloc \
+        --hide-extension Report\ Bug.webloc \
+        --hide-extension Forum.webloc \
+        --hide-extension Documentation.webloc \
+        --filesystem APFS \
+        ${dmg_name}.dmg ${srcDir}
     else
         hdiutil create -format UDBZ -fs HFS+ -srcdir "${srcDir}" -volname "${PROJECT_NAME}_${PROJECT_FULL_VERSION}" "${dmg_name}.dmg"
     fi
@@ -458,28 +449,7 @@ function CreateDmg {
         msg "Notarizing the dmg:"
         zip "${dmg_name}.dmg.zip" "${dmg_name}.dmg"
         echo "Uploading..."
-        uuid=$(xcrun altool --notarize-app --primary-bundle-id "us.pixls.art" ${NOTARY} --file "${dmg_name}.dmg.zip" 2>&1 | grep 'RequestUUID' | awk '{ print $3 }')
-        echo "dmg Result= ${uuid}" # Display identifier string
-        sleep 15
-        while :
-        do
-            fullstatus=`xcrun altool --notarization-info "$uuid" ${NOTARY} 2>&1`  # get the status
-            status1=`echo "$fullstatus" | grep 'Status\:' | awk '{ print $2 }'`
-            if [[ $status1 = "success" ]]; then
-                xcrun stapler staple "${dmg_name}.dmg"   #  staple the ticket
-                xcrun stapler validate -v "${dmg_name}.dmg"
-                echo "dmg Notarization success"
-                rm *dmg.zip
-                break
-                elif [[ $status1 = "in" ]]; then
-                echo "dmg Notarization still in progress, sleeping for 15 seconds and trying again"
-                sleep 15
-            else
-                echo "dmg Notarization failed fullstatus below"
-                echo "$fullstatus"
-                exit 1
-            fi
-        done
+        sudo xcrun notarytool submit "${dmg_name}.dmg.zip" ${NOTARY} --wait
     fi
     
     # Zip disk image for redistribution
