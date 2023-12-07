@@ -60,7 +60,7 @@ const float rec2020_xyz[3][3] = invert_f33(xyz_rec2020);
 const float MIDDLE_GREY = 0.1845;
 
 const float display_black_target = 0.0152;
-const float display_white_target = 100;
+//const float display_white_target = 100;
 
 
 //-----------------------------------------------------------------------------
@@ -344,6 +344,7 @@ void calculate_adjusted_primaries(float inset[3], float rotation[3],
 
 // @ART-param: ["middle_grey_contrast", "$TP_LABCURVE_CONTRAST", 0.7, 3, 1.5, 0.1]
 // @ART-param: ["contrast_skewness", "$CTL_SIGMOID_SKEW", -1, 1, -0.2, 0.01]
+// @ART-param: ["white_point", "$TP_TONECURVE_WHITEPOINT", 0.8, 40, 1, 0.1]
 // @ART-param: ["custom_primaries", "$CTL_SIGMOID_USE_PRIMARIES", true]
 // @ART-param: ["primaries_base_profile", "$CTL_SIGMOID_BASE_PRIMARIES", ["Rec. 2020", "Rec. 709 / sRGB"]]
 // @ART-param: ["r_inset", "$CTL_SIGMOID_INSET", 0, 50, 10, 0.1, "$TP_CHMIXER_PRIMARY_R"]
@@ -362,6 +363,7 @@ void ART_main(varying float r,
               output varying float bout,
               float middle_grey_contrast,
               float contrast_skewness,
+              float white_point,
               bool custom_primaries,
               int primaries_base_profile,
               float r_inset, float r_rotation,
@@ -378,7 +380,7 @@ void ART_main(varying float r,
 
     // compute the sigmoid parameters from the UI controls
     calculate_params(middle_grey_contrast, contrast_skewness,
-                     display_black_target, display_white_target, film_power,
+                     display_black_target, white_point * 100.0, film_power,
                      white_target, black_target, film_fog,
                      paper_exposure, paper_power);
 
