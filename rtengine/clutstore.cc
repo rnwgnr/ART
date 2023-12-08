@@ -954,7 +954,11 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
         bool found = ctl_cache_.get(full_filename, result);
         if (!found || result.md5 != md5) {
             intp = std::make_shared<Ctl::SimdInterpreter>();
-            intp->setModulePaths({ Glib::path_get_dirname(full_filename) });
+            intp->setModulePaths({
+                    Glib::path_get_dirname(full_filename),
+                    Glib::build_filename(options.rtdir, "ctlscripts"),
+                    Glib::build_filename(argv0, "ctlscripts")
+                });
             intp->loadFile(full_filename, removeExtension(Glib::path_get_basename(full_filename)));
 
             auto f = intp->newFunctionCall("ART_main");
