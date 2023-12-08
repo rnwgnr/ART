@@ -269,11 +269,11 @@ echo "Creating GTK settings.ini."
 mkdir -p "${RESOURCES}"/share/gtk-3.0
 mkdir -p "${ETC}"/gtk-3.0
 echo $'[Settings]\ngtk-primary-button-warps-slider = true\ngtk-overlay-scrolling = true' > "${RESOURCES}/share/gtk-3.0/settings.ini"
-"${LOCAL_PREFIX}"/bin/gdk-pixbuf-query-loaders "${LIB}"/libpixbufloader-*.so > "${ETC}"/gtk-3.0/gdk-pixbuf.loaders
-"${LOCAL_PREFIX}"/bin/gtk-query-immodules-3.0 "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules || "${LOCAL_PREFIX}"/bin/gtk-query-immodules "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules
-sed -i.bak -e "s|${PWD}/${PROJECT_NAME}.app/Contents/|/Applications/${PROJECT_NAME}.app/Contents/|" "${ETC}"/gtk-3.0/gdk-pixbuf.loaders "${ETC}/gtk-3.0/gtk.immodules"
-sed -i.bak -e "s|${LOCAL_PREFIX}/share/|/Applications/${PROJECT_NAME}.app/Contents/Resources/share/|" "${ETC}"/gtk-3.0/gtk.immodules
-sed -i.bak -e "s|${LOCAL_PREFIX}/|/Applications/${PROJECT_NAME}.app/Contents/Frameworks/|" "${ETC}"/gtk-3.0/gtk.immodules
+${LOCAL_PREFIX}/bin/gdk-pixbuf-query-loaders "${LIB}"/libpixbufloader-*.so > "${ETC}"/gtk-3.0/gdk-pixbuf.loaders
+${LOCAL_PREFIX}/bin/gtk-query-immodules-3.0 "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules || "${LOCAL_PREFIX}"/bin/gtk-query-immodules "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules
+sed -i.bak -e "s|${PWD}/ART.app/Contents/|/Applications/ART.app/Contents/|" "${ETC}"/gtk-3.0/gdk-pixbuf.loaders "${ETC}/gtk-3.0/gtk.immodules"
+sed -i.bak -e "s|${LOCAL_PREFIX}/share/|/Applications/ART.app/Contents/Resources/share/|" "${ETC}"/gtk-3.0/gtk.immodules
+sed -i.bak -e "s|${LOCAL_PREFIX}/|/Applications/ART.app/Contents/Frameworks/|" "${ETC}"/gtk-3.0/gtk.immodules
 rm "${ETC}"/*/*.bak
 
 # Install names
