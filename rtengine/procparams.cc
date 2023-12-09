@@ -37,6 +37,7 @@
 #include "base64.h"
 #include "iccstore.h"
 #include "compress.h"
+#include "clutstore.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/options.h"
@@ -3360,6 +3361,49 @@ int ProcParams::saveEmbedded(ProgressListener *pl, const Glib::ustring &fname)
 }
 
 
+namespace {
+
+bool save_lut_params(KeyFile &keyFile, const Glib::ustring &group, const Glib::ustring &name, const CLUTParamValueMap &params)
+{
+    std::ostringstream buf;
+    for (auto &p : params) {
+        buf << p.first << "=" << p.second << ";";
+    }
+    Glib::ustring val(buf.str());
+    return saveToKeyfile(group, name, val, keyFile);
+}
+
+
+bool load_lut_params(const KeyFile &keyFile, const Glib::ustring &group, const Glib::ustring &name, CLUTParamValueMap &out)
+{
+    Glib::ustring val;
+    if (assignFromKeyfile(keyFile, group, name, val)) {
+        out.clear();
+        std::ostringstream buf;
+        const char *s = val.c_str();
+        std::string key;
+        double val = 0;
+        while (*s) {
+            if (*s == '=') {
+                key = buf.str();
+                buf.str("");
+            } else if (*s == ';') {
+                auto v = buf.str();
+                val = std::atof(v.c_str());
+                buf.str("");
+                out[key] = val;
+            } else {
+                buf << *s;
+            }
+            ++s;
+        }
+        return true;
+    }
+    return false;
+}
+
+} // namespace
+
 
 int ProcParams::save(ProgressListener *pl, bool save_general,
                      KeyFile &keyFile, const ParamsEdited *pedited,
@@ -3838,7 +3882,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             if (filmSimulation.after_tone_curve) {
                 saveToKeyfile("Film Simulation", "AfterToneCurve", filmSimulation.after_tone_curve, keyFile);
             }
-            saveToKeyfile("Film Simulation", "ClutParams", filmSimulation.lut_params, keyFile);
+            //saveToKeyfile("Film Simulation", "ClutParams", filmSimulation.lut_params, keyFile);
+            save_lut_params(keyFile, "Film Simulation", "ClutParams", filmSimulation.lut_params);
         }
 
 // RGB curves        
@@ -3942,7 +3987,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("HueShift_") + n, l.hueshift, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("LUTFilename_") + n, filenameToUri(l.lutFilename, basedir), keyFile);
-                    putToKeyfile("ColorCorrection", Glib::ustring("LUTParams_") + n, l.lut_params, keyFile);
+                    //putToKeyfile("ColorCorrection", Glib::ustring("LUTParams_") + n, l.lut_params, keyFile);
+                    save_lut_params(keyFile, "ColorCorrection", Glib::ustring("LUTParams_") + n, l.lut_params);
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
@@ -5083,12 +5129,20 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 filmSimulation.after_tone_curve = (ppVersion < 1040);
             }
 
-            std::vector<float> tmpparams;
-            if (assignFromKeyfile(keyFile, "Film Simulation", "ClutParams", tmpparams)) {
-                filmSimulation.lut_params.clear();
-                for (auto v : tmpparams) {
-                    filmSimulation.lut_params.push_back(v);
+            if (ppVersion < 1041) {
+                std::vector<float> tmpparams;
+                if (assignFromKeyfile(keyFile, "Film Simulation", "ClutParams", tmpparams)) {
+                    filmSimulation.lut_params.clear();
+                    CLUTApplication lut(filmSimulation.clutFilename);
+                    if (lut) {
+                        auto desc = lut.get_param_descriptors();
+                        for (size_t i = 0, n = std::min(desc.size(), tmpparams.size()); i < n; ++i) {
+                            filmSimulation.lut_params[desc[i].name] = tmpparams[i];
+                        }
+                    }
                 }
+            } else {
+                load_lut_params(keyFile, "Film Simulation", "ClutParams", filmSimulation.lut_params);
             }
         }
 
@@ -5396,15 +5450,28 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     found = true;
                     done = false;
                 }
-                std::vector<float> tmpparams;
-                if (assignFromKeyfile(keyFile, ccgroup, prefix + "LUTParams_" + n, tmpparams)) {
-                    cur.lut_params.clear();
-                    for (auto v : tmpparams) {
-                        cur.lut_params.push_back(v);
+
+                if (ppVersion < 1041) {
+                    std::vector<float> tmpparams;
+                    if (assignFromKeyfile(keyFile, ccgroup, prefix + "LUTParams_" + n, tmpparams)) {
+                        cur.lut_params.clear();
+                        CLUTApplication lut(cur.lutFilename);
+                        if (lut) {
+                            auto desc = lut.get_param_descriptors();
+                            for (size_t i = 0, n = std::min(desc.size(), tmpparams.size()); i < n; ++i) {
+                                cur.lut_params[desc[i].name] = tmpparams[i];
+                            }
+                        }
+                        found = true;
+                        done = false;
                     }
-                    found = true;
-                    done = false;
+                } else {
+                    if (load_lut_params(keyFile, ccgroup, prefix + "LUTParams_" + n, cur.lut_params)) {
+                        found = true;
+                        done = false;
+                    }
                 }
+                
                 if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {
                     found = true;
                     done = false;

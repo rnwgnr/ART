@@ -22,6 +22,7 @@
 #include <string>
 #include <glibmm/ustring.h>
 #include <vector>
+#include <map>
 
 namespace rtengine {
 
@@ -43,5 +44,7 @@ struct CLUTParamDescriptor {
     Glib::ustring gui_group;
     double gui_step;
 };
+
+typedef std::map<std::string, double> CLUTParamValueMap;
 
 } // namespace rtengine

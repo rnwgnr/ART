@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the ARP file format is modified or the behaviour of a tool changes
-#define PPVERSION 1040
+#define PPVERSION 1041
 
 /*
   Log of version changes
+  1041  2023-12-09
+        changed format of LUT parameter values
   1040  2023-08-30
         changed position of the film simulation tool in the pipeline
         (with "after_tone_curve" param to keep backwards compatibility)

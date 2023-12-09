@@ -30,8 +30,8 @@ public:
     CLUTParamsPanel();
 
     void setParams(const std::vector<rtengine::CLUTParamDescriptor> &params);
-    void setValue(const std::vector<double> &val);
-    std::vector<double> getValue() const;
+    void setValue(const rtengine::CLUTParamValueMap &val);
+    rtengine::CLUTParamValueMap getValue() const;
     
     sigc::signal<void> signal_changed() { return sig_changed_; }
 

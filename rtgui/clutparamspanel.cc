@@ -136,9 +136,9 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
 }
 
 
-std::vector<double> CLUTParamsPanel::getValue() const
+rtengine::CLUTParamValueMap CLUTParamsPanel::getValue() const
 {
-    std::vector<double> values;
+    rtengine::CLUTParamValueMap values;
     
     for (size_t i = 0; i < params_.size(); ++i) {
         auto w = widgets_[i];
@@ -160,14 +160,14 @@ std::vector<double> CLUTParamsPanel::getValue() const
             break;
         }
 
-        values.push_back(v);
+        values[d.name] = v;
     }
 
     return values;
 }
 
 
-void CLUTParamsPanel::setValue(const std::vector<double> &val)
+void CLUTParamsPanel::setValue(const rtengine::CLUTParamValueMap &val)
 {
     bool prev = sig_blocked_;
     sig_blocked_ = true;
@@ -176,7 +176,8 @@ void CLUTParamsPanel::setValue(const std::vector<double> &val)
         auto w = widgets_[i];
         auto &d = params_[i];
 
-        double v = i < val.size() ? val[i] : d.value_default;
+        auto it = val.find(d.name);
+        double v = it != val.end() ? it->second : d.value_default;
         
         switch (d.type) {
         case rtengine::CLUTParamType::PT_BOOL: 

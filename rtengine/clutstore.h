@@ -83,7 +83,7 @@ public:
     OCIO::ConstProcessorRcPtr getOCIOLut(const Glib::ustring &filename) const;
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
-    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace) const;
+    std::vector<Ctl::FunctionCallPtr> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace, int &lut_dim) const;
     float CTL_shaper(float a, bool inv);
 #endif // ART_USE_CTL
 
@@ -134,7 +134,7 @@ public:
     operator bool() const { return ok_; }
 
     std::vector<CLUTParamDescriptor> get_param_descriptors() const;
-    bool set_param_values(const std::vector<double> &values, Quality q=Quality::HIGH);
+    bool set_param_values(const CLUTParamValueMap &values, Quality q=Quality::HIGH);
 
     static std::vector<CLUTParamDescriptor> get_param_descriptors(const Glib::ustring &filename);
 
@@ -169,12 +169,13 @@ private:
 #ifdef ART_USE_CTL
     bool CTL_init(int num_threads);
     void CTL_apply(int thread_id, int W, float *r, float *g, float *b);
-    bool CTL_set_params(const std::vector<double> &values, Quality q);
+    bool CTL_set_params(const CLUTParamValueMap &values, Quality q);
     void CTL_init_lut(int dim);
     std::vector<Ctl::FunctionCallPtr> ctl_func_;
     int ctl_chunk_size_;
     std::vector<CLUTParamDescriptor> ctl_params_;
     LUT3D ctl_lut_;
+    int ctl_lut_dim_;
 #endif // ART_USE_CTL
 
 #if defined ART_USE_OCIO || defined ART_USE_CTL

@@ -560,7 +560,7 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
 
 namespace {
 
-bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<CLUTParamDescriptor> &params, cJSON *root)
+bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<CLUTParamDescriptor> &params, cJSON *root, std::string &name)
 {
     if (!cJSON_IsArray(root)) {
         return false;
@@ -575,7 +575,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
     if (!cJSON_IsString(n)) {
         return false;
     }
-    std::string name = cJSON_GetStringValue(n);
+    name = cJSON_GetStringValue(n);
     auto it = name2pos.find(name);
     if (it == name2pos.end()) {
         return false;
@@ -779,7 +779,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  *    // ...
  * }
  */ 
-bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out, Glib::ustring &colorspace)
+bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out, Glib::ustring &colorspace, int &lut_dim)
 {
     out.clear();
     std::unordered_map<std::string, int> name2pos;
@@ -859,10 +859,13 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
         }
     }
 
+    std::unordered_map<std::string, int> order;
+    
     if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
         auto fn = Glib::filename_from_utf8(filename);
         std::ifstream src(fn.c_str());
         std::string line;
+        std::string name;
         while (src && std::getline(src, line)) {
             ++cur_line;
             size_t s = 0;
@@ -881,11 +884,12 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 if (!root) {
                     return err("bad parameter definition:\n  " + line);
                 }
-                bool ok = fill_from_json(name2pos, out, root);
+                bool ok = fill_from_json(name2pos, out, root, name);
                 cJSON_Delete(root);
                 if (!ok) {
                     return err("bad parameter definition:\n  " + line);
                 }
+                order[name] = cur_line;
             } else if (line.find("@ART-colorspace:", s) == s) {
                 line = line.substr(16+s);
                 cJSON *root = cJSON_Parse(line.c_str());
@@ -900,7 +904,19 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 } else {
                     return err("invalid colorspace definition:\n  " + line);
                 }
-            }            
+            } else if (line.find("@ART-lut:", s) == s) {
+                line = line.substr(9+s);
+                cJSON *root = cJSON_Parse(line.c_str());
+                if (!root || !cJSON_IsNumber(root)) {
+                    return err("invalid lut definition:\n  " + line);
+                }
+                double v = root->valuedouble;
+                cJSON_Delete(root);
+                lut_dim = int(v);
+                if (lut_dim <= 0 || v != lut_dim) {
+                    return err("invalid lut definition:\n  " + line);
+                }
+            }
         }
     } else {
         return err("file reading error");
@@ -916,13 +932,20 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
         }
         return err(msg);
     }
+
+    const auto lt =
+        [&](const CLUTParamDescriptor &a, const CLUTParamDescriptor &b) -> bool
+        {
+            return order[a.name] < order[b.name];
+        };
+    std::sort(out.begin(), out.end(), lt);
     
     return true;
 }
 
 } // namespace
 
-std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace) const
+std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace, int &lut_dim) const
 {
     MyMutex::MyLock lock(mutex_);
     
@@ -983,7 +1006,8 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
                 }
             }
 
-            if (!get_CTL_params(full_filename, intp, f, params, colorspace)) {
+            if (!get_CTL_params(full_filename, intp, f, params, colorspace,
+                                lut_dim)) {
                 params.clear();
                 return err("error in parsing CTL parameters");
             }
@@ -1176,10 +1200,11 @@ bool CLUTApplication::OCIO_init()
 
 bool CLUTApplication::CTL_init(int num_threads)
 {
+    ctl_lut_dim_ = 0;
     try {
         Glib::ustring colorspace = "ACESp0";
         Glib::ustring lbl;
-        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_, colorspace);
+        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_, colorspace, ctl_lut_dim_);
         if (func.empty()) {
             ok_ = false;
             return false;
@@ -1196,36 +1221,58 @@ bool CLUTApplication::CTL_init(int num_threads)
 }
 
 
-bool CLUTApplication::CTL_set_params(const std::vector<double> &values, Quality q)
+bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
 {
     try {
-        if (values.size() != ctl_params_.size() && !values.empty()) {
-            if (settings->verbose) {
-                std::cout << "Error in setting parameters for LUT " << clut_filename_ << ": " << (values.size() < ctl_params_.size() ? "not enough values" : "too many values") << std::endl;
-            }
-            return false;
-        }
         for (size_t i = 0; i < ctl_params_.size(); ++i) {
             auto &desc = ctl_params_[i];
-            auto v = i < values.size() ? values[i] : desc.value_default;
+            auto it = values.find(desc.name);
+            if (it == values.end()) {
+                std::cout << "WARNING: no value for " << desc.name << std::endl;
+            }
+            auto v = it != values.end() ? it->second : desc.value_default;
+            int arg = -1;
+            for (size_t j = 0, n = ctl_func_[0]->numInputArgs(); j < n; ++j) {
+                if (ctl_func_[0]->inputArg(j)->name() == desc.name) {
+                    arg = j;
+                    break;
+                }
+            }
+            if (arg < 0) {
+                if (settings->verbose) {
+                    std::cout << "Error: no parameter " << desc.name << " in LUT " << clut_filename_ << std::endl;
+                }
+                return false;
+            }
             switch (desc.type) {
             case CLUTParamType::PT_BOOL:
                 for (auto f : ctl_func_) {
-                    *reinterpret_cast<bool *>(f->inputArg(i+3)->data()) = v;
+                    *reinterpret_cast<bool *>(f->inputArg(arg)->data()) = v;
                 }
                 break;
             case CLUTParamType::PT_FLOAT:
                 for (auto f : ctl_func_) {
-                    *reinterpret_cast<float *>(f->inputArg(i+3)->data()) = v;
+                    *reinterpret_cast<float *>(f->inputArg(arg)->data()) = v;
                 }
                 break;
             case CLUTParamType::PT_INT:
             case CLUTParamType::PT_CHOICE:
             default:
                 for (auto f : ctl_func_) {
-                    *reinterpret_cast<int *>(f->inputArg(i+3)->data()) = v;
+                    *reinterpret_cast<int *>(f->inputArg(arg)->data()) = v;
                 }
                 break;
+            }
+        }
+        if (settings->verbose) {
+            std::set<std::string> valid;
+            for (auto &p : ctl_params_) {
+                valid.insert(p.name);
+            }
+            for (auto &p : values) {
+                if (valid.find(p.first) == valid.end()) {
+                    std::cout << "Warning: invalid parameter " << p.first << " for LUT " << clut_filename_ << std::endl;
+                }
             }
         }
     } catch (std::exception &exc) {
@@ -1234,20 +1281,29 @@ bool CLUTApplication::CTL_set_params(const std::vector<double> &values, Quality 
         }
         return false;
     } catch (...) {
+        if (settings->verbose) {
+            std::cout << "UNKNOWN Error in setting parameters for LUT " << clut_filename_ << std::endl;
+        }
         return false;
     }
 
+    int dim = ctl_lut_dim_;
     if (settings->ctl_scripts_fast_preview) {
         switch (q) {
         case Quality::LOW:
-            CTL_init_lut(16);
+            dim = !dim ? 16 : std::min(dim, 16);
+            //CTL_init_lut(16);
             break;
         case Quality::MEDIUM:
-            CTL_init_lut(50);
+            dim = !dim ? 50 : std::min(dim, 50);
+            //CTL_init_lut(50);
             break;
         default:
             break;
         }
+    }
+    if (dim > 0) {
+        CTL_init_lut(dim);
     }
 
     return true;
@@ -1335,7 +1391,7 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors() const
 }
 
 
-bool CLUTApplication::set_param_values(const std::vector<double> &values, Quality q)
+bool CLUTApplication::set_param_values(const CLUTParamValueMap &values, Quality q)
 {
 #ifdef ART_USE_CTL
     if (!ctl_func_.empty()) {
@@ -1353,7 +1409,7 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
         std::vector<CLUTParamDescriptor> params;
         int n;
         Glib::ustring colorspace;
-        auto func = CLUTStore::getInstance().getCTLLut(filename, 1, n, params, colorspace);
+        auto func = CLUTStore::getInstance().getCTLLut(filename, 1, n, params, colorspace, n);
         return params;
     } catch (...) {}
 #endif // ART_USE_CTL
@@ -1649,7 +1705,13 @@ void CLUTApplication::apply(int thread_id, int W, float *r, float *g, float *b)
 #endif
 #ifdef ART_USE_CTL
     if (!ctl_func_.empty()) {
-        CTL_apply(thread_id, W, r, g, b);
+        try {
+            CTL_apply(thread_id, W, r, g, b);
+        } catch (std::exception &exc) {
+            if (settings->verbose) {
+                std::cout << "Error in applying CTL LUT " << clut_filename_ << ": " << exc.what() << std::endl;
+            }
+        }
         return;
     }
 #endif
