@@ -3365,37 +3365,26 @@ namespace {
 
 bool save_lut_params(KeyFile &keyFile, const Glib::ustring &group, const Glib::ustring &name, const CLUTParamValueMap &params)
 {
-    std::ostringstream buf;
+    std::vector<std::string> val;
     for (auto &p : params) {
-        buf << p.first << "=" << p.second << ";";
+        val.push_back(p.first + "=" + std::to_string(p.second));
     }
-    Glib::ustring val(buf.str());
     return saveToKeyfile(group, name, val, keyFile);
 }
 
 
 bool load_lut_params(const KeyFile &keyFile, const Glib::ustring &group, const Glib::ustring &name, CLUTParamValueMap &out)
 {
-    Glib::ustring val;
+    std::vector<std::string> val;
     if (assignFromKeyfile(keyFile, group, name, val)) {
         out.clear();
-        std::ostringstream buf;
-        const char *s = val.c_str();
-        std::string key;
-        double val = 0;
-        while (*s) {
-            if (*s == '=') {
-                key = buf.str();
-                buf.str("");
-            } else if (*s == ';') {
-                auto v = buf.str();
-                val = std::atof(v.c_str());
-                buf.str("");
+        for (auto &v : val) {
+            auto p = v.find('=');
+            if (p != std::string::npos) {
+                auto key = v.substr(0, p);
+                double val = std::atof(v.c_str() + (p+1));
                 out[key] = val;
-            } else {
-                buf << *s;
             }
-            ++s;
         }
         return true;
     }
@@ -5136,8 +5125,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     CLUTApplication lut(filmSimulation.clutFilename);
                     if (lut) {
                         auto desc = lut.get_param_descriptors();
-                        for (size_t i = 0, n = std::min(desc.size(), tmpparams.size()); i < n; ++i) {
-                            filmSimulation.lut_params[desc[i].name] = tmpparams[i];
+                        if (desc.size() == tmpparams.size()) {
+                            for (size_t i = 0, n = desc.size(); i < n; ++i) {
+                                filmSimulation.lut_params[desc[i].name] = tmpparams[i];
+                            }
                         }
                     }
                 }
@@ -5458,8 +5449,10 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         CLUTApplication lut(cur.lutFilename);
                         if (lut) {
                             auto desc = lut.get_param_descriptors();
-                            for (size_t i = 0, n = std::min(desc.size(), tmpparams.size()); i < n; ++i) {
-                                cur.lut_params[desc[i].name] = tmpparams[i];
+                            if (desc.size() == tmpparams.size()) {
+                                for (size_t i = 0, n = desc.size(); i < n; ++i) {
+                                    cur.lut_params[desc[i].name] = tmpparams[i];
+                                }
                             }
                         }
                         found = true;
