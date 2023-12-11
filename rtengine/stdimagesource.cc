@@ -330,19 +330,6 @@ void StdImageSource::getSize (const PreviewProps &pp, int& w, int& h)
     h = pp.getHeight() / pp.getSkip() + (pp.getHeight() % pp.getSkip() > 0);
 }
 
-void StdImageSource::getAutoExpHistogram (LUTu & histogram, int& histcompr)
-{
-    if (img->getType() == sImage8) {
-        Image8 *img_ = static_cast<Image8*>(img);
-        img_->computeAutoHistogram(histogram, histcompr);
-    } else if (img->getType() == sImage16) {
-        Image16 *img_ = static_cast<Image16*>(img);
-        img_->computeAutoHistogram(histogram, histcompr);
-    } else if (img->getType() == sImagefloat) {
-        Imagefloat *img_ = static_cast<Imagefloat*>(img);
-        img_->computeAutoHistogram(histogram, histcompr);
-    }
-}
 
 void StdImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
 {

@@ -58,8 +58,6 @@ public:
         return true;
     }
 
-    void getAutoExpHistogram(LUTu &histogram, int& histcompr) override;
-
     double getDefGain() const override
     {
         return 0.0;

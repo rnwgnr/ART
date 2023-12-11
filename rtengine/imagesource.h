@@ -121,7 +121,6 @@ public:
         }
     }
 
-    virtual void getAutoExpHistogram(LUTu & histogram, int& histcompr) = 0;
     virtual void getRAWHistogram(LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw)
     {
         histRedRaw.clear();

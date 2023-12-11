@@ -1826,15 +1826,6 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
     }
 
-    // if(prepareDenoise && dirpyrdenoiseExpComp == INFINITY) {
-    //     LUTu aehist;
-    //     int aehistcompr;
-    //     double clip = 0;
-    //     int brightness, contrast, black, hlcompr, hlcomprthresh;
-    //     getAutoExpHistogram (aehist, aehistcompr);
-    //     ImProcFunctions::getAutoExp (aehist, aehistcompr, clip, dirpyrdenoiseExpComp, brightness, contrast, black, hlcompr, hlcomprthresh);
-    // }
-
     t2.set();
 
     if( settings->verbose ) {
@@ -3730,87 +3721,6 @@ void RawImageSource::hlRecovery(float* red, float* green, float* blue, int width
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-void RawImageSource::getAutoExpHistogram (LUTu & histogram, int& histcompr)
-{
-//    BENCHFUN
-    histcompr = 3;
-
-    histogram(65536 >> histcompr);
-    histogram.clear();
-    const float refwb[3] = {static_cast<float>(refwb_red  / (1 << histcompr)), static_cast<float>(refwb_green / (1 << histcompr)), static_cast<float>(refwb_blue / (1 << histcompr))};
-
-#ifdef _OPENMP
-    #pragma omp parallel
-#endif
-    {
-        LUTu tmphistogram(histogram.getSize());
-        tmphistogram.clear();
-#ifdef _OPENMP
-        #pragma omp for schedule(dynamic,16) nowait
-#endif
-
-        for (int i = border; i < H - border; i++) {
-            int start, end;
-            getRowStartEnd (i, start, end);
-
-            if (ri->getSensorType() == ST_BAYER) {
-                // precalculate factors to avoid expensive per pixel calculations
-                float refwb0 =  refwb[ri->FC(i, start)];
-                float refwb1 =  refwb[ri->FC(i, start + 1)];
-                int j;
-
-                for (j = start; j < end - 1; j += 2) {
-                    tmphistogram[(int)(refwb0 * rawData[i][j])] += 4;
-                    tmphistogram[(int)(refwb1 * rawData[i][j + 1])] += 4;
-                }
-
-                if(j < end) {
-                    tmphistogram[(int)(refwb0 * rawData[i][j])] += 4;
-                }
-            } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
-                // precalculate factors to avoid expensive per pixel calculations
-                float refwb0 =  refwb[ri->XTRANSFC(i, start)];
-                float refwb1 =  refwb[ri->XTRANSFC(i, start + 1)];
-                float refwb2 =  refwb[ri->XTRANSFC(i, start + 2)];
-                float refwb3 =  refwb[ri->XTRANSFC(i, start + 3)];
-                float refwb4 =  refwb[ri->XTRANSFC(i, start + 4)];
-                float refwb5 =  refwb[ri->XTRANSFC(i, start + 5)];
-                int j;
-
-                for (j = start; j < end - 5; j += 6) {
-                    tmphistogram[(int)(refwb0 * rawData[i][j])] += 4;
-                    tmphistogram[(int)(refwb1 * rawData[i][j + 1])] += 4;
-                    tmphistogram[(int)(refwb2 * rawData[i][j + 2])] += 4;
-                    tmphistogram[(int)(refwb3 * rawData[i][j + 3])] += 4;
-                    tmphistogram[(int)(refwb4 * rawData[i][j + 4])] += 4;
-                    tmphistogram[(int)(refwb5 * rawData[i][j + 5])] += 4;
-                }
-
-                for (; j < end; j++) {
-                    tmphistogram[(int)(refwb[ri->XTRANSFC(i, j)] * rawData[i][j])] += 4;
-                }
-            } else if (ri->get_colors() == 1) {
-                for (int j = start; j < end; j++) {
-                    tmphistogram[(int)(refwb[0] * rawData[i][j])]++;
-                }
-            } else {
-                for (int j = start; j < end; j++) {
-                    tmphistogram[(int)(refwb[0] * rawData[i][3 * j + 0])]++;
-                    tmphistogram[(int)(refwb[1] * rawData[i][3 * j + 1])]++;
-                    tmphistogram[(int)(refwb[2] * rawData[i][3 * j + 2])]++;
-                }
-            }
-        }
-
-#ifdef _OPENMP
-        #pragma omp critical
-#endif
-        {
-            histogram += tmphistogram;
-        }
-    }
-}
 
 //-----------------------------------------------------------------------------
 #if 0
