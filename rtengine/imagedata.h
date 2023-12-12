@@ -57,6 +57,7 @@ private:
     int w_;
     int h_;
     bool dng_;
+    bool raw_;
     std::string internal_make_model_;
     
 public:
@@ -99,6 +100,8 @@ public:
     void setDimensions(int w, int h);
     void setDNG(bool yes) { dng_ = yes; }
     bool isDNG() const override { return dng_; }
+    void setRAW(bool yes) { raw_ = yes; }
+    bool isRAW() const override { return raw_; }
 
     void setInternalMakeModel(const std::string &m);
     std::string getInternalMakeModel() const { return internal_make_model_; }

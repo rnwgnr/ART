@@ -84,7 +84,8 @@ FramesData::FramesData(const Glib::ustring &fname):
     rating_(0),
     w_(-1),
     h_(-1),
-    dng_(false)
+    dng_(false),
+    raw_(false)
 {
     memset(&time, 0, sizeof(time));
     timeStamp = 0;
@@ -841,6 +842,9 @@ std::string FramesData::getOrientation() const
 void FramesData::setDCRawFrameCount(unsigned int frameCount)
 {
     dcrawFrameCount = frameCount;
+    if (dcrawFrameCount > 0) {
+        raw_ = true;
+    }
 }
 
 unsigned int FramesData::getFrameCount() const

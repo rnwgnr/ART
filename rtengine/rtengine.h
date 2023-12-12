@@ -137,6 +137,7 @@ public:
     virtual std::vector<GainMap> getGainMaps() const = 0;
     virtual void getDimensions(int &w, int &h) const = 0;
     virtual bool isDNG() const { return false; }
+    virtual bool isRAW() const { return false; }
 };
 
 /** This listener interface is used to indicate the progress of time consuming operations */

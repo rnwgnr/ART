@@ -1231,6 +1231,7 @@ void Thumbnail::saveMetadata()
 std::shared_ptr<rtengine::FramesMetaData> Thumbnail::getMetaData()
 {
     rtengine::FramesMetaData* imageMetaData = rtengine::FramesMetaData::fromFile(fname);
+    static_cast<rtengine::FramesData *>(imageMetaData)->setRAW(getType() == FT_Raw);
     return std::shared_ptr<rtengine::FramesMetaData>(imageMetaData);
 }
 

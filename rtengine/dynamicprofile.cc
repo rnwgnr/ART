@@ -134,7 +134,7 @@ bool DynamicProfileRule::matches(const rtengine::FramesMetaData *im) const
             && expcomp(im->getExpComp())
             && camera(im->getCamera())
             && lens(im->getLens())
-            && imagetype(im->getImageType())
+            && imagetype(im->isRAW() ? "raw" : "nonraw")
             && filetype(getFileExtension(im->getFileName()))
             && software(im->getSoftware())
             && customdata(im));

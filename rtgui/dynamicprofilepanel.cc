@@ -47,9 +47,8 @@ DynamicProfilePanel::EditDialog::EditDialog(const Glib::ustring &title, Gtk::Win
     
     imagetype_ = Gtk::manage(new MyComboBoxText());
     imagetype_->append(Glib::ustring("(") + M("DYNPROFILEEDITOR_IMGTYPE_ANY") + ")");
-    imagetype_->append(M("DYNPROFILEEDITOR_IMGTYPE_STD"));
-    imagetype_->append(M("DYNPROFILEEDITOR_IMGTYPE_HDR"));
-    imagetype_->append(M("DYNPROFILEEDITOR_IMGTYPE_PS"));
+    imagetype_->append(M("DYNPROFILEEDITOR_IMGTYPE_RAW"));
+    imagetype_->append(M("DYNPROFILEEDITOR_IMGTYPE_NONRAW"));
     imagetype_->set_active(0);
     hb = Gtk::manage(new Gtk::HBox());
     hb->pack_start(*Gtk::manage(new Gtk::Label(M("EXIFFILTER_IMAGETYPE"))), false, false, 4);
@@ -121,12 +120,10 @@ void DynamicProfilePanel::EditDialog::set_rule(
     
     if (!rule.imagetype.enabled) {
         imagetype_->set_active(0);
-    } else if (rule.imagetype.value == "STD") {
+    } else if (rule.imagetype.value == "raw") {
         imagetype_->set_active(1);
-    } else if (rule.imagetype.value == "HDR") {
+    } else if (rule.imagetype.value == "nonraw") {
         imagetype_->set_active(2);
-    } else if (rule.imagetype.value == "PS") {
-        imagetype_->set_active(3);
     } else {
         imagetype_->set_active(0);
     }
@@ -178,13 +175,10 @@ DynamicProfileRule DynamicProfilePanel::EditDialog::get_rule()
     ret.imagetype.enabled = imagetype_->get_active_row_number() > 0;
     switch (imagetype_->get_active_row_number()) {
     case 1:
-        ret.imagetype.value = "STD";
+        ret.imagetype.value = "raw";
         break;
     case 2:
-        ret.imagetype.value = "HDR";
-        break;
-    case 3:
-        ret.imagetype.value = "PS";
+        ret.imagetype.value = "nonraw";
         break;
     default:
         ret.imagetype.value = "";
@@ -527,7 +521,7 @@ void DynamicProfilePanel::render_imagetype(
     Gtk::CellRendererText *ct = static_cast<Gtk::CellRendererText *>(cell);
     DynamicProfileRule::Optional o = row[columns_.imagetype];
     if (o.enabled) {
-        ct->property_text() = M(std::string("DYNPROFILEEDITOR_IMGTYPE_") + o.value);
+        ct->property_text() = M(std::string("DYNPROFILEEDITOR_IMGTYPE_") + o.value.uppercase());
     } else {
         ct->property_text() = "";
     }

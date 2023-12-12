@@ -1436,7 +1436,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
 
     // Load complete Exif information
     idata = new FramesData (fname);
-    idata->setDCRawFrameCount (numFrames);
+    idata->setDCRawFrameCount(numFrames);
     idata->setGainMaps(gain_maps);
     {
         int ww, hh;
