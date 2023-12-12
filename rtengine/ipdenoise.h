@@ -23,8 +23,36 @@
 #pragma once
 
 #include "improcfun.h"
+#include "curves.h"
 
 namespace rtengine { namespace denoise {
+
+class NoiseCurve {
+private:
+    LUTf lutNoiseCurve;  // 0xffff range
+    float sum;
+    void Set(const Curve &pCurve);
+
+public:
+    virtual ~NoiseCurve() {};
+    NoiseCurve();
+    void Reset();
+    void Set(const std::vector<double> &curvePoints);
+
+    float getSum() const
+    {
+        return sum;
+    }
+    float operator[](float index) const
+    {
+        return lutNoiseCurve[index];
+    }
+    operator bool (void) const
+    {
+        return lutNoiseCurve;
+    }
+};
+
 
 void Tile_calc(int tilesize, int overlap, int kall, int imwidth, int imheight, int &numtiles_W, int &numtiles_H, int &tilewidth, int &tileheight, int &tileWskip, int &tileHskip);
     

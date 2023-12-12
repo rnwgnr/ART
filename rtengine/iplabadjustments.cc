@@ -33,6 +33,37 @@ extern const Settings* settings;
 
 namespace {
 
+void fillCurveArray(DiagonalCurve* diagCurve, LUTf &outCurve, int skip, bool needed)
+{
+    if (needed) {
+
+        for (int i = 0; i <= 0xffff; i += i < 0xffff - skip ? skip : 1 ) {
+            // change to [0,1] range
+            float val = (float)i / 65535.f;
+            // apply custom/parametric/NURBS curve, if any
+            val = diagCurve->getVal (val);
+            // store result in a temporary array
+            outCurve[i] = val;
+        }
+
+        // if skip>1, let apply linear interpolation in the skipped points of the curve
+        if (skip > 1) {
+            float skipmul = 1.f / (float) skip;
+
+            for (int i = 0; i <= 0x10000 - skip; i += skip) {
+                for(int j = 1; j < skip; j++) {
+                    outCurve[i + j] = ( outCurve[i] * (skip - j) + outCurve[i + skip] * j ) * skipmul;
+                }
+            }
+        }
+
+        outCurve *= 65535.f;
+    } else {
+        outCurve.makeIdentity();
+    }
+}
+
+
 void get_L_curve(LUTf &out, int brightness, int contrast, const std::vector<double> &curve, const LUTu &histogram, int skip)
 {
     if (brightness) {
@@ -140,14 +171,14 @@ void get_ab_curves(LUTf &aout, LUTf &bout, const std::vector<double> &acurve, co
     if (!acurve.empty() && acurve[0] != 0) {
         dCurve.reset(new DiagonalCurve(acurve, CURVES_MIN_POLY_POINTS / skip));
     }
-    CurveFactory::fillCurveArray(dCurve.get(), aout, skip, dCurve && !dCurve->isIdentity());
+    fillCurveArray(dCurve.get(), aout, skip, dCurve && !dCurve->isIdentity());
 
     dCurve = nullptr;
 
     if (!bcurve.empty() && bcurve[0] != 0) {
         dCurve.reset(new DiagonalCurve(bcurve, CURVES_MIN_POLY_POINTS / skip));
     }
-    CurveFactory::fillCurveArray(dCurve.get(), bout, skip, dCurve && !dCurve->isIdentity());
+    fillCurveArray(dCurve.get(), bout, skip, dCurve && !dCurve->isIdentity());
 }
 
 

@@ -24,6 +24,42 @@
 
 namespace rtengine {
 
+namespace {
+
+void RGBCurve(const std::vector<double>& curvePoints, LUTf & outCurve, int skip)
+{
+
+    // create a curve if needed
+    std::unique_ptr<DiagonalCurve> tcurve;
+
+    if (!curvePoints.empty() && curvePoints[0] != 0) {
+        tcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(curvePoints, CURVES_MIN_POLY_POINTS / skip));
+    }
+
+    if (tcurve && tcurve->isIdentity()) {
+        tcurve = nullptr;
+    }
+
+    if (tcurve) {
+        if (!outCurve) {
+            outCurve(65536, 0);
+        }
+
+        for (int i = 0; i < 65536; i++) {
+            // apply custom/parametric/NURBS curve, if any
+            // RGB curves are defined with sRGB gamma, but operate on linear data
+            float val = Color::gamma2curve[i] / 65535.f;
+            val = tcurve->getVal(val);
+            outCurve[i] = Color::igammatab_srgb[val * 65535.f];
+        }
+    } else { // let the LUTf empty for identity curves
+        outCurve.reset();
+    }
+}
+   
+} // namespace
+
+
 void ImProcFunctions::rgbCurves(Imagefloat *img)
 {
     PlanarWhateverData<float> *editWhatever = nullptr;
@@ -42,9 +78,9 @@ void ImProcFunctions::rgbCurves(Imagefloat *img)
     img->setMode(Imagefloat::Mode::RGB, multiThread);
 
     LUTf rCurve, gCurve, bCurve;
-    CurveFactory::RGBCurve(params->rgbCurves.rcurve, rCurve, scale);
-    CurveFactory::RGBCurve(params->rgbCurves.gcurve, gCurve, scale);
-    CurveFactory::RGBCurve(params->rgbCurves.bcurve, bCurve, scale);
+    RGBCurve(params->rgbCurves.rcurve, rCurve, scale);
+    RGBCurve(params->rgbCurves.gcurve, gCurve, scale);
+    RGBCurve(params->rgbCurves.bcurve, bCurve, scale);
 
     const int W = img->getWidth();
     const int H = img->getHeight();

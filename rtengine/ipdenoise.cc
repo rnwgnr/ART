@@ -671,6 +671,54 @@ void RGB_denoise_info(ImProcData &im, Imagefloat * src, Imagefloat * provicalc, 
 } // namespace
 
 
+namespace denoise {
+
+NoiseCurve::NoiseCurve() : sum(0.f) {}
+
+void NoiseCurve::Reset()
+{
+    lutNoiseCurve.reset();
+    sum = 0.f;
+}
+
+void NoiseCurve::Set(const Curve &pCurve)
+{
+    if (pCurve.isIdentity()) {
+        Reset(); // raise this value if the quality suffers from this number of samples
+        return;
+    }
+
+    lutNoiseCurve(501); // raise this value if the quality suffers from this number of samples
+    sum = 0.f;
+
+    for (int i = 0; i < 501; i++) {
+        lutNoiseCurve[i] = pCurve.getVal(double(i) / 500.);
+
+        if(lutNoiseCurve[i] < 0.01f) {
+            lutNoiseCurve[i] = 0.01f;    //avoid 0.f for wavelet : under 0.01f quasi no action for each value
+        }
+
+        sum += lutNoiseCurve[i]; //minima for Wavelet about 6.f or 7.f quasi no action
+    }
+
+    //lutNoisCurve.dump("Nois");
+}
+
+void NoiseCurve::Set(const std::vector<double> &curvePoints)
+{
+
+    if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
+        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        tcurve.setIdentityValue(0.);
+        Set(tcurve);
+    } else {
+        Reset();
+    }
+}
+
+} // namespace denoise
+
+
 
 void ImProcFunctions::DenoiseInfoStore::reset()
 {
@@ -747,6 +795,7 @@ bool ImProcFunctions::DenoiseInfoStore::update_pparams(const procparams::ProcPar
         return !changed;
     }
 }
+
 
 void ImProcFunctions::denoiseComputeParams(ImageSource *imgsrc, const ColorTemp &currWB, DenoiseInfoStore &store, procparams::DenoiseParams &dnparams)
 {
@@ -1056,8 +1105,8 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
     }
     
     procparams::DenoiseParams denoiseParams = dnparams;
-    NoiseCurve noiseLCurve;
-    NoiseCurve noiseCCurve;
+    denoise::NoiseCurve noiseLCurve;
+    denoise::NoiseCurve noiseCCurve;
 
     const int W = img->getWidth();
     const int H = img->getHeight();

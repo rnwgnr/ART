@@ -139,6 +139,88 @@ void filmlike_clip(Imagefloat *rgb, float whitept, bool multithread)
 }
 
 
+inline float igamma(float x, float gamma, float start, float slope, float mul, float add)
+{
+    return (x <= start * slope ? x / slope : xexpf(xlogf((x + add) / mul) * gamma) );
+}
+
+
+void legacy_contrast_curve(double contr, LUTu &histogram, LUTf &outCurve, int skip)
+{
+    // the curve shapes are defined in sRGB gamma, but the output curves will operate on linear floating point data,
+    // hence we do both forward and inverse gamma conversions here.
+    const float gamma_ = Color::sRGBGammaCurve;
+    const float start = expf(gamma_ * logf( -0.055 / ((1.0 / gamma_ - 1.0) * 1.055 )));
+    const float slope = 1.055 * powf (start, 1.0 / gamma_ - 1) - 0.055 / start;
+    const float mul = 1.055;
+    const float add = 0.055;
+
+    // curve without contrast
+    LUTf dcurve(0x10000);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%
+    float val = 1.f / 65535.f;
+    val = Color::gammatab_srgb[0] / 65535.f;
+
+    // store result in a temporary array
+    dcurve[0] = val;
+
+    for (int i = 1; i < 0x10000; i++) {
+        float val = i / 65535.f;
+        // gamma correction
+        val = Color::gammatab_srgb[i] / 65535.f;
+        // store result in a temporary array
+        dcurve[i] = val;
+    }
+    
+    // check if contrast curve is needed
+    if (contr > 0.00001 || contr < -0.00001) {
+
+        // compute mean luminance of the image with the curve applied
+        unsigned int sum = 0;
+        float avg = 0;
+
+        for (int i = 0; i <= 0xffff; i++) {
+            avg += dcurve[i] * histogram[i];
+            sum += histogram[i];
+        }
+
+        avg /= sum;
+
+        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        std::vector<double> contrastcurvePoints(9);
+        contrastcurvePoints[0] = DCT_NURBS;
+
+        contrastcurvePoints[1] = 0; //black point.  Value in [0 ; 1] range
+        contrastcurvePoints[2] = 0; //black point.  Value in [0 ; 1] range
+
+        contrastcurvePoints[3] = avg - avg * (0.6 - contr / 250.0); //toe point
+        contrastcurvePoints[4] = avg - avg * (0.6 + contr / 250.0); //value at toe point
+
+        contrastcurvePoints[5] = avg + (1 - avg) * (0.6 - contr / 250.0); //shoulder point
+        contrastcurvePoints[6] = avg + (1 - avg) * (0.6 + contr / 250.0); //value at shoulder point
+
+        contrastcurvePoints[7] = 1.; // white point
+        contrastcurvePoints[8] = 1.; // value at white point
+
+        const DiagonalCurve contrastcurve(contrastcurvePoints, CURVES_MIN_POLY_POINTS / skip);
+
+        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // apply contrast enhancement
+        for (int i = 0; i <= 0xffff; i++) {
+            dcurve[i] = contrastcurve.getVal (dcurve[i]);
+        }
+    }
+
+
+    for (int i = 0; i <= 0xffff; i++) {
+        float val = dcurve[i];
+        val = igamma (val, gamma_, start, slope, mul, add);
+        outCurve[i] = (65535.f * val);
+    }
+}
+
+
 void legacy_contrast(Imagefloat *rgb, const ImProcData &im, int contrast, const Glib::ustring &working_profile, float whitept)
 {
     if (contrast) {
@@ -152,7 +234,7 @@ void legacy_contrast(Imagefloat *rgb, const ImProcData &im, int contrast, const 
         ImProcFunctions ipf(im.params, im.multiThread);
         ipf.firstAnalysis(rgb, *im.params, hist16);
 
-        CurveFactory::contrastCurve(contrast, hist16, curve, max(im.scale, 1.0));
+        legacy_contrast_curve(contrast, hist16, curve, max(im.scale, 1.0));
         apply_tc(rgb, tc, ToneCurveParams::TcMode::STD, working_profile, im.params->icm.outputProfile, 100, whitept, im.multiThread);
     }
 }
