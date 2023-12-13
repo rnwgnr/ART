@@ -352,9 +352,14 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             case Pipeline::THUMBNAIL:
                 q = CLUTApplication::Quality::LOW;
                 break;
+            case Pipeline::NAVIGATOR:
+                q = CLUTApplication::Quality::MEDIUM;
+                break;
             case Pipeline::PREVIEW:
-                if (scale > 1) {
+                if (scale >= 3) {
                     q = CLUTApplication::Quality::MEDIUM;
+                } else if (scale > 1) {
+                    q = CLUTApplication::Quality::HIGH;
                 }
                 break;
             default:

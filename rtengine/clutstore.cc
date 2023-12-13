@@ -1061,7 +1061,7 @@ inline float CTL_shaper_pq(float a, bool inv)
     constexpr float c1 = 107.0 / 128.0;
     constexpr float c2 = 2413.0 / 128.0;
     constexpr float c3 = 2392.0 / 128.0;
-    constexpr float scale = 100.0;
+    constexpr float scale = 400.0; // 11 Ev above mid gray
 
     if (a <= 0.f) {
         return 0.f;
@@ -1292,11 +1292,12 @@ bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
         switch (q) {
         case Quality::LOW:
             dim = !dim ? 16 : std::min(dim, 16);
-            //CTL_init_lut(16);
             break;
         case Quality::MEDIUM:
-            dim = !dim ? 50 : std::min(dim, 50);
-            //CTL_init_lut(50);
+            dim = !dim ? 32 : std::min(dim, 32);
+            break;
+        case Quality::HIGH:
+            dim = !dim ? 64 : std::min(dim, 64);
             break;
         default:
             break;

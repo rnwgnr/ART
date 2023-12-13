@@ -126,7 +126,8 @@ public:
     enum class Quality {
         LOW,
         MEDIUM,
-        HIGH
+        HIGH,
+        HIGHEST
     };
     CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile="", float strength=1.f, int num_threads=1);
     void operator()(Imagefloat *img);
