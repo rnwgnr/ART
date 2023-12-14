@@ -112,7 +112,11 @@ int check_lut(int argc, char **argv)
     rtengine::settings = &options.rtSettings;
     
     if (argc == 3) {
-        rtengine::CLUTApplication lut(argv[2]);
+        Glib::ustring fn = argv[2];
+        if (!Glib::path_is_absolute(fn)) {
+            fn = Glib::build_filename(Glib::get_current_dir(), fn);
+        }
+        rtengine::CLUTApplication lut(fn);
         if (!lut) {
             std::cout << "Invalid LUT file: " << argv[2] << std::endl;
             return 1;
