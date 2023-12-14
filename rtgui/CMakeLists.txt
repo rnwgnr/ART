@@ -336,5 +336,10 @@ if(HAS_MIMALLOC)
 endif()
 
 # Install executables
-install(TARGETS art DESTINATION ${BINDIR})
-install(TARGETS art-cli DESTINATION ${BINDIR})
+if(APPLE)
+    install(TARGETS art DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/MacOS")
+    install(TARGETS art-cli DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/MacOS")
+else()
+    install(TARGETS art DESTINATION ${BINDIR})
+    install(TARGETS art-cli DESTINATION ${BINDIR})
+endif()

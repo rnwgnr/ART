@@ -172,11 +172,11 @@ install -d "${LIB}"
 install -d "${ETC}"
 
 msg "Copying binary executable files."
-ditto "${CMAKE_BUILD_TYPE}/MacOS" "${MACOS}"
+cp -RL "${CMAKE_BUILD_TYPE}/MacOS/" "${MACOS}"
 
 msg "Copying Resources directory."
-#cp AboutThisBuild.txt "${RESOURCES}"
-ditto "${CMAKE_BUILD_TYPE}/Resources" "${RESOURCES}"
+cp AboutThisBuild.txt "${RESOURCES}"
+cp -RL ${CMAKE_BUILD_TYPE}/Resources/ "${RESOURCES}"
 
 echo "\n--------\n" >> "${RESOURCES}/AboutThisBuild.txt"
 echo "Bundle system: $(sysctl -n machdep.cpu.brand_string)" >> "${RESOURCES}/AboutThisBuild.txt"
@@ -190,16 +190,16 @@ mkdir -p "${RESOURCES}/share/lensfun"
 lensfunversion=$(pkg-config --modversion lensfun | cut -f3 -d'.')
 if [ $lensfunversion = 95 ]
 then
-    ditto ${LOCAL_PREFIX}/share/lensfun/version_2/* "${RESOURCES}/share/lensfun"
+    cp -RL ${LOCAL_PREFIX}/share/lensfun/version_2/* "${RESOURCES}/share/lensfun"
 else
-    ditto ${LOCAL_PREFIX}/share/lensfun/version_1/* "${RESOURCES}/share/lensfun"
+    cp -RL ${LOCAL_PREFIX}/share/lensfun/version_1/* "${RESOURCES}/share/lensfun"
 fi
 
 # Copy liblensfun to Frameworks
-ditto ${LOCAL_PREFIX}/lib/liblensfun.2.dylib "${CONTENTS}/Frameworks/liblensfun.2.dylib"
+cp -RL ${LOCAL_PREFIX}/lib/liblensfun.2.dylib "${CONTENTS}/Frameworks/liblensfun.2.dylib"
 
 # Copy libomp to Frameworks
-ditto ${LOCAL_PREFIX}/lib/libomp.dylib "${CONTENTS}/Frameworks"
+cp -RL ${LOCAL_PREFIX}/lib/libomp.dylib "${CONTENTS}/Frameworks"
 
 msg "Copying dependencies from ${GTK_PREFIX}."
 CheckLink "${EXECUTABLE}" 2>&1
@@ -208,23 +208,23 @@ CheckLink "${EXECUTABLE}" 2>&1
 ModifyInstallNames 2>&1
 
 # Copy libjpeg-turbo ("62") into the app bundle
-ditto ${LOCAL_PREFIX}/lib/libjpeg.62.dylib "${CONTENTS}/Frameworks/libjpeg.62.dylib"
+cp -RL ${LOCAL_PREFIX}/lib/libjpeg.62.dylib "${CONTENTS}/Frameworks/libjpeg.62.dylib"
 
 # Copy libexpat into the app bundle (which is keg-only)
 if [[ -d /usr/local/Cellar/expat ]]; then ditto /usr/local/Cellar/expat/*/lib/libexpat.1.dylib "${CONTENTS}/Frameworks"; else ditto "${EXPATLIB}" "${CONTENTS}/Frameworks/libexpat.1.dylib"; fi
 
 # Copy libz into the app bundle
-ditto ${LOCAL_PREFIX}/lib/libz.1.dylib "${CONTENTS}/Frameworks"
+cp -RL ${LOCAL_PREFIX}/lib/libz.1.dylib "${CONTENTS}/Frameworks"
 
 # Copy libpng12 & 16 to the app bundle
-ditto ${LOCAL_PREFIX}/lib/libpng16.16.dylib "${CONTENTS}/Frameworks/libpng16.16.dylib"
-ditto ${LOCAL_PREFIX}/lib/libpng12.0.dylib "${CONTENTS}/Frameworks/libpng12.0.dylib"
+cp -RL ${LOCAL_PREFIX}/lib/libpng16.16.dylib "${CONTENTS}/Frameworks/libpng16.16.dylib"
+cp -RL ${LOCAL_PREFIX}/lib/libpng12.0.dylib "${CONTENTS}/Frameworks/libpng12.0.dylib"
 
 # Copy libtiff 5 into the app bundle
-ditto ${LOCAL_PREFIX}/lib/libtiff.5.dylib "${CONTENTS}/Frameworks/libtiff.5.dylib"
+cp -RL ${LOCAL_PREFIX}/lib/libtiff.5.dylib "${CONTENTS}/Frameworks/libtiff.5.dylib"
 
 # Copy libomp to Frameworks
-ditto ${LOCAL_PREFIX}/lib/libomp.dylib "${CONTENTS}/Frameworks"
+cp -RL ${LOCAL_PREFIX}/lib/libomp.dylib "${CONTENTS}/Frameworks"
 
 # Prepare GTK+3 installation
 msg "Copying configuration files from ${GTK_PREFIX}:"
@@ -244,8 +244,8 @@ rm -r "${LIB}"/gdk-pixbuf-2.0
 
 # GTK+3 themes
 msg "Copy GTK+3 theme and icon resources:"
-ditto {"${LOCAL_PREFIX}","${RESOURCES}"}/share/themes/Mac/gtk-3.0/gtk-keys.css
-ditto {"${LOCAL_PREFIX}","${RESOURCES}"}/share/themes/Default/gtk-3.0/gtk-keys.css
+cp -RL {"${LOCAL_PREFIX}","${RESOURCES}"}/share/themes/Mac/gtk-3.0/gtk-keys.css
+cp -RL {"${LOCAL_PREFIX}","${RESOURCES}"}/share/themes/Default/gtk-3.0/gtk-keys.css
 
 # Adwaita icons
 msg "Copy Adwaita icons"
@@ -255,8 +255,10 @@ for f in "${iconfolders[@]}"; do
     cp -RL ${LOCAL_PREFIX}/share/icons/Adwaita/${f}/* "${RESOURCES}"/share/icons/Adwaita/${f}
 done
 cp -RL {"${LOCAL_PREFIX}","${RESOURCES}"}/share/icons/Adwaita/index.theme
-"${LOCAL_PREFIX}/bin/gtk-update-icon-cache" "${RESOURCES}/share/icons/Adwaita" || "${LOCAL_PREFIX}/bin/gtk-update-icon-cache-3.0" "${RESOURCES}/share/icons/Adwaita"
-cp -RL "${LOCAL_PREFIX}/share/icons/hicolor" "${RESOURCES}/share/icons/hicolor"
+${LOCAL_PREFIX}/bin/gtk-update-icon-cache ${RESOURCES}/share/icons/Adwaita || ${LOCAL_PREFIX}/bin/gtk-update-icon-cache-3.0 ${RESOURCES}/share/icons/Adwaita
+cp -RL ${LOCAL_PREFIX}/share/icons/hicolor ${RESOURCES}/share/icons/hicolor
+${LOCAL_PREFIX}/bin/gtk-update-icon-cache ${RESOURCES}/share/icons/hicolor || ${LOCAL_PREFIX}/bin/gtk-update-icon-cache-3.0 ${RESOURCES}/share/icons/hicolor
+
 
 # fix libfreetype install name
 for lib in "${LIB}"/*; do
@@ -270,8 +272,8 @@ mkdir -p "${RESOURCES}"/share/gtk-3.0
 mkdir -p "${ETC}"/gtk-3.0
 echo $'[Settings]\ngtk-primary-button-warps-slider = true\ngtk-overlay-scrolling = true' > "${RESOURCES}/share/gtk-3.0/settings.ini"
 ${LOCAL_PREFIX}/bin/gdk-pixbuf-query-loaders "${LIB}"/libpixbufloader-*.so > "${ETC}"/gtk-3.0/gdk-pixbuf.loaders
-${LOCAL_PREFIX}/bin/gtk-query-immodules-3.0 "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules || "${LOCAL_PREFIX}"/bin/gtk-query-immodules "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules
-sed -i.bak -e "s|${PWD}/ART.app/Contents/|/Applications/ART.app/Contents/|" "${ETC}"/gtk-3.0/gdk-pixbuf.loaders "${ETC}/gtk-3.0/gtk.immodules"
+${LOCAL_PREFIX}/bin/gtk-query-immodules-3.0 "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules || ${LOCAL_PREFIX}/bin/gtk-query-immodules "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules
+sed -i.bak -e "s|${PWD}/ART.app/Contents/|/Applications/ART.app/Contents/|" "${ETC}"/gtk-3.0/gdk-pixbuf.loaders ${ETC}/gtk-3.0/gtk.immodules
 sed -i.bak -e "s|${LOCAL_PREFIX}/share/|/Applications/ART.app/Contents/Resources/share/|" "${ETC}"/gtk-3.0/gtk.immodules
 sed -i.bak -e "s|${LOCAL_PREFIX}/|/Applications/ART.app/Contents/Frameworks/|" "${ETC}"/gtk-3.0/gtk.immodules
 rm "${ETC}"/*/*.bak
@@ -281,27 +283,28 @@ ModifyInstallNames 2>/dev/null
 
 # Mime directory
 msg "Copying shared files from ${GTK_PREFIX}:"
-ditto {"${LOCAL_PREFIX}","${RESOURCES}"}/share/mime
+cp -RL {"${LOCAL_PREFIX}","${RESOURCES}"}/share/mime
 
 msg "Installing required application bundle files:"
 PROJECT_SOURCE_DATA_DIR="${PROJECT_SOURCE_DIR}/tools/osx"
-ditto "${PROJECT_SOURCE_DIR}/rtdata/fonts" "${ETC}/fonts"
+cp -RL "${PROJECT_SOURCE_DIR}/rtdata/fonts" "${ETC}/fonts"
+cp "${PROJECT_SOURCE_DIR}/LICENSE.txt" ${RESOURCES}
 
 # App bundle resources
-ditto "${PROJECT_SOURCE_DATA_DIR}/"{ART,profile}.icns "${RESOURCES}"
-#ditto "${PROJECT_SOURCE_DATA_DIR}/PkgInfo" "${CONTENTS}"
+cp -RL "${PROJECT_SOURCE_DATA_DIR}/"{ART,profile}.icns "${RESOURCES}"
+#cp -RL "${PROJECT_SOURCE_DATA_DIR}/PkgInfo" "${CONTENTS}"
 
-update-mime-database -V  "${RESOURCES}/share/mime"
-cp -RL "${LOCAL_PREFIX}/share/locale" "${RESOURCES}/share/locale"
+update-mime-database -V  ${RESOURCES}/share/mime
+cp -RL ${LOCAL_PREFIX}/share/locale ${RESOURCES}/share/locale
 
 msg "Build glib database:"
 mkdir -p ${RESOURCES}/share/glib-2.0
 cp -LR {"${LOCAL_PREFIX}","${RESOURCES}"}/share/glib-2.0/schemas
-"${LOCAL_PREFIX}/bin/glib-compile-schemas" "${RESOURCES}/share/glib-2.0/schemas"
+${LOCAL_PREFIX}/bin/glib-compile-schemas ${RESOURCES}/share/glib-2.0/schemas
 
 # Append an LC_RPATH
 msg "Registering @rpath into the main executable."
-install_name_tool -add_rpath /Applications/"${LIB}" "${EXECUTABLE}" 2>/dev/null
+install_name_tool -add_rpath /Applications/${LIB} "${EXECUTABLE}" 2>/dev/null
 
 ModifyInstallNames 2>/dev/null
 
@@ -309,12 +312,13 @@ ModifyInstallNames 2>/dev/null
 msg "Registering @rpath in Frameworks folder."
 for frameworklibs in "${LIB}"/*{dylib,so,cli}; do
     install_name_tool -delete_rpath ${LOCAL_PREFIX}/lib "${frameworklibs}" 2>/dev/null
-    install_name_tool -add_rpath /Applications/"${LIB}" "${frameworklibs}" 2>/dev/null
+    install_name_tool -add_rpath /Applications/${LIB} "${frameworklibs}" 2>/dev/null
 done
-for dylib in ./${PROJECT_NAME}.app/Contents/Frameworks/*.dylib ; do if [[ $dylib ]]; then sudo install_name_tool -change $(otool -L ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME} | grep $(basename $dylib) | cut -f2  | cut -d ' ' -f1 ) /Applications/${PROJECT_NAME}.app/Contents/Frameworks/$(basename $dylib) ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME} ; fi ; done
+for dylib in ./${PROJECT_NAME}.app/Contents/Frameworks/*.dylib ; do if [[ $dylib ]]; then install_name_tool -change $(otool -L ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME} | grep $(basename $dylib) | cut -f2  | cut -d ' ' -f1 ) /Applications/${PROJECT_NAME}.app/Contents/Frameworks/$(basename $dylib) ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME} ; fi ; done
+for dylib in ./${PROJECT_NAME}.app/Contents/Frameworks/*.dylib ; do if [[ $dylib ]]; then install_name_tool -change $(otool -L ${PROJECT_NAME}.app/Contents/Frameworks/${PROJECT_NAME}-cli | grep $(basename $dylib) | cut -f2  | cut -d ' ' -f1 ) /Applications/${PROJECT_NAME}.app/Contents/Frameworks/$(basename $dylib) ${PROJECT_NAME}.app/Contents/Frameworks/${PROJECT_NAME}-cli ; fi ; done
 install_name_tool -delete_rpath ${PROJECT_NAME}.app/Contents/Frameworks "${EXECUTABLE}"-cli 2>/dev/null
-install_name_tool -add_rpath /Applications/"${LIB}" "${EXECUTABLE}"-cli 2>/dev/null
-ditto "${EXECUTABLE}"-cli "${APP}"/..
+install_name_tool -add_rpath /Applications/${LIB} "${EXECUTABLE}"-cli 2>/dev/null
+cp -RL ${EXECUTABLE}-cli "${APP}"/..
 
 # Merge the app with the other archictecture to create the Universal app.
 if [[ -n $UNIVERSAL_URL ]]; then
@@ -348,7 +352,7 @@ if [[ -n $UNIVERSAL_URL ]]; then
     for lib in ${PROJECT_NAME}-arm64.app/Contents/Frameworks/* ; do
         lipo -create -output $(basename $lib) ${PROJECT_NAME}-arm64.app/Contents/Frameworks/$(basename $lib) ${PROJECT_NAME}-x86_64.app/Contents/Frameworks/$(basename $lib)
     done
-    sudo mv *cli *so *dylib ${PROJECT_NAME}.app/Contents/Frameworks
+    mv *cli *so *dylib ${PROJECT_NAME}.app/Contents/Frameworks
     rm -r ${PROJECT_NAME}-arm64.app
     rm -r ${PROJECT_NAME}-x86_64.app
 else
@@ -377,7 +381,7 @@ if [[ -n $NOTARY ]]; then
     msg "Notarizing the application:"
     ditto -c -k --sequesterRsrc --keepParent "${APP}" "${APP}.zip"
     echo "Uploading..."
-    sudo xcrun notarytool submit "${APP}.zip" ${NOTARY} --wait
+    xcrun notarytool submit "${APP}.zip" ${NOTARY} --wait
 fi
 
 function CreateDmg {
@@ -449,13 +453,13 @@ function CreateDmg {
         msg "Notarizing the dmg:"
         zip "${dmg_name}.dmg.zip" "${dmg_name}.dmg"
         echo "Uploading..."
-        sudo xcrun notarytool submit "${dmg_name}.dmg.zip" ${NOTARY} --wait
+        xcrun notarytool submit "${dmg_name}.dmg.zip" ${NOTARY} --wait
     fi
     
     # Zip disk image for redistribution
     msg "Zipping disk image for redistribution:"
     mkdir "${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}_folder"
-        ditto {"${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}.dmg","${PROJECT_NAME}-cli","${PROJECT_SOURCE_DATA_DIR}/INSTALL.txt"} "${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}_folder"
+        cp -RL {"${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}.dmg","${PROJECT_NAME}-cli","${PROJECT_SOURCE_DATA_DIR}/INSTALL.txt"} "${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}_folder"
     zip -r "${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}.zip" "${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}_folder/"
     if [[ -n $NIGHTLY ]]; then
         cp "${PROJECT_NAME}_macOS_${MINIMUM_SYSTEM_VERSION}_${arch}_${PROJECT_FULL_VERSION}.zip" "${PROJECT_NAME}_macOS_${arch}_latest.zip"

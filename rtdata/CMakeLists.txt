@@ -28,6 +28,11 @@ if(WIN32)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/WindowsInnoSetup.iss" DESTINATION ${BINDIR})
 endif()
 
+if(APPLE)
+    set(ICONSDIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources/share/icons")
+    set(DATADIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources/share")
+endif()
+
 if(UNIX)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ART.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/ART.desktop")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ART.desktop" DESTINATION ${DESKTOPDIR})

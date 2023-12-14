@@ -6,15 +6,15 @@
             <key>XDG_CONFIG_DIRS</key>
             <string>/Applications/ART.app/Contents/Resources/share/gtk-3.0</string>
             <key>XDG_CONFIG_HOME</key>
-            <string>/Applications/ART.app/Contents/Resources/share</string>
+            <string>art/Library/Application Support</string>
             <key>XDG_DATA_DIRS</key>
             <string>/Applications/ART.app/Contents/Resources/share/gtk-3.0</string>
             <key>GTK_PATH</key>
-            <string>/Applications/ART.app/Contents/Resources/share/gtk-3.0</string>
+            <string>/Applications/ART.app/Contents/Resources/etc/gtk-3.0</string>
             <key>GTK_IM_MODULE_FILE</key>
             <string>/Applications/ART.app/Contents/Resources/etc/gtk-3.0/gtk.immodules</string>
             <key>XDG_DATA_HOME</key>
-            <string>/Applications/ART.app/Contents/Resources/share</string>
+            <string>art/Library/Application Support</string>
             <key>GSETTINGS_SCHEMA_DIR</key>
             <string>/Applications/ART.app/Contents/Resources/share/glib-2.0/schemas</string>
             <key>GDK_PIXBUF_MODULE_FILE</key>
@@ -150,7 +150,7 @@
         <key>CFBundleGetInfoString</key>
         <string>@version@, Copyright © 2004-2010 Gábor Horváth, 2010-2022 A/RT Development Teams</string>
         <key>CFBundleIconFile</key>
-        <string>art.icns</string>
+        <string>ART.icns</string>
         <key>CFBundleIdentifier</key>
         <string>us.pixls.art.ART</string>
         <key>CFBundleInfoDictionaryVersion</key>
