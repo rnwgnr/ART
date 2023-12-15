@@ -58,6 +58,7 @@ protected:
     Gtk::CheckButton *contrast_legacy_;
     Gtk::HBox *mode_box_;
     Gtk::HBox *contrast_legacy_box_;
+    MyComboBoxText *basecurve_;
 
     rtengine::ProcEvent EvHistMatching;
     rtengine::ProcEvent EvHistMatchingBatch;
@@ -66,6 +67,7 @@ protected:
     rtengine::ProcEvent EvContrastLegacy;
     rtengine::ProcEvent EvMode;
     rtengine::ProcEvent EvWhitePoint;
+    rtengine::ProcEvent EvBaseCurve;
 
     // used temporarily in eventing
     std::vector<double> nextToneCurve;
@@ -75,6 +77,7 @@ protected:
     void showPerceptualStrength();
     void contrastLegacyToggled();
     void modeChanged();
+    void baseCurveChanged();
     void showWhitePoint();
     void updateSatCurves(int i);
 

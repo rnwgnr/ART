@@ -1492,7 +1492,8 @@ ToneCurveParams::ToneCurveParams():
     saturation2{ DCT_Linear },
     perceptualStrength(100),
     contrastLegacyMode(false),
-    whitePoint(1.0)    
+    whitePoint(1.0),
+    basecurve(ToneCurveParams::BcMode::LINEAR)
 {
 }
 
@@ -3455,6 +3456,11 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 {ToneCurveParams::TcMode::PERCEPTUAL, "Perceptual"},
                 {ToneCurveParams::TcMode::NEUTRAL, "Neutral"}
             };
+            const std::map<ToneCurveParams::BcMode, const char*> bc_mapping = {
+                {ToneCurveParams::BcMode::LINEAR, "Linear"},
+                {ToneCurveParams::BcMode::ROLLOFF, "Rolloff"},
+                {ToneCurveParams::BcMode::SCURVE, "SCurve"}
+            };
 
             saveToKeyfile("ToneCurve", "CurveMode", tc_mapping, toneCurve.curveMode, keyFile);
             if (!toneCurve.curve2.empty() && toneCurve.curve2[0] != DCT_Linear && toneCurve.curveMode != toneCurve.curveMode2) {
@@ -3472,6 +3478,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 saveToKeyfile("ToneCurve", "ContrastLegacyMode", toneCurve.contrastLegacyMode, keyFile);
             }
             saveToKeyfile("ToneCurve", "WhitePoint", toneCurve.whitePoint, keyFile);
+            saveToKeyfile("ToneCurve", "BaseCurve", bc_mapping, toneCurve.basecurve, keyFile);
         }
 
 // Local contrast
@@ -4287,6 +4294,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             {"OpenDisplayTransform", ToneCurveParams::TcMode::NEUTRAL},
             {"Neutral", ToneCurveParams::TcMode::NEUTRAL}
         };
+        const std::map<std::string, ToneCurveParams::BcMode> bc_mapping = {
+            {"Linear", ToneCurveParams::BcMode::LINEAR},
+            {"Rolloff", ToneCurveParams::BcMode::ROLLOFF},
+            {"SCurve", ToneCurveParams::BcMode::SCURVE}
+        };
 
         if (ppVersion < 350) {
             if (keyFile.has_group("Exposure")) {
@@ -4396,6 +4408,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     toneCurve.contrastLegacyMode = (ppVersion < 1026);
                 }
                 assignFromKeyfile(keyFile, "ToneCurve", "WhitePoint", toneCurve.whitePoint);
+                assignFromKeyfile(keyFile, "ToneCurve", "BaseCurve", bc_mapping, toneCurve.basecurve);
             }
         }
 

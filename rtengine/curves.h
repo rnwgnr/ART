@@ -339,6 +339,7 @@ public:
 class NeutralToneCurve: public ToneCurve {
 public:
     struct ApplyState {
+        const Curve *basecurve;
         float ws[3][3];
         float iws[3][3];
         Mat33<float> to_work;
@@ -351,7 +352,7 @@ public:
         float brange;
         float yrange;        
         
-        explicit ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile);
+        explicit ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile, const Curve *base);
     };
     void BatchApply(const size_t start, const size_t end, float *r, float *g, float *b, const ApplyState &state) const;
 };

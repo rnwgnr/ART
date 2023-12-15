@@ -853,8 +853,10 @@ void PerceptualToneCurve::initApplyState(PerceptualToneCurveState &state, const 
 }
 
 
-NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile)
+NeutralToneCurve::ApplyState::ApplyState(const Glib::ustring &workingSpace, const Glib::ustring &outprofile, const Curve *base)
 {
+    basecurve = base;
+    
     auto work = ICCStore::getInstance()->workingSpaceMatrix(workingSpace);
     auto iwork = ICCStore::getInstance()->workingSpaceInverseMatrix(workingSpace);
 
@@ -981,14 +983,20 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
         rgb[2] = ac-cd[2]*aac;
           
         rgb = dot_product(state.to_work, rgb);
-        
-        float oY = (rgb[0] + rgb[1] + rgb[2]) / 3.f;
-        if (oY > 0.f) {
-            float f = iY / oY;
-            rgb[0] *= f;
-            rgb[1] *= f;
-            rgb[2] *= f;
-            Color::filmlike_clip(&rgb[0], &rgb[1], &rgb[2], Lmax);
+
+        if (state.basecurve) {
+            for (int c = 0; c < 3; ++c) {
+                rgb[c] = state.basecurve->getVal(rgb[c]);
+            }
+        } else {
+            float oY = (rgb[0] + rgb[1] + rgb[2]) / 3.f;
+            if (oY > 0.f) {
+                float f = iY / oY;
+                rgb[0] *= f;
+                rgb[1] *= f;
+                rgb[2] *= f;
+                Color::filmlike_clip(&rgb[0], &rgb[1], &rgb[2], Lmax);
+            }
         }
         
         // apply the curve
@@ -1015,16 +1023,13 @@ void NeutralToneCurve::BatchApply(const size_t start, const size_t end, float *r
 #endif
 
         float sat = jch[1];
-        float olum = jch[0];
+        if (!state.basecurve) {
+            float olum = jch[0];
 
-        float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
-#if 1
-        // float yellow_dist = gauss(hue, yhue, yrange);
-        // ccf = LIM01(intp(yellow_dist, ccf, ccf + 0.5f));
-        ccf = LIM01(ccf + 0.5f * gauss(hue, state.yhue, state.yrange));
-#endif
-        
-        sat *= ccf;
+            float ccf = ilum > 1e-5f ? (1.f - (LIM01((olum / ilum) - 1.f) * 0.2f)) : 1.f;
+            ccf = LIM01(ccf + 0.5f * gauss(hue, state.yhue, state.yrange));
+            sat *= ccf;
+        }
         
         Color::jzczhz2rgb(jch[0], sat, hue, rgb[0], rgb[1], rgb[2], state.iws);
 

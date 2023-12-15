@@ -73,8 +73,20 @@ ToneCurve::ToneCurve():
     EvContrastLegacy = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_CONTRAST_LEGACY");
     EvWhitePoint = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_WHITEPOINT");
     EvMode = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_MODE");
+    EvBaseCurve = m->newEvent(LUMINANCECURVE, "HISTORY_MSG_TONECURVE_BASECURVE");
     EvToolEnabled.set_action(AUTOEXP);
     EvToolReset.set_action(AUTOEXP);
+
+    basecurve_ = Gtk::manage(new MyComboBoxText());
+    basecurve_->append(M("TP_TONECURVE_BASECURVE_LINEAR"));
+    basecurve_->append(M("TP_TONECURVE_BASECURVE_ROLLOFF"));
+    basecurve_->append(M("TP_TONECURVE_BASECURVE_SCURVE"));
+    basecurve_->signal_changed().connect(sigc::mem_fun(*this, &ToneCurve::baseCurveChanged));
+    Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
+    hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_TONECURVE_BASECURVE") + ": ")), Gtk::PACK_SHRINK);
+    hb->pack_start(*basecurve_, Gtk::PACK_EXPAND_WIDGET);
+    hb->show_all();
+    pack_start(*hb);
 
     contrast = Gtk::manage (new Adjuster(M("TP_BRIGHTCONTRSAT_CONTRAST"), -100, 100, 1, 0));
     pack_start(*contrast);
@@ -202,7 +214,7 @@ ToneCurve::ToneCurve():
     whitePoint->setAdjusterListener(this);
     whitePoint->setLogScale(40, 1);
     pack_start(*whitePoint);
-    
+
     mode_ = Gtk::manage(new MyComboBoxText());
     mode_->append(M("TP_EXPOSURE_TCMODE_NEUTRAL"));
     mode_->append(M("TP_EXPOSURE_TCMODE_STANDARD"));
@@ -298,6 +310,7 @@ void ToneCurve::read(const ProcParams* pp)
     showWhitePoint();
 
     //updateSatCurves(0);
+    basecurve_->set_active(int(pp->toneCurve.basecurve));
     
     enableListener();
 }
@@ -353,6 +366,8 @@ void ToneCurve::write(ProcParams* pp)
     pp->toneCurve.contrastLegacyMode = contrast_legacy_->get_active();
 
     pp->toneCurve.whitePoint = whitePoint->getValue();
+
+    pp->toneCurve.basecurve = ToneCurveParams::BcMode(basecurve_->get_active_row_number());
 }
 
 
@@ -458,6 +473,7 @@ void ToneCurve::enableAll(bool yes)
     contrast->set_sensitive(yes);
     perceptualStrength->set_sensitive(yes);
     whitePoint->set_sensitive(yes);
+    basecurve_->set_sensitive(yes);
 }
 
 
@@ -624,10 +640,9 @@ void ToneCurve::colorForValue(double valX, double valY, enum ColorCaller::ElemTy
 }
 
 
-// void ToneCurve::updateSatCurves(int i)
-// {
-//     auto b = satcurve->getCurveTypeButton();
-//     bool show = b->getSelected() > 0;
-//     satcurve_h_->getCurveTypeButton()->buttonGroup->set_visible(show);
-//     satcurve_c_->getCurveTypeButton()->buttonGroup->set_visible(show);
-// }
+void ToneCurve::baseCurveChanged()
+{
+    if (listener && getEnabled()) {
+        listener->panelChanged(EvBaseCurve, basecurve_->get_active_text());
+    }
+}

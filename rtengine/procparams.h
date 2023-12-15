@@ -531,6 +531,12 @@ struct ToneCurveParams {
         NEUTRAL            // Neutral mode: Standard with JzAzBz hue preservation and ACES-inspired desaturation "sweetener"
     };
 
+    enum class BcMode {
+        LINEAR,
+        ROLLOFF,
+        SCURVE
+    };
+
     int contrast;
     std::vector<double> curve;
     std::vector<double> curve2;
@@ -543,6 +549,7 @@ struct ToneCurveParams {
     int perceptualStrength;
     bool contrastLegacyMode;
     double whitePoint;
+    BcMode basecurve;
 
     ToneCurveParams();
 

@@ -45,7 +45,7 @@ inline void apply(const Curve &c, Imagefloat *rgb, int W, int H, bool multithrea
 }
 
 
-void apply_tc(Imagefloat *rgb, const ToneCurve &tc, ToneCurveParams::TcMode curveMode, const Glib::ustring &working_profile, const Glib::ustring &outprofile, int perceptual_strength, float whitept, bool multithread)
+void apply_tc(Imagefloat *rgb, const ToneCurve &tc, ToneCurveParams::TcMode curveMode, const Glib::ustring &working_profile, const Glib::ustring &outprofile, int perceptual_strength, float whitept, const Curve *basecurve, bool multithread)
 {
     const int W = rgb->getWidth();
     const int H = rgb->getHeight();
@@ -88,7 +88,7 @@ void apply_tc(Imagefloat *rgb, const ToneCurve &tc, ToneCurveParams::TcMode curv
         }
     } else if (curveMode == ToneCurveParams::TcMode::NEUTRAL) {
         const NeutralToneCurve &c = static_cast<const NeutralToneCurve &>(tc);
-        NeutralToneCurve::ApplyState state(working_profile, outprofile);
+        NeutralToneCurve::ApplyState state(working_profile, outprofile, basecurve);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
@@ -106,7 +106,7 @@ public:
     void getVal(const std::vector<double>& t, std::vector<double>& res) const {}
     bool isIdentity () const { return false; }
     
-    double getVal(double x) const
+    double getVal(double x) const override
     {
         double res = lin2log(std::pow(x/w_, a_), b_)*w_;
         return res;
@@ -116,6 +116,98 @@ private:
     double a_;
     double b_;
     double w_;
+};
+
+
+// tone mapping from
+//  https://github.com/thatcherfreeman/utility-dctls/
+// Copyright of the original code
+/*
+MIT License
+
+Copyright (c) 2023 Thatcher Freeman
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+class ToneMapCurve: public Curve {
+public:
+    ToneMapCurve(float target_slope, float white_point, float black_point,
+                 float mid_gray_in, float mid_gray_out, bool rolloff):
+        rolloff_(rolloff),
+        lut_(65536)
+    {
+        mid_gray_out_ = mid_gray_out;
+        // Constraint 1: h(0) = black_point
+        c_ = black_point;
+        // Constraint 2: h(infty) = white_point
+        a_ = white_point - c_;
+        // Constraint 3: h(mid_out) = mid_out
+        b_ = (a_ / (mid_gray_out_ - c_)) *
+            (1.f - ((mid_gray_out_ - c_) / a_)) * mid_gray_out_;
+        // Constraint 4: h'(mid_out) = target_slope
+        gamma_ = target_slope * std::pow((mid_gray_out_ + b_), 2.0) / (a_ * b_);
+        
+        for (int i = 0; i < 65536; ++i) {
+            lut_[i] = do_get(float(i) / 65535.f);
+        }
+    }
+
+    void getVal(const std::vector<double>& t, std::vector<double>& res) const {}
+    bool isIdentity () const { return false; }
+    
+    double getVal(double dx) const override
+    {
+        float x = dx;
+        if (x <= 1.f) {
+            return lut_[x * 65535.f];
+        } else {
+            return do_get(x);
+        }
+    }
+
+private:
+    inline float rolloff_function(float x) const
+    {
+        return a_ * (x / (x + b_)) + c_;
+    }
+
+    inline float scene_contrast(float x) const
+    {
+        return mid_gray_out_ * std::pow(x / mid_gray_out_, gamma_);
+    }
+    
+    inline float do_get(float x) const
+    {
+        if (rolloff_ && x <= mid_gray_out_) {
+            return x;
+        } else {
+            return rolloff_function(scene_contrast(x));
+        }
+    }
+    
+    float a_;
+    float b_;
+    float c_;
+    float gamma_;
+    float mid_gray_out_;
+    bool rolloff_;
+    LUTf lut_;
 };
 
 
@@ -235,7 +327,7 @@ void legacy_contrast(Imagefloat *rgb, const ImProcData &im, int contrast, const 
         ipf.firstAnalysis(rgb, *im.params, hist16);
 
         legacy_contrast_curve(contrast, hist16, curve, max(im.scale, 1.0));
-        apply_tc(rgb, tc, ToneCurveParams::TcMode::STD, working_profile, im.params->icm.outputProfile, 100, whitept, im.multiThread);
+        apply_tc(rgb, tc, ToneCurveParams::TcMode::STD, working_profile, im.params->icm.outputProfile, 100, whitept, nullptr, im.multiThread);
     }
 }
 
@@ -482,10 +574,24 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         const float whitept = params->toneCurve.hasWhitePoint() ? params->toneCurve.whitePoint : 1.f;
 
         const bool single_curve = params->toneCurve.curveMode == params->toneCurve.curveMode2;
+
+        ToneCurve tc;
+        std::unique_ptr<Curve> basecurve;
+        if (params->toneCurve.basecurve != ToneCurveParams::BcMode::LINEAR) {
+            float gray = (params->logenc.enabled ? params->logenc.targetGray / 100.0 : 0.18f);
+            bool ro = params->toneCurve.basecurve == ToneCurveParams::BcMode::ROLLOFF;
+            basecurve.reset(new ToneMapCurve(1.f, whitept, 1.f/65535.f, gray, gray, ro));
+        }
         
         ImProcData im(params, scale, multiThread);
         if (!(single_curve && params->toneCurve.curveMode == ToneCurveParams::TcMode::NEUTRAL)) {
-            filmlike_clip(img, whitept, im.multiThread);
+            if (basecurve) {
+                tc.Set(*basecurve, whitept);
+                apply_tc(img, tc, ToneCurveParams::TcMode::STD, params->icm.workingProfile, params->icm.outputProfile, 100, whitept, nullptr, multiThread);
+                basecurve.reset(nullptr);
+            } else {
+                filmlike_clip(img, whitept, im.multiThread);
+            }
         }
 
         std::unique_ptr<Curve> ccurve;
@@ -547,7 +653,6 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
                 return c;
             };
 
-        ToneCurve tc;
         DiagonalCurve tcurve2(adjust(params->toneCurve.curve2), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         DiagonalCurve tcurve1(adjust(params->toneCurve.curve), CURVES_MIN_POLY_POINTS / max(int(scale), 1));
         DoubleCurve dcurve(tcurve1, tcurve2);
@@ -558,16 +663,17 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
             tcurve = dccurve.get();
         }
 
+        if (single_curve && editImgFloat && (editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2)) {
+            fill_pipette(img, editImgFloat, multiThread);
+        }
+
         if (single_curve) {
-            if (editImgFloat && (editID == EUID_ToneCurve1 || editID == EUID_ToneCurve2)) {
-                fill_pipette(img, editImgFloat, multiThread);
-            }
             tc.Set(*tcurve, whitept);
-            apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+            apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, basecurve.get(), multiThread);
         } else {
             if (ccurve) {
                 tc.Set(*ccurve, whitept);
-                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, 100, whitept, multiThread);
+                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, 100, whitept, nullptr, multiThread);
             }
             
             if (editImgFloat && editID == EUID_ToneCurve1) {
@@ -576,7 +682,7 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
         
             if (!tcurve1.isIdentity()) {
                 tc.Set(tcurve1, whitept);
-                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+                apply_tc(img, tc, params->toneCurve.curveMode, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, nullptr, multiThread);
             }
 
             if (editImgFloat && editID == EUID_ToneCurve2) {
@@ -585,7 +691,7 @@ void ImProcFunctions::toneCurve(Imagefloat *img)
 
             if (!tcurve2.isIdentity()) {
                 tc.Set(tcurve2, whitept);
-                apply_tc(img, tc, params->toneCurve.curveMode2, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, multiThread);
+                apply_tc(img, tc, params->toneCurve.curveMode2, params->icm.workingProfile, params->icm.outputProfile, params->toneCurve.perceptualStrength, whitept, nullptr, multiThread);
             }
         }
 
