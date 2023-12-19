@@ -114,8 +114,8 @@ private:
         Glib::ustring colorspace;
     };
     mutable Cache<Glib::ustring, CTLCacheEntry> ctl_cache_;
-    LUTf ctl_pq_;
-    LUTf ctl_pq_inv_;
+    LUTf ctl_shaper_lut_;
+    LUTf ctl_shaper_lut_inv_;
 #endif // ART_USE_CTL
     mutable MyMutex mutex_;
 };

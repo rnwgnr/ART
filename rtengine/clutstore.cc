@@ -1054,7 +1054,7 @@ void rtengine::CLUTStore::clearCache()
 
 namespace {
 
-inline float CTL_shaper_pq(float a, bool inv)
+inline float CTL_shaper_func(float a, bool inv)
 {
     constexpr float m1 = 2610.0 / 16384.0;
     constexpr float m2 = 2523.0 / 32.0;
@@ -1091,12 +1091,12 @@ rtengine::CLUTStore::CLUTStore() :
 #endif // ART_USE_CTL
 {
 #ifdef ART_USE_CTL
-    ctl_pq_(65536);
-    ctl_pq_inv_(65536);
+    ctl_shaper_lut_(65536);
+    ctl_shaper_lut_inv_(65536);
     for (int i = 0; i < 65536; ++i) {
         float x = float(i) / 65535.f;
-        ctl_pq_[i] = CTL_shaper_pq(x, false);
-        ctl_pq_inv_[i] = CTL_shaper_pq(x, true);
+        ctl_shaper_lut_[i] = CTL_shaper_func(x, false);
+        ctl_shaper_lut_inv_[i] = CTL_shaper_func(x, true);
     }    
 #endif
 }
@@ -1107,9 +1107,9 @@ rtengine::CLUTStore::CLUTStore() :
 float CLUTStore::CTL_shaper(float a, bool inv)
 {
     if (a >= 0.f && a <= 1.f) {
-        return inv ? ctl_pq_inv_[a * 65535.f] : ctl_pq_[a * 65535.f];
+        return inv ? ctl_shaper_lut_inv_[a * 65535.f] : ctl_shaper_lut_[a * 65535.f];
     }
-    return CTL_shaper_pq(a, inv);
+    return CTL_shaper_func(a, inv);
 }
 
 #endif // ART_USE_CTL

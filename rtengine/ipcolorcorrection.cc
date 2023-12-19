@@ -347,7 +347,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 #else
             int num_threads = 1;
 #endif
-            CLUTApplication::Quality q = CLUTApplication::Quality::HIGH;
+            CLUTApplication::Quality q = CLUTApplication::Quality::HIGHEST;
             switch (cur_pipeline) {
             case Pipeline::THUMBNAIL:
                 q = CLUTApplication::Quality::LOW;
@@ -356,9 +356,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                 q = CLUTApplication::Quality::MEDIUM;
                 break;
             case Pipeline::PREVIEW:
-                if (scale >= 3) {
-                    q = CLUTApplication::Quality::MEDIUM;
-                } else if (scale > 1) {
+                if (scale > 1) {
                     q = CLUTApplication::Quality::HIGH;
                 }
                 break;
