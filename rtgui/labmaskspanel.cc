@@ -1566,13 +1566,16 @@ void LabMasksPanel::maskGet(int idx)
 
 void LabMasksPanel::onAddPressed()
 {
-    if (!cp_->addPressed()) {
+    int idx = std::min(size_t(selected_)+1, masks_.size());
+    if (!cp_->addPressed(idx)) {
         return;
     }
 
     listEdited = true;
-    selected_ = masks_.size();
-    masks_.push_back(rtengine::procparams::Mask());
+    // selected_ = masks_.size();
+    // masks_.push_back(rtengine::procparams::Mask());
+    auto it = masks_.insert(masks_.begin()+idx, rtengine::procparams::Mask());
+    selected_ = it - masks_.begin();
     populateList();
     area_shape_index_ = 0;
     maskShow(selected_);

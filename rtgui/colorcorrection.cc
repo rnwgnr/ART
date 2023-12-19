@@ -139,9 +139,9 @@ public:
         parent_->regionShow(idx);
     }
 
-    bool addPressed() override
+    bool addPressed(int idx) override
     {
-        parent_->data.push_back(rtengine::procparams::ColorCorrectionParams::Region());
+        parent_->data.insert(parent_->data.begin() + idx, rtengine::procparams::ColorCorrectionParams::Region());
         return true;
     }
 

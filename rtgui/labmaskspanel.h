@@ -43,7 +43,7 @@ public:
 
     virtual void selectionChanging(int idx) = 0;
     virtual void selectionChanged(int idx) = 0;
-    virtual bool addPressed() = 0;
+    virtual bool addPressed(int idx) = 0;
     virtual bool removePressed(int idx) = 0;
     virtual bool copyPressed(int idx) = 0;
     virtual bool moveUpPressed(int idx) = 0;

@@ -75,9 +75,9 @@ public:
         parent_->regionShow(idx);
     }
 
-    bool addPressed() override
+    bool addPressed(int idx) override
     {
-        parent_->regionData.push_back(LocalContrastParams::Region());
+        parent_->regionData.insert(parent_->regionData.begin() + idx, LocalContrastParams::Region());
         return true;
     }
 

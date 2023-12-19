@@ -74,9 +74,9 @@ public:
         parent_->regionShow(idx);
     }
 
-    bool addPressed() override
+    bool addPressed(int idx) override
     {
-        parent_->data.push_back(TextureBoostParams::Region());
+        parent_->data.insert(parent_->data.begin() + idx, TextureBoostParams::Region());
         return true;
     }
 
