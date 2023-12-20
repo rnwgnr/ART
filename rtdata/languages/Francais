@@ -498,7 +498,6 @@ HISTORY_MSG_473;PS - Utiliser LMMSE
 HISTORY_MSG_474;PS - Égaliser
 HISTORY_MSG_475;PS - Égaliser par canal
 HISTORY_MSG_485;Correction d'Objectif
-HISTORY_MSG_486;Corr. d'Obj. - Appareil photo
 HISTORY_MSG_487;Corr. d'Obj. - Objectif
 HISTORY_MSG_488;Compression de la Plage Dynamique
 HISTORY_MSG_489;CPD - Détail
@@ -685,6 +684,7 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;Égaliseur Tonal - Bandes
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Égaliseur Tonal - Régularisation
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Égaliseur Tonal - Carte tonale
 HISTORY_MSG_TONE_EQUALIZER_PIVOT;Égaliseur Tonal - Pivot
+HISTORY_MSG_TONECURVE_BASECURVE; Tone curve - Courbe de base
 HISTORY_MSG_TONECURVE_SATCURVE;Courbe tonale - Saturation
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Courbe tonale - Force perceptuelle 
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Courbe tonale - Contraste mode hérité
@@ -792,7 +792,6 @@ IPTCPANEL_TITLE;Titre
 IPTCPANEL_TITLEHINT;Entrez un nom court et humainement lisible pour l'image, cela peut être le nom du fichier
 IPTCPANEL_TRANSREFERENCE;Identifiant du travail
 IPTCPANEL_TRANSREFERENCEHINT;Entrez un nombre ou identifiant servant au contrôle du flux de travail ou au suivi
-LABMASKS_AREA_MASK_EMPTY_WARNING;Warning: the current combination of area shapes results in an empty mask
 MAIN_BUTTON_FULLSCREEN;Plein écran
 MAIN_BUTTON_ICCPROFCREATOR;Créateur de Profil ICC
 MAIN_BUTTON_NAVNEXT_TOOLTIP;Naviguer à l'image Suivante relativement à l'image ouverte dans l'Éditeur.\nRaccourci : <b>Shift-F4</b>\n\nPour naviguer à l'image suivante relativement à la vignette sélectionnée dans le Navigateur de fichiers ou la Pellicule :\nRaccourci : <b>F4</b>
@@ -967,7 +966,6 @@ PARTIALPASTE_RESIZE;Redimensionner
 PARTIALPASTE_RETINEX;Retinex
 PARTIALPASTE_RGBCURVES;Courbes RVB
 PARTIALPASTE_ROTATION;Rotation
-PARTIALPASTE_TEXTUREBOOST;Renforcer la Texture/netteté
 PARTIALPASTE_SHADOWSHIGHLIGHTS;Ombres/Hautes Lumières
 PARTIALPASTE_SHARPENEDGE;Bords
 PARTIALPASTE_SHARPENING;Netteté de capture
@@ -1938,6 +1936,10 @@ TP_TM_FATTAL_AMOUNT;Quantité
 TP_TM_FATTAL_LABEL;Compression de la Plage Dynamique
 TP_TM_FATTAL_THRESHOLD;Détail
 TP_TM_FATTAL_SATCONTROL;Contrôle de saturation
+TP_TONECURVE_BASECURVE;Courbe de base
+TP_TONECURVE_BASECURVE_LINEAR;Linéaire
+TP_TONECURVE_BASECURVE_ROLLOFF;Atténuation progressive des hautes lumière
+TP_TONECURVE_BASECURVE_SCURVE;Courbe en S progressive
 TP_TONECURVE_LABEL;Courbes Tonales
 TP_TONECURVE_SATCURVE;Saturation
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Force de la courbe perceptuelle

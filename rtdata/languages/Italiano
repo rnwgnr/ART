@@ -20,6 +20,7 @@
 #20 2023-09-01 alvaro
 #21 2023-09-27 alvaro
 #22 2023-12-04 alvaro
+#23 2023-12-16 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -33,7 +34,7 @@ CTL_SIGMOID_BASE_PRIMARIES;Primari base
 CTL_SIGMOID_INSET;Attenuazione
 CTL_SIGMOID_PURITY;Recupero della purezza
 CTL_SIGMOID_ROTATION;Rotazione
-CTL_SIGMOID_SKEW;Distorto
+CTL_SIGMOID_SKEW;Deviazione
 CTL_SIGMOID_USE_PRIMARIES;Usa primari personalizzati
 CURVEEDITOR_AXIS_IN;I:
 CURVEEDITOR_AXIS_LEFT_TAN;LT:
@@ -205,7 +206,7 @@ FILEBROWSER_RANK3_TOOLTIP;Punteggio 3 *\nScorciatoia: <b>Shift-3</b>
 FILEBROWSER_RANK4_TOOLTIP;Punteggio 4 *\nScorciatoia: <b>Shift-4</b>
 FILEBROWSER_RANK5_TOOLTIP;Punteggio 5 *\nScorciatoia: <b>Shift-5</b>
 FILEBROWSER_RENAMEDLGLABEL;Rinomina il file
-FILEBROWSER_RESETDEFAULTPROFILE;Reimposta al default
+FILEBROWSER_RESETDEFAULTPROFILE;Reimposta predefinito
 FILEBROWSER_SELECTDARKFRAME;Seleziona un Dark Frame...
 FILEBROWSER_SELECTFLATFIELD;Seleziona un Flat Field...
 FILEBROWSER_SESSION_ADD_LABEL;Aggiungi alla sessione
@@ -702,6 +703,7 @@ HISTORY_MSG_SOFTLIGHT_STRENGTH;Soft light - Intensità
 HISTORY_MSG_SPOT;Rimozione punti
 HISTORY_MSG_SPOT_ENTRY;Rimozione punti - Modif. punto
 HISTORY_MSG_TM_FATTAL_SATCONTROL;DRC - Controllo saturazione
+HISTORY_MSG_TONECURVE_BASECURVE;Curva tonale - Curva base
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Curva tonale - Contrasto vecchia modalità
 HISTORY_MSG_TONECURVE_MODE;Curva tonale - Modalità
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Curva tonale - Intensità percettiva
@@ -1085,7 +1087,7 @@ PREFERENCES_HISTOGRAMPOSITIONLEFT;Istogramma nel pannello sinistro
 PREFERENCES_HISTOGRAM_TOOLTIP;Se abilitato, Navigatore e Istogramma usano il Profilo di Lavoro anziché il Profilo di Uscita (con gamma)
 PREFERENCES_HLTHRESHOLD;Soglia per alte luci bruciate
 PREFERENCES_ICCDIR;Cartella profili colore
-PREFERENCES_IMPROCPARAMS;Parametri predefiniti di elaborazione dell'immagine
+PREFERENCES_IMPROCPARAMS;Profili predefiniti di elaborazione dell'immagine
 PREFERENCES_INSPECT_LABEL;Ispezione
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;Numero massimo di immagini nella cache
 PREFERENCES_INSPECT_MAXBUFFERS_TOOLTIP;Imposta il numero massimo di immagini memorizzato nella cache quando si passa su di esse nel navigatore; nei sistemi con poca RAM (2GB) questo numero dovrebbe essere 1 o 2.
@@ -1961,6 +1963,10 @@ TP_TM_FATTAL_AMOUNT;Intensità
 TP_TM_FATTAL_LABEL;Compressione gamma dinamica
 TP_TM_FATTAL_SATCONTROL;Controllo saturazione
 TP_TM_FATTAL_THRESHOLD;Dettaglio
+TP_TONECURVE_BASECURVE;Curva base
+TP_TONECURVE_BASECURVE_LINEAR;Lineare
+TP_TONECURVE_BASECURVE_ROLLOFF;Smorzamento morbido alte luci
+TP_TONECURVE_BASECURVE_SCURVE;Forma a S morbida
 TP_TONECURVE_CONTRAST_LEGACY;Contrasto in vecchia modalità
 TP_TONECURVE_LABEL;Curva di tono
 TP_TONECURVE_MODE;Modalità
@@ -2002,6 +2008,7 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
+
 
 
 
