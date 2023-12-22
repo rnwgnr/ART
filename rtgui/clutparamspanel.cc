@@ -130,6 +130,9 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
             w = a;
         }   break;
         }
+        if (!d.gui_tooltip.empty()) {
+            w->set_tooltip_markup(d.gui_tooltip);
+        }
         widgets_.push_back(w);
     }
     show_all_children();

@@ -43,6 +43,7 @@ struct CLUTParamDescriptor {
     Glib::ustring gui_name;
     Glib::ustring gui_group;
     double gui_step;
+    Glib::ustring gui_tooltip;
 };
 
 typedef std::map<std::string, double> CLUTParamValueMap;

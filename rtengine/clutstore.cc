@@ -592,14 +592,21 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
     desc.gui_group = "";
     desc.gui_step = 1;
 
-    const auto set_group =
-        [&](int i) -> bool
+    const auto set_group_tooltip =
+        [&](int i, int sz) -> bool
         {
             auto n = cJSON_GetArrayItem(root, i);
             if (!cJSON_IsString(n)) {
                 return false;
             }
             desc.gui_group = cJSON_GetStringValue(n);
+            if (i+1 < sz) {
+                n = cJSON_GetArrayItem(root, i+1);
+                if (!cJSON_IsString(n)) {
+                    return false;
+                }
+                desc.gui_tooltip = cJSON_GetStringValue(n);
+            }
             return true;
         };
 
@@ -620,20 +627,20 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
     case CLUTParamType::PT_BOOL:
         if (sz == 2) {
             return true;
-        } else if (sz == 3 || sz == 4) {
+        } else if (sz >= 3 && sz <= 5) {
             n = cJSON_GetArrayItem(root, 2);
             if (cJSON_IsBool(n)) {
                 desc.value_default = cJSON_IsTrue(n);
             }
-            if (sz == 4) {
-                return set_group(3);
+            if (sz >= 4) {
+                return set_group_tooltip(3, sz);
             } else {
                 return true;
             }
         }
         break;
     case CLUTParamType::PT_FLOAT:
-        if (sz >= 4 && sz <= 7) {
+        if (sz >= 4 && sz <= 8) {
             n = cJSON_GetArrayItem(root, 2);
             if (cJSON_IsNumber(n)) {
                 desc.value_min = n->valuedouble;
@@ -663,15 +670,15 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                 } else {
                     desc.gui_step = (desc.value_max - desc.value_min) / 100.0;
                 }
-                if (sz == 7) {
-                    return set_group(6);
+                if (sz >= 7) {
+                    return set_group_tooltip(6, sz);
                 }
             }
             return true;
         }
         break;
     case CLUTParamType::PT_INT:
-        if (sz >= 3 && sz <= 6) {
+        if (sz >= 3 && sz <= 7) {
             n = cJSON_GetArrayItem(root, 2);
             if (cJSON_IsArray(n)) {
                 for (int i = 0, k = cJSON_GetArraySize(n); i < k; ++i) {
@@ -687,7 +694,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                     if (!set_int(n, desc.value_default)) {
                         return false;
                     }
-                    return (sz == 4) || set_group(4);
+                    return (sz >= 4) || set_group_tooltip(4, sz);
                 } else {
                     return (sz == 3);
                 }
@@ -704,8 +711,8 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                     if (!set_int(n, desc.value_default)) {
                         return false;
                     }
-                    if (sz == 6) {
-                        return set_group(5);
+                    if (sz >= 6) {
+                        return set_group_tooltip(5, sz);
                     }
                 }
                 return true;
