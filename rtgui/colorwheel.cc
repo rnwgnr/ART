@@ -520,6 +520,9 @@ void ColorWheel::setParams(double x, double y, double s, bool notify)
     if (ph.radius > 1) {
         s *= ph.radius;
     }
+    while (rtengine::max(std::abs(x / s), std::abs(y / s)) > 1.0) {
+        s *= 2;
+    }
     if (scale) {
         scale->set_value(s);
     }
@@ -541,27 +544,56 @@ void ColorWheel::onRightClickPressed()
     Gtk::HBox hb;
     p.set_border_width(16);
     p.add(hb);
-    Gtk::Label lx("X: ");
-    Gtk::SpinButton x;
-    x.set_range(-2.5, 2.5);
-    x.set_digits(3);
-    x.set_increments(0.01, 0.1);
-    Gtk::Label ly("Y: ");
-    Gtk::SpinButton y;
-    y.set_range(-2.5, 2.5);
-    y.set_digits(3);
-    y.set_increments(0.01, 0.1);
+
+    Gtk::Label lx(M("TP_COLORCORRECTION_H") + ": ");
+    Gtk::SpinButton hue;
+    hue.set_range(0, 360);
+    hue.set_digits(1);
+    hue.set_increments(0.1, 1);
+    Gtk::Label ly(M("TP_COLORCORRECTION_S") + ": ");
+    Gtk::SpinButton sat;
+    sat.set_range(0, 250);
+    sat.set_digits(1);
+    sat.set_increments(0.1, 1);
     hb.pack_start(lx);
-    hb.pack_start(x);
+    hb.pack_start(hue);
     Gtk::Label spc("  ");
     hb.pack_start(spc);
     hb.pack_start(ly);
-    hb.pack_start(y);
+    hb.pack_start(sat);
+    
+    // Gtk::Label lx("X: ");
+    // Gtk::SpinButton x;
+    // x.set_range(-2.5, 2.5);
+    // x.set_digits(3);
+    // x.set_increments(0.01, 0.1);
+    // Gtk::Label ly("Y: ");
+    // Gtk::SpinButton y;
+    // y.set_range(-2.5, 2.5);
+    // y.set_digits(3);
+    // y.set_increments(0.01, 0.1);
+    // hb.pack_start(lx);
+    // hb.pack_start(x);
+    // Gtk::Label spc("  ");
+    // hb.pack_start(spc);
+    // hb.pack_start(ly);
+    // hb.pack_start(y);
 
     double vx, vy, vs;
     getParams(vx, vy, vs);
-    x.set_value(vx);
-    y.set_value(vy);
+    // x.set_value(vx);
+    // y.set_value(vy);
+    double vhue = std::atan2(vy, vx) * 180 / rtengine::RT_PI;
+    if (vhue < 0) {
+        vhue += 360;
+    } else if (vhue > 360) {
+        vhue -= 360;
+    }
+    double s = std::sqrt(vx * vx + vy * vy);
+    double vsat = s * 100;
+    //vsat /= vs;
+    hue.set_value(vhue);
+    sat.set_value(vsat);
     
     int result = 0;
 
@@ -570,9 +602,16 @@ void ColorWheel::onRightClickPressed()
             [&]()
             {
                 result = 1;
-                if (x.get_value() != vx || y.get_value() != vy) {
-                    setParams(x.get_value(), y.get_value(), vs, true);
+                double h = hue.get_value() * rtengine::RT_PI / 180.0;
+                double s = sat.get_value() / 100.0;
+                double x = s * std::cos(h);
+                double y = s * std::sin(h);
+                if (x != vx || y != vy) {
+                    setParams(x, y, vs, true);
                 }
+                // if (x.get_value() != vx || y.get_value() != vy) {
+                //     setParams(x.get_value(), y.get_value(), vs, true);
+                // }
             })
         );
 
