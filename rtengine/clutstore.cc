@@ -319,7 +319,15 @@ Glib::ustring rtengine::CLUTStore::getClutDisplayName(const Glib::ustring &filen
                         if (cJSON_IsString(root)) {
                             name = cJSON_GetStringValue(root);
                             if (!name.empty() && name[0] == '$') {
-                                name = M(name.c_str()+1);
+                                auto pos = name.find(';');
+                                if (pos != Glib::ustring::npos) {
+                                    auto key = name.substr(1, pos-1);
+                                    auto dflt = name.substr(pos+1);
+                                    auto res = M(key);
+                                    name = (res == key) ? dflt : res;
+                                } else {
+                                    name = M(name.c_str()+1);
+                                }
                             }
                             found = !name.empty();
                         }

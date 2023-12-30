@@ -46,7 +46,15 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
         [](const Glib::ustring &l) -> Glib::ustring
         {
             if (!l.empty() && l[0] == '$') {
-                return M(l.c_str()+1);
+                auto pos = l.find(';');
+                if (pos != Glib::ustring::npos) {
+                    auto key = l.substr(1, pos-1);
+                    auto dflt = l.substr(pos+1);
+                    auto res = M(key);
+                    return (res == key) ? dflt : res;
+                } else {
+                    return M(l.c_str()+1);
+                }
             } else {
                 return l;
             }
