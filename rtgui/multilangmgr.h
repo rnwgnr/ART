@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -16,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _MULTILANGMGR_
-#define _MULTILANGMGR_
+#pragma once
 
 #include <map>
 #include <string>
@@ -25,10 +25,9 @@
 
 #include <glibmm/ustring.h>
 
-class MultiLangMgr
-{
+class MultiLangMgr {
 public:
-    MultiLangMgr ();
+    MultiLangMgr();
 
     void load(const Glib::ustring &language, const std::vector<Glib::ustring> &fnames);
     Glib::ustring getStr(const std::string& key) const;
@@ -41,9 +40,7 @@ private:
 
 extern MultiLangMgr langMgr;
 
-inline Glib::ustring M (const std::string& key)
+inline Glib::ustring M(const std::string& key)
 {
-    return langMgr.getStr (key);
+    return langMgr.getStr(key);
 }
-
-#endif

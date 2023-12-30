@@ -25,12 +25,10 @@
 #include <winnls.h>
 #endif
 
-namespace
-{
+namespace {
 
 // Maps standard locales to languages, e.g. "de-DE" to "Deutsch".
-struct LocaleToLang : private std::map<std::pair<Glib::ustring, Glib::ustring>, Glib::ustring>
-{
+struct LocaleToLang : private std::map<std::pair<Glib::ustring, Glib::ustring>, Glib::ustring> {
     static const std::pair<Glib::ustring, Glib::ustring> key (const Glib::ustring& major, const Glib::ustring& minor = Glib::ustring ())
     {
         return std::make_pair (major, minor);

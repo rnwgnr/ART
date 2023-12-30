@@ -2371,6 +2371,10 @@ void Options::load(bool lightweight, int verbose)
     Glib::ustring languageTranslation = "";
     Glib::ustring localeTranslation = "";
 
+    Glib::ustring user_default_translation = Glib::build_filename(rtdir, "languages", "default");
+    Glib::ustring user_language_translation = "";
+    Glib::ustring user_locale_translation = "";
+
     if (options.languageAutoDetect) {
         options.language = langMgr.getOSUserLanguage();
     }
@@ -2380,14 +2384,16 @@ void Options::load(bool lightweight, int verbose)
 
         if (langPortions.size() >= 1) {
             languageTranslation = Glib::build_filename(argv0, "languages", langPortions.at(0));
+            user_language_translation = Glib::build_filename(rtdir, "languages", langPortions.at(0));
         }
 
         if (langPortions.size() >= 2) {
             localeTranslation = Glib::build_filename(argv0, "languages", options.language);
+            user_locale_translation = Glib::build_filename(rtdir, "languages", options.language);
         }
     }
 
-    langMgr.load(options.language, {localeTranslation, languageTranslation, defaultTranslation});
+    langMgr.load(options.language, {user_locale_translation, localeTranslation, user_language_translation, languageTranslation, user_default_translation, defaultTranslation});
 
     rtengine::init(&options.rtSettings, argv0, rtdir, !lightweight);
 }
