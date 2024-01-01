@@ -21,6 +21,7 @@
 #20 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 #21 2023-09-19 Ohnishi, Yasuo, updates for 1.20.2
 #22 2023-12-03 Ohnishi, Yasuo, updates for 1.21
+#23 2023-12-26 Ohnishi, Yasuo, updates for commit 0724288
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -29,7 +30,7 @@ ABOUT_TAB_SPLASH;スプラッシュ
 ADJUSTER_RESET_TO_DEFAULT;<b>クリック</b> - デフォルト値にリセット\n<b>Ctrl</b>+<b>クリック</b> - 最後に保存した値にリセット
 CTL_SIGMOID;シグモイド・トーンマッパー
 CTL_SIGMOID_BASE_PRIMARIES;基本原色
-CTL_SIGMOID_INSET;減衰
+CTL_SIGMOID_INSET;純色度の減衰
 CTL_SIGMOID_PURITY;純色に戻す
 CTL_SIGMOID_ROTATION;回転
 CTL_SIGMOID_SKEW;傾き(Skew)
@@ -66,9 +67,8 @@ DYNPROFILEEDITOR_EDIT;編集
 DYNPROFILEEDITOR_EDIT_RULE;ダイナミックプロファイルの規定を変更
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;大/小文字は区別しません\n正規表現を使うには\n入力の際に"re:"という接頭語を付けます
 DYNPROFILEEDITOR_IMGTYPE_ANY;全ての画像
-DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
-DYNPROFILEEDITOR_IMGTYPE_PS;ピクセルシフト
-DYNPROFILEEDITOR_IMGTYPE_STD;標準
+DYNPROFILEEDITOR_IMGTYPE_RAW;Raw
+DYNPROFILEEDITOR_IMGTYPE_NONRAW;非Raw
 DYNPROFILEEDITOR_MOVE_DOWN;下に移動
 DYNPROFILEEDITOR_MOVE_UP;上に移動
 DYNPROFILEEDITOR_NEW;新規
@@ -704,6 +704,7 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;トーンイコライザ - Bands
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;トーンイコライザ - 遷移のスムーズ化 (Regularization)
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;トーンイコライザ - トーンマップ
 HISTORY_MSG_TONE_EQUALIZER_PIVOT;トーンイコライザー - ピボット
+HISTORY_MSG_TONECURVE_BASECURVE; トーンカーブ - ベースカーブ
 HISTORY_MSG_TONECURVE_SATCURVE;トーンカーブ - 彩度 (Saturation)
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;トーンカーブ - Perceptual strength
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;トーンカーブ - コントラスト (従来モード)
@@ -1252,7 +1253,7 @@ QUEUE_DESTFILENAME;パスとファイル名
 QUEUE_FORMAT_TITLE;ファイル形式
 QUEUE_LOCATION_FOLDER;フォルダに保存
 QUEUE_LOCATION_TEMPLATE;テンプレートを使う
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;元の写真の場所、評価、ゴミ箱内かどうか、またはキュー内の位置に基づいて出力場所を指定します。\n\n例えば次のパス名を使う場合...:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\n書式設定文字列の意味は次のとおりです:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> は写真の評価に置き換えられます。写真に評価がない場合は、「<i>0</i>」が使用されます。写真がゴミ箱にある場合は、「<i>x</i>」が使われます。\n\n<b>%s1</b>, ..., <b>%s9</b> はキューが開始されたときのキュー内の写真の最初の位置に置き換えられます。数値は桁数を意味します。 例えば<b>%s3</b> の結果は「<i>001</i>」になります。\n\n<b>%n</b> は、現在適用されているスナップショットの名前に置き換えられます。スナップショットが存在しない場合、またはスナップショットが選択されている場合は、空の文字列が使用されます。 <b>%n</b> の代わりに <b>%u</b> を使用すると、スナップショット名のスペースをアンダースコアに置き換えることができます。\n\n出力イメージを元のイメージと一緒に保存する場合は、次のように書きます:\n<b>%p1/%f</b>\n\nソース写真のフォルダ内にある '<i>converted</i>' という名前のフォルダに出力画像を保存する場合は、次のように書きます:\n<b>%p1/converted/%f</b>\n\n出力イメージを \n'<i>/home/tom/photos/converted/2010-10-31</i>' に保存する場合、次のように書きます:\n<b>%p2/converted/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;元の写真の場所、評価、ゴミ箱内かどうか、またはキュー内の位置に基づいて出力場所を指定します。\n\n例えば次のパス名を使う場合...:\n<b>/home/tom/photos/2010-10-31/photo1.raw</b>\n書式設定文字列の意味は次のとおりです:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i >tom</i>\n<b>%d2</b> = <i>photos</i>\n<b>%d1</b> = <i>2010-10-31</i> \n<b>%f</b> = <i>photo1</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/tom/photos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> は写真の評価に置き換えられます。写真に評価がない場合は、「<i>0</i>」が使用されます。写真がゴミ箱にある場合は、「<i>x</i>」が使われます。\n\n<b>%s1</b>, ..., <b>%s9</b> はキューが開始されたときのキュー内の写真の最初の位置に置き換えられます。数値は桁数を意味します。 例えば<b>%s3</b> の結果は「<i>001</i>」になります。\n\n<b>%n</b> は、現在適用されているスナップショットの名前に置き換えられます。スナップショットが存在しない場合、またはスナップショットが選択されている場合は、空の文字列が使用されます。 <b>%n</b> の代わりに <b>%u</b> を使用すると、スナップショット名のスペースをアンダースコアに置き換えることができます。\n\n出力イメージを元のイメージと一緒に保存する場合は、次のように書きます:\n<b>%p1/%f</b>\n\nソース写真のフォルダ内にある '<i>converted</i>' という名前のフォルダに出力画像を保存する場合は、次のように書きます:\n<b>%p1/converted/%f</b>\n\n出力イメージを \n'<i>/home/tom/photos/converted/2010-10-31</i>' に保存する場合、次のように書きます:\n<b>%p2/converted/%d1/%f</b>
 QUEUE_LOCATION_TITLE;出力の場所
 QUEUE_STARTSTOP_TOOLTIP;キューにある画像の現像を始める 或いは中止する\n\nショートカット: <b>Ctrl</b>+<b>s</b>
 RENAME_DIALOG_BASEDIR;基本ディレクトリ
@@ -1955,6 +1956,10 @@ TP_TM_FATTAL_AMOUNT;量
 TP_TM_FATTAL_LABEL;ダイナミックレンジ圧縮
 TP_TM_FATTAL_THRESHOLD;ディテール
 TP_TM_FATTAL_SATCONTROL;彩度 (Saturation) コントロール
+TP_TONECURVE_BASECURVE;ベースカーブ
+TP_TONECURVE_BASECURVE_LINEAR;リニア
+TP_TONECURVE_BASECURVE_ROLLOFF;ハイライトへのなだらかな遷移
+TP_TONECURVE_BASECURVE_SCURVE;滑らかな S カーブ
 TP_TONECURVE_LABEL;トーンカーブ
 TP_TONECURVE_SATCURVE;彩度 (Saturation)
 TP_TONECURVE_PERCEPTUAL_STRENGTH;知覚的カーブの強さ

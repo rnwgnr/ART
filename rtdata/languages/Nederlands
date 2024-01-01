@@ -37,7 +37,7 @@
 #36 27-12-2022 update naar ART v1.18 door pm
 #37 14-03-2023 update naar ART v1.18.1 door pm
 #38 04-09-2023 update naar ART v1.19 door pm
-#39 16-12-2023 update naar ART v1.21 door pm
+#39 30-12-2023 update naar ART v1.21 door pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -304,7 +304,7 @@ GENERAL_SLIDER;Schuifregelaar
 GENERAL_UNCHANGED;(Onveranderd)
 GENERAL_WARNING;Waarschuwing
 GIMP_PLUGIN_INFO;Welkom bij de ART GIMP plug-in!\nAls uw bewerking gereed is, sluit dan het hoofdvenster van ART en uw afbeelding wordt automatisch in GIMP geladen.
-HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), top: %5 (%6)\n    bereik: %7 LW, waarden: %8, pixels: %9
+HISTOGRAM_RAW_STATS_TOOLTIP;min: %1 (%2), max: %3 (%4), top: %5 (%6)\nbereik: %7 LW, waarden: %8, pixels: %9
 HISTOGRAM_TOOLTIP_BAR;Toon/verberg RGB-indicator
 HISTOGRAM_TOOLTIP_B;Toon/verberg blauw histogram
 HISTOGRAM_TOOLTIP_CHRO;Toon/verberg chromaticiteitshistogram
@@ -346,134 +346,134 @@ HISTORY_MSG_118;Raw CA-correctie - Blauw
 HISTORY_MSG_119;Lijnruisfilter
 HISTORY_MSG_11;Tooncurve - curve 1
 HISTORY_MSG_120;Groenbalans
-HISTORY_MSG_121;Raw CA-correctie - Auto
-HISTORY_MSG_122;Donkerframe - Automatische selectie
-HISTORY_MSG_123;Donkerframe - Bestand
-HISTORY_MSG_126;Vlakveld - Bestand
-HISTORY_MSG_127;Vlakveld - Automatische selectie
-HISTORY_MSG_128;Vlakveld - Verzachtingsstraal
-HISTORY_MSG_129;Vlakveld - Verzachtingstype
+HISTORY_MSG_121;Raw CA-correctie - auto
+HISTORY_MSG_122;Donkerframe - autom. selectie
+HISTORY_MSG_123;Donkerframe - bestand
+HISTORY_MSG_126;Vlakveld - bestand
+HISTORY_MSG_127;Vlakveld - autom. selectie
+HISTORY_MSG_128;Vlakveld - verzachtingsstraal
+HISTORY_MSG_129;Vlakveld - verzachtingstype
 HISTORY_MSG_130;Automatische vervormingscorrectie
-HISTORY_MSG_131;RV - Luma
-HISTORY_MSG_132;RV - Chroma
+HISTORY_MSG_131;Ruisonderdr. - luma
+HISTORY_MSG_132;Ruisonderdr. - chroma
 HISTORY_MSG_133;Uitvoergamma
-HISTORY_MSG_137;Zwartniveau - Groen 1
-HISTORY_MSG_138;Zwartniveau - Rood
-HISTORY_MSG_139;Zwartniveau - Blauw
-HISTORY_MSG_140;Zwartniveau - Groen 2
+HISTORY_MSG_137;Zwartniveau - groen 1
+HISTORY_MSG_138;Zwartniveau - rood
+HISTORY_MSG_139;Zwartniveau - blauw
+HISTORY_MSG_140;Zwartniveau - groen 2
 HISTORY_MSG_141;Zwartniveau - koppel groenen
-HISTORY_MSG_14;Lab - Helderheid
-HISTORY_MSG_158;TK - Sterkte
-HISTORY_MSG_15;Lab - Contrast
-HISTORY_MSG_160;TK - Schaal
-HISTORY_MSG_162;Textuurversterking/Verscherping
-HISTORY_MSG_163;RGB-curven - Rood
-HISTORY_MSG_164;RGB-curven - Groen
-HISTORY_MSG_165;RGB-curven - Blauw
-HISTORY_MSG_166;Belichting - Teruggezet
+HISTORY_MSG_14;Lab - helderheid
+HISTORY_MSG_158;TK - sterkte
+HISTORY_MSG_15;Lab - contrast
+HISTORY_MSG_160;TK - schaal
+HISTORY_MSG_162;Textuurversterking/verscherping
+HISTORY_MSG_163;RGB-curven - rood
+HISTORY_MSG_164;RGB-curven - groen
+HISTORY_MSG_165;RGB-curven - blauw
+HISTORY_MSG_166;Belichting - teruggezet
 HISTORY_MSG_167;Demozaïekmethode
-HISTORY_MSG_173;RO - Detailherstel
+HISTORY_MSG_173;Ruisonderdr. - detailherstel
 HISTORY_MSG_19;L*a*b* - L*-curve
 HISTORY_MSG_1;Foto geladen
-HISTORY_MSG_201;RO - Chroma - Rood-Groen
-HISTORY_MSG_202;RO - Chroma - Blauw-Geel
-HISTORY_MSG_203;RO - kleurruimte
+HISTORY_MSG_201;Ruisonderdr. - chroma - rood-groen
+HISTORY_MSG_202;Ruisonderdr. - chroma - blauw-geel
+HISTORY_MSG_203;Ruisonderdr. - kleurruimte
 HISTORY_MSG_204;LMMSE verbeterstappen
 HISTORY_MSG_207;Verzachten - tintcurve
-HISTORY_MSG_208;WB - Blauw/Rood-balans
+HISTORY_MSG_208;WB - blauw/rood-balans
 HISTORY_MSG_20;Opnameverscherping
-HISTORY_MSG_210;GF - Hoek
+HISTORY_MSG_210;Grijsverloop - hoek
 HISTORY_MSG_211;Grijsverloopfilter
-HISTORY_MSG_212;VF - Kracht
+HISTORY_MSG_212;Vignettering - sterkte
 HISTORY_MSG_213;Vignetteringsfilter
-HISTORY_MSG_214;Zwartwit
-HISTORY_MSG_215;ZW - KM - Rood
-HISTORY_MSG_216;ZW - KM - Groen
-HISTORY_MSG_217;ZW - KM - Blauw
-HISTORY_MSG_218;ZW - Gamma - Rood
-HISTORY_MSG_219;ZW - Gamma - Groen
-HISTORY_MSG_21;Opnameverscherping - Straal
-HISTORY_MSG_220;ZW - Gamma - Blauw
-HISTORY_MSG_221;ZW - Kleurenfilter
-HISTORY_MSG_222;ZW - Voorinstellingen
-HISTORY_MSG_223;ZW - KM - Oranje
-HISTORY_MSG_224;ZW - KM - Geel
-HISTORY_MSG_225;ZW - KM - Cyaan
-HISTORY_MSG_226;ZW - KM - Magenta
-HISTORY_MSG_227;ZW - KM - Paars
-HISTORY_MSG_22;Opnameverscherping - Hoeveelheid
-HISTORY_MSG_230;ZW - Modus
-HISTORY_MSG_235;ZW - CM - Auto
-HISTORY_MSG_237;ZW - KM
-HISTORY_MSG_238;GF - Verzachten
-HISTORY_MSG_239;GF - Sterkte
-HISTORY_MSG_23;Opnameverscherping - Drempel
-HISTORY_MSG_240;GF - Centrum
-HISTORY_MSG_241;VF - Verzachten
-HISTORY_MSG_242;VF - Rondheid
-HISTORY_MSG_243;VC - Straal
-HISTORY_MSG_244;VC - Sterkte
-HISTORY_MSG_245;VC - Centrum
-HISTORY_MSG_24;Opnameverscherping - Alleen randen verscherpen
-HISTORY_MSG_250;RV - Verbeteren
-HISTORY_MSG_255;RO - Finale verzachting
-HISTORY_MSG_256;RV - Mediaan - Type
-HISTORY_MSG_25;Opnameverscherping - Straal randdetectie
-HISTORY_MSG_26;Opnameverscherping - Randtolerantie
-HISTORY_MSG_27;Opnameverscherping - Halocontrole
-HISTORY_MSG_285;RO - Mediaan - Methode
-HISTORY_MSG_286;RO - Mediaan - Type
-HISTORY_MSG_287;RO - Mediaan - Herhaling
+HISTORY_MSG_214;Zwart-wit
+HISTORY_MSG_215;Z-W - kleurenmixer - rood
+HISTORY_MSG_216;Z-W - kleurenmixer - groen
+HISTORY_MSG_217;Z-W - kleurenmixer - blauw
+HISTORY_MSG_218;Z-W - gammacorrectie - rood
+HISTORY_MSG_219;Z-W - gammacorrectie - groen
+HISTORY_MSG_21;Opnameverscherping - straal
+HISTORY_MSG_220;Z-W - gammacorrectie - blauw
+HISTORY_MSG_221;Z-W - kleurenfilter
+HISTORY_MSG_222;Z-W - voorinstellingen
+HISTORY_MSG_223;Z-W - kleurenmixer - oranje
+HISTORY_MSG_224;Z-W - kleurenmixer - geel
+HISTORY_MSG_225;Z-W - kleurenmixer - cyaan
+HISTORY_MSG_226;Z-W - kleurenmixer - magenta
+HISTORY_MSG_227;Z-W - kleurenmixer - paars
+HISTORY_MSG_22;Opnameverscherping - hoeveelheid
+HISTORY_MSG_230;Z-W - modus
+HISTORY_MSG_235;Z-W - kleurenmixer - auto
+HISTORY_MSG_237;Z-W - kleurenmixer
+HISTORY_MSG_238;Grijsverloop - verloop
+HISTORY_MSG_239;Grijsverloop - sterkte
+HISTORY_MSG_23;Opnameverscherping - drempel
+HISTORY_MSG_240;Grijsverloop - centrum
+HISTORY_MSG_241;Vignettering - straal
+HISTORY_MSG_242;Vignettering - rondheid
+HISTORY_MSG_243;VC - straal
+HISTORY_MSG_244;VC - sterkte
+HISTORY_MSG_245;VC - centrum
+HISTORY_MSG_24;Opnameverscherping - alleen randen
+HISTORY_MSG_250;Ruisonderdr. - verbeteren
+HISTORY_MSG_255;Ruisonderdr. - finale verzachting
+HISTORY_MSG_256;Ruisonderdr. - mediaan - type
+HISTORY_MSG_25;Opnameverscherping - straal randdetectie
+HISTORY_MSG_26;Opnameverscherping - randtolerantie
+HISTORY_MSG_27;Opnameverscherping - halocontrole
+HISTORY_MSG_285;Ruisonderdr. - mediaan - methode
+HISTORY_MSG_286;Ruisonderdr. - mediaan - type
+HISTORY_MSG_287;Ruisonderdr. - mediaan - herhaling
 HISTORY_MSG_288;Vlakveld - afkapcontrole
 HISTORY_MSG_289;Vlakveld - afkapcontrole - auto
-HISTORY_MSG_28;Opnameverscherping - Halo hoeveelheid
-HISTORY_MSG_290;Zwartniveau - Rood
-HISTORY_MSG_291;Zwartniveau - Groen
-HISTORY_MSG_292;Zwartniveau - Blauw
+HISTORY_MSG_28;Opnameverscherping - halo hoeveelheid
+HISTORY_MSG_290;Zwartniveau - rood
+HISTORY_MSG_291;Zwartniveau - groen
+HISTORY_MSG_292;Zwartniveau - blauw
 HISTORY_MSG_293;Filmsimulatie
-HISTORY_MSG_294;Filmsimulatie - Sterkte
-HISTORY_MSG_295;Filmsimulatie - Film
-HISTORY_MSG_297;RO - Modus
-HISTORY_MSG_298;Dodepixelsfilter
-HISTORY_MSG_29;Opnameverscherping - Methode
+HISTORY_MSG_294;Filmsimulatie - sterkte
+HISTORY_MSG_295;Filmsimulatie - film
+HISTORY_MSG_297;Ruisonderdr. - modus
+HISTORY_MSG_298;Dode-pixelsfilter
+HISTORY_MSG_29;Opnameverscherping - methode
 HISTORY_MSG_2;arp-profiel geladen
-HISTORY_MSG_302;RO - Chromamethode
-HISTORY_MSG_303;RO - Chromamethode
-HISTORY_MSG_30;RL-Versch. - Straal
-HISTORY_MSG_31;RL-Versch. - Hoeveelheid
-HISTORY_MSG_32;RLD - Dempen
-HISTORY_MSG_33;RLD - Herhalingen
+HISTORY_MSG_302;Ruisonderdr. - chromamethode
+HISTORY_MSG_303;Ruisonderdr. - chromamethode
+HISTORY_MSG_30;RL-verscherping - straal
+HISTORY_MSG_31;RL-verscherping - hoeveelheid
+HISTORY_MSG_32;RLD - dempen
+HISTORY_MSG_33;RLD - herhalingen
 HISTORY_MSG_34;Lenscorrectie - vervorming
 HISTORY_MSG_359;Hete/dode pxs - drempel
 HISTORY_MSG_35;Lenscorrectie - vignettering
 HISTORY_MSG_360;TM Gamma
-HISTORY_MSG_36;Lenscorrectie - CA
+HISTORY_MSG_36;Lenscorrectie - ca
 HISTORY_MSG_371;Uitvoerverscherping
-HISTORY_MSG_372;Uitvoerversch. USM - Straal
-HISTORY_MSG_373;Uitvoerversch. USM - Hoeveelheid
-HISTORY_MSG_374;Uitvoerversch. USM - Drempel
-HISTORY_MSG_375;Uitvoerversch. USM - Alleen randen verscherpen
-HISTORY_MSG_376;Uitvoerversch. USM - Straal randdetectie
-HISTORY_MSG_377;Uitvoerversch. USM - Randtolerantie
-HISTORY_MSG_378;Uitvoerversch. USM - Halocontrole
-HISTORY_MSG_379;Uitvoerversch. USM - Halocontrole, hoeveelheid
-HISTORY_MSG_380;Uitvoerversch. - Methode
-HISTORY_MSG_381;Uitvoerversch. RLD - Straal
-HISTORY_MSG_382;Uitvoerversch. RLD - Hoeveelheid
-HISTORY_MSG_383;Uitvoerversch. RLD - Demping
-HISTORY_MSG_384;Uitvoerversch. RLD - Herhalingen
+HISTORY_MSG_372;Uitvoerversch. USM - straal
+HISTORY_MSG_373;Uitvoerversch. USM - hoeveelheid
+HISTORY_MSG_374;Uitvoerversch. USM - drempel
+HISTORY_MSG_375;Uitvoerversch. USM - alleen randen verscherpen
+HISTORY_MSG_376;Uitvoerversch. USM - straal randdetectie
+HISTORY_MSG_377;Uitvoerversch. USM - randtolerantie
+HISTORY_MSG_378;Uitvoerversch. USM - halocontrole
+HISTORY_MSG_379;Uitvoerversch. USM - halocontrole, hoeveelheid
+HISTORY_MSG_380;Uitvoerversch. - methode
+HISTORY_MSG_381;Uitvoerversch. RLD - straal
+HISTORY_MSG_382;Uitvoerversch. RLD - hoeveelheid
+HISTORY_MSG_383;Uitvoerversch. RLD - demping
+HISTORY_MSG_384;Uitvoerversch. RLD - herhalingen
 HISTORY_MSG_38;Witbalans - methode
-HISTORY_MSG_393;DCP - 'Look' tabel
-HISTORY_MSG_394;DCP - Basisbelichting
-HISTORY_MSG_395;DCP - Basistabel
+HISTORY_MSG_393;DCP - 'look'-tabel
+HISTORY_MSG_394;DCP - basisbelichting
+HISTORY_MSG_395;DCP - basistabel
 HISTORY_MSG_39;WB - temperatuur
 HISTORY_MSG_3;arp-profiel aangepast
 HISTORY_MSG_40;WB - groentint
 HISTORY_MSG_41;Tooncurve - curve modus 1
 HISTORY_MSG_427;Weergave-intentie uitvoer
 HISTORY_MSG_428;Weergave-intentie beeldscherm
-HISTORY_MSG_42;Tooncurve - Curve 2
-HISTORY_MSG_43;Tooncurve - Curve 2 modus
+HISTORY_MSG_42;Tooncurve - curve 2
+HISTORY_MSG_43;Tooncurve - curve 2 modus
 HISTORY_MSG_443;Zwartpuntcompensatie uitvoer
 HISTORY_MSG_445;Raw sub-afbeelding
 HISTORY_MSG_449;PV ISO-aanpassing
@@ -489,18 +489,18 @@ HISTORY_MSG_471;PV Bewegingscorrectie
 HISTORY_MSG_472;PV Zachte overgang
 HISTORY_MSG_473;PV Gebruik LMMSE
 HISTORY_MSG_474;PV Balans
-HISTORY_MSG_475;PS - Kanaalbalans
+HISTORY_MSG_475;PS - kanaalbalans
 HISTORY_MSG_485;Lenscorrectie
-HISTORY_MSG_486;Lenscorrectie - Camera
-HISTORY_MSG_487;Lenscorrectie - Lens
+HISTORY_MSG_486;Lenscorrectie - camera
+HISTORY_MSG_487;Lenscorrectie - lens
 HISTORY_MSG_488;Compressie dynamisch bereik
-HISTORY_MSG_489;CDB - Detail
+HISTORY_MSG_489;CDB - detail
 HISTORY_MSG_48;DCP - tooncurve
-HISTORY_MSG_490;CDB - Hoeveelheid
+HISTORY_MSG_490;CDB - hoeveelheid
 HISTORY_MSG_491;Witbalans
 HISTORY_MSG_492;RGB-curven
 HISTORY_MSG_493;L*a*b*-aanpassingen
-HISTORY_MSG_49;DCP-Illuminant
+HISTORY_MSG_49;DCP-illuminant
 HISTORY_MSG_4;Door geschiedenis bladeren
 HISTORY_MSG_57;Grof roteren
 HISTORY_MSG_58;Horizontaal spiegelen
@@ -523,31 +523,31 @@ HISTORY_MSG_74;Schalen - schaal
 HISTORY_MSG_75;Schalen - methode
 HISTORY_MSG_76;Exifdata
 HISTORY_MSG_77;IPTC-data
-HISTORY_MSG_79;Schalen - Breedte
+HISTORY_MSG_79;Schalen - breedte
 HISTORY_MSG_7;Belichting - schaduwen
-HISTORY_MSG_80;Schalen - Hoogte
+HISTORY_MSG_80;Schalen - hoogte
 HISTORY_MSG_81;Schalen
 HISTORY_MSG_82;Profiel veranderd
 HISTORY_MSG_84;Perspectiefcorrectie
 HISTORY_MSG_85;Lenscorrectie - LCP-profiel
 HISTORY_MSG_87;Impulse ruisonderdrukking
-HISTORY_MSG_88;Impulse RO - Drempel
+HISTORY_MSG_88;Impulse RO - drempel
 HISTORY_MSG_89;Ruisonderdrukking
 HISTORY_MSG_8;Belichtingscompensatie
-HISTORY_MSG_90;RO -Luminantie
-HISTORY_MSG_91;RO - Chroma - Maestro
-HISTORY_MSG_92;RO - Gamma
-HISTORY_MSG_95;L*a*b* - Chroma
+HISTORY_MSG_90;Ruisonderdr. - luminantie
+HISTORY_MSG_91;Ruisonderdr. - chroma - maestro
+HISTORY_MSG_92;Ruisonderdr. - gamma
+HISTORY_MSG_95;L*a*b* - chroma
 HISTORY_MSG_96;L*a*b* - a*-curve
 HISTORY_MSG_97;L*a*b* - b*-curve
 HISTORY_MSG_98;Demozaïekmethode
-HISTORY_MSG_99;Hetepixelsfilter
-HISTORY_MSG_BWMIX_COLORCAST;Z&W - Tint
-HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Kanaalmixer - Primair blauw
-HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Kanaalmixer - Primair groen
+HISTORY_MSG_99;Hete-pixelsfilter
+HISTORY_MSG_BWMIX_COLORCAST;Z-W - tint
+HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Kanaalmixer - primair blauw
+HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Kanaalmixer - primair groen
 HISTORY_MSG_CHMIXER_MODE;Kanaalmixer - modus
-HISTORY_MSG_CHMIXER_RED_PRIMARY;Kanaalmixer - Primair rood
-HISTORY_MSG_COLORCORRECTION_AB;K/Tc chrominantie
+HISTORY_MSG_CHMIXER_RED_PRIMARY;Kanaalmixer - primair rood
+HISTORY_MSG_COLORCORRECTION_AB;K/Tc - chrominantie
 HISTORY_MSG_COLORCORRECTION_AREAMASK;K/Tc - gebiedsmasker
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;K/Tc - gebied C-masker
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;K/Tc - masker contrastdrempel
@@ -555,7 +555,7 @@ HISTORY_MSG_COLORCORRECTION_DELTAEMASK;K/Tc - kleurverwantschapsmasker
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;K/Tc - penseelmasker
 HISTORY_MSG_COLORCORRECTION_ENABLED;Kleur/tooncorrectie
 HISTORY_MSG_COLORCORRECTION_HUEMASK;K/Tc - gebied T-masker
-HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - tintverschuiving
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;K/Tc - tintverschuiving
 HISTORY_MSG_COLORCORRECTION_INSATURATION;K/Tc - verzadiging invoer
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;K/Tc - helderheid
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;K/Tc - gebied L-masker
@@ -571,30 +571,30 @@ HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;K/Tc - LUT-parameters
 HISTORY_MSG_COLORCORRECTION_PIVOT;K/Tc - kantelpunt
 HISTORY_MSG_COLORCORRECTION_POWER;K/Tc - middentonen/gamma
 HISTORY_MSG_COLORCORRECTION_COMPRESSION;K/Tc - compressie
-HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;K/Tc - Luminantiemodus
+HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;K/Tc - luminantiemodus
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;K/Tc - toon masker
 HISTORY_MSG_COLORCORRECTION_SLOPE;K/Tc - hoge lichten/++
-HISTORY_MSG_COLORTONING_LABGRID_VALUE;K/Tc - Kleurcorrectie
-HISTORY_MSG_DEHAZE_BLACKPOINT;Nevelvermindering - Correctie zwartpunten
+HISTORY_MSG_COLORTONING_LABGRID_VALUE;K/Tc - kleurcorrectie
+HISTORY_MSG_DEHAZE_BLACKPOINT;Nevelvermindering - correctie zwartpunten
 HISTORY_MSG_DEHAZE_DEPTH;Nevelvermindering - diepte
 HISTORY_MSG_DEHAZE_ENABLED;Nevelvermindering
 HISTORY_MSG_DEHAZE_LUMINANCE;Nevelvermindering - alleen luminantie
-HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Nevelvermindering - Toon dieptemap
-HISTORY_MSG_DEHAZE_STRENGTH;Nevelvermindering - Sterkte
-HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;RV - auto chroma-sterkte
-HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;RO - Fin. verzachting C
+HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Nevelvermindering - toon dieptemap
+HISTORY_MSG_DEHAZE_STRENGTH;Nevelvermindering - sterkte
+HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;Ruisonderdr. - autom. reductiekracht
+HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;Ruisonderdr. - fin. verzachting chroma
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;RV - GF C-kracht
 HISTORY_MSG_DENOISE_LUMINANCE_CURVE;RV - Luminantiecurve
-HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;RO - Detaildrempel
-HISTORY_MSG_DENOISE_NL_DETAIL;RO - Finale verzachting Detailherstel
-HISTORY_MSG_DENOISE_NL_STRENGTH;RO - Finale verzachting Luminantie
-HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RV - Verzachtmethode
+HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;Ruisonderdr. - detaildrempel
+HISTORY_MSG_DENOISE_NL_DETAIL;Ruisonderdr. - finale verzachting detailherstel
+HISTORY_MSG_DENOISE_NL_STRENGTH;Ruisonderdr. - finale verzachting luminantie
+HISTORY_MSG_DENOISE_SMOOTHING_METHOD;RV - Verzachtingsmethode
 HISTORY_MSG_DISTORTION_AUTO;Autom. vervormingscorrectie
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Dual-demozaïek - auto-drempel
-HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dual-demozaïek - Contrastdrempel
+HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dual-demozaïek - contrastdrempel
 HISTORY_MSG_EPD_AREAMASK;TV - gebiedsmasker
 HISTORY_MSG_EPD_CHROMATICITYMASK;TV - C-masker
-HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TV - Masker contrastdrempel
+HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TV - masker contrastdrempel
 HISTORY_MSG_EPD_DELTAEMASK;TV - kleurverwantschapsmasker
 HISTORY_MSG_EPD_DETAIL_THRESHOLD;TV - detailschaal
 HISTORY_MSG_EPD_DRAWNMASK;TV - penseelmasker
@@ -608,52 +608,52 @@ HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - nabewerking masker
 HISTORY_MSG_EPD_SHOWMASK;TV - toon masker
 HISTORY_MSG_EXPOSURE_BLACK;Zwartpuntcompensatie
 HISTORY_MSG_EXPOSURE_HRBLUR;Belichting - gladheid kleurverspreiding
-HISTORY_MSG_FILMNEGATIVE_BALANCE;FN - Referentie uitvoer
+HISTORY_MSG_FILMNEGATIVE_BALANCE;Filmneg. - referentie uitvoer
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatief
 HISTORY_MSG_FILMNEGATIVE_FILMBASE;Basiskleur film
 HISTORY_MSG_FILMNEGATIVE_VALUES;Filmnegatief waarden
-HISTORY_MSG_FILMNEGATIVE_REF_SPOT;FN - Referentie invoer
-HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmsimulatie - Na tooncurve
+HISTORY_MSG_FILMNEGATIVE_REF_SPOT;Filmneg. - referentie invoer
+HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE;Filmsimulatie - na tooncurve
 HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS;Filmsimulatie - LUT-parameters
-HISTORY_MSG_FLATFIELD_EMBEDDED;Ingebed vlakveld
+HISTORY_MSG_FLATFIELD_EMBEDDED;ingebed vlakveld
 HISTORY_MSG_GRAIN_ENABLED;Filmkorrel
 HISTORY_MSG_GRAIN_ISO;Filmkorrel - ISO
-HISTORY_MSG_GRAIN_SCALE;Filmkorrel - Schaal
-HISTORY_MSG_GRAIN_STRENGTH;Filmkorrel - Kracht
+HISTORY_MSG_GRAIN_SCALE;Filmkorrel - schaal
+HISTORY_MSG_GRAIN_STRENGTH;Filmkorrel - kracht
 HISTORY_MSG_HISTMATCHING;Auto-tooncurve
-HISTORY_MSG_HSL_SMOOTHING;Kleur-equalizer - Verzachten
+HISTORY_MSG_HSL_SMOOTHING;Kleur-equalizer - verzachten
 HISTORY_MSG_ICM_INPUT_CAT;Invoerprofiel - CAT
-HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Uitvoer - Primaire kleuren
+HISTORY_MSG_ICM_OUTPUT_PRIMARIES;Uitvoer - primaire kleuren
 HISTORY_MSG_ICM_OUTPUT_TEMP;Uitvoer - ICC-v4 illuminant D
-HISTORY_MSG_ICM_OUTPUT_TYPE;Uitvoer - Type
+HISTORY_MSG_ICM_OUTPUT_TYPE;Uitvoer - type
 HISTORY_MSG_LABMASKS_MASK_NAME;Maskernaam
-HISTORY_MSG_LOCALCONTRAST_AMOUNT;Lokaal contrast - Hoeveelheid
-HISTORY_MSG_LOCALCONTRAST_CONTRAST;Lokaal contrast - Residueel contrast
-HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;Lokaal Contrast - Masker contrastdrempel
-HISTORY_MSG_LOCALCONTRAST_CURVE;Lokaal contrast - Curve
-HISTORY_MSG_LOCALCONTRAST_DARKNESS;Lokaal contrast - Donker
+HISTORY_MSG_LOCALCONTRAST_AMOUNT;Lokaal contrast - hoeveelheid
+HISTORY_MSG_LOCALCONTRAST_CONTRAST;Lokaal contrast - residueel contrast
+HISTORY_MSG_LOCALCONTRAST_CONTRASTTHRESHOLDMASK;Lokaal contrast - masker contrastdrempel
+HISTORY_MSG_LOCALCONTRAST_CURVE;Lokaal contrast - curve
+HISTORY_MSG_LOCALCONTRAST_DARKNESS;Lokaal contrast - donker
 HISTORY_MSG_LOCALCONTRAST_ENABLED;Lokaal contrast
-HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Lokaal contrast - Licht
-HISTORY_MSG_LOCALCONTRAST_MODE;Lokaal contrast - Methode
-HISTORY_MSG_LOCALCONTRAST_RADIUS;Lokaal contrast - Straal
+HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Lokaal contrast - licht
+HISTORY_MSG_LOCALCONTRAST_MODE;Lokaal contrast - methode
+HISTORY_MSG_LOCALCONTRAST_RADIUS;Lokaal contrast - straal
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Lokaal contrast - toon masker
 HISTORY_MSG_LOCALCONTRAST_DELTAEMASK;Lokaal contrast - kleurgelijkheidsmasker
 HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Lokaal contrast- penseelmasker
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Lokaal contrast - parametrisch masker
 HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;Lokaal contrast - nabewerking masker 
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
-HISTORY_MSG_LOGENC_AUTOGAIN;Log - Auto-versterking
-HISTORY_MSG_LOGENC_REGULARIZATION;Log - Fijnafstemming
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - auto-versterking
+HISTORY_MSG_LOGENC_REGULARIZATION;Log - fijnafstemming
 HISTORY_MSG_LOGENC_ENABLED;Log toonmappen
-HISTORY_MSG_LOGENC_BLACK_EV;Log - Zwart LW
-HISTORY_MSG_LOGENC_GAIN;Log - Versterking
-HISTORY_MSG_LOGENC_WHITE_EV;Log - Wit LW
-HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Bestemming grijspunt
-HISTORY_MSG_LOGENC_SATCONTROL;Log - Beperk verzadiging
-HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - Voorcompressie hoge lichten
+HISTORY_MSG_LOGENC_BLACK_EV;Log - zwart LW
+HISTORY_MSG_LOGENC_GAIN;Log - versterking
+HISTORY_MSG_LOGENC_WHITE_EV;Log - wit LW
+HISTORY_MSG_LOGENC_TARGET_GRAY;Log - bestemming grijspunt
+HISTORY_MSG_LOGENC_SATCONTROL;Log - beperk verzadiging
+HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - voorcompressie hoge lichten
 HISTORY_MSG_METADATA_MODE;Metadata kopieermodus
-HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrast - Contrastdrempel
-HISTORY_MSG_PCVIGNETTE_CENTER;VF - Centrum
+HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrast - contrastdrempel
+HISTORY_MSG_PCVIGNETTE_CENTER;Vignettering - centrum
 HISTORY_MSG_PERSPECTIVE_CTRL_LINE;Perspectief - controlelijnen
 HISTORY_MSG_PERSPECTIVE_ENABLED;Perspectiefcorrectie
 HISTORY_MSG_PERSPECTIVE_LENS;Perspectief - lensgegevens
@@ -662,20 +662,20 @@ HISTORY_MSG_PREPROCESS_LINEDENOISE_DIRECTION;Lijnruisfilter richting
 HISTORY_MSG_PREPROCESS_PDAFLINESFILTER;Filter PDAF-lijnen
 HISTORY_MSG_PRSHARPEN_CONTRAST;PRS - Contrastdrempel
 HISTORY_MSG_RAW_BORDER;Raw-rand
-HISTORY_MSG_RAWCACORR_AUTOIT;Raw CA-correctie - Herhaling
-HISTORY_MSG_RAWCACORR_COLORSHIFT;Raw CA-correctie - Vermijd kleurverschuiving
+HISTORY_MSG_RAWCACORR_AUTOIT;Raw CA-correctie - herhaling
+HISTORY_MSG_RAWCACORR_COLORSHIFT;Raw CA-correctie - vermijd kleurverschuiving
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Schalen - sta vergroting toe
 HISTORY_MSG_RESIZE_PPI;Schalen - PPI
-HISTORY_MSG_RESIZE_UNIT;Schalen - Eenheid
-HISTORY_MSG_SHARPENING_AUTORADIUS;Opnameverscherping - Auto RLD-radius
+HISTORY_MSG_RESIZE_UNIT;Schalen - eenheid
+HISTORY_MSG_SHARPENING_AUTORADIUS;Opnameverscherping - auto RLD-radius
 HISTORY_MSG_SATURATION_VIBRANCE;Levendigheid
-HISTORY_MSG_SHARPENING_BLUR;Opnameverscherping - Vervagingsradius
-HISTORY_MSG_SHARPENING_CONTRAST;Opnameverscherping - Contrastdrempel
+HISTORY_MSG_SHARPENING_BLUR;Opnameverscherping - vervagingsradius
+HISTORY_MSG_SHARPENING_CONTRAST;Opnameverscherping - contrastdrempel
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Opnameverscherping - RLD hoek
-HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Opnameverscherping - Toename hoekstraal
+HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Opnameverscherping - toename hoekstraal
 HISTORY_MSG_SHARPENING_PSF_KERNEL;Opnameverscherping - PSF-bestand
 HISTORY_MSG_SHARPENING_PSF_ITERATIONS;Opnameverscherping - PSF-herhalingen
-HISTORY_MSG_SH_COLORSPACE;S/H - Kleurruimte
+HISTORY_MSG_SH_COLORSPACE;S/H - kleurruimte
 HISTORY_MSG_SMOOTHING_AREAMASK;Gebiedsmasker
 HISTORY_MSG_SMOOTHING_CHANNEL;Begeleid - kanaal
 HISTORY_MSG_SMOOTHING_CHROMATICITYMASK;C-masker
@@ -705,22 +705,22 @@ HISTORY_MSG_SMOOTHING_RADIUS;Straal
 HISTORY_MSG_SMOOTHING_SHOWMASK;Toon masker
 HISTORY_MSG_SMOOTHING_SIGMA;Straal
 HISTORY_MSG_SOFTLIGHT_ENABLED;Zacht licht
-HISTORY_MSG_SOFTLIGHT_STRENGTH;Zacht licht - Sterkte
+HISTORY_MSG_SOFTLIGHT_STRENGTH;Zacht licht - kracht
 HISTORY_MSG_SPOT_ENTRY;Vlekken verwijderen
 HISTORY_MSG_SPOT;Vlekken verwijderen
-HISTORY_MSG_TM_FATTAL_SATCONTROL;CDB - Beperk verzadiging
-HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tooncurve - Perceptuele kracht
-HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tooncurve - Contrastmodus (verouderd)
+HISTORY_MSG_TM_FATTAL_SATCONTROL;CDB - beperk verzadiging
+HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tooncurve - perceptuele kracht
+HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tooncurve - contrastmodus (verouderd)
 HISTORY_MSG_TONECURVE_SATCURVE;Verzadiging
 HISTORY_MSG_TONECURVE_MODE;Tooncurven - modus
 HISTORY_MSG_TONECURVE_WHITEPOINT;Witpunt
-HISTORY_MSG_TONE_EQUALIZER_BANDS;Tooneq. - Banden
+HISTORY_MSG_TONE_EQUALIZER_BANDS;Tooneq. - banden
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Toonequalizer
-HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tooneq. - Fijnafstemming
+HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tooneq. - fijnafstemming
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Toon kleurenkaart
-HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tooneq. - Kantelpunt
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tooneq. - kantelpunt
 HISTORY_MSG_WBALANCE_MULT;WB - versterkers
-HISTORY_NEWSNAPSHOT_TOOLTIP;Sneltoets: <b>Alt-s</b>
+HISTORY_NEWSNAPSHOT_TOOLTIP;Sneltoets: <b>Alt+s</b>
 HISTORY_NEWSNAPSHOT;Voeg toe
 HISTORY_SNAPSHOT_CONFIRM_UPDATE;Huidig snapshot overschrijven?
 HISTORY_SNAPSHOT;Snapshot
@@ -730,7 +730,7 @@ ICCPROFCREATOR_COPYRIGHT_RESET_TOOLTIP;Zet terug naar standaard copyright, verle
 ICCPROFCREATOR_CUSTOM;Handmatig
 ICCPROFCREATOR_DESCRIPTION_ADDPARAM;Voeg gamma- en hellingwaarden toe aan de beschrijving
 ICCPROFCREATOR_DESCRIPTION;Beschrijving:
-ICCPROFCREATOR_DESCRIPTION_TOOLTIP;Laat leeg voor de standaard beschrijving.
+ICCPROFCREATOR_DESCRIPTION_TOOLTIP;Laat leeg voor de standaardbeschrijving.
 ICCPROFCREATOR_GAMMA;Gamma
 ICCPROFCREATOR_ICCVERSION;ICC-versie:
 ICCPROFCREATOR_ILL_41;D41
@@ -1048,7 +1048,7 @@ PREFERENCES_DARKFRAMEFOUND;Gevonden
 PREFERENCES_DARKFRAMESHOTS;opnamen
 PREFERENCES_DARKFRAMETEMPLATES;sjablonen
 PREFERENCES_DATEFORMAT;Datumformaat
-PREFERENCES_DATEFORMATHINT;U kunt de volgende formaten gebruiken:\n<b>%y</b>  jaar\n<b>%m</b>  maand\n<b>%d</b> dag\nHet Nederlandse datumformaat is \n<b>%d/%m/%y</b>
+PREFERENCES_DATEFORMATHINT;U kunt de volgende formaten gebruiken:\n<b>%y</b> jaar\n<b>%m</b>  maand\n<b>%d</b> dag\nHet Nederlandse datumformaat is \n<b>%d/%m/%y</b>
 PREFERENCES_DENOISE_ZOOM_OUT_TOOLTIP;Maar dit is nog steeds niet volledig accuraat...
 PREFERENCES_DENOISE_ZOOM_OUT;Toon effect ruisonderdrukking in voorbeeldvenster bij <100% zoom
 PREFERENCES_DIRBROWSER_SINGLECLICK;Open mappen in de Bestandsnavigator met een enkele muisklik
@@ -1256,7 +1256,7 @@ QUEUE_DESTFILENAME;Pad en bestandsnaam
 QUEUE_FORMAT_TITLE;Bestandsformaat
 QUEUE_LOCATION_FOLDER;Sla op in map
 QUEUE_LOCATION_TEMPLATE;Gebruik sjabloon
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op  locatie, waardering, prullenbakpositie of positie in de verwerkingsrij.\n\nAls voorbeeld nemen we de volgende padnaam:\n<b>/home/tom/fotoos/2020-10-31/foto1.raw</b>\nDe betekenis van de formatteeropties zijn als volgt:\n\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>fotoos</i>\n<b>%d1</b> = <i>2020-10-31</i>\n<b>%f</b> = <i>foto1</i>\n<b>%p1</b> = <i>/home/tom/fotoos/2020-10-31/</i>\n<b>%p2</b> = <i>/home/tom/fotoos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wordt vervangen door de waardering van de foto. Heeft de foto geen waardering, dan wordt '<i>0</i>' gebruikt. Als de foto in de prullenbak zit wordt 'x' gebruikt.\n\n<b>%s1 ... %s9</b> wordt vervangen door de initiële plek van de foto in de verwerkingsrij wanneer deze gestart wordt. Het getal bepaalt de getalruimte: <b>%s3</b> resulteert in <i>001</i>.\n\n<b>%n</b> wordt vervangen door de naam van het huidige snapshot. Als er geen snapshot bestaat, wordt een lege tekenreeks gebruikt. U kunt <b>%u</b> gebruiken in plaats van <b>%n</b> om spaties in de snapshot-naam te vervangen door underscores.\n\nWilt u het uitvoerbestand naast het oorspronkelijke bestand bewaren, schrijf dan:\n<b>%p1/%f</b>\n\nAls u de uitvoer in een map genaamd <i>geconverteerd</i> wilt bewaren die in dezelfde map staat als de oorspronkelijke foto, zegt u :\n<b>%p1/geconverteerd/%f</b>\n\nAls u het resulterende bestand wilt bewaren in \n<i>/home/tom/fotoos/geconverteerd/2020-10-31</i>, schrijft u:\n<b>%p2/geconverteerd/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op locatie, waardering, prullenbakpositie of positie in de verwerkingsrij.\n\nAls voorbeeld nemen we de volgende padnaam:\n<b>/home/tom/fotoos/2020-10-31/foto1.raw</b>\nDe betekenis van de formatteeropties zijn als volgt:\n\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>fotoos</i>\n<b>%d1</b> = <i>2020-10-31</i>\n<b>%f</b> = <i>foto1</i>\n<b>%p1</b> = <i>/home/tom/fotoos/2020-10-31/</i>\n<b>%p2</b> = <i>/home/tom/fotoos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wordt vervangen door de waardering van de foto. Heeft de foto geen waardering, dan wordt '<i>0</i>' gebruikt. Als de foto in de prullenbak zit wordt 'x' gebruikt.\n\n<b>%s1 ... %s9</b> wordt vervangen door de initiële plek van de foto in de verwerkingsrij wanneer deze gestart wordt. Het getal bepaalt de getalruimte: <b>%s3</b> resulteert in <i>001</i>.\n\n<b>%n</b> wordt vervangen door de naam van het huidige snapshot. Als er geen snapshot bestaat, wordt een lege tekenreeks gebruikt. U kunt <b>%u</b> gebruiken in plaats van <b>%n</b> om spaties in de snapshot-naam te vervangen door underscores.\n\nWilt u het uitvoerbestand naast het oorspronkelijke bestand bewaren, schrijf dan:\n<b>%p1/%f</b>\n\nAls u de uitvoer in een map genaamd <i>geconverteerd</i> wilt bewaren die in dezelfde map staat als de oorspronkelijke foto, zegt u :\n<b>%p1/geconverteerd/%f</b>\n\nAls u het resulterende bestand wilt bewaren in \n<i>/home/tom/fotoos/geconverteerd/2020-10-31</i>, schrijft u:\n<b>%p2/geconverteerd/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Uitvoerlocatie
 QUEUE_STARTSTOP_TOOLTIP;Start of stop de verwerking van foto's in de rij.\n\nSneltoets: <b>Ctrl+s</b>
 RENAME_DIALOG_ALLOW_WHITESPACE;Sta spaties in nieuwe naam toe
@@ -1343,7 +1343,7 @@ TP_BWMIX_LABEL;Zwart-wit
 TP_BWMIX_NEUTRAL;Standaardwaarden
 TP_BWMIX_RGBLABEL_HINT;RGB-omrekeningsfactoren. Hierin zijn alle gekozen opties verwerkt.\nHet totaal is de som van de uit te voeren RGB-factoren:\n- dit is altijd 100% in relatieve RGB-modus\n- hoger (lichter) of lager (donkerder) dan 100% in absolute RGB-modus.
 TP_BWMIX_RGBLABEL;R: %1%%   G: %2%%   B: %3%%   Totaal: %4%%
-TP_BWMIX_RGB_TOOLTIP;Mix de RGB-kanalen, handmatig of via  Voorinstellingen.\nNegatieve waarden kunnen onregelmatigheden ('artefacten') veroorzaken.
+TP_BWMIX_RGB_TOOLTIP;Mix de RGB-kanalen, handmatig of via Voorinstellingen.\nNegatieve waarden kunnen onregelmatigheden ('artefacten') veroorzaken.
 TP_BWMIX_SATURATION;Verzadiging
 TP_BWMIX_SET_HIGHCONTAST;Hoog contrast
 TP_BWMIX_SET_HIGHSENSIT;Hoge gevoeligheid
@@ -1563,7 +1563,7 @@ TP_GRADIENT_DEGREE;Hoek
 TP_GRADIENT_DEGREE_TOOLTIP;Rotatiehoek in graden
 TP_GRADIENT_FEATHER_TOOLTIP;Breedte verloopfilter als percentage van de afbeeldingsdiagonaal
 TP_GRADIENT_FEATHER;Verloop
-TP_GRADIENT_LABEL;Verloopfilter
+TP_GRADIENT_LABEL;Grijsverloopfilter
 TP_GRADIENT_STRENGTH;Sterkte
 TP_GRADIENT_STRENGTH_TOOLTIP;Filtersterkte in stops
 TP_GRAIN_ISO;Korreligheid (ISO)
@@ -1742,7 +1742,7 @@ TP_PCVIGNETTE_CENTER_X;Centrum X
 TP_PCVIGNETTE_CENTER_Y;Centrum Y
 TP_PCVIGNETTE_FEATHER;Straal
 TP_PCVIGNETTE_FEATHER_TOOLTIP;Straal: \n0=alleen hoeken \n50=halverwege tot het centrum \n100=tot aan het centrum
-TP_PCVIGNETTE_LABEL;Vignettering
+TP_PCVIGNETTE_LABEL;Vignetteringsfilter
 TP_PCVIGNETTE_ROUNDNESS;Rondheid
 TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;Vorm: \n0 = rechthoek \n50 = ellips \n100 = cirkel
 TP_PCVIGNETTE_STRENGTH;Sterkte
@@ -1852,7 +1852,7 @@ TP_RAW_PIXELSHIFTMM_AUTO;Automatisch
 TP_RAW_PIXELSHIFTMM_CUSTOM;Handmatig
 TP_RAW_PIXELSHIFTMM_OFF;Uit
 TP_RAW_PIXELSHIFTMOTIONMETHOD;Bewegingscorrectie
-TP_RAW_PIXELSHIFTMOTION_TOOLTIP;0 betekent geen bewegingsdetectie.\n1 - 99 betekent dat beweging wordt ontdekt op grond van deze waarde. Verhoog de waarde om de ontdekkingsratio te vergroten.\n100 Betekent dat het AMaZE-gedemozaïekte  frame zal worden gebruikt.
+TP_RAW_PIXELSHIFTMOTION_TOOLTIP;0 betekent geen bewegingsdetectie.\n1 - 99 betekent dat beweging wordt ontdekt op grond van deze waarde. Verhoog de waarde om de ontdekkingsratio te vergroten.\n100 Betekent dat het AMaZE-gedemozaïekte frame zal worden gebruikt.
 TP_RAW_PIXELSHIFTNONGREENCROSS;Controleer rood/blauwkanaal voor beweging
 TP_RAW_PIXELSHIFT;Pixel-shift
 TP_RAW_PIXELSHIFTSHOWMOTIONMASKONLY_TOOLTIP;Toont het bewegingsmasker zonder de afbeelding
