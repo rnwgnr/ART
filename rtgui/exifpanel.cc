@@ -662,12 +662,15 @@ void ExifPanel::setExifTagValue(Gtk::CellRenderer *renderer, const Gtk::TreeMode
 
 namespace {
 
+class InvalidValue: public std::exception {};
 
 Glib::ustring to_fraction(const Glib::ustring &s)
 {
-    auto i = s.find(".");
+    auto i = s.find('.');
     if (i != Glib::ustring::npos) {
         return s.substr(0, i) + s.substr(i+1) + "/1" + Glib::ustring(s.size() - i - 1, '0');
+    } else if (s.find('/') == Glib::ustring::npos) {
+        return s + "/1";
     }
     return s;
 }
@@ -677,10 +680,12 @@ typedef Glib::ustring (*validator_func)(const Glib::ustring &);
 Glib::ustring get_fnumber(const Glib::ustring &val)
 {
     Glib::MatchInfo m;
-    auto re = Glib::Regex::create("f? *([0-9.]+) *", Glib::REGEX_CASELESS);
+    auto re = Glib::Regex::create("^ *f? *([0-9.]+) *$", Glib::REGEX_CASELESS);
     if (re->match(val, m)) {
         auto s = m.fetch(1);
         return to_fraction(s);
+    } else {
+        throw InvalidValue();
     }
     return val;
 }
@@ -688,10 +693,12 @@ Glib::ustring get_fnumber(const Glib::ustring &val)
 Glib::ustring get_shutterspeed(const Glib::ustring &val)
 {
     Glib::MatchInfo m;
-    auto re = Glib::Regex::create(" *([0-9/]+) *s? *", Glib::REGEX_CASELESS);
+    auto re = Glib::Regex::create("^ *([0-9/]+) *s? *$", Glib::REGEX_CASELESS);
     if (re->match(val, m)) {
         auto s = m.fetch(1);
-        return s;
+        return to_fraction(s);
+    } else {
+        throw InvalidValue();
     }
     return val;
 }
@@ -699,10 +706,12 @@ Glib::ustring get_shutterspeed(const Glib::ustring &val)
 Glib::ustring get_focallen(const Glib::ustring &val)
 {
     Glib::MatchInfo m;
-    auto re = Glib::Regex::create(" *([0-9.]+) *(mm)? *", Glib::REGEX_CASELESS);
+    auto re = Glib::Regex::create("^ *([0-9.]+) *(mm)? *$", Glib::REGEX_CASELESS);
     if (re->match(val, m)) {
         auto s = m.fetch(1);
         return to_fraction(s);
+    } else {
+        throw InvalidValue();
     }
     return val;
 }
@@ -710,10 +719,12 @@ Glib::ustring get_focallen(const Glib::ustring &val)
 Glib::ustring get_expcomp(const Glib::ustring &val)
 {
     Glib::MatchInfo m;
-    auto re = Glib::Regex::create(" *(-?[0-9.]+) *(EV)? *", Glib::REGEX_CASELESS);
+    auto re = Glib::Regex::create("^ *(-?[0-9.]+) *(EV)? *$", Glib::REGEX_CASELESS);
     if (re->match(val, m)) {
         auto s = m.fetch(1);
         return to_fraction(s);
+    } else {
+        throw InvalidValue();
     }
     return val;
 }
