@@ -155,7 +155,7 @@ public:
     void tbBeforeLock_toggled();
     void saveAsPressed(GdkEventButton *event);
     void queueImgPressed(GdkEventButton *event);
-    void sendToGimpPressed ();
+    void sendToGimpPressed(GdkEventButton *event);
     void openNextEditorImage ();
     void openPreviousEditorImage ();
     void syncFileBrowser ();
@@ -204,6 +204,7 @@ private:
 
     void do_save_image(bool fast_export);
     void do_queue_image(bool fast_export);
+    void do_send_to_gimp(bool fast_export);
     bool autosave();
 
     bool can_open_now() const;

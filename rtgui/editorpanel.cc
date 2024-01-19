@@ -936,11 +936,9 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     beforeAfter->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::beforeAfterToggled) );
     hidehp->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::hideHistoryActivated) );
     tbRightPanel_1->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::tbRightPanel_1_toggled) );
-    // saveimgas->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::saveAsPressed) );
-    // queueimg->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::queueImgPressed) );
     saveimgas->signal_button_release_event().connect_notify(sigc::mem_fun(*this, &EditorPanel::saveAsPressed));
     queueimg->signal_button_release_event().connect_notify(sigc::mem_fun(*this, &EditorPanel::queueImgPressed));
-    sendtogimp->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::sendToGimpPressed) );
+    sendtogimp->signal_button_release_event().connect_notify(sigc::mem_fun(*this, &EditorPanel::sendToGimpPressed));
     toggleHistogramProfile->signal_toggled().connect( sigc::mem_fun (*this, &EditorPanel::histogramProfile_toggled) );
 
     if (navPrev) {
@@ -1844,8 +1842,9 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     break;
                     
                 case GDK_KEY_e:
+                case GDK_KEY_E:
                     if (!gimpPlugin) {
-                        sendToGimpPressed();
+                        do_send_to_gimp(event->keyval == GDK_KEY_E);
                     }
 
                     return true;
@@ -2214,7 +2213,13 @@ void EditorPanel::do_queue_image(bool fast_export)
     parent->addBatchQueueJob(createBatchQueueEntry(fast_export, true, nullptr));
 }
 
-void EditorPanel::sendToGimpPressed ()
+void EditorPanel::sendToGimpPressed(GdkEventButton *event)
+{
+    do_send_to_gimp(event->state & GDK_CONTROL_MASK);
+}
+
+
+void EditorPanel::do_send_to_gimp(bool fast_export)
 {
     if (!ipc || !openThm) {
         return;
@@ -2226,7 +2231,8 @@ void EditorPanel::sendToGimpPressed ()
     if (options.editor_bypass_output_profile) {
         pparams.icm.outputProfile = rtengine::procparams::ColorManagementParams::NoProfileString;
     }
-    rtengine::ProcessingJob* job = rtengine::ProcessingJob::create (ipc->getInitialImage(), pparams);
+    // rtengine::ProcessingJob* job = rtengine::ProcessingJob::create (ipc->getInitialImage(), pparams);
+    rtengine::ProcessingJob* job = create_processing_job(ipc->getInitialImage(), pparams, fast_export);
     ProgressConnector<rtengine::IImagefloat*> *ld = new ProgressConnector<rtengine::IImagefloat*>();
     ld->startFunc (sigc::bind (sigc::ptr_fun (&rtengine::processImage), job, err, parent->getProgressListener(), false ),
                    sigc::bind (sigc::mem_fun ( *this, &EditorPanel::idle_sendToGimp ), ld, openThm->getFileName() ));
