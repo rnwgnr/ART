@@ -702,7 +702,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                     if (!set_int(n, desc.value_default)) {
                         return false;
                     }
-                    return (sz >= 4) || set_group_tooltip(4, sz);
+                    return (sz == 4) || set_group_tooltip(4, sz);
                 } else {
                     return (sz == 3);
                 }
