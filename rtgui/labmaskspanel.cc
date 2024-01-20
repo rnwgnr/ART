@@ -1595,7 +1595,7 @@ void LabMasksPanel::onRemovePressed()
     
     listEdited = true;
     masks_.erase(masks_.begin() + selected_);
-    selected_ = rtengine::LIM(selected_-1, 0u, unsigned(masks_.size()-1));
+    selected_ = rtengine::LIM(int(selected_)-1, 0, int(masks_.size()-1));
     populateList();
     area_shape_index_ = 0;
     maskShow(selected_);
@@ -1651,8 +1651,11 @@ void LabMasksPanel::onCopyPressed()
         listEdited = true;
         
         auto r = masks_[selected_];
-        masks_.push_back(r);
-        selected_ = masks_.size()-1;
+        int idx = std::min(size_t(selected_)+1, masks_.size());
+        auto it = masks_.insert(masks_.begin()+idx, r);
+        selected_ = it - masks_.begin();
+        // masks_.push_back(r);
+        // selected_ = masks_.size()-1;
         populateList();
 
         auto l = getListener();

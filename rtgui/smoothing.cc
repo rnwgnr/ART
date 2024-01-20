@@ -90,7 +90,7 @@ public:
     
     bool copyPressed(int idx) override
     {
-        parent_->data.push_back(parent_->data[idx]);
+        parent_->data.insert(parent_->data.begin() + idx + 1, parent_->data[idx]);
         return true;
     }
 

@@ -89,7 +89,7 @@ public:
     
     bool copyPressed(int idx) override
     {
-        parent_->regionData.push_back(parent_->regionData[idx]);
+        parent_->regionData.insert(parent_->regionData.begin() + idx + 1, parent_->regionData[idx]);
         return true;
     }
 
