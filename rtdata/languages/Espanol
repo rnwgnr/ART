@@ -23,8 +23,9 @@
 #22 2022-12-01 mrleemon, update for 1.17.2
 #23 2022-12-27 mrleemon, update for 1.18
 #24 2023-03-11 mrleemon, update for 1.18.1
-#25 2023-08-01 mrleemon, update for 1.21
-#26 2023-12-04 mrleemon, update for 1.22
+#25 2023-08-01 mrleemon, update for 1.20
+#26 2023-12-04 mrleemon, update for 1.21
+#27 2024-01-19 mrleemon, update for 1.21.1
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -71,9 +72,8 @@ DYNPROFILEEDITOR_EDIT;Editar
 DYNPROFILEEDITOR_EDIT_RULE;Editar regla de perfil dinámico
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;La coincidencia no distingue entre mayúsculas y minúsculas.\nUse el prefijo "re:" para introducir\nuna expresión regular.
 DYNPROFILEEDITOR_IMGTYPE_ANY;Cualquier
-DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
-DYNPROFILEEDITOR_IMGTYPE_PS;Cambio de píxel
-DYNPROFILEEDITOR_IMGTYPE_STD;Estándar
+DYNPROFILEEDITOR_IMGTYPE_RAW;Raw
+DYNPROFILEEDITOR_IMGTYPE_NONRAW;No raw
 DYNPROFILEEDITOR_MOVE_DOWN;Mover hacia abajo
 DYNPROFILEEDITOR_MOVE_UP;Mover hacia arriba
 DYNPROFILEEDITOR_NEW;Nuevo
@@ -715,6 +715,7 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;Ecualizador tonal - Bandas
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Ecualizador tonal - Regularización
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Ecualizador tonal - Mapa tonal
 HISTORY_MSG_TONE_EQUALIZER_PIVOT;Ecualizador tonal - Pivote
+HISTORY_MSG_TONECURVE_BASECURVE;Curva tonal - Curva base
 HISTORY_MSG_TONECURVE_SATCURVE;Curva tonal - Saturación
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Curva tonal - Intensidad perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Curva tonal - Modo antiguo de contraste
@@ -831,7 +832,7 @@ MAIN_BUTTON_PREFERENCES;Preferencias
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Añadir la imagen actual a la cola de procesamiento (Ctrl-clic para una exportación rápida).\nAtajo: <b>Ctrl-b</b> (<b>Ctrl-Mayús-b</b> para una exportación rápida)
 MAIN_BUTTON_SAVE_TOOLTIP;Guarda la imagen actual (Ctrl-clic para exportación rápida.)\nAtajo: <b>Ctrl-s</b> (<b>Ctrl-Mayús-s</b> para exportación rápida)
 MAIN_BUTTON_SENDTOEDITOR;Editar la imagen en un editor externo
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Edita la imagen actual en un editor externo.\nAtajo: <b>Ctrl-e</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Edita la imagen actual en un editor externo.\nAtajo: <b>Ctrl-e</b> (<b>Ctrl-Mayús-e</b> para exportación rápida)
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Muestra/Oculta todos los paneles laterales.\nAtajo: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Salir de la pantalla completa
 MAIN_FRAME_EDITOR;Editor
@@ -1966,6 +1967,10 @@ TP_TM_FATTAL_AMOUNT;Cantidad
 TP_TM_FATTAL_LABEL;Compresión de rango dinámico
 TP_TM_FATTAL_THRESHOLD;Detalle
 TP_TM_FATTAL_SATCONTROL;Control de saturación
+TP_TONECURVE_BASECURVE;Curva base
+TP_TONECURVE_BASECURVE_LINEAR;Lineal
+TP_TONECURVE_BASECURVE_ROLLOFF;Atenuación suave de las altas luces
+TP_TONECURVE_BASECURVE_SCURVE;Suave en forma de S
 TP_TONECURVE_LABEL;Curvas tonales
 TP_TONECURVE_SATCURVE;Saturación
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Intensidad de la curva perceptual

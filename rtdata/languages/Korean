@@ -12,7 +12,7 @@
 #11 2023-03-12 Ohnishi, Yasuo, updates for 1.19
 #12 2023-09-19 Ohnishi, Yasuo, updates for 1.20.2
 #13 2023-12-03 Ohnishi, Yasuo, updates for 1.21
-#14 2023-12-03 Ohnishi, Yasuo, updates for commit 0724288
+#14 2024-01-20 Ohnishi, Yasuo, updates for 1.21.1
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -812,7 +812,7 @@ MAIN_BUTTON_PREFERENCES;환경 설정
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;현재 화상을 큐처리에 추가 (Ctrl-click으로 즉시 출력)\n단축키: <b>Ctrl-s</b> (<b>Ctrl-Shift-b</b>로 즉시 출력)
 MAIN_BUTTON_SAVE_TOOLTIP;현재 화상을 보존 (Ctrl-click으로 즉시 출력)\n단축키: <b>Ctrl-s</b> (<b>Ctrl-Shift-s</b>으로 즉시 출력)
 MAIN_BUTTON_SENDTOEDITOR;외부 편집소프트로 화상을 편집함
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;현재 화상을 외부 편집소프트로 편집함.\n단축키: <b>Ctrl-e</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;현재 화상을 외부 편집소프트로 편집함.\n단축키: <b>Ctrl-e</b> (<b>Ctrl-Shift-e</b> 으로 즉시 출력)
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;표시비/표시 모두 패널\n단축키: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;전체 화면 모드 해제
 MAIN_FRAME_EDITOR;편집

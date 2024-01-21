@@ -1,3 +1,4 @@
+
 #00 Als Grundlage die Übersetzung von RawTherapee übernommen.
 #01 Vielen Dank an die Übersetzer von RT: cytrinox, Ingo, keenonkites, klonk, marter, MaWe, Metex, mozzihh, oduis, phberlin, TooWaBoo
 #02 12.2022 Übernahme identischer Strings von RT nach ART. Kleinere Änderungen, weiterer Anpassungen und Übersetzung ART-exklusiver Strings (apostel338)
@@ -11,7 +12,7 @@ ABOUT_TAB_LICENSE;Lizenz
 ABOUT_TAB_RELEASENOTES;Versionshinweise
 ABOUT_TAB_SPLASH;Startbild
 ADJUSTER_RESET_TO_DEFAULT;<b>Linksklick</b> - Auf Standardwert zurücksetzen.\n<b>Strg + Linksklick</b> - Auf zuletzt gespeicherten Wert zurücksetzen.
-CTL_SIGMOID;Sigmoid Tone-Tonemapper
+CTL_SIGMOID;Sigmoid Tonemapper
 CTL_SIGMOID_BASE_PRIMARIES;RGB Primärfarben
 CTL_SIGMOID_INSET;Dämpfung
 CTL_SIGMOID_PURITY;Reinheit wiederherstellen
@@ -54,7 +55,9 @@ DYNPROFILEEDITOR_EDIT_RULE;Profilregel ändern
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;Groß-/Kleinschreibung wird NICHT berücksichtigt.\nFür einen regulären Ausdruck benutzen Sie 're:' als Prefix.
 DYNPROFILEEDITOR_IMGTYPE_ANY;Alle
 DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
+DYNPROFILEEDITOR_IMGTYPE_NONRAW;Nicht-Raw
 DYNPROFILEEDITOR_IMGTYPE_PS;Pixel-Shift
+DYNPROFILEEDITOR_IMGTYPE_RAW;Raw
 DYNPROFILEEDITOR_IMGTYPE_STD;Standard
 DYNPROFILEEDITOR_MOVE_DOWN;Runter
 DYNPROFILEEDITOR_MOVE_UP;Hoch
@@ -684,6 +687,7 @@ HISTORY_MSG_SOFTLIGHT_STRENGTH;Weiches Licht - Intensität
 HISTORY_MSG_SPOT;Flecken entfernen
 HISTORY_MSG_SPOT_ENTRY;Flecken entfernen - Punkt modifiziert
 HISTORY_MSG_TM_FATTAL_SATCONTROL;Dynamikkompression - Sättigungskontrolle
+HISTORY_MSG_TONECURVE_BASECURVE; Tonwertkurve - Basiskurve
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tonwertkurve - Kontrast (veraltet)
 HISTORY_MSG_TONECURVE_MODE;Tonwertkurve - Modus
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tonwertkurve - Wahrnehmungsstärke
@@ -805,7 +809,7 @@ MAIN_BUTTON_PREFERENCES;Einstellungen
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Bild zur Warteschlange hinzufügen (<i>Strg + Linksklick</i> für Schnell-Export).\nTaste: <b>Strg + b</b>  (<b>Strg + Shift + b</b> für Schnell-Export)
 MAIN_BUTTON_SAVE_TOOLTIP;Bild speichern (<i>Strg + Linksklick</i> für Schnell-Export).\nTaste: <b>Strg + s</b>  (<b>Strg + Shift + s</b> für Schnell-Export)
 MAIN_BUTTON_SENDTOEDITOR;Bild im externen Editor öffnen.
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Bild im externen Editor öffnen.\nTaste: <b>Strg + e</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Bild im externen Editor öffnen.\nTaste: <b>Strg + e</b> (<b>Strg + Shift + e</b> für Schnell-Export)
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Alle seitlichen Bedienfelder ein-/ausblenden.\nTaste: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Vollbild beenden.\nTaste: <b>F11</b>
 MAIN_FRAME_EDITOR;Editor
@@ -1944,6 +1948,10 @@ TP_TM_FATTAL_AMOUNT;Intensität
 TP_TM_FATTAL_LABEL;Dynamikkompression
 TP_TM_FATTAL_SATCONTROL;Sättigungskontrolle
 TP_TM_FATTAL_THRESHOLD;Details
+TP_TONECURVE_BASECURVE;Basiskurve
+TP_TONECURVE_BASECURVE_LINEAR;Linear
+TP_TONECURVE_BASECURVE_ROLLOFF;Sanfter Lichterabfall
+TP_TONECURVE_BASECURVE_SCURVE;Weiche S-Form
 TP_TONECURVE_CONTRAST_LEGACY;Kontrast (veraltet)
 TP_TONECURVE_LABEL;Tonwertkurven
 TP_TONECURVE_MODE;Modus

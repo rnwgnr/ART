@@ -20,8 +20,9 @@
 #19 2022-12-01 mrleemon, update for 1.17.2
 #20 2022-12-27 mrleemon, update for 1.18
 #21 2023-03-11 mrleemon, update for 1.18.1
-#22 2023-08-01 mrleemon, update for 1.21
-#23 2023-12-04 mrleemon, update for 1.22
+#22 2023-08-01 mrleemon, update for 1.20
+#23 2023-12-04 mrleemon, update for 1.21
+#24 2024-01-19 mrleemon, update for 1.21.1
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -68,9 +69,8 @@ DYNPROFILEEDITOR_EDIT;Edita
 DYNPROFILEEDITOR_EDIT_RULE;Edita la regla de perfil dinàmic
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;La coincidència no distingeix entre majúscules i minúscules.\nUtilitzeu el prefix "re:" per introduir\nuna expressió regular.
 DYNPROFILEEDITOR_IMGTYPE_ANY;Qualsevol
-DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
-DYNPROFILEEDITOR_IMGTYPE_PS;Canvi de píxel
-DYNPROFILEEDITOR_IMGTYPE_STD;Estàndard
+DYNPROFILEEDITOR_IMGTYPE_RAW;Raw
+DYNPROFILEEDITOR_IMGTYPE_NONRAW;No raw
 DYNPROFILEEDITOR_MOVE_DOWN;Mou cap avall
 DYNPROFILEEDITOR_MOVE_UP;Mou cap amunt
 DYNPROFILEEDITOR_NEW;Nou
@@ -712,6 +712,7 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;Equalitzador tonal - Bandes
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Equalitzador tonal - Regularització
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Equalitzador tonal - Mapa tonal
 HISTORY_MSG_TONE_EQUALIZER_PIVOT;Equalitzador tonal - Pivot
+HISTORY_MSG_TONECURVE_BASECURVE;Corba tonal - Corba base
 HISTORY_MSG_TONECURVE_SATCURVE;Corba tonal - Saturació
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Corba tonal - Intensitat perceptual
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Corba tonal - Mode antic de contrast 
@@ -828,7 +829,7 @@ MAIN_BUTTON_PREFERENCES;Preferències
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Afegeix la imatge actual a la cua de processament (Ctrl-clic per a una exportació ràpida).\nDrecera: <b>Ctrl-b</b> (<b>Ctrl-Majús-b</b> per a una exportació ràpida)
 MAIN_BUTTON_SAVE_TOOLTIP;Desa la imatge actual (Ctrl-clic per a exportació ràpida.)\nDrecera: <b>Ctrl-s</b> (<b>Ctrl-Majús-s</b> per a exportació ràpida)
 MAIN_BUTTON_SENDTOEDITOR;Edita la imatge en un editor extern
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Edita la imatge actual en un editor extern.\nDrecera: <b>Ctrl-e</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Edita la imatge actual en un editor extern.\nDrecera: <b>Ctrl-e</b> (<b>Ctrl-Majús-e</b> per a exportació ràpida)
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Mostra/Oculta tots els panells laterals.\nDrecera: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Surt de la pantalla completa
 MAIN_FRAME_EDITOR;Editor
@@ -1963,6 +1964,10 @@ TP_TM_FATTAL_AMOUNT;Quantitat
 TP_TM_FATTAL_LABEL;Compressió de rang dinàmic
 TP_TM_FATTAL_THRESHOLD;Detall
 TP_TM_FATTAL_SATCONTROL;Control de saturació
+TP_TONECURVE_BASECURVE;Corba base
+TP_TONECURVE_BASECURVE_LINEAR;Lineal
+TP_TONECURVE_BASECURVE_ROLLOFF;Atenuació suau de les altes llums
+TP_TONECURVE_BASECURVE_SCURVE;Suau en forma de S
 TP_TONECURVE_LABEL;Corbes tonals
 TP_TONECURVE_SATCURVE;Saturació
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Intensitat de la corba perceptual
