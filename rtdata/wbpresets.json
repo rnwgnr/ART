@@ -85,9 +85,11 @@
 // LEICA M (TYP 240)
 // OLYMPUS E-P7
 // OLYMPUS TG-6
-
 // updated on Thu Dec  7 08:08:53 2023:
 // SONY ILCE-7CM2
+
+// updated on Mon Jan 22 08:55:54 2024:
+// PHASE ONE IQ180
 
 [
   {
@@ -6248,6 +6250,15 @@
       { "name" : "4500k", "multipliers" : [ 2.1982421875, 1, 1.7783203125 ] },
       { "name" : "6000k", "multipliers" : [ 2.564453125, 1, 1.4853515625 ] },
       { "name" : "8500k", "multipliers" : [ 2.92578125, 1, 1.2568359375 ] }
+    ]
+  },
+  {
+    "make_model" : "PHASE ONE IQ180",
+    "presets" : [
+      { "name" : "tungsten", "multipliers" : [ 1.17704999446869, 1, 2.67000007629395 ] },
+      { "name" : "fluorescent", "multipliers" : [ 1.17704999446869, 1, 3.04999995231628 ] },
+      { "name" : "flash", "multipliers" : [ 1.60302996635437, 1, 1.74000000953674 ] },
+      { "name" : "daylight", "multipliers" : [ 1.67029011249542, 1, 1.75999999046326 ] }
     ]
   }
 ]
