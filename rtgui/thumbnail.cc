@@ -104,13 +104,14 @@ void Thumbnail::_generateThumbnailImage(bool save_in_cache, bool info_only)
     first_process_ = true;
 
     if (ext.lowercase() == "jpg" || ext.lowercase() == "jpeg") {
-        infoFromImage (fname);
+        infoFromImage(fname);
         tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
 
         if (tpp) {
             cfs.format = FT_Jpeg;
         }
     } else if (ext.lowercase() == "png") {
+        infoFromImage(fname);
         tpp = rtengine::Thumbnail::loadFromImage (fname, tw, th, -1, pparams.master.wb.equal);
 
         if (tpp) {
