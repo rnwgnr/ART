@@ -1306,7 +1306,7 @@ bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
     if (settings->ctl_scripts_fast_preview) {
         switch (q) {
         case Quality::LOW:
-            dim = !dim ? 16 : std::min(dim, 16);
+            dim = !dim ? 24 : std::min(dim, 24);
             break;
         case Quality::MEDIUM:
             dim = !dim ? 32 : std::min(dim, 32);
