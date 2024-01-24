@@ -21,6 +21,7 @@
 #21 2023-09-27 alvaro
 #22 2023-12-04 alvaro
 #23 2023-12-16 alvaro
+#24 2024-01-23 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -71,6 +72,8 @@ DYNPROFILEEDITOR_EDIT;Modifica
 DYNPROFILEEDITOR_EDIT_RULE;Modifica regola profilo dinamico
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;L'abbinamento ignora maiuscolo/minuscolo.\nUsa il prefisso "re:" per inserire\nun'espressione regolare.
 DYNPROFILEEDITOR_IMGTYPE_ANY;Qualunque
+DYNPROFILEEDITOR_IMGTYPE_RAW;Raw
+DYNPROFILEEDITOR_IMGTYPE_NONRAW;Non raw
 DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
 DYNPROFILEEDITOR_IMGTYPE_PS;Pixel Shift
 DYNPROFILEEDITOR_IMGTYPE_STD;Standard
@@ -825,7 +828,7 @@ MAIN_BUTTON_PREFERENCES;Preferenze
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Aggiungi l'immagine corrente alla coda di sviluppo.\nScorciatoia: <b>Ctrl-b</b>
 MAIN_BUTTON_SAVE_TOOLTIP;Salva l'immagine corrente.\nSscorciatoia: <b>Ctrl-s</b>
 MAIN_BUTTON_SENDTOEDITOR;Modifica immagine nell'editor esterno
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Modifica l'immagine corrente con un programma di fotoritocco.\nScorciatoia: <b>Ctrl-e</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Modifica l'immagine corrente con un programma di fotoritocco.\nScorciatoia: <b>Ctrl-e</b> (<b>Ctrl-Shift-e</b> per esportazione veloce)
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Mostra/Nascondi tutti i pannelli laterali.\nScorciatoia: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Esci da schermo intero
 MAIN_FRAME_EDITOR;Modifica
