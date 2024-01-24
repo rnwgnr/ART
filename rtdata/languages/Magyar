@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2023-12-04 Bereczky Péter
+#03 2023-12-25 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -47,6 +47,8 @@ DYNPROFILEEDITOR_EDIT;Szerkesztés
 DYNPROFILEEDITOR_EDIT_RULE;Dinamikus profil szabály szerkesztése
 DYNPROFILEEDITOR_ENTRY_TOOLTIP;Megkülönbözteti a kis- és nagybetűket.\nHasználja a "re:" előtagot\nreguláris kifejezés megadásakor.
 DYNPROFILEEDITOR_IMGTYPE_ANY;Mindegyik
+DYNPROFILEEDITOR_IMGTYPE_RAW;Nyers
+DYNPROFILEEDITOR_IMGTYPE_NONRAW;Nem nyers
 DYNPROFILEEDITOR_IMGTYPE_HDR;HDR
 DYNPROFILEEDITOR_IMGTYPE_PS;Pixel eltolás
 DYNPROFILEEDITOR_IMGTYPE_STD;Standard
@@ -686,8 +688,7 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;Tónuskiegyenlítő - Sávok
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tónuskiegyenlítő - Szabályozás
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Tónuskiegyenlítő - Tónustérkép
 HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tónuskiegyenlítő - Pivot
-HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tónuskiegyenlítő - Pivot
-HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tónuskiegyenlítő - Pivot
+HISTORY_MSG_TONECURVE_BASECURVE;Tónusgörbe - Alapgörbe
 HISTORY_MSG_TONECURVE_SATCURVE;Tónusgörbe - Telítettség
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tónusgörbe - Érzékelési erősség
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tónusgörbe - Kontraszt örökölt mód
@@ -804,7 +805,7 @@ MAIN_BUTTON_PREFERENCES;Beállítások
 MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Az aktuális kép elhelyezése a feldolgozási sorba (Ctrl-kattintás a gyors exportáláshoz).\nGyorsbillentyű: <b>Ctrl-b</b> (<b>Ctrl-Shift-b</b> gyors exportáláshoz)
 MAIN_BUTTON_SAVE_TOOLTIP;Aktuális kép mentése (Ctrl-kattintás a gyors exportáláshoz).\nGyorsbillentyű: <b>Ctrl-s</b> (<b>Ctrl-Shift-s</b> gyors exportáláshoz)
 MAIN_BUTTON_SENDTOEDITOR;Kép szerkesztése külső szerkesztőben
-MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Az aktuális kép szerkesztése külső szerkesztőben.\nGyorsbillentyű: <b>Ctrl-e</b>
+MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Az aktuális kép szerkesztése külső szerkesztőben.\nGyorsbillentyű: <b>Ctrl-e</b> (<b>Ctrl-Shift-e</b> a gyors exportáláshoz)
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Minden oldalsó panel megjelenítése/elrejtése.\nGyorsbillentyű: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Kilépés a teljes képernyőből
 MAIN_FRAME_EDITOR;Szerkesztő
@@ -1687,7 +1688,7 @@ TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatikusan adatbázisból
 TP_LENSPROFILE_CORRECTION_EXIF;Metaadatokba ágyazva
 TP_LENSPROFILE_CORRECTION_LCPFILE;LCP fájl
 TP_LENSPROFILE_CORRECTION_MANUAL;Manuálisan adatbázisból
-TP_LENSPROFILE_LABEL;Profilozott Objektív korrekció
+TP_LENSPROFILE_LABEL;Profilozott objektív korrekció
 TP_LENSPROFILE_LENS_WARNING;Figyelmeztetés: az objektív profilalkotáshoz használt vágási tényező nagyobb, mint a fényképezőgép vágási tényezője, az eredmény hibás lehet.
 TP_LENSPROFILE_MODE_HEADER;Objektív profil:
 TP_LENSPROFILE_USE_CA;Kromatikus aberráció
@@ -1939,6 +1940,10 @@ TP_TM_FATTAL_AMOUNT;Mérték
 TP_TM_FATTAL_LABEL;Dinamikus tartomány tömörítés
 TP_TM_FATTAL_THRESHOLD;Részletek
 TP_TM_FATTAL_SATCONTROL;Telítettség szabályozása 
+TP_TONECURVE_BASECURVE;Alapgörbe
+TP_TONECURVE_BASECURVE_LINEAR;Lineáris
+TP_TONECURVE_BASECURVE_ROLLOFF;Fokozatos átmenet a csúcsfényekhez
+TP_TONECURVE_BASECURVE_SCURVE;Sima S-alakú
 TP_TONECURVE_LABEL;Tónusgörbék
 TP_TONECURVE_SATCURVE;Telítettség
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Észlelési görbe erőssége
