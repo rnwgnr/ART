@@ -82,10 +82,11 @@ endif()
 if(UNIX AND PROC_LABEL STREQUAL "undefined")
     execute_process(COMMAND uname -p OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE cpu)
     if("${cpu}" STREQUAL "unknown")
-        set(PROC_LABEL "${CMAKE_SYSTEM_PROCESSOR}")
+        set(_proc_label "${CMAKE_SYSTEM_PROCESSOR}")
     else()
-        set(PROC_LABEL "${cpu}")
+        set(_proc_label "${cpu}")
     endif()
+    string(REGEX REPLACE "[^a-zA-Z0-9]" "_" PROC_LABEL "${_proc_label}")
 endif()
 
 # If PROC_FORCED_LABEL exists, its value is loaded in PROC_LABEL to override the one from ProcessorTargets:
