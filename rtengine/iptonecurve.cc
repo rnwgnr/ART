@@ -108,7 +108,7 @@ public:
     
     double getVal(double x) const override
     {
-        double res = lin2log(std::pow(x/w_, a_), b_)*w_;
+        double res = lin2log(std::pow(LIM(x, 0.0, w_)/w_, a_), b_)*w_;
         return res;
     }
 
