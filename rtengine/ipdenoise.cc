@@ -1162,7 +1162,7 @@ void ImProcFunctions::denoise(ImageSource *imgsrc, const ColorTemp &currWB, Imag
         expcomp(img, &expparams);
     }
     
-    denoise::RGB_denoise(im, 0, img, img, calclum, dnstore.ch_M, dnstore.max_r, dnstore.max_b, imgsrc->isRAW(), denoiseParams, 0, noiseLCurve, noiseCCurve, nresi, highresi);
+    denoise::RGB_denoise(im, 0, img, img, calclum, dnstore.ch_M, dnstore.max_r, dnstore.max_b, true/*imgsrc->isRAW()*/, denoiseParams, 0, noiseLCurve, noiseCCurve, nresi, highresi);
 
     if (plistener) {
         plistener->setProgress(0.8);
