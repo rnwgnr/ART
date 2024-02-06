@@ -284,6 +284,7 @@ int ImageIO::loadPNG(const Glib::ustring &fname)
         png_get_iCCP(png, info, &name, &compression_type, &profdata, &proflen);
         embProfile = cmsOpenProfileFromMem(profdata, proflen);
         loadedProfileData = new char[proflen];
+        loadedProfileLength = proflen;
         memcpy(loadedProfileData, profdata, proflen);
     }
 

@@ -194,6 +194,8 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
     if (data && tpp->embProfileLength) {
         tpp->embProfileData = new unsigned char [tpp->embProfileLength];
         memcpy (tpp->embProfileData, data, tpp->embProfileLength);
+        tpp->embProfile = cmsOpenProfileFromMem(tpp->embProfileData,
+                                                tpp->embProfileLength);
     }
 
     tpp->scaleForSave = 8192;
