@@ -334,4 +334,5 @@ private:
     DiagonalCurveEditor *maskCurve;
     Adjuster *maskPosterization;
     Adjuster *maskSmoothing;
+    Adjuster *maskOpacity;
 };

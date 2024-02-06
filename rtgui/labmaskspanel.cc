@@ -1038,6 +1038,10 @@ LabMasksPanel::LabMasksPanel(LabMasksContentProvider *cp):
     hb->pack_start(*maskInverted);
     mask_box->pack_start(*hb);
 
+    maskOpacity = Gtk::manage(new Adjuster(M("TP_LABMASKS_DRAWNMASK_OPACITY"), 0, 100, 1, 0, nullptr, nullptr, nullptr, nullptr, false, true));
+    mask_box->pack_start(*maskOpacity);
+    maskOpacity->setAdjusterListener(this);
+
     parametricMask = Gtk::manage(new MyExpander(true, M("TP_LABMASKS_PARAMETRIC")));
     ToolParamBlock *tb = Gtk::manage(new ToolParamBlock());
     parametricMask->add(*tb, false);
@@ -1561,6 +1565,7 @@ void LabMasksPanel::maskGet(int idx)
     r.curve = maskCurve->getCurve();
     r.posterization = maskPosterization->getValue();
     r.smoothing = maskSmoothing->getValue();
+    r.opacity = maskOpacity->getValue();
 }
 
 
@@ -1756,6 +1761,7 @@ void LabMasksPanel::maskShow(int idx, bool list_only, bool unsub)
         maskCurve->setCurve(r.curve);
         maskPosterization->setValue(r.posterization);
         maskSmoothing->setValue(r.smoothing);
+        maskOpacity->setValue(r.opacity);
 
         if (unsub && isCurrentSubscriber()) {
             if (areaMaskToggle->get_active()) {
@@ -2194,6 +2200,10 @@ void LabMasksPanel::adjusterChanged(Adjuster *a, double newval)
     } else if (a == maskSmoothing) {
         if (l) {
             l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_POSTPROCESS_SMOOTHING") + ": " + a->getTextValue());
+        }
+    } else if (a == maskOpacity) {
+        if (l) {
+            l->panelChanged(EvMaskPostprocess, M("TP_LABMASKS_DRAWNMASK_OPACITY") + ": " + a->getTextValue());
         }
     }
     maskShow(selected_, true);

@@ -851,6 +851,9 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
             has_mask = true;
             ldetail[i] = LIM01(float(r.parametricMask.lightnessDetail) / 100.f);
         }
+        if (r.opacity < 100) {
+            has_mask = true;
+        }
     }
 
     assert(!abmask || abmask->size() == size_t(n));
@@ -1176,6 +1179,22 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
                     }
                     if (Lmask) {
                         (*Lmask)[i][y][x] = 1.f - (*Lmask)[i][y][x];
+                    }
+                }
+            }
+        }
+        if (masks[i].opacity < 100) {
+            const float b = LIM01(float(masks[i].opacity) / 100.f);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    if (abmask) {
+                        (*abmask)[i][y][x] *= b;
+                    }
+                    if (Lmask) {
+                        (*Lmask)[i][y][x] *= b;
                     }
                 }
             }

@@ -276,6 +276,7 @@ public:
     std::vector<double> curve;
     int posterization;
     int smoothing;
+    int opacity;
 
     Mask();
     bool operator==(const Mask &other) const;
