@@ -157,25 +157,6 @@ public:
                     }
                 }
 
-                // switch (mode_) {
-                // case MODE_LINEAR:
-                //     break;
-                // case MODE_PQ:
-                //     for (int i = 0; i < 3; ++i) {
-                //         rgb[i] = Color::eval_PQ_curve(rgb[i], true);
-                //     }
-                //     break;
-                // case MODE_HLG:
-                //     for (int i = 0; i < 3; ++i) {
-                //         rgb[i] = Color::eval_HLG_curve(rgb[i], true);
-                //     }
-                //     break;
-                // default: // MODE_GAMMA
-                //     for (int i = 0; i < 3; ++i) {
-                //         rgb[i] = cmsEvalToneCurveFloat(tc_, rgb[i]);
-                //     }
-                // }
-
                 dst->r(y, x) = rgb[0] * 65535.f;
                 dst->g(y, x) = rgb[1] * 65535.f;
                 dst->b(y, x) = rgb[2] * 65535.f;

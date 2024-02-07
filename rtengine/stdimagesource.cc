@@ -249,6 +249,120 @@ void StdImageSource::convertColorSpace(Imagefloat* image, const ColorManagementP
     colorSpaceConversion (image, cmp, embProfile, img->getSampleFormat(), plistener);
 }
 
+
+namespace {
+
+class ARTInputProfile {
+public:
+    ARTInputProfile(cmsHPROFILE prof, const procparams::ColorManagementParams &icm):
+        mode_(MODE_INVALID),
+        tc_(nullptr)
+    {
+        auto iws = ICCStore::getInstance()->workingSpaceInverseMatrix(icm.workingProfile);
+        Mat33<float> m;
+        float g = 0, s = 0;
+        cmsCIEXYZ bp;
+        if (ICCStore::getProfileMatrix(prof, m) && ICCStore::getProfileParametricTRC(prof, g, s) && (!cmsDetectDestinationBlackPoint(&bp, prof, INTENT_RELATIVE_COLORIMETRIC, 0) || (bp.X == 0 && bp.Y == 0 && bp.Z == 0))) {
+            if (g == -2) {
+                mode_ = MODE_PQ;
+            } else if (g == -1) {
+                mode_ = MODE_HLG;
+            } else if (g == 1 && s == 0) {
+                mode_ = MODE_LINEAR;
+            } else {
+                mode_ = MODE_GAMMA;
+                LMCSToneCurveParams params;
+                Color::compute_LCMS_tone_curve_params(g, s, params);
+                tc_ = cmsBuildParametricToneCurve(0, 5, &params[0]);
+                if (!tc_) {
+                    mode_ = MODE_INVALID;
+                }
+            }
+            matrix_ = dot_product(iws, m);
+        }
+    }
+
+    ~ARTInputProfile()
+    {
+        if (tc_) {
+            cmsFreeToneCurve(tc_);
+        }
+    }
+
+    operator bool() const { return mode_ != MODE_INVALID; }
+    
+    void operator()(const Imagefloat *src, Imagefloat *dst, bool multiThread)
+    {
+        const int W = src->getWidth();
+        const int H = src->getHeight();
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            Vec3<float> rgb;
+            for (int x = 0; x < W; ++x) {
+                rgb[0] = src->r(y, x) / 65535.f;
+                rgb[1] = src->g(y, x) / 65535.f;
+                rgb[2] = src->b(y, x) / 65535.f;
+
+                for (int i = 0; i < 3; ++i) {
+                    rgb[i] = eval(rgb[i]);
+                }
+
+                rgb = dot_product(matrix_, rgb);
+
+                dst->r(y, x) = rgb[0] * 65535.f;
+                dst->g(y, x) = rgb[1] * 65535.f;
+                dst->b(y, x) = rgb[2] * 65535.f;
+            }
+        }
+    }
+
+    void operator()(const float *src, float *dst, int W)
+    {
+        Vec3<float> rgb;
+        const int W3 = W * 3;
+        for (int x = 0; x < W3; x += 3) {
+            rgb[0] = src[x];
+            rgb[1] = src[x+1];
+            rgb[2] = src[x+2];
+
+            for (int i = 0; i < 3; ++i) {
+                rgb[i] = eval(rgb[i]);
+            }
+
+            rgb = dot_product(matrix_, rgb);
+
+            dst[x] = rgb[0];
+            dst[x+1] = rgb[1];
+            dst[x+2] = rgb[2];
+        }
+    }
+
+private:
+    float eval(float x)
+    {
+        switch (mode_) {
+        case MODE_LINEAR:
+            return x;
+        case MODE_PQ:
+            return Color::eval_PQ_curve(x, false);
+        case MODE_HLG:
+            return Color::eval_HLG_curve(x, false);
+        default: // MODE_GAMMA
+            return cmsEvalToneCurveFloat(tc_, x);
+        }
+    }
+    
+    enum Mode { MODE_INVALID, MODE_LINEAR, MODE_GAMMA, MODE_HLG, MODE_PQ };
+    Mode mode_;
+    Mat33<float> matrix_;
+    cmsToneCurve *tc_;
+};
+
+} // namespace
+
 void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat, ProgressListener *plistener)
 {
 
@@ -291,12 +405,21 @@ void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagement
             in = ICCStore::getInstance()->getsRGBProfile ();
         }
 
-        lcmsMutex->lock ();
-        cmsHTRANSFORM hTransform = cmsCreateTransform (in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC,
+        lcmsMutex->lock();
+        ARTInputProfile artprof(in, cmp);
+        cmsHTRANSFORM hTransform = nullptr;
+        if (!artprof) {
+            hTransform = cmsCreateTransform (in, TYPE_RGB_FLT, out, TYPE_RGB_FLT, INTENT_RELATIVE_COLORIMETRIC,
                                                        cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
-        lcmsMutex->unlock ();
+        }
+        lcmsMutex->unlock();
 
-        if(hTransform) {
+        if (artprof) {
+            if (settings->verbose) {
+                printf("stdimagesource: ART ICC profile detected, using built-in color space conversion\n");
+            }
+            artprof(im, im, true);
+        } else if (hTransform) {
             // Convert to the [0.0 ; 1.0] range
             im->normalizeFloatTo1();
 
