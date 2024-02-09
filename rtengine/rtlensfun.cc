@@ -21,6 +21,11 @@
 #include "rtlensfun.h"
 #include "settings.h"
 #include <iostream>
+
+#if LF_VERSION <= ((3 << 16) | (3 << 8))
+#  define ART_LENSFUN_LEGACY
+#endif
+
 namespace rtengine {
 
 extern const Settings *settings;
@@ -32,7 +37,11 @@ extern const Settings *settings;
 LFModifier::~LFModifier()
 {
     if (data_) {
+#ifdef ART_LENSFUN_LEGACY
         data_->Destroy();
+#else
+        delete data_;
+#endif // ART_LENSFUN_LEGACY
     }
 }
 
@@ -317,7 +326,11 @@ LFDatabase LFDatabase::instance_;
 
 bool LFDatabase::init(const Glib::ustring &dbdir)
 {
+#ifdef ART_LENSFUN_LEGACY
     instance_.data_ = lfDatabase::Create();
+#else
+    instance_.data_ = new lfDatabase();
+#endif // ART_LENSFUN_LEGACY
 
     if (settings->verbose) {
         std::cout << "Loading lensfun database from ";
@@ -391,7 +404,11 @@ LFDatabase::~LFDatabase()
 {
     if (data_) {
         MyMutex::MyLock lock(lfDBMutex);
+#ifdef ART_LENSFUN_LEGACY
         data_->Destroy();
+#else
+        delete data_;
+#endif // ART_LENSFUN_LEGACY
     }
 }
 
@@ -493,12 +510,24 @@ std::unique_ptr<LFModifier> LFDatabase::getModifier(const LFCamera &camera, cons
     if (data_) {
         MyMutex::MyLock lock(lfDBMutex);
         if (camera && lens) {
-            lfModifier *mod = lfModifier::Create(lens.data_, camera.getCropFactor(), width, height);
             int flags = LF_MODIFY_DISTORTION | LF_MODIFY_SCALE | LF_MODIFY_TCA;
             if (aperture > 0) {
                 flags |= LF_MODIFY_VIGNETTING;
             }
+#ifdef ART_LENSFUN_LEGACY
+            lfModifier *mod = lfModifier::Create(lens.data_, camera.getCropFactor(), width, height);
             flags = mod->Initialize(lens.data_, LF_PF_F32, focalLen, aperture, focusDist > 0 ? focusDist : 1000, 0.0, LF_RECTILINEAR, flags, false);
+#else // ART_LENSFUN_LEGACY
+            lfModifier *mod = new lfModifier(lens.data_, focalLen, camera.getCropFactor(), width, height, LF_PF_F32, false);
+            mod->EnableDistortionCorrection();
+            mod->EnableTCACorrection();
+            if (aperture > 0) {
+                mod->EnableVignettingCorrection(aperture, focusDist > 0 ? focusDist : 1000);
+            }
+            mod->EnableProjectionTransform(LF_RECTILINEAR);
+            mod->EnableScaling(0.0);
+            flags = mod->GetModFlags();
+#endif // ART_LENSFUN_LEGACY
             ret.reset(new LFModifier(mod, swap_xy, flags));
         }
     }

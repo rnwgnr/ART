@@ -34,10 +34,7 @@
 
 namespace rtengine {
 
-class LFModifier final :
-    public LensCorrection,
-    public NonCopyable
-{
+class LFModifier final: public LensCorrection, public NonCopyable {
 public:
     ~LFModifier() override;
 
@@ -60,8 +57,7 @@ private:
     int flags_;
 };
 
-class LFCamera final
-{
+class LFCamera final {
 public:
     LFCamera();
 
@@ -79,8 +75,7 @@ private:
     const lfCamera *data_;
 };
 
-class LFLens final
-{
+class LFLens final {
 public:
     LFLens();
 
@@ -99,9 +94,7 @@ private:
     const lfLens *data_;
 };
 
-class LFDatabase final :
-    public NonCopyable
-{
+class LFDatabase final: public NonCopyable {
 public:
     static bool init(const Glib::ustring &dbdir);
     static const LFDatabase *getInstance();
