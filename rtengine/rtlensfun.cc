@@ -22,7 +22,7 @@
 #include "settings.h"
 #include <iostream>
 
-#if LF_VERSION <= ((3 << 16) | (3 << 8))
+#if LF_VERSION < ((3 << 16) | (99 << 8))
 #  define ART_LENSFUN_LEGACY
 #endif
 
