@@ -412,6 +412,10 @@ void ThumbBrowserBase::selectFirst (bool enlarge)
                 }
             }
 
+            if (first == fd.end()) {
+                return;
+            }
+
             scrollToEntry (h, v, internal.get_width (), internal.get_height (), *first);
 
             ThumbBrowserEntryBase* lastEntry = lastClicked;
