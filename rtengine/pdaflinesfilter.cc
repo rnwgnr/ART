@@ -281,7 +281,7 @@ int PDAFLinesFilter::mark(array2D<float> &rawData, PixelsMap &bpMap)
             int n = markLine(rawData, bpMap, y) + markLine(rawData, bpMap, y-1) + markLine(rawData, bpMap, y+1);
             if (n) {
                 found += n;
-                if (settings->verbose) {
+                if (settings->verbose > 1) {
                     std::cout << "marked " << n << " pixels in PDAF line at " << y << std::endl;
                 }
             }
@@ -294,7 +294,7 @@ int PDAFLinesFilter::mark(array2D<float> &rawData, PixelsMap &bpMap)
         }
     }
 
-    if (settings->verbose) {
+    if (settings->verbose > 1) {
         static_cast<PDAFGreenEqulibrateThreshold *>(gthresh_)->print();
     }
     static_cast<PDAFGreenEqulibrateThreshold *>(gthresh_)->processTiles();
