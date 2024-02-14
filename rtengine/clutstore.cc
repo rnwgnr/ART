@@ -799,7 +799,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
     out.clear();
     std::unordered_map<std::string, int> name2pos;
 
-    colorspace = "ACESp0";
+    colorspace = "";
 
     static std::unordered_map<std::string, std::string> profilemap = {
         {"aces2065-1", "ACESp0"},
@@ -1217,7 +1217,7 @@ bool CLUTApplication::CTL_init(int num_threads)
 {
     ctl_lut_dim_ = 0;
     try {
-        Glib::ustring colorspace = "ACESp0";
+        Glib::ustring colorspace = "";
         Glib::ustring lbl;
         auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_, colorspace, ctl_lut_dim_);
         if (func.empty()) {
@@ -1439,18 +1439,28 @@ void CLUTApplication::init_matrices(const Glib::ustring &lut_profile)
 {
     wprof_ = ICCStore::getInstance()->workingSpaceMatrix(working_profile_);
     wiprof_ = ICCStore::getInstance()->workingSpaceInverseMatrix(working_profile_);
-    auto lprof = ICCStore::getInstance()->workingSpaceMatrix(lut_profile);
-    auto liprof = ICCStore::getInstance()->workingSpaceInverseMatrix(lut_profile);
-    
-    auto ws = dot_product(liprof, wprof_);
-    auto iws = dot_product(wiprof_, lprof);
-
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            conv_[i][j] = ws[i][j];
-            iconv_[i][j] = iws[i][j] * 65535.f;
+    if (lut_profile.empty()) {
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                float val = (i == j) ? 1.f : 0.f;
+                conv_[i][j] = val;
+                iconv_[i][j] = val * 65535.f;
+            }
         }
-    }        
+    } else {
+        auto lprof = ICCStore::getInstance()->workingSpaceMatrix(lut_profile);
+        auto liprof = ICCStore::getInstance()->workingSpaceInverseMatrix(lut_profile);
+    
+        auto ws = dot_product(liprof, wprof_);
+        auto iws = dot_product(wiprof_, lprof);
+
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                conv_[i][j] = ws[i][j];
+                iconv_[i][j] = iws[i][j] * 65535.f;
+            }
+        }
+    }
 }
 
 #endif // ART_USE_OCIO || ART_USE_CTL
