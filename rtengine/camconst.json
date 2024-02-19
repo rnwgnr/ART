@@ -1332,12 +1332,14 @@ Camera constants:
     },
 
     { // Quality C
-        "make_model": [ "FUJIFILM GFX 100", "FUJIFILM GFX100S" ],
+        "make_model": [ "FUJIFILM GFX 100", "FUJIFILM GFX100S", "FUJIFILM GFX 100S", "FUJIFILM GFX 100 II" ],
         "raw_crop": [
             // multi-aspect crop to account for 16-shot pixel shift images
             { "frame" : [11808, 8754], "crop" : [ 0, 2, 11664, 8734 ] },
             { "frame" : [23616, 17508], "crop" : [ 0, 4, 23328, 17468 ] }
-        ]
+        ],
+        "pdaf_pattern" : [ 0, 18 ],
+        "pdaf_offset" : 0        
     },
 
     { // Quality B
