@@ -85,7 +85,11 @@ public:
 
             vig[i] = std::pow(2.f, 0.5f - std::pow(2.f, vig_scaling * vignetting[i] * std::pow(2.f, -13.f) -1));
         }
-    }    
+    }
+
+    bool has_dist() const override { return true; }
+    bool has_vign() const override { return true; }
+    bool has_ca() const override { return true; }
 };
 
 
@@ -121,8 +125,11 @@ public:
             vig[i] = 1 - (1 - vignetting[i] / 100);
         }
     }
-};
 
+    bool has_dist() const override { return true; }
+    bool has_vign() const override { return true; }
+    bool has_ca() const override { return true; }
+};
 
 
 class DNGCorrectionData: public ExifLensCorrection::CorrectionData {
@@ -216,7 +223,92 @@ public:
             return new DNGCorrectionData(ret);
         }
     }
+
+    bool has_dist() const override { return !warp_rectilinear.empty(); }
+    bool has_vign() const override { return !vignette_radial.empty(); }
+    bool has_ca() const override { return false; }
 };
+
+
+// Olympus correction data adapted from src/iop/lens.cc in darktable 4.6
+// copyright of original code follows
+/*
+    This file is part of darktable,
+    Copyright (C) 2019-2023 darktable developers.
+
+    darktable is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    darktable is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with darktable.  If not, see <http://www.gnu.org/licenses/>.
+*/
+class OlympusCorrectionData: public ExifLensCorrection::CorrectionData {
+public:
+    std::array<float, 4> distortion;
+    std::array<float, 6> cacorr;
+    bool ca_ok;
+
+    void get_coeffs(std::vector<float> &knots, std::vector<float> &dist, std::vector<float> &vig, std::array<std::vector<float>, 3> &ca, bool &is_dng) const override
+    {
+        is_dng = false;
+        constexpr int nc = 16;
+
+        float drs = distortion[3];
+        float dk2 = distortion[0];
+        float dk4 = distortion[1];
+        float dk6 = distortion[2];
+
+        float car0 = cacorr[0];
+        float car2 = cacorr[1];
+        float car4 = cacorr[2];
+        float cab0 = cacorr[3];
+        float cab2 = cacorr[4];
+        float cab4 = cacorr[5];
+        
+        knots.resize(nc);
+        for (int i = 0; i < 3; ++i) {
+            ca[i].resize(nc);
+        }
+        dist.resize(nc);
+
+        for (int i = 0; i < nc; i++) {
+            const float r = float(i) / (nc - 1);
+            knots[i] = r;
+
+            // Convert the polynomial to a spline by evaluating it at each knot
+            //
+            // The distortion polynomial maps a radius Rout in the output
+            // (undistorted) image, where the corner is defined as Rout=1, to a
+            // radius in the input (distorted) image, where the corner is defined
+            // as Rin=1.
+            // Rin = Rout*dk0 * (1 + dk2 * (Rout*dk0)^2 + dk4 * (Rout*dk0)^4 + dk6 * (Rout*dk0)^6)
+            //
+            // r_cor is Rin / Rout.
+            const float rs2 = powf(r * drs, 2);
+            const float r_cor = drs * (1 + rs2 * (dk2 + rs2 * (dk4 + rs2 * dk6)));
+            dist[i] = r_cor;
+
+            const float rd = r;
+            const float rd2 = powf(rd, 2);
+
+            ca[0][i] = ca[1][i] = ca[2][i] = 1.f;
+            ca[0][i] += rd * (car0 + rd2 * (car2 + rd2 * car4)) / r;
+            ca[2][i] += rd * (cab0 + rd2 * (cab2 + rd2 * cab4)) / r;
+        }
+    }
+
+    bool has_dist() const override { return distortion[0] || distortion[1] || distortion[2]; }
+    bool has_vign() const override { return false; }
+    bool has_ca() const override { return ca_ok; }
+};
+
 
 
 float interpolate(const std::vector<float> &xi, const std::vector<float> &yi, float x)
@@ -256,8 +348,14 @@ ExifLensCorrection::ExifLensCorrection(const FramesMetaData *meta, int width, in
     h2_ = height * 0.5f;
     r_ = 1 / std::sqrt(SQR(w2_) + SQR(h2_));
 
-    auto make = meta->getMake();
-    if (make != "SONY" && make != "FUJIFILM" && !meta->isDNG()) {
+    std::string make = Glib::ustring(meta->getMake()).uppercase();
+    static const std::unordered_set<std::string> makers = {
+        "SONY",
+        "FUJIFILM",
+        "OLYMPUS",
+        "OM DIGITAL SOLUTIONS"
+    };
+    if (makers.find(make) == makers.end() && !meta->isDNG()) {
         return;
     }
     
@@ -273,6 +371,34 @@ ExifLensCorrection::ExifLensCorrection(const FramesMetaData *meta, int width, in
                 buf.resize(it->value().size());
                 it->value().copy(&buf[0], Exiv2::invalidByteOrder);
                 data_.reset(DNGCorrectionData::parse(buf));
+            }
+        } else if (make == "OLYMPUS" || make == "OM DIGITAL SOLUTIONS") {
+            if (Exiv2::versionNumber() < EXIV2_MAKE_VERSION(0, 27, 4)) {
+                return;
+            }
+            md.load();
+            auto &exif = md.exifData();
+            auto it = exif.findKey(Exiv2::ExifKey("Exif.OlympusIp.0x150a"));
+            if (it != exif.end() && it->count() == 4) {
+                OlympusCorrectionData *od = new OlympusCorrectionData();
+                data_.reset(od);
+                od->ca_ok = false;
+                for (int i = 0; i < 4; ++i) {
+                    const float kd = it->toFloat(i);
+                    od->distortion[i] = kd;
+                }
+                it = exif.findKey(Exiv2::ExifKey("Exif.OlympusIp.0x150c"));
+                if (it != exif.end() && it->count() == 6) {
+                    for (int i = 0; i < 6; ++i) {
+                        const float kc = it->toFloat(i);
+                        od->cacorr[i] = kc;
+                    }
+                    od->ca_ok = true;
+                } else {
+                    for (int i = 0; i < 6; ++i) {
+                        od->cacorr[i] = 0;
+                    }
+                }
             }
         } else {
             auto mn = md.getMakernotes();
@@ -396,7 +522,9 @@ bool ExifLensCorrection::ok(const FramesMetaData *meta)
 
 void ExifLensCorrection::correctDistortion(double &x, double &y, int cx, int cy, double scale) const
 {
-    if (!data_) {
+    if (!data_ || !data_->has_dist()) {
+        x *= scale;
+        y *= scale;
         return;
     }
     
@@ -461,13 +589,13 @@ void ExifLensCorrection::correctDistortion(double &x, double &y, int cx, int cy,
 
 bool ExifLensCorrection::isCACorrectionAvailable() const
 {
-    return data_.get() && !is_dng_;
+    return data_.get() && data_->has_ca();
 }
 
 
 void ExifLensCorrection::correctCA(double &x, double &y, int cx, int cy, int channel) const
 {
-    if (data_ && !is_dng_) {
+    if (data_ && data_->has_ca()) {
         float xx = x + cx;
         float yy = y + cy;
         if (swap_xy_) {
@@ -491,7 +619,7 @@ void ExifLensCorrection::correctCA(double &x, double &y, int cx, int cy, int cha
 
 void ExifLensCorrection::processVignette(int width, int height, float** rawData) const
 {
-    if (!data_) {
+    if (!data_ || !data_->has_vign()) {
         return;
     }
     

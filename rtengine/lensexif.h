@@ -43,6 +43,9 @@ public:
     public:
         virtual ~CorrectionData() = default;
         virtual void get_coeffs(std::vector<float> &knots, std::vector<float> &dist, std::vector<float> &vig, std::array<std::vector<float>, 3> &ca, bool &is_dng) const = 0;
+        virtual bool has_dist() const = 0;
+        virtual bool has_ca() const = 0;
+        virtual bool has_vign() const = 0;
     };
     
 private:
