@@ -596,10 +596,9 @@ void CameraConst::update_Crop(CameraConst *other)
         return;
     }
 
-    // if (other->has_rawCrop()) {
-    //     other->get_rawCrop(raw_crop[0], raw_crop[1], raw_crop[2], raw_crop[3]);
-    // }
-    raw_crop.insert(other->raw_crop.begin(), other->raw_crop.end());
+    for (auto &p : other->raw_crop) {
+        raw_crop[p.first] = p.second;
+    }
 }
 
 
@@ -609,12 +608,9 @@ void CameraConst::update_rawMask(CameraConst *other)
         return;
     }
 
-    raw_mask.insert(other->raw_mask.begin(), other->raw_mask.end());
-    // for (int i = 0; i < 8; ++i) {
-    //     if (other->has_rawMask(i)) {
-    //         other->get_rawMask(i, raw_mask[i][0], raw_mask[i][1], raw_mask[i][2], raw_mask[i][3]);
-    //     }
-    // }
+    for (auto &p : other->raw_mask) {
+        raw_mask[p.first] = p.second;
+    }
 }
 
 
