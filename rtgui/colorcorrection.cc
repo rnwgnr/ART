@@ -1061,6 +1061,12 @@ void ColorCorrection::regionShow(int idx)
     default:
         mode->set_active(0);
     }
+
+    static_cast<CurveDisplay *>(curve_rgb)->setDirty(true);
+    curve_rgb->queue_draw();
+
+    static_cast<CurveDisplay *>(curve_lum)->setDirty(true);
+    curve_lum->queue_draw();
     
     if (disable) {
         enableListener();
