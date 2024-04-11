@@ -4403,6 +4403,9 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                 assignFromKeyfile(keyFile, "ToneCurve", "Curve2", toneCurve.curve2);
                 assignFromKeyfile(keyFile, "ToneCurve", "HistogramMatching", toneCurve.histmatching);
                 assignFromKeyfile(keyFile, "ToneCurve", "CurveFromHistogramMatching", toneCurve.fromHistMatching);
+                if (toneCurve.fromHistMatching) {
+                    toneCurve.histmatching = false;
+                }
                 assignFromKeyfile(keyFile, "ToneCurve", "Saturation", toneCurve.saturation);
                 assignFromKeyfile(keyFile, "ToneCurve", "Saturation2", toneCurve.saturation2);
                 if (!assignFromKeyfile(keyFile, "ToneCurve", "PerceptualStrength", toneCurve.perceptualStrength) && ppVersion >= 1026) {
