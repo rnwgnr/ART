@@ -120,6 +120,8 @@ private:
     Gtk::Entry* Query;
     Gtk::Button* buttonQueryClear;
 
+    Gtk::Label *selection_counter_;
+
     double hScrollPos[18];
     double vScrollPos[18];
     int lastScrollPos;

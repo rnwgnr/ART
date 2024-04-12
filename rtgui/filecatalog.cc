@@ -580,6 +580,10 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     tbRightPanel_1->signal_toggled().connect( sigc::mem_fun(*this, &FileCatalog::tbRightPanel_1_toggled) );
     buttonBar->pack_end (*tbRightPanel_1, Gtk::PACK_SHRINK);
 
+    selection_counter_ = Gtk::manage(new Gtk::Label(""));
+    buttonBar->pack_end(*selection_counter_, Gtk::PACK_SHRINK, 4 * RTScalable::getScale());
+    setExpandAlignProperties(selection_counter_, false, false, Gtk::ALIGN_END, Gtk::ALIGN_END);
+
     // add default panel
     hBox = Gtk::manage( new Gtk::HBox () );
     hBox->show ();
@@ -1426,6 +1430,11 @@ void FileCatalog::selectionChanged(const std::vector<Thumbnail*>& tbe)
 {
     if (fslistener) {
         fslistener->selectionChanged (tbe);
+    }
+    if (tbe.size() <= 1) {
+        selection_counter_->set_text("");
+    } else {
+        selection_counter_->set_text(Glib::ustring::compose(M("FILEBROWSER_SELECTION_COUNTER"), tbe.size()));
     }
 }
 
