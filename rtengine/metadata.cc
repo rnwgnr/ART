@@ -344,20 +344,27 @@ private:
     void init()
     {
         if (!initialized_) {
-            if (settings->verbose) {
-                std::cout << "starting exiftool... " << std::flush;
-            }
             initialized_ = true;
-            
-            std::vector<Glib::ustring> argv = {
-                get_bin(),
-                "-stay_open", "true",
-                "-@", "-",
-                "-common_args", "-charset", "filename=utf8"
-            };
-            p_ = subprocess::popen("", argv, true, true, true);
-            if (settings->verbose) {
-                std::cout << (p_? "OK" : "ERROR!") << std::endl;
+            auto e = get_bin();
+            if (e.empty()) {
+                p_.reset(nullptr);
+                if (settings->verbose) {
+                    std::cout << "exiftool disabled or not found" << std::endl;
+                }
+            } else {
+                if (settings->verbose) {
+                    std::cout << "starting exiftool... " << std::flush;
+                }
+                std::vector<Glib::ustring> argv = {
+                    e,
+                    "-stay_open", "true",
+                    "-@", "-",
+                    "-common_args", "-charset", "filename=utf8"
+                };
+                p_ = subprocess::popen("", argv, true, true, true);
+                if (settings->verbose) {
+                    std::cout << (p_? "OK" : "ERROR!") << std::endl;
+                }
             }
         }
     }
