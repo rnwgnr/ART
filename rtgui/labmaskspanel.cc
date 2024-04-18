@@ -281,7 +281,7 @@ public:
             {
                 w->set_relief(Gtk::RELIEF_NONE);
                 w->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
-                w->set_can_focus(false);
+                //w->set_can_focus(false);
             };
 
         auto tb = Gtk::manage(new ToolParamBlock());
@@ -405,6 +405,30 @@ public:
         signal_enabled_toggled().connect(sigc::mem_fun(*this, &DrawnMaskPanel::on_enabled_toggled));
 
         tb->signal_unmap().connect(sigc::mem_fun(*this, &DrawnMaskPanel::on_hide));
+
+        add_events(Gdk::KEY_PRESS_MASK);
+        const auto keypress =
+            [this](GdkEventKey *evt) -> bool
+            {
+                bool ctrl = evt->state & GDK_CONTROL_MASK;
+                bool shift = evt->state & GDK_SHIFT_MASK;
+                bool alt = evt->state & GDK_MOD1_MASK;
+
+                if (ctrl && !alt) {
+                    switch (evt->keyval) {
+                    case GDK_KEY_z:
+                    case GDK_KEY_Z:
+                        if (shift) {
+                            on_reset();
+                        } else {
+                            on_undo();
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            };
+        signal_key_press_event().connect(sigc::slot<bool, GdkEventKey *>(keypress), false);
     }
 
     ~DrawnMaskPanel()
@@ -597,7 +621,7 @@ public:
 
     typedef sigc::signal<void> SigDrawUpdated;
     SigDrawUpdated signal_draw_updated() { return sig_draw_updated_; }
-    
+
 private:
     void update_pressure(PressureMode m)
     {
