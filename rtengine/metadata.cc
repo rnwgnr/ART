@@ -361,9 +361,16 @@ private:
                     "-@", "-",
                     "-common_args", "-charset", "filename=utf8"
                 };
-                p_ = subprocess::popen("", argv, true, true, true);
-                if (settings->verbose) {
-                    std::cout << (p_? "OK" : "ERROR!") << std::endl;
+                try {
+                    p_ = subprocess::popen("", argv, true, true, true);
+                    if (settings->verbose) {
+                        std::cout << (p_ ? "OK" : "ERROR!") << std::endl;
+                    }
+                } catch (subprocess::error &exc) {
+                    p_.reset(nullptr);
+                    if (settings->verbose) {
+                        std::cout << "ERROR: " << exc.what() << std::endl;
+                    }
                 }
             }
         }

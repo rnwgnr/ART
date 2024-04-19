@@ -597,6 +597,23 @@ std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::v
     std::unique_ptr<SubprocessInfo> res;
     std::unique_ptr<SubprocessData> data(new SubprocessData());
 
+    std::string executable = "";
+    if (argv.empty()) {
+        throw (error() << "invalid arguments");
+    } else {
+        if (!search_in_path) {
+            executable = argv[0];
+        } else {
+            executable = Glib::find_program_in_path(argv[0]);
+            if (!Glib::file_test(executable, Glib::FILE_TEST_IS_EXECUTABLE) && argv[0].find('/') == Glib::ustring::npos && !workdir.empty()) {
+                executable = Glib::build_filename(workdir, argv[0]);
+            }
+        }
+        if (!Glib::file_test(executable, Glib::FILE_TEST_IS_EXECUTABLE)) {
+            throw (error() << "executable not found: " << argv[0]);
+        }
+    }
+    
     if (pipe_in) {
         if (pipe(fds_to) != 0) {
             throw (error() << "pipe failed");
@@ -639,17 +656,20 @@ std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::v
         }
 
         std::vector<char *> args_vec(argv.size()+1);
-        const char *path = argv[0].c_str();
         for (size_t i = 0; i < argv.size(); ++i) {
             args_vec[i] = const_cast<char *>(argv[i].c_str());
         }
         args_vec.back() = nullptr;
         auto args = &args_vec[0];
+
+        execv(executable.c_str(), args);
         
-        if (search_in_path) {
-            exit(execvp(path, args));
-        } else {
-            exit(execv(path, args));
+        if (pipe_in) {
+            close(0);
+        }
+        if (pipe_out) {
+            close(1);
+            close(2);
         }
         return res;
     }
