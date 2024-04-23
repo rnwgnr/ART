@@ -37,6 +37,7 @@
 #include "tweakoperator.h"
 #include "gainmap.h"
 #include "array2D.h"
+#include "colortemp.h"
 
 /**
  * @file
@@ -371,7 +372,7 @@ class AutoWBListener
 {
 public:
     virtual ~AutoWBListener() = default;
-    virtual void WBChanged(double temp, double green) = 0;
+    virtual void WBChanged(ColorTemp ctemp) = 0;
 };
 
 class FrameCountListener
@@ -504,10 +505,11 @@ public:
       * @return a pointer to the Crop object that handles the image data trough its own pipeline */
     virtual DetailedCrop* createCrop  (::EditDataProvider *editDataProvider, bool isDetailWindow) = 0;
 
-    virtual bool        getAutoWB   (double& temp, double& green, double equal) = 0;
-    virtual void        getCamWB    (double& temp, double& green) = 0;
-    virtual void        getSpotWB  (int x, int y, int rectSize, double& temp, double& green) = 0;
-    virtual void        getAutoCrop (double ratio, int &x, int &y, int &w, int &h) = 0;
+    virtual bool getAutoWB(ColorTemp &out, double equal) = 0;
+    virtual void getCamWB(ColorTemp &out) = 0;
+    virtual void getSpotWB(int x, int y, int rectSize, ColorTemp &out) = 0;
+    
+    virtual void getAutoCrop(double ratio, int &x, int &y, int &w, int &h) = 0;
 
     virtual bool getDeltaELCH(EditUniqueID id, int x, int y, float &L, float &C, float &H) = 0;
 

@@ -3597,7 +3597,9 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("White Balance", "Setting", method, keyFile);
             saveToKeyfile("White Balance", "Temperature", wb.temperature, keyFile);
             saveToKeyfile("White Balance", "Green", wb.green, keyFile);
-            saveToKeyfile("White Balance", "Equal", wb.equal, keyFile);
+            if (wb.equal != 1) {
+                saveToKeyfile("White Balance", "Equal", wb.equal, keyFile);
+            }
             std::vector<double> m(wb.mult.begin(), wb.mult.end());
             saveToKeyfile("White Balance", "Multipliers", m, keyFile);
         }

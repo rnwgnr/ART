@@ -44,7 +44,7 @@ class Thumbnail {
     double camwbGreen;
     double camwbBlue;
     double redAWBMul, greenAWBMul, blueAWBMul;  // multipliers for auto WB
-    double autoWBTemp, autoWBGreen, wbEqual;    // autoWBTemp and autoWBGreen are updated each time autoWB is requested and if wbEqual has been modified
+    //double autoWBTemp, autoWBGreen, wbEqual;    // autoWBTemp and autoWBGreen are updated each time autoWB is requested and if wbEqual has been modified
     int embProfileLength;
     unsigned char* embProfileData;
     cmsHPROFILE embProfile;
@@ -84,10 +84,10 @@ public:
     static Thumbnail *loadFromImage(const Glib::ustring& fname, int &w, int &h, int fixwh, double wbEq);
     static Thumbnail *loadInfoFromRaw(const Glib::ustring &fname, eSensorType &sensorType, int &w, int &h, int fixwh);
 
-    void getCamWB     (double& temp, double& green);
-    void getAutoWB    (double& temp, double& green, double equal);
+    void getCamWB(ColorTemp &out);
+    void getAutoWB(ColorTemp &out, double equal);
     void getAutoWBMultipliers (double& rm, double& gm, double& bm);
-    void getSpotWB    (const procparams::ProcParams& params, int x, int y, int rect, double& temp, double& green);
+    void getSpotWB(const procparams::ProcParams& params, int x, int y, int rect, ColorTemp &out);
 
     unsigned char* getGrayscaleHistEQ (int trim_width);
     bool writeImage (const Glib::ustring& fname);

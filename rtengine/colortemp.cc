@@ -198,28 +198,75 @@ void temp2mulxyz(double temp, double &Xxyz, double &Zxyz)
 } // namespace
 
 
-ColorTemp::ColorTemp (double t, double g, double e, const std::string &m) : temp(t), green(g), equal(e), method(m)
+ColorTemp::ColorTemp():
+    mode_(MULTIPLIERS),
+    temp(-1.), green(-1.), equal (1.),
+    clipped_(false)
 {
-    clip (temp, green, equal);
+    mult_[0] = mult_[1] = mult_[2] = 1;
 }
 
-void ColorTemp::clip (double &temp, double &green)
+
+ColorTemp::ColorTemp(double e):
+    mode_(TEMP_TINT),
+    temp(-1.), green(-1.), equal(e),
+    clipped_(false)
 {
+    mult_[0] = mult_[1] = mult_[2] = 1;
+}
+
+
+ColorTemp::ColorTemp (double t, double g, double e, const std::string &m):
+    mode_(TEMP_TINT),
+    temp(t), green(g), equal(e),
+    mult_{0},
+    clipped_(false)
+{
+    clip(temp, green, equal);
+}
+
+
+void ColorTemp::clip(double &temp, double &green) const
+{
+    if (temp < MINTEMP || temp > MAXTEMP) {
+        clipped_ = true;
+    }
     temp = rtengine::LIM(temp, MINTEMP, MAXTEMP);
+    if (green < MINGREEN || green > MAXGREEN) {
+        clipped_ = true;
+    }
     green = rtengine::LIM(green, MINGREEN, MAXGREEN);
 }
 
-void ColorTemp::clip (double &temp, double &green, double &equal)
+void ColorTemp::clip(double &temp, double &green, double &equal) const
 {
-    temp = rtengine::LIM(temp, MINTEMP, MAXTEMP);
-    green = rtengine::LIM(green, MINGREEN, MAXGREEN);
+    clip(temp, green);
     equal = rtengine::LIM(equal, MINEQUAL, MAXEQUAL);
 }
 
-ColorTemp::ColorTemp (double mulr, double mulg, double mulb, double e) : equal(e), method("Custom")
+ColorTemp::ColorTemp(double mulr, double mulg, double mulb, double e):
+    mode_(TEMP_TINT),
+    equal(e),
+    mult_{0},
+    clipped_(false)
 {
     mul2temp(mulr, mulg, mulb, equal, temp, green);
 }
+
+
+ColorTemp::ColorTemp(double mulr, double mulg, double mulb):
+    mode_(MULTIPLIERS),
+    temp(-1),
+    green(-1),
+    equal(1),
+    clipped_(false)
+{
+    mult_[0] = mulr;
+    mult_[1] = mulg;
+    mult_[2] = mulb;
+    mul2temp(mulr, mulg, mulb, equal, temp, green);
+}
+
 
 void ColorTemp::mul2temp (const double rmul, const double gmul, const double bmul, const double equal, double& temp, double& green) const
 {
@@ -276,6 +323,57 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
     rmul /= gmul;
     bmul /= gmul;
     gmul = 1.0;
+}
+
+
+void ColorTemp::update(const double rmul, const double gmul, const double bmul, const double equal)
+{
+    mode_ = TEMP_TINT;
+    this->equal = equal;
+    clipped_ = false;
+    mul2temp (rmul, gmul, bmul, this->equal, temp, green);
+}
+
+
+void ColorTemp::useDefaults(const double equal)
+{
+    mode_ = TEMP_TINT;
+    temp = 6504;    // Values copied from procparams.cc
+    green = 1.0;
+    this->equal = equal;
+    clipped_ = false;
+}
+
+
+void ColorTemp::getMultipliers(double &mulr, double &mulg, double &mulb) const
+{
+    if (mode_ == TEMP_TINT) {
+        temp2mul(temp, green, equal, mulr, mulg, mulb);
+    } else {
+        mulr = mult_[0];
+        mulg = mult_[1];
+        mulb = mult_[2];
+    }
+}
+
+
+bool ColorTemp::operator==(const ColorTemp& other) const
+{
+    if (mode_ == other.mode_) {
+        if (mode_ == TEMP_TINT) {
+            return fabs(temp - other.temp) < 1e-10 && fabs(green - other.green) < 1e-10;
+        } else {
+            return mult_ == other.mult_;
+        }
+    } else {
+        return false;
+    }
+}
+
+
+bool ColorTemp::operator!=(const ColorTemp& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace rtengine

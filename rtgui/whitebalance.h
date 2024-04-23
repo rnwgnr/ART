@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _WB_H_
-#define _WB_H_
+#pragma once
 
 #include <gtkmm.h>
 #include "toolpanel.h"
@@ -44,7 +43,6 @@ public:
     void read(const rtengine::procparams::ProcParams* pp) override;
     void write(rtengine::procparams::ProcParams* pp) override;
     void setDefaults(const rtengine::procparams::ProcParams* defParams) override;
-    void updateMethodGui();
     void methodChanged();
     void spotPressed();
     void spotSizeChanged();
@@ -59,8 +57,8 @@ public:
     {
         wblistener = l;
     }
-    void setWB (int temp, double green);
-    void WBChanged(double temp, double green) override;
+    void setWB(rtengine::ColorTemp ctemp);
+    void WBChanged(rtengine::ColorTemp ctemp) override;
 
     void trimValues(rtengine::procparams::ProcParams* pp) override;
     void enabledChanged() override;
@@ -71,6 +69,8 @@ public:
 private:
     void fillMethods();
     int getActiveMethod();
+    void syncSliders(bool from_mult);
+    void updateMethodGui(bool check_temp);
     
     class MethodColumns : public Gtk::TreeModel::ColumnRecord {
     public:
@@ -110,6 +110,7 @@ private:
 
     rtengine::ProcEvent EvWBMult;
     std::vector<WBPreset> presets;
+
+    Gtk::Box *temp_warning_;
 };
 
-#endif

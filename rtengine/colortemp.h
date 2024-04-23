@@ -36,39 +36,18 @@ constexpr double INITIALBLACKBODY = 4000.0;
 
 
 class ColorTemp {
-
-private:
-    double temp;
-    double green;
-    double equal;
-    std::string method;
-    static void clip(double &temp, double &green);
-    static void clip(double &temp, double &green, double &equal);
-    void temp2mul(double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const;
-
 public:
-    ColorTemp() : temp(-1.), green(-1.), equal (1.), method("Custom") {}
-    explicit ColorTemp(double e) : temp(-1.), green(-1.), equal (e), method("Custom") {}
+    ColorTemp();
+    explicit ColorTemp(double e);
     ColorTemp(double t, double g, double e, const std::string &m);
     ColorTemp(double mulr, double mulg, double mulb, double e);
+    ColorTemp(double mulr, double mulg, double mulb);
 
-    void update(const double rmul, const double gmul, const double bmul, const double equal)
-    {
-        this->equal = equal;
-        mul2temp (rmul, gmul, bmul, this->equal, temp, green);
-    }
+    void update(const double rmul, const double gmul, const double bmul, const double equal);
     
-    void useDefaults(const double equal)
-    {
-        temp = 6504;    // Values copied from procparams.cc
-        green = 1.0;
-        this->equal = equal;
-    }
+    void useDefaults(const double equal);
 
-    inline std::string getMethod() const
-    {
-        return method;
-    }
+    bool clipped() const { return clipped_; }
     
     inline double getTemp() const
     {
@@ -85,23 +64,28 @@ public:
         return equal;
     }
 
-    void  getMultipliers(double &mulr, double &mulg, double &mulb) const
-    {
-        temp2mul(temp, green, equal, mulr, mulg, mulb);
-    }
+    void getMultipliers(double &mulr, double &mulg, double &mulb) const;
 
     void mul2temp(const double rmul, const double gmul, const double bmul, const double equal, double& temp, double& green) const;
 
-    bool operator==(const ColorTemp& other) const
-    {
-        return fabs(temp - other.temp) < 1e-10 && fabs(green - other.green) < 1e-10;
-    }
+    bool operator==(const ColorTemp& other) const;
+    bool operator!=(const ColorTemp& other) const;
 
-    bool operator!=(const ColorTemp& other) const
-    {
-        return !(*this == other);
-    }
-
+private:
+    void clip(double &temp, double &green) const;
+    void clip(double &temp, double &green, double &equal) const;
+    void temp2mul(double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const;
+    
+    enum Mode {
+        TEMP_TINT,
+        MULTIPLIERS
+    };
+    Mode mode_;
+    double temp;
+    double green;
+    double equal;
+    std::array<double, 3> mult_;
+    mutable bool clipped_;
 };
 
 } // namespace rtengine

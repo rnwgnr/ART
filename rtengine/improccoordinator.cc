@@ -349,7 +349,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                     imgsrc->getAutoWBMultipliers(rm, gm, bm);
     
                     if (rm != -1.) {
-                        autoWB.update(rm, gm, bm, params.wb.equal);
+                        //autoWB.update(rm, gm, bm, params.wb.equal);
+                        if (params.wb.equal == 1) {
+                            autoWB = ColorTemp(rm, gm, bm);
+                        } else {
+                            autoWB = ColorTemp(rm, gm, bm, params.wb.equal);
+                        }
                         lastAwbEqual = params.wb.equal;
                     } else {
                         lastAwbEqual = -1.;
@@ -365,7 +370,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
     
             if (params.wb.method == WBParams::AUTO && awbListener && params.wb.enabled) {
-                awbListener->WBChanged(params.wb.temperature, params.wb.green);
+                awbListener->WBChanged(currWB);
             }
     
             //setScale(scale);
@@ -620,7 +625,7 @@ void ImProcCoordinator::updateWB()
             double gm = params.wb.mult[1];
             double bm = params.wb.mult[2];
             imgsrc->wbCamera2Mul(rm, gm, bm);
-            currWB = ColorTemp(rm, gm, bm, 1.0);            
+            currWB = ColorTemp(rm, gm, bm);//, 1.0);            
         } break;
         case WBParams::AUTO:
         default:
@@ -1146,7 +1151,7 @@ void ImProcCoordinator::progress(Glib::ustring str, int pr)
       }*/
 }
 
-bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal)
+bool ImProcCoordinator::getAutoWB(ColorTemp &out, double equal)
 {
 
     if (imgsrc) {
@@ -1164,29 +1169,30 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal)
             }
         }
 
-        temp = autoWB.getTemp();
-        green = autoWB.getGreen();
+        // temp = autoWB.getTemp();
+        // green = autoWB.getGreen();
+        out = autoWB;
         return true;
     } else {
         //temp = autoWB.getTemp();
-        temp = -1.0;
-        green = -1.0;
+        // temp = -1.0;
+        // green = -1.0;
+        out = ColorTemp();
         return false;
     }
 }
 
-void ImProcCoordinator::getCamWB(double& temp, double& green)
+void ImProcCoordinator::getCamWB(ColorTemp &out)
 {
-
     if (imgsrc) {
-        temp = imgsrc->getWB().getTemp();
-        green = imgsrc->getWB().getGreen();
+        out = imgsrc->getWB();
+    } else {
+        out = rtengine::ColorTemp();
     }
 }
 
-void ImProcCoordinator::getSpotWB(int x, int y, int rect, double& temp, double& tgreen)
+void ImProcCoordinator::getSpotWB(int x, int y, int rect, ColorTemp &out)
 {
-
     ColorTemp ret;
 
     {
@@ -1210,11 +1216,13 @@ void ImProcCoordinator::getSpotWB(int x, int y, int rect, double& temp, double& 
     }
 
     if (ret.getTemp() > 0) {
-        temp = ret.getTemp();
-        tgreen = ret.getGreen();
+        out = ret;
+        // temp = ret.getTemp();
+        // tgreen = ret.getGreen();
     } else {
-        temp = currWB.getTemp();
-        tgreen = currWB.getGreen();
+        out = currWB;
+        // temp = currWB.getTemp();
+        // tgreen = currWB.getGreen();
     }
 }
 
@@ -1337,7 +1345,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
             double gm = params.wb.mult[1];
             double bm = params.wb.mult[2];
             imgsrc->wbCamera2Mul(rm, gm, bm);
-            currWB = ColorTemp(rm, gm, bm, 1.0);
+            currWB = ColorTemp(rm, gm, bm);//, 1.0);
         } break;
         }            
     }

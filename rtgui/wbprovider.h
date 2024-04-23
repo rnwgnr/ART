@@ -23,6 +23,7 @@
 #include <vector>
 #include <map>
 #include <glibmm.h>
+#include "../rtengine/rtengine.h"
 
 struct WBPreset {
     Glib::ustring label;
@@ -35,9 +36,9 @@ struct WBPreset {
 class WBProvider {
 public:
     virtual ~WBProvider() {}
-    virtual void getAutoWB (double& temp, double& green, double equal) {}
-    virtual void getCamWB (double& temp, double& green) {}
-    virtual void spotWBRequested (int size) {}
+    virtual void getAutoWB(rtengine::ColorTemp &out, double equal) {}
+    virtual void getCamWB(rtengine::ColorTemp &out) {}
+    virtual void spotWBRequested(int size) {}
     
     virtual std::vector<WBPreset> getWBPresets() const { return std::vector<WBPreset>(); }
     virtual void convertWBCam2Mul(double &rm, double &gm, double &bm) {}

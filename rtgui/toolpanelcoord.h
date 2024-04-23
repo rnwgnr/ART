@@ -286,16 +286,16 @@ public:
 
 
     // wbprovider interface
-    void getAutoWB (double& temp, double& green, double equal) override
+    void getAutoWB(rtengine::ColorTemp &out, double equal) override
     {
         if (ipc) {
-            ipc->getAutoWB (temp, green, equal);
+            ipc->getAutoWB(out, equal);
         }
     }
-    void getCamWB (double& temp, double& green) override
+    void getCamWB(rtengine::ColorTemp &out) override
     {
         if (ipc) {
-            ipc->getCamWB (temp, green);
+            ipc->getCamWB(out);
         }
     }
 

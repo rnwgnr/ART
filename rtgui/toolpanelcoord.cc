@@ -769,10 +769,9 @@ void ToolPanelCoordinator::spotWBselected(int x, int y, Thumbnail* thm)
     int hh = ipc->getFullHeight();
 
     if (x - rect > 0 && y - rect > 0 && x + rect < ww && y + rect < hh) {
-        double temp;
-        double green;
-        ipc->getSpotWB (x, y, rect, temp, green);
-        whitebalance->setWB (temp, green);
+        rtengine::ColorTemp ctemp;
+        ipc->getSpotWB(x, y, rect, ctemp);
+        whitebalance->setWB(ctemp);
     }
 }
 

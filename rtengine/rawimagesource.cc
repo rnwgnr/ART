@@ -902,9 +902,13 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         ctemp.getMultipliers(r, g, b);
         wbMul2Camera(r, g, b);
 
-        rm *= r;
-        gm *= g;
-        bm *= b;
+        if (r > 0 && g > 0 && b > 0) {
+            rm *= r;
+            gm *= g;
+            bm *= b;
+        } else if (plistener) {
+            plistener->error(M("ERROR_MSG_INVALID_WB"));
+        }
     }
     hlmax[0] = clmax[0] * rm;
     hlmax[1] = clmax[1] * gm;
@@ -1369,7 +1373,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
     double cam_r = imatrices.rgb_cam[0][0] * camwb_red + imatrices.rgb_cam[0][1] * camwb_green + imatrices.rgb_cam[0][2] * camwb_blue;
     double cam_g = imatrices.rgb_cam[1][0] * camwb_red + imatrices.rgb_cam[1][1] * camwb_green + imatrices.rgb_cam[1][2] * camwb_blue;
     double cam_b = imatrices.rgb_cam[2][0] * camwb_red + imatrices.rgb_cam[2][1] * camwb_green + imatrices.rgb_cam[2][2] * camwb_blue;
-    camera_wb = ColorTemp (cam_r, cam_g, cam_b, 1.); // as shot WB
+    camera_wb = ColorTemp (cam_r, cam_g, cam_b); //, 1.); // as shot WB
 
     // ColorTemp ReferenceWB;
     // double ref_r, ref_g, ref_b;
@@ -1479,19 +1483,23 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
 
         double rm, gm, bm;
         ColorTemp refwb;
+        bool wbok = false;
         if (wb.getTemp() > 0) {
             wb.getMultipliers(rm, gm, bm);
-            ref_pre_mul[0] = ri->get_pre_mul(0) / rm;
-            ref_pre_mul[1] = ri->get_pre_mul(1) / gm;
-            ref_pre_mul[2] = ri->get_pre_mul(2) / bm;
-            ref_pre_mul[3] = ref_pre_mul[1];
-            refwb = wb;
+            if (rm > 0 && gm > 0 && bm > 0) {
+                ref_pre_mul[0] = ri->get_pre_mul(0) / rm;
+                ref_pre_mul[1] = ri->get_pre_mul(1) / gm;
+                ref_pre_mul[2] = ri->get_pre_mul(2) / bm;
+                ref_pre_mul[3] = ref_pre_mul[1];
+                refwb = wb;
+                wbok = true;
+            }
         }
         refwb_red = ri->get_pre_mul(0) / ref_pre_mul[0];
         refwb_green = ri->get_pre_mul(1) / ref_pre_mul[1];
         refwb_blue = ri->get_pre_mul(2) / ref_pre_mul[2];
 
-        if (wb.getTemp() <= 0) {
+        if (!wbok) {
             rm = imatrices.rgb_cam[0][0] * refwb_red + imatrices.rgb_cam[0][1] * refwb_green + imatrices.rgb_cam[0][2] * refwb_blue;
             gm = imatrices.rgb_cam[1][0] * refwb_red + imatrices.rgb_cam[1][1] * refwb_green + imatrices.rgb_cam[1][2] * refwb_blue;
             bm = imatrices.rgb_cam[2][0] * refwb_red + imatrices.rgb_cam[2][1] * refwb_green + imatrices.rgb_cam[2][2] * refwb_blue;
@@ -1499,7 +1507,7 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
             
         if (settings->verbose) {
-            printf("Raw preprocessing white balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", refwb.getTemp(), refwb.getGreen(), rm, gm, bm, refwb_red, refwb_blue, refwb_green);
+            printf("Raw preprocessing white balance: temp %f, tint %f, multipliers [%f %f %f | %f %f %f]\n", refwb.getTemp(), refwb.getGreen(), rm, gm, bm, refwb_red, refwb_green, refwb_blue);
         }
     }
 
@@ -4478,7 +4486,12 @@ ColorTemp RawImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
         double gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
         double bm = imatrices.rgb_cam[2][0] * reds + imatrices.rgb_cam[2][1] * greens + imatrices.rgb_cam[2][2] * blues;
 
-        return ColorTemp (rm, gm, bm, equal);
+        //return ColorTemp (rm, gm, bm, equal);
+        if (equal == 1) {
+            return ColorTemp(rm, gm, bm);
+        } else {
+            return ColorTemp(rm, gm, bm, equal);
+        }
     }
 }
 

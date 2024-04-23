@@ -22,6 +22,7 @@
 #include "../rtengine/colortemp.h"
 
 #include <iomanip>
+#include <iostream>
 
 #include "rtimage.h"
 #include "options.h"
@@ -193,7 +194,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
 
     Gtk::HSeparator *separator = Gtk::manage (new  Gtk::HSeparator());
     separator->get_style_context()->add_class("grid-row-separator");
-    pack_start (*separator, Gtk::PACK_SHRINK, 0);
+    pack_start(*separator, Gtk::PACK_SHRINK, 0);
 
     Gtk::Image* itempL =  Gtk::manage (new RTImage ("circle-blue-small.png"));
     Gtk::Image* itempR =  Gtk::manage (new RTImage ("circle-yellow-small.png"));
@@ -202,17 +203,17 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     Gtk::Image* iblueredL = Gtk::manage (new RTImage ("circle-blue-small.png"));
     Gtk::Image* iblueredR = Gtk::manage (new RTImage ("circle-red-small.png"));
 
-    temp = Gtk::manage (new Adjuster (M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR, &wbSlider2Temp, &wbTemp2Slider));
-    green = Gtk::manage (new Adjuster (M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
+    temp = Gtk::manage(new Adjuster(M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR, &wbSlider2Temp, &wbTemp2Slider));
+    green = Gtk::manage (new Adjuster(M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
     green->setLogScale(100, 1, true);
-    equal = Gtk::manage (new Adjuster (M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR));
+    equal = Gtk::manage(new Adjuster(M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR, nullptr, nullptr, true));
     // cache_customTemp (0);
     // cache_customGreen (0);
     // cache_customEqual (0);
     equal->set_tooltip_markup (M("TP_WBALANCE_EQBLUERED_TOOLTIP"));
-    temp->show ();
-    green->show ();
-    equal->show ();
+    temp->show();
+    green->show();
+    equal->show();
 
     temp->delay = options.adjusterMaxDelay;
     green->delay = options.adjusterMaxDelay;
@@ -220,6 +221,17 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     
     tempBox = Gtk::manage(new Gtk::VBox());
 
+    temp_warning_ = Gtk::manage(new Gtk::HBox());
+    auto warnico = Gtk::manage(new RTImage("warning.png"));
+    auto warnlbl = Gtk::manage(new Gtk::Label(M("WARNING_INVALID_WB_TEMP_TINT")));
+    warnico->show();
+    warnlbl->show();
+    temp_warning_->pack_start(*warnico, Gtk::PACK_SHRINK);
+    temp_warning_->pack_start(*warnlbl, Gtk::PACK_EXPAND_WIDGET, 4);
+    setExpandAlignProperties(warnlbl, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    temp_warning_->hide();
+    
+    tempBox->pack_start(*temp_warning_);
     tempBox->pack_start(*temp);
     tempBox->pack_start(*green);
     tempBox->pack_start(*equal);
@@ -282,23 +294,25 @@ void WhiteBalance::enabledChanged()
 
 void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
 {
+    int m = getActiveMethod();
     {
-        int m = getActiveMethod();
         ConnectionBlocker blocker(methconn);
-        if (m <= int(WBParams::AUTO)) {
+        if (a == mult[0] || a == mult[1] || a == mult[2]) {
+            method->set_active(int(WBParams::CUSTOM_MULT));
+        } else if (m <= int(WBParams::AUTO)) {
             method->set_active(int(WBParams::CUSTOM_TEMP));
         }
     }
 
-    updateMethodGui();
+    syncSliders(a == mult[0] || a == mult[1] || a == mult[2]);
     
     if (listener && getEnabled()) {
         if (a == temp) {
-            listener->panelChanged (EvWBTemp, Glib::ustring::format ((int)a->getValue()));
+            listener->panelChanged(EvWBTemp, Glib::ustring::format ((int)a->getValue()));
         } else if (a == green) {
-            listener->panelChanged (EvWBGreen, Glib::ustring::format (std::setw(4), std::fixed, std::setprecision(3), a->getValue()));
+            listener->panelChanged(EvWBGreen, Glib::ustring::format (std::setw(4), std::fixed, std::setprecision(3), a->getValue()));
         } else if (a == equal) {
-            listener->panelChanged (EvWBequal, Glib::ustring::format (std::setw(4), std::fixed, std::setprecision(3), a->getValue()));
+            listener->panelChanged(EvWBequal, Glib::ustring::format (std::setw(4), std::fixed, std::setprecision(3), a->getValue()));
         } else if (a == mult[0] || a == mult[1] || a == mult[2]) {
             listener->panelChanged(EvWBMult, Glib::ustring::compose("%1 %2 %3", mult[0]->getTextValue(), mult[1]->getTextValue(), mult[2]->getTextValue()));
         }
@@ -316,9 +330,10 @@ void WhiteBalance::methodChanged()
     int m = getActiveMethod();
     auto row = *(method->get_active());
     int preset = row[methodColumns.colPreset];
-    bool update_scale = true;
+    // bool update_scale = false;//true;
 
     disableListener();
+    bool check_temp = false;
 
     if (preset >= 0) {
         ConnectionBlocker methblock(methconn);
@@ -326,22 +341,30 @@ void WhiteBalance::methodChanged()
         for (int i = 0; i < 3; ++i) {
             mult[i]->setValue(presets[preset].mult[i]);
         }
+        syncSliders(true);
+        method->set_active(WBParams::CUSTOM_TEMP);
+        check_temp = true;
     }
 
     Glib::ustring label;
+    
     switch (m) {
     case int(WBParams::CAMERA): {
         if (wbp) {
-            double ctemp, cgreen;
-            wbp->getCamWB(ctemp, cgreen);
-            temp->setValue(ctemp);
-            green->setValue(cgreen);
-            equal->setValue(1.0);
+            rtengine::ColorTemp ct;
+            wbp->getCamWB(ct);
+            double m[3];
+            ct.getMultipliers(m[0], m[1], m[2]);
+            wbp->convertWBMul2Cam(m[0], m[1], m[2]);
+            for (int i = 0; i < 3; ++i) {
+                mult[i]->setValue(m[i]);
+            }
+            syncSliders(true);
+            check_temp = true;
         }
     } break;
     case int(WBParams::CUSTOM_TEMP):
     case int(WBParams::CUSTOM_MULT):
-        update_scale = false;
         break;
     default:
         break;
@@ -351,15 +374,11 @@ void WhiteBalance::methodChanged()
         label = M(labels[m]);
     }
 
-    if (update_scale) {
-        green->setLogScale(100, green->getValue(), true);
+    if (m != int(WBParams::AUTO)) {
+        updateMethodGui(check_temp);
     }
 
-    updateMethodGui();
-
     if (preset >= 0) {
-        method->set_active(WBParams::CUSTOM_TEMP);
-        updateMethodGui();
         label = M("TP_WBALANCE_PRESET") + ": " + presets[preset].label;
     }
     
@@ -408,59 +427,49 @@ void WhiteBalance::read(const ProcParams* pp)
         mult[i]->setValue(m[i]);
     }
 
-    if (pp->wb.method == WBParams::CAMERA) {
-        if (wbp) {
-            double ctemp = -1.0;
-            double cgreen = -1.0;
-            wbp->getCamWB(ctemp, cgreen);
-
-            if (ctemp != -1.0) {
-                temp->setValue(ctemp);
-                green->setValue(cgreen);
-                equal->setValue(1.);
-            }
-        }
-    }
+    bool check_temp = true;
 
     switch (pp->wb.method) {
+    case WBParams::CAMERA:
+        if (wbp) {
+            rtengine::ColorTemp ctemp;
+            wbp->getCamWB(ctemp);
+            double m[3];
+            ctemp.getMultipliers(m[0], m[1], m[2]);
+            wbp->convertWBMul2Cam(m[0], m[1], m[2]);
+            for (int i = 0; i < 3; ++i) {
+                mult[i]->setValue(m[i]);
+            }
+            syncSliders(true);
+        }
+        break;
+    case WBParams::CUSTOM_TEMP:
+        check_temp = false;
+        break;
     case WBParams::AUTO:
         break;
-    case WBParams::CUSTOM_MULT: {
-        if (wbp) {
-            wbp->convertWBCam2Mul(m[0], m[1], m[2]);
-        }
-        rtengine::ColorTemp ct(m[0], m[1], m[2], 1.0);
-        equal->setValue(1.0);
-        temp->setValue(ct.getTemp());
-        green->setValue(ct.getGreen());
-    } break;
+    case WBParams::CUSTOM_MULT:
+        syncSliders(true);
+        break;
     case WBParams::CUSTOM_MULT_LEGACY: {
         rtengine::ColorTemp ct(m[0], m[1], m[2], 1.0);
-        equal->setValue(1.0);
-        temp->setValue(ct.getTemp());
-        green->setValue(ct.getGreen());
         if (wbp) {
             wbp->convertWBMul2Cam(m[0], m[1], m[2]);
             for (int i = 0; i < 3; ++i) {
                 mult[i]->setValue(m[i]);
             }
+            syncSliders(true);
         }
     } break;
-    default: {
-        rtengine::ColorTemp ct(temp->getValue(), green->getValue(), equal->getValue(), "Custom");
-        ct.getMultipliers(m[0], m[1], m[2]);
-        if (wbp) {
-            wbp->convertWBMul2Cam(m[0], m[1], m[2]);
-        }
-        for (int i = 0; i < 3; ++i) {
-            mult[i]->setValue(m[i]);
-        }
-    } break;
+    default:
+        syncSliders(false);
+        break;
     }
 
+    equal->set_visible(equal->getValue() != 1);
+
     setEnabled(pp->wb.enabled);
-    green->setLogScale(100, green->getValue(), true);
-    updateMethodGui();
+    updateMethodGui(check_temp);
 
     enableListener();
 }
@@ -471,8 +480,8 @@ void WhiteBalance::write(ProcParams* pp)
     pp->wb.enabled = getEnabled();
     pp->wb.method = WBParams::Type(getActiveMethod());
     pp->wb.temperature = temp->getIntValue ();
-    pp->wb.green = green->getValue ();
-    pp->wb.equal = equal->getValue ();
+    pp->wb.green = green->getValue();
+    pp->wb.equal = equal->getValue();
     for (int i = 0; i < 3; ++i) {
         pp->wb.mult[i] = mult[i]->getValue();
     }
@@ -485,14 +494,13 @@ void WhiteBalance::setDefaults(const ProcParams* defParams)
     equal->setDefault (defParams->wb.equal);
 
     if (wbp && defParams->wb.method == WBParams::CAMERA) {
-        double ctemp;
-        double cgreen;
-        wbp->getCamWB(ctemp, cgreen);
+        rtengine::ColorTemp ctemp;
+        wbp->getCamWB(ctemp);
 
         // FIXME: Seems to be always -1.0, called too early? Broken!
-        if (ctemp != -1.0) {
-            temp->setDefault(ctemp);
-            green->setDefault(cgreen);
+        if (ctemp.getTemp() > 0) {
+            temp->setDefault(ctemp.getTemp());
+            green->setDefault(ctemp.getGreen());
         }
     } else {
         temp->setDefault(defParams->wb.temperature);
@@ -514,21 +522,13 @@ int WhiteBalance::getSize ()
 }
 
 
-void WhiteBalance::setWB(int vtemp, double vgreen)
+void WhiteBalance::setWB(rtengine::ColorTemp ctemp)
 {
     disableListener();
-    int m = getActiveMethod();
-    {
-        ConnectionBlocker methblocker(methconn);
-        if (m <= int(WBParams::AUTO)) {
-            method->set_active(int(WBParams::CUSTOM_TEMP));
-        }
-    }
+    ConnectionBlocker methblocker(methconn);
+//    int m = getActiveMethod();
+    method->set_active(int(WBParams::CUSTOM_TEMP));
     setEnabled(true);
-    temp->setValue(vtemp);
-    green->setValue(vgreen);
-    double e = m == int(WBParams::CUSTOM_MULT) ? 1.0 : equal->getValue();
-    rtengine::ColorTemp ctemp(vtemp, vgreen, e, "Custom");
     double mm[3];
     ctemp.getMultipliers(mm[0], mm[1], mm[2]);
     if (wbp) {
@@ -537,13 +537,19 @@ void WhiteBalance::setWB(int vtemp, double vgreen)
     for (int i = 0; i < 3; ++i) {
         mult[i]->setValue(mm[i]);
     }
-    updateMethodGui();
+    syncSliders(true);
+    updateMethodGui(true);
+    enableListener();
 
     if (listener) {
-        listener->panelChanged (EvWBTemp, Glib::ustring::compose("%1, %2", (int)temp->getValue(), Glib::ustring::format (std::setw(4), std::fixed, std::setprecision(3), green->getValue())));
+        if (tempBox->is_visible()) {
+            listener->panelChanged(EvWBTemp, Glib::ustring::compose("%1, %2", (int)temp->getValue(), green->getTextValue()));
+        } else {
+            listener->panelChanged(EvWBMult, Glib::ustring::compose("%1 %2 %3", mult[0]->getTextValue(), mult[1]->getTextValue(), mult[2]->getTextValue()));
+        }
     }
 
-    green->setLogScale(100, vgreen, true);
+    // green->setLogScale(100, vgreen, true);
 }
 
 
@@ -558,18 +564,15 @@ void WhiteBalance::trimValues (rtengine::procparams::ProcParams* pp)
 }
 
 
-void WhiteBalance::WBChanged(double temperature, double greenVal)
+void WhiteBalance::WBChanged(rtengine::ColorTemp ctemp)
 {
     idle_register.add(
-        [this, temperature, greenVal]() -> bool
+        [this, ctemp]() -> bool
         {
             disableListener();
             setEnabled(true);
-            temp->setValue(temperature);
-            green->setValue(greenVal);
-            temp->setDefault(temperature);
-            green->setDefault(greenVal);
-            rtengine::ColorTemp ctemp(temperature, greenVal, equal->getValue(), "Custom");
+            temp->setDefault(ctemp.getTemp());
+            green->setDefault(ctemp.getGreen());
             double m[3];
             ctemp.getMultipliers(m[0], m[1], m[2]);
             if (wbp) {
@@ -578,8 +581,10 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
             for (int i = 0; i < 3; ++i) {
                 mult[i]->setValue(m[i] / m[1]);
             }
+            syncSliders(true);
+            updateMethodGui(true);
             enableListener();
-            green->setLogScale(100, greenVal, true);
+            // green->setLogScale(100, greenVal, true);
 
             return false;
         }
@@ -587,37 +592,71 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
 }
 
 
-void WhiteBalance::updateMethodGui()
+void WhiteBalance::syncSliders(bool from_mult)
 {
-    if (getActiveMethod() == int(WBParams::CUSTOM_MULT)) {
-        tempBox->hide();
-        multBox->show();
+    if (!wbp) {
+        return;
+    }
 
-        disableListener();
+    temp_warning_->hide();
+    
+    disableListener();
+    if (from_mult) {
         double m[3] = { mult[0]->getValue(), mult[1]->getValue(), mult[2]->getValue() };
-        if (wbp) {
-            wbp->convertWBCam2Mul(m[0], m[1], m[2]);
-        }
-        rtengine::ColorTemp ct(m[0], m[1], m[2], 1.0);
+        wbp->convertWBCam2Mul(m[0], m[1], m[2]);
+        rtengine::ColorTemp ct(m[0], m[1], m[2]);
         temp->setValue(ct.getTemp());
         green->setValue(ct.getGreen());
         equal->setValue(1.0);
-        enableListener();
-    } else {
-        tempBox->show();
-        multBox->hide();
 
-        disableListener();
-        rtengine::ColorTemp ct(temp->getValue(), green->getValue(), equal->getValue(), "Custom");
+        rtengine::ColorTemp ct2(ct.getTemp(), ct.getGreen(), 1.0, "");
+        double m2[3];
+        ct2.getMultipliers(m2[0], m2[1], m2[2]);
+        if (rtengine::max(std::abs(m[0]-m2[0]), std::abs(m[1]-m2[1]), std::abs(m[2]-m2[2])) > 1e-2) {
+            temp_warning_->show();
+        }
+    } else {
+        rtengine::ColorTemp ct(temp->getValue(), green->getValue(), equal->getValue(), "");
         double m[3];
         ct.getMultipliers(m[0], m[1], m[2]);
-        if (wbp) {
-            wbp->convertWBMul2Cam(m[0], m[1], m[2]);
-        }
+        wbp->convertWBMul2Cam(m[0], m[1], m[2]);
         for (int i = 0; i < 3; ++i) {
-            mult[i]->setValue(m[i] / m[1]);
+            mult[i]->setValue(m[i]);
         }
-        enableListener();
+    }
+    enableListener();
+}
+
+
+void WhiteBalance::updateMethodGui(bool check_temp)
+{
+//    temp_warning_->hide();
+    switch (getActiveMethod()) {
+    case int(WBParams::CAMERA):
+    case int(WBParams::AUTO):
+    case int(WBParams::CUSTOM_TEMP):
+        multBox->hide();
+        tempBox->show();
+        if (check_temp && wbp) {
+            rtengine::ColorTemp ct1(temp->getValue(), green->getValue(), equal->getValue(), "");
+            double m1[3];
+            ct1.getMultipliers(m1[0], m1[1], m1[2]);
+            double m2[3] = { mult[0]->getValue(), mult[1]->getValue(), mult[2]->getValue() };
+            wbp->convertWBCam2Mul(m2[0], m2[1], m2[2]);
+            if (rtengine::max(std::abs(m1[0]-m2[0]), std::abs(m1[1]-m2[1]), std::abs(m1[2]-m2[2])) > 1e-2) {
+                multBox->show();
+                tempBox->hide();
+                ConnectionBlocker methblocker(methconn);
+                if (getActiveMethod() == int(WBParams::CUSTOM_TEMP)) {
+                    method->set_active(int(WBParams::CUSTOM_MULT));
+                }
+            }
+        }
+        break;
+    default:
+        tempBox->hide();
+        multBox->show();
+        break;
     }
 }
 

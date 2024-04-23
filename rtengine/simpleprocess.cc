@@ -204,7 +204,7 @@ private:
                 double gm = params.wb.mult[1];
                 double bm = params.wb.mult[2];
                 imgsrc->wbCamera2Mul(rm, gm, bm);
-                currWB = ColorTemp(rm, gm, bm, 1.0);
+                currWB = ColorTemp(rm, gm, bm);//, 1.0);
             }  break;
             case WBParams::AUTO:
             default:

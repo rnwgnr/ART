@@ -66,6 +66,7 @@ ERROR_MSG_METADATA_VALUE;Metadata: error setting %1 to %2
 ERROR_MSG_INVALID_PROFILE;Invalid profile: %1
 ERROR_MSG_INVALID_PSF;Invalid PSF file: %1
 ERROR_MSG_INVALID_LUT_PARAMS;Invalid LUT parameters for: %1
+ERROR_MSG_INVALID_WB;Invalid white balance coefficients
 EXIFFILTER_APERTURE;Aperture
 EXIFFILTER_CAMERA;Camera
 EXIFFILTER_DATE;Date
@@ -1976,6 +1977,7 @@ TP_WBALANCE_SIZE;Size:
 TP_WBALANCE_SPOTWB;Use the pipette to pick the white balance from a neutral patch in the preview.
 TP_WBALANCE_TEMPERATURE;Temperature
 TP_WBALANCE_PRESET;Camera preset
+WARNING_INVALID_WB_TEMP_TINT;Warning: temperature or tint out of range
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Open (new) detail window
 ZOOMPANEL_ZOOM100;Zoom to 100%\nShortcut: <b>z</b>

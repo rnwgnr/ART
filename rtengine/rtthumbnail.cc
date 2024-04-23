@@ -244,14 +244,14 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
     int n = 0;
 
     if (n > 0) {
-        ColorTemp cTemp;
+        // ColorTemp cTemp;
 
         tpp->redAWBMul   = avg_r / double (n);
         tpp->greenAWBMul = avg_g / double (n);
         tpp->blueAWBMul  = avg_b / double (n);
-        tpp->wbEqual = wbEq;
+        // tpp->wbEqual = wbEq;
 
-        cTemp.mul2temp (tpp->redAWBMul, tpp->greenAWBMul, tpp->blueAWBMul, tpp->wbEqual, tpp->autoWBTemp, tpp->autoWBGreen);
+        // cTemp.mul2temp (tpp->redAWBMul, tpp->greenAWBMul, tpp->blueAWBMul, tpp->wbEqual, tpp->autoWBTemp, tpp->autoWBGreen);
     }
 
     tpp->init ();
@@ -757,10 +757,10 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, eSensorType &sens
         tpp->redAWBMul   = ri->get_rgb_cam (0, 0) * reds + ri->get_rgb_cam (0, 1) * greens + ri->get_rgb_cam (0, 2) * blues;
         tpp->greenAWBMul = ri->get_rgb_cam (1, 0) * reds + ri->get_rgb_cam (1, 1) * greens + ri->get_rgb_cam (1, 2) * blues;
         tpp->blueAWBMul  = ri->get_rgb_cam (2, 0) * reds + ri->get_rgb_cam (2, 1) * greens + ri->get_rgb_cam (2, 2) * blues;
-        tpp->wbEqual = wbEq;
+        // tpp->wbEqual = wbEq;
 
-        ColorTemp cTemp;
-        cTemp.mul2temp (tpp->redAWBMul, tpp->greenAWBMul, tpp->blueAWBMul, tpp->wbEqual, tpp->autoWBTemp, tpp->autoWBGreen);
+        // ColorTemp cTemp;
+        // cTemp.mul2temp (tpp->redAWBMul, tpp->greenAWBMul, tpp->blueAWBMul, tpp->wbEqual, tpp->autoWBTemp, tpp->autoWBGreen);
     }
 
     if (rotate && ri->get_rotateDegree() > 0) {
@@ -809,9 +809,9 @@ Thumbnail::Thumbnail () :
     redAWBMul (-1.0),
     greenAWBMul (-1.0),
     blueAWBMul (-1.0),
-    autoWBTemp (2700),
-    autoWBGreen (1.0),
-    wbEqual (-1.0),
+    // autoWBTemp (2700),
+    // autoWBGreen (1.0),
+    // wbEqual (-1.0),
     embProfileLength (0),
     embProfileData (nullptr),
     embProfile (nullptr),
@@ -881,13 +881,13 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
 {
     std::string camName = metadata->getCamera();
     
-    // check if the WB's equalizer value has changed
-    if (wbEqual < (params.wb.equal - 5e-4) || wbEqual > (params.wb.equal + 5e-4)) {
-        wbEqual = params.wb.equal;
-        // recompute the autoWB
-        ColorTemp cTemp;
-        cTemp.mul2temp (redAWBMul, greenAWBMul, blueAWBMul, wbEqual, autoWBTemp, autoWBGreen);
-    }
+    // // check if the WB's equalizer value has changed
+    // if (wbEqual < (params.wb.equal - 5e-4) || wbEqual > (params.wb.equal + 5e-4)) {
+    //     wbEqual = params.wb.equal;
+    //     // recompute the autoWB
+    //     ColorTemp cTemp;
+    //     cTemp.mul2temp (redAWBMul, greenAWBMul, blueAWBMul, wbEqual, autoWBTemp, autoWBGreen);
+    // }
 
     // compute WB multipliers
     ColorTemp currWB;
@@ -907,9 +907,10 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
         double cam_r = colorMatrix[0][0] * cr + colorMatrix[0][1] * cg + colorMatrix[0][2] * cb;
         double cam_g = colorMatrix[1][0] * cr + colorMatrix[1][1] * cg + colorMatrix[1][2] * cb;
         double cam_b = colorMatrix[2][0] * cr + colorMatrix[2][1] * cg + colorMatrix[2][2] * cb;
-        currWB = ColorTemp (cam_r, cam_g, cam_b, params.wb.equal);
+        currWB = ColorTemp (cam_r, cam_g, cam_b);//, params.wb.equal);
     } else if (params.wb.method == WBParams::AUTO) {
-        currWB = ColorTemp (autoWBTemp, autoWBGreen, wbEqual, "Custom");
+        //currWB = ColorTemp (autoWBTemp, autoWBGreen, wbEqual, "Custom");
+        currWB = ColorTemp(redAWBMul, greenAWBMul, blueAWBMul);
     } else if (params.wb.method == WBParams::CUSTOM_TEMP) {
         currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, "Custom");
     } else if (params.wb.method == WBParams::CUSTOM_MULT_LEGACY) {
@@ -1123,30 +1124,32 @@ void Thumbnail::getDimensions (int& w, int& h, double& scaleFac)
     }
 }
 
-void Thumbnail::getCamWB (double& temp, double& green)
+void Thumbnail::getCamWB(ColorTemp &out)
 {
 
     double cam_r = colorMatrix[0][0] * camwbRed + colorMatrix[0][1] * camwbGreen + colorMatrix[0][2] * camwbBlue;
     double cam_g = colorMatrix[1][0] * camwbRed + colorMatrix[1][1] * camwbGreen + colorMatrix[1][2] * camwbBlue;
     double cam_b = colorMatrix[2][0] * camwbRed + colorMatrix[2][1] * camwbGreen + colorMatrix[2][2] * camwbBlue;
     ColorTemp currWB = ColorTemp (cam_r, cam_g, cam_b, 1.0);  // we do not take the equalizer into account here, because we want camera's WB
-    temp = currWB.getTemp ();
-    green = currWB.getGreen ();
+    // temp = currWB.getTemp ();
+    // green = currWB.getGreen ();
+    out = currWB;
 }
 
-void Thumbnail::getAutoWB (double& temp, double& green, double equal)
+
+void Thumbnail::getAutoWB(ColorTemp &out, double equal)
 {
-
-    if (equal != wbEqual) {
+    // if (equal != wbEqual) {
         // compute the values depending on equal
-        ColorTemp cTemp;
-        wbEqual = equal;
-        // compute autoWBTemp and autoWBGreen
-        cTemp.mul2temp (redAWBMul, greenAWBMul, blueAWBMul, wbEqual, autoWBTemp, autoWBGreen);
-    }
+    ColorTemp cTemp(redAWBMul, greenAWBMul, blueAWBMul);
+    //     wbEqual = equal;
+    //     // compute autoWBTemp and autoWBGreen
+    //     cTemp.mul2temp (redAWBMul, greenAWBMul, blueAWBMul, wbEqual, autoWBTemp, autoWBGreen);
+    // // }
 
-    temp = autoWBTemp;
-    green = autoWBGreen;
+    // temp = autoWBTemp;
+    // green = autoWBGreen;
+        out = cTemp;
 }
 
 void Thumbnail::getAutoWBMultipliers (double& rm, double& gm, double& bm)
@@ -1157,7 +1160,7 @@ void Thumbnail::getAutoWBMultipliers (double& rm, double& gm, double& bm)
 }
 
 
-void Thumbnail::getSpotWB (const procparams::ProcParams& params, int xp, int yp, int rect, double& rtemp, double& rgreen)
+void Thumbnail::getSpotWB(const procparams::ProcParams& params, int xp, int yp, int rect, ColorTemp &out)
 {
 
     std::vector<Coord2D> points, red, green, blue;
@@ -1190,8 +1193,9 @@ void Thumbnail::getSpotWB (const procparams::ProcParams& params, int xp, int yp,
     double bm = colorMatrix[2][0] * reds + colorMatrix[2][1] * greens + colorMatrix[2][2] * blues;
 
     ColorTemp ct (rm, gm, bm, params.wb.equal);
-    rtemp = ct.getTemp ();
-    rgreen = ct.getGreen ();
+    // rtemp = ct.getTemp ();
+    // rgreen = ct.getGreen ();
+    out = ct;
 }
 
 
