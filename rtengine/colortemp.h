@@ -23,6 +23,7 @@
 #include <cmath>
 #include <map>
 #include <string>
+#include <array>
 
 namespace rtengine {
 
