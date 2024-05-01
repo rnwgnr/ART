@@ -823,6 +823,13 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 profile_data = new char[profile_length];
                 memcpy(profile_data, libraw_->imgdata.color.profile, profile_length);
             }
+
+            if (isBayer() && RT_blacklevel_from_constant == ThreeValBool::T && max(black, cblack[0], cblack[1], cblack[2], cblack[3]) == 0) {
+                auto &black_stat = libraw_->imgdata.color.black_stat;
+                for (int i = 0; i < 4; ++i) {
+                    cblack[i] = black_stat[i] / (1+black_stat[i+4]);
+                }
+            }
 #endif // ART_USE_LIBRAW
         }
 

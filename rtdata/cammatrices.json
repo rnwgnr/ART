@@ -2310,7 +2310,7 @@ XIAOMI 14 ULTRA REAR WIDE CAMERA
         "dcraw_matrix" : [5329, -1459, -390, -5407, 12930, 2768, -1119, 1772, 6046]
     },
     {
-        "make_model" : "HASSELBLAD 100-20-COATED6",
+        "make_model" : ["HASSELBLAD 100-20-COATED6-FFF", "HASSELBLAD 100-20-COATED6-3FR"],
         "dcraw_matrix" : [6468, -1899, -545, -4526, 12266, 2542, -388, 1276, 6096]
     },
     {
