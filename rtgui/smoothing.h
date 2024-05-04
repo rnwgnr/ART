@@ -76,6 +76,8 @@ private:
     rtengine::ProcEvent EvOffset;
     rtengine::ProcEvent EvNoiseStrength;
     rtengine::ProcEvent EvNoiseCoarseness;
+    rtengine::ProcEvent EvHalationSize;
+    rtengine::ProcEvent EvHalationColor;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -111,6 +113,8 @@ private:
     Adjuster *offset;
     Adjuster *noise_strength;
     Adjuster *noise_coarseness;
+    Adjuster *halation_size;
+    Adjuster *halation_color;
     Gtk::VBox *box;
     Gtk::HBox *chan_box;
     Gtk::VBox *guided_box;
@@ -118,6 +122,7 @@ private:
     Gtk::VBox *nl_box;
     Gtk::VBox *lens_motion_box;
     Gtk::VBox *noise_box;
+    Gtk::VBox *halation_box;
 
     rtengine::procparams::SmoothingParams initial_params;
 };

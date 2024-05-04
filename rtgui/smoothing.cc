@@ -165,6 +165,10 @@ public:
             return Glib::ustring::compose(
                 "%3: %1 %2 [%4]", r.noise_strength, r.noise_coarseness,
                 M("TP_SMOOTHING_MODE_NOISE"), ch);
+        case SmoothingParams::Region::Mode::HALATION:
+            return Glib::ustring::compose(
+                "%3: %1 %2", r.halation_size, r.halation_color,
+                M("TP_SMOOTHING_MODE_HALATION"));
         default:
             return "";
         }
@@ -207,6 +211,8 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     EvOffset = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_OFFSET");
     EvNoiseStrength = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_NOISE_STRENGTH");
     EvNoiseCoarseness = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_NOISE_COARSENESS");
+    EvHalationSize = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_HALATION_SIZE");
+    EvHalationColor = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_HALATION_COLOR");
 
     EvList = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_SMOOTHING_PARAMETRICMASK");
@@ -234,6 +240,7 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     mode->append(M("TP_SMOOTHING_MODE_MOTION"));
     mode->append(M("TP_SMOOTHING_MODE_LENS"));
     mode->append(M("TP_SMOOTHING_MODE_NOISE"));
+    mode->append(M("TP_SMOOTHING_MODE_HALATION"));
     mode->set_active(0);
     mode->signal_changed().connect(sigc::mem_fun(*this, &Smoothing::modeChanged));
     Gtk::HBox *hb = Gtk::manage(new Gtk::HBox());
@@ -299,12 +306,22 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     noise_coarseness = Gtk::manage(new Adjuster(M("TP_SMOOTHING_NOISE_COARSENESS"), 0, 100, 1, 30));
     noise_coarseness->setAdjusterListener(this);
     noise_box->pack_start(*noise_coarseness);
+
+    halation_box = Gtk::manage(new Gtk::VBox());
+    halation_size = Gtk::manage(new Adjuster(M("TP_SMOOTHING_HALATION_SIZE"), 0.001, 5, 0.01, 1));
+    halation_size->setLogScale(5, 1, true);
+    halation_size->setAdjusterListener(this);
+    halation_box->pack_start(*halation_size);
+    halation_color = Gtk::manage(new Adjuster(M("TP_SMOOTHING_HALATION_COLOR"), -0.5, 0.5, 0.001, 0));
+    halation_color->setAdjusterListener(this);
+    halation_box->pack_start(*halation_color);
     
     box->pack_start(*guided_box);
     box->pack_start(*gaussian_box);
     box->pack_start(*nl_box);
     box->pack_start(*lens_motion_box);
     box->pack_start(*noise_box);
+    box->pack_start(*halation_box);
 
     iterations = Gtk::manage(new Adjuster(M("TP_SMOOTHING_ITERATIONS"), 1, 10, 1, 1));
     iterations->setAdjusterListener(this);
@@ -329,6 +346,8 @@ Smoothing::Smoothing(): FoldableToolPanel(this, "smoothing", M("TP_SMOOTHING_LAB
     offset->delay = options.adjusterMaxDelay;
     noise_strength->delay = options.adjusterMaxDelay;
     noise_coarseness->delay = options.adjusterMaxDelay;
+    halation_size->delay = options.adjusterMaxDelay;
+    halation_color->delay = options.adjusterMaxDelay;
 
     labMasksContentProvider.reset(new SmoothingMasksContentProvider(this));
     labMasks = Gtk::manage(new LabMasksPanel(labMasksContentProvider.get()));
@@ -386,6 +405,8 @@ void Smoothing::setDefaults(const ProcParams *defParams)
     offset->setDefault(defParams->smoothing.regions[0].offset);
     noise_strength->setDefault(defParams->smoothing.regions[0].noise_strength);
     noise_coarseness->setDefault(defParams->smoothing.regions[0].noise_coarseness);
+    halation_size->setDefault(defParams->smoothing.regions[0].halation_size);
+    halation_color->setDefault(defParams->smoothing.regions[0].halation_color);
 
     initial_params = defParams->smoothing;
 }
@@ -422,7 +443,11 @@ void Smoothing::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvNoiseStrength, a->getTextValue());
         } else if (a == noise_coarseness) {
             listener->panelChanged(EvNoiseCoarseness, a->getTextValue());
-        }
+        } else if (a == halation_size) {
+            listener->panelChanged(EvHalationSize, a->getTextValue());
+        } else if (a == halation_color) {
+            listener->panelChanged(EvHalationColor, a->getTextValue());
+        }            
     }
 }
 
@@ -488,6 +513,8 @@ void Smoothing::regionGet(int idx)
     r.curvature = curvature->getValue();
     r.noise_strength = noise_strength->getValue();
     r.noise_coarseness = noise_coarseness->getValue();
+    r.halation_size = halation_size->getValue();
+    r.halation_color = halation_color->getValue();
 }
 
 
@@ -514,6 +541,8 @@ void Smoothing::regionShow(int idx)
     curvature->setValue(r.curvature);
     noise_strength->setValue(r.noise_strength);
     noise_coarseness->setValue(r.noise_coarseness);
+    halation_size->setValue(r.halation_size);
+    halation_color->setValue(r.halation_color);
     
     if (disable) {
         enableListener();
@@ -537,6 +566,7 @@ void Smoothing::modeChanged()
     guided_box->hide();
     lens_motion_box->hide();
     noise_box->hide();
+    halation_box->hide();
     if (r == 0) {
         guided_box->show();
     } else if (r == 1 || r == 2) {
@@ -545,6 +575,8 @@ void Smoothing::modeChanged()
         nl_box->show();
     } else if (r == 6) {
         noise_box->show();
+    } else if (r == 7) {
+        halation_box->show();
     } else {
         guided_box->show();
         lens_motion_box->show();

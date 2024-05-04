@@ -1252,7 +1252,8 @@ struct SmoothingParams {
             NLMEANS,
             MOTION,
             LENS,
-            NOISE
+            NOISE,
+            HALATION
         };
         Mode mode;
         Channel channel;
@@ -1269,6 +1270,8 @@ struct SmoothingParams {
         double offset;
         int noise_strength;
         int noise_coarseness;
+        double halation_size;
+        double halation_color;
 
         Region();
         bool operator==(const Region &other) const;

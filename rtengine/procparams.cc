@@ -2667,7 +2667,9 @@ SmoothingParams::Region::Region():
     curvature(0),
     offset(0),
     noise_strength(10),
-    noise_coarseness(30)
+    noise_coarseness(30),
+    halation_size(1.0),
+    halation_color(0.0)
 {
 }
 
@@ -2688,7 +2690,9 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && curvature == other.curvature
         && offset == other.offset
         && noise_strength == other.noise_strength
-        && noise_coarseness == other.noise_coarseness;
+        && noise_coarseness == other.noise_coarseness
+        && halation_size == other.halation_size
+        && halation_color == other.halation_color;
 }
 
 
@@ -3925,6 +3929,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("Offset_") + n, r.offset, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("NoiseStrength_") + n, r.noise_strength, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("NoiseCoarseness_") + n, r.noise_coarseness, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("HalationSize_") + n, r.halation_size, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("HalationColor_") + n, r.halation_color, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
@@ -5258,6 +5264,14 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     done = false;
                 }
                 if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("NoiseCoarseness_") + n, cur.noise_coarseness)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("HalationSize_") + n, cur.halation_size)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("HalationColor_") + n, cur.halation_color)) {
                     found = true;
                     done = false;
                 }

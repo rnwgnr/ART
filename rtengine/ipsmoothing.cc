@@ -627,6 +627,60 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
 }
 
 
+// adapted from https://github.com/hotgluebanjo/halation-dctl
+void halation(array2D<float> &R, array2D<float> &G, array2D<float> &B, int size, float color, bool multithread)
+{
+    if (size <= 0) {
+        return;
+    }
+    
+    array2D<float> kernel(2*size+1, 2*size+1);
+    float radius = size;
+
+    for (int i = -size, y = 0; i <= size; ++i, ++y) {
+        for (int j = -size, x = 0; j <= size; ++j, ++x) {
+            float dist = SQR(i) + SQR(j);
+            float e = dist == 0.f ? 1.f : 1.f / dist;
+            kernel[y][x] = e * std::max((radius - std::sqrt(dist)) / radius, 0.f);
+        }
+    }
+    
+    normalize(kernel, compute_norm(kernel));
+
+    const int W = R.width();
+    const int H = R.height();
+
+    Convolution conv(kernel, W, H, multithread);
+    array2D<float> hR(W, H);
+    array2D<float> hG(W, H);
+    array2D<float> hB(W, H);
+    conv(R, hR);
+    conv(G, hG);
+    conv(B, hB);
+
+    constexpr float cR = 0.7f;
+    const float cG = 1.f - color / 3.f;
+    constexpr float cB = 1.f;
+
+    const auto halate =
+        [](float &rgb, float blurred, float color) -> void
+        {
+            float halated = (rgb - blurred) * color;
+            rgb = halated + blurred;
+        };
+    
+#ifdef _OPENMP
+#   pragma omp parallel for if (multithread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            halate(R[y][x], hR[y][x], cR);
+            halate(G[y][x], hG[y][x], cG);
+            halate(B[y][x], hB[y][x], cB);
+        }
+    }
+}
+
 } // namespace
 
 
@@ -754,6 +808,8 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             } else if (r.mode == SmoothingParams::Region::Mode::LENS || r.mode == SmoothingParams::Region::Mode::MOTION) {
                 ImProcData im(params, scale, multiThread);
                 lens_motion_blur(im, &working, blend, i);
+            } else if (r.mode == SmoothingParams::Region::Mode::HALATION) {
+                halation(R, G, B, 50 * r.halation_size / scale, LIM01(r.halation_color+0.5), multiThread);
             } else if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;
