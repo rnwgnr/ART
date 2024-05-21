@@ -212,6 +212,7 @@ FILEBROWSER_RENAMEDLGLABEL;Rinomina il file
 FILEBROWSER_RESETDEFAULTPROFILE;Reimposta predefinito
 FILEBROWSER_SELECTDARKFRAME;Seleziona un Dark Frame...
 FILEBROWSER_SELECTFLATFIELD;Seleziona un Flat Field...
+FILEBROWSER_SELECTION_COUNTER;%1 file selezionati
 FILEBROWSER_SESSION_ADD_LABEL;Aggiungi alla sessione
 FILEBROWSER_SESSION_REMOVE_LABEL;Rimuovi la selezione dalla sessione
 FILEBROWSER_SESSION_LOAD_LABEL;Carica sessione da file
@@ -1045,7 +1046,7 @@ PREFERENCES_CURVEBBOXPOS_LEFT;Sinistra
 PREFERENCES_CURVEBBOXPOS_RIGHT;Destra
 PREFERENCES_CUSTPROFBUILD;Generatore profili personalizzati
 PREFERENCES_CUSTPROFBUILDHINT;File eseguibile (o script) richiamato quando è necessario generare un nuovo profilo per un'immagine.\nIl percorso del file di comunicazione (del tipo *.ini, detto "Keyfile") è aggiunto come parametro da linea di comando. Contiene diversi paramentri necessari agli script e ai dati Exif per generare un profilo di sviluppo.\n\n<b>ATTENZIONE:</b>: Devi utilizzare le virgolette doppie quando necessario se utilizzi percorsi contenenti spazi.
-PREFERENCES_CUSTPROFBUILDKEYFORMAT;Formato tasti
+PREFERENCES_CUSTPROFBUILDKEYFORMAT;Formato chiavi
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_NAME;Nome
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_TID;TagID
 PREFERENCES_CUSTPROFBUILDPATH;Percorso dell'eseguibile
