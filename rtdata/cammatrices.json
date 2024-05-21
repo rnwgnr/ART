@@ -1191,6 +1191,16 @@ XIAOMI 14 ULTRA REAR SUPER TELEPHOTO CAMERA
 XIAOMI 14 ULTRA REAR TELEPHOTO CAMERA
 XIAOMI 14 ULTRA REAR ULTRAWIDE CAMERA
 XIAOMI 14 ULTRA REAR WIDE CAMERA
+
+Updated on Tue May 21 09:38:19 2024 (with Adobe DNG converter 16.3.0.1866):
+HASSELBLAD 100-20-COATED6
+LEICA LEITZ PHONE 3 WIDE CAMERA
+LEICA SL3
+RICOH GR III HDF
+RICOH GR IIIX HDF
+XIAOMI CIVI 4 PRO REAR TELEPHOTO CAMERA
+XIAOMI CIVI 4 PRO REAR ULTRAWIDE CAMERA
+XIAOMI CIVI 4 PRO REAR WIDE CAMERA
 */
 {"camera_constants": [
     {
@@ -2310,6 +2320,10 @@ XIAOMI 14 ULTRA REAR WIDE CAMERA
         "dcraw_matrix" : [5329, -1459, -390, -5407, 12930, 2768, -1119, 1772, 6046]
     },
     {
+        "make_model" : "HASSELBLAD 100-20-COATED6",
+        "dcraw_matrix" : [6468, -1899, -545, -4526, 12266, 2542, -388, 1276, 6096]
+    },
+    {
         "make_model" : ["HASSELBLAD 100-20-COATED6-FFF", "HASSELBLAD 100-20-COATED6-3FR"],
         "dcraw_matrix" : [6468, -1899, -545, -4526, 12266, 2542, -388, 1276, 6096]
     },
@@ -3010,6 +3024,10 @@ XIAOMI 14 ULTRA REAR WIDE CAMERA
         "dcraw_matrix" : [8054, -1886, -1025, -8348, 16367, 2039, -2805, 3542, 7630]
     },
     {
+        "make_model" : "LEICA LEITZ PHONE 3 WIDE CAMERA",
+        "dcraw_matrix" : [13706, -6529, -1155, -2385, 11076, 1484, -75, 1065, 4784]
+    },
+    {
         "make_model" : "LEICA M (TYP 240)",
         "dcraw_matrix" : [7199, -2140, -712, -4005, 13327, 649, -810, 2521, 6673]
     },
@@ -3096,6 +3114,10 @@ XIAOMI 14 ULTRA REAR WIDE CAMERA
     {
         "make_model" : "LEICA SL2-S",
         "dcraw_matrix" : [9824, -3852, -754, -3835, 11729, 2387, -483, 1403, 5684]
+    },
+    {
+        "make_model" : "LEICA SL3",
+        "dcraw_matrix" : [9860, -3893, -823, -3878, 11761, 2398, -346, 1164, 5470]
     },
     {
         "make_model" : "LEICA T (TYP 701)",
@@ -4634,7 +4656,15 @@ XIAOMI 14 ULTRA REAR WIDE CAMERA
         "dcraw_matrix" : [6127, -1777, -585, -5913, 13698, 2428, -1088, 1780, 6017]
     },
     {
+        "make_model" : "RICOH GR III HDF",
+        "dcraw_matrix" : [6127, -1777, -585, -5913, 13698, 2428, -1088, 1780, 6017]
+    },
+    {
         "make_model" : "RICOH GR IIIX",
+        "dcraw_matrix" : [6472, -2101, -574, -4519, 12343, 2442, -275, 1104, 5628]
+    },
+    {
+        "make_model" : "RICOH GR IIIX HDF",
         "dcraw_matrix" : [6472, -2101, -574, -4519, 12343, 2442, -275, 1104, 5628]
     },
     {
@@ -5744,6 +5774,18 @@ XIAOMI 14 ULTRA REAR WIDE CAMERA
     {
         "make_model" : "XIAOMI 14 ULTRA REAR WIDE CAMERA",
         "dcraw_matrix" : [9386, -3935, -872, -3469, 11931, 1714, -388, 1438, 4759]
+    },
+    {
+        "make_model" : "XIAOMI CIVI 4 PRO REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12085, -4503, -955, -2178, 10939, 1407, 761, 1424, 4291]
+    },
+    {
+        "make_model" : "XIAOMI CIVI 4 PRO REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [11128, -4079, -1281, -3963, 12007, 2199, -94, 2037, 4992]
+    },
+    {
+        "make_model" : "XIAOMI CIVI 4 PRO REAR WIDE CAMERA",
+        "dcraw_matrix" : [10833, -4515, -1110, -4012, 12342, 1850, -304, 1579, 4955]
     },
     {
         "make_model" : "XIAOMI MI 11 LITE FRONT CAMERA",
