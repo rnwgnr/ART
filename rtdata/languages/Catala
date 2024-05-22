@@ -23,6 +23,7 @@
 #22 2023-08-01 mrleemon, update for 1.20
 #23 2023-12-04 mrleemon, update for 1.21
 #24 2024-01-19 mrleemon, update for 1.21.1
+#25 2024-05-21 mrleemon, update for 1.21.4
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -88,6 +89,7 @@ ERROR_MSG_METADATA_VALUE;Metadades: error en establir %1 a %2
 ERROR_MSG_INVALID_PROFILE;Perfil no vàlid: %1
 ERROR_MSG_INVALID_PSF;Fitxer PSF no vàlid: %1
 ERROR_MSG_INVALID_LUT_PARAMS;Paràmetres LUT no vàlids per a: %1
+ERROR_MSG_INVALID_WB;Coeficients de balanç de blancs no vàlids
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Càmera
 EXIFFILTER_DATE;Data
@@ -209,6 +211,7 @@ FILEBROWSER_RENAMEDLGLABEL;Canvia el nom a fitxer(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Restableix al valor predeterminat
 FILEBROWSER_SELECTDARKFRAME;Selecciona presa negra...
 FILEBROWSER_SELECTFLATFIELD;Selecciona camp pla...
+FILEBROWSER_SELECTION_COUNTER;%1 fitxers seleccionats
 FILEBROWSER_SESSION_ADD_LABEL;Afegeix a la sessió
 FILEBROWSER_SESSION_REMOVE_LABEL;Elimina els seleccionats de la sessió
 FILEBROWSER_SESSION_LOAD_LABEL;Carrega la sessió d'un fitxer
@@ -702,6 +705,8 @@ HISTORY_MSG_SMOOTHING_OFFSET;Suavitzat - desplaçament
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Suavitzat - post-processament de màscara
 HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Suavitzat - intensitat del soroll
 HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Suavitzat - rugositat del soroll
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Suavitzat - intensitat de l'halo
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Suavitzat - tint de l'halo
 HISTORY_MSG_SOFTLIGHT_ENABLED;Llum tènue
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Llum tènue - Intensitat
 HISTORY_MSG_SPOT;Eliminació de taques
@@ -1921,10 +1926,13 @@ TP_SHARPENING_PSF_ITERATIONS;Iteracions
 TP_SMOOTHING_LABEL;Suavitzat
 TP_SMOOTHING_LIST_TITLE;Paràmetres de suavitzat
 TP_SMOOTHING_FALLOFF;Difuminat
+TP_SMOOTHING_HALATION_SIZE;Intensitat
+TP_SMOOTHING_HALATION_COLOR;Tint
 TP_SMOOTHING_MODE;Mode
 TP_SMOOTHING_MODE_GUIDED;Guiat
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussià
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Lluentor
+TP_SMOOTHING_MODE_HALATION;Halo
 TP_SMOOTHING_MODE_NLMEANS;Mitjanes no locals
 TP_SMOOTHING_MODE_LENS;Desenfocament de lent
 TP_SMOOTHING_MODE_MOTION;Desenfocament de moviment
@@ -2003,6 +2011,7 @@ TP_WBALANCE_SIZE;Mida:
 TP_WBALANCE_SPOTWB;Utilitzeu el comptagotes per triar el balanç de blancs d'una zona neutra a la vista prèvia.
 TP_WBALANCE_TEMPERATURE;Temperatura
 TP_WBALANCE_PRESET;Predefinit de càmera
+WARNING_INVALID_WB_TEMP_TINT;Avís: temperatura o tint fora de rang
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Obre (nova) finestra de detall
 ZOOMPANEL_ZOOM100;Zoom al 100%\nDrecera: <b>z</b>

@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2023-12-25 Bereczky Péter
+#03 2024-05-22 Bereczky Péter, updates for the new release
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -69,6 +69,7 @@ ERROR_MSG_METADATA_VALUE;Metaadat: hiba a %1 -nek %2 -re történő állításak
 ERROR_MSG_INVALID_PROFILE;Érvénytelen profil: %1
 ERROR_MSG_INVALID_PSF;Érvénytelen PSF fájl: %1
 ERROR_MSG_INVALID_LUT_PARAMS;Érvénytelen LUT paraméterek ehhez: %1
+ERROR_MSG_INVALID_WB;Érvénytelen fehéregyensúly együtthatók
 EXIFFILTER_APERTURE;Rekeszérték
 EXIFFILTER_CAMERA;Fényképezőgép
 EXIFFILTER_DATE;Dátum
@@ -190,8 +191,9 @@ FILEBROWSER_RENAMEDLGLABEL;Fájl(ok) átnevezése
 FILEBROWSER_RESETDEFAULTPROFILE;Visszaállítás az alapértelmezettre
 FILEBROWSER_SELECTDARKFRAME;dark-frame kiválasztása
 FILEBROWSER_SELECTFLATFIELD;flat-field kiválasztása
+FILEBROWSER_SELECTION_COUNTER;%1 kijelölt fájl
 FILEBROWSER_SESSION_ADD_LABEL;Hozzáadás a munkamenethez
-FILEBROWSER_SESSION_REMOVE_LABEL;A kiválasztott eltávolítása a munkamenetből
+FILEBROWSER_SESSION_REMOVE_LABEL;A kijelölt(ek) eltávolítása a munkamenetből
 FILEBROWSER_SESSION_LOAD_LABEL;Munkamenet betöltése fájlból
 FILEBROWSER_SESSION_SAVE_LABEL;Munkamenet mentése fájlba
 FILECHOOSER_FILTER_ARS;ART munkamenet fájlok (*.ars)
@@ -678,6 +680,8 @@ HISTORY_MSG_SMOOTHING_OFFSET;Simítás - ellensúlyoz
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Simítás - maszk utófeldolgozás
 HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Simítás - zaj erőssége
 HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Simítás - zaj durvasága
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Simítás - fényudvar erőssége
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Simítás - fényudvar színárnyalata
 HISTORY_MSG_SOFTLIGHT_ENABLED;Lágy fény
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Lágy fény - Erősség
 HISTORY_MSG_SPOT;Foltok eltávolítása
@@ -1308,7 +1312,7 @@ TP_SATURATION_LABEL;Telítettség/Vibrancia
 TP_BRIGHTCONTRSAT_CONTRAST;Kontraszt
 TP_SATURATION_SATURATION;Telítettség
 TP_SATURATION_VIBRANCE;Vibrancia
-TP_BWMIX_COLORCAST;Színez
+TP_BWMIX_COLORCAST;Színezet
 TP_BWMIX_HUE;Színárnyalat
 TP_BWMIX_SATURATION;Telítettség
 TP_BWMIX_FILTER;Színszűrő
@@ -1897,10 +1901,13 @@ TP_SHARPENING_PSF_ITERATIONS;Iterációk
 TP_SMOOTHING_LABEL;Simítás
 TP_SMOOTHING_LIST_TITLE;Simítási paraméterek
 TP_SMOOTHING_FALLOFF;Csökkenés
+TP_SMOOTHING_HALATION_SIZE;Erősség
+TP_SMOOTHING_HALATION_COLOR;Színárnyalat
 TP_SMOOTHING_MODE;Mód
 TP_SMOOTHING_MODE_GUIDED;Irányított
 TP_SMOOTHING_MODE_GAUSSIAN;Gauss
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Ragyogás
+TP_SMOOTHING_MODE_HALATION;Fényudvar
 TP_SMOOTHING_MODE_NLMEANS;Nem helyi eszközök
 TP_SMOOTHING_MODE_LENS;Objektív elmosódása
 TP_SMOOTHING_MODE_MOTION;Bemozdulásos elmosódás
@@ -1971,14 +1978,15 @@ TP_WBALANCE_CUSTOM;Egyedi színhőmérséklet
 TP_WBALANCE_CUSTOM_MULT;Egyedi szorzók
 TP_WBALANCE_EQBLUERED;Kék/Piros kiegyenlítő
 TP_WBALANCE_EQBLUERED_TOOLTIP;Lehetővé teszi a „fehéregyensúly” normál viselkedésétől való eltérését a kék/vörös egyensúly módosításával.\nEz akkor lehet hasznos, ha a fényképezési körülmények:\na) messze vannak a szokásos megvilágítástól (pl. víz alatt),\nb) távol vannak a kalibrálás elvégzésének körülményeitől,\nc) ahol a mátrixok vagy az ICC profilok nem megfelelőek.
-TP_WBALANCE_GREEN;Színtónus
+TP_WBALANCE_GREEN;Színárnyalat
 TP_WBALANCE_LABEL;Fehéregyensúly
 TP_WBALANCE_METHOD;Módszer
 TP_WBALANCE_PICKER;Választ
 TP_WBALANCE_SIZE;Méret:
 TP_WBALANCE_SPOTWB;A pipettával válassza ki a fehéregyensúlyt egy semleges foltról az előnézetben.
 TP_WBALANCE_TEMPERATURE;Színhőmérséklet
-TP_WBALANCE_PRESET;Fényképezőgép előbeállítás
+TP_WBALANCE_PRESET;Fényképezőgépen beállított
+WARNING_INVALID_WB_TEMP_TINT;Figyelmeztetés: a színhőmérséklet vagy az árnyalat a tartományon kívül esik
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Egy új részletek ablak megnyitása
 ZOOMPANEL_ZOOM100;Nagyítás 100%-ra\nGyorsbillentyű: <b>z</b>

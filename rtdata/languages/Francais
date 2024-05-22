@@ -66,6 +66,7 @@ ERROR_MSG_MAXERRORS;... (%1 erreur(s) précédente(s) non montrée(s))
 ERROR_MSG_METADATA_VALUE;Metadata: réglage de l'erreur %1 à %2
 ERROR_MSG_INVALID_PSF;Fichier PSF invalide: %1
 ERROR_MSG_INVALID_PROFILE; Profile invalide: %1
+ERROR_MSG_INVALID_WB;Coefficients de balance des blancs invalides
 ERROR_MSG_INVALID_LUT_PARAMS;Paramètres LUT non valides pour : %1
 EXIFFILTER_APERTURE;Diaphragme
 EXIFFILTER_CAMERA;Appareil photo
@@ -186,6 +187,7 @@ FILEBROWSER_RANK4_TOOLTIP;Assigner le rang 4 *\nRaccourci : <b>Shift-4</b>
 FILEBROWSER_RANK5_TOOLTIP;Assigner le rang 5 *\nRaccourci : <b>Shift-5</b>
 FILEBROWSER_RENAMEDLGLABEL;Renommer le(s) fichier(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Réinitialiser au profil par défaut
+FILEBROWSER_SELECTION_COUNTER;%1 Fichiers sélectionnés
 FILEBROWSER_SELECTDARKFRAME;Choisir une image de Trame Noire...
 FILEBROWSER_SELECTFLATFIELD;Sélectionner une image de Champ Uniforme...
 FILEBROWSER_SESSION_ADD_LABEL;Ajouter à la session
@@ -674,7 +676,9 @@ HISTORY_MSG_SMOOTHING_CURVATURE;Lissage - courbure
 HISTORY_MSG_SMOOTHING_OFFSET;Lissage - décalage
 HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Lissage - Force du masque
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Lissage - Post-traitement du masque
-HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Lissage - dureté du bruit
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Lissage - Force du halo
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Lissage - Tinte du halo
+HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Lissage - Dureté du bruit
 HISTORY_MSG_SOFTLIGHT_ENABLED;Lumière douce
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Lumière douce - Force
 HISTORY_MSG_SPOT;Retrait de taches
@@ -1893,10 +1897,13 @@ TP_SHARPENING_PSF_ITERATIONS;Itérations
 TP_SMOOTHING_LABEL;Lissage
 TP_SMOOTHING_LIST_TITLE;Pamamétres de lissage
 TP_SMOOTHING_FALLOFF;Atténuation
+TP_SMOOTHING_HALATION_SIZE;Force
+TP_SMOOTHING_HALATION_COLOR;Tinte
 TP_SMOOTHING_MODE;Mode
 TP_SMOOTHING_MODE_GUIDED;Guidé
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussien
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Halo diffus
+TP_SMOOTHING_MODE_HALATION;Halo
 TP_SMOOTHING_MODE_NLMEANS;Outils non-locaux
 TP_SMOOTHING_MODE_LENS;Flou d'objectif
 TP_SMOOTHING_MODE_MOTION;Flou de mouvement
@@ -1975,6 +1982,7 @@ TP_WBALANCE_SIZE;Taille :
 TP_WBALANCE_SPOTWB;Utiliser la pipette pour échantillonner la balance des blancs à partir d'une zone neutre de l'image.
 TP_WBALANCE_TEMPERATURE;Température
 TP_WBALANCE_PRESET;Préréglage appareil photo
+WARNING_INVALID_WB_TEMP_TINT;Attention : température ou teinte hors plage
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Ouvrir une (nouvelle) vue détaillée
 ZOOMPANEL_ZOOM100;Zoomer à 100%\nRaccourci : <b>z</b>

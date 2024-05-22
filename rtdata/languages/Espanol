@@ -26,6 +26,7 @@
 #25 2023-08-01 mrleemon, update for 1.20
 #26 2023-12-04 mrleemon, update for 1.21
 #27 2024-01-19 mrleemon, update for 1.21.1
+#28 2024-05-21 mrleemon, update for 1.21.4
 
 ABOUT_TAB_BUILD;Versión
 ABOUT_TAB_CREDITS;Créditos
@@ -91,6 +92,7 @@ ERROR_MSG_METADATA_VALUE;Metadatos: error al establecer %1 a %2
 ERROR_MSG_INVALID_PROFILE;Perfil no válido: %1
 ERROR_MSG_INVALID_PSF;Archivo PSF no válido: %1
 ERROR_MSG_INVALID_LUT_PARAMS;Parámetros LUT no válidos para: %1
+ERROR_MSG_INVALID_WB;Coeficientes de balance de blancos no válidos
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Cámara
 EXIFFILTER_DATE;Fecha
@@ -212,6 +214,7 @@ FILEBROWSER_RENAMEDLGLABEL;Renombrar archivo(s)
 FILEBROWSER_RESETDEFAULTPROFILE;Restablecer al valor predeterminado
 FILEBROWSER_SELECTDARKFRAME;Seleccionar toma negra...
 FILEBROWSER_SELECTFLATFIELD;Seleccionar campo plano...
+FILEBROWSER_SELECTION_COUNTER;%1 archivos seleccionados
 FILEBROWSER_SESSION_ADD_LABEL;Añadir a la sesión
 FILEBROWSER_SESSION_REMOVE_LABEL;Eliminar los seleccionados de la sesión
 FILEBROWSER_SESSION_LOAD_LABEL;Cargar la sesión de un archivo
@@ -705,6 +708,8 @@ HISTORY_MSG_SMOOTHING_OFFSET;Suavizado - desplazamiento
 HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Suavizado - post-procesamiento de máscara
 HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Suavizado - intensidad del ruido
 HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Suavizado - rugosidad del ruido
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Suavizado - intensidad del halo
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Suavizado - tinte del halo
 HISTORY_MSG_SOFTLIGHT_ENABLED;Luz tenue
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Luz tenue - Intensidad
 HISTORY_MSG_SPOT;Eliminación de manchas
@@ -1924,10 +1929,13 @@ TP_SHARPENING_PSF_ITERATIONS;Iteraciones
 TP_SMOOTHING_LABEL;Suavizado
 TP_SMOOTHING_LIST_TITLE;Parámetros de suavizado
 TP_SMOOTHING_FALLOFF;Difuminación
+TP_SMOOTHING_HALATION_SIZE;Intensidad
+TP_SMOOTHING_HALATION_COLOR;Tinte
 TP_SMOOTHING_MODE;Modo
 TP_SMOOTHING_MODE_GUIDED;Guiado
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussiano
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Resplandor
+TP_SMOOTHING_MODE_HALATION;Halo
 TP_SMOOTHING_MODE_NLMEANS;Medias no locales
 TP_SMOOTHING_MODE_LENS;Desenfoque de lente
 TP_SMOOTHING_MODE_MOTION;Desenfoque de movimiento
@@ -2006,6 +2014,7 @@ TP_WBALANCE_SIZE;Tamaño:
 TP_WBALANCE_SPOTWB;Use el cuentagotas para escoger el balance de blancos de una zona neutra en la vista previa.
 TP_WBALANCE_TEMPERATURE;Temperatura
 TP_WBALANCE_PRESET;Preajuste de cámara
+WARNING_INVALID_WB_TEMP_TINT;Aviso: temperatura o tinte fuera de rango
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Abrir (nueva) ventana de detalle
 ZOOMPANEL_ZOOM100;Zoom al 100%\nAtajo: <b>z</b>
