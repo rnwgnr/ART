@@ -39,6 +39,7 @@
 #38 04-09-2023 update naar ART v1.19 door pm
 #39 30-12-2023 update naar ART v1.21 door pm
 #40 23-01-2024 update naar ART v1.21.1 door pm
+#41 23-05-24 update naar ART v1.23 door pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -104,6 +105,7 @@ ERROR_MSG_METADATA_VALUE;Metadata: fout veranderen %1 in %2
 ERROR_MSG_INVALID_PROFILE;Ongeldig profiel: %1
 ERROR_MSG_INVALID_PSF;Ongeldig PSF-bestand: %1
 ERROR_MSG_INVALID_LUT_PARAMS;Ongeldige LUT-parameters voor: %1
+ERROR_MSG_INVALID_WB;Ongeldige witbalanswaarden
 EXIFFILTER_APERTURE;Diafragma
 EXIFFILTER_CAMERA;Camera
 EXIFFILTER_DATE;Datum
@@ -225,6 +227,7 @@ FILEBROWSER_RENAMEDLGLABEL; Hernoem bestand(en)
 FILEBROWSER_RESETDEFAULTPROFILE;Terugzetten naar standaardwaarde
 FILEBROWSER_SELECTDARKFRAME;Kies donkerframe...
 FILEBROWSER_SELECTFLATFIELD;Kies vlakveldopname...
+FILEBROWSER_SELECTION_COUNTER;%1 bestanden geselecteerd
 FILEBROWSER_SESSION_ADD_LABEL;Voeg foto of geselecteerde foto's aan sessie toe
 FILEBROWSER_SESSION_REMOVE_LABEL;Verwijder foto of selectie uit sessie
 FILEBROWSER_SESSION_LOAD_LABEL;Laad sessiebestand
@@ -236,9 +239,9 @@ FILEBROWSER_SHOWCOLORLABEL3HINT;Toon foto's met label Groen\nSneltoets <b>Alt+3<
 FILEBROWSER_SHOWCOLORLABEL4HINT;Toon foto's met label Blauw\nSneltoets <b>Alt+4</b>
 FILEBROWSER_SHOWCOLORLABEL5HINT;Toon foto's met label Paars\nSneltoets <b>Alt+5</b>
 FILEBROWSER_SHOWDIRHINT;Verwijder alle filters\nSneltoets: <b>d</b>
-FILEBROWSER_SHOWEDITEDHINT;Toon bewerkte foto's\nSneltoets: <b>7</b>
-FILEBROWSER_SHOWEDITEDNOTHINT;Toon niet-bewerkte foto's\nSneltoets: <b>6</b>
-FILEBROWSER_SHOWEXIFINFO;Toon Exif-info\nSneltoetsen:\n<b>i</b> - Multi-tab modus,\n<b>Alt-i</b> - Enkel-tab modus.
+FILEBROWSER_SHOWEDITEDHINT;Toon bewerkte afbeeldingen\nSneltoets: <b>7</b>
+FILEBROWSER_SHOWEDITEDNOTHINT;Toon onbewerkte afbeeldingen\nSneltoets: <b>6</b>
+FILEBROWSER_SHOWEXIFINFO;Toon Exif-info\nSneltoetsen:\n<b>I</b> - Multi-tab modus,\n<b>Alt+I</b> - Enkel-tab modus.
 FILEBROWSER_SHOWNOTTRASHHINT;Toon alleen niet-verwijderde afbeeldingen.
 FILEBROWSER_SHOWORIGINALHINT;Toon alleen originele afbeelding.\n\nAls er meerdere afbeeldingen zijn met dezelfde naam maar verschillende extensies, dan wordt de afbeelding waarvan de extensie het hoogst staat in de lijst met extensies in Voorkeuren > Bestandsnavigator > Extensies als het origineel beschouwd.
 FILEBROWSER_SHOWRANK1HINT;Toon foto's met 1 ster\nSneltoets: <b>1</b>
@@ -246,13 +249,13 @@ FILEBROWSER_SHOWRANK2HINT;Toon foto's met 2 sterren\nSneltoets: <b>2</b>
 FILEBROWSER_SHOWRANK3HINT;Toon foto's met 3 sterren\nSneltoets: <b>3</b>
 FILEBROWSER_SHOWRANK4HINT;Toon foto's met 4 sterren\nSneltoets: <b>4</b>
 FILEBROWSER_SHOWRANK5HINT;Toon foto's met 5 sterren\nSneltoets: <b>5</b>
-FILEBROWSER_SHOWRECENTLYSAVEDHINT;Toon bewaarde foto's\nSneltoets: <b>Alt+7</b>
-FILEBROWSER_SHOWRECENTLYSAVEDNOTHINT;Toon niet-bewaarde foto's\nSneltoets: <b>Alt+6</b>
-FILEBROWSER_SHOWTRASHHINT;Toon inhoud prullenbak\nSneltoets: <b>Ctrl+t</b>
+FILEBROWSER_SHOWRECENTLYSAVEDHINT;Toon opgeslagen afbeeldingen\nSneltoets: <b>Alt+7</b>
+FILEBROWSER_SHOWRECENTLYSAVEDNOTHINT;Toon niet-opgeslagen afbeeldingen\nSneltoets: <b>Alt+6</b>
+FILEBROWSER_SHOWTRASHHINT;Toon inhoud prullenbak\nSneltoets: <b>Ctrl+T</b>
 FILEBROWSER_SHOWUNCOLORHINT;Toon foto's zonder kleurlabel\nSneltoets: <b>Alt+0</b>
 FILEBROWSER_SHOWUNRANKHINT;Toon foto's zonder sterwaardering\nSneltoets: <b>0</b>
 FILEBROWSER_SORT_LABEL;Volgorde miniaturen
-FILEBROWSER_SORT_FILENAME;Bestandsnaam 
+FILEBROWSER_SORT_FILENAME;Bestandsnaam  in
 FILEBROWSER_SORT_DATE;Datum
 FILEBROWSER_SORT_DATE_REV;Datum (omgekeerd)
 FILEBROWSER_SORT_MODTIME;Tijdstip bestandsmodificatie
@@ -261,8 +264,8 @@ FILEBROWSER_SORT_PROCTIME;Tijdstip laatst bewaard
 FILEBROWSER_SORT_PROCTIME_REV;Tijdstip laatst bewaard (omgekeerd)
 FILEBROWSER_THUMBSIZE;Grootte miniaturen
 FILEBROWSER_UNRANK_TOOLTIP;Verwijder sterwaardering\nSneltoets: <b>Shift+0</b>
-FILEBROWSER_ZOOMINHINT;Vergroot miniaturen\n\nSneltoetsen:\n<b>+</b> - multi-tab modus,\n<b>Alt++</b> - enkel-tab modus.
-FILEBROWSER_ZOOMOUTHINT;Verklein miniaturen\n\nSneltoetsen:\n<b>-</b> - multi-tab modus,\n<b>Alt+-</b> - enkel-tab modus.
+FILEBROWSER_ZOOMINHINT;Vergroot miniaturen\n\nSneltoetsen:\n- multi-tab <b>+</b> (azerty: <b>Alt+=</b>)\n- enkel-tab <b>Alt++</b> 
+FILEBROWSER_ZOOMOUTHINT;Verklein miniaturen\n\nSneltoetsen:\n- multi-tab <b>-</b> (azerty: <b>Alt+_)</b>,\n- enkel-tab <b>Alt+-</b>
 FILECHOOSER_FILTER_ANY;Alle bestanden
 FILECHOOSER_FILTER_COLPROF;Kleurprofielen (*.icc)
 FILECHOOSER_FILTER_CURVE;Curvebestanden
@@ -568,7 +571,7 @@ HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;K/Tc - parametrisch masker
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;K/Tc - nabewerking masker
 HISTORY_MSG_COLORCORRECTION_LUT;K/Tc - LUT
 HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;K/Tc - LUT-parameters
-HISTORY_MSG_COLORCORRECTION_PIVOT;K/Tc - kantelpunt
+HISTORY_MSG_COLORCORRECTION_PIVOT;K/Tc - draaipunt
 HISTORY_MSG_COLORCORRECTION_POWER;K/Tc - middentonen/gamma
 HISTORY_MSG_COLORCORRECTION_COMPRESSION;K/Tc - compressie
 HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;K/Tc - luminantiemodus
@@ -685,6 +688,8 @@ HISTORY_MSG_SMOOTHING_DRAWNMASK;Penseelmasker
 HISTORY_MSG_SMOOTHING_ENABLED;Verzachten
 HISTORY_MSG_SMOOTHING_EPSILON;Detail
 HISTORY_MSG_SMOOTHING_FALLOFF;Sterkte
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Halatie - tint
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Halatie - sterkte
 HISTORY_MSG_SMOOTHING_HUEMASK;T-masker
 HISTORY_MSG_SMOOTHING_ITERATIONS;Herhaling
 HISTORY_MSG_SMOOTHING_LIGHTNESSMASK;L-masker detailbescherming
@@ -718,7 +723,7 @@ HISTORY_MSG_TONE_EQUALIZER_BANDS;Tooneq. - banden
 HISTORY_MSG_TONE_EQUALIZER_ENABLED;Toonequalizer
 HISTORY_MSG_TONE_EQUALIZER_REGULARIZATION;Tooneq. - fijnafstemming
 HISTORY_MSG_TONE_EQUALIZER_SHOW_COLOR_MAP;Toon kleurenkaart
-HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tooneq. - kantelpunt
+HISTORY_MSG_TONE_EQUALIZER_PIVOT;Tooneq. - draaipunt
 HISTORY_MSG_TONECURVE_BASECURVE; Tooncurve - basiscurve
 HISTORY_MSG_WBALANCE_MULT;WB - versterkers
 HISTORY_NEWSNAPSHOT_TOOLTIP;Sneltoets: <b>Alt+s</b>
@@ -1109,7 +1114,7 @@ PREFERENCES_METADATA_SYNC_NONE;Uit
 PREFERENCES_METADATA_SYNC_READ;Alleen lezen
 PREFERENCES_METADATA_SYNC_READWRITE;Bidirectioneel
 PREFERENCES_METADATA_SYNC;Synchroniseer metadata met XMP-sidecars
-PREFERENCES_MONINTENT;Standaard renderintentie
+PREFERENCES_MONINTENT;Standaard weergave-intentie
 PREFERENCES_MONITOR;Beeldscherm
 PREFERENCES_MONITORICCDIR;Map met kleurprofielen beeldscherm
 PREFERENCES_MONPROFILE;Standaard kleurprofiel
@@ -1150,7 +1155,7 @@ PREFERENCES_PROFILESAVELOCATION;Opslaglocatie profielen
 PREFERENCES_PROFILE_SAVE_OUTPUT_EMBEDDED;Inbedden in metadata
 PREFERENCES_PROFILE_SAVE_OUTPUT_SIDECAR;Bewaar in zijspanbestand (uitvoer.ext.arp voor uitvoer.ext)
 PREFERENCES_PROFILE_SAVE_OUTPUT;Verwerkingsprofielen voor uitvoerbeelden
-PREFERENCES_PRTINTENT;Renderintentie
+PREFERENCES_PRTINTENT;Weergave-intentie
 PREFERENCES_PRTPROFILE;Kleurprofiel
 PREFERENCES_PSPATH;Installatiemap Adobe Photoshop
 PREFERENCES_REMEMBERZOOMPAN;Onthoud zoom% en pan-verschuiving
@@ -1202,8 +1207,8 @@ PREFERENCES_WBPREVIEW_BEFORE_HIGH_DETAIL;Voor demozaïeken bij >=100% zoom, ande
 PREFERENCES_WBPREVIEW_BEFORE;Voor demozaïeken (accurater)
 PREFERENCES_WBPREVIEW_LABEL;Positie witbalans in voorbeeld-pijplijn: 
 PREFERENCES_WORKFLOW;Lay-out
-PREFERENCES_XMP_SIDECAR_MODE_EXT;zoals in Darktable/Digikam (FILENAME.ext.xmp voor FILENAME.ext)
-PREFERENCES_XMP_SIDECAR_MODE_STD;Standaard (FILENAME.xmp voor FILENAME.ext)
+PREFERENCES_XMP_SIDECAR_MODE_EXT;Zoals in Darktable/Digikam (BESTANDSNAAM.ext.xmp voor BESTANDSNAAM.ext)
+PREFERENCES_XMP_SIDECAR_MODE_STD;Standaard (BESTANDSNAAM.xmp voor BESTANDSNAAM.ext)
 PREFERENCES_XMP_SIDECAR_MODE;XMP sidecar-stijl
 PROCPARAMS_EMBEDDED_SAVE_WARNING;Waarschuwing: kon verwerkingsparameters niet aan %1 toevoegen, daarom bewaard in zijspanbestand %2
 PROCPARAMS_LOAD_ERROR;Fout tijdens laden parameters van %1: %2
@@ -1257,7 +1262,7 @@ QUEUE_DESTFILENAME;Pad en bestandsnaam
 QUEUE_FORMAT_TITLE;Bestandsformaat
 QUEUE_LOCATION_FOLDER;Sla op in map
 QUEUE_LOCATION_TEMPLATE;Gebruik sjabloon
-QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op locatie, waardering, prullenbakpositie of positie in de verwerkingsrij.\n\nAls voorbeeld nemen we de volgende padnaam:\n<b>/home/tom/fotoos/2020-10-31/foto1.raw</b>\nDe betekenis van de formatteeropties zijn als volgt:\n\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>fotoos</i>\n<b>%d1</b> = <i>2020-10-31</i>\n<b>%f</b> = <i>foto1</i>\n<b>%p1</b> = <i>/home/tom/fotoos/2020-10-31/</i>\n<b>%p2</b> = <i>/home/tom/fotoos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wordt vervangen door de waardering van de foto. Heeft de foto geen waardering, dan wordt '<i>0</i>' gebruikt. Als de foto in de prullenbak zit wordt 'x' gebruikt.\n\n<b>%s1 ... %s9</b> wordt vervangen door de initiële plek van de foto in de verwerkingsrij wanneer deze gestart wordt. Het getal bepaalt de getalruimte: <b>%s3</b> resulteert in <i>001</i>.\n\n<b>%n</b> wordt vervangen door de naam van het huidige snapshot. Als er geen snapshot bestaat, wordt een lege tekenreeks gebruikt. U kunt <b>%u</b> gebruiken in plaats van <b>%n</b> om spaties in de snapshot-naam te vervangen door underscores.\n\nWilt u het uitvoerbestand naast het oorspronkelijke bestand bewaren, schrijf dan:\n<b>%p1/%f</b>\n\nAls u de uitvoer in een map genaamd <i>geconverteerd</i> wilt bewaren die in dezelfde map staat als de oorspronkelijke foto, zegt u :\n<b>%p1/geconverteerd/%f</b>\n\nAls u het resulterende bestand wilt bewaren in \n<i>/home/tom/fotoos/geconverteerd/2020-10-31</i>, schrijft u:\n<b>%p2/geconverteerd/%d1/%f</b>
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Geef uitvoerlocatie op, gebaseerd op locatie, waardering, prullenbakpositie of positie in de verwerkingsrij.\n\nAls voorbeeld nemen we de volgende padnaam:\n<b>/home/tom/fotoos/2020-10-31/foto1.raw</b>\nDe betekenis van de formatteeropties is als volgt:\n\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>tom</i>\n<b>%d2</b> = <i>fotoos</i>\n<b>%d1</b> = <i>2020-10-31</i>\n<b>%f</b> = <i>foto1</i>\n<b>%p1</b> = <i>/home/tom/fotoos/2020-10-31/</i>\n<b>%p2</b> = <i>/home/tom/fotoos/</i>\n<b>%p3</b> = <i>/home/tom/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> wordt vervangen door de waardering van de foto. Heeft de foto geen waardering, dan wordt '<i>0</i>' gebruikt. Als de foto in de prullenbak zit wordt 'x' gebruikt.\n\n<b>%s1 ... %s9</b> wordt vervangen door de initiële plek van de foto in de verwerkingsrij wanneer deze gestart wordt. Het getal bepaalt de getalruimte: <b>%s3</b> resulteert in <i>001</i>.\n\n<b>%n</b> wordt vervangen door de naam van het huidige snapshot. Als er geen snapshot bestaat, wordt een lege tekenreeks gebruikt. Gebruik <b>%u</b>  in plaats van <b>%n</b> om spaties in de snapshot-naam te vervangen door underscores.\n\nWilt u het uitvoerbestand naast het oorspronkelijke bestand bewaren, typ dan:\n<b>%p1/%f</b>\n\nAls u de uitvoer in een map genaamd <i>geconverteerd</i> wilt bewaren die in dezelfde map staat als de oorspronkelijke foto, zegt u :\n<b>%p1/geconverteerd/%f</b>\n\nAls u het resulterende bestand wilt bewaren in \n<i>/home/tom/fotoos/geconverteerd/2020-10-31</i>, schrijft u:\n<b>%p2/geconverteerd/%d1/%f</b>
 QUEUE_LOCATION_TITLE;Uitvoerlocatie
 QUEUE_STARTSTOP_TOOLTIP;Start of stop de verwerking van foto's in de rij.\n\nSneltoets: <b>Ctrl+s</b>
 RENAME_DIALOG_ALLOW_WHITESPACE;Sta spaties in nieuwe naam toe
@@ -1344,7 +1349,7 @@ TP_BWMIX_LABEL;Zwart-wit
 TP_BWMIX_NEUTRAL;Standaardwaarden
 TP_BWMIX_RGBLABEL_HINT;RGB-omrekeningsfactoren. Hierin zijn alle gekozen opties verwerkt.\nHet totaal is de som van de uit te voeren RGB-factoren:\n- dit is altijd 100% in relatieve RGB-modus\n- hoger (lichter) of lager (donkerder) dan 100% in absolute RGB-modus.
 TP_BWMIX_RGBLABEL;R: %1%%   G: %2%%   B: %3%%   Totaal: %4%%
-TP_BWMIX_RGB_TOOLTIP;Mix de RGB-kanalen, handmatig of via Voorinstellingen.\nNegatieve waarden kunnen onregelmatigheden ('artefacten') veroorzaken.
+TP_BWMIX_RGB_TOOLTIP;Mix de RGB-kanalen, handmatig of via Voorinstellingen.\nNegatieve waarden kunnen onregelmatigheden veroorzaken.
 TP_BWMIX_SATURATION;Verzadiging
 TP_BWMIX_SET_HIGHCONTAST;Hoog contrast
 TP_BWMIX_SET_HIGHSENSIT;Hoge gevoeligheid
@@ -1397,7 +1402,7 @@ TP_COLORCORRECTION_MODE;Modus
 TP_COLORCORRECTION_MODE_RGBCHANNELS;Aparte RGB-kanalen
 TP_COLORCORRECTION_OFFSET;Schaduwen/++
 TP_COLORCORRECTION_OUT;Uitvoer
-TP_COLORCORRECTION_PIVOT;Kantelpunt
+TP_COLORCORRECTION_PIVOT;Draaipunt
 TP_COLORCORRECTION_POWER;Middentonen/Gamma
 TP_COLORCORRECTION_COMPRESSION;Compressie
 TP_COLORCORRECTION_RGBLUMINANCE;Luminantiemodus
@@ -1608,7 +1613,7 @@ TP_ICM_LABEL;Kleurbeheer
 TP_ICM_NOICM;Geen ICM: sRGB-uitvoer
 TP_ICM_NOPROFILE;Geen profiel (doorgeefmodus)
 TP_ICM_OUTPUTPROFILE;Uitvoerprofiel
-TP_ICM_PROFILEINTENT;Renderintentie
+TP_ICM_PROFILEINTENT;Weergave-intentie
 TP_ICM_SAVEREFERENCE_APPLYWB;Witbalans toepassen
 TP_ICM_SAVEREFERENCE_APPLYWB_TOOLTIP;Gebruik witbalans bij het opslaan van foto's voor het maken van ICC-profielen. Gebruik geen witbalans bij het maken van DCP-profielen.
 TP_ICM_SAVEREFERENCE;Bewaar referentie-afbeelding
@@ -1871,7 +1876,7 @@ TP_RAW_RCDBILINEAR;RCD+Bilineair
 TP_RAW_RCD;RCD
 TP_RAW_RCDVNG4;RCD+VNG4
 TP_RAW_SENSOR_BAYER_LABEL;Sensor met Bayer-matrix
-TP_RAW_SENSOR_XTRANS_DMETHOD_TOOLTIP;3-pass geeft het beste resultaat (aanbevolen voor lage ISO-waarden)\n1-pass geeft vrijwel hetzelfde resultaat als 3-pass voor hoge ISO-waarden en is sneller.\n+Snel geeft minder artefacten in vlakke gebieden
+TP_RAW_SENSOR_XTRANS_DMETHOD_TOOLTIP;3-pass geeft het beste resultaat (aanbevolen voor lage ISO-waarden)\n1-pass geeft vrijwel hetzelfde resultaat als 3-pass voor hoge ISO-waarden en is sneller.\n+Snel geeft minder onregelmatigheden in vlakke gebieden
 TP_RAW_SENSOR_XTRANS_LABEL;Sensor met X-Trans-matrix
 TP_RAW_VNG4;VNG4
 TP_RAW_XTRANSFAST;Snel X-Trans
@@ -1934,6 +1939,8 @@ TP_SMOOTHING_CHANNEL_L;Luminantie
 TP_SMOOTHING_CHANNEL_RGB;RGB
 TP_SMOOTHING_EPSILON;Detail
 TP_SMOOTHING_FALLOFF;Sterkte
+TP_SMOOTHING_HALATION_COLOR;Tint
+TP_SMOOTHING_HALATION_SIZE;Kracht
 TP_SMOOTHING_ITERATIONS;Herhaling
 TP_SMOOTHING_NLSTRENGTH;Kracht
 TP_SMOOTHING_NLDETAIL;Detail
@@ -1947,6 +1954,7 @@ TP_SMOOTHING_MODE_GAUSSIAN;Gaussiaans
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Gloed
 TP_SMOOTHING_MODE_NLMEANS;Globaal gemiddelde
 TP_SMOOTHING_MODE_LENS;Lensvervaging
+TP_SMOOTHING_MODE_HALATION;Halatie
 TP_SMOOTHING_MODE_MOTION;Bewegingsvervaging
 TP_SMOOTHING_MODE_NOISE;Voeg ruis toe
 TP_SMOOTHING_NOISE_COARSENESS;Grofheid
@@ -1992,7 +2000,7 @@ TP_TONE_EQUALIZER_BAND_4;Witten
 TP_TONE_EQUALIZER_DETAIL;Fijnafstemming
 TP_TONE_EQUALIZER_LABEL;Toonequalizer
 TP_TONE_EQUALIZER_SHOW_COLOR_MAP;Toon kleurenkaart
-TP_TONE_EQUALIZER_PIVOT;Kantelpunt (Ev)
+TP_TONE_EQUALIZER_PIVOT;Draaipunt (LW)
 TP_VIGNETTING_AMOUNT;Hoeveelheid
 TP_VIGNETTING_CENTER;Centrum
 TP_VIGNETTING_CENTER_X;Centrum X
@@ -2014,6 +2022,7 @@ TP_WBALANCE_PRESET;Camera-voorinstelling
 TP_WBALANCE_SIZE;Grootte:
 TP_WBALANCE_SPOTWB;Gebruik pipet om de witbalans op een neutraal vlak in de foto te kiezen.
 TP_WBALANCE_TEMPERATURE;Kleurtemperatuur
+WARNING_INVALID_WB_TEMP_TINT;Waarschuwing: temperatuur of tint buiten bereik
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Open (nieuw) detailvenster
 ZOOMPANEL_ZOOM100;Zoom naar 100%\nSneltoets: <b>z</b>
