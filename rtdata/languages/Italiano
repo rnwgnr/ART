@@ -22,6 +22,7 @@
 #22 2023-12-04 alvaro
 #23 2023-12-16 alvaro
 #24 2024-01-23 alvaro
+#25 2024-05-22 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -91,6 +92,7 @@ ERROR_MSG_INVALID_PSF;File PSF non valido: %1
 ERROR_MSG_MAXERRORS;... (%1 errori precedenti non mostrati)
 ERROR_MSG_METADATA_VALUE;Metadati: errore impostazione %1 in %2
 ERROR_MSG_INVALID_LUT_PARAMS;Parametri LUT non validi per: %1
+ERROR_MSG_INVALID_WB;Coefficienti del bilanciamento del bianco non validi
 EXIFFILTER_APERTURE;Diaframma
 EXIFFILTER_CAMERA;Fotocamera
 EXIFFILTER_DATE;Data
@@ -133,8 +135,8 @@ EXPORT_BYPASS_RAW_LMMSE_ITERATIONS;Ignora i Passaggi di Miglioramento LMMSE
 EXPORT_BYPASS_SHARPENING;Ignora Nitidezza
 EXPORT_FASTEXPORTOPTIONS;<b>Opzioni di Esportazione Rapida</b>
 EXPORT_INSTRUCTIONS;Le opzioni di Esportazione Rapida forniscono la possibilità di ignorare le impostazioni di sviluppo che impiegano molto tempo e risorse ed avviare quindi la coda di sviluppo usando solo le impostazioni veloci. Questo metodo è consigliato per lo sviluppo veloce di immagini a bassa risoluzione quando è importante la rapidità, oppure quando si desidera ridimensionare una o più immagini senza apportare modifiche ai parametri di sviluppo salvati.
-EXPORT_MAXHEIGHT;Altezza Massima:
-EXPORT_MAXWIDTH;Larghezza Massima:
+EXPORT_MAXHEIGHT;Altezza massima:
+EXPORT_MAXWIDTH;Larghezza massima:
 EXPORT_PIPELINE;Catena di elaborazione
 EXPORT_PUTTOQUEUEFAST;Aggiungi alla coda di sviluppo per l'Esportazione Rapida
 EXPORT_RAW_DMETHOD;Metodo di Demosaicizzazione
@@ -308,7 +310,7 @@ HISTOGRAM_TOOLTIP_RAW;Mostra/Nascondi l'istogramma del raw.
 HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Mostra/Nascondi pulsanti di opzioni del grafico.
 HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Regola luminosità del grafico.
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;Istogramma
-HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Istogramma Raw
+HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Istogramma raw
 HISTOGRAM_TOOLTIP_TYPE_PARADE;RGB Parade
 HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;Vettorscopio Tinta-Cromaticità
 HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;Vettorscopio Tinta-Saturazione
@@ -361,7 +363,7 @@ HISTORY_MSG_60;Ruota
 HISTORY_MSG_61;Adattamento autom.
 HISTORY_MSG_62;Correzione Distorsione
 HISTORY_MSG_63;Istantanea Selezionata
-HISTORY_MSG_64;Ritaglia
+HISTORY_MSG_64;Ritaglio
 HISTORY_MSG_65;Correzione AC
 HISTORY_MSG_66;Esposizione - Ricostruzione HL
 HISTORY_MSG_67;Esposizione - Ricostruzione HLR
@@ -404,11 +406,11 @@ HISTORY_MSG_108;Esposizione - Soglia HLC
 HISTORY_MSG_109;Ridimensiona - Riquadro
 HISTORY_MSG_110;Ridimensiona - Applicato a
 HISTORY_MSG_115;Soppressione Falsi Colori
-HISTORY_MSG_117;Correzione AC Rosso (Raw)
-HISTORY_MSG_118;Correzione AC Blu (Raw)
+HISTORY_MSG_117;Correzione AC Rosso (raw)
+HISTORY_MSG_118;Correzione AC Blu (raw)
 HISTORY_MSG_119;Filtro rumore a bande
 HISTORY_MSG_120;Bilanciam. verde
-HISTORY_MSG_121;Correzione AC Raw - Auto
+HISTORY_MSG_121;Correzione AC raw - Auto
 HISTORY_MSG_122;Dark-Frame - Selezione automatica
 HISTORY_MSG_123;Dark-Frame - File
 HISTORY_MSG_124;Correzione Guadagno/Punto del bianco
@@ -439,7 +441,7 @@ HISTORY_MSG_202;NR - Crominanza - B&Y
 HISTORY_MSG_203;NR - Spazio colore
 HISTORY_MSG_204;Passaggi di miglioramento LMMSE
 HISTORY_MSG_207;Defringe - Curva di colore
-HISTORY_MSG_208;WB - B/R Equalizzatore
+HISTORY_MSG_208;WB - Equalizzatore B/R
 HISTORY_MSG_210;FG - Angolo
 HISTORY_MSG_211;Filtro Graduato (FG)
 HISTORY_MSG_212;FV - Intensità
@@ -509,7 +511,7 @@ HISTORY_MSG_395;DCP - Tabella base
 HISTORY_MSG_427;Destinazione resa su uscita
 HISTORY_MSG_428;Destinazione resa su monitor
 HISTORY_MSG_443;Compensazione punto del nero in uscita
-HISTORY_MSG_445;Sotto-immagine Raw
+HISTORY_MSG_445;Sotto-immagine raw
 HISTORY_MSG_449;PS - Adattamento ISO
 HISTORY_MSG_452;PS - Mostra movimento
 HISTORY_MSG_453;PS - Mostra solo maschera
@@ -520,7 +522,7 @@ HISTORY_MSG_465;PS - Raggio di sfocatura
 HISTORY_MSG_468;PS - Riempi i buchi
 HISTORY_MSG_469;PS - Mediana
 HISTORY_MSG_471;PS - Correzione movimento
-HISTORY_MSG_472;PS - Levigatura transizioni
+HISTORY_MSG_472;PS - Transizioni morbide
 HISTORY_MSG_473;PS - Usa LMMSE
 HISTORY_MSG_474;PS - Equalizza
 HISTORY_MSG_475;PS - Canale di equalizzazione
@@ -533,7 +535,7 @@ HISTORY_MSG_490;CGD - Quantità
 HISTORY_MSG_491;Bilanciamento del bianco
 HISTORY_MSG_492;Curve RGB
 HISTORY_MSG_493;Regolazioni L*a*b*
-HISTORY_MSG_BWMIX_COLORCAST;B&N - Tinta
+HISTORY_MSG_BWMIX_COLORCAST;BN - Tinta
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;Mixer canali - Primario blu
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;Mixer canali - Primario verde
 HISTORY_MSG_CHMIXER_MODE;Mixer canali - modalità
@@ -543,27 +545,27 @@ HISTORY_MSG_COLORCORRECTION_AREAMASK;CC - Maschera area regione
 HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - Maschera regione C
 HISTORY_MSG_COLORCORRECTION_COMPRESSION;CC - Compressione
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - Maschera soglia contrasto
-HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - maschera colore similare
-HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - maschera pennello
+HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - Maschera colore similare
+HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - Maschera pennello
 HISTORY_MSG_COLORCORRECTION_ENABLED;Correzione Colore/Tono
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - Maschera regione H
 HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - Spostamento tinta
-HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - saturazione ingresso
-HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - luminosità
+HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - Saturazione ingresso
+HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - Luminosità
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - Maschera regione L
-HISTORY_MSG_COLORCORRECTION_LIST;CC - regioni
+HISTORY_MSG_COLORCORRECTION_LIST;CC - Regioni
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
 HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - Parametri LUT
-HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - sfocatura maschera regioni
-HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - post-elaborazione maschera
+HISTORY_MSG_COLORCORRECTION_MASKBLUR;CC - Sfocatura maschera regioni
+HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - Post-elaborazione maschera
 HISTORY_MSG_COLORCORRECTION_MODE;CC - Modalità
-HISTORY_MSG_COLORCORRECTION_OFFSET;CC - ombre/innalza
-HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - saturazione uscita
-HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - maschera parametrica
-HISTORY_MSG_COLORCORRECTION_PIVOT;CC - perno
-HISTORY_MSG_COLORCORRECTION_POWER;CC - tonimedi/gamma
-HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - modalità luminanza
-HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - mostra maschera regione
+HISTORY_MSG_COLORCORRECTION_OFFSET;CC - Ombre/innalza
+HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - Saturazione uscita
+HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - Maschera parametrica
+HISTORY_MSG_COLORCORRECTION_PIVOT;CC - Perno
+HISTORY_MSG_COLORCORRECTION_POWER;CC - Tonimedi/gamma
+HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - Modalità luminanza
+HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - Mostra maschera regione
 HISTORY_MSG_COLORCORRECTION_SLOPE;CC - Alte luci/guadagno
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Correzione colore
 HISTORY_MSG_DEHAZE_BLACKPOINT;Rimozione foschia - Correzione punto del nero
@@ -587,7 +589,7 @@ HISTORY_MSG_EPD_AREAMASK;TB - Maschera area
 HISTORY_MSG_EPD_CHROMATICITYMASK;TB - Maschera C
 HISTORY_MSG_EPD_CONTRASTTHRESHOLDMASK;TB - Maschera soglia di contrasto
 HISTORY_MSG_EPD_DELTAEMASK;TB - Maschera colore similare
-HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - scala di dettaglio
+HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - Scala di dettaglio
 HISTORY_MSG_EPD_DRAWNMASK;TB - Maschera con pennello
 HISTORY_MSG_EPD_HUEMASK;TB - Maschera H
 HISTORY_MSG_EPD_ITERATIONS;TB - iterazioni
@@ -631,7 +633,7 @@ HISTORY_MSG_LOCALCONTRAST_ENABLED;Contrasto locale
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;Contrasto locale - Maschera H
 HISTORY_MSG_LOCALCONTRAST_LIGHTNESS;Contrasto locale - Luce
 HISTORY_MSG_LOCALCONTRAST_LIGHTNESSMASK;Contrasto locale - Maschera L
-HISTORY_MSG_LOCALCONTRAST_LIST;Contrasto locale - regioni
+HISTORY_MSG_LOCALCONTRAST_LIST;Contrasto locale - Regioni
 HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Contrasto locale - Sfocatura maschera
 HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;Contrasto locale - Maschera post-elaborazione
 HISTORY_MSG_LOCALCONTRAST_MODE;Contrasto locale - Metodo
@@ -659,9 +661,9 @@ HISTORY_MSG_PREPROCESS_DYNROWNOISEFILTER;Filtro dinamico rumore di linea
 HISTORY_MSG_PREPROCESS_LINEDENOISE_DIRECTION;Direzione filtro rumore di linea
 HISTORY_MSG_PREPROCESS_PDAFLINESFILTER;Filtro linee PDAF
 HISTORY_MSG_PRSHARPEN_CONTRAST;PRS - Soglia di contrasto
-HISTORY_MSG_RAWCACORR_AUTOIT;Correzione AC Raw - Iterazioni
-HISTORY_MSG_RAWCACORR_COLORSHIFT;Correzione AC Raw - Evita scostamento di colore
-HISTORY_MSG_RAW_BORDER;Bordo Raw
+HISTORY_MSG_RAWCACORR_AUTOIT;Correzione AC raw - Iterazioni
+HISTORY_MSG_RAWCACORR_COLORSHIFT;Correzione AC raw - Evita scostamento di colore
+HISTORY_MSG_RAW_BORDER;Bordo raw
 HISTORY_MSG_RESIZE_ALLOWUPSCALING;Ridimensiona - Permetti ingrandimento
 HISTORY_MSG_RESIZE_PPI;Ridimensiona - PPI
 HISTORY_MSG_RESIZE_UNIT;Ridimensiona - Unità
@@ -674,34 +676,36 @@ HISTORY_MSG_SHARPENING_PSF_KERNEL;Nitidezza di cattura - File PSF
 HISTORY_MSG_SHARPENING_RLD_CORNERLATITUDE;Nitidezza di cattura - Latitudine angolo RLD
 HISTORY_MSG_SHARPENING_RLD_CORNERRADIUS;Nitidezza di cattura - Incremento raggio angolo RLD
 HISTORY_MSG_SH_COLORSPACE;S/H - Spazio colore
-HISTORY_MSG_SMOOTHING_ANGLE;Levigatura - angolo
-HISTORY_MSG_SMOOTHING_AREAMASK;Levigatura - maschera area
-HISTORY_MSG_SMOOTHING_CHANNEL;Levigatura - canale
-HISTORY_MSG_SMOOTHING_CHROMATICITYMASK;Levigatura - maschera C
-HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Levigatura - maschera soglia di contrasto
-HISTORY_MSG_SMOOTHING_CURVATURE;Levigatura - curvatura
-HISTORY_MSG_SMOOTHING_DELTAEMASK;Levigatura - maschera colore similare
-HISTORY_MSG_SMOOTHING_DRAWNMASK;Levigatura - maschera con pennello
-HISTORY_MSG_SMOOTHING_ENABLED;Levigatura
-HISTORY_MSG_SMOOTHING_EPSILON;Levigatura - dettaglio
-HISTORY_MSG_SMOOTHING_FALLOFF;Levigatura - diminuzione
-HISTORY_MSG_SMOOTHING_HUEMASK;Levigatura - maschera H
-HISTORY_MSG_SMOOTHING_ITERATIONS;Levigatura - iterazioni
-HISTORY_MSG_SMOOTHING_LIGHTNESSMASK;Levigatura - maschera L
-HISTORY_MSG_SMOOTHING_LIST;Levigatura - regioni
-HISTORY_MSG_SMOOTHING_MASKBLUR;Levigatura - sfocatura maschera
-HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Levigatura - maschera post-elaborazione
-HISTORY_MSG_SMOOTHING_MODE;Levigatura - modalità
-HISTORY_MSG_SMOOTHING_NLDETAIL;Levigatura - dettaglio NLM
-HISTORY_MSG_SMOOTHING_NLSTRENGTH;Levigatura - intensità NLM
+HISTORY_MSG_SMOOTHING_ANGLE;Sfocatura - angolo
+HISTORY_MSG_SMOOTHING_AREAMASK;Sfocatura - maschera area
+HISTORY_MSG_SMOOTHING_CHANNEL;Sfocatura - canale
+HISTORY_MSG_SMOOTHING_CHROMATICITYMASK;Sfocatura - maschera C
+HISTORY_MSG_SMOOTHING_CONTRASTTHRESHOLDMASK;Sfocatura - maschera soglia di contrasto
+HISTORY_MSG_SMOOTHING_CURVATURE;Sfocatura - curvatura
+HISTORY_MSG_SMOOTHING_DELTAEMASK;Sfocatura - maschera colore similare
+HISTORY_MSG_SMOOTHING_DRAWNMASK;Sfocatura - maschera con pennello
+HISTORY_MSG_SMOOTHING_ENABLED;Sfocatura
+HISTORY_MSG_SMOOTHING_EPSILON;Sfocatura - dettaglio
+HISTORY_MSG_SMOOTHING_FALLOFF;Sfocatura - diminuzione
+HISTORY_MSG_SMOOTHING_HUEMASK;Sfocatura - maschera H
+HISTORY_MSG_SMOOTHING_ITERATIONS;Sfocatura - iterazioni
+HISTORY_MSG_SMOOTHING_LIGHTNESSMASK;Sfocatura - maschera L
+HISTORY_MSG_SMOOTHING_LIST;Sfocatura - regioni
+HISTORY_MSG_SMOOTHING_MASKBLUR;Sfocatura - sfocatura maschera
+HISTORY_MSG_SMOOTHING_MASK_POSTPROCESS;Sfocatura - maschera post-elaborazione
+HISTORY_MSG_SMOOTHING_MODE;Sfocatura - modalità
+HISTORY_MSG_SMOOTHING_NLDETAIL;Sfocatura - dettaglio NLM
+HISTORY_MSG_SMOOTHING_NLSTRENGTH;Sfocatura - intensità NLM
 HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Sfocatura - grana rumore
 HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Sfocatura - intensità rumore
-HISTORY_MSG_SMOOTHING_NUMBLADES;Levigatura - lamelle
-HISTORY_MSG_SMOOTHING_OFFSET;Levigatura - scostamento
-HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Levigatura - maschera parametrica
-HISTORY_MSG_SMOOTHING_RADIUS;Levigatura - raggio
-HISTORY_MSG_SMOOTHING_SHOWMASK;Levigatura - mostra maschera
-HISTORY_MSG_SMOOTHING_SIGMA;Levigatura - raggio
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Sfocatura - Dimensione alone
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Sfocatura - Tinta alone
+HISTORY_MSG_SMOOTHING_NUMBLADES;Sfocatura - lamelle
+HISTORY_MSG_SMOOTHING_OFFSET;Sfocatura - scostamento
+HISTORY_MSG_SMOOTHING_PARAMETRICMASK;Sfocatura - maschera parametrica
+HISTORY_MSG_SMOOTHING_RADIUS;Sfocatura - raggio
+HISTORY_MSG_SMOOTHING_SHOWMASK;Sfocatura - mostra maschera
+HISTORY_MSG_SMOOTHING_SIGMA;Sfocatura - raggio
 HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Soft light - Intensità
 HISTORY_MSG_SPOT;Rimozione punti
@@ -1461,7 +1465,7 @@ TP_DIRPYRDENOISE_CHROMINANCE_FRAME;Crominanza
 TP_DIRPYRDENOISE_CHROMINANCE_MANUAL;Manuale
 TP_DIRPYRDENOISE_CHROMINANCE_MASTER;Crominanza (Principale)
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD;Metodo
-TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manuale\nFunziona sull'immagine intera.\nControlli manualmente le impostazioni della riduzione di rumore.\n\nGlobale automatico\nFunziona su immagine intera.\nSono usate 9 zones per calcolare la riduzione globale del rumore di crominanza.\n\nMulti zona automatico\nNessuna anteprima - funziona solo durante il salvataggioworks only during saving, ma usando il metodo "Anteprima" abbinando la misura del quadrato a quella della finestra centrata e visualizzata puoi avere un'idea del risultato che otterrai.\nL'immagine è divisa in quadrati (da circa 10 a 70 a seconda della dimensione dell'immagine) e ciascun quadrato riceve il suo valore di riduzione del rumore di crominanza.\n\nAnteprima\nFunziona sull'immagine intera.\nLa parte di immagine visibile è usata per calcolare il valore globale di riduzione di rumore di crominanza.
+TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manuale\nFunziona sull'immagine intera.\nControlli manualmente le impostazioni della riduzione di rumore.\n\nGlobale automatico\nFunziona su immagine intera.\nSono usate 9 zones per calcolare la riduzione globale del rumore di crominanza.\n\nMulti zona automatico\nNessuna anteprima - funziona solo durante il salvataggio, ma usando il metodo "Anteprima" abbinando la misura del quadrato a quella della finestra centrata e visualizzata puoi avere un'idea del risultato che otterrai.\nL'immagine è divisa in quadrati (da circa 10 a 70 a seconda della dimensione dell'immagine) e ciascun quadrato riceve il suo valore di riduzione del rumore di crominanza.\n\nAnteprima\nFunziona sull'immagine intera.\nLa parte di immagine visibile è usata per calcolare il valore globale di riduzione di rumore di crominanza.
 TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Crominanza - Rosso-Verde
 TP_DIRPYRDENOISE_LABEL;Riduzione di rumore
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL;Recupero del dettaglio
@@ -1506,7 +1510,7 @@ TP_EPD_STRENGTH;intensità
 TP_EXPOSURE_BLACK;Compensazione punto del nero
 TP_EXPOSURE_CURVEEDITOR1;Curva Tono 1
 TP_EXPOSURE_CURVEEDITOR2;Curva Tono 2
-TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Fare riferimento alla pagina "Exposure > Tone Curves" di RawPedia per capire come ottenere i risultati migliori con le doppie curve.
+TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Fare riferimento alla pagina "Esposizione > Curve di tono" di RawPedia per capire come ottenere i risultati migliori con le doppie curve.
 TP_EXPOSURE_EXPCOMP;Compensazione Esposizione
 TP_EXPOSURE_HISTMATCHING;Curva di tono automatica
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;Regola automaticamente cursori e curve (tranne compensaz. esposizione) per ottenere un look corrispondente al JPEG incorporaato.
@@ -1545,7 +1549,7 @@ TP_FILMNEGATIVE_REF_PICK;Preleva un punto per bilanciamento del bianco
 TP_FILMNEGATIVE_REF_TOOLTIP;Seleziona una zona grigia per il bilanciamento del bianco dell'uscita, immagine positiva.
 TP_FILMSIMULATION_AFTER_TONE_CURVE;Applica dopo curva tonale
 TP_FILMSIMULATION_LABEL;Simulazione della pellicola
-TP_FILMSIMULATION_SLOWPARSEDIR;ART è configurato per cercare immagini Hald CLUT (usate per la Simulazione Pellicola) in una cartella che impiega troppo tempo per caricarsi.\nVai a Preferenze > Elaborazione Immagine > Simulazione pellicola\nper vedere quale cartella è usata. Dovresti configurare una cartella che contiene solo immagini Hald CLUT e nient'altro, oppure una cartella vuota se non vuoi usare lo strumento Simulazione Pellicola.\n\nLeggi l'articolo della Simulazione Pellicola su Rawpedia per ulteriori informazioni.\n\nVuoi annullare la scansione adesso?
+TP_FILMSIMULATION_SLOWPARSEDIR;ART è configurato per cercare immagini Hald CLUT (usate per la Simulazione Pellicola) in una cartella che impiega troppo tempo per caricarsi.\nVai a Preferenze > Elaborazione Immagine > Cartella Hald CLUT\nper vedere quale cartella è usata. Dovresti configurare una cartella che contiene solo immagini Hald CLUT e nient'altro, oppure una cartella vuota se non vuoi usare lo strumento Simulazione Pellicola.\n\nLeggi l'articolo della Simulazione Pellicola su Rawpedia per ulteriori informazioni.\n\nVuoi annullare la scansione adesso?
 TP_FILMSIMULATION_STRENGTH;intensità
 TP_FILMSIMULATION_ZEROCLUTSFOUND;Imposta cartella HaldCLUT in Preferenze
 TP_FLATFIELD_AUTOSELECT;Autoselezione
@@ -1779,7 +1783,7 @@ TP_PRSHARPENING_LABEL;Nitidezza in uscita
 TP_PRSHARPENING_TOOLTIP;Aumenta la nitidezza dell'immagine dopo ridimensionamento
 TP_RAWCACORR_AUTO;Autocorrezione
 TP_RAWCACORR_AUTOIT;Iterazioni
-TP_RAWCACORR_AUTOIT_TOOLTIP;Questa impostazione è disponibile se "Auto-correzione" è attiva.\nAuto-correzione è conservativo, nel senso che spesso non corregge tutte le aberrazioni cromatiche.\nPer correggere le rimanenti aberrazioni cromatiche, puoi usare fino a 5 iterazioni di correzione.\nCiascuna iterazione ridurrà la rimanente aberrazione a costo di ulteriore tempo di elaborazione.
+TP_RAWCACORR_AUTOIT_TOOLTIP;Questa impostazione è disponibile se "Autocorrezione" è attiva.\nAutocorrezione è conservativo, nel senso che spesso non corregge tutte le aberrazioni cromatiche.\nPer correggere le rimanenti aberrazioni cromatiche, puoi usare fino a 5 iterazioni di correzione.\nCiascuna iterazione ridurrà la rimanente aberrazione a costo di ulteriore tempo di elaborazione.
 TP_RAWCACORR_AVOIDCOLORSHIFT;Evita lo scostamento di colore
 TP_RAWCACORR_CABLUE;Blu
 TP_RAWCACORR_CARED;Rosso
@@ -1818,7 +1822,7 @@ TP_RAW_EAHD;EAHD
 TP_RAW_FALSECOLOR;Stadi per soppressione di falsi colori
 TP_RAW_FAST;Veloce
 TP_RAW_HD;Soglia
-TP_RAW_HD_TOOLTIP;Valori bassi rendono più aggressivo il rilevamento dei pixel guasti/surriscaldati, ma falsi positivi potrebbero generare artefatti. Se noti artefatti che compaiono appena abiliti il filtro pixel guasti/surriscaldati, incrementa gradualemnte il valore di soglia finché scompaiono.
+TP_RAW_HD_TOOLTIP;Valori bassi rendono più aggressivo il rilevamento dei pixel guasti/surriscaldati, ma falsi positivi potrebbero generare artefatti. Se noti artefatti che compaiono appena abiliti il filtro pixel guasti/surriscaldati, incrementa gradualmente il valore di soglia finché scompaiono.
 TP_RAW_HPHD;HPHD
 TP_RAW_IGV;IGV
 TP_RAW_IMAGENUM;Sotto-immagine
@@ -1829,7 +1833,7 @@ TP_RAW_LMMSE;LMMSE
 TP_RAW_LMMSEITERATIONS;Passaggi di miglioramento LMMSE
 TP_RAW_LMMSE_TOOLTIP;Aggiunge gamma (passo 1) - Aggiunge mediana (passi 2-4), poi perfeziona (passi 5-6) per ridurre gli artefatti e migliorare il rapporto segnale/rumore.
 TP_RAW_MONO;Mono
-TP_RAW_NONE;Nessuno (Mostra schema sensore)
+TP_RAW_NONE;Nessuno (mostra schema sensore)
 TP_RAW_PIXELSHIFT;Pixel Shift
 TP_RAW_PIXELSHIFTBLUR;Maschera sfocatura movimento
 TP_RAW_PIXELSHIFTDMETHOD;Metodo di demosaicizz. per movimento
@@ -1879,7 +1883,7 @@ TP_RESIZE_FITBOX;Riquadro delimitato
 TP_RESIZE_FULLIMAGE;Tutta l'immagine
 TP_RESIZE_H;A:
 TP_RESIZE_HEIGHT;Altezza
-TP_RESIZE_IN;in
+TP_RESIZE_IN;pollici
 TP_RESIZE_LABEL;Ridimensiona
 TP_RESIZE_PX;px
 TP_RESIZE_SCALE;Scala
@@ -1929,6 +1933,8 @@ TP_SMOOTHING_CHANNEL_RGB;RGB
 TP_SMOOTHING_CURVATURE;Curvatura
 TP_SMOOTHING_EPSILON;Dettaglio
 TP_SMOOTHING_FALLOFF;Caduta
+TP_SMOOTHING_HALATION_SIZE;Dimensione
+TP_SMOOTHING_HALATION_COLOR;Tinta
 TP_SMOOTHING_ITERATIONS;Iterazioni
 TP_SMOOTHING_LABEL;Sfocatura
 TP_SMOOTHING_LIST_TITLE;Parametri di sfocatura
@@ -1936,6 +1942,7 @@ TP_SMOOTHING_MODE;Modalità
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussiana
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Bagliore
 TP_SMOOTHING_MODE_GUIDED;Guidata
+TP_SMOOTHING_MODE_HALATION;Alone
 TP_SMOOTHING_MODE_LENS;Sfocatura obiettivo
 TP_SMOOTHING_MODE_MOTION;Mosso
 TP_SMOOTHING_MODE_NLMEANS;Media non locale
@@ -2006,6 +2013,7 @@ TP_WBALANCE_PRESET;Preset fotocamera
 TP_WBALANCE_SIZE;Dimensione:
 TP_WBALANCE_SPOTWB;Usa la pipetta per indicare un'area neutra nell'immagine e far calcolare il bilanciamento del bianco.
 TP_WBALANCE_TEMPERATURE;Temperatura
+WARNING_INVALID_WB_TEMP_TINT;Attenzione: tinta o temperatura fuori range
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Apri (nuova) finestra di dettaglio
 ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
