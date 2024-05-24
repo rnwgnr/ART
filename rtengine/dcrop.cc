@@ -254,7 +254,7 @@ void Crop::update(int todo)
             if (!params.spot.entries.empty()) {
                 PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
                 int tr = getCoarseBitMask(params.coarse);
-                parent->ipf.removeSpots(spotCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, &params.icm, tr);
+                parent->ipf.removeSpots(spotCrop, parent->imgsrc, params.spot.entries, pp, parent->currWB, &params.icm, tr, &parent->denoiseInfoStore);
             }
         } else {
             if (spotCrop) {

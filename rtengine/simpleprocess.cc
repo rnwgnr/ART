@@ -272,7 +272,7 @@ private:
 
         // Spot Removal
         if (params.spot.enabled && !params.spot.entries.empty ()) {
-            ipf.removeSpots (img, imgsrc, params.spot.entries, pp, currWB, nullptr, tr);
+            ipf.removeSpots (img, imgsrc, params.spot.entries, pp, currWB, nullptr, tr, nullptr);
         }
 
         if (flush) {

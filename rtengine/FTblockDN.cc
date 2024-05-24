@@ -2282,6 +2282,14 @@ BENCHFUN
                                 maxlev2 = 5;
                             }
 
+                            if (minsizetile < 32) {
+                                maxlev2 = 4;
+                            }
+
+                            if (minsizetile < 16) {
+                                maxlev2 = 3;
+                            }
+                            
                             levwav = min(maxlev2, levwav);
 
                             //  if (settings->verbose) printf("levwavelet=%i  noisevarA=%f noisevarB=%f \n",levwav, noisevarab_r, noisevarab_b);

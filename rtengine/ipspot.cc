@@ -661,7 +661,7 @@ public:
     }
 };
 
-void ImProcFunctions::removeSpots(rtengine::Imagefloat* img, ImageSource* imgsrc, const std::vector<SpotEntry> &entries, const PreviewProps &pp, const ColorTemp &currWB, const ColorManagementParams *cmp, int tr)
+void ImProcFunctions::removeSpots(rtengine::Imagefloat* img, ImageSource* imgsrc, const std::vector<SpotEntry> &entries, const PreviewProps &pp, const ColorTemp &currWB, const ColorManagementParams *cmp, int tr, DenoiseInfoStore *dnstore)
 {
     //Get the clipped image areas (src & dst) from the source image
 
@@ -692,7 +692,10 @@ void ImProcFunctions::removeSpots(rtengine::Imagefloat* img, ImageSource* imgsrc
             }
             if (!converted) {
                 imgsrc->convertColorSpace(img, *cmp, currWB);
-            }            
+            }
+            if (params->denoise.enabled && dnstore && std::max(img->getWidth(), img->getHeight()) > 16) {
+                denoise(imgsrc, currWB, img, *dnstore, params->denoise);
+            }
         };
 
     for (auto entry : params->spot.entries) {

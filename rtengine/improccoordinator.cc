@@ -408,7 +408,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                 allocCache(spotprev);
                 orig_prev->copyTo(spotprev);
                 PreviewProps pp(0, 0, fw, fh, scale);
-                ipf.removeSpots(spotprev, imgsrc, params.spot.entries, pp, currWB, &params.icm, tr);
+                ipf.removeSpots(spotprev, imgsrc, params.spot.entries, pp, currWB, &params.icm, tr, nullptr);
             } else {
                 if (spotprev) {
                     delete spotprev;
