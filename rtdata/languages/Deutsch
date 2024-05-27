@@ -1,4 +1,3 @@
-
 #00 Als Grundlage die Übersetzung von RawTherapee übernommen.
 #01 Vielen Dank an die Übersetzer von RT: cytrinox, Ingo, keenonkites, klonk, marter, MaWe, Metex, mozzihh, oduis, phberlin, TooWaBoo
 #02 12.2022 Übernahme identischer Strings von RT nach ART. Kleinere Änderungen, weiterer Anpassungen und Übersetzung ART-exklusiver Strings (apostel338)
@@ -6,6 +5,7 @@
 #04 11.03.2023 Update für neue Version (apostel338)
 #05 01.09.2023 Update für neue Version (apostel338)
 #06 04.12.2023 Update für neue Version (apostel338)
+#07 25.05.2024 Update für neue Version (apostel338)
 ABOUT_TAB_BUILD;Version
 ABOUT_TAB_CREDITS;Danksagungen
 ABOUT_TAB_LICENSE;Lizenz
@@ -71,6 +71,7 @@ ERROR_MSG_FILE_READ;Fehler beim Lesen der Datei: %1
 ERROR_MSG_INVALID_LUT_PARAMS;Ungültige LUT-Parameter für: %1
 ERROR_MSG_INVALID_PROFILE;Ungültiges Profil: %1
 ERROR_MSG_INVALID_PSF;Ungültige PSF Datei: %1
+ERROR_MSG_INVALID_WB;Ungültige Weißabgleich-Koeffizienten
 ERROR_MSG_MAXERRORS;... (%1 vorherige(r) Fehler nicht angezeigt)
 ERROR_MSG_METADATA_VALUE;Metadata: Fehlerhafte Einstellung %1 - %2
 EXIFFILTER_APERTURE;Blende
@@ -194,6 +195,7 @@ FILEBROWSER_RENAMEDLGLABEL;Datei(en) umbenennen
 FILEBROWSER_RESETDEFAULTPROFILE;Profil auf Vorgabe zurücksetzen
 FILEBROWSER_SELECTDARKFRAME;Dunkelbild wählen...
 FILEBROWSER_SELECTFLATFIELD;Weißbild wählen...
+FILEBROWSER_SELECTION_COUNTER;%1 Dateien ausgewählt
 FILEBROWSER_SESSION_ADD_LABEL;Zu Sitzung hinzufügen
 FILEBROWSER_SESSION_LOAD_LABEL;Lade Sitzung aus Datei
 FILEBROWSER_SESSION_REMOVE_LABEL;Ausgewählte von Sitzung entfernen
@@ -665,6 +667,8 @@ HISTORY_MSG_SMOOTHING_DRAWNMASK;Weichzeichnen - Gezeichnete Maske
 HISTORY_MSG_SMOOTHING_ENABLED;Weichzeichnen
 HISTORY_MSG_SMOOTHING_EPSILON;Weichzeichnen - Details
 HISTORY_MSG_SMOOTHING_FALLOFF;Weichzeichnen - Rückgang
+HISTORY_MSG_SMOOTHING_HALATION_COLOR;Weichzeichnen - Halo-Tönung
+HISTORY_MSG_SMOOTHING_HALATION_SIZE;Weichzeichnen - Halo-Stärke
 HISTORY_MSG_SMOOTHING_HUEMASK;Weichzeichnen - H-Maske
 HISTORY_MSG_SMOOTHING_ITERATIONS;Weichzeichnen - Iterationen
 HISTORY_MSG_SMOOTHING_LIGHTNESSMASK;Weichzeichnen - L-Maske
@@ -1910,6 +1914,8 @@ TP_SMOOTHING_CHANNEL_RGB;RGB
 TP_SMOOTHING_CURVATURE;Krümmung
 TP_SMOOTHING_EPSILON;Detail
 TP_SMOOTHING_FALLOFF;Rückgang
+TP_SMOOTHING_HALATION_COLOR;Tönung
+TP_SMOOTHING_HALATION_SIZE;Stärke
 TP_SMOOTHING_ITERATIONS;Iterationen
 TP_SMOOTHING_LABEL;Weichzeichnen
 TP_SMOOTHING_LIST_TITLE;Parameter
@@ -1917,6 +1923,7 @@ TP_SMOOTHING_MODE;Modus
 TP_SMOOTHING_MODE_GAUSSIAN;Gaussian
 TP_SMOOTHING_MODE_GAUSSIAN_GLOW;Leuchten
 TP_SMOOTHING_MODE_GUIDED;Geführt
+TP_SMOOTHING_MODE_HALATION;Halo
 TP_SMOOTHING_MODE_LENS;Objektivunschärfe
 TP_SMOOTHING_MODE_MOTION;Bewegungsunschärfe
 TP_SMOOTHING_MODE_NLMEANS;Nicht-lokales Mittel
@@ -1987,6 +1994,7 @@ TP_WBALANCE_PRESET;Kamera-Voreinstellungen
 TP_WBALANCE_SIZE;Größe:
 TP_WBALANCE_SPOTWB;Manuell setzen
 TP_WBALANCE_TEMPERATURE;Farbtemperatur
+WARNING_INVALID_WB_TEMP_TINT;Warnung: Temperatur oder Tönung außerhalb des zulässigen Bereichs.
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Neues Detailfenster öffnen.
 ZOOMPANEL_ZOOM100;Zoom 100%\nTaste: <b>z</b>
