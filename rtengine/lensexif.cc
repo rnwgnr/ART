@@ -299,8 +299,10 @@ public:
             const float rd2 = powf(rd, 2);
 
             ca[0][i] = ca[1][i] = ca[2][i] = 1.f;
-            ca[0][i] += rd * (car0 + rd2 * (car2 + rd2 * car4)) / r;
-            ca[2][i] += rd * (cab0 + rd2 * (cab2 + rd2 * cab4)) / r;
+            if (r > 0) {
+                ca[0][i] += rd * (car0 + rd2 * (car2 + rd2 * car4)) / r;
+                ca[2][i] += rd * (cab0 + rd2 * (cab2 + rd2 * cab4)) / r;
+            }
         }
     }
 
