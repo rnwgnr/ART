@@ -43,6 +43,7 @@ private:
         Gtk::TreeModelColumn<bool> active;
         Gtk::TreeModelColumn<bool> is_group;
         Gtk::TreeModelColumn<bool> activatable;
+        Gtk::TreeModelColumn<Glib::ustring> tooltip;
 
         ExifColumns()
         {
@@ -56,6 +57,7 @@ private:
             add(active);
             add(is_group);
             add(activatable);
+            add(tooltip);
         }
     };
     Glib::RefPtr<Gdk::Pixbuf> editicon;

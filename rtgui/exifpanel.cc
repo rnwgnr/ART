@@ -54,8 +54,9 @@ ExifPanel::ExifPanel():
     exifTree->set_model(exifTreeModel);
     exifTree->set_grid_lines(Gtk::TREE_VIEW_GRID_LINES_NONE);
     exifTree->set_show_expanders(false);
-    exifTree->set_tooltip_column(0);
+    exifTree->set_tooltip_column(10);
     exifTree->set_enable_search(false);
+    exifTree->set_search_column(0);
         
     //keepicon = RTImage::createPixbufFromFile("tick-small.png");
     editicon = RTImage::createPixbufFromFile("edit-small.png");
@@ -197,14 +198,14 @@ void ExifPanel::setImageData (const FramesMetaData* id)
 void ExifPanel::addTag(const std::string &key, const std::pair<Glib::ustring, Glib::ustring> &label, const Glib::ustring &value, bool editable, bool edited, bool activatable)
 {
     const auto getgroup =
-        [&]() -> Gtk::TreeNodeChildren
+        [&]() -> std::pair<Glib::ustring, Gtk::TreeNodeChildren>
         {
             auto root = exifTreeModel->children();
             
             for (auto &row : root) {
                 std::string key = row[exifColumns.key];
                 if (row[exifColumns.is_group] && key == label.first) {
-                    return row.children();
+                    return std::make_pair(key, row.children());
                 }
             }
             auto it = exifTreeModel->append(root);
@@ -218,11 +219,13 @@ void ExifPanel::addTag(const std::string &key, const std::pair<Glib::ustring, Gl
             row[exifColumns.value] = "";
             row[exifColumns.is_group] = true;
             row[exifColumns.activatable] = activatable;
+            row[exifColumns.tooltip] = label.first;
 
-            return it->children();
+            return std::make_pair(label.first, it->children());
         };
 
-    auto root = getgroup();
+    auto p = getgroup();
+    auto root = p.second;
 
     Gtk::TreeModel::Row row = *(exifTreeModel->append(root));
     row[exifColumns.editable] = editable;
@@ -231,7 +234,8 @@ void ExifPanel::addTag(const std::string &key, const std::pair<Glib::ustring, Gl
     row[exifColumns.is_group] = false;
     row[exifColumns.value_nopango] = value;
 
-    row[exifColumns.label] = escapeHtmlChars(label.second);
+    auto lbl = escapeHtmlChars(label.second);
+    row[exifColumns.label] = lbl;
     row[exifColumns.value] = value;
 
     bool active = activatable && (all_keys_active() || cur_active_keys_.find(key) != cur_active_keys_.end());
@@ -241,6 +245,7 @@ void ExifPanel::addTag(const std::string &key, const std::pair<Glib::ustring, Gl
     if (edited) {
         row[exifColumns.icon] = editicon;
     }
+    row[exifColumns.tooltip] = Glib::ustring::compose(M("EXIFPANEL_METADATUM_TOOLTIP"), p.first + " ► " + lbl, key, value);
 }
 
 
