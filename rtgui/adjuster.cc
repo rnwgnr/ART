@@ -101,6 +101,20 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
     slider->set_draw_value (false);
     //slider->set_has_origin(false);  // ------------------ This will remove the colored part on the left of the slider's knob
 
+    const auto on_double_click =
+        [this](GdkEventButton *event) -> bool
+        {
+            if (event->button == 1 && event->type == GDK_2BUTTON_PRESS) {
+                resetValue(event->state & GDK_CONTROL_MASK);
+                return false;
+            }
+            return true;
+        };
+    slider->add_events(Gdk::BUTTON_PRESS_MASK);
+    slider->signal_button_press_event().connect(sigc::slot<bool, GdkEventButton *>(on_double_click));
+    spin->add_events(Gdk::BUTTON_PRESS_MASK);
+    spin->signal_button_press_event().connect(sigc::slot<bool, GdkEventButton *>(on_double_click));
+
     if (vlabel.empty() || compact) {
         // No label, everything goes in a single row
         if (vlabel.empty()) {
