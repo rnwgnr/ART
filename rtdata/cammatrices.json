@@ -3968,11 +3968,11 @@ XIAOMI CIVI 4 PRO REAR WIDE CAMERA
         "dcraw_matrix" : [9488, -3983, -714, -2887, 10945, 2229, -137, 960, 5786]
     },
     {
-        "make_model" : "OM DIGITAL SOLUTIONS OM-1 MARK II",
+        "make_model" : ["OM DIGITAL SOLUTIONS OM-1 MARK II", "OLYMPUS OM-1MARKII"],
         "dcraw_matrix" : [9090, -3590, -756, -3252, 11396, 2109, -318, 1059, 5606]
     },
     {
-        "make_model" : "OM DIGITAL SOLUTIONS OM-5",
+        "make_model" : ["OM DIGITAL SOLUTIONS OM-5", "OLYMPUS OM-5"],
         "dcraw_matrix" : [11896, -5110, -1076, -3181, 11378, 2048, -519, 1224, 5165]
     },
     {
