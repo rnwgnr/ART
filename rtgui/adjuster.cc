@@ -112,8 +112,18 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
         };
     slider->add_events(Gdk::BUTTON_PRESS_MASK);
     slider->signal_button_press_event().connect(sigc::slot<bool, GdkEventButton *>(on_double_click));
+    const auto on_spin_double_click =
+        [this](GdkEventButton *event) -> bool
+        {
+            auto area = spin->get_text_area();
+            if (event->button == 1 && event->type == GDK_2BUTTON_PRESS && event->x >= area.get_x() && event->x <= area.get_x() + area.get_width() && event->y >= area.get_y() && event->y <= area.get_y() + area.get_height()) {
+                resetValue(event->state & GDK_CONTROL_MASK);
+                return false;
+            }
+            return true;
+        };
     spin->add_events(Gdk::BUTTON_PRESS_MASK);
-    spin->signal_button_press_event().connect(sigc::slot<bool, GdkEventButton *>(on_double_click));
+    spin->signal_button_press_event().connect(sigc::slot<bool, GdkEventButton *>(on_spin_double_click));
 
     if (vlabel.empty() || compact) {
         // No label, everything goes in a single row
