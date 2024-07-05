@@ -1355,7 +1355,7 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
                             if (Glib::file_test(options.getParamFile(dest_fPath), Glib::FILE_TEST_EXISTS)) {
                                 // profile already got copied to destination from cache after cacheMgr->renameEntry
                                 // delete source profile as cleanup
-                                ::g_remove (options.getParamFile(src_fPath).c_str ());
+                                ::g_remove(options.getParamFile(src_fPath).c_str());
                             } else {
                                 scr_param->move(dest_param);
                             }
@@ -1367,9 +1367,14 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, b
                     auto xmp_sidecar = Thumbnail::getXmpSidecarPath(src_fPath);
                     if (Glib::file_test(xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
                         auto s = Gio::File::create_for_path(xmp_sidecar);
-                        auto dst = Gio::File::create_for_path(Thumbnail::getXmpSidecarPath(dest_fPath));
+                        auto dst_xmp_sidecar = Thumbnail::getXmpSidecarPath(dest_fPath);
+                        auto dst = Gio::File::create_for_path(dst_xmp_sidecar);
                         if (moveRequested) {
-                            s->move(dst);
+                            if (Glib::file_test(dst_xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
+                                ::g_remove(xmp_sidecar.c_str());
+                            } else {
+                                s->move(dst);
+                            }
                         } else {
                             s->copy(dst);
                         }
