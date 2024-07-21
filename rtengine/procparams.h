@@ -1173,6 +1173,7 @@ struct MetaDataParams {
     std::vector<std::string> exifKeys;
     ExifPairs exif;
     IPTCPairs iptc;
+    Glib::ustring notes;
 
     MetaDataParams();
 

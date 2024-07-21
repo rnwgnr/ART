@@ -3204,7 +3204,8 @@ MetaDataParams::MetaDataParams():
     mode(MetaDataParams::EDIT),
     exifKeys{},
     exif{},
-    iptc{}
+    iptc{},
+    notes("")
 {
     exifKeys = basicExifKeys;
 }
@@ -3215,7 +3216,8 @@ bool MetaDataParams::operator==(const MetaDataParams &other) const
     return mode == other.mode
         && exifKeys == other.exifKeys
         && exif == other.exif
-        && iptc == other.iptc;
+        && iptc == other.iptc
+        && notes == other.notes;
 }
 
 bool MetaDataParams::operator!=(const MetaDataParams &other) const
@@ -4134,6 +4136,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
         if (RELEVANT_(metadata)) {
             saveToKeyfile("MetaData", "Mode", metadata.mode, keyFile);
             saveToKeyfile("MetaData", "ExifKeys", metadata.exifKeys, keyFile);
+            saveToKeyfile("MetaData", "Notes", metadata.notes, keyFile);
         }
 
 // EXIF change list
@@ -5809,6 +5812,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     metadata.exifKeys = { "*" };
                 }
             }
+            assignFromKeyfile(keyFile, "MetaData", "Notes", metadata.notes);
         }
 
         if (keyFile.has_group("Exif") && RELEVANT_(exif)) {

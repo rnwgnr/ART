@@ -29,6 +29,7 @@ using namespace rtengine::procparams;
 MetaDataPanel::MetaDataPanel()
 {
     EvMetaDataMode = ProcEventMapper::getInstance()->newEvent(M_VOID, "HISTORY_MSG_METADATA_MODE");
+    EvNotes = ProcEventMapper::getInstance()->newEvent(M_VOID, "HISTORY_MSG_METADATA_NOTES");
 
     Gtk::HBox *box = Gtk::manage(new Gtk::HBox());
     box->pack_start(*Gtk::manage(new Gtk::Label(M("TP_METADATA_MODE") + ": ")), Gtk::PACK_SHRINK, 4);
@@ -49,6 +50,26 @@ MetaDataPanel::MetaDataPanel()
     tagsNotebook->append_page(*exifpanel, M("MAIN_TAB_EXIF"));
     tagsNotebook->append_page(*iptcpanel, M("MAIN_TAB_IPTC"));
 
+    notes_ = Gtk::TextBuffer::create();
+    notes_view_ = Gtk::manage(new Gtk::TextView(notes_));
+    setExpandAlignProperties(notes_view_, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
+    Gtk::ScrolledWindow *sw = Gtk::manage(new Gtk::ScrolledWindow());
+    setExpandAlignProperties(notes_view_, true, true, Gtk::ALIGN_FILL, Gtk::ALIGN_FILL);
+    sw->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
+    sw->add(*notes_view_);
+    Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
+    vb->pack_start(*sw, Gtk::PACK_EXPAND_WIDGET, 4);
+    vb->set_spacing(4);
+    tagsNotebook->append_page(*vb, M("TP_METADATA_NOTES"));
+    const auto update_notes =
+        [&]() -> void
+        {
+            if (listener) {
+                listener->panelChanged(EvNotes, M("HISTORY_CHANGED"));
+            }
+        };
+    notes_->signal_changed().connect(sigc::slot<void>(update_notes));
+
     pack_end(*tagsNotebook);
 }
 
@@ -67,6 +88,7 @@ void MetaDataPanel::read(const rtengine::procparams::ProcParams* pp)
 
     exifpanel->read(pp);
     iptcpanel->read(pp);
+    notes_->set_text(pp->metadata.notes);
     
     enableListener();
 }
@@ -75,6 +97,7 @@ void MetaDataPanel::read(const rtengine::procparams::ProcParams* pp)
 void MetaDataPanel::write(rtengine::procparams::ProcParams* pp)
 {
     pp->metadata.mode = static_cast<MetaDataParams::Mode>(min(metadataMode->get_active_row_number(), 2));
+    pp->metadata.notes = notes_->get_text();
     
     exifpanel->write(pp);
     iptcpanel->write(pp);

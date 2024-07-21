@@ -25,15 +25,6 @@
 #include "iptcpanel.h"
 
 class MetaDataPanel: public Gtk::VBox, public ToolPanel {
-private:
-    rtengine::ProcEvent EvMetaDataMode;
-    MyComboBoxText *metadataMode;
-    Gtk::Notebook *tagsNotebook;
-    ExifPanel *exifpanel;
-    IPTCPanel *iptcpanel;
-
-    void metaDataModeChanged();
-
 public:
     MetaDataPanel();
     ~MetaDataPanel() override;
@@ -46,5 +37,18 @@ public:
     void setListener(ToolPanelListener *tpl) override;
 
     void setProgressListener(rtengine::ProgressListener *pl);
+
+private:
+    rtengine::ProcEvent EvMetaDataMode;
+    rtengine::ProcEvent EvNotes;
+    
+    MyComboBoxText *metadataMode;
+    Gtk::Notebook *tagsNotebook;
+    ExifPanel *exifpanel;
+    IPTCPanel *iptcpanel;
+    Gtk::TextView *notes_view_;
+    Glib::RefPtr<Gtk::TextBuffer> notes_;
+
+    void metaDataModeChanged();
 };
 
