@@ -1,4 +1,5 @@
-/*
+/* -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -16,16 +17,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _CURVELISTENER_
-#define _CURVELISTENER_
+#pragma once
 
 #include <vector>
 
 class CurveEditor;
 
-class CurveListener
-{
-
+class CurveListener {
 private:
     bool multi;
 public:
@@ -87,4 +85,3 @@ public:
     }
 };
 
-#endif

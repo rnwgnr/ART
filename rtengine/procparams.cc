@@ -3378,7 +3378,13 @@ bool save_lut_params(KeyFile &keyFile, const Glib::ustring &group, const Glib::u
 {
     std::vector<std::string> val;
     for (auto &p : params) {
-        val.push_back(p.first + "=" + std::to_string(p.second));
+        std::string v;
+        const char *sep = "";
+        for (auto f : p.second) {
+            v += sep + std::to_string(f);
+            sep = ",";
+        }
+        val.push_back(p.first + "=" + v);
     }
     return saveToKeyfile(group, name, val, keyFile);
 }
@@ -3393,8 +3399,10 @@ bool load_lut_params(const KeyFile &keyFile, const Glib::ustring &group, const G
             auto p = v.find('=');
             if (p != std::string::npos) {
                 auto key = v.substr(0, p);
-                double val = std::atof(v.c_str() + (p+1));
-                out[key] = val;
+                for (auto d : Glib::Regex::split_simple(",", Glib::ustring(v.c_str() + (p+1)))) {
+                    double val = std::atof(d.c_str());
+                    out[key].push_back(val);
+                }
             }
         }
         return true;
@@ -5158,7 +5166,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         auto desc = lut.get_param_descriptors();
                         if (desc.size() == tmpparams.size()) {
                             for (size_t i = 0, n = desc.size(); i < n; ++i) {
-                                filmSimulation.lut_params[desc[i].name] = tmpparams[i];
+                                filmSimulation.lut_params[desc[i].name] = { tmpparams[i] };
                             }
                         }
                     }
@@ -5490,7 +5498,7 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                             auto desc = lut.get_param_descriptors();
                             if (desc.size() == tmpparams.size()) {
                                 for (size_t i = 0, n = desc.size(); i < n; ++i) {
-                                    cur.lut_params[desc[i].name] = tmpparams[i];
+                                    cur.lut_params[desc[i].name] = { tmpparams[i] };
                                 }
                             }
                         }

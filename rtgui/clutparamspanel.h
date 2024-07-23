@@ -22,10 +22,11 @@
 #include <gtkmm.h>
 #include "toolpanel.h"
 #include "adjuster.h"
+#include "curvelistener.h"
 #include "../rtengine/clutparams.h"
 
 
-class CLUTParamsPanel: public Gtk::VBox, public AdjusterListener {
+class CLUTParamsPanel: public Gtk::VBox, public AdjusterListener, public CurveListener {
 public:
     CLUTParamsPanel();
 
@@ -37,7 +38,11 @@ public:
 
     void adjusterChanged(Adjuster *a, double v) override { emit_signal(); }
     void adjusterAutoToggled(Adjuster *a, bool v) override {}
+    void curveChanged() override { emit_signal(); }
+    void curveChanged(CurveEditor *ce) override { emit_signal(); }
     
+    Gtk::SizeRequestMode get_request_mode_vfunc () const override;
+
 private:
     void emit_signal();
     

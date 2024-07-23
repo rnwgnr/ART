@@ -30,7 +30,10 @@ enum class CLUTParamType {
     PT_INT,
     PT_FLOAT,
     PT_BOOL,
-    PT_CHOICE
+    PT_CHOICE,
+    PT_CURVE,
+    PT_FLATCURVE,
+    PT_FLATCURVE_PERIODIC
 };
 
 struct CLUTParamDescriptor {
@@ -38,7 +41,7 @@ struct CLUTParamDescriptor {
     CLUTParamType type;
     double value_min;
     double value_max;
-    double value_default;
+    std::vector<double> value_default;
     std::vector<Glib::ustring> choices;
     Glib::ustring gui_name;
     Glib::ustring gui_group;
@@ -46,6 +49,6 @@ struct CLUTParamDescriptor {
     Glib::ustring gui_tooltip;
 };
 
-typedef std::map<std::string, double> CLUTParamValueMap;
+typedef std::map<std::string, std::vector<double>> CLUTParamValueMap;
 
 } // namespace rtengine

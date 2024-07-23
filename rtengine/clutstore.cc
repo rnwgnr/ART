@@ -599,6 +599,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
     desc.gui_name = cJSON_GetStringValue(n);
     desc.gui_group = "";
     desc.gui_step = 1;
+    desc.value_default = { 0 };
 
     const auto set_group_tooltip =
         [&](int i, int sz) -> bool
@@ -638,7 +639,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
         } else if (sz >= 3 && sz <= 5) {
             n = cJSON_GetArrayItem(root, 2);
             if (cJSON_IsBool(n)) {
-                desc.value_default = cJSON_IsTrue(n);
+                desc.value_default = { double(cJSON_IsTrue(n)) };
             }
             if (sz >= 4) {
                 return set_group_tooltip(3, sz);
@@ -664,7 +665,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
             if (sz >= 5) {
                 n = cJSON_GetArrayItem(root, 4);
                 if (cJSON_IsNumber(n)) {
-                    desc.value_default = n->valuedouble;
+                    desc.value_default = { n->valuedouble };
                 } else {
                     return false;
                 }
@@ -699,7 +700,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                 desc.type = CLUTParamType::PT_CHOICE;
                 if (sz >= 4) {
                     n = cJSON_GetArrayItem(root, 3);
-                    if (!set_int(n, desc.value_default)) {
+                    if (!set_int(n, desc.value_default[0])) {
                         return false;
                     }
                     return (sz == 4) || set_group_tooltip(4, sz);
@@ -716,7 +717,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                 }
                 if (sz >= 5) {
                     n = cJSON_GetArrayItem(root, 4);
-                    if (!set_int(n, desc.value_default)) {
+                    if (!set_int(n, desc.value_default[0])) {
                         return false;
                     }
                     if (sz >= 6) {
@@ -727,6 +728,52 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
             } else {
                 return false;
             }
+        }
+        break;
+    case CLUTParamType::PT_CURVE:
+        if (sz >= 3 && sz <= 6) {
+            n = cJSON_GetArrayItem(root, 2);
+            if (cJSON_IsNumber(n) && n->valuedouble == int(n->valuedouble)) {
+                switch (int(n->valuedouble)) {
+                case 0:
+                    desc.type = CLUTParamType::PT_CURVE;
+                    break;
+                case 1:
+                    desc.type = CLUTParamType::PT_FLATCURVE;
+                    break;
+                case 2:
+                    desc.type = CLUTParamType::PT_FLATCURVE_PERIODIC;
+                    break;
+                default:
+                    return false;
+                }
+                if (sz >= 4) {
+                    n = cJSON_GetArrayItem(root, 3);
+                    if (cJSON_IsNumber(n) && n->valuedouble == 0) {
+                        // 0 is a special case for a default curve
+                        desc.value_default = { 0 };
+                    } else if (cJSON_IsArray(n)) {
+                        desc.value_default.clear();
+                        for (int i = 0, k = cJSON_GetArraySize(n); i < k; ++i) {
+                            auto v = cJSON_GetArrayItem(n, i);
+                            if (!cJSON_IsNumber(v)) {
+                                return false;
+                            }
+                            desc.value_default.push_back(v->valuedouble);
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+                if (sz >= 5) {
+                    return set_group_tooltip(4, sz);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } else if (sz == 2) {
+            return true;
         }
         break;
     default:
@@ -843,7 +890,15 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
         case Ctl::FloatTypeEnum:
             tp = CLUTParamType::PT_FLOAT;
             break;
-        default: return err("parameter " + a->name() + " is of unsupported type");
+        case Ctl::ArrayTypeEnum:
+            if (a->type().cast<Ctl::ArrayType>()->elementType().cast<Ctl::FloatType>()) {
+                tp = CLUTParamType::PT_CURVE;
+                break;
+            } else {
+                // fall back to error
+            }
+        default:
+            return err("parameter " + a->name() + " is of unsupported type");
         }
 
         std::string name = a->name();
@@ -856,18 +911,18 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
 
         desc.value_min = 0;
         desc.value_max = 1;
-        desc.value_default = 0;
+        desc.value_default = { 0 };
 
         if (a->hasDefaultValue()) {
             switch (tp) {
             case CLUTParamType::PT_BOOL:
-                desc.value_default = *reinterpret_cast<bool *>(a->data());
+                desc.value_default[0] = *reinterpret_cast<bool *>(a->data());
                 break;
             case CLUTParamType::PT_FLOAT:
-                desc.value_default = *reinterpret_cast<float *>(a->data());
+                desc.value_default[0] = *reinterpret_cast<float *>(a->data());
                 break;
             case CLUTParamType::PT_INT:
-                desc.value_default = *reinterpret_cast<int *>(a->data());
+                desc.value_default[0] = *reinterpret_cast<int *>(a->data());
             default:
                 break;
             }
@@ -1249,7 +1304,8 @@ bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
             if (it == values.end()) {
                 std::cout << "WARNING: no value for " << desc.name << std::endl;
             }
-            auto v = it != values.end() ? it->second : desc.value_default;
+            auto vv = it != values.end() ? it->second : desc.value_default;
+            auto v = vv[0];
             int arg = -1;
             for (size_t j = 0, n = ctl_func_[0]->numInputArgs(); j < n; ++j) {
                 if (ctl_func_[0]->inputArg(j)->name() == desc.name) {
@@ -1274,6 +1330,25 @@ bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
                     *reinterpret_cast<float *>(f->inputArg(arg)->data()) = v;
                 }
                 break;
+            case CLUTParamType::PT_CURVE:
+            case CLUTParamType::PT_FLATCURVE:
+            case CLUTParamType::PT_FLATCURVE_PERIODIC: {
+                std::unique_ptr<Curve> curve;
+                if (desc.type == CLUTParamType::PT_CURVE) {
+                    curve.reset(new DiagonalCurve(vv));
+                } else {
+                    curve.reset(new FlatCurve(vv, desc.type == CLUTParamType::PT_FLATCURVE_PERIODIC));
+                }
+                for (auto f : ctl_func_) {
+                    Ctl::ArrayTypePtr atp = f->inputArg(arg)->type().cast<Ctl::ArrayType>();
+                    auto d = f->inputArg(arg)->data();
+                    size_t n = atp->size();
+                    for (size_t j = 0; j < n; ++j) {
+                        double x = double(j) / double(n-1);
+                        *(reinterpret_cast<float *>(d) + j) = curve->getVal(x);
+                    }
+                }
+            }   break;
             case CLUTParamType::PT_INT:
             case CLUTParamType::PT_CHOICE:
             default:

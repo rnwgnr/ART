@@ -21,11 +21,32 @@
 #include "clutparamspanel.h"
 #include "guiutils.h"
 #include "multilangmgr.h"
+#include "curveeditor.h"
+#include "curveeditorgroup.h"
+
+namespace {
+
+class CLUTParamsCurveEditorGroup: public CurveEditorGroup {
+public:
+    CLUTParamsCurveEditorGroup(Glib::ustring &curveDir, Glib::ustring groupLabel="", float curvesRatio=1.f):
+        CurveEditorGroup(curveDir, groupLabel, curvesRatio) {}
+
+    const std::vector<CurveEditor *> getCurveEditors() const { return curveEditors; }
+};
+
+} // namespace
 
 
 CLUTParamsPanel::CLUTParamsPanel():
     sig_blocked_(false)
 {
+    set_orientation(Gtk::ORIENTATION_VERTICAL);
+}
+
+
+Gtk::SizeRequestMode CLUTParamsPanel::get_request_mode_vfunc() const
+{
+    return Gtk::SIZE_REQUEST_HEIGHT_FOR_WIDTH;
 }
 
 
@@ -129,10 +150,27 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
             w = c;
             box->pack_start(*hb);
         }   break;
+        case rtengine::CLUTParamType::PT_CURVE:
+        case rtengine::CLUTParamType::PT_FLATCURVE:
+        case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC: {
+            auto grp = Gtk::manage(new CLUTParamsCurveEditorGroup(options.lastColorToningCurvesDir, lbl(d.gui_name)));
+            grp->setCurveListener(this);
+            CurveEditor *ce = nullptr;
+            if (d.type == rtengine::CLUTParamType::PT_CURVE) {
+                ce = grp->addCurve(CT_Diagonal, "");
+                static_cast<DiagonalCurveEditor *>(ce)->setResetCurve(DiagonalCurveType(d.value_default[0]), d.value_default);
+            } else {
+                ce = grp->addCurve(CT_Flat, "", nullptr, false, d.type == rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC);
+                static_cast<FlatCurveEditor *>(ce)->setResetCurve(FlatCurveType(d.value_default[0]), d.value_default);
+            }
+            grp->curveListComplete();
+            box->pack_start(*grp);
+            w = grp;
+        }   break;
         case rtengine::CLUTParamType::PT_INT:
         case rtengine::CLUTParamType::PT_FLOAT:
         default: {
-            Adjuster *a = Gtk::manage(new Adjuster(lbl(d.gui_name), d.value_min, d.value_max, d.gui_step, d.value_default));
+            Adjuster *a = Gtk::manage(new Adjuster(lbl(d.gui_name), d.value_min, d.value_max, d.gui_step, d.value_default.empty() ? 0.0 : d.value_default[0]));
             a->setAdjusterListener(this);
             box->pack_start(*a);
             w = a;
@@ -155,19 +193,24 @@ rtengine::CLUTParamValueMap CLUTParamsPanel::getValue() const
         auto w = widgets_[i];
         auto &d = params_[i];
 
-        double v = 0;
+        std::vector<double> v = { 0 };
         
         switch (d.type) {
         case rtengine::CLUTParamType::PT_BOOL: 
-            v = static_cast<Gtk::CheckButton *>(w)->get_active();
+            v[0] = static_cast<Gtk::CheckButton *>(w)->get_active();
             break;
         case rtengine::CLUTParamType::PT_CHOICE:
-            v = static_cast<MyComboBoxText *>(w)->get_active_row_number();
+            v[0] = static_cast<MyComboBoxText *>(w)->get_active_row_number();
+            break;
+        case rtengine::CLUTParamType::PT_CURVE:
+        case rtengine::CLUTParamType::PT_FLATCURVE:
+        case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC:
+            v = static_cast<CLUTParamsCurveEditorGroup *>(w)->getCurveEditors()[0]->getCurve();
             break;
         case rtengine::CLUTParamType::PT_INT:
         case rtengine::CLUTParamType::PT_FLOAT:
         default:
-            v = static_cast<Adjuster *>(w)->getValue();
+            v[0] = static_cast<Adjuster *>(w)->getValue();
             break;
         }
 
@@ -188,7 +231,8 @@ void CLUTParamsPanel::setValue(const rtengine::CLUTParamValueMap &val)
         auto &d = params_[i];
 
         auto it = val.find(d.name);
-        double v = it != val.end() ? it->second : d.value_default;
+        auto vv = it != val.end() ? it->second : d.value_default;
+        auto v = vv.empty() ? 0.0 : vv[0];
         
         switch (d.type) {
         case rtengine::CLUTParamType::PT_BOOL: 
@@ -197,6 +241,13 @@ void CLUTParamsPanel::setValue(const rtengine::CLUTParamValueMap &val)
         case rtengine::CLUTParamType::PT_CHOICE:
             static_cast<MyComboBoxText *>(w)->set_active(int(v));
             break;
+        case rtengine::CLUTParamType::PT_CURVE:
+        case rtengine::CLUTParamType::PT_FLATCURVE:
+        case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC: {
+            CurveEditor *ce = static_cast<CLUTParamsCurveEditorGroup *>(w)->getCurveEditors()[0];
+            ce->setCurve(vv);
+            ce->openIfNonlinear();
+        }   break;
         case rtengine::CLUTParamType::PT_INT:
         case rtengine::CLUTParamType::PT_FLOAT:
         default:
