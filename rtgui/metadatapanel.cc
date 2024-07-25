@@ -52,6 +52,7 @@ MetaDataPanel::MetaDataPanel()
 
     notes_ = Gtk::TextBuffer::create();
     notes_view_ = Gtk::manage(new Gtk::TextView(notes_));
+    notes_view_->set_wrap_mode(Gtk::WRAP_WORD);
     setExpandAlignProperties(notes_view_, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
     Gtk::ScrolledWindow *sw = Gtk::manage(new Gtk::ScrolledWindow());
     setExpandAlignProperties(notes_view_, true, true, Gtk::ALIGN_FILL, Gtk::ALIGN_FILL);
