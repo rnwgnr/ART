@@ -660,6 +660,15 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
             return false;
         };
 
+    std::unordered_map<std::string, double> curvetypes = {
+        {"Linear", double(DCT_Linear)},
+        {"Spline", double(DCT_Spline)},
+        {"CatmullRom", double(DCT_CatmullRom)},
+        {"NURBS", double(DCT_NURBS)},
+        {"Parametric", double(DCT_Parametric)},
+        {"ControlPoints", double(FCT_MinMaxCPoints)}
+    };
+
     switch (desc.type) {
     case CLUTParamType::PT_BOOL:
         if (sz == 2) {
@@ -784,10 +793,20 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                         desc.value_default.clear();
                         for (int i = 0, k = cJSON_GetArraySize(n); i < k; ++i) {
                             auto v = cJSON_GetArrayItem(n, i);
-                            if (!cJSON_IsNumber(v)) {
+                            double d = 0;
+                            if (i == 0 && cJSON_IsString(v)) {
+                                auto it = curvetypes.find(cJSON_GetStringValue(v));
+                                if (it == curvetypes.end()) {
+                                    return false;
+                                } else {
+                                    d = it->second;
+                                }
+                            } else if (cJSON_IsNumber(v)) {
+                                d = v->valuedouble;
+                            } else {
                                 return false;
                             }
-                            desc.value_default.push_back(v->valuedouble);
+                            desc.value_default.push_back(d);
                         }
                     } else {
                         return false;
@@ -831,8 +850,8 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
 
 /**
  * ART-compatible CTL scripts can contain parameters as additional uniform
- * input parameters to ART_main. Currently, only parameters of type "bool",
- * "int" or "float" are supported. Each such parameter must come with an
+ * input parameters to ART_main. The supported parameter types are "bool",
+ * "int", "float" and arrays of floats. Each such parameter must come with an
  * associated ART parameter definition in the CTL script. ART parameter
  * definitions are special comment lines of the following form:
  *
@@ -865,6 +884,20 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  *   be at least 4, with the 3rd and 4th elements corresponding to the minimum
  *   and maximum values for the GUI slider. The optional 5th element is the
  *   default value, and the optional last element the GUI group name.
+ *
+ * - arrays of floats are used to represent curves as 1D LUTs. Both curve
+ *   types supported by ART (i.e. "diagonal" and "flat") are available,
+ *   depending on the parameter definition. The array size of the parameter
+ *   definition must be at least 2 and at most 8. The 3rd parameter indicates
+ *   the curve type: 0 for diagonal, 1 for flat, and 2 for periodic flat
+ *   (e.g. like a hue curve in ART). If not given, it defaults to 0. The 4th
+ *   parameter, if given, specifies the default value for the curve. This can
+ *   either be 0 (i.e. an identity curve), or an array of floats defining the
+ *   type of curve and its control points, in the format used by .rtc curve
+ *   files. The 5th and 6th parameters can be used to define the gradients
+ *   appearing at the bottom and left of the curves in the GUI. Finally, as
+ *   for other parameter types, the last two optional elements are the GUI
+ *   group name and tooltip string.
  *
  * If default values are not given in the ART parameter definition, they are
  * taken from the definition of the ART_main function. If no default is given,
