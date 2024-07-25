@@ -632,6 +632,34 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
             return false;
         };
 
+    const auto set_gradient =
+        [&](cJSON *n, std::vector<std::array<float, 4>> &out) -> bool
+        {
+            out.clear();
+            if (cJSON_IsNumber(n) && n->valuedouble == 0) {
+                return true;
+            } else if (cJSON_IsArray(n)) {
+                size_t k = cJSON_GetArraySize(n);
+                for (size_t j = 0; j < k; ++j) {
+                    auto g = cJSON_GetArrayItem(n, j);
+                    if (!cJSON_IsArray(g) || cJSON_GetArraySize(g) != 4) {
+                        return false;
+                    }
+                    out.emplace_back();
+                    auto &arr = out.back();
+                    for (size_t c = 0; c < 4; ++c) {
+                        auto e = cJSON_GetArrayItem(g, c);
+                        if (!cJSON_IsNumber(e)) {
+                            return false;
+                        }
+                        arr[c] = e->valuedouble;
+                    }
+                }
+                return true;
+            }
+            return false;
+        };
+
     switch (desc.type) {
     case CLUTParamType::PT_BOOL:
         if (sz == 2) {
@@ -731,7 +759,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
         }
         break;
     case CLUTParamType::PT_CURVE:
-        if (sz >= 3 && sz <= 6) {
+        if (sz >= 3 && sz <= 8) {
             n = cJSON_GetArrayItem(root, 2);
             if (cJSON_IsNumber(n) && n->valuedouble == int(n->valuedouble)) {
                 switch (int(n->valuedouble)) {
@@ -766,7 +794,25 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
                     }
                 }
                 if (sz >= 5) {
-                    return set_group_tooltip(4, sz);
+                    if (set_group_tooltip(4, sz)) {
+                        return true;
+                    }
+                    n = cJSON_GetArrayItem(root, 4);
+                    if (!set_gradient(n, desc.gui_bottom_gradient)) {
+                        return false;
+                    }
+                    if (sz >= 6) {
+                        if (set_group_tooltip(5, sz)) {
+                            return true;
+                        }
+                        n = cJSON_GetArrayItem(root, 5);
+                        if (!set_gradient(n, desc.gui_left_gradient)) {
+                            return false;
+                        }
+                        if (sz >= 7) {
+                            return set_group_tooltip(6, sz);
+                        }
+                    }
                 }
                 return true;
             } else {

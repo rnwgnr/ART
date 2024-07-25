@@ -23,6 +23,7 @@
 #include "multilangmgr.h"
 #include "curveeditor.h"
 #include "curveeditorgroup.h"
+#include <map>
 
 namespace {
 
@@ -84,6 +85,7 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
     Gtk::VBox *vb = this;
 
     std::vector<std::pair<Glib::ustring, Gtk::Box *>> groups;
+    std::map<Glib::ustring, int> group_is_curve;
 
     const auto reset =
         [this]() -> void
@@ -107,11 +109,29 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
     hb->pack_start(*sep);
     hb->pack_start(*r, Gtk::PACK_SHRINK, 2);
     vb->pack_start(*hb);
+
+    for (auto &d : params) {
+        if (!d.gui_group.empty()) {
+            switch (d.type) {
+            case rtengine::CLUTParamType::PT_CURVE:
+            case rtengine::CLUTParamType::PT_FLATCURVE:
+            case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC:
+                if (group_is_curve.find(d.gui_group) == group_is_curve.end()) {
+                    group_is_curve[d.gui_group] = 1;
+                } else if (group_is_curve[d.gui_group] > 0) {
+                    ++group_is_curve[d.gui_group];
+                }
+                break;
+            default:
+                group_is_curve[d.gui_group] = 0;
+            }
+        }
+    }
     
     for (auto &d : params) {
-        Gtk::Widget *w = nullptr;
+        void *w = nullptr;
         Gtk::Box *box = nullptr;
-        if (!d.gui_group.empty()) {
+        if (!d.gui_group.empty() && !group_is_curve[d.gui_group]) {
             for (auto &p : groups) {
                 if (p.first == d.gui_group) {
                     box = p.second;
@@ -131,6 +151,7 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
         if (!box) {
             box = vb;
         }
+        bool tooltip_ok = true;
         switch (d.type) {
         case rtengine::CLUTParamType::PT_BOOL: {
             Gtk::CheckButton *b = Gtk::manage(new Gtk::CheckButton(lbl(d.gui_name)));
@@ -153,19 +174,62 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
         case rtengine::CLUTParamType::PT_CURVE:
         case rtengine::CLUTParamType::PT_FLATCURVE:
         case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC: {
-            auto grp = Gtk::manage(new CLUTParamsCurveEditorGroup(options.lastColorToningCurvesDir, lbl(d.gui_name)));
+            CLUTParamsCurveEditorGroup *grp = nullptr;
+            bool grp_shared = !d.gui_group.empty() && group_is_curve[d.gui_group];
+            Glib::ustring label = "";
+            Glib::ustring grp_label = lbl(d.gui_name);
+            bool grp_pack = false;
+            if (grp_shared) {
+                label = lbl(d.gui_name);
+                grp_label = lbl(d.gui_group);
+                for (auto &p : groups) {
+                    if (p.first == d.gui_group) {
+                        grp = static_cast<CLUTParamsCurveEditorGroup *>(p.second);
+                        break;
+                    }
+                }
+            }
+            if (!grp) {
+                grp = Gtk::manage(new CLUTParamsCurveEditorGroup(options.lastColorToningCurvesDir, grp_label));
+                grp_pack = true;
+                if (grp_shared) {
+                    groups.emplace_back(d.gui_group, grp);
+                }
+            }
             grp->setCurveListener(this);
             CurveEditor *ce = nullptr;
             if (d.type == rtengine::CLUTParamType::PT_CURVE) {
-                ce = grp->addCurve(CT_Diagonal, "");
+                ce = grp->addCurve(CT_Diagonal, label);
                 static_cast<DiagonalCurveEditor *>(ce)->setResetCurve(DiagonalCurveType(d.value_default[0]), d.value_default);
             } else {
-                ce = grp->addCurve(CT_Flat, "", nullptr, false, d.type == rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC);
+                ce = grp->addCurve(CT_Flat, label, nullptr, false, d.type == rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC);
                 static_cast<FlatCurveEditor *>(ce)->setResetCurve(FlatCurveType(d.value_default[0]), d.value_default);
             }
-            grp->curveListComplete();
-            box->pack_start(*grp);
-            w = grp;
+            if (!d.gui_bottom_gradient.empty()) {
+                std::vector<GradientMilestone> ms;
+                for (auto &g : d.gui_bottom_gradient) {
+                    ms.push_back(GradientMilestone(g[0], g[1], g[2], g[3]));
+                }
+                ce->setBottomBarBgGradient(ms);
+            }
+            if (!d.gui_left_gradient.empty()) {
+                std::vector<GradientMilestone> ms;
+                for (auto &g : d.gui_left_gradient) {
+                    ms.push_back(GradientMilestone(g[0], g[1], g[2], g[3]));
+                }
+                ce->setLeftBarBgGradient(ms);
+            }
+            if (!grp_shared || int(grp->getCurveEditors().size()) == group_is_curve[d.gui_group]) {
+                grp->curveListComplete();
+            }
+            if (grp_pack) {
+                box->pack_start(*grp);
+            }
+            w = ce;
+            if (!d.gui_tooltip.empty()) {
+                ce->setTooltip(d.gui_tooltip);
+            }
+            tooltip_ok = false;
         }   break;
         case rtengine::CLUTParamType::PT_INT:
         case rtengine::CLUTParamType::PT_FLOAT:
@@ -176,8 +240,8 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
             w = a;
         }   break;
         }
-        if (!d.gui_tooltip.empty()) {
-            w->set_tooltip_markup(d.gui_tooltip);
+        if (!d.gui_tooltip.empty() && tooltip_ok) {
+            static_cast<Gtk::Widget *>(w)->set_tooltip_markup(d.gui_tooltip);
         }
         widgets_.push_back(w);
     }
@@ -205,7 +269,7 @@ rtengine::CLUTParamValueMap CLUTParamsPanel::getValue() const
         case rtengine::CLUTParamType::PT_CURVE:
         case rtengine::CLUTParamType::PT_FLATCURVE:
         case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC:
-            v = static_cast<CLUTParamsCurveEditorGroup *>(w)->getCurveEditors()[0]->getCurve();
+            v = static_cast<CurveEditor *>(w)->getCurve();
             break;
         case rtengine::CLUTParamType::PT_INT:
         case rtengine::CLUTParamType::PT_FLOAT:
@@ -244,7 +308,7 @@ void CLUTParamsPanel::setValue(const rtengine::CLUTParamValueMap &val)
         case rtengine::CLUTParamType::PT_CURVE:
         case rtengine::CLUTParamType::PT_FLATCURVE:
         case rtengine::CLUTParamType::PT_FLATCURVE_PERIODIC: {
-            CurveEditor *ce = static_cast<CLUTParamsCurveEditorGroup *>(w)->getCurveEditors()[0];
+            CurveEditor *ce = static_cast<CurveEditor *>(w);
             ce->setCurve(vv);
             ce->openIfNonlinear();
         }   break;

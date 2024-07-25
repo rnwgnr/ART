@@ -49,5 +49,5 @@ private:
     sigc::signal<void> sig_changed_;
     bool sig_blocked_;
     std::vector<rtengine::CLUTParamDescriptor> params_;
-    std::vector<Gtk::Widget *> widgets_;
+    std::vector<void *> widgets_;
 };

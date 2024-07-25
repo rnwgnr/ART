@@ -23,6 +23,7 @@
 #include <glibmm/ustring.h>
 #include <vector>
 #include <map>
+#include <array>
 
 namespace rtengine {
 
@@ -47,6 +48,8 @@ struct CLUTParamDescriptor {
     Glib::ustring gui_group;
     double gui_step;
     Glib::ustring gui_tooltip;
+    std::vector<std::array<float, 4>> gui_bottom_gradient;
+    std::vector<std::array<float, 4>> gui_left_gradient;
 };
 
 typedef std::map<std::string, std::vector<double>> CLUTParamValueMap;
