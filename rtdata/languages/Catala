@@ -24,6 +24,7 @@
 #23 2023-12-04 mrleemon, update for 1.21
 #24 2024-01-19 mrleemon, update for 1.21.1
 #25 2024-05-21 mrleemon, update for 1.21.4
+#26 2024-07-28 mrleemon, update for 1.22.2
 
 ABOUT_TAB_BUILD;Versió
 ABOUT_TAB_CREDITS;Crèdits
@@ -653,6 +654,7 @@ HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Punt gris destí
 HISTORY_MSG_LOGENC_SATCONTROL;Log - Control de saturació
 HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - Precompressió d'altes llums
 HISTORY_MSG_METADATA_MODE;Mode de còpia de metadades
+HISTORY_MSG_METADATA_NOTES;Notes de processament
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrast - Llindar de contrast
 HISTORY_MSG_PCVIGNETTE_CENTER;FV - Centre
 HISTORY_MSG_PERSPECTIVE_ENABLED;Correcció de perspectiva
@@ -1740,6 +1742,7 @@ TP_METADATA_EDIT;Aplica modificacions
 TP_METADATA_MODE;Mode de còpia de metadades
 TP_METADATA_STRIP;Elimina totes les metadades
 TP_METADATA_TUNNEL;Copia sense canvis
+TP_METADATA_NOTES;Notes de processament
 TP_PCVIGNETTE_CENTER_X;Centre X
 TP_PCVIGNETTE_CENTER_Y;Centre Y
 TP_PCVIGNETTE_FEATHER;Difuminat

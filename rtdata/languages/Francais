@@ -625,6 +625,7 @@ HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Point gris cible
 HISTORY_MSG_LOGENC_SATCONTROL;Log - Contrôle de saturation
 HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - Précompression des hautes lumières
 HISTORY_MSG_METADATA_MODE;Mode de copie des métadonnées
+HISTORY_MSG_METADATA_NOTES;Notes de traitement
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontraste - Seuil de contraste
 HISTORY_MSG_PCVIGNETTE_CENTER;VF - Centre
 HISTORY_MSG_PERSPECTIVE_ENABLED;Correction de perspective
@@ -1712,6 +1713,7 @@ TP_METADATA_EDIT;Appliquer les modifications
 TP_METADATA_MODE;Mode de copie des métadonnées
 TP_METADATA_STRIP;Effacer toutes les métadonnées
 TP_METADATA_TUNNEL;Copier à l'identique
+TP_METADATA_NOTES;Notes de traitement
 TP_PCVIGNETTE_CENTER_X;Centrer X
 TP_PCVIGNETTE_CENTER_Y;Centrer Y
 TP_PCVIGNETTE_FEATHER;Dégradé

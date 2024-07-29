@@ -40,6 +40,7 @@
 #39 30-12-2023 update naar ART v1.21 door pm
 #40 23-01-2024 update naar ART v1.21.1 door pm
 #41 23-05-24 update naar ART v1.23 door pm
+#42 28-07-24 update naar ART v1.24 door pm
 
 ABOUT_TAB_BUILD;Versie
 ABOUT_TAB_CREDITS;Credits
@@ -655,6 +656,7 @@ HISTORY_MSG_LOGENC_TARGET_GRAY;Log - bestemming grijspunt
 HISTORY_MSG_LOGENC_SATCONTROL;Log - beperk verzadiging
 HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - voorcompressie hoge lichten
 HISTORY_MSG_METADATA_MODE;Metadata kopieermodus
+HISTORY_MSG_METADATA_NOTES;Aantekeningen
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrast - contrastdrempel
 HISTORY_MSG_PCVIGNETTE_CENTER;Vignettering - centrum
 HISTORY_MSG_PERSPECTIVE_CTRL_LINE;Perspectief - controlelijnen
@@ -1744,6 +1746,7 @@ TP_METADATA_EDIT;Pas wijzigingen toe
 TP_METADATA_MODE;Kopieermodus metadata
 TP_METADATA_STRIP;Verwijder alle metadata
 TP_METADATA_TUNNEL;Kopieer onveranderd
+TP_METADATA_NOTES;Aantekeningen
 TP_PCVIGNETTE_CENTER_X;Centrum X
 TP_PCVIGNETTE_CENTER_Y;Centrum Y
 TP_PCVIGNETTE_FEATHER;Straal

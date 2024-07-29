@@ -23,6 +23,7 @@
 #23 2023-12-16 alvaro
 #24 2024-01-23 alvaro
 #25 2024-05-22 alvaro
+#26 2024-07-28 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -651,6 +652,7 @@ HISTORY_MSG_LOGENC_SATCONTROL;Log - Controllo saturazione
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Grigio di riferimento
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Ev bianco
 HISTORY_MSG_METADATA_MODE;Modalità copia metadati
+HISTORY_MSG_METADATA_NOTES;Annotazioni
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microcontrasto - Soglia di contrasto
 HISTORY_MSG_PCVIGNETTE_CENTER;FV - Centro
 HISTORY_MSG_PERSPECTIVE_CTRL_LINE;Prospettiva - Linee di controllo
@@ -1737,6 +1739,7 @@ TP_LOGENC_TARGET_GRAY;Punto di grigio target (luminosità)
 TP_LOGENC_WHITE_EV;Esposizione relativa al bianco (Ev)
 TP_METADATA_EDIT;Applica modifiche
 TP_METADATA_MODE;Modalità copia metadati
+TP_METADATA_NOTES;Annotazioni
 TP_METADATA_STRIP;Togli tutti i metadati
 TP_METADATA_TUNNEL;Copia senza cambiamenti
 TP_PCVIGNETTE_CENTER_X;Centro X
@@ -2020,8 +2023,5 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
-
-
-
 
 

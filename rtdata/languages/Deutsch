@@ -6,6 +6,7 @@
 #05 01.09.2023 Update für neue Version (apostel338)
 #06 04.12.2023 Update für neue Version (apostel338)
 #07 25.05.2024 Update für neue Version (apostel338)
+#08 28.07.2024 Update für neue Version (apostel338)
 ABOUT_TAB_BUILD;Version
 ABOUT_TAB_CREDITS;Danksagungen
 ABOUT_TAB_LICENSE;Lizenz
@@ -631,6 +632,7 @@ HISTORY_MSG_LOGENC_SATCONTROL;Log-Tonemapping - Sättigungskontrolle
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log-Tonemapping - Mittleres Grau
 HISTORY_MSG_LOGENC_WHITE_EV;Log-Tonemapping - Weiß EV
 HISTORY_MSG_METADATA_MODE;Metadaten - Kopiermodus
+HISTORY_MSG_METADATA_NOTES;Bearbeitungsnotizen
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Mikrokontrast - Kontrastschwelle
 HISTORY_MSG_PCVIGNETTE_CENTER;Vignettierungsfilter - Zentrum
 HISTORY_MSG_PERSPECTIVE_CTRL_LINE;Perspektive - Leitlinie
@@ -1718,6 +1720,7 @@ TP_LOGENC_TARGET_GRAY;Mittleres Grau (Helligkeit)
 TP_LOGENC_WHITE_EV;Weiß relative Belichtung (Ev)
 TP_METADATA_EDIT;Veränderte Daten
 TP_METADATA_MODE;Kopiermodus
+TP_METADATA_NOTES;Bearbeitungsnotizen
 TP_METADATA_STRIP;Keine
 TP_METADATA_TUNNEL;Unveränderte Daten
 TP_PCVIGNETTE_CENTER_X;Zentrum X
