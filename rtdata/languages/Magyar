@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2024-05-22 Bereczky Péter, updates for the new release
+#03 2024-07-30 Bereczky Péter, updates for the new release
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -389,7 +389,7 @@ HISTORY_MSG_120;Zöldegyensúly
 HISTORY_MSG_121;Raw CA javítás - Auto
 HISTORY_MSG_122;Dark-Frame - Auto
 HISTORY_MSG_123;Dark-Frame - Fájl
-HISTORY_MSG_124;Gain/fehérpont korrekció
+HISTORY_MSG_124;Erősítés/fehérpont korrekció
 HISTORY_MSG_126;Flat-Field - Fájl
 HISTORY_MSG_127;Flat-Field - Auto
 HISTORY_MSG_128;Flat-Field - Elmosás sugara
@@ -544,7 +544,7 @@ HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - fényerő mód
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - bemeneti telítettség
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - kimeneti telítettség
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - maszk megjelenítése
-HISTORY_MSG_COLORCORRECTION_SLOPE;CC - csúcsfények/gain
+HISTORY_MSG_COLORCORRECTION_SLOPE;CC - csúcsfények/erősítés
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - színbeli hasonlóság maszk
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - ecsetmaszk
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametrikus maszk
@@ -618,16 +618,17 @@ HISTORY_MSG_LOCALCONTRAST_DRAWNMASK;Helyi kontraszt - ecsetmaszk
 HISTORY_MSG_LOCALCONTRAST_PARAMETRICMASK;Helyi kontraszt - parametrikus maszk
 HISTORY_MSG_LOCALCONTRAST_MASK_POSTPROCESS;Helyi kontraszt - maszk utófeldolgozás
 HISTORY_MSG_LOGENC_AUTO;Log - Auto
-HISTORY_MSG_LOGENC_AUTOGAIN;Log - Automatikus Gain
+HISTORY_MSG_LOGENC_AUTOGAIN;Log - Automatikus Erősítés
 HISTORY_MSG_LOGENC_REGULARIZATION;Log - Helyi kontraszt megőrzés
 HISTORY_MSG_LOGENC_ENABLED;Log Kódolás
 HISTORY_MSG_LOGENC_BLACK_EV;Log - Fekete Fé
-HISTORY_MSG_LOGENC_GAIN;Log - Gain Exp. Komp.
+HISTORY_MSG_LOGENC_GAIN;Log - Erősítés
 HISTORY_MSG_LOGENC_WHITE_EV;Log - Fehér Fé
 HISTORY_MSG_LOGENC_TARGET_GRAY;Log - Cél szürke pont
 HISTORY_MSG_LOGENC_SATCONTROL;Log - Telítettség vezérlése
 HISTORY_MSG_LOGENC_HLCOMPRESSION;Log - Csúcsfény előtömörítés
 HISTORY_MSG_METADATA_MODE;Metaadat másolás mód
+HISTORY_MSG_METADATA_NOTES;Jegyzetek feldolgozása
 HISTORY_MSG_MICROCONTRAST_CONTRAST;Microkontraszt - Kontrasztküszöb
 HISTORY_MSG_PCVIGNETTE_CENTER;VF - Középpont
 HISTORY_MSG_PERSPECTIVE_ENABLED;Perspektíva korrekció
@@ -964,7 +965,7 @@ PARTIALPASTE_PRSHARPENING;Kimeneti élesítés
 PARTIALPASTE_RAWCA;Raw CA korrekció
 PARTIALPASTE_RAW_DEMOSAIC;Deinterpoláció
 PARTIALPASTE_RAW_BLACK;Feketeszint
-PARTIALPASTE_RAW_WHITE;Gain/fehérpont korrekció
+PARTIALPASTE_RAW_WHITE;Erősítés/fehérpont korrekció
 PARTIALPASTE_RAWGROUP;Raw beállítások
 PARTIALPASTE_RAW_PREPROCESSING;Raw előfeldolgozás
 PARTIALPASTE_HOT_DEAD_PIXEL_FILTER;Forró/halott pixel szűrő
@@ -1504,7 +1505,7 @@ TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Telítettség és érték keverése
 TP_EXPOSURE_TCMODE_STANDARD;Standard
 TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Súlyozott Standard
 TP_EXPOS_BLACKPOINT_LABEL;Raw Feketepont
-TP_EXPOS_WHITEPOINT_LABEL;Raw Gain/Fehérpont
+TP_EXPOS_WHITEPOINT_LABEL;Raw Erősítés/Fehérpont
 TP_FILMNEGATIVE_BLUE;Kék arány
 TP_FILMNEGATIVE_BLUEBALANCE;Hideg/Meleg
 TP_FILMNEGATIVE_FILMBASE_PICK;Válassza ki a film alapszínét
@@ -1705,7 +1706,7 @@ TP_LOCALCONTRAST_LABEL;Helyi kontraszt
 TP_LOGENC_AUTO;Automatikus
 TP_LOGENC_ADVANCED;Haladó beállítások
 TP_LOGENC_BLACK_EV;Fekete relatív expozíció (Fé)
-TP_LOGENC_GAIN;Exp. komp. tónusleképezés előtt (Fé)
+TP_LOGENC_GAIN;Erősítés (Fé)
 TP_LOGENC_WHITE_EV;Fehér relatív expozíció (Fé)
 TP_LOGENC_TARGET_GRAY;Cél szürke pont (fényerő)
 TP_LOGENC_LABEL;Log Tónustérképezés
@@ -1715,6 +1716,7 @@ TP_METADATA_EDIT;Módosítások alkalmazása
 TP_METADATA_MODE;Metaadat másolási mód
 TP_METADATA_STRIP;Összes metaadat eltávolítása
 TP_METADATA_TUNNEL;Másolás változtatás nélkül
+TP_METADATA_NOTES;Jegyzetek feldolgozása
 TP_PCVIGNETTE_CENTER_X;Középpont X
 TP_PCVIGNETTE_CENTER_Y;Középpont Y
 TP_PCVIGNETTE_FEATHER;Tollazat
@@ -1771,7 +1773,7 @@ TP_RAWEXPOS_BLACK_3;Zöld 2
 TP_RAWEXPOS_BLACK_BLUE;Kék
 TP_RAWEXPOS_BLACK_GREEN;Zöld
 TP_RAWEXPOS_BLACK_RED;Piros
-TP_RAWEXPOS_LINEAR;Gain/Fehérpont korrekció
+TP_RAWEXPOS_LINEAR;Erősítés/Fehérpont korrekció
 TP_RAWEXPOS_TWOGREEN;Zöldek összekapcsolása
 TP_RAW_1PASSMEDIUM;1-lépés (Markesteijn)
 TP_RAW_2PASS;1-lépés+gyors
