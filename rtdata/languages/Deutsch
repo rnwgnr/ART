@@ -1997,7 +1997,7 @@ TP_WBALANCE_PRESET;Kamera-Voreinstellungen
 TP_WBALANCE_SIZE;Größe:
 TP_WBALANCE_SPOTWB;Manuell setzen
 TP_WBALANCE_TEMPERATURE;Farbtemperatur
-WARNING_INVALID_WB_TEMP_TINT;Warnung: Temperatur oder Tönung außerhalb des zulässigen Bereichs.
+WARNING_INVALID_WB_TEMP_TINT;Warnung: Temperatur oder Tönung\naußerhalb des zulässigen Bereichs.
 ZOOMPANEL_100;(100%)
 ZOOMPANEL_NEWCROPWINDOW;Neues Detailfenster öffnen.
 ZOOMPANEL_ZOOM100;Zoom 100%\nTaste: <b>z</b>
