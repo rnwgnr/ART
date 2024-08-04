@@ -37,13 +37,19 @@ def getopts():
 
 def extra_files(opts):
     def D(s): return opts.msys + '/' + s
+    exiftool = []
+    if opts.exiftool:
+        exiftool.append((opts.exiftool, 'exiftool.exe'))
+        exiftool_files = os.path.join(os.path.dirname(opts.exiftool),
+                                      'exiftool_files')
+        if os.path.isdir(exiftool_files):
+            exiftool.append((exiftool_files, 'exiftool_files'))
     return [
         ('.', [
             D('mingw64/bin/gdbus.exe'),
             D('mingw64/bin/gspawn-win64-helper.exe'),
             D('mingw64/bin/gspawn-win64-helper-console.exe')
-            ] + ([(opts.exiftool, 'exiftool.exe')] if opts.exiftool else []),
-        ),
+        ] + exiftool),
         ('share/icons/Adwaita', [
             D('mingw64/share/icons/Adwaita/scalable'),
             D('mingw64/share/icons/Adwaita/index.theme'), 

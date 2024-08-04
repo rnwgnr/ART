@@ -76,6 +76,7 @@ Source: "{#MyBuildBasePath}\ART-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyBuildBasePath}\*.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyBuildBasePath}\dynamicprofile.cfg"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyBuildBasePath}\exiftool.exe"; DestDir: "{app}"; Flags: skipifsourcedoesntexist ignoreversion
+Source: "{#MyBuildBasePath}\exiftool_files\*"; DestDir: "{app}\exiftool_files\"; Flags: skipifsourcedoesntexist ignoreversion recursesubdirs createallsubdirs
 Source: "{#MyBuildBasePath}\dcpprofiles\*"; DestDir: "{app}\dcpprofiles\"; Flags: ignoreversion recursesubdirs createallsubdirs
 ;Source: "{#MyBuildBasePath}\etc\*"; DestDir: "{app}\etc\"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#MyBuildBasePath}\iccprofiles\*"; DestDir: "{app}\iccprofiles\"; Flags: ignoreversion recursesubdirs createallsubdirs
