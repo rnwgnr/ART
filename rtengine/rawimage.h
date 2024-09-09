@@ -211,6 +211,9 @@ public:
     Image8 *getThumbnail();
 
     float get_optical_black(int row, int col) const;
+
+protected:
+    void set_black_from_masked_areas();
 };
 
 } // namespace rtengine

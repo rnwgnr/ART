@@ -977,6 +977,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             if (use_internal_decoder_) {
                 crop_masked_pixels();
                 free(raw_image);
+            } else if (!float_raw_image && strncmp(libraw_->unpack_function_name(), "canon_600_load_raw", 18) != 0) {
+                set_black_from_masked_areas();
             }
             raw_image = nullptr;
             adjust_margins = !float_raw_image; //true;
@@ -1132,6 +1134,30 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
 
     return 0;
 }
+
+
+void RawImage::set_black_from_masked_areas()
+{
+    unsigned mblack[8] = { 0 };
+    unsigned zero = 0;
+    for (unsigned m = 0; m < 8; ++m) {
+        for (int row = std::max(int(mask[m][0]), 0); row < std::min(int(mask[m][2]), int(raw_height)); row++) {
+            for (int col = std::max(int(mask[m][1]), 0); col < std::min(int(mask[m][3]), int(raw_width)); col++) {
+                unsigned c = FC(row-top_margin, col-left_margin);
+                unsigned val = raw_image[row * raw_width + col];
+                mblack[c] += val;
+                mblack[4+c]++;
+                zero += !val;
+            }
+        }
+    }
+    if (zero < mblack[4] && mblack[5] && mblack[6] && mblack[7]) {
+        for (int c = 0; c < 4; ++c) {
+            cblack[c] = mblack[c] / mblack[4+c];
+        }
+        cblack[4] = cblack[5] = cblack[6] = 0;
+    }
+}    
 
 
 float** RawImage::compress_image(unsigned int frameNum, bool freeImage)

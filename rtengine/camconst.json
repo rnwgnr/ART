@@ -1185,12 +1185,25 @@ Camera constants:
     },
     
     { // Quality C
+        "make_model": "Canon EOS R1",
+        "raw_crop" : [ 138, 130, 6006, 4006 ],
+        "masked_areas" : [90, 30, 4120, 120]
+    },
+
+    { // Quality C
         "make_model": "Canon EOS R5",
         "raw_crop" : [ 132, 100, 8200, 5472 ],
         "masked_areas" : [ 94, 20, 5578, 122 ],
         "ranges" : { "white" : 16382 } 
     },
-
+    
+    { // Quality C
+        "make_model": "Canon EOS R5M2",
+        "raw_crop" : [ 272, 176, 8190, 5464 ],
+        "masked_areas" : [90, 30, 5644, 246],
+        "ranges" : { "white" : 16382 },
+    },
+    
     { // Quality C
         "make_model": "Canon EOS R6",
         "raw_crop": [
