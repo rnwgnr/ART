@@ -1201,7 +1201,7 @@ Camera constants:
         "make_model": "Canon EOS R5M2",
         "raw_crop" : [ 272, 176, 8190, 5464 ],
         "masked_areas" : [90, 30, 5644, 246],
-        "ranges" : { "white" : 16382 },
+        "ranges" : { "white" : 16382 }
     },
     
     { // Quality C
