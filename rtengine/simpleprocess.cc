@@ -465,7 +465,7 @@ private:
             readyImg->setOutputProfile(wpc.getData().c_str(), wpc.getData().size());
         } else {
             // No ICM
-            readyImg->setOutputProfile (nullptr, 0);
+            readyImg->setOutputProfile(nullptr, 0);
         }
 
         if (!job->initialImage) {

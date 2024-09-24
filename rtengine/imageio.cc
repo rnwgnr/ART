@@ -1480,6 +1480,7 @@ bool ImageIO::saveMetadata(const Glib::ustring &fname) const
             metadataInfo.saveToImage(pl, fname, false);
             if (!profileData) {
                 Exiv2Metadata outmd(fname);
+                outmd.load();
                 outmd.exifData()["Exif.Photo.ColorSpace"] = 1;
                 outmd.saveToImage(nullptr, fname, true);
             }
