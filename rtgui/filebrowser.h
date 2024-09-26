@@ -119,6 +119,7 @@ protected:
     FileBrowserListener* tbl;
     BrowserFilter filter;
     int numFiltered;
+    Glib::ustring last_selected_fname_;
 
     void toTrashRequested   (std::vector<FileBrowserEntry*> tbe);
     void fromTrashRequested (std::vector<FileBrowserEntry*> tbe);

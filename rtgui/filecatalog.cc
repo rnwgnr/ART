@@ -609,8 +609,9 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
         if (options.remember_exif_filter_settings) {
             dirEFS = options.last_exif_filter_settings;
         }
-    }    
+    }
 }
+
 
 FileCatalog::~FileCatalog()
 {
@@ -901,11 +902,6 @@ void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring 
         previewsToLoad = 0;
         previewsLoaded = 0;
 
-        // if openfile exists, we have to open it first (it is a command line argument)
-        if (!openfile.empty()) {
-            addAndOpenFile(openfile, true);
-        }
-
         if (!is_session) {
             selectedDirectory = dir->get_parse_name();
         } else {
@@ -914,8 +910,14 @@ void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring 
 
         BrowsePath->set_text(selectedDirectory);
         buttonBrowsePath->set_image(*iRefreshWhite);
-        fileNameList = getFileList();
 
+        fileNameList = getFileList();
+        
+        // if openfile exists, we have to open it first (it is a command line argument)
+        if (!openfile.empty()) {
+            addAndOpenFile(openfile, true);
+        }
+        
         for (unsigned int i = 0; i < fileNameList.size(); i++) {
             file_name_set_.insert(fileNameList[i]);
             if (openfile.empty() || fileNameList[i] != openfile) { // if we opened a file at the beginning don't add it again
@@ -933,6 +935,7 @@ void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring 
 
         dirMonitor = is_session ? dir->monitor_file() : dir->monitor_directory();
         dirMonitor->signal_changed().connect(sigc::mem_fun(*this, &FileCatalog::on_dir_changed));
+
     } catch (Glib::Exception& ex) {
         std::cout << ex.what();
     }
@@ -1125,7 +1128,8 @@ void FileCatalog::previewsFinishedUI ()
 
         // restart anything that might have been loaded low quality
         fileBrowser->refreshQuickThumbImages();
-        fileBrowser->applyFilter (getFilter());  // refresh total image count
+        fileBrowser->applyFilter(getFilter());  // refresh total image count
+        fileBrowser->getFocus();
         _refreshProgressBar();
     }
     filepanel->loadingThumbs(M("PROGRESSBAR_READY"), 0);

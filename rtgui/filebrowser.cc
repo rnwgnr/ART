@@ -222,6 +222,7 @@ FileBrowser::FileBrowser () :
     numFiltered(-1)
 {
     session_id_ = 0;
+    last_selected_fname_ = "";
 
     ProfileStore::getInstance()->addListener(this);
 
@@ -1404,6 +1405,9 @@ void FileBrowser::applyPartialMenuItemActivated (ProfileStoreLabel *label)
 
 void FileBrowser::applyFilter (const BrowserFilter& filter)
 {
+    if (!selected.empty()) {
+        last_selected_fname_ = selected.back()->thumbnail->getFileName();
+    }
 
     this->filter = filter;
 
@@ -1437,12 +1441,33 @@ void FileBrowser::applyFilter (const BrowserFilter& filter)
         }
     }
 
+    if (selected.empty() && !last_selected_fname_.empty()) {
+        ThumbBrowserEntryBase *found = nullptr;
+        for (size_t i = 0; i < fd.size(); i++) {
+            if (!fd[i]->filtered && fd[i]->thumbnail && fd[i]->thumbnail->getFileName() == last_selected_fname_) {
+                found = fd[i];
+                break;
+            }
+        }
+        if (!found && !fd.empty()) {
+            found = fd[0];
+        }
+        if (found) {
+            found->selected = true;
+            selected.push_back(found);
+            selchanged = true;
+            lastClicked = anchor = found;
+        }
+    } else if (!selected.empty()) {
+        last_selected_fname_ = selected.back()->thumbnail->getFileName();
+    }
+
     if (selchanged) {
-        notifySelectionListener ();
+        notifySelectionListener();
     }
 
     tbl->filterApplied();
-    redraw ();
+    redraw();
 }
 
 bool FileBrowser::checkFilter (ThumbBrowserEntryBase* entryb)   // true -> entry complies filter
