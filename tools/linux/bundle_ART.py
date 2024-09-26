@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+Helper script to generate an ART self-contained "bundle" directory,
+with all the required dependencies (linux version)
+"""
+
 import os, sys
 import shutil
 import subprocess
