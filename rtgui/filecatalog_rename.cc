@@ -925,6 +925,8 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
     sidecars.set_tooltip_markup(M("RENAME_DIALOG_SIDECARS_TIP"));
     hb5.pack_start(sidecars, Gtk::PACK_EXPAND_WIDGET, pad);
     msd.get_message_area()->pack_start(hb5, Gtk::PACK_SHRINK, pad);
+    msd.set_default_response(Gtk::RESPONSE_YES);
+    sidecars.set_activates_default(true);
     msd.show_all_children();
 
     if (onlySelected) {
