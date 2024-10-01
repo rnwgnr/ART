@@ -55,21 +55,20 @@ std::ostream &operator<<(std::ostream &out, const S &s)
 }
 
 
-inline void exec_sync(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, std::string *out, std::string *err)
+inline void exec_sync(const Glib::ustring &usrdir, const Glib::ustring &sysdir, const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, std::string *out, std::string *err)
 {
-#ifdef BUILD_BUNDLE
     auto pth = Glib::getenv("PATH");
-    auto extrapath = Glib::build_filename(argv0, "imageio", "bin") + G_SEARCHPATH_SEPARATOR_S + argv0;
+    auto extrapath = Glib::build_filename(usrdir, "bin") + G_SEARCHPATH_SEPARATOR_S + Glib::build_filename(sysdir, "bin");
+#ifdef BUILD_BUNDLE
+    extrapath += G_SEARCHPATH_SEPARATOR_S + argv0;
+#endif // BUILD_BUNDLE
     auto epth = Glib::getenv("ART_EXIFTOOL_BASE_DIR");
     if (!epth.empty()) {
         extrapath += G_SEARCHPATH_SEPARATOR_S + epth;
     }
     Glib::setenv("PATH", extrapath + G_SEARCHPATH_SEPARATOR_S + pth);
-#endif // BUILD_BUNDLE
     subprocess::exec_sync(workdir, argv, search_in_path, out, err);
-#ifdef BUILD_BUNDLE
     Glib::setenv("PATH", pth);
-#endif // BUILD_BUNDLE
 }
 
 } // namespace
@@ -83,8 +82,10 @@ ImageIOManager *ImageIOManager::getInstance()
 
 void ImageIOManager::init(const Glib::ustring &base_dir, const Glib::ustring &user_dir)
 {
-    do_init(Glib::build_filename(base_dir, "imageio"));
-    do_init(Glib::build_filename(user_dir, "imageio"));
+    sysdir_ = Glib::build_filename(base_dir, "imageio");
+    usrdir_ = Glib::build_filename(user_dir, "imageio");
+    do_init(sysdir_);
+    do_init(usrdir_);
 }
 
 
@@ -244,7 +245,7 @@ bool ImageIOManager::load(const Glib::ustring &fileName, ProgressListener *plist
         std::cout << "loading " << fileName << " with " << cmd << std::endl;
     }
     try {
-        exec_sync(dir, argv, true, &sout, &serr);
+        exec_sync(usrdir_, sysdir_, dir, argv, true, &sout, &serr);
     } catch (subprocess::error &err) {
         if (settings->verbose) {
             std::cout << "  exec error: " << err.what() << std::endl;
@@ -402,7 +403,7 @@ bool ImageIOManager::save(IImagefloat *img, const std::string &ext, const Glib::
             std::cout << "saving " << fileName << " with " << cmd << std::endl;
         }
         try {
-            exec_sync(dir, argv, true, &sout, &serr);
+            exec_sync(usrdir_, sysdir_, dir, argv, true, &sout, &serr);
         } catch (subprocess::error &err) {
             if (settings->verbose) {
                 std::cout << "  exec error: " << err.what() << std::endl;

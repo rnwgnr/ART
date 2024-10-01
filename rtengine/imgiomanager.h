@@ -71,6 +71,9 @@ private:
     void do_init(const Glib::ustring &dir);
     static Glib::ustring get_ext(Format f);
 
+    Glib::ustring sysdir_;
+    Glib::ustring usrdir_;
+    
     typedef std::pair<Glib::ustring, Glib::ustring> Pair;
     std::unordered_map<std::string, Pair> loaders_;
     std::unordered_map<std::string, Pair> savers_;
