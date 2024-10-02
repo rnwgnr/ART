@@ -9,6 +9,25 @@ import os, sys
 import shutil
 import subprocess
 import argparse
+from urllib.request import urlopen
+import tarfile
+import tempfile
+import io
+
+
+def getopts():
+    p = argparse.ArgumentParser()
+    p.add_argument('-o', '--outdir', required=True,
+                   help='output directory for the bundle')
+    p.add_argument('-e', '--exiftool', help='path to exiftool dir')
+    p.add_argument('-E', '--exiftool-download', action='store_true')
+    p.add_argument('-i', '--imageio', help='path to imageio plugins')
+    p.add_argument('-b', '--imageio-bin', help='path to imageio binaries')
+    p.add_argument('-I', '--imageio-download', action='store_true')
+    p.add_argument('-v', '--verbose', action='store_true')
+    ret = p.parse_args()
+    return ret
+
 
 def getdlls(opts):
     blacklist = {
@@ -36,21 +55,55 @@ def getdlls(opts):
                 res.append(lib)
     return res
 
-def getopts():
-    p = argparse.ArgumentParser()
-    p.add_argument('-o', '--outdir', required=True,
-                   help='output directory for the bundle')
-    p.add_argument('-e', '--exiftool', help='path to exiftool dir')
-    p.add_argument('-v', '--verbose', action='store_true')
-    ret = p.parse_args()
-    return ret
 
 def extra_files(opts):
     def D(s): return os.path.expanduser(s)
     if opts.exiftool and os.path.isdir(opts.exiftool):
         extra = [('lib', [(opts.exiftool, 'exiftool')])]
+    elif opts.exiftool_download:
+        with urlopen('https://exiftool.org/ver.txt') as f:
+            ver = f.read().strip().decode('utf-8')
+        name = 'Image-ExifTool-%s.tar.gz' % ver
+        with urlopen('https://exiftool.org/' + name) as f:
+            if opts.verbose:
+                print('downloading %s from https://exiftool.org ...' % name)
+            tf = tarfile.open(fileobj=io.BytesIO(f.read()))
+            if opts.verbose:
+                print('unpacking %s ...' % name)
+            tf.extractall(opts.tempdir)
+        extra = [('lib', [(os.path.join(opts.tempdir, 'Image-ExifTool-' + ver),
+                           'exiftool')])]
     else:
         extra = []
+    if opts.imageio:
+        extra.append(('.', [(opts.imageio, 'imageio')]))
+    elif opts.imageio_download:
+        with urlopen('https://bitbucket.org/agriggio/art-imageio/'
+                     'downloads/ART-imageio.tar.gz') as f:
+            if opts.verbose:
+                print('downloading ART-imageio.tar.gz '
+                      'from https://bitbucket.org ...')
+            tf = tarfile.open(fileobj=io.BytesIO(f.read()))
+            if opts.verbose:
+                print('unpacking ART-imageio.tar.gz ...')
+            tf.extractall(opts.tempdir)
+        extra.append(('.', [(os.path.join(opts.tempdir, 'ART-imageio'),
+                             'imageio')]))
+    if opts.imageio_bin:
+        extra.append(('imageio', [(opts.imageio_bin, 'bin')]))            
+    elif opts.imageio_download:
+        with urlopen('https://bitbucket.org/agriggio/art-imageio/'
+                     'downloads/ART-imageio-bin-linux64.tar.gz') as f:
+            if opts.verbose:
+                print('downloading ART-imageio-bin-linux64.tar.gz '
+                      'from http://bitbucket.org ...')
+            tf = tarfile.open(fileobj=io.BytesIO(f.read()))
+            if opts.verbose:
+                print('unpacking ART-imageio-bin-linux64.tar.gz ...')
+            tf.extractall(opts.tempdir)
+        extra.append(('imageio',
+                      [(os.path.join(opts.tempdir, 'ART-imageio-bin-linux64'),
+                        'bin')]))
     return [
         ('share/icons/Adwaita', [
             D('/usr/share/icons/Adwaita/scalable'),
@@ -93,25 +146,27 @@ def main():
             print('copying: %s' % lib)
         shutil.copy2(lib,
                      os.path.join(opts.outdir, 'lib', os.path.basename(lib)))
-    for key, elems in extra_files(opts):
-        for elem in elems:
-            name = None
-            if isinstance(elem, tuple):
-                elem, name = elem
-            else:
-                name = os.path.basename(elem)
-            if opts.verbose:
-                print('copying: %s' % elem)
-            if not os.path.exists(elem):
-                print('SKIPPING non-existing: %s' % elem)
-            elif os.path.isdir(elem):
-                shutil.copytree(elem, os.path.join(opts.outdir, key, name))
-            else:
-                dest = os.path.join(opts.outdir, key, name)
-                destdir = os.path.dirname(dest)
-                if not os.path.exists(destdir):
-                    os.makedirs(destdir)
-                shutil.copy2(elem, dest)
+    with tempfile.TemporaryDirectory() as d:
+        opts.tempdir = d
+        for key, elems in extra_files(opts):
+            for elem in elems:
+                name = None
+                if isinstance(elem, tuple):
+                    elem, name = elem
+                else:
+                    name = os.path.basename(elem)
+                if opts.verbose:
+                    print('copying: %s' % elem)
+                if not os.path.exists(elem):
+                    print('SKIPPING non-existing: %s' % elem)
+                elif os.path.isdir(elem):
+                    shutil.copytree(elem, os.path.join(opts.outdir, key, name))
+                else:
+                    dest = os.path.join(opts.outdir, key, name)
+                    destdir = os.path.dirname(dest)
+                    if not os.path.exists(destdir):
+                        os.makedirs(destdir)
+                    shutil.copy2(elem, dest)
     os.makedirs(os.path.join(opts.outdir, 'share/gtk-3.0'))
     with open(os.path.join(opts.outdir, 'share/gtk-3.0/settings.ini'), 'w') \
          as out:
