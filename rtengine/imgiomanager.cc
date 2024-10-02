@@ -102,7 +102,7 @@ void ImageIOManager::do_init(const Glib::ustring &dirname)
 
         for (auto &filename : dirlist) {
             auto ext = getFileExtension(filename).lowercase();
-            if (ext != "txt") {
+            if (filename[0] == '.' || ext != "txt") {
                 continue;
             }
             
@@ -187,12 +187,15 @@ void ImageIOManager::do_init(const Glib::ustring &dirname)
                     saveprofiles_[savefmt] = std::move(p);
                 }
             } catch (Glib::Exception &exc) {
-                std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what())
-                          << std::endl;
+                if (settings->verbose) {
+                    std::cout << "ERROR loading " << S(pth) << ": " << S(exc.what()) << std::endl;
+                }
             }
         }
     } catch (Glib::Exception &exc) {
-        std::cout << "ERROR scanning " << S(dirname) << ": " << S(exc.what()) << std::endl;
+        if (settings->verbose) {
+            std::cout << "ERROR scanning " << S(dirname) << ": " << S(exc.what()) << std::endl;
+        }
     }
 
     if (settings->verbose) {
