@@ -51,8 +51,10 @@ def getdlls(opts):
     return res
 
 
-def extra_files(opts):
-    def D(s): return opts.msys + '/' + s
+def extra_files(opts, msys_env, tempdir):
+    assert msys_env is not None
+    assert tempdir is not None
+    def D(s): return opts.msys + '/' + msys_env + '/' + s
     exiftool = []
     extra = []
     if not opts.exiftool and opts.exiftool_download:
@@ -65,8 +67,8 @@ def extra_files(opts):
             zf = zipfile.ZipFile(io.BytesIO(f.read()))
             if opts.verbose:
                 print('unpacking %s.zip ...' % name)
-            zf.extractall(opts.tempdir)
-            opts.exiftool = os.path.join(opts.tempdir, name, 'exiftool(-k).exe')
+            zf.extractall(tempdir)
+            opts.exiftool = os.path.join(tempdir, name, 'exiftool(-k).exe')
     if opts.exiftool:
         exiftool.append((opts.exiftool, 'exiftool.exe'))
         exiftool_files = os.path.join(os.path.dirname(opts.exiftool),
@@ -84,9 +86,8 @@ def extra_files(opts):
             tf = tarfile.open(fileobj=io.BytesIO(f.read()))
             if opts.verbose:
                 print('unpacking ART-imageio.tar.gz ...')
-            tf.extractall(opts.tempdir)
-        extra.append(('.', [(os.path.join(opts.tempdir, 'ART-imageio'),
-                             'imageio')]))
+            tf.extractall(tempdir)
+        extra.append(('.', [(os.path.join(tempdir, 'ART-imageio'), 'imageio')]))
     if opts.imageio_bin:
         extra.append(('imageio', [(opts.imageio_bin, 'bin')]))            
     elif opts.imageio_download:
@@ -98,29 +99,28 @@ def extra_files(opts):
             tf = tarfile.open(fileobj=io.BytesIO(f.read()))
             if opts.verbose:
                 print('unpacking ART-imageio-bin-win64.tar.gz ...')
-            tf.extractall(opts.tempdir)
+            tf.extractall(tempdir)
         extra.append(('imageio',
-                      [(os.path.join(opts.tempdir, 'ART-imageio-bin-win64'),
-                        'bin')]))
+                      [(os.path.join(tempdir, 'ART-imageio-bin-win64'), 'bin')]))
     return [
         ('.', [
-            D('mingw64/bin/gdbus.exe'),
-            D('mingw64/bin/gspawn-win64-helper.exe'),
-            D('mingw64/bin/gspawn-win64-helper-console.exe')
+            D('bin/gdbus.exe'),
+            D('bin/gspawn-win64-helper.exe'),
+            D('bin/gspawn-win64-helper-console.exe')
         ] + exiftool),
         ('share/icons/Adwaita', [
-            D('mingw64/share/icons/Adwaita/scalable'),
-            D('mingw64/share/icons/Adwaita/index.theme'), 
-            D('mingw64/share/icons/Adwaita/cursors'),
+            D('share/icons/Adwaita/scalable'),
+            D('share/icons/Adwaita/index.theme'), 
+            D('share/icons/Adwaita/cursors'),
         ]),
         ('lib', [
-            D('mingw64/lib/gdk-pixbuf-2.0'),
+            D('lib/gdk-pixbuf-2.0'),
         ]),
         ('share/glib-2.0/schemas', [
-            D('mingw64/share/glib-2.0/schemas/gschemas.compiled'),
+            D('share/glib-2.0/schemas/gschemas.compiled'),
         ]),
         ('share', [
-            (D('mingw64/var/lib/lensfun-updates/version_1'), 'lensfun'),
+            (D('var/lib/lensfun-updates/version_1'), 'lensfun'),
         ]),
     ] + extra
 
@@ -135,14 +135,19 @@ def main():
     if opts.verbose:
         print('copying %s to %s' % (os.getcwd(), opts.outdir))
     shutil.copytree(d, opts.outdir)
+    msys_env = None
     for lib in getdlls(opts):
         if opts.verbose:
             print('copying: %s' % lib)
-        shutil.copy2(lib,
-                     os.path.join(opts.outdir, os.path.basename(lib)))
+        bn = os.path.basename(lib)
+        if msys_env is None and lib.startswith(opts.msys) \
+           and bn.startswith('libgtk'):
+            msys_env = lib[len(opts.msys) + 1:].split('/')[0]
+        shutil.copy2(lib, os.path.join(opts.outdir, bn))
+    if opts.verbose:
+        print('detected msys environment: ' + str(msys_env))
     with tempfile.TemporaryDirectory() as d:
-        opts.tempdir = d
-        for key, elems in extra_files(opts):
+        for key, elems in extra_files(opts, msys_env, d):
             for elem in elems:
                 name = None
                 if isinstance(elem, tuple):
