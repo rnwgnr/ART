@@ -20,32 +20,31 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
 
         # Fail if Git is not installed
         if(GIT_CMD STREQUAL GIT_CMD-NOTFOUND)
-            message(FATAL_ERROR "git command not found!")
+            message(WARNING "git command not found! -- info will be bogus")
         else()
             message(STATUS "git command found: ${GIT_CMD}")
+            # Get version description.
+            # Depending on whether you checked out a branch (dev) or a tag (release),
+            # "git describe" will return "5.0-gtk2-2-g12345678" or "5.0-gtk2", respectively.
+            execute_process(COMMAND ${GIT_CMD} describe --tags --always --exact-match OUTPUT_VARIABLE GIT_DESCRIBE OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+            # Get branch name.
+            # Will return empty if you checked out a commit or tag. Empty string handled later.
+            execute_process(COMMAND ${GIT_CMD} symbolic-ref --short -q HEAD OUTPUT_VARIABLE GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+            # Get commit hash.
+            execute_process(COMMAND ${GIT_CMD} rev-parse --short --verify HEAD OUTPUT_VARIABLE GIT_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+            # Get commit date, YYYY-MM-DD.
+            execute_process(COMMAND ${GIT_CMD} show -s --format=%cd --date=format:%Y-%m-%d OUTPUT_VARIABLE GIT_COMMIT_DATE OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+            # Get number of commits since tagging. This is what "GIT_DESCRIBE" uses.
+            # Works when checking out branch, tag or commit.
+            # Get a list of all tags in repo:
+            execute_process(COMMAND ${GIT_CMD} tag --merged HEAD OUTPUT_VARIABLE GIT_TAG WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+            # Replace newlines with semicolons so that it can be split:
+            string(REPLACE "\n" ";" GIT_TAG_LIST "${GIT_TAG}")
         endif()
-
-        # Get version description.
-        # Depending on whether you checked out a branch (dev) or a tag (release),
-        # "git describe" will return "5.0-gtk2-2-g12345678" or "5.0-gtk2", respectively.
-        execute_process(COMMAND ${GIT_CMD} describe --tags --always --exact-match OUTPUT_VARIABLE GIT_DESCRIBE OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        # Get branch name.
-        # Will return empty if you checked out a commit or tag. Empty string handled later.
-        execute_process(COMMAND ${GIT_CMD} symbolic-ref --short -q HEAD OUTPUT_VARIABLE GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        # Get commit hash.
-        execute_process(COMMAND ${GIT_CMD} rev-parse --short --verify HEAD OUTPUT_VARIABLE GIT_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        # Get commit date, YYYY-MM-DD.
-        execute_process(COMMAND ${GIT_CMD} show -s --format=%cd --date=format:%Y-%m-%d OUTPUT_VARIABLE GIT_COMMIT_DATE OUTPUT_STRIP_TRAILING_WHITESPACE WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-        # Get number of commits since tagging. This is what "GIT_DESCRIBE" uses.
-        # Works when checking out branch, tag or commit.
-        # Get a list of all tags in repo:
-        execute_process(COMMAND ${GIT_CMD} tag --merged HEAD OUTPUT_VARIABLE GIT_TAG WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-        # Replace newlines with semicolons so that it can be split:
-        string(REPLACE "\n" ";" GIT_TAG_LIST "${GIT_TAG}")
     elseif(EXISTS "${PROJECT_SOURCE_DIR}/.hg")
         # a hg-git repo (i.e. Alberto's one :-)
 
@@ -63,33 +62,33 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
 
         # Fail if Mercurial is not installed
         if(HG_CMD STREQUAL HG_CMD-NOTFOUND)
-            message(FATAL_ERROR "hg command not found!")
+            message(WARNING "hg command not found! -- info will be bogus")
         else()
             message(STATUS "hg command found: ${HG_CMD}")
-        endif()
         
-        # we emulate the behaviour of git with Mercurial
-        execute_process(COMMAND ${HG_CMD} log -r .
-            #--template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{sub('^.*/.*:', '', tag)}{ifeq(distance, 0, '', '-')}{ifeq(distance, 0, '', count(revset('ancestors(\".\") and descendants(last(tag(r\"re:^v?[0-9]+[.][0-9.]+(rc[0-9]+)?$\"), 1))'))-1)}{ifeq(distance, 0, '', '-g')}{ifeq(distance, 0, '', short(gitnode))}'}"
-            --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{ifeq(distance, 0, sub('^.*/.*:', '', tag), '')}'}"
-            OUTPUT_VARIABLE GIT_DESCRIBE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+            # we emulate the behaviour of git with Mercurial
+            execute_process(COMMAND ${HG_CMD} log -r .
+                #--template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{sub('^.*/.*:', '', tag)}{ifeq(distance, 0, '', '-')}{ifeq(distance, 0, '', count(revset('ancestors(\".\") and descendants(last(tag(r\"re:^v?[0-9]+[.][0-9.]+(rc[0-9]+)?$\"), 1))'))-1)}{ifeq(distance, 0, '', '-g')}{ifeq(distance, 0, '', short(gitnode))}'}"
+                --template "{latesttag('re:.*v?[0-9.]+(rc)?[0-9]+$') % '{ifeq(distance, 0, sub('^.*/.*:', '', tag), '')}'}"
+                OUTPUT_VARIABLE GIT_DESCRIBE
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-        execute_process(COMMAND ${HG_CMD} log -r . --template "{activebookmark}"
-            OUTPUT_VARIABLE GIT_BRANCH
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+            execute_process(COMMAND ${HG_CMD} log -r . --template "{activebookmark}"
+                OUTPUT_VARIABLE GIT_BRANCH
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-        execute_process(COMMAND ${HG_CMD} log -r . --template "{if(gitnode, short(gitnode), short(node))}{if(gitnode, '', '+')}"
-            OUTPUT_VARIABLE GIT_COMMIT
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+            execute_process(COMMAND ${HG_CMD} log -r . --template "{if(gitnode, short(gitnode), short(node))}{if(gitnode, '', '+')}"
+                OUTPUT_VARIABLE GIT_COMMIT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-        execute_process(COMMAND ${HG_CMD} log -r . --template "{date|shortdate}"
-            OUTPUT_VARIABLE GIT_COMMIT_DATE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+            execute_process(COMMAND ${HG_CMD} log -r . --template "{date|shortdate}"
+                OUTPUT_VARIABLE GIT_COMMIT_DATE
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+        endif()
     else()
         message(WARNING "not inside a repository -- info will be bogus!")
     endif()
