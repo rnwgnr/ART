@@ -89,7 +89,22 @@ public:
 
     void clearCache();
 
-    static Glib::ustring getClutDisplayName(const Glib::ustring &filename);
+    struct CLUTName {
+        Glib::ustring name;
+        int order;
+        CLUTName(const Glib::ustring &n, int o=-1): name(n), order(o) {}
+        bool operator<(const CLUTName &o) const
+        {
+            if (order == o.order) {
+                return name < o.name;
+            } else {
+                return (order >=0) && (o.order < 0 || order <= o.order);
+            }
+        }
+
+        operator Glib::ustring () const { return name; }
+    };
+    static CLUTName getClutDisplayName(const Glib::ustring &filename);
     
     static void splitClutFilename(
         const Glib::ustring& filename,

@@ -286,7 +286,7 @@ void rtengine::HaldCLUT::getRGB(
 }
 
 
-Glib::ustring rtengine::CLUTStore::getClutDisplayName(const Glib::ustring &filename)
+rtengine::CLUTStore::CLUTName rtengine::CLUTStore::getClutDisplayName(const Glib::ustring &filename)
 {
     Glib::ustring name;
     
@@ -301,13 +301,16 @@ Glib::ustring rtengine::CLUTStore::getClutDisplayName(const Glib::ustring &filen
             std::ifstream src(fn.c_str());
             std::string line;
             bool found = false;
-            while (src && std::getline(src, line) && !found) {
+            int order = -1;
+            while (src && std::getline(src, line)) {
                 size_t s = 0;
                 while (s < line.size() && std::isspace(line[s])) {
                     ++s;
                 }
                 if (s+1 < line.size() && line[s] == '/' && line[s+1] == '/') {
                     s += 2;
+                } else {
+                    continue;
                 }
                 while (s < line.size() && std::isspace(line[s])) {
                     ++s;
@@ -333,11 +336,25 @@ Glib::ustring rtengine::CLUTStore::getClutDisplayName(const Glib::ustring &filen
                         }
                         cJSON_Delete(root);
                     }
-                    break;
+                    if (order >= 0) {
+                        break;
+                    }
+                } else if (line.find("@ART-order:", s) == s) {
+                    line = line.substr(11+s);
+                    cJSON *root = cJSON_Parse(line.c_str());
+                    if (root) {
+                        if (cJSON_IsNumber(root)) {
+                            order = root->valueint;
+                        }
+                        cJSON_Delete(root);
+                    }
+                    if (found) {
+                        break;
+                    }
                 }
             }
             if (found) {
-                return name;
+                return CLUTName(name, order);
             }
         }
     }

@@ -47,7 +47,7 @@ void get_builtin_luts()
             Glib::build_filename(argv0, "ctlscripts")
         };
 
-        std::map<Glib::ustring, Glib::ustring> order;
+        std::map<rtengine::CLUTStore::CLUTName, Glib::ustring> order;
 
         for (auto &dir : dirs) {
             try {
