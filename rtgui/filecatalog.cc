@@ -2600,6 +2600,11 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
     if (ctrl && !alt) {
         switch (event->keyval) {
         case GDK_KEY_o:
+            if (button_session_load_->is_visible()) {
+                sessionLoadPressed();
+                return true;
+            }
+        case GDK_KEY_O:
             if (!BrowsePath->has_focus()) {
                 BrowsePath->select_region(0, BrowsePath->get_text_length());
                 BrowsePath->grab_focus();
@@ -2628,6 +2633,28 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
                 emptyTrash();
                 return true;
             }
+            break;
+
+        case GDK_KEY_plus:
+            if (button_session_add_->is_visible()) {
+                sessionAddPressed();
+                return true;
+            }
+            break;
+
+        case GDK_KEY_minus:
+            if (button_session_remove_->is_visible()) {
+                sessionRemovePressed();
+                return true;
+            }
+            break;
+
+        case GDK_KEY_s:
+            if (button_session_save_->is_visible()) {
+                sessionSavePressed();
+                return true;
+            }
+            break;
         }
     }
 
@@ -2813,10 +2840,19 @@ void FileCatalog::sessionAddPressed()
 void FileCatalog::sessionRemovePressed()
 {
     std::vector<Glib::ustring> todel;
+    ThumbBrowserEntryBase *tosel = nullptr;
+    bool sel = true;
     for (auto e : fileBrowser->getEntries()) {
         if (e->selected) {
             todel.push_back(e->filename);
+            sel = true;
+        } else if (sel) {
+            tosel = e;
+            sel = false;
         }
+    }
+    if (tosel) {
+        fileBrowser->selectImage(tosel->thumbnail->getFileName());
     }
     art::session::remove(todel);
 }

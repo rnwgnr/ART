@@ -496,6 +496,9 @@ void FileBrowser::build_menu()
     partpasteprof->add_accelerator ("activate", pmaccelgroup, GDK_KEY_V, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
     copyTo->add_accelerator ("activate", pmaccelgroup, GDK_KEY_C, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
     moveTo->add_accelerator ("activate", pmaccelgroup, GDK_KEY_M, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
+    rename->add_accelerator("activate", pmaccelgroup, GDK_KEY_F2, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
+    remove->add_accelerator("activate", pmaccelgroup, GDK_KEY_Delete, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
+    add_to_session_->add_accelerator("activate", pmaccelgroup, GDK_KEY_S, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
 
     // Bind to event handlers
     open->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), open));
@@ -1159,6 +1162,9 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
     } else if (event->keyval == GDK_KEY_Delete && shift && !ctrl) {
         menuItemActivated (untrash);
         return true;
+    } else if (event->keyval == GDK_KEY_Delete && shift && ctrl) {
+        menuItemActivated(remove);
+        return true;
     } else if ((event->keyval == GDK_KEY_B || event->keyval == GDK_KEY_b) && ctrl && !shift) {
         menuItemActivated (develop);
         return true;
@@ -1170,6 +1176,9 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
         return true;
     } else if (event->keyval == GDK_KEY_F2 && !ctrl) {
         menuItemActivated (rename);
+        return true;
+    } else if ((event->keyval == GDK_KEY_S || event->keyval == GDK_KEY_s) && ctrl && shift) {
+        menuItemActivated(add_to_session_);
         return true;
     } else if (event->keyval == GDK_KEY_F3 && !(ctrl || shift || alt)) { // open Previous image from FileBrowser perspective
         FileBrowser::openPrevImage ();
