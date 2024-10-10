@@ -403,8 +403,10 @@ int main (int argc, char **argv)
 #ifdef WITH_MIMALLOC
     mi_version();
 #endif
-    
+
+#ifndef ART_WIN32_UCRT
     setlocale (LC_ALL, "");
+#endif
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
     simpleEditor = false;

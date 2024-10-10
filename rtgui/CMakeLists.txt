@@ -183,8 +183,14 @@ if(APPLE)
 endif()
 
 if(WIN32)
-    set(EXTRA_SRC_CLI myicon.rc)
-    set(EXTRA_SRC_NONCLI myicon.rc)
+    if (ART_USES_UCRT)
+        message(STATUS "ucrt detected, setting locale to UTF8")
+        set(EXTRA_SRC_CLI myicon.rc utf8.rc)
+        set(EXTRA_SRC_NONCLI myicon.rc utf8.rc)
+    else()
+        set(EXTRA_SRC_CLI myicon.rc)
+        set(EXTRA_SRC_NONCLI myicon.rc)
+    endif()
     set(EXTRA_LIB_RTGUI winmm)
     include_directories(${EXTRA_INCDIR}
         ${GIOMM_INCLUDE_DIRS}

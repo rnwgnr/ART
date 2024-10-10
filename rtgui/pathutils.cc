@@ -53,7 +53,6 @@ Glib::ustring getExtension (const Glib::ustring& filename)
 Glib::ustring fname_to_utf8(const std::string &fname)
 {
 #ifdef WIN32
-
     try {
         return Glib::locale_to_utf8(fname);
     } catch (Glib::Error&) {

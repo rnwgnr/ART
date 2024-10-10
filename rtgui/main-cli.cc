@@ -135,7 +135,9 @@ int main (int argc, char **argv)
     mi_version();
 #endif
 
+#ifndef ART_WIN32_UCRT
     setlocale (LC_ALL, "");
+#endif
     setlocale (LC_NUMERIC, "C"); // to set decimal point to "."
 
     if (argc > 1 && strcmp(argv[1], "--make-icc") == 0) {

@@ -94,10 +94,13 @@ if(REL_INFO_FILE STREQUAL REL_INFO_FILE-NOTFOUND)
     endif()
 
     # If user checked-out something which is not a branch, use the description as branch name.
-    if(GIT_DESCRIBE STREQUAL "")
+    if(NOT GIT_COMMIT)
+        set(GIT_COMMIT "unknown")
+    endif()
+    if(NOT GIT_DESCRIBE)
         set(GIT_DESCRIBE "${GIT_COMMIT}")
     endif()
-    if(GIT_BRANCH STREQUAL "")
+    if(NOT GIT_BRANCH)
         set(GIT_BRANCH "${GIT_DESCRIBE}")
     endif()
 
