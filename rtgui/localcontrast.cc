@@ -190,7 +190,7 @@ LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_L
     EvToolEnabled.set_action(EVENT);
     EvToolReset.set_action(EVENT);
     
-    box = Gtk::manage(new Gtk::VBox());
+    box = Gtk::manage(new ToolParamBlock());
 
     contrast = Gtk::manage(new Adjuster(M("TP_LOCALCONTRAST_CONTRAST"), -100., 100., 0.1, 0.));
 

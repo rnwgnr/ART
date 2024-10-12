@@ -37,7 +37,7 @@ private:
     std::unique_ptr<LabMasksContentProvider> labMasksContentProvider;
     LabMasksPanel *labMasks;
 
-    Gtk::VBox *box;
+    Gtk::Box *box;
     Adjuster *contrast;
     CurveEditorGroup *cg;
     FlatCurveEditor *curve;
