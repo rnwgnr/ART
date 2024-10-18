@@ -680,6 +680,9 @@ HISTORY_MSG_SMOOTHING_NOISE_STRENGTH;Smoothing - noise strength
 HISTORY_MSG_SMOOTHING_NOISE_COARSENESS;Smoothing - noise coarseness
 HISTORY_MSG_SMOOTHING_HALATION_SIZE;Smoothing - halation strength
 HISTORY_MSG_SMOOTHING_HALATION_COLOR;Smoothing - halation tint
+HISTORY_MSG_SMOOTHING_WAVELETS_STRENGTH;Smoothing - wavelets strength
+HISTORY_MSG_SMOOTHING_WAVELETS_LEVELS;Smoothing - wavelets levels
+HISTORY_MSG_SMOOTHING_WAVELETS_GAMMA;Smoothing - wavelets gamma
 HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Soft light - Strength
 HISTORY_MSG_SPOT;Spot removal
@@ -1538,7 +1541,7 @@ TP_FLATFIELD_CLIPCONTROL;Clip control
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;Clip control avoids clipped highlights caused by applying the flat field. If there are already clipped highlights before applying the flat field, clip control can lead to color cast.
 TP_FLATFIELD_EMBEDDED;Embedded in metadata
 TP_FLATFIELD_LABEL;Flat-Field
-TP_GENERAL_11SCALE_TOOLTIP;The effects of this tool are only visible or only accurate at a preview scale of 1:1.
+TP_GENERAL_11SCALE_TOOLTIP;The effects of this tool are only accurate at a preview scale of 1:1.
 TP_GENERAL_RESET_DEFAULT;Reset to default
 TP_GENERAL_RESET_SAVED;Reset to saved
 TP_GENERAL_TOOL_RESET_TOOLTIP;Reset all settings.
@@ -1911,6 +1914,7 @@ TP_SMOOTHING_MODE_NLMEANS;Non-local means
 TP_SMOOTHING_MODE_LENS;Lens blur
 TP_SMOOTHING_MODE_MOTION;Motion blur
 TP_SMOOTHING_MODE_NOISE;Add noise
+TP_SMOOTHING_MODE_WAVELETS;Wavelets
 TP_SMOOTHING_NOISE_COARSENESS;Coarseness
 TP_SMOOTHING_CHANNEL;Channel
 TP_SMOOTHING_CHANNEL_L;Luminance
@@ -1926,6 +1930,7 @@ TP_SMOOTHING_NUMBLADES;Blades
 TP_SMOOTHING_ANGLE;Angle
 TP_SMOOTHING_CURVATURE;Curvature
 TP_SMOOTHING_OFFSET;Offset
+TP_SMOOTHING_WAVELETS_LEVELS;Levels
 TP_SOFTLIGHT_LABEL;Soft Light
 TP_SOFTLIGHT_STRENGTH;Strength
 TP_SPOT_COUNTLABEL;%1 point(s)

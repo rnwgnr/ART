@@ -681,6 +681,124 @@ void halation(array2D<float> &R, array2D<float> &G, array2D<float> &B, int size,
     }
 }
 
+
+void wavelet_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, float strength, int levels, float gamma, double scale, Channel chan, bool multithread)
+{
+    if (strength <= 0.1f) {
+        return;
+    }
+    
+    const int W = R.width();
+    const int H = R.height();
+    const int nlevels = std::max(levels - int(std::log2(scale)), 2);
+    constexpr float eps = 0.01f;
+    const float s = SQR(float(strength)/125.f * (1.f + strength / 25.f));
+
+    const auto mad =
+        [&](float *coeffs, int len) -> float
+        {
+            float med = 0.f;
+            AlignedBuffer<float> buf(len);
+#ifdef _OPENMP
+#           pragma omp parallel for if (multithread)
+#endif
+            for (int i = 0; i < len; ++i) {
+                buf.data[i] = std::abs(coeffs[i]);
+            }
+            findMinMaxPercentile(buf.data, len, 0.5f, med, 0.5f, med, multithread);
+            return med / 0.6745f;
+        };
+
+    const auto wav =
+        [&](float *data) -> void
+        {
+#ifdef _OPENMP
+            int nthreads = multithread ? omp_get_num_procs() : 1;
+#else
+            int nthreads = 1;
+#endif
+            wavelet_decomposition wd(data, W, H, nlevels, 1, 1, nthreads);
+            for (int lvl = 0; lvl < wd.maxlevel(); ++lvl) {
+                for (int dir = 1; dir < 4; ++dir) {
+                    const int lW = wd.level_W(lvl);
+                    const int lH = wd.level_H(lvl);
+                    float **coeffs = wd.level_coeffs(lvl);
+                    float m = SQR(mad(coeffs[dir], lW * lH) * 65535.f);
+                    float level_factor = m * 5.0 / float(lvl + 1);
+                    const int n = lW * lH;
+                    
+#ifdef _OPENMP
+#                   pragma omp parallel for if (multithread)
+#endif
+                    for (int i = 0; i < n; ++i) {
+                        float mag = SQR(coeffs[dir][i] * 65535.f);
+                        float sf = mag / (mag + level_factor * s * xexpf(-mag / (9 * level_factor * s)) + eps);
+                        float f = SQR(sf) / (sf + eps);
+                        coeffs[dir][i] *= f;
+                    }
+                }
+            }
+            wd.reconstruct(data);
+        };
+    
+    if (gamma > 1.f) {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                R[y][x] = pow_F(std::max(R[y][x], 0.f), 1.f/gamma);
+                G[y][x] = pow_F(std::max(G[y][x], 0.f), 1.f/gamma);
+                B[y][x] = pow_F(std::max(B[y][x], 0.f), 1.f/gamma);
+            }
+        }
+    }
+
+    if (chan == Channel::LC) {
+        wav(R);
+        wav(G);
+        wav(B);
+    } else {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], G[y][x], R[y][x], B[y][x], ws);
+            }
+        }
+
+        if (chan == Channel::L) {
+            wav(G);
+        } else {
+            wav(R);
+            wav(B);
+        }
+
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                Color::yuv2rgb(G[y][x], R[y][x], B[y][x], R[y][x], G[y][x], B[y][x], ws);
+            }
+        }
+    }
+
+    if (gamma > 1.f) {
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                R[y][x] = pow_F(std::max(R[y][x], 0.f), gamma);
+                G[y][x] = pow_F(std::max(G[y][x], 0.f), gamma);
+                B[y][x] = pow_F(std::max(B[y][x], 0.f), gamma);
+            }
+        }        
+    }
+}
+
 } // namespace
 
 
@@ -793,9 +911,10 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 rgb->copyTo(&working);
             }
 
-            array2D<float> R(ww, hh, working.r.ptrs, ARRAY2D_BYREFERENCE);
-            array2D<float> G(ww, hh, working.g.ptrs, ARRAY2D_BYREFERENCE);
-            array2D<float> B(ww, hh, working.b.ptrs, ARRAY2D_BYREFERENCE);
+            const int flags = r.mode == SmoothingParams::Region::Mode::WAVELETS ? 0 : ARRAY2D_BYREFERENCE;
+            array2D<float> R(ww, hh, working.r.ptrs, flags);
+            array2D<float> G(ww, hh, working.g.ptrs, flags);
+            array2D<float> B(ww, hh, working.b.ptrs, flags);
 
             const bool glow = r.mode == SmoothingParams::Region::Mode::GAUSSIAN_GLOW;
             Channel ch = glow ? Channel::LC : Channel(int(r.channel));
@@ -810,6 +929,18 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
                 lens_motion_blur(im, &working, blend, i);
             } else if (r.mode == SmoothingParams::Region::Mode::HALATION) {
                 halation(R, G, B, 50 * r.halation_size / scale, LIM01(r.halation_color+0.5), multiThread);
+            } else if (r.mode == SmoothingParams::Region::Mode::WAVELETS) {
+                wavelet_smoothing(R, G, B, ws, r.wav_strength, r.wav_levels, r.wav_gamma, scale, ch, multiThread);
+#ifdef _OPENMP
+#               pragma omp parallel for if (multiThread)
+#endif
+                for (int y = 0; y < R.height(); ++y) {
+                    for (int x = 0; x < R.width(); ++x) {
+                        working.r(y, x) = R[y][x];
+                        working.g(y, x) = G[y][x];
+                        working.b(y, x) = B[y][x];
+                    }
+                }
             } else if (r.mode != SmoothingParams::Region::Mode::GUIDED) {
                 AlignedBuffer<float> buf(ww * hh);
                 double sigma = r.sigma;

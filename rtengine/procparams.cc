@@ -2669,7 +2669,10 @@ SmoothingParams::Region::Region():
     noise_strength(10),
     noise_coarseness(30),
     halation_size(1.0),
-    halation_color(0.0)
+    halation_color(0.0),
+    wav_strength(0),
+    wav_levels(5),
+    wav_gamma(2.2)
 {
 }
 
@@ -2692,7 +2695,10 @@ bool SmoothingParams::Region::operator==(const Region &other) const
         && noise_strength == other.noise_strength
         && noise_coarseness == other.noise_coarseness
         && halation_size == other.halation_size
-        && halation_color == other.halation_color;
+        && halation_color == other.halation_color
+        && wav_strength == other.wav_strength
+        && wav_levels == other.wav_levels
+        && wav_gamma == other.wav_gamma;
 }
 
 
@@ -3941,6 +3947,9 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                 putToKeyfile("Smoothing", Glib::ustring("NoiseCoarseness_") + n, r.noise_coarseness, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("HalationSize_") + n, r.halation_size, keyFile);
                 putToKeyfile("Smoothing", Glib::ustring("HalationColor_") + n, r.halation_color, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("WavStrength_") + n, r.wav_strength, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("WavLevels_") + n, r.wav_levels, keyFile);
+                putToKeyfile("Smoothing", Glib::ustring("WavGamma_") + n, r.wav_gamma, keyFile);
                 smoothing.labmasks[j].save(keyFile, "Smoothing", "", Glib::ustring("_") + n);
             }
             saveToKeyfile("Smoothing", "ShowMask", smoothing.showMask, keyFile);
@@ -5283,6 +5292,18 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                     done = false;
                 }
                 if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("HalationColor_") + n, cur.halation_color)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("WavStrength_") + n, cur.wav_strength)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("WavLevels_") + n, cur.wav_levels)) {
+                    found = true;
+                    done = false;
+                }
+                if (assignFromKeyfile(keyFile, smoothing_group, Glib::ustring("WavGamma_") + n, cur.wav_gamma)) {
                     found = true;
                     done = false;
                 }

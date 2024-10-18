@@ -1254,7 +1254,8 @@ struct SmoothingParams {
             MOTION,
             LENS,
             NOISE,
-            HALATION
+            HALATION,
+            WAVELETS
         };
         Mode mode;
         Channel channel;
@@ -1273,6 +1274,9 @@ struct SmoothingParams {
         int noise_coarseness;
         double halation_size;
         double halation_color;
+        double wav_strength;
+        int wav_levels;
+        double wav_gamma;
 
         Region();
         bool operator==(const Region &other) const;
