@@ -166,7 +166,7 @@ private:
 // LocalContrast
 //-----------------------------------------------------------------------------
 
-LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_LOCALCONTRAST_LABEL"), false, true, true)
+LocalContrast::LocalContrast(): FoldableToolPanel(this, "localcontrast", M("TP_LOCALCONTRAST_LABEL"), true, true, true)
 {
     auto m = ProcEventMapper::getInstance();
     auto EVENT = DISPLAY;
