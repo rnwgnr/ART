@@ -680,6 +680,9 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
                 raw_height = height;
                 top_margin = 0;
                 left_margin = 0;
+
+                RT_whitelevel_from_constant = ThreeValBool::F;
+                RT_blacklevel_from_constant = ThreeValBool::F;
             }
 
             static char xtrans_zero[6][6] = { 0 };
