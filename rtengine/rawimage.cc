@@ -1104,8 +1104,8 @@ int RawImage::loadRaw (bool loadData, unsigned int imageNum, bool closeFile, Pro
             printf("white levels: R:%d G1:%d B:%d G2:%d (provided by %s)\n", get_white(0), get_white(1), get_white(2), get_white(3),
                    white_from_cc ? "camconst.json" : decoder);
             printf("raw crop: %d %d %d %d (provided by %s)\n", left_margin, top_margin, width, height, raw_crop_cc ? "camconst.json" : decoder);
-            printf("color matrix provided by %s\n", (cc && cc->has_dcrawMatrix()) ? "camconst.json" : decoder);
-            if (cc && cc->has_dcrawMatrix()) {
+            printf("color matrix provided by %s\n", (cc && cc->has_dcrawMatrix() && RT_matrix_from_constant == ThreeValBool::T) ? "camconst.json" : decoder);
+            if (cc && cc->has_dcrawMatrix() && RT_matrix_from_constant == ThreeValBool::T) {
                 const short *mx = cc->get_dcrawMatrix();
                 printf("[");
                 const char *sep = "";

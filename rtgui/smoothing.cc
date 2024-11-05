@@ -171,8 +171,8 @@ public:
                 M("TP_SMOOTHING_MODE_HALATION"));
         case SmoothingParams::Region::Mode::WAVELETS:
             return Glib::ustring::compose(
-                "%4: %1 %2 %3", r.wav_strength, r.wav_levels, r.wav_gamma,
-                M("TP_SMOOTHING_MODE_WAVELETS"));
+                "%4: %1 %2 %3 [%5]", r.wav_strength, r.wav_levels, r.wav_gamma,
+                M("TP_SMOOTHING_MODE_WAVELETS"), ch);
         default:
             return "";
         }
