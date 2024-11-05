@@ -22,8 +22,32 @@
 #include <cstdlib>
 #include "opthelper.h"
 #include "boxblur.h"
-namespace
-{
+#include "alignedbuffer.h"
+
+namespace {
+
+template <class T>
+class AlignedMatrix {
+public:
+    AlignedMatrix(int h, int w): w_(w), h_(h), buf_(w * h)  {}
+    T *operator[](int x) { return buf_.data + (x * w_); }
+private:
+    int w_;
+    int h_;
+    rtengine::AlignedBuffer<T> buf_;
+};
+
+template <class T>
+class AlignedVector {
+public:
+    AlignedVector(int w): w_(w), buf_(w)  {}
+    operator T *() { return buf_.data; }
+private:
+    int w_;
+    rtengine::AlignedBuffer<T> buf_;
+};
+
+
 
 void compute7x7kernel(float sigma, float kernel[7][7]) {
     const double temp = -2.f * rtengine::SQR(sigma);
@@ -421,7 +445,8 @@ template<class T> void gauss5x5mult (T** RESTRICT src, T** RESTRICT dst, const i
 // use separated filter if the support window is small and src == dst
 template<class T> void gaussHorizontal3 (T** src, T** dst, int W, int H, const float c0, const float c1)
 {
-    T temp[W] ALIGNED16;
+    AlignedVector<T> temp(W);
+    //T temp[W] ALIGNED16;
 #ifdef _OPENMP
     #pragma omp for
 #endif
@@ -479,7 +504,8 @@ template<class T> void gaussVertical3 (T** src, T** dst, int W, int H, const flo
     }
 
 // Borders are done without SSE
-    float temp[H] ALIGNED16;
+    //float temp[H] ALIGNED16;
+    AlignedVector<float> temp(H);
 #ifdef _OPENMP
     #pragma omp single
 #endif
@@ -501,7 +527,8 @@ template<class T> void gaussVertical3 (T** src, T** dst, int W, int H, const flo
 #else
 template<class T> void gaussVertical3 (T** src, T** dst, int W, int H, const float c0, const float c1)
 {
-    T temp[H] ALIGNED16;
+    //T temp[H] ALIGNED16;
+    AlignedVector<T> temp(H);
 #ifdef _OPENMP
     #pragma omp for
 #endif
@@ -539,7 +566,8 @@ template<class T> void gaussHorizontalSse (T** src, T** dst, const int W, const 
     vfloat Tv, Tm2v, Tm3v;
     vfloat Bv, b1v, b2v, b3v;
     vfloat temp2W, temp2Wp1;
-    float tmp[W][4] ALIGNED16;
+    //float tmp[W][4] ALIGNED16;
+    AlignedMatrix<float> tmp(W, 4);
     Bv = F2V(B);
     b1v = F2V(b1);
     b2v = F2V(b2);
@@ -648,7 +676,8 @@ template<class T> void gaussHorizontal (T** src, T** dst, const int W, const int
             M[i][j] /= (1.0 + b1 - b2 + b3) * (1.0 + b2 + (b1 - b3) * b3);
         }
 
-    double temp2[W] ALIGNED16;
+    //double temp2[W] ALIGNED16;
+    AlignedVector<double> temp2(W);
 
 #ifdef _OPENMP
     #pragma omp for
@@ -695,7 +724,8 @@ template<class T> void gaussVerticalSse (T** src, T** dst, const int W, const in
             M[i][j] /= (1.0 + b1 - b2 + b3) * (1.0 - b1 - b2 - b3);
         }
 
-    float tmp[H][8] ALIGNED16;
+    //float tmp[H][8] ALIGNED16;
+    AlignedMatrix<float> tmp(H, 8);
     vfloat Rv;
     vfloat Tv, Tm2v, Tm3v;
     vfloat Rv1;
@@ -838,7 +868,8 @@ template<class T> void gaussVerticalSsemult (T** RESTRICT src, T** RESTRICT dst,
             M[i][j] /= (1.0 + b1 - b2 + b3) * (1.0 - b1 - b2 - b3);
         }
 
-    float tmp[H][8] ALIGNED16;
+    //float tmp[H][8] ALIGNED16;
+    AlignedMatrix<float> tmp(H, 8);
     vfloat Rv;
     vfloat Tv, Tm2v, Tm3v;
     vfloat Rv1;
@@ -979,7 +1010,8 @@ template<class T> void gaussVerticalSsediv (T** src, T** dst, T** divBuffer, con
             M[i][j] /= (1.0 + b1 - b2 + b3) * (1.0 - b1 - b2 - b3);
         }
 
-    float tmp[H][8] ALIGNED16;
+    //float tmp[H][8] ALIGNED16;
+    AlignedMatrix<float> tmp(H, 8);
     vfloat Rv;
     vfloat Tv, Tm2v, Tm3v;
     vfloat Rv1;
@@ -1125,7 +1157,8 @@ template<class T> void gaussVertical (T** src, T** dst, const int W, const int H
 
     // process 'numcols' columns for better usage of L1 cpu cache (especially faster for large values of H)
     static const int numcols = 8;
-    double temp2[H][numcols] ALIGNED16;
+    //double temp2[H][numcols] ALIGNED16;
+    AlignedMatrix<double> temp2(H, numcols);
     double temp2Hm1[numcols], temp2H[numcols], temp2Hp1[numcols];
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -1204,7 +1237,8 @@ template<class T> void gaussVerticaldiv (T** src, T** dst, T** divBuffer, const 
 
     // process 'numcols' columns for better usage of L1 cpu cache (especially faster for large values of H)
     static const int numcols = 8;
-    double temp2[H][numcols] ALIGNED16;
+    //double temp2[H][numcols] ALIGNED16;
+    AlignedMatrix<double> temp2(H, numcols);
     double temp2Hm1[numcols], temp2H[numcols], temp2Hp1[numcols];
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -1282,7 +1316,8 @@ template<class T> void gaussVerticalmult (T** src, T** dst, const int W, const i
 
     // process 'numcols' columns for better usage of L1 cpu cache (especially faster for large values of H)
     static const int numcols = 8;
-    double temp2[H][numcols] ALIGNED16;
+    //double temp2[H][numcols] ALIGNED16;
+    AlignedMatrix<double> temp2(H, numcols);
     double temp2Hm1[numcols], temp2H[numcols], temp2Hp1[numcols];
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -1530,7 +1565,8 @@ template<class T> void gaussianBlurImpl(T** src, T** dst, const int W, const int
         }
     }
 }
-}
+
+} // namespace
 
 void gaussianBlur(float** src, float** dst, const int W, const int H, const double sigma, float *buffer, eGaussType gausstype, float** buffer2)
 {
