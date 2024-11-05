@@ -2624,6 +2624,11 @@ Camera constants:
         "raw_crop": [ 12, 0, -110, -62 ] // for small size all numbers/2
     },
 
+    { // Quality C
+        "make_model" : "Sigma DP1",
+        "dcraw_matrix" : [  12165, -843, -1740, 5365,  5210,  440, 1377,  4935,  4047 ]
+    },
+
     { // Quality C, only raw crop for now - see #3858
         "make_model": "Sigma sd Quattro",
         "raw_crop": [ 200, 74, 5632, 3698 ]
