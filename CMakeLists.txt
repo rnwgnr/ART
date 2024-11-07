@@ -610,7 +610,7 @@ endif()
 
 set(HAS_MIMALLOC)
 set(ART_MIMALLOC_VERSION_INFO "N/A")
-if(NOT WITH_SAN)
+if(NOT WITH_SAN AND NOT APPLE)
     find_package(mimalloc)
     if(mimalloc_FOUND)
         if ("${mimalloc_VERSION}" VERSION_LESS 1.4)
