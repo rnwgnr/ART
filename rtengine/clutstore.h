@@ -161,7 +161,7 @@ private:
     Glib::ustring working_profile_;
     bool ok_;
     bool clut_and_working_profiles_are_same_;
-    bool multiThread_;
+    int num_threads_;
     float strength_;
     std::shared_ptr<HaldCLUT> hald_clut_;
     TMatrix wprof_;

@@ -1294,7 +1294,7 @@ CLUTApplication::CLUTApplication(const Glib::ustring &clut_filename, const Glib:
     working_profile_(working_profile),
     ok_(false),
     clut_and_working_profiles_are_same_(false),
-    multiThread_(num_threads > 1),
+    num_threads_(num_threads),
     strength_(strength)
 {
     init(num_threads);
@@ -1651,7 +1651,7 @@ void CLUTApplication::operator()(Imagefloat *img)
     const int H = img->getHeight();
 
 #ifdef _OPENMP
-#   pragma omp parallel for if (multiThread_)
+#   pragma omp parallel for if (num_threads_ > 1) num_threads(num_threads_)
 #endif
     for (int y = 0; y < H; ++y) {
 #ifdef _OPENMP
