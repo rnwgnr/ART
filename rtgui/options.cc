@@ -2375,6 +2375,18 @@ void Options::load(bool lightweight, int verbose)
     Glib::ustring user_language_translation = "";
     Glib::ustring user_locale_translation = "";
 
+    Glib::ustring ctl_default_translation = "";
+    Glib::ustring user_ctl_default_translation = "";
+    Glib::ustring ctl_language_translation = "";
+    Glib::ustring ctl_locale_translation = "";
+    Glib::ustring user_ctl_language_translation = "";
+    Glib::ustring user_ctl_locale_translation = "";
+
+#ifdef ART_USE_CTL
+    ctl_default_translation = Glib::build_filename(argv0, "ctlscripts", "languages", "default");
+    user_ctl_default_translation = Glib::build_filename(rtdir, "ctlscripts", "languages", "default");
+#endif // ART_USE_CTL
+
     if (options.languageAutoDetect) {
         options.language = langMgr.getOSUserLanguage();
     }
@@ -2385,15 +2397,30 @@ void Options::load(bool lightweight, int verbose)
         if (langPortions.size() >= 1) {
             languageTranslation = Glib::build_filename(argv0, "languages", langPortions.at(0));
             user_language_translation = Glib::build_filename(rtdir, "languages", langPortions.at(0));
+
+#ifdef ART_USE_CTL
+            ctl_language_translation = Glib::build_filename(argv0, "ctlscripts", "languages", langPortions.at(0));
+            user_ctl_language_translation = Glib::build_filename(rtdir, "ctlscripts", "languages", langPortions.at(0));
+#endif // ART_USE_CTL
         }
 
         if (langPortions.size() >= 2) {
             localeTranslation = Glib::build_filename(argv0, "languages", options.language);
             user_locale_translation = Glib::build_filename(rtdir, "languages", options.language);
+
+#ifdef ART_USE_CTL
+            ctl_locale_translation = Glib::build_filename(argv0, "ctlscripts", "languages", options.language);
+            user_ctl_locale_translation = Glib::build_filename(rtdir, "ctlscripts", "languages", options.language);
+#endif // ART_USE_CTL
         }
     }
 
-    langMgr.load(options.language, {user_locale_translation, localeTranslation, user_language_translation, languageTranslation, user_default_translation, defaultTranslation});
+    std::vector<Glib::ustring> fnames = {
+        user_locale_translation, localeTranslation, user_ctl_locale_translation, ctl_locale_translation, 
+        user_language_translation, languageTranslation, user_ctl_language_translation, ctl_language_translation, 
+        user_default_translation, defaultTranslation, user_ctl_default_translation, ctl_default_translation
+    };
+    langMgr.load(options.language, fnames);
 
     rtengine::init(&options.rtSettings, argv0, rtdir, !lightweight);
 }
