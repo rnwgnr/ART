@@ -1209,7 +1209,7 @@ PROFILEPANEL_PINTERNAL;Semleges
 PROFILEPANEL_PLASTSAVED;Utoljára mentett
 PROFILEPANEL_SAVEDLGLABEL;Feldolgozási paraméterek mentése...
 PROFILEPANEL_SAVEPPASTE;Mentendő paraméterek
-PROFILEPANEL_TOOLTIPCOPY;Aktuális feldolgozási profil másolása a vágólapra.\n<b>Ctrl-click</b> a másolandó paraméterek kiválasztásához.
+PROFILEPANEL_TOOLTIPCOPY;Aktuális feldolgozási profil másolása a vágólapra.
 PROFILEPANEL_TOOLTIPLOAD;Profil betöltése fájlból.\n<b>Ctrl-click</b> a betöltendő paraméterek kiválasztásához.
 PROFILEPANEL_TOOLTIPPASTE;Profil beillesztése a vágólapról.\n<b>Ctrl-click</b> a beillesztendő paraméterek kiválasztásához.
 PROFILEPANEL_TOOLTIPSAVE;Aktuális profil mentése.\n<b>Ctrl-click</b> a mentendő paraméterek kiválasztásához.

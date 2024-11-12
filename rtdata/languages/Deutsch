@@ -1216,7 +1216,7 @@ PROFILEPANEL_PINTERNAL;Neutral
 PROFILEPANEL_PLASTSAVED;Zuletzt gespeichert
 PROFILEPANEL_SAVEDLGLABEL;Bearbeitungsprofil speichern...
 PROFILEPANEL_SAVEPPASTE;Zu speichernde Parameter
-PROFILEPANEL_TOOLTIPCOPY;Profil in Zwischenablage kopieren.\n\nStrg beim Klicken gedrückt halten, um\nzu kopierende Parameter auszuwählen.
+PROFILEPANEL_TOOLTIPCOPY;Profil in Zwischenablage kopieren.
 PROFILEPANEL_TOOLTIPLOAD;Profil aus Datei laden.\n\nStrg beim Klicken gedrückt halten, um\nzu ladende Parameter auszuwählen.
 PROFILEPANEL_TOOLTIPPASTE;Profil aus Zwischenablage einfügen.\n\nStrg beim Klicken gedrückt halten, um\neinzufügende Parameter auszuwählen.
 PROFILEPANEL_TOOLTIPSAVE;Profil speichern.\n\nStrg beim Klicken gedrückt halten, um\nzu speichernde Parameter auszuwählen.

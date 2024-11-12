@@ -1238,7 +1238,7 @@ PROFILEPANEL_PINTERNAL;Neutro
 PROFILEPANEL_PLASTSAVED;Último guardado
 PROFILEPANEL_SAVEDLGLABEL;Guardar parámetros de procesamiento...
 PROFILEPANEL_SAVEPPASTE;Parámetros a guardar
-PROFILEPANEL_TOOLTIPCOPY;Copiar parámetros de procesamiento al portapapeles.\n<b>Ctrl-clic</b> para seleccionar los parámetros a copiar.
+PROFILEPANEL_TOOLTIPCOPY;Copiar parámetros de procesamiento al portapapeles.
 PROFILEPANEL_TOOLTIPLOAD;Cargar perfil de un archivo.\n<b>Ctrl-clic</b> para seleccionar los parámetros a cargar.
 PROFILEPANEL_TOOLTIPPASTE;Pegar perfil del portapapeles.\n<b>Ctrl-clic</b> para seleccionar los parámetros a pegar.
 PROFILEPANEL_TOOLTIPSAVE;Guardar perfil actual.\n<b>Ctrl-clic</b> para seleccionar los parámetros a guardar.

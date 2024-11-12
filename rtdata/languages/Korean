@@ -1219,7 +1219,7 @@ PROFILEPANEL_PINTERNAL;뉴트럴
 PROFILEPANEL_PLASTSAVED;갱신필
 PROFILEPANEL_SAVEDLGLABEL;처리 프로파일을 보존함...
 PROFILEPANEL_SAVEPPASTE;보존할 매개 변수
-PROFILEPANEL_TOOLTIPCOPY;클립 보드에 현재 프로파일을 복사합니다.\nCtrl-클릭으로 복사하는 매개 변수를 선택합니다.
+PROFILEPANEL_TOOLTIPCOPY;클립 보드에 현재 프로파일을 복사합니다.
 PROFILEPANEL_TOOLTIPLOAD;파일에서 프로파일을 불러옵니다.\nCtrl-클릭으로 불러오는 매개 변수를 선택합니다.
 PROFILEPANEL_TOOLTIPPASTE; 클립 보드에서 프로파일을 붙입니다.\nCtrl-클릭으로 붙이는 매개 변수를 선택합니다.
 PROFILEPANEL_TOOLTIPSAVE;현재 프로파일을 보존\nCtrl-클릭으로 보존하는 매개 변수를 선택합니다.

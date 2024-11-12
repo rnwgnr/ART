@@ -1374,7 +1374,7 @@ PROFILEPANEL_PINTERNAL;Neutro
 PROFILEPANEL_PLASTSAVED;Último salvo
 PROFILEPANEL_SAVEDLGLABEL;Salvar Parâmetros de Processamento...
 PROFILEPANEL_SAVEPPASTE;Parâmetros para salvar
-PROFILEPANEL_TOOLTIPCOPY;Copie o perfil de processamento atual para a área de transferência.\n<b>Ctrl-click</b> para selecionar os parâmetros a serem copiados.
+PROFILEPANEL_TOOLTIPCOPY;Copie o perfil de processamento atual para a área de transferência.
 PROFILEPANEL_TOOLTIPLOAD;Carregue um perfil do arquivo.\n<b>Ctrl-click</b> para selecionar os parâmetros a serem carregados.
 PROFILEPANEL_TOOLTIPPASTE;Cole o perfil da área de transferência.\n<b>Ctrl-click</b> para selecionar os parâmetros a serem colados.
 PROFILEPANEL_TOOLTIPSAVE;Salvar o perfil atual.\n<b>Ctrl-click</b> para selecionar os parâmetros a serem salvos.

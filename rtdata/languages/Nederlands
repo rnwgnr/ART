@@ -1231,7 +1231,7 @@ PROFILEPANEL_PINTERNAL;Neutraal
 PROFILEPANEL_PLASTSAVED;Laatst opgeslagen
 PROFILEPANEL_SAVEDLGLABEL;Bewaar profiel...
 PROFILEPANEL_SAVEPPASTE;Te bewaren parameters
-PROFILEPANEL_TOOLTIPCOPY;Kopieer huidig profiel naar klembord.\n<b>Ctrl+klik</b> om de te kopiëren parameters te selecteren.
+PROFILEPANEL_TOOLTIPCOPY;Kopieer huidig profiel naar klembord.
 PROFILEPANEL_TOOLTIPLOAD;Laad profiel uit bestand.\n<b>Ctrl+klik</b> om de te laden parameters te selecteren.
 PROFILEPANEL_TOOLTIPPASTE; Plak profiel van klembord.\n<b>Ctrl+klik</b> om de te plakken parameters te selecteren.
 PROFILEPANEL_TOOLTIPSAVE;Bewaar huidig profiel.\n<b>Ctrl+klik</b> om de te bewaren parameters te selecteren.

@@ -1235,7 +1235,7 @@ PROFILEPANEL_PINTERNAL;Neutre
 PROFILEPANEL_PLASTSAVED;Últim desat
 PROFILEPANEL_SAVEDLGLABEL;Desa els paràmetres de processament...
 PROFILEPANEL_SAVEPPASTE;Paràmetres a desar
-PROFILEPANEL_TOOLTIPCOPY;Copia els paràmetres de processament al porta-retalls.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a copiar.
+PROFILEPANEL_TOOLTIPCOPY;Copia els paràmetres de processament al porta-retalls.
 PROFILEPANEL_TOOLTIPLOAD;Carrega el perfil d'un fitxer.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a carregar.
 PROFILEPANEL_TOOLTIPPASTE;Enganxa el perfil del porta-retalls.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a enganxar.
 PROFILEPANEL_TOOLTIPSAVE;Desa el perfil actual.\n<b>Ctrl-clic</b> per seleccionar els paràmetres a desar.

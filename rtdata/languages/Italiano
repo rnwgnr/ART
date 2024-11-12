@@ -1235,7 +1235,7 @@ PROFILEPANEL_PINTERNAL;Neutro
 PROFILEPANEL_PLASTSAVED;Ultimo salvato
 PROFILEPANEL_SAVEDLGLABEL;Salvo i parametri di sviluppo...
 PROFILEPANEL_SAVEPPASTE;Parametri da salvare
-PROFILEPANEL_TOOLTIPCOPY;Copia il profilo corrente negli appunti.\n<b>Ctrl-click</b> per selezionare i parametri da copiare.
+PROFILEPANEL_TOOLTIPCOPY;Copia il profilo corrente negli appunti.
 PROFILEPANEL_TOOLTIPLOAD;Carica profilo da file.\n<b>Ctrl-click</b> per selezionare i parametri da caricare.
 PROFILEPANEL_TOOLTIPPASTE;Incolla il profilo dagli appunti.\n<b>Ctrl-click</b> per selezionare i parametri da incollare.
 PROFILEPANEL_TOOLTIPSAVE;Salva il profilo corrente.\n<b>Ctrl-click</b> per selezionare i parametri da salvare.

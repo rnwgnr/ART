@@ -433,48 +433,11 @@ void ProfilePanel::copy_clicked (GdkEventButton* event)
         toSave = lastsaved;
     }
     
-    // if (isCustomSelected()) {
-    //     toSave = custom;
-    // } else if (isLastSavedSelected()) {
-    //     toSave = lastsaved;
-    // } else if (isDefaultSelected()) {
-    //     toSave = defprofile;
-    // } else {
-    //     const ProfileStoreEntry* entry = profiles->getSelectedEntry();
-    //     toSave = entry ? ProfileStore::getInstance()->getProfile (entry) : nullptr;
-    // }
-
-    // toSave has to be a complete procparams
     if (toSave) {
-        if (event->state & Gdk::CONTROL_MASK) {
-            // opening the partial paste dialog window
-            if(!partialProfileDlg) {
-                partialProfileDlg = new PartialPasteDlg(Glib::ustring (), parent);
-            }
-            partialProfileDlg->set_allow_3way(false);
-            partialProfileDlg->set_title(M("PROFILEPANEL_COPYPPASTE"));
-            int i = partialProfileDlg->run();
-            partialProfileDlg->hide();
-
-            if (i != Gtk::RESPONSE_OK) {
-                return;
-            }
-
-            // saving a partial profile
-            rtengine::procparams::ProcParams pp;
-            toSave->applyTo(pp);
-            // ParamsEdited pe(true);
-            // partialProfileDlg->applyPaste(pp, pe, toSave->pparams, toSave->pedited);
-            auto pe = partialProfileDlg->getParamsEdited();
-            clipboard.setProcParams(pp);
-            clipboard.setParamsEdited(pe);
-            // ppTemp.deleteInstance();
-        } else {
-            rtengine::procparams::ProcParams pp;
-            toSave->applyTo(pp);
-            clipboard.setProcParams(pp);
-            clipboard.setParamsEdited(ParamsEdited(true));
-        }
+        rtengine::procparams::ProcParams pp;
+        toSave->applyTo(pp);
+        clipboard.setProcParams(pp);
+        clipboard.setParamsEdited(ParamsEdited(true));
     }
 
     return;

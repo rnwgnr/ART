@@ -1206,7 +1206,7 @@ PROFILEPANEL_PINTERNAL;Neutre
 PROFILEPANEL_PLASTSAVED;Dernier sauvegardé
 PROFILEPANEL_SAVEDLGLABEL;Enregistrer les paramètres de traitement...
 PROFILEPANEL_SAVEPPASTE;Paramètres à enregistrer
-PROFILEPANEL_TOOLTIPCOPY;Copier le profil courant dans le presse-papier\n<b>CTRL-clic</b> pour sélectionner les paramètres à copier.
+PROFILEPANEL_TOOLTIPCOPY;Copier le profil courant dans le presse-papier.
 PROFILEPANEL_TOOLTIPLOAD;Charger un profil depuis un fichier\n<b>CTRL-clic</b> pour sélectionner les paramètres à charger.
 PROFILEPANEL_TOOLTIPPASTE;Coller le profil depuis le presse-papier\n<b>CTRL-clic</b> pour sélectionner les paramètres à coller.
 PROFILEPANEL_TOOLTIPSAVE;Enregistrer le profil actuel\n<b>CTRL-clic</b> pour sélectionner les paramètres à enregistrer.

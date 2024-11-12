@@ -1209,7 +1209,7 @@ PROFILEPANEL_PINTERNAL;Neutral
 PROFILEPANEL_PLASTSAVED;Last Saved
 PROFILEPANEL_SAVEDLGLABEL;Save Processing Parameters...
 PROFILEPANEL_SAVEPPASTE;Parameters to save
-PROFILEPANEL_TOOLTIPCOPY;Copy current processing profile to clipboard.\n<b>Ctrl-click</b> to select the parameters to copy.
+PROFILEPANEL_TOOLTIPCOPY;Copy current processing profile to clipboard.
 PROFILEPANEL_TOOLTIPLOAD;Load a profile from file.\n<b>Ctrl-click</b> to select the parameters to load.
 PROFILEPANEL_TOOLTIPPASTE;Paste profile from clipboard.\n<b>Ctrl-click</b> to select the parameters to paste.
 PROFILEPANEL_TOOLTIPSAVE;Save current profile.\n<b>Ctrl-click</b> to select the parameters to save.
