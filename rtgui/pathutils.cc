@@ -82,7 +82,7 @@ Glib::ustring fname_to_utf8(const std::string &fname)
 }
 
 
-Glib::ustring getExecutablePath(char *argv0)
+Glib::ustring getExecutablePath(const char *argv0)
 {
     char exname[512] = {0};
     
