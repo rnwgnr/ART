@@ -178,7 +178,7 @@ def get_version(opts):
 
 def make_info_plist(opts):
     version = get_version(opts)
-    with open(os.path.join(opts.outdir, 'Info.plist'), 'w') as out:
+    with open(os.path.join(opts.outdir, 'Contents', 'Info.plist'), 'w') as out:
         out.write(f"""\
 <?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
