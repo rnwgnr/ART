@@ -343,11 +343,16 @@ if(HAS_MIMALLOC)
 endif()
 
 # Install executables
-install(TARGETS art DESTINATION ${BINDIR})
-install(TARGETS art-cli DESTINATION ${BINDIR})
+if(APPLE AND NOT APPLE_NEW_BUNDLE)
+    install(TARGETS art DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/MacOS")
+    install(TARGETS art-cli DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/MacOS")
+else()
+    install(TARGETS art DESTINATION ${BINDIR})
+    install(TARGETS art-cli DESTINATION ${BINDIR})
+endif()
 
 # Create config.h which defines where data are stored
-if(APPLE)
+if(APPLE_NEW_BUNDLE)
     foreach(_v DATADIR DOCDIR CREDITSDIR LICENCEDIR LENSFUNDBDIR)
         if(${_v})
             set(${_v} "../../${${_v}}")

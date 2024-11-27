@@ -168,6 +168,73 @@ def extra_files(opts):
     ] + extra
 
 
+def get_version(opts):
+    with open('Contents/Resources/AboutThisBuild.txt') as f:
+        for line in f:
+            if line.startswith('Version: '):
+                return line.split()[-1]
+    return 'UNKNOWN'
+
+
+def make_info_plist(opts):
+    version = get_version(opts)
+    with open(os.path.join(opts.outdir, 'Info.plist'), 'w') as out:
+        out.write(f"""\
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+    <dict>
+        <key>CFBundleExecutable</key>
+        <string>ART</string>
+        <key>CFBundleGetInfoString</key>
+        <string>{version}, Copyright © 2004-2010 Gábor Horváth, 2010-2019 RawTherapee Development Team, 2019-2024 Alberto Griggio</string>
+        <key>CFBundleIconFile</key>
+        <string>ART.icns</string>
+        <key>CFBundleIdentifier</key>
+        <string>us.pixls.art.ART</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundleName</key>
+        <string>ART</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleShortVersionString</key>
+        <string>{version}</string>
+        <key>CFBundleSignature</key>
+        <string>????</string>
+        <key>CFBundleVersion</key>
+        <string>{version}</string>
+        <key>NSHighResolutionCapable</key>
+        <true />
+        <key>NSHumanReadableCopyright</key>
+        <string>Copyright © 2004-2010 Gábor Horváth, 2010-2019 RawTherapee Development Team, 2019-2024 Alberto Griggio</string>
+        <key>LSMultipleInstancesProhibited</key>
+        <true />
+    </dict>
+</plist>
+""")
+
+
+def make_icns(opts):
+    icondir = os.path.join(opts.tempdir, 'ART.iconset')
+    os.mkdir(icondir)
+    for i, sz in enumerate([16, 32, 64, 128, 256, 512]):
+        shutil.copy2(os.path.join('Contents/Resources/images',
+                                  f'ART-logo-{sz}.png'),
+                     os.path.join(icondir, f'icon_{sz}x{sz}.png'))
+        if i > 0:
+            sz2 = sz / 2
+            shutil.copy2(os.path.join('Contents/Resources/images',
+                                      f'ART-logo-{sz}.png'),
+                         os.path.join(icondir, f'icon_{sz2}x{sz2}@2x.png'))
+    shutil.copy2(os.path.join('Contents/Resources/images',
+                              'ART-logo-1024.png'),
+                 os.path.join(icondir, 'icon_512x512@2x.png'))
+    subprocess.run(['iconutil', '-c', 'icns', 'ART.iconset'], check=True,
+                   cwd=opts.tempdir)
+    shutil.copy2(os.path.join(opts.tempdir, 'ART.icns'),
+                 os.path.join(opts.outdir, 'Contents/Resources/ART.icns'))
+    
+
 def make_dmg(opts):
     if opts.verbose:
         print(f'Creating dmg in {opts.outdir}/{opts.dmg_name}.dmg ...')
@@ -218,6 +285,8 @@ def main():
                     if not os.path.exists(destdir):
                         os.makedirs(destdir)
                     shutil.copy2(elem, dest)
+        make_info_plist(opts)
+        make_icns(opts)
     os.makedirs(os.path.join(opts.outdir, 'Contents/Resources/share/gtk-3.0'))
     with open(os.path.join(opts.outdir,
                            'Contents/Resources/share/gtk-3.0/settings.ini'),
