@@ -166,21 +166,19 @@ if(WIN32 OR APPLE)
 endif()
 
 if(NOT DEFINED BUNDLE_BASE_INSTALL_DIR)
+    set(BUNDLE_BASE_INSTALL_DIR "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
     if(APPLE)
-        set(BUNDLE_BASE_INSTALL_DIR "${PROJECT_SOURCE_DIR}/build")
-    else()
-        set(BUNDLE_BASE_INSTALL_DIR "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+        set(BUNDLE_BASE_INSTALL_DIR "${BUNDLE_BASE_INSTALL_DIR}/ART.app")
     endif()
 endif()
 
 if(BUILD_BUNDLE)
     if(APPLE)
-        set(BINDIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/MacOS")
-        set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/build")
+        set(BINDIR "Contents/MacOS")
     else()
         set(BINDIR .)
-        set(CMAKE_INSTALL_PREFIX "${BUNDLE_BASE_INSTALL_DIR}")
     endif()
+    set(CMAKE_INSTALL_PREFIX "${BUNDLE_BASE_INSTALL_DIR}")
 endif()
 
 if(NOT DEFINED BINDIR)
@@ -190,11 +188,7 @@ endif()
 if(NOT DEFINED DATADIR)
     if(BUILD_BUNDLE)
         if(APPLE)
-            if(NOT OSX_DEV_BUILD)
-                set(DATADIR "/Applications/ART.app/Contents/Resources/share")
-            else()
-                set(DATADIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources/share")
-            endif()
+            set(DATADIR "Contents/Resources")
         else()
             set(DATADIR .)
         endif()
@@ -206,7 +200,7 @@ endif()
 if(NOT DEFINED LIBDIR)
     if(BUILD_BUNDLE)
         if(APPLE)
-            set(LIBDIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Frameworks")
+            set(LIBDIR "Contents/Frameworks")
         else()
             set(LIBDIR .)
         endif()
@@ -227,11 +221,7 @@ endif()
 if(NOT DEFINED DOCDIR)
     if(BUILD_BUNDLE)
         if(APPLE)
-            if(NOT OSX_DEV_BUILD)
-                set(DOCDIR "/Applications/ART.app/Contents/Resources")
-            else()
-                set(DOCDIR "${DATADIR}/doc")
-            endif()
+            set(DOCDIR "${DATADIR}/doc")
         else()
             set(DOCDIR "${DATADIR}/share/doc")
         endif()
@@ -242,15 +232,7 @@ endif()
 
 if(NOT DEFINED CREDITSDIR)
     if(BUILD_BUNDLE)
-        if(APPLE)
-            if(NOT OSX_DEV_BUILD)
-                set(CREDITSDIR "/Applications/ART.app/Contents/Resources")
-            else()
-                set(CREDITSDIR "${DATADIR}/..")
-            endif()
-        else()
-            set(CREDITSDIR "${DATADIR}")
-        endif()
+        set(CREDITSDIR "${DATADIR}")
     else()
         set(CREDITSDIR "${CMAKE_INSTALL_PREFIX}/share/doc/ART")
     endif()
@@ -258,11 +240,7 @@ endif()
 
 if(NOT DEFINED LICENCEDIR)
     if(BUILD_BUNDLE)
-        if(APPLE)
-            set(LICENCEDIR "${CREDITSDIR}")
-        else()
-            set(LICENCEDIR "${DATADIR}")
-        endif()
+        set(LICENCEDIR "${CREDITSDIR}")
     else()
         set(LICENCEDIR "${CMAKE_INSTALL_PREFIX}/share/doc/ART")
     endif()
@@ -310,62 +288,8 @@ if(NOT DEFINED APPDATADIR)
     endif()
 endif()
 
-if(NOT APPLE)
-    if(DEFINED LENSFUNDBDIR AND NOT IS_ABSOLUTE "${LENSFUNDBDIR}")
-        set(LENSFUNDBDIR "${DATADIR}/${LENSFUNDBDIR}")
-    endif()
-else()
-    set(LENSFUNDBDIR "${LENSFUNDBDIR}")
-endif()
-
-if(APPLE)
-    if("${CODESIGNID}")
-        set(CODESIGNID
-            "${CODESIGNID}"
-            CACHE STRING "Codesigning Identity")
-    endif()
-    if("${NOTARY}")
-        set(NOTARY
-            "${NOTARY}"
-            CACHE STRING "Notarization Identity")
-    endif()
-    if("${LOCAL_PREFIX}")
-        set(LOCAL_PREFIX
-            "${LOCAL_PREFIX}"
-            CACHE STRING "macos/gtk parent directory ie /usr/local or /opt/local or /opt/homebrew (for arm64)")
-    else()
-        set(LOCAL_PREFIX
-            /usr/local
-            CACHE STRING "macos/gtk parent directory ie /usr/local (default) or /opt/local (macports) or /opt/homebrew (for arm64)")
-    endif()
-    if("${FANCY_DMG}")
-        set(FANCY_DMG
-            ON
-            CACHE BOOL
-                  "Use the andreyvit/create-dmg script to make a fancy .dmg")
-    endif()
-endif()
-
-# For macOS only, OSX_DEV_BUILD option allows using relative paths instead of absolute
-# paths. Consequently, for development builds, application can be launching without
-# being bundled. However, file access can be restricted for some folder.
-option(OSX_DEV_BUILD "Generate macOS development builds" OFF)
-
-# On macOS, optionally generate the final zip artifact file without version in the name for nightly upload purposes.
-option(OSX_NIGHTLY "Generate a generically-named zip" OFF)
-
-# Generate a universal macOS build
-option(OSX_UNIVERSAL "Generate a universal app" OFF)
-
-# On macOS: merge the app via a specific url to generate a universal bundle with both x86_64 and arm64
-if(OSX_UNIVERSAL)
-    if(NOT OSX_UNIVERSAL_URL)
-        if(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
-            set(OSX_UNIVERSAL_URL "ART_macOS_x86_64_latest.zip" CACHE STRING "URL of x86_64 app for lipo")
-        else()
-            set(OSX_UNIVERSAL_URL "ART_macOS_arm64_latest.zip" CACHE STRING "URL of arm64 app for lipo")
-        endif()
-    endif()
+if(DEFINED LENSFUNDBDIR AND NOT IS_ABSOLUTE "${LENSFUNDBDIR}")
+    set(LENSFUNDBDIR "${DATADIR}/${LENSFUNDBDIR}")
 endif()
 
 # Enforce absolute paths for non-bundle builds:
@@ -651,9 +575,15 @@ if(ENABLE_CTL)
     find_path(CTL_INCLUDE_DIR NAMES "CtlInterpeter.h" PATH_SUFFIXES "CTL")
     pkg_check_modules(OPENEXR OpenEXR>=3)
     #find_path(_openexr_half OpenEXR/half.h)
-    find_library(_ctl_lib IlmCtl)
-    find_library(_ctl_math_lib IlmCtlMath)
-    find_library(_ctl_simd_lib IlmCtlSimd)
+    if(CTL_LIBRARY_DIR)
+        find_library(_ctl_lib IlmCtl PATHS "${CTL_LIBRARY_DIR}")
+        find_library(_ctl_math_lib IlmCtlMath PATHS "${CTL_LIBRARY_DIR}")
+        find_library(_ctl_simd_lib IlmCtlSimd PATHS "${CTL_LIBRARY_DIR}")
+    else()
+        find_library(_ctl_lib IlmCtl)
+        find_library(_ctl_math_lib IlmCtlMath)
+        find_library(_ctl_simd_lib IlmCtlSimd)
+    endif()
     if(NOT OPENEXR_FOUND)
         pkg_check_modules(OPENEXR IlmBase)
     endif()
@@ -753,29 +683,12 @@ if(WIN32)
         -DCOMPILER_INFO:STRING="${COMPILER_INFO}"
         -DCMAKE_INSTALL_PREFIX:STRING="${CMAKE_INSTALL_PREFIX}"
         -DBIT_DEPTH:STRING="${CMAKE_SIZEOF_VOID_P}")
-elseif(APPLE)
-    set(
-         ABOUT_COMMAND_WITH_ARGS
-         ${CMAKE_COMMAND}
-             -DPROJECT_SOURCE_DIR:STRING=${PROJECT_SOURCE_DIR}
-             -DCACHE_NAME_SUFFIX:STRING=${CACHE_NAME_SUFFIX}
-             -DSYSTEM:STRING=Apple
-             -DCXX_FLAGS:STRING=${CXX_FLAGS}
-             -DLFLAGS:STRING=${LFLAGS}
-             -DCOMPILER_INFO:STRING=${COMPILER_INFO}
-             -DPROC_LABEL:STRING="${PROC_LABEL}"
-             -DPROC_BIT_DEPTH:STRING="${PROC_BIT_DEPTH}"
-             -DBUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-             -DGTKMM_VERSION:STRING=${GTKMM_VERSION}
-             -DOPTION_OMP:STRING=${OPTION_OMP}
-             -DWITH_MYFILE_MMAP:STRING=${WITH_MYFILE_MMAP}
-             -DLENSFUN_VERSION:STRING=${LENSFUN_VERSION}
-             -P ${PROJECT_SOURCE_DIR}/UpdateInfo.cmake)
 else()
     list(APPEND ABOUT_COMMAND_WITH_ARGS -DSYSTEM:STRING="${CMAKE_SYSTEM_NAME}"
         -DCXX_FLAGS:STRING=${CXX_FLAGS}
         -DLFLAGS:STRING=${LFLAGS}
-        -DCOMPILER_INFO:STRING=${COMPILER_INFO})
+        -DCOMPILER_INFO:STRING=${COMPILER_INFO} 
+        -DBIT_DEPTH:STRING=${CMAKE_SIZEOF_VOID_P})       
 endif()
 
 if(ENABLE_LIBRAW AND LIBRAW_FOUND)
@@ -811,19 +724,10 @@ add_custom_target(UpdateInfo ALL
 
 ### End generating AboutThisBuild.txt
 
-if(APPLE)
-  if(NOT OSX_DEV_BUILD)
-    install(FILES AUTHORS.txt DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources")
-    install(FILES LICENSE.txt DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources")
-    install(FILES "${CMAKE_BINARY_DIR}/AboutThisBuild.txt" DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources")
-    install(FILES RELEASE_NOTES.txt DESTINATION "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources/share" OPTIONAL)
-    endif()
-else()
-  install(FILES AUTHORS.txt DESTINATION "${CREDITSDIR}")
-  install(FILES LICENSE.txt DESTINATION "${LICENCEDIR}")
-  install(FILES "${CMAKE_BINARY_DIR}/AboutThisBuild.txt" DESTINATION "${CREDITSDIR}")
-  install(FILES RELEASE_NOTES.txt DESTINATION "${CREDITSDIR}" OPTIONAL)
-endif()
+install(FILES AUTHORS.txt DESTINATION "${CREDITSDIR}")
+install(FILES LICENSE.txt DESTINATION "${LICENCEDIR}")
+install(FILES "${CMAKE_BINARY_DIR}/AboutThisBuild.txt" DESTINATION "${CREDITSDIR}")
+install(FILES RELEASE_NOTES.txt DESTINATION "${CREDITSDIR}" OPTIONAL)
 
 # The standard location for man pages in Linux is /usr/share/man
 # Use "manpath" to see the search paths for man pages on your system.
@@ -849,6 +753,11 @@ if(WIN32)
     if (ART_USES_UCRT)
         add_definitions(-DART_WIN32_UCRT)
     endif()
+endif()
+
+if(APPLE)
+    install(FILES "${CMAKE_BINARY_DIR}/Info.plist" DESTINATION "${CMAKE_INSTALL_PREFIX}/Contents")
+    install(FILES "${PROJECT_SOURCE_DIR}/tools/osx/ART.icns" DESTINATION "${CMAKE_INSTALL_PREFIX}/Contents/Resources")
 endif()
 
 add_subdirectory(rtengine)
