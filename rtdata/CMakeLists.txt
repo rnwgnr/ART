@@ -28,7 +28,7 @@ if(WIN32)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/WindowsInnoSetup.iss" DESTINATION ${BINDIR})
 endif()
 
-if(APPLE)
+if(APPLE AND NOT APPLE_NEW_BUNDLE)
     set(ICONSDIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources/share/icons")
     set(DATADIR "${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Resources/share")
 endif()
@@ -69,7 +69,7 @@ install(FILES ${IMG_ICO} DESTINATION "${DATADIR}/images")
 install(DIRECTORY ${CTLSCRIPTSDIR} DESTINATION "${DATADIR}" FILES_MATCHING PATTERN "*.ctl")
 install(DIRECTORY ${LUTSDIR} DESTINATION "${DATADIR}" FILES_MATCHING REGEX ".*[^~]$")
 
-if(APPLE)
+if(APPLE AND NOT APPLE_NEW_BUNDLE)
     # CMake escapes first item quote character. Do not remove 'DUMMY_VARIABLE='
     set(MACOSX_BUNDLE_COMMAND DUMMY_VARIABLE=
         PROJECT_NAME="${PROJECT_NAME}"
