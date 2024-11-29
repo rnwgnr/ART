@@ -1,0 +1,56 @@
+name: Generate source tarball
+
+on:
+  push:
+    tags:
+      - 'v[1-9]+.*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: Get version
+        run: |
+          cd repo
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+              echo "ART_VERSION=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          else
+              echo "ART_VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          fi
+
+      - name: Generate tarball
+        run: |
+          cd repo
+          ./tools/generateSourceTarball
+          mv ART-*.tar.xz ..
+
+      - name: Prepare artifact name
+        run: |
+          ARTIFACT_NAME=$(ls -1 "ART-*.tar.xz")
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+              echo "RELEASE_TAG=${ART_VERSION}" >> $GITHUB_ENV
+              echo "RELEASE_MAKE_LATEST=true" >> $GITHUB_ENV
+          else
+              echo "RELEASE_TAG=nightly" >> $GITHUB_ENV
+              echo "RELEASE_MAKE_LATEST=false" >> $GITHUB_ENV
+          fi
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.RELEASE_TAG }}
+          body: ${{ env.RELEASE_TAG }}
+          allowUpdates: true
+          makeLatest: ${{ env.RELEASE_MAKE_LATEST }}
+          artifacts: ${{ env.ARTIFACT_NAME }}
