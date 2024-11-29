@@ -114,8 +114,7 @@ jobs:
       - name: Build
         run: |
           cd build
-          make -j$(nproc)
-          make install
+          ninja install
 
       - name: Include Lensfun
         run: |
