@@ -25,6 +25,7 @@
 # include <glibmm/threads.h>
 # include <unistd.h>
 #else // WIN32
+# include <windows.h>
 # include <glibmm/thread.h>
 # include "conio.h"
 #endif
