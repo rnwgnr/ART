@@ -14,4 +14,4 @@ jobs:
           target_repo_url:
             git@bitbucket.org:agriggio/art.git
           ssh_private_key:
-            ${{ secrets.BITBUCKET_KEY }}
+            ${{ secrets.BITBUCKET_SSH_KEY }}
