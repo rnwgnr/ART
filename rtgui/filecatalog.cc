@@ -39,6 +39,7 @@
 #include "fastexport.h"
 #include "../rtengine/imagedata.h"
 #include "session.h"
+#include "rtwindow.h"
 
 using namespace std;
 
@@ -977,30 +978,19 @@ void FileCatalog::_refreshProgressBar ()
         idle_register.add(
             [this]() -> bool
             {
-                Gtk::Notebook *nb = (Gtk::Notebook *)(filepanel->get_parent());
-                Gtk::Grid* grid = Gtk::manage(new Gtk::Grid());
-                Gtk::Label *label = nullptr;
-
                 int tot = previewsToLoad ? previewsToLoad : previewsLoaded;
-                grid->attach_next_to(*Gtk::manage(new RTImage("folder-closed.png")), options.tabbedUI ? Gtk::POS_RIGHT : Gtk::POS_TOP, 1, 1);
                 int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : min(fileBrowser->getNumFiltered(), tot);
 
-                label = Gtk::manage(new Gtk::Label(M("MAIN_FRAME_FILEBROWSER") +
-                                                   (filteredCount != tot ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
-                                                   + Glib::ustring::format(tot) +
-                                                   (filteredCount != tot ? "]" : ")")));
+                Glib::ustring text = M("MAIN_FRAME_FILEBROWSER") +
+                    (filteredCount != tot ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
+                    + Glib::ustring::format(tot) +
+                    (filteredCount != tot ? "]" : ")");
 
-                if (!options.tabbedUI) {
-                    label->set_angle(90);
+                auto label = filepanel->getParent()->getFileBrowserTabLabel();
+                if (label) {
+                    label->set_text(text);
                 }
-                grid->attach_next_to(*label, !options.tabbedUI ? Gtk::POS_TOP : Gtk::POS_RIGHT, 1, 1);
-                grid->set_tooltip_markup(M("MAIN_FRAME_FILEBROWSER_TOOLTIP"));
-                grid->show_all();
-
-                if (nb) {
-                    nb->set_tab_label(*filepanel, *grid);
-                    return false;
-                }
+                
                 if (previewsToLoad) {
                     filepanel->loadingThumbs(M("PROGRESSBAR_LOADINGTHUMBS"), float(previewsLoaded) / float(previewsToLoad));
                 }

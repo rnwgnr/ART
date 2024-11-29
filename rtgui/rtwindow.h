@@ -130,6 +130,8 @@ public:
     void setApplication(bool yes) { is_application_ = yes; }
     bool isApplication() const { return is_application_; }
 
+    Gtk::Label *getFileBrowserTabLabel() { return browser_tab_label_; }
+
 private:
     // void show_info_msg(const Glib::ustring &msg, bool is_error, double duration, size_t padding);
     // bool hide_info_msg();
@@ -156,6 +158,8 @@ private:
     Gtk::Button * btn_fullscreen;
 
     Gtk::Image *iFullscreen, *iFullscreen_exit;
+
+    Gtk::Label *browser_tab_label_;
 
     bool isSingleTabMode()
     {

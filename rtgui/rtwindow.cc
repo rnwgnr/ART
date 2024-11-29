@@ -273,6 +273,7 @@ RTWindow::RTWindow():
     bpanel(nullptr),
     splash(nullptr),
     btn_fullscreen(nullptr),
+    browser_tab_label_(nullptr),
     is_application_(false)
 {
 
@@ -529,6 +530,7 @@ RTWindow::RTWindow():
         Gtk::Grid* fpanelLabelGrid = Gtk::manage (new Gtk::Grid ());
         setExpandAlignProperties (fpanelLabelGrid, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         Gtk::Label* fpl = Gtk::manage (new Gtk::Label ( Glib::ustring (" ") + M ("MAIN_FRAME_EDITOR") ));
+        browser_tab_label_ = fpl;
 
         if (!options.tabbedUI) {
             mainNB->set_tab_pos (Gtk::POS_LEFT);
