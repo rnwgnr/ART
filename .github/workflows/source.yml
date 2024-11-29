@@ -36,7 +36,7 @@ jobs:
 
       - name: Prepare artifact name
         run: |
-          ARTIFACT_NAME=$(ls -1 "ART-*.tar.xz")
+          ARTIFACT_NAME=$(ls -1 ART-*.tar.xz)
           echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
               echo "RELEASE_TAG=${ART_VERSION}" >> $GITHUB_ENV
