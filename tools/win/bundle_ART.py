@@ -78,11 +78,11 @@ def extra_files(opts, msys_env, tempdir):
     if opts.imageio:
         extra.append(('.', [(opts.imageio, 'imageio')]))
     elif opts.imageio_download:
-        with urlopen('https://bitbucket.org/agriggio/art-imageio/'
-                     'downloads/ART-imageio.tar.gz') as f:
+        with urlopen('https://github.com/artpixls/ART-imageio/releases/'
+                     'download/v1.0/ART-imageio.tar.gz') as f:
             if opts.verbose:
                 print('downloading ART-imageio.tar.gz '
-                      'from https://bitbucket.org ...')
+                      'from GitHub ...')
             tf = tarfile.open(fileobj=io.BytesIO(f.read()))
             if opts.verbose:
                 print('unpacking ART-imageio.tar.gz ...')
@@ -91,11 +91,11 @@ def extra_files(opts, msys_env, tempdir):
     if opts.imageio_bin:
         extra.append(('imageio', [(opts.imageio_bin, 'bin')]))            
     elif opts.imageio_download:
-        with urlopen('https://bitbucket.org/agriggio/art-imageio/'
-                     'downloads/ART-imageio-bin-win64.tar.gz') as f:
+        with urlopen('https://github.com/artpixls/ART-imageio/releases/'
+                     'download/v1.0/ART-imageio-bin-win64.tar.gz') as f:
             if opts.verbose:
                 print('downloading ART-imageio-bin-win64.tar.gz '
-                      'from http://bitbucket.org ...')
+                      'from GitHub ...')
             tf = tarfile.open(fileobj=io.BytesIO(f.read()))
             if opts.verbose:
                 print('unpacking ART-imageio-bin-win64.tar.gz ...')
