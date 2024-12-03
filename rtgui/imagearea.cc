@@ -164,7 +164,7 @@ void ImageArea::setInfoText (Glib::ustring text)
 
     // update font
     fontd.set_weight (Pango::WEIGHT_BOLD);
-    fontd.set_size (10 * Pango::SCALE);
+    fontd.set_size(options.fontSize * Pango::SCALE);
     context->set_font_description (fontd);
 
     // create text layout
