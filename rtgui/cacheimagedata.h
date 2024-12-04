@@ -24,9 +24,7 @@
 #include "../rtengine/rtengine.h"
 #include "../rtengine/imageformat.h"
 
-class CacheImageData: public rtengine::FramesMetaData
-{
-
+class CacheImageData: public rtengine::FramesMetaData {
 public:
 
     // basic information
@@ -62,6 +60,7 @@ public:
     Glib::ustring filetype;
     Glib::ustring expcomp;
     int rating;
+    int colorLabel;
     time_t timestamp;
 
     // store a copy of the autoWB's multipliers computed in Thumbnail::_generateThumbnailImage
@@ -113,6 +112,7 @@ public:
     rtengine::IIOSampleFormat getSampleFormat() const override { return sampleFormat; }
     std::string getSoftware() const override { return ""; }
     int getRating() const override { return rating; }
+    int getColorLabel() const override { return colorLabel; }
     std::vector<rtengine::GainMap> getGainMaps() const override
     { return std::vector<rtengine::GainMap>(); }
     void getDimensions(int &w, int &h) const override

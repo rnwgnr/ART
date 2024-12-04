@@ -834,6 +834,7 @@ int Thumbnail::infoFromImage (const Glib::ustring& fname)
         cfs.camMake      = idata->getMake();
         cfs.camModel     = idata->getModel();
         cfs.rating = idata->getRating();
+        cfs.colorLabel = idata->getColorLabel();
         cfs.timestamp = idata->getDateTimeAsTS();
 
         if (idata->getOrientation() == "Rotate 90 CW") {
@@ -1059,41 +1060,6 @@ bool Thumbnail::imageLoad(bool loading)
 }
 
 
-namespace {
-
-int xmp_label2color(const std::string &label)
-{
-    static const std::map<std::string, int> m = {
-        {"Red", 1},
-        {"Yellow", 2},
-        {"Green", 3},
-        {"Blue", 4},
-        {"Purple", 5}
-    };
-    auto it = m.find(label);
-    if (it != m.end()) {
-        return it->second;
-    }
-    return 0;
-}
-        
-
-std::string xmp_color2label(int color)
-{
-    switch (color) {
-    case 1: return "Red";
-    case 2: return "Yellow";
-    case 3: return "Green";
-    case 4: return "Blue";
-    case 5: return "Purple";
-    default:
-        return "";
-    }
-}
-
-} // namespace
-
-
 void Thumbnail::saveRating()
 {
     if (!rating_.edited()) {
@@ -1118,7 +1084,7 @@ void Thumbnail::saveRating()
         try {
             auto xmp = rtengine::Exiv2Metadata::getXmpSidecar(fname);
             if (rating_.color.edited) {
-                xmp["Xmp.xmp.Label"] = xmp_color2label(rating_.color);
+                xmp["Xmp.xmp.Label"] = rtengine::FramesData::xmp_color2label(rating_.color);
             }
             if (rating_.trash.edited || rating_.rank.edited) {
                 xmp["Xmp.xmp.Rating"] = (rating_.trash ? "-1" : std::to_string(rating_.rank));
@@ -1140,6 +1106,7 @@ void Thumbnail::saveRating()
 void Thumbnail::loadRating()
 {
     bool update_rating_xmp = false;
+    bool update_color_xmp = false;
     rating_ = Rating();
     if (cfs.exifValid) {
         if (cfs.getRating() < 0) {
@@ -1147,6 +1114,7 @@ void Thumbnail::loadRating()
         } else {
             rating_.rank.value = rtengine::LIM(cfs.getRating(), 0, 5);
         }
+        rating_.color.value = rtengine::LIM(cfs.getColorLabel(), -1, 5);
     } else {
         auto md = getMetaData();
         if (md && md->hasExif()) {
@@ -1156,6 +1124,11 @@ void Thumbnail::loadRating()
                 rating_.rank.value = rtengine::LIM(md->getRating(), 0, 5);
             }
             update_rating_xmp = md->getRating() != 0;
+            auto color = md->getColorLabel();
+            if (color >= 1 && color <= 5) {
+                rating_.color.value = color;
+                update_color_xmp = true;
+            }
         }
     }
     if (options.thumbnail_rating_mode == Options::ThumbnailRatingMode::PROCPARAMS) {
@@ -1183,7 +1156,9 @@ void Thumbnail::loadRating()
             }
             pos = xmp.findKey(Exiv2::XmpKey("Xmp.xmp.Label"));
             if (pos != xmp.end()) {
-                rating_.color.value = xmp_label2color(pos->toString());
+                rating_.color.value = rtengine::FramesData::xmp_label2color(pos->toString());
+            } else if (update_color_xmp) {
+                rating_.color.edited = true;
             }
         } catch (std::exception &exc) {
             std::cerr << "ERROR loading thumbnail rating data from "

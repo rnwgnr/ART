@@ -53,6 +53,7 @@ private:
     bool isPixelShift;
     bool isHDR;
     int rating_;
+    int color_label_;
     std::vector<GainMap> gain_maps_;
     int w_;
     int h_;
@@ -87,6 +88,7 @@ public:
     std::string getOrientation() const override;
     Glib::ustring getFileName() const override;
     int getRating() const override;
+    int getColorLabel() const override { return color_label_; }
     std::vector<GainMap> getGainMaps() const override { return gain_maps_; }
     void getDimensions(int &w, int &h) const override;
 
@@ -105,6 +107,9 @@ public:
 
     void setInternalMakeModel(const std::string &m);
     std::string getInternalMakeModel() const { return internal_make_model_; }
+
+    static int xmp_label2color(const std::string &label);
+    static std::string xmp_color2label(int color);
 };
 
 

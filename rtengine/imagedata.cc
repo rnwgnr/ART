@@ -82,6 +82,7 @@ FramesData::FramesData(const Glib::ustring &fname):
     isPixelShift(false),
     isHDR(false),
     rating_(0),
+    color_label_(-1),
     w_(-1),
     h_(-1),
     dng_(false),
@@ -422,6 +423,13 @@ FramesData::FramesData(const Glib::ustring &fname):
                 rating_ = exiv2_to_long(*it);
             }
         }
+
+        {
+            auto it = meta.xmpData().findKey(Exiv2::XmpKey("Xmp.xmp.Label"));
+            if (it != meta.xmpData().end()) {
+                color_label_ = xmp_label2color(it->toString());
+            }
+        }            
 
         // try getting some metadata from ImageDescription
         if (!make.compare(0, 5, "KODAK") && !getISOSpeed() && !getFNumber() && !getFocalLen() && !getShutterSpeed() &&
@@ -997,4 +1005,35 @@ void FramesData::setInternalMakeModel(const std::string &s)
         };
         
     internal_make_model_ = upcase(s);
+}
+
+
+int FramesData::xmp_label2color(const std::string &label)
+{
+    static const std::map<std::string, int> m = {
+        {"Red", 1},
+        {"Yellow", 2},
+        {"Green", 3},
+        {"Blue", 4},
+        {"Purple", 5}
+    };
+    auto it = m.find(label);
+    if (it != m.end()) {
+        return it->second;
+    }
+    return 0;
+}
+        
+
+std::string FramesData::xmp_color2label(int color)
+{
+    switch (color) {
+    case 1: return "Red";
+    case 2: return "Yellow";
+    case 3: return "Green";
+    case 4: return "Blue";
+    case 5: return "Purple";
+    default:
+        return "";
+    }
 }

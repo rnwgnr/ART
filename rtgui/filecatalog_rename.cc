@@ -85,6 +85,7 @@ public:
     std::string getSoftware() const override { return f()->getSoftware(); }
     rtengine::IIOSampleFormat getSampleFormat() const override { return f()->getSampleFormat(); }
     int getRating() const override { return f()->getRating(); }
+    int getColorLabel() const override { return f()->getColorLabel(); }
     std::vector<rtengine::GainMap> getGainMaps() const override { return f()->getGainMaps(); }
     void getDimensions(int &w, int &h) const override { f()->getDimensions(w, h); }
     

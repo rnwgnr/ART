@@ -135,6 +135,7 @@ public:
 
     virtual Glib::ustring getFileName() const = 0;
     virtual int getRating() const = 0;
+    virtual int getColorLabel() const = 0;
     virtual std::vector<GainMap> getGainMaps() const = 0;
     virtual void getDimensions(int &w, int &h) const = 0;
     virtual bool isDNG() const { return false; }

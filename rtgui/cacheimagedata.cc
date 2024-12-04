@@ -28,7 +28,7 @@ CacheImageData::CacheImageData ()
       timeValid(false), year(0), month(0), day(0), hour(0), min(0), sec(0), exifValid(false), frameCount(1),
       fnumber(0.0), shutter(0.0), focalLen(0.0), focalLen35mm(0.0), focusDist(0.f), iso(0), isHDR (false),
       isPixelShift (false), sensortype(rtengine::ST_NONE), sampleFormat(rtengine::IIOSF_UNKNOWN),
-      rating(0), timestamp(-1),
+      rating(0), colorLabel(-1), timestamp(-1),
       redAWBMul(-1.0), greenAWBMul(-1.0), blueAWBMul(-1.0),
       rotate(0), thumbImgType(0),
       width(-1), height(-1)
@@ -156,6 +156,10 @@ int CacheImageData::load (const Glib::ustring& fname)
                     if (keyFile.has_key("ExifInfo", "Rating")) {
                         rating = keyFile.get_integer("ExifInfo", "Rating");
                     }
+
+                    if (keyFile.has_key("ExifInfo", "ColorLabel")) {
+                        colorLabel = keyFile.get_integer("ExifInfo", "ColorLabel");
+                    }
                 }
 
                 if (keyFile.has_key ("ExifInfo", "Lens")) {
@@ -269,6 +273,7 @@ int CacheImageData::save (const Glib::ustring& fname)
         keyFile.set_boolean ("ExifInfo", "IsPixelShift", isPixelShift);
         keyFile.set_string  ("ExifInfo", "ExpComp", expcomp);
         keyFile.set_integer("ExifInfo", "Rating", rating);
+        keyFile.set_integer("ExifInfo", "ColorLabel", colorLabel);
     }
 
     keyFile.set_string  ("ExifInfo", "Lens", lens);
