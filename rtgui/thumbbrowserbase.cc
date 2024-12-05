@@ -853,7 +853,11 @@ void ThumbBrowserBase::Internal::setParent (ThumbBrowserBase* p)
 bool ThumbBrowserBase::Internal::on_key_press_event (GdkEventKey* event)
 {
     // Gtk signals automatically acquire the GUI (i.e. this method is enclosed by gdk_thread_enter and gdk_thread_leave)
+#ifdef __APPLE__ 
+    return false;
+#else
     return parent->keyPressed (event);
+#endif
 }
 
 bool ThumbBrowserBase::Internal::on_button_press_event (GdkEventButton* event)

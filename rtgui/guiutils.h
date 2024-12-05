@@ -632,3 +632,47 @@ inline Gtk::Window& getToplevelWindow (Gtk::Widget* widget)
 
 
 void setTreeViewCssProvider(Gtk::TreeView *tree);
+
+
+namespace HWKeyCode {
+#ifdef __WIN32__
+enum {
+    KEY_0 = 0x30,
+    KEY_1 = 0x31,
+    KEY_2 = 0x32,
+    KEY_3 = 0x33,
+    KEY_4 = 0x34,
+    KEY_5 = 0x35,
+    KEY_6 = 0x36,
+    KEY_7 = 0x37,
+    KEY_8 = 0x38,
+    KEY_9 = 0x39
+};
+#elif defined __APPLE__
+enum {
+    KEY_0 = 29,
+    KEY_1 = 18,
+    KEY_2 = 19,
+    KEY_3 = 20,
+    KEY_4 = 21,
+    KEY_5 = 23,
+    KEY_6 = 22,
+    KEY_7 = 26,
+    KEY_8 = 28,
+    KEY_9 = 25
+};
+#else
+enum {
+    KEY_0 = 0x13,
+    KEY_1 = 0x0a,
+    KEY_2 = 0x0b,
+    KEY_3 = 0x0c,
+    KEY_4 = 0x0d,
+    KEY_5 = 0x0e,
+    KEY_6 = 0x0f,
+    KEY_7 = 0x10,
+    KEY_8 = 0x11,
+    KEY_9 = 0x12
+};
+#endif
+} // namespace HWKeyCode

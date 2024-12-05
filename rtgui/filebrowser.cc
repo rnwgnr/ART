@@ -1126,14 +1126,13 @@ void FileBrowser::partPasteProfile ()
 
 bool FileBrowser::keyPressed (GdkEventKey* event)
 {
-    bool ctrl  = event->state & GDK_CONTROL_MASK;
+    bool ctrl = event->state & GDK_CONTROL_MASK;
     bool shift = event->state & GDK_SHIFT_MASK;
-    bool alt   = event->state & GDK_MOD1_MASK;
-#ifdef __WIN32__
-    bool altgr = event->state & GDK_MOD2_MASK;
-#endif
+    bool alt = event->state & GDK_MOD1_MASK;
+    bool altgr = event->state & (GDK_MOD2_MASK | GDK_MOD5_MASK);
 
     const bool in_inspector = inspector && inspector->isActive();
+
     if (in_inspector && inspector->handleShortcutKey(event)) {
         return true;
     }
@@ -1218,119 +1217,59 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
     } else if (event->keyval == GDK_KEY_Page_Down) {
         scrollPage(GDK_SCROLL_DOWN);
         return true;
-    }
-
-#ifdef __WIN32__
-    else if ((shift || in_inspector) && !ctrl && !alt && !altgr) { // rank
+    } else if ((shift || in_inspector) && !ctrl && !alt && !altgr) { // rank
         switch(event->hardware_keycode) {
-        case 0x30:  // 0-key
-            requestRanking (0);
+        case HWKeyCode::KEY_0:
+            requestRanking(0);
             return true;
 
-        case 0x31:  // 1-key
-            requestRanking (1);
+        case HWKeyCode::KEY_1:
+            requestRanking(1);
             return true;
 
-        case 0x32:  // 2-key
-            requestRanking (2);
+        case HWKeyCode::KEY_2:
+            requestRanking(2);
             return true;
 
-        case 0x33:  // 3-key
-            requestRanking (3);
+        case HWKeyCode::KEY_3:
+            requestRanking(3);
             return true;
 
-        case 0x34:  // 4-key
-            requestRanking (4);
+        case HWKeyCode::KEY_4:
+            requestRanking(4);
             return true;
 
-        case 0x35:  // 5-key
-            requestRanking (5);
+        case HWKeyCode::KEY_5:
+            requestRanking(5);
             return true;
         }
     } else if ((shift || in_inspector) && ctrl && !alt && !altgr) { // color labels
         switch(event->hardware_keycode) {
-        case 0x30:  // 0-key
-            requestColorLabel (0);
+        case HWKeyCode::KEY_0:
+            requestColorLabel(0);
             return true;
 
-        case 0x31:  // 1-key
-            requestColorLabel (1);
+        case HWKeyCode::KEY_1:
+            requestColorLabel(1);
             return true;
 
-        case 0x32:  // 2-key
-            requestColorLabel (2);
+        case HWKeyCode::KEY_2:
+            requestColorLabel(2);
             return true;
 
-        case 0x33:  // 3-key
-            requestColorLabel (3);
+        case HWKeyCode::KEY_3:
+            requestColorLabel(3);
             return true;
 
-        case 0x34:  // 4-key
-            requestColorLabel (4);
+        case HWKeyCode::KEY_4:
+            requestColorLabel(4);
             return true;
 
-        case 0x35:  // 5-key
-            requestColorLabel (5);
+        case HWKeyCode::KEY_5:
+            requestColorLabel(5);
             return true;
         }
     }
-
-#else
-    else if ((shift || in_inspector) && !ctrl && !alt) { // rank
-        switch(event->hardware_keycode) {
-        case 0x13:
-            requestRanking (0);
-            return true;
-
-        case 0x0a:
-            requestRanking (1);
-            return true;
-
-        case 0x0b:
-            requestRanking (2);
-            return true;
-
-        case 0x0c:
-            requestRanking (3);
-            return true;
-
-        case 0x0d:
-            requestRanking (4);
-            return true;
-
-        case 0x0e:
-            requestRanking (5);
-            return true;
-        }
-    } else if ((shift || in_inspector) && ctrl && !alt) { // color labels
-        switch(event->hardware_keycode) {
-        case 0x13:
-            requestColorLabel (0);
-            return true;
-
-        case 0x0a:
-            requestColorLabel (1);
-            return true;
-
-        case 0x0b:
-            requestColorLabel (2);
-            return true;
-
-        case 0x0c:
-            requestColorLabel (3);
-            return true;
-
-        case 0x0d:
-            requestColorLabel (4);
-            return true;
-
-        case 0x0e:
-            requestColorLabel (5);
-            return true;
-        }
-    }
-
-#endif
 
     return false;
 }

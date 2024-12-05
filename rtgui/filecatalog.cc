@@ -2343,11 +2343,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
     bool ctrl = event->state & GDK_CONTROL_MASK;
     bool shift = event->state & GDK_SHIFT_MASK;
     bool alt = event->state & GDK_MOD1_MASK;
-#ifdef __WIN32__
-    bool altgr = event->state & GDK_MOD2_MASK;
-#else
-    bool altgr = event->state & GDK_MOD5_MASK;
-#endif
+    bool altgr = event->state & (GDK_MOD2_MASK | GDK_MOD5_MASK);
     modifierKey = event->state;
 
     // GUI Layout
@@ -2385,39 +2381,37 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
         }
     }
 
-#ifdef __WIN32__
-
     if (!alt && !shift && !altgr) { // shift is reserved for ranking
         switch(event->hardware_keycode) {
-        case 0x30:
+        case HWKeyCode::KEY_0:
             categoryButtonToggled(bUnRanked, false);
             return true;
 
-        case 0x31:
+        case HWKeyCode::KEY_1:
             categoryButtonToggled(bRank[0], false);
             return true;
 
-        case 0x32:
+        case HWKeyCode::KEY_2:
             categoryButtonToggled(bRank[1], false);
             return true;
 
-        case 0x33:
+        case HWKeyCode::KEY_3:
             categoryButtonToggled(bRank[2], false);
             return true;
 
-        case 0x34:
+        case HWKeyCode::KEY_4:
             categoryButtonToggled(bRank[3], false);
             return true;
 
-        case 0x35:
+        case HWKeyCode::KEY_5:
             categoryButtonToggled(bRank[4], false);
             return true;
 
-        case 0x36:
+        case HWKeyCode::KEY_6:
             categoryButtonToggled(bEdited[0], false);
             return true;
 
-        case 0x37:
+        case HWKeyCode::KEY_7:
             categoryButtonToggled(bEdited[1], false);
             return true;
         }
@@ -2439,129 +2433,39 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
 
     if (alt && !shift) { // shift is reserved for color labeling
         switch(event->hardware_keycode) {
-        case 0x30:
+        case HWKeyCode::KEY_0:
             categoryButtonToggled(bUnCLabeled, false);
             return true;
 
-        case 0x31:
+        case HWKeyCode::KEY_1:
             categoryButtonToggled(bCLabel[0], false);
             return true;
 
-        case 0x32:
+        case HWKeyCode::KEY_2:
             categoryButtonToggled(bCLabel[1], false);
             return true;
 
-        case 0x33:
+        case HWKeyCode::KEY_3:
             categoryButtonToggled(bCLabel[2], false);
             return true;
 
-        case 0x34:
+        case HWKeyCode::KEY_4:
             categoryButtonToggled(bCLabel[3], false);
             return true;
 
-        case 0x35:
+        case HWKeyCode::KEY_5:
             categoryButtonToggled(bCLabel[4], false);
             return true;
 
-        case 0x36:
+        case HWKeyCode::KEY_6:
             categoryButtonToggled(bRecentlySaved[0], false);
             return true;
 
-        case 0x37:
+        case HWKeyCode::KEY_7:
             categoryButtonToggled(bRecentlySaved[1], false);
             return true;
         }
     }
-
-#else
-
-    if (!alt && !shift && !altgr) { // shift is reserved for ranking
-        switch(event->hardware_keycode) {
-        case 0x13:
-            categoryButtonToggled(bUnRanked, false);
-            return true;
-
-        case 0x0a:
-            categoryButtonToggled(bRank[0], false);
-            return true;
-
-        case 0x0b:
-            categoryButtonToggled(bRank[1], false);
-            return true;
-
-        case 0x0c:
-            categoryButtonToggled(bRank[2], false);
-            return true;
-
-        case 0x0d:
-            categoryButtonToggled(bRank[3], false);
-            return true;
-
-        case 0x0e:
-            categoryButtonToggled(bRank[4], false);
-            return true;
-
-        case 0x0f:
-            categoryButtonToggled(bEdited[0], false);
-            return true;
-
-        case 0x10:
-            categoryButtonToggled(bEdited[1], false);
-            return true;
-        }
-    }
-
-    if (!alt && !shift) {
-        switch(event->keyval) {
-
-        case GDK_KEY_Return:
-        case GDK_KEY_KP_Enter:
-            if (BrowsePath->is_focus()) {
-                FileCatalog::buttonBrowsePathPressed ();
-                return true;
-            }
-
-            break;
-        }
-    }
-
-    if (alt && !shift) { // shift is reserved for color labeling
-        switch(event->hardware_keycode) {
-        case 0x13:
-            categoryButtonToggled(bUnCLabeled, false);
-            return true;
-
-        case 0x0a:
-            categoryButtonToggled(bCLabel[0], false);
-            return true;
-
-        case 0x0b:
-            categoryButtonToggled(bCLabel[1], false);
-            return true;
-
-        case 0x0c:
-            categoryButtonToggled(bCLabel[2], false);
-            return true;
-
-        case 0x0d:
-            categoryButtonToggled(bCLabel[3], false);
-            return true;
-
-        case 0x0e:
-            categoryButtonToggled(bCLabel[4], false);
-            return true;
-
-        case 0x0f:
-            categoryButtonToggled(bRecentlySaved[0], false);
-            return true;
-
-        case 0x10:
-            categoryButtonToggled(bRecentlySaved[1], false);
-            return true;
-        }
-    }
-
-#endif
 
     if (!ctrl && !alt) {
         switch(event->keyval) {

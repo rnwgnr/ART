@@ -1694,21 +1694,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
             break;
     }
 
-#ifdef __WIN32__
-
-    if (!alt && !ctrl && !altgr && event->hardware_keycode == 0x39 ) {
+    if (!alt && !ctrl && !altgr && event->hardware_keycode == HWKeyCode::KEY_9) {
         iareapanel->imageArea->previewModePanel->togglebackColor();
         return true;
     }
-
-#else
-
-    if (!alt && !ctrl && !altgr && event->hardware_keycode == 0x12 ) {
-        iareapanel->imageArea->previewModePanel->togglebackColor();
-        return true;
-    }
-
-#endif
 
     if (!alt) {
         if (!ctrl) {
