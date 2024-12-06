@@ -50,6 +50,17 @@ std::vector<int> get_theme_color(Gtk::ColorButton *c)
     return ret;
 }
 
+Glib::ustring getFontFamily(const Pango::FontDescription &fd)
+{
+    auto res = fd.get_family();
+#ifdef __APPLE__
+    if (res == ".AppleSystemUIFont") {
+        res = "system-ui";
+    }
+#endif
+    return res;
+}
+
 } // namespace
 
 
@@ -70,8 +81,8 @@ Preferences::Preferences (RTWindow *rtwindow)
     set_default_size (options.preferencesWidth, options.preferencesHeight);
 
     Pango::FontDescription defaultFont = get_style_context ()->get_font();
-    initialFontFamily = defaultFont.get_family ();
-    initialFontSize = defaultFont.get_size () / Pango::SCALE;
+    initialFontFamily = getFontFamily(defaultFont);
+    initialFontSize = defaultFont.get_size() / Pango::SCALE;
 
     Gtk::Box* mainBox = get_content_area ();
 //GTK318
@@ -1675,14 +1686,14 @@ void Preferences::storePreferences ()
     Pango::FontDescription fd (mainFontFB->get_font_name());
 
     if (newFont) {
-        moptions.fontFamily = fd.get_family();
+        moptions.fontFamily = getFontFamily(fd);
         moptions.fontSize = fd.get_size() / Pango::SCALE;
     }
 
     Pango::FontDescription cpfd (colorPickerFontFB->get_font_name());
 
     if (newCPFont) {
-        moptions.CPFontFamily = cpfd.get_family();
+        moptions.CPFontFamily = getFontFamily(cpfd);
         moptions.CPFontSize = cpfd.get_size() / Pango::SCALE;
     }
 
@@ -2236,7 +2247,7 @@ void Preferences::cancelPressed ()
     // set the initial font back
     Pango::FontDescription fd (mainFontFB->get_font_name());
 
-    if (fd.get_family() != options.fontFamily && (fd.get_size() / Pango::SCALE) != options.fontSize) {
+    if (getFontFamily(fd) != options.fontFamily && (fd.get_size() / Pango::SCALE) != options.fontSize) {
         if (options.fontFamily == "default") {
             switchFontTo (initialFontFamily, initialFontSize);
         } else {
@@ -2486,7 +2497,7 @@ void Preferences::fontChanged ()
 {
     newFont = true;
     Pango::FontDescription fd (mainFontFB->get_font_name());
-    switchFontTo(fd.get_family(), fd.get_size() / Pango::SCALE);
+    switchFontTo(getFontFamily(fd), fd.get_size() / Pango::SCALE);
 }
 
 void Preferences::cpFontChanged ()
