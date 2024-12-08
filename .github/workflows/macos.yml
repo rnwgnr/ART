@@ -174,7 +174,7 @@ jobs:
           OUTDIR=$(pwd)
           cd build/Debug/ART.app
           python "${OUTDIR}/repo/tools/osx/bundle_ART.py" \
-            -o "${OUTDIR}" -v -r /opt/art-deps/lib \
+            -o "${OUTDIR}" -v -r /opt/art-deps/lib -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin \
             -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}"
           cd "${OUTDIR}"
 
