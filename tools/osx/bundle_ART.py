@@ -261,9 +261,12 @@ def main():
     for lib in getdlls(opts):
         if opts.verbose:
             print('copying: %s' % lib)
-        shutil.copy2(lib,
-                     os.path.join(opts.outdir, 'Contents/Frameworks',
-                                  os.path.basename(lib)))
+        try:
+            shutil.copy2(lib,
+                         os.path.join(opts.outdir, 'Contents/Frameworks',
+                                      os.path.basename(lib)))
+        except FileNotFoundError as e:
+            sys.stderr.write(f'WARNING: {lib} not found, skipping\n')
     with tempfile.TemporaryDirectory() as d:
         opts.tempdir = d
         for key, elems in extra_files(opts):
