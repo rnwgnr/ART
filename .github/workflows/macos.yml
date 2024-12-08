@@ -13,9 +13,9 @@ jobs:
         os: [macos-13, macos-14]
         include:
           - os: macos-13
-            arch: x64
+            arch: x64-debug-asan
           - os: macos-14
-            arch: arm64
+            arch: arm64-debug-asan
       fail-fast: false
         
     runs-on: ${{ matrix.os }}
@@ -172,7 +172,7 @@ jobs:
         run: |
           ART_NAME="ART-${ART_VERSION}"
           OUTDIR=$(pwd)
-          cd build/Release/ART.app
+          cd build/Debug/ART.app
           python "${OUTDIR}/repo/tools/osx/bundle_ART.py" \
             -o "${OUTDIR}" -v -r /opt/art-deps/lib \
             -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}"
