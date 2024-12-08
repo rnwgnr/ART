@@ -10,9 +10,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-12, macos-14]
+        os: [macos-13, macos-14]
         include:
-          - os: macos-12
+          - os: macos-13
             arch: x64
           - os: macos-14
             arch: arm64
@@ -42,11 +42,11 @@ jobs:
               echo "ART_VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           fi
         
-      - if: ${{ matrix.os == 'macos-12' }}
+      - if: ${{ matrix.os == 'macos-13' }}
         name: Install MacPorts x64
         run: |          
-          wget https://github.com/macports/macports-base/releases/download/v2.10.4/MacPorts-2.10.4-12-Monterey.pkg
-          sudo installer -pkg MacPorts-2.10.4-12-Monterey.pkg -target /
+          wget https://github.com/macports/macports-base/releases/download/v2.10.5/MacPorts-2.10.5-13-Ventura.pkg
+          sudo installer -pkg MacPorts-2.10.5-13-Ventura.pkg -target /
 
       - if: ${{ matrix.os == 'macos-14' }}
         name: Install MacPorts arm64
