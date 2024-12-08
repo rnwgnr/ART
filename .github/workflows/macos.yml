@@ -108,7 +108,7 @@ jobs:
             -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-17 \
             -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-17 \
             -DCMAKE_INSTALL_PREFIX=$INSTDIR \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=asan \
             ../CTL
           make -j$(nproc)
           sudo make install
@@ -146,7 +146,7 @@ jobs:
           /opt/local/bin/cmake \
             -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-17 \
             -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-17 \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=Debug -DWITH_SAN=address \
             -DENABLE_CTL=1 \
             -DENABLE_LIBRAW=1 \
             -DCTL_INCLUDE_DIR=/opt/art-deps/include/CTL \
