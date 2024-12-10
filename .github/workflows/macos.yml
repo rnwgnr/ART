@@ -13,9 +13,9 @@ jobs:
         os: [macos-13, macos-14]
         include:
           - os: macos-13
-            arch: x64-debug-asan
+            arch: x64
           - os: macos-14
-            arch: arm64-debug-asan
+            arch: arm64
       fail-fast: false
         
     runs-on: ${{ matrix.os }}
@@ -24,7 +24,7 @@ jobs:
       contents: write
     
     steps:
-      - name: Get version
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           path: repo
@@ -41,7 +41,20 @@ jobs:
           else
               echo "ART_VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           fi
-        
+
+      - name: Set build type
+        run: |
+          if [ "${{ vars.BUILD_DEBUG }}" = "true" ]; then
+              echo "CTL_BUILD_TYPE=asan" >> $GITHUB_ENV
+              echo "BUILD_TYPE=Debug" >> $GITHUB_ENV
+              echo "WITH_SAN=address" >> $GITHUB_ENV
+              echo "BUILD_SUFFIX=-debug-asan" >> $GITHUB_ENV
+          else
+              echo "CTL_BUILD_TYPE=Release" >> $GITHUB_ENV
+              echo "BUILD_TYPE=Release" >> $GITHUB_ENV
+              echo "WITH_SAN=OFF" >> $GITHUB_ENV
+          fi
+          
       - if: ${{ matrix.os == 'macos-13' }}
         name: Install MacPorts x64
         run: |          
@@ -108,7 +121,7 @@ jobs:
             -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-17 \
             -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-17 \
             -DCMAKE_INSTALL_PREFIX=$INSTDIR \
-            -DCMAKE_BUILD_TYPE=asan \
+            -DCMAKE_BUILD_TYPE=${CTL_BUILD_TYPE} \
             ../CTL
           make -j$(nproc)
           sudo make install
@@ -146,7 +159,7 @@ jobs:
           /opt/local/bin/cmake \
             -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-17 \
             -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-17 \
-            -DCMAKE_BUILD_TYPE=Debug -DWITH_SAN=address \
+            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DWITH_SAN=${WITH_SAN} \
             -DENABLE_CTL=1 \
             -DENABLE_LIBRAW=1 \
             -DCTL_INCLUDE_DIR=/opt/art-deps/include/CTL \
@@ -172,15 +185,15 @@ jobs:
         run: |
           ART_NAME="ART-${ART_VERSION}"
           OUTDIR=$(pwd)
-          cd build/Debug/ART.app
+          cd build/${BUILD_TYPE}/ART.app
           python "${OUTDIR}/repo/tools/osx/bundle_ART.py" \
             -o "${OUTDIR}" -v -r /opt/art-deps/lib -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin \
-            -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}"
+            -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}${BUILD_SUFFIX}"
           cd "${OUTDIR}"
 
       - name: Prepare artifact name
         run: |
-          ARTIFACT_NAME="ART-${ART_VERSION}_macOS-${OS_VERSION}_${{ matrix.arch }}.dmg"
+          ARTIFACT_NAME="ART-${ART_VERSION}_macOS-${OS_VERSION}_${{ matrix.arch }}${BUILD_SUFFIX}.dmg"
           echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
               echo "RELEASE_TAG=${ART_VERSION}" >> $GITHUB_ENV
