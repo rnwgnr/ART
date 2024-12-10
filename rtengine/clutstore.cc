@@ -1111,7 +1111,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
 
 } // namespace
 
-std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace, int &lut_dim) const
+std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace, int &lut_dim) const
 {
     MyMutex::MyLock lock(mutex_);
     
@@ -1124,19 +1124,20 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
             ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
             : filename;
     if (!Glib::file_test(full_filename, Glib::FILE_TEST_IS_REGULAR) || getFileExtension(full_filename) != "ctl") {
-        return retval;
+        return std::make_pair(intp, retval);
     }
     const auto md5 = getMD5(full_filename, true);
 
     const auto err =
-        [&](const char *msg) -> std::vector<Ctl::FunctionCallPtr>
+        [&](const char *msg)
         {
             if (settings->verbose) {
                 std::cout << "Error in CTL script from " << full_filename << ": "
                           << msg << std::endl;
             }
             retval.clear();
-            return retval;
+            intp.reset();
+            return std::make_pair(intp, retval);
         };
 
     try {
@@ -1202,7 +1203,7 @@ std::vector<Ctl::FunctionCallPtr> rtengine::CLUTStore::getCTLLut(const Glib::ust
         return err(exc.what());
     }
 
-    return retval;
+    return std::make_pair(intp, retval);
 }
 
 #endif // ART_USE_CTL
@@ -1374,13 +1375,16 @@ bool CLUTApplication::CTL_init(int num_threads)
     try {
         Glib::ustring colorspace = "";
         Glib::ustring lbl;
-        auto func = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_, colorspace, ctl_lut_dim_);
+        auto res = CLUTStore::getInstance().getCTLLut(clut_filename_, num_threads, ctl_chunk_size_, ctl_params_, colorspace, ctl_lut_dim_);
+        auto intp = res.first;
+        auto &func = res.second;
         if (func.empty()) {
             ok_ = false;
             return false;
         } else {
-            ctl_func_ = std::move(func);
             init_matrices(colorspace);
+            ctl_intp_ = intp;
+            ctl_func_ = std::move(func);
             ok_ = true;
             return true;
         }
@@ -1600,7 +1604,7 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
         std::vector<CLUTParamDescriptor> params;
         int n;
         Glib::ustring colorspace;
-        auto func = CLUTStore::getInstance().getCTLLut(filename, 1, n, params, colorspace, n);
+        auto p = CLUTStore::getInstance().getCTLLut(filename, 1, n, params, colorspace, n);
         return params;
     } catch (...) {}
 #endif // ART_USE_CTL
