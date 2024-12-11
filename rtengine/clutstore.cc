@@ -21,6 +21,8 @@
 #include "../rtgui/pathutils.h"
 #include "cJSON.h"
 
+#include "StopWatch.h"
+
 #ifdef _OPENMP
 # include <omp.h>
 #endif
@@ -550,6 +552,11 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
 
     bool found = ocio_cache_.get(full_filename, result);
     if (!found || result.second != md5) {
+        if (settings->verbose > 1) {
+            std::cout << "CLF cache miss: " << full_filename << std::endl;
+        }
+        StopWatch load_CLF("CLF LUT load", true);
+        
         std::string fn = "";
         bool del_fn = false;
         try {
@@ -1143,6 +1150,11 @@ std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> 
     try {
         bool found = ctl_cache_.get(full_filename, result);
         if (!found || result.md5 != md5) {
+            if (settings->verbose > 1) {
+                std::cout << "CTL cache miss: " << full_filename << std::endl;
+            }
+            StopWatch load_CTL("CTL script load", true);
+            
             intp = std::make_shared<Ctl::SimdInterpreter>();
             intp->setMaxInstCount(10*10000000);
             std::vector<std::string> module_paths{
