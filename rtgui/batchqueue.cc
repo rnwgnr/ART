@@ -177,25 +177,63 @@ void BatchQueue::doubleClicked(ThumbBrowserEntryBase* entry)
 
 bool BatchQueue::keyPressed (GdkEventKey* event)
 {
-    bool ctrl  = event->state & GDK_CONTROL_MASK;
+    bool ctrl = event->state & GDK_CONTROL_MASK;
+    bool shift = event->state & GDK_SHIFT_MASK;
 
     if ((event->keyval == GDK_KEY_A || event->keyval == GDK_KEY_a) && ctrl) {
-        selectAll ();
+        selectAll();
         return true;
     } else if ((event->keyval == GDK_KEY_E || event->keyval == GDK_KEY_e) && ctrl) {
         openLastSelectedItemInEditor();
         return true;
     } else if (event->keyval == GDK_KEY_Home) {
-        headItems (selected);
+        if (!ctrl) {
+            selectFirst(shift);
+        } else {
+            headItems(selected);
+        }
         return true;
     } else if (event->keyval == GDK_KEY_End) {
-        tailItems (selected);
+        if (!ctrl) {
+            selectLast(shift);
+        } else {
+            tailItems(selected);
+        }
         return true;
     } else if (event->keyval == GDK_KEY_Delete) {
-        cancelItems (selected);
+        ThumbBrowserEntryBase *tosel = nullptr;
+        bool seen = false;
+        for (auto t : fd) {
+            if (!t->selected) {
+                tosel = t;
+                if (seen) {
+                    break;
+                }
+            } else {
+                seen = true;
+                if (tosel) {
+                    break;
+                }
+            }
+        }
+        cancelItems(selected);
+        if (tosel) {
+            selectEntry(tosel);
+        }
+        return true;
+    } else if (event->keyval == GDK_KEY_Left) {
+        selectPrev(1, shift);
+        return true;
+    } else if (event->keyval == GDK_KEY_Right) {
+        selectNext(1, shift);
+        return true;
+    } else if (event->keyval == GDK_KEY_Up) {
+        selectPrev(numOfCols, shift);
+        return true;
+    } else if (event->keyval == GDK_KEY_Down) {
+        selectNext(numOfCols, shift);
         return true;
     }
-
     return false;
 }
 
