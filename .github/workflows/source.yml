@@ -3,7 +3,8 @@ name: Generate source tarball
 on:
   push:
     tags:
-      - 'v[1-9]+.*'
+      - '[1-9].[0-9]+'
+      - '[1-9].[0-9]+.[0-9]+'
   workflow_dispatch:
 
 jobs:
