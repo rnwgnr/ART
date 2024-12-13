@@ -454,11 +454,7 @@ void Options::setDefaults()
     curvebboxpos = 1;
     prevdemo = PD_Sidecar;
     rgbDenoiseThreadLimit = 0;
-#if defined( _OPENMP ) && defined( __x86_64__ )
-    clutCacheSize = omp_get_num_procs();
-#else
-    clutCacheSize = 1;
-#endif
+    clutCacheSize = 5;
     thumb_delay_update = false;
     thumb_lazy_caching = true;
     thumb_cache_processed = false;

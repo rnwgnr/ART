@@ -1270,7 +1270,7 @@ rtengine::CLUTStore::CLUTStore() :
     , ocio_cache_(options.clutCacheSize)
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
-    , ctl_cache_(options.clutCacheSize)
+    , ctl_cache_(options.clutCacheSize * 4)
 #endif // ART_USE_CTL
 {
 #ifdef ART_USE_CTL

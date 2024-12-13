@@ -426,14 +426,10 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     clutCacheSizeHB->set_spacing (4);
     Gtk::Label* CLUTLl = Gtk::manage ( new Gtk::Label (M ("PREFERENCES_CLUTSCACHE_LABEL") + ":", Gtk::ALIGN_START));
     clutCacheSizeSB = Gtk::manage ( new Gtk::SpinButton () );
-    clutCacheSizeSB->set_digits (0);
-    clutCacheSizeSB->set_increments (1, 5);
-    clutCacheSizeSB->set_max_length (2); // Will this be sufficient? :)
-#ifdef _OPENMP
-    clutCacheSizeSB->set_range (1, 3 * omp_get_num_procs());
-#else
-    clutCacheSizeSB->set_range (1, 12);
-#endif
+    clutCacheSizeSB->set_digits(0);
+    clutCacheSizeSB->set_increments(1, 5);
+    clutCacheSizeSB->set_max_length(2);
+    clutCacheSizeSB->set_range(1, 50);
     clutCacheSizeHB->pack_start (*CLUTLl, Gtk::PACK_SHRINK, 0);
     clutCacheSizeHB->pack_end (*clutCacheSizeSB, Gtk::PACK_SHRINK, 0);
     fclut->add (*clutCacheSizeHB);
