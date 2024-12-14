@@ -308,7 +308,7 @@ def main():
                     os.path.join(opts.outdir, 'Contents/MacOS',
                                  '.' + name + '.bin'))
     with open(os.path.join(opts.outdir, 'Contents/MacOS/ART'), 'w') as out:
-        out.write("""#!/bin/bash
+        out.write("""#!/bin/zsh
 export ART_restore_GTK_CSD=$GTK_CSD
 export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
 export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
@@ -338,7 +338,7 @@ export GTK_OVERLAY_SCROLLING=0
 /bin/rm -rf "$t"
 """)
     with open(os.path.join(opts.outdir, 'Contents/MacOS/ART-cli'), 'w') as out:
-        out.write("""#!/bin/bash
+        out.write("""#!/bin/zsh
 export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
 d=$(dirname "$0")/..
