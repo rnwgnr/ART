@@ -182,13 +182,20 @@ jobs:
           export PATH=/opt/local/libexec/gnubin:/opt/local/bin:/opt/local/sbin:$PATH
           lensfun-update-data
 
+      - name: Install exiftool
+        run: |
+          wget https://exiftool.org/ver.txt
+          wget https://exiftool.org/ExifTool-$(cat ver.txt).pkg
+          sudo installer -pkg ExifTool-$(cat ver.txt).pkg -target /
+
       - name: Create bundle
         run: |
           ART_NAME="ART-${ART_VERSION}"
           OUTDIR=$(pwd)
           cd build/${BUILD_TYPE}/ART.app
           python "${OUTDIR}/repo/tools/osx/bundle_ART.py" \
-            -o "${OUTDIR}" -v -r /opt/art-deps/lib -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin \
+            -o "${OUTDIR}" -v -r /opt/art-deps/lib \
+            -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin -e \
             -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}${BUILD_SUFFIX}"
           cd "${OUTDIR}"
 

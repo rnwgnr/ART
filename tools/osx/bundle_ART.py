@@ -20,8 +20,7 @@ def getopts():
     p = argparse.ArgumentParser()
     p.add_argument('-o', '--outdir', required=True,
                    help='output directory for the bundle')
-    # p.add_argument('-e', '--exiftool', help='path to exiftool dir')
-    # p.add_argument('-E', '--exiftool-download', action='store_true')
+    p.add_argument('-e', '--exiftool', action='store_true')
     # p.add_argument('-i', '--imageio', help='path to imageio plugins')
     # p.add_argument('-b', '--imageio-bin', help='path to imageio binaries')
     # p.add_argument('-I', '--imageio-download', action='store_true')
@@ -87,24 +86,12 @@ def extra_files(opts):
     pref = getprefix(opts)
     def D(s): return os.path.expanduser(s)
     def P(s): return os.path.join(pref, s)
-    # if opts.exiftool and os.path.isdir(opts.exiftool):
-    #     extra = [('lib', [(opts.exiftool, 'exiftool')])]
-    # elif opts.exiftool_download:
-    #     with urlopen('https://exiftool.org/ver.txt') as f:
-    #         ver = f.read().strip().decode('utf-8')
-    #     name = 'Image-ExifTool-%s.tar.gz' % ver
-    #     with urlopen('https://exiftool.org/' + name) as f:
-    #         if opts.verbose:
-    #             print('downloading %s from https://exiftool.org ...' % name)
-    #         tf = tarfile.open(fileobj=io.BytesIO(f.read()))
-    #         if opts.verbose:
-    #             print('unpacking %s ...' % name)
-    #         tf.extractall(opts.tempdir)
-    #     extra = [('lib', [(os.path.join(opts.tempdir, 'Image-ExifTool-' + ver),
-    #                        'exiftool')])]
-    # else:
-    #     extra = []
-    extra = []
+    if opts.exiftool and os.path.exists('/usr/local/bin/exiftool'):
+        extra = [('Contents/Resources/exiftool',
+                  [('/usr/local/bin/exiftool', 'exiftool'),
+                   ('/usr/local/bin/lib', 'lib')])]
+    else:
+        extra = []
     # if opts.imageio:
     #     extra.append(('.', [(opts.imageio, 'imageio')]))
     # elif opts.imageio_download:
@@ -334,6 +321,7 @@ export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
 export XDG_DATA_DIRS="$d/Resources/share"
 export GDK_RENDERING=similar
 export GTK_OVERLAY_SCROLLING=0
+export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 "$d/MacOS/.ART.bin" "$@"
 /bin/rm -rf "$t"
 """)
@@ -343,6 +331,7 @@ export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
 d=$(dirname "$0")/..
 export DYLD_LIBRARY_PATH="$d/Frameworks"
+export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 exec "$d/MacOS/.ART-cli.bin" "$@"
 """)
     for name in ('ART', 'ART-cli'):
