@@ -741,14 +741,20 @@ private:
         }
         
         cmsHPROFILE monitor = nullptr;
+        bool is_srgb = false;
 #if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
         monitor = getProfile_unlocked(defaultMonitorProfile);
 #else
         monitor = getsRGBProfile();
+        is_srgb = true;
 #endif
 
         if (monitor) {
-            monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, ProfileContent(monitor).getData());
+            if (is_srgb) {
+                monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, "ART builtin sRGB");
+            } else {
+                monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, ProfileContent(monitor).getData());
+            }
             switch (settings->monitorIntent) {
             case RI_PERCEPTUAL: monitor_profile_hash_.push_back('0'); break;
             case RI_RELATIVE: monitor_profile_hash_.push_back('1'); break;
