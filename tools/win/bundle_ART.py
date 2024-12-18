@@ -25,6 +25,7 @@ def getopts():
                    help='path to exiftool.exe (default: search in PATH)')
     p.add_argument('-v', '--verbose', action='store_true')
     p.add_argument('-E', '--exiftool-download', action='store_true')
+    p.add_argument('--exiftool-version')
     p.add_argument('-i', '--imageio', help='path to imageio plugins')
     p.add_argument('-b', '--imageio-bin', help='path to imageio binaries')
     p.add_argument('-I', '--imageio-download', action='store_true')
@@ -58,8 +59,11 @@ def extra_files(opts, msys_env, tempdir):
     exiftool = []
     extra = []
     if not opts.exiftool and opts.exiftool_download:
-        with urlopen('https://exiftool.org/ver.txt') as f:
-            ver = f.read().strip().decode('utf-8')
+        if opts.exiftool_version:
+            ver = opts.exiftool_version
+        else:
+            with urlopen('https://exiftool.org/ver.txt') as f:
+                ver = f.read().strip().decode('utf-8')
         name = 'exiftool-%s_64' % ver
         with urlopen('https://exiftool.org/' + name + '.zip') as f:
             if opts.verbose:
