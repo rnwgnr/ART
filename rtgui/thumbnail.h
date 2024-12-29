@@ -183,7 +183,8 @@ public:
 
     int getColorLabel()
     {
-        return rating_.color;
+        int c = rating_.color;
+        return rtengine::LIM(c, 0, 5);
     }
     void setColorLabel(int colorlabel)
     {
