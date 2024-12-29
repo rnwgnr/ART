@@ -227,7 +227,7 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
             }
             w = ce;
             if (!d.gui_tooltip.empty()) {
-                ce->setTooltip(d.gui_tooltip);
+                ce->setTooltip(lbl(d.gui_tooltip));
             }
             tooltip_ok = false;
         }   break;
@@ -241,7 +241,7 @@ void CLUTParamsPanel::setParams(const std::vector<rtengine::CLUTParamDescriptor>
         }   break;
         }
         if (!d.gui_tooltip.empty() && tooltip_ok) {
-            static_cast<Gtk::Widget *>(w)->set_tooltip_markup(d.gui_tooltip);
+            static_cast<Gtk::Widget *>(w)->set_tooltip_markup(lbl(d.gui_tooltip));
         }
         widgets_.push_back(w);
     }
