@@ -281,16 +281,12 @@ def main():
     with open(os.path.join(opts.outdir,
                            'Contents/Resources/share/gtk-3.0/settings.ini'),
               'w') as out:
-        #out.write('[Settings]\ngtk-button-images=1\n')
         out.write('[Settings]\ngtk-primary-button-warps-slider = true\n'
                   'gtk-overlay-scrolling = true\n')
     with open(os.path.join(opts.outdir, 'Contents/Resources/options'),
               'a') as out:
-        out.write('\n[Lensfun]\nDBDirectory=../Contents/Resources/lensfun\n')
-        # if opts.exiftool:
-        #     out.write('\n[Metadata]\nExiftoolPath=exiftool\n')
+        out.write('\n[Lensfun]\nDBDirectory=lensfun\n')
     for name in ('ART', 'ART-cli'):
-        #fix_dlls(opts, name)
         shutil.move(os.path.join(opts.outdir, 'Contents/MacOS', name),
                     os.path.join(opts.outdir, 'Contents/MacOS',
                                  '.' + name + '.bin'))

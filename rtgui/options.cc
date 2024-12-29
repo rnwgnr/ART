@@ -2242,8 +2242,14 @@ void Options::load(bool lightweight, int verbose)
     cacheBaseDir = Glib::build_filename(argv0, "mycache");
 
     // Read the global option file (the one located in the application's base folder)
+    Glib::ustring lensfun_db_dir = options.rtSettings.lensfunDbDirectory;
+    bool lensfun_db_dir_update = false;
     try {
         options.readFromFile(Glib::build_filename(argv0, "options"));
+        if (options.rtSettings.lensfunDbDirectory != lensfun_db_dir) {
+            lensfun_db_dir = options.rtSettings.lensfunDbDirectory;
+            lensfun_db_dir_update = true;
+        }
     } catch (Options::Error &) {
         // ignore errors here
     }
@@ -2278,6 +2284,10 @@ void Options::load(bool lightweight, int verbose)
         options.readFromFile(Glib::build_filename(rtdir, "options"));
         if (verbose >= 0) {
             options.rtSettings.verbose = verbose;
+        }
+        if (options.is_new_version() && lensfun_db_dir_update &&
+            !Glib::path_is_absolute(options.rtSettings.lensfunDbDirectory)) {
+            options.rtSettings.lensfunDbDirectory = lensfun_db_dir;
         }
     } catch (Options::Error &) {
         // If the local option file does not exist or is broken, and the local cache folder does not exist, recreate it
