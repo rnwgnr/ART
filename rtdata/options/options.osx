@@ -38,7 +38,7 @@ CustomProfileBuilder=
 #ImgDefault=Neutral
 
 [GUI]
-FontFamily=system-ui
+FontFamily=Helvetica
 FontSize=13
-CPFontFamily=system-ui
+CPFontFamily=Helvetica
 CPFontSize=11
