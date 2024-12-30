@@ -637,9 +637,9 @@ Gtk::Widget* Preferences::getColorManPanel ()
     gmonitor->attach (*osxwarn, 1, row, 1, 1);
 #else
     gmonitor->attach (*monProfile, 1, row, 1, 1);
-#endif
     ++row;
     gmonitor->attach (*cbAutoMonProfile, 1, row, 1, 1);
+#endif
     ++row;
     gmonitor->attach (*milabel, 0, row, 1, 1);
     gmonitor->attach (*monIntent, 1, row, 1, 1);
