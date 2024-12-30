@@ -2751,6 +2751,7 @@ ColorCorrectionParams::Region::Region():
     hueshift(0),
     lutFilename(""),
     lut_params{},
+    hsl_gamma(2.4),
     mode(ColorCorrectionParams::Mode::JZAZBZ)
 {
 }
@@ -2775,6 +2776,7 @@ bool ColorCorrectionParams::Region::operator==(const Region &other) const
         && hueshift == other.hueshift
         && lutFilename == other.lutFilename
         && lut_params == other.lut_params
+        && hsl_gamma == other.hsl_gamma
         && mode == other.mode;
 }
 
@@ -4014,8 +4016,8 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
                     putToKeyfile("ColorCorrection", Glib::ustring("RGBLuminance_") + n, l.rgbluminance, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("HueShift_") + n, l.hueshift, keyFile);
                     putToKeyfile("ColorCorrection", Glib::ustring("LUTFilename_") + n, filenameToUri(l.lutFilename, basedir), keyFile);
-                    //putToKeyfile("ColorCorrection", Glib::ustring("LUTParams_") + n, l.lut_params, keyFile);
                     save_lut_params(keyFile, "ColorCorrection", Glib::ustring("LUTParams_") + n, l.lut_params);
+                    putToKeyfile("ColorCorrection", Glib::ustring("HSLGamma_") + n, l.hsl_gamma, keyFile);
                 }
                 colorcorrection.labmasks[j].save(keyFile, "ColorCorrection", "", Glib::ustring("_") + n);
             }
@@ -5531,6 +5533,13 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
                         found = true;
                         done = false;
                     }
+                }
+
+                if (assignFromKeyfile(keyFile, ccgroup, prefix + "HSLGamma_" + n, cur.hsl_gamma)) {
+                    found = true;
+                    done = false;
+                } else if (ppVersion < 1042) {
+                    cur.hsl_gamma = 1.0;
                 }
                 
                 if (curmask.load(ppVersion, keyFile, ccgroup, prefix, Glib::ustring("_") + n)) {

@@ -92,6 +92,7 @@ private:
     rtengine::ProcEvent EvCompression;
     rtengine::ProcEvent EvLUT;
     rtengine::ProcEvent EvLUTParams;
+    rtengine::ProcEvent EvHSLGamma;
 
     rtengine::ProcEvent EvList;
     rtengine::ProcEvent EvParametricMask;
@@ -148,6 +149,7 @@ private:
     
     Adjuster *lfactor[3];
     HueSatColorWheel *huesat[3];
+    Adjuster *hsl_gamma;
 
     Gtk::DrawingArea *curve_lum;
     Gtk::DrawingArea *curve_rgb;

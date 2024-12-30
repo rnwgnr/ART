@@ -1321,6 +1321,7 @@ struct ColorCorrectionParams {
         double hueshift;
         Glib::ustring lutFilename;
         CLUTParamValueMap lut_params;
+        double hsl_gamma;
         Mode mode;
 
         Region();

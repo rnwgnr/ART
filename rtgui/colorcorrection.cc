@@ -209,7 +209,7 @@ public:
                 {
                     return Glib::ustring::compose("{s=%1,o=%2,p=%3}", v[0], v[1], v[2]);
                 };
-            return Glib::ustring::compose("HSL S=%4 So=%5 h=%6\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation, r.hueshift);
+            return Glib::ustring::compose("HSL S=%4 So=%5 h=%6 g=%7\nH=%1\nS=%2\nL=%3", lbl(r.hue), lbl(r.sat), lbl(r.factor), r.inSaturation, r.outSaturation, r.hueshift, r.hsl_gamma);
         }   break;
         case rtengine::procparams::ColorCorrectionParams::Mode::LUT:
             if (builtin_lut_to_idx.find(r.lutFilename) != builtin_lut_to_idx.end()) {
@@ -475,6 +475,8 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     EvLUT = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LUT");
     EvLUTParams = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LUT_PARAMS");
 
+    EvHSLGamma = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_HSL_GAMMA");
+
     EvList = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_LIST");
     EvParametricMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK");
     EvHueMask = m->newEvent(EVENT, "HISTORY_MSG_COLORCORRECTION_HUEMASK");
@@ -677,6 +679,10 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
     }
     box_hsl->pack_start(*box_hsl_h);
 
+    hsl_gamma = Gtk::manage(new Adjuster(M("TP_COLORCORRECTION_HSL_GAMMA"), 1, 3, 0.1, 2.4));
+    box_hsl->pack_start(*hsl_gamma);
+    hsl_gamma->setAdjusterListener(this);
+    
     lut_filename = Gtk::manage(new MyFileChooserButton(M("TP_COLORCORRECTION_LUT_SELECT")));
     if (!options.clutsDir.empty()) {
         lut_filename->set_current_folder(options.clutsDir);
@@ -734,6 +740,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         lfactor[c]->delay = options.adjusterMaxDelay;
         compression_rgb[c]->delay = options.adjusterMaxDelay;
     }
+    hsl_gamma->delay = options.adjusterMaxDelay;
 
     labMasksContentProvider.reset(new ColorCorrectionMasksContentProvider(this));
     labMasks = Gtk::manage(new LabMasksPanel(labMasksContentProvider.get()));
@@ -800,6 +807,7 @@ void ColorCorrection::setDefaults(const ProcParams *defParams)
         pivot_rgb[c]->setDefault(defParams->colorcorrection.regions[0].pivot[c]);
         compression_rgb[c]->setDefault(defParams->colorcorrection.regions[0].compression[c]);
     }
+    hsl_gamma->setDefault(defParams->colorcorrection.regions[0].hsl_gamma);
 
     initial_params = defParams->colorcorrection;
 }
@@ -826,6 +834,8 @@ void ColorCorrection::adjusterChanged(Adjuster* a, double newval)
         hueshift_bar->queue_draw();
     } else if (a == compression) {
         evt = EvCompression;
+    } else if (a == hsl_gamma) {
+        evt = EvHSLGamma;
     } else {
         Adjuster **targets = nullptr;
         for (int c = 0; c < 3; ++c) {
@@ -969,6 +979,7 @@ void ColorCorrection::regionGet(int idx)
     r.inSaturation = inSaturation->getValue();
     r.outSaturation = outSaturation->getValue();
     r.hueshift = hueshift->getValue();
+    r.hsl_gamma = hsl_gamma->getValue();
     // double top, bot;
     // hueshift->getValue(bot, top);
     // r.hueshift = top;
@@ -1014,6 +1025,7 @@ void ColorCorrection::regionShow(int idx)
     inSaturation->setValue(r.inSaturation);
     outSaturation->setValue(r.outSaturation);
     hueshift->setValue(r.hueshift);
+    hsl_gamma->setValue(r.hsl_gamma);
     if (wheel->isCurrentSubscriber()) {
         wheel->unsubscribe();
     }

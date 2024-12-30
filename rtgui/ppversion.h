@@ -1,10 +1,12 @@
 #pragma once
 
 // This number has to be incremented whenever the ARP file format is modified or the behaviour of a tool changes
-#define PPVERSION 1041
+#define PPVERSION 1042
 
 /*
   Log of version changes
+  1042  2024-12-30
+        added gamma to color/tone correction in HSL mode
   1041  2023-12-09
         changed format of LUT parameter values
   1040  2023-08-30
