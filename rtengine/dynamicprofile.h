@@ -81,7 +81,7 @@ protected:
     bool rulesLoaded;
 
 public:
-    bool loadRules();
+    bool loadRules(bool force_builtins=false);
     bool storeRules();
     const std::vector<DynamicProfileRule> &getRules();
     void setRules (const std::vector<DynamicProfileRule> &r);

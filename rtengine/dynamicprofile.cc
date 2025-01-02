@@ -261,13 +261,13 @@ void set_customdata(Glib::KeyFile &kf, const Glib::ustring &group,
 } // namespace
 
 
-bool DynamicProfileRules::loadRules()
+bool DynamicProfileRules::loadRules(bool force_builtins)
 {
     dynamicRules.clear();
     Glib::KeyFile kf;
 
     Glib::ustring rules_file = Glib::build_filename(Options::rtdir, "dynamicprofile.cfg");
-    if (!Glib::file_test(rules_file, Glib::FILE_TEST_EXISTS)) {
+    if (force_builtins || !Glib::file_test(rules_file, Glib::FILE_TEST_EXISTS)) {
         rules_file = builtin_rules_file_;
     }
     
@@ -356,7 +356,16 @@ bool DynamicProfileRules::storeRules()
         kf.set_string(group, "profilepath", rule.profilepath);
     }
 
-    return kf.save_to_file(Glib::build_filename(Options::rtdir, "dynamicprofile.cfg"));
+    Glib::ustring fname = Glib::build_filename(Options::rtdir, "dynamicprofile.cfg");
+    if (Glib::file_test(fname, Glib::FILE_TEST_EXISTS)) {
+        try {
+            Glib::KeyFile old;
+            old.load_from_file(fname);
+            old.save_to_file(fname + ".bak");
+        } catch (std::exception &e) {
+        }
+    }
+    return kf.save_to_file(fname);
 }
 
 

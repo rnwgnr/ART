@@ -28,6 +28,7 @@ public:
     void save();
 
 private:
+    void reset();
     void update_rule(Gtk::TreeModel::Row row, const DynamicProfileRule &rule);
     void add_rule(const DynamicProfileRule &rule);
     DynamicProfileRule to_rule(Gtk::TreeModel::Row row, int serial = 0);
@@ -38,6 +39,7 @@ private:
     void on_button_new();
     void on_button_edit();
     void on_button_delete();
+    void on_button_reset();
 
     class DynamicProfileColumns: public Gtk::TreeModel::ColumnRecord {
     public:
@@ -147,4 +149,5 @@ private:
     Gtk::Button button_new_;
     Gtk::Button button_edit_;
     Gtk::Button button_delete_;
+    Gtk::Button button_reset_;
 };

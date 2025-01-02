@@ -282,7 +282,8 @@ DynamicProfilePanel::DynamicProfilePanel():
     button_down_(M("DYNPROFILEEDITOR_MOVE_DOWN")),
     button_new_(M("DYNPROFILEEDITOR_NEW")),
     button_edit_(M("DYNPROFILEEDITOR_EDIT")),
-    button_delete_(M("DYNPROFILEEDITOR_DELETE"))
+    button_delete_(M("DYNPROFILEEDITOR_DELETE")),
+    button_reset_(M("FILEBROWSER_RESETDEFAULTPROFILE"))
 {
     add(vbox_);
 
@@ -299,6 +300,7 @@ DynamicProfilePanel::DynamicProfilePanel():
     buttonbox_.pack_start(button_delete_, Gtk::PACK_SHRINK);
     buttonbox_.pack_start(button_up_, Gtk::PACK_SHRINK);
     buttonbox_.pack_start(button_down_, Gtk::PACK_SHRINK);
+    buttonbox_.pack_start(button_reset_, Gtk::PACK_SHRINK);
     buttonbox_.set_border_width(5);
     buttonbox_.set_layout(Gtk::BUTTONBOX_END);
     button_up_.signal_clicked().connect(
@@ -311,6 +313,8 @@ DynamicProfilePanel::DynamicProfilePanel():
         sigc::mem_fun(*this, &DynamicProfilePanel::on_button_edit));
     button_delete_.signal_clicked().connect(
         sigc::mem_fun(*this, &DynamicProfilePanel::on_button_delete));
+    button_reset_.signal_clicked().connect(
+        sigc::mem_fun(*this, &DynamicProfilePanel::on_button_reset));
 
     treemodel_ = Gtk::ListStore::create(columns_);
     treeview_.set_model(treemodel_);
@@ -342,7 +346,13 @@ DynamicProfilePanel::DynamicProfilePanel():
     ADD_COL(customdata, "DYNPROFILEEDITOR_CUSTOMDATA");
     
     show_all_children();
+    reset();
+}
 
+
+void DynamicProfilePanel::reset()
+{
+    treemodel_->clear();
     for (auto &r : ProfileStore::getInstance()->getRules()) {
         add_rule(r);
     }
@@ -622,6 +632,17 @@ void DynamicProfilePanel::on_button_edit()
         update_rule(row, d.get_rule());
     }
 }
+
+
+void DynamicProfilePanel::on_button_reset()
+{
+    auto ps = ProfileStore::getInstance();
+    auto rules = ps->getRules();
+    ps->loadRules(true);
+    reset();
+    ps->setRules(rules);
+}
+
 
 
 void DynamicProfilePanel::save()
