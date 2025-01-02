@@ -1,5 +1,9 @@
 ## A(nother) RT
 
-ART is a fork of RawTherapee, a powerful cross-platform raw photo processing program. **This is not an official RawTherapee repository!**, and there is **no support whatsoever** for this version.
+This is the repository of ART, a [free, open-source](https://www.gnu.org/philosophy/philosophy.html), cross-platform 
+raw image processing program. 
+ART is a derivative of the popular [RawTherapee](http://rawtherapee.com),
+trading a bit of customization and control over various processing parameters for a simpler and (hopefully) easier to use interface,
+while still maintaining the power and quality of RawTherapee.
 
-If you are looking for the RawTherapee code, please go to the official repo at [GitHub](https://github.com/Beep6581/RawTherapee).
+For more information about ART, please visit [its webpage](https://art.pixls.us).
