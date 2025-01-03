@@ -444,8 +444,6 @@ RTWindow::RTWindow():
 #if defined(__APPLE__)
     {
         osxApp  = (GtkosxApplication *)g_object_new (GTKOSX_TYPE_APPLICATION, NULL);
-        gboolean falseval = FALSE;
-        gboolean trueval = TRUE;
         RTWindow *rtWin = this;
         g_signal_connect (osxApp, "NSApplicationBlockTermination", G_CALLBACK (osx_should_quit_cb), rtWin);
         g_signal_connect (osxApp, "NSApplicationWillTerminate",  G_CALLBACK (osx_will_quit_cb), rtWin);

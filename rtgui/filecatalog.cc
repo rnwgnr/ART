@@ -1966,7 +1966,7 @@ void FileCatalog::addAndOpenFile(const Glib::ustring& fname, bool force)
         tmb->increaseRef();
         to_open_ = {tmb};
         idle_register.add(
-            [this, tmb]() -> bool
+            [this]() -> bool
             {
                 _openImage();
                 return !to_open_.empty();

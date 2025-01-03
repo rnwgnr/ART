@@ -54,6 +54,8 @@ void setprogressStrUI(double val, const Glib::ustring str, MyProgressBar* pProgr
 }
 
 
+#ifndef __APPLE__
+
 bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
 {
 #ifdef WIN32
@@ -134,6 +136,8 @@ bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, G
 #endif
     return false;
 }
+
+#endif // __APPLE__
 
 } // namespace
 
