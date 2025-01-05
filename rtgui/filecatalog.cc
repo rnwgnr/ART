@@ -978,6 +978,8 @@ void FileCatalog::_refreshProgressBar ()
         idle_register.add(
             [this]() -> bool
             {
+                GThreadLock lock;
+                
                 int tot = previewsToLoad ? previewsToLoad : previewsLoaded;
                 int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : min(fileBrowser->getNumFiltered(), tot);
 
