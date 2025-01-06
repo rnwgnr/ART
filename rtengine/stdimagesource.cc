@@ -246,7 +246,7 @@ void StdImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
 
 void StdImageSource::convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb)
 {
-    colorSpaceConversion (image, cmp, embProfile, img->getSampleFormat(), plistener);
+    colorSpaceConversion(image, cmp, embProfile, img->getSampleFormat(), plistener, true);
 }
 
 
@@ -363,7 +363,12 @@ private:
 
 } // namespace
 
-void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat, ProgressListener *plistener)
+void StdImageSource::colorSpaceConversion(Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat, ProgressListener *plistener)
+{
+    colorSpaceConversion(im, cmp, embedded, sampleFormat, plistener, false);
+}
+
+void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat, ProgressListener *plistener, bool multithread)
 {
 
     bool skipTransform = false;
@@ -418,12 +423,12 @@ void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagement
             if (settings->verbose) {
                 printf("stdimagesource: ART ICC profile detected, using built-in color space conversion\n");
             }
-            artprof(im, im, true);
+            artprof(im, im, multithread);
         } else if (hTransform) {
             // Convert to the [0.0 ; 1.0] range
             im->normalizeFloatTo1();
 
-            im->ExecCMSTransform(hTransform);
+            im->ExecCMSTransform(hTransform, multithread);
 
             // Converting back to the [0.0 ; 65535.0] range
             im->normalizeFloatTo65535();

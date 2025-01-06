@@ -1368,7 +1368,8 @@ void DCPProfile::apply(
     const Triple& pre_mul,
     const Matrix& cam_wb_matrix,
     bool apply_hue_sat_map,
-    bool apply_look_table
+    bool apply_look_table,
+    bool multithread
 ) const
 {
 
@@ -1396,7 +1397,7 @@ void DCPProfile::apply(
 
         // Apply the matrix part
 #ifdef _OPENMP
-        #pragma omp parallel for
+#       pragma omp parallel for if (multithread)
 #endif
 
         for (int y = 0; y < img->getHeight(); ++y) {
@@ -1434,7 +1435,7 @@ void DCPProfile::apply(
 
         // Convert to ProPhoto and apply LUT
 #ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic,16)
+#       pragma omp parallel for schedule(dynamic,16) if (multithread)
 #endif
 
         for (int y = 0; y < img->getHeight(); ++y) {

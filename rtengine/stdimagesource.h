@@ -36,6 +36,8 @@ protected:
     //void transformPixel             (int x, int y, int tran, int& tx, int& ty);
     void getSampleFormat(const Glib::ustring &fname, IIOSampleFormat &sFormat, IIOSampleArrangement &sArrangement);
 
+    static void colorSpaceConversion(Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat, ProgressListener *plistener, bool multithread);
+    
 public:
     StdImageSource();
     ~StdImageSource() override;

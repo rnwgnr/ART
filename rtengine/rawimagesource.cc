@@ -1129,7 +1129,7 @@ void RawImageSource::convertColorSpace(Imagefloat* image, const ColorManagementP
     if (findInputProfile(cmp.inputProfile, embProfile, (static_cast<const FramesData*>(getMetaData()))->getCamera(), fileName, &dcpProf, in, plistener)) {
         
         double pre_mul[3] = { ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2) };
-        colorSpaceConversion_(image, cmp, wb, pre_mul, camProfile, imatrices.xyz_cam, in, dcpProf, plistener);
+        colorSpaceConversion_(image, cmp, wb, pre_mul, camProfile, imatrices.xyz_cam, in, dcpProf, plistener, true);
 
         if (dcpProf == nullptr && in == nullptr && cmp.inputProfileCAT && wb.getTemp() > 0) {
             apply_cat(this, image, wb);
@@ -1143,7 +1143,7 @@ void RawImageSource::colorSpaceConversion(Imagefloat* im, const ColorManagementP
     cmsHPROFILE in;
     DCPProfile *dcpProf;
     if (findInputProfile(cmp.inputProfile, embedded, camName, fileName, &dcpProf, in, plistener)) {
-        colorSpaceConversion_(im, cmp, wb, pre_mul, camprofile, cam, in, dcpProf, plistener);
+        colorSpaceConversion_(im, cmp, wb, pre_mul, camprofile, cam, in, dcpProf, plistener, false);
     }
 }
 
@@ -3146,7 +3146,7 @@ lab2ProphotoRgbD50(float L, float A, float B, float& r, float& g, float& b)
 }
 
 // Converts raw image including ICC input profile to working space - floating point version
-void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE camprofile, double camMatrix[3][3], cmsHPROFILE in, DCPProfile *dcpProf, ProgressListener *plistener)
+void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagementParams& cmp, const ColorTemp &wb, double pre_mul[3], cmsHPROFILE camprofile, double camMatrix[3][3], cmsHPROFILE in, DCPProfile *dcpProf, ProgressListener *plistener, bool multithread)
 {
     if (dcpProf != nullptr && wb.getTemp() > 0) {
         // DCP processing
@@ -3161,7 +3161,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
                 {camMatrix[2][0], camMatrix[2][1], camMatrix[2][2]}
             }
         };
-        dcpProf->apply(im, cmp.dcpIlluminant, cmp.workingProfile, wb, pre_mul_row, cam_matrix, cmp.applyHueSatMap, cmp.applyLookTable);
+        dcpProf->apply(im, cmp.dcpIlluminant, cmp.workingProfile, wb, pre_mul_row, cam_matrix, cmp.applyHueSatMap, cmp.applyLookTable, multithread);
         return;
     }
 
@@ -3180,7 +3180,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
                 }
 
 #ifdef _OPENMP
-        #pragma omp parallel for
+#       pragma omp parallel for if (multithread)
 #endif
 
         for (int i = 0; i < im->getHeight(); i++)
@@ -3340,7 +3340,7 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
         }
 
 #ifdef _OPENMP
-        #pragma omp parallel
+#       pragma omp parallel if (multithread)
 #endif
         {
             AlignedBuffer<float> buffer(im->getWidth() * 3);

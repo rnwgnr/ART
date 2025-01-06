@@ -472,7 +472,7 @@ Imagefloat* ImProcFunctions::rgb2out(Imagefloat *img, const procparams::ColorMan
             cmsHTRANSFORM hTransform = cmsCreateTransform(iprof, TYPE_RGB_FLT, oprof, TYPE_RGB_FLT, icm.outputIntent, flags);
             lcmsMutex->unlock();
 
-            image->ExecCMSTransform(hTransform, img);
+            image->ExecCMSTransform(hTransform, img, multiThread);
             cmsDeleteTransform(hTransform);
         }
     } else if (icm.outputProfile != procparams::ColorManagementParams::NoProfileString) {

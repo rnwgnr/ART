@@ -491,13 +491,13 @@ void Imagefloat::calcCroppedHistogram(const ProcParams &params, float scale, LUT
 }
 
 // Parallelized transformation; create transform with cmsFLAGS_NOCACHE!
-void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform)
+void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, bool multithread)
 {
 
     // LittleCMS cannot parallelize planar setups -- Hombre: LCMS2.4 can! But it we use this new feature, memory allocation
     // have to be modified too to build temporary buffers that allow multi processor execution
 #ifdef _OPENMP
-    #pragma omp parallel
+#   pragma omp parallel if (multithread)
 #endif
     {
         AlignedBuffer<float> pBuf(width * 3);
@@ -533,7 +533,7 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform)
 }
 
 // Parallelized transformation; create transform with cmsFLAGS_NOCACHE!
-void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *src)
+void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *src, bool multithread)
 {
     mode_ = Mode::RGB;
     constexpr int cx = 0, cy = 0;
@@ -541,7 +541,7 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform, const Imagefloat *sr
     // LittleCMS cannot parallelize planar Lab float images
     // so build temporary buffers to allow multi processor execution
 #ifdef _OPENMP
-    #pragma omp parallel
+#   pragma omp parallel if (multithread)
 #endif
     {
         AlignedBuffer<float> bufferSrc(width * 3);
