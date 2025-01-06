@@ -113,8 +113,12 @@ def extra_files(opts):
         ('lib', [
             D('/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0'),
         ]),
-        ('lib', [
-            D('/usr/lib/x86_64-linux-gnu/gio'),
+        # ('lib', [
+        #     D('/usr/lib/x86_64-linux-gnu/gio'),
+        # ]),
+        ('lib/gio/modules', [
+            D('/usr/lib/x86_64-linux-gnu/gio/modules/libgioremote-volume-monitor.so'),
+            D('/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so'),
         ]),
         ('share/glib-2.0/schemas', [
             D('/usr/share/glib-2.0/schemas/gschemas.compiled'),
@@ -175,6 +179,12 @@ def main():
         out.write('\n[Lensfun]\nDBDirectory=share/lensfun\n')
         if opts.exiftool:
             out.write('\n[Metadata]\nExiftoolPath=exiftool\n')
+    with open(os.path.join(opts.outdir,
+                           'lib/gio/modules/giomodule.cache'), 'w') as out:
+        out.write("""\
+libgioremote-volume-monitor.so: gio-native-volume-monitor,gio-volume-monitor
+libgvfsdbus.so: gio-vfs,gio-volume-monitor
+""")        
     for name in ('ART', 'ART-cli'):
         shutil.move(os.path.join(opts.outdir, name),
                     os.path.join(opts.outdir, name + '.bin'))

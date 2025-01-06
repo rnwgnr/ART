@@ -48,6 +48,7 @@ jobs:
             libinih-dev \
             libbrotli-dev \
             libexpat1-dev \
+            gvfs \
             wget
 
       - name: Install LCMS2
