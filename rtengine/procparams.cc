@@ -522,6 +522,7 @@ Glib::ustring filenameToUri(const Glib::ustring &fname, const Glib::ustring &bas
     
     try {
         auto fn = Glib::filename_from_utf8(fname);
+        auto home = Glib::get_home_dir();
         if (Glib::path_is_absolute(fname)) {
             if (stripif(fn, argv0)) {
                 return Glib::filename_to_uri(fn, "S");
@@ -530,6 +531,8 @@ Glib::ustring filenameToUri(const Glib::ustring &fname, const Glib::ustring &bas
             } else if (Glib::path_get_dirname(fname) == basedir) {
                 fn = fname_to_utf8(Glib::path_get_basename(fname));
                 return Glib::filename_to_uri(fn, "B");
+            } else if (!home.empty() && stripif(fn, home)) {
+                return Glib::filename_to_uri(fn, "H");
             } else {
                 return Glib::filename_to_uri(fn);
             }
@@ -568,6 +571,8 @@ Glib::ustring filenameFromUri(const Glib::ustring &uri, const Glib::ustring &bas
                 f = Glib::build_filename(Glib::filename_from_utf8(argv0), f);
             } else if (hn == "B") {
                 f = Glib::build_filename(Glib::filename_from_utf8(basedir), f);
+            } else if (hn == "H") {
+                f = Glib::build_filename(Glib::get_home_dir(), f);
             } else if (hn != "R") {
                 return uri;
             }
