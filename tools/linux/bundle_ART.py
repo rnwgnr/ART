@@ -120,6 +120,12 @@ def extra_files(opts):
             D('/usr/lib/x86_64-linux-gnu/gio/modules/libgioremote-volume-monitor.so'),
             D('/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so'),
         ]),
+        ('lib', [
+            D('/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules')
+        ]),
+        ('lib', [
+            D('/usr/lib/x86_64-linux-gnu/libgtk-3-0/gtk-query-immodules-3.0')
+        ]),
         ('share/glib-2.0/schemas', [
             D('/usr/share/glib-2.0/schemas/gschemas.compiled'),
         ]),
@@ -252,16 +258,19 @@ export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
 export ART_restore_GDK_BACKEND=$GDK_BACKEND     
+export ART_restore_GTK_IM_MODULE_FILE=$GTK_IM_MODULE_FILE
 export GTK_CSD=0
 d=$(dirname $(readlink -f "$0"))
 t=$(mktemp -d --suffix=-ART)
 ln -s "$d" "$t/ART"
 d="$t/ART"
+export LD_LIBRARY_PATH="$d/lib"
 "$d/lib/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so" > "$t/loader.cache"
+"$d/lib/gtk-query-immodules-3.0" "$d"/lib/immodules/im-*.so > "$t/gtk.immodules"
 export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
 export GDK_PIXBUF_MODULEDIR="$d/lib/gdk-pixbuf-2.0"
+export GTK_IM_MODULE_FILE="$t/gtk.immodules"
 export GIO_MODULE_DIR="$d/lib/gio/modules"
-export LD_LIBRARY_PATH="$d/lib"
 export FONTCONFIG_FILE="$d/fonts.conf"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
 export GDK_BACKEND=x11        
