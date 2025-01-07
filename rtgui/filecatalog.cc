@@ -978,7 +978,7 @@ void FileCatalog::_refreshProgressBar ()
         idle_register.add(
             [this]() -> bool
             {
-                GThreadLock lock;
+                //GThreadLock lock;
                 
                 int tot = previewsToLoad ? previewsToLoad : previewsLoaded;
                 int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : min(fileBrowser->getNumFiltered(), tot);
@@ -1003,6 +1003,8 @@ void FileCatalog::_refreshProgressBar ()
 
 void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
 {
+    GThreadLock lock;
+    
     if ( dir_id != selectedDirectoryId ) {
         delete fdn;
         return;
@@ -1078,6 +1080,7 @@ void FileCatalog::previewReady (int dir_id, FileBrowserEntry* fdn)
             idle_register.add(
                 [this]() -> bool
                 {
+                    //GThreadLock lock;
                     if (filter_panel_update_) {
                         filter_panel_update_ = false;
                         filterPanel->setFilter(dirEFS, false);
