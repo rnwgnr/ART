@@ -744,6 +744,8 @@ private:
         bool is_srgb = false;
 #if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
         monitor = getProfile_unlocked(defaultMonitorProfile);
+#elif defined ART_MACOS_DISPLAYP3_PROFILE
+        monitor = getProfile_unlocked("RTv4_DisplayP3");
 #else
         monitor = getsRGBProfile();
         is_srgb = true;

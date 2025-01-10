@@ -36,6 +36,12 @@ Glib::RefPtr<Gtk::CssProvider> cssForced;
 extern unsigned char initialGdkScale;
 
 #if defined(__APPLE__)
+
+#ifdef __APPLE__
+extern void macos_tag_colorspace(GdkWindow *w);
+#endif
+
+
 static gboolean
 osx_should_quit_cb (GtkosxApplication *app, gpointer data)
 {
@@ -695,6 +701,10 @@ RTWindow::~RTWindow()
 void RTWindow::on_realize()
 {
     Gtk::Window::on_realize();
+
+#ifdef __APPLE__
+    macos_tag_colorspace(get_window()->gobj());
+#endif
     
     mainWindowCursorManager.init(get_window());
 

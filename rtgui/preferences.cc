@@ -2437,6 +2437,33 @@ void Preferences::restoreValue()
     storedValueImg = "";
 }
 
+namespace {
+
+std::vector<int> get_theme_color(const std::vector<int> &c)
+{
+#if defined(__APPLE__) && defined ART_MACOS_DISPLAYP3_PROFILE
+    std::vector<int> res(c);
+    auto s = rtengine::ICCStore::getInstance();
+    auto p = s->getProfile("RTv4_DisplayP3");
+    if (p) {
+        auto xform = cmsCreateTransform(s->getsRGBProfile(), TYPE_RGB_8, p, TYPE_RGB_8, rtengine::RI_RELATIVE, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+        uint8_t buf[3];
+        for (int i = 0; i < 3; ++i) {
+            buf[i] = rtengine::LIM(c[i], 0, 255);
+        }
+        cmsDoTransform(xform, buf, buf, 3);
+        cmsDeleteTransform(xform);
+        for (int i = 0; i < 3; ++i) {
+            res[i] = buf[i];
+        }
+    }
+    return res;
+#else
+    return c;
+#endif
+}
+
+} // namespace
 
 void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *opts)
 {
@@ -2463,10 +2490,13 @@ void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *op
                 return s;
             };
         std::ostringstream buf;
+        auto bg = get_theme_color(opts->theme_bg_color);
+        auto fg = get_theme_color(opts->theme_fg_color);
+        auto hl = get_theme_color(opts->theme_hl_color);
         std::string filename(Glib::build_filename(argv0, "themes", "_ART.css"));
-        buf << "@define-color ART-bg rgb(" << opts->theme_bg_color[0] << "," << opts->theme_bg_color[1] << "," << opts->theme_bg_color[2] << ");\n"
-            << "@define-color ART-fg rgb(" << opts->theme_fg_color[0] << "," << opts->theme_fg_color[1] << "," << opts->theme_fg_color[2] << ");\n"
-            << "@define-color ART-hl rgb(" << opts->theme_hl_color[0] << "," << opts->theme_hl_color[1] << "," << opts->theme_hl_color[2] << ");\n"
+        buf << "@define-color ART-bg rgb(" << bg[0] << "," << bg[1] << "," << bg[2] << ");\n"
+            << "@define-color ART-fg rgb(" << fg[0] << "," << fg[1] << "," << fg[2] << ");\n"
+            << "@define-color ART-hl rgb(" << hl[0] << "," << hl[1] << "," << hl[2] << ");\n"
             << "@import \"" << pth(filename) << "\";\n";
         try {
             themecss->load_from_data(buf.str());

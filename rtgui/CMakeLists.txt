@@ -176,6 +176,7 @@ set(NONCLISOURCEFILES
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(APPLE)
+    set(NONCLISOURCEFILES ${NONCLISOURCEFILES} rtwindow_macos.cc)
     pkg_check_modules(MacIntegration gtk-mac-integration-gtk3)
     if(NOT MacIntegration_FOUND)
         find_package(MacIntegration REQUIRED)
@@ -340,6 +341,10 @@ target_link_libraries(art-cli PUBLIC
 if(HAS_MIMALLOC)
     target_link_libraries(art PUBLIC mimalloc)
     target_link_libraries(art-cli PUBLIC mimalloc)
+endif()
+
+if(APPLE)
+    target_link_libraries(art PRIVATE "-framework ApplicationServices")
 endif()
 
 # Install executables

@@ -102,6 +102,8 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
     if (!monitorProfile.empty()) {
 #if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
         monitor = ICCStore::getInstance()->getProfile(monitorProfile);
+#elif defined ART_MACOS_DISPLAYP3_PROFILE
+        monitor = ICCStore::getInstance()->getProfile("RTv4_DisplayP3");
 #else
         monitor = ICCStore::getInstance()->getsRGBProfile();
 #endif

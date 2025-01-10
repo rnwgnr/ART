@@ -171,6 +171,8 @@ else()
     set(APPLE_NEW_BUNDLE 0)
 endif()
 
+option(OSX_DISPLAYP3_GAMUT "Enable support for Display P3 color gamut on macOS" OFF)
+
 # Set installation directories:
 if(WIN32 OR APPLE)
     if(BUILD_BUNDLE)
@@ -825,6 +827,10 @@ if(WIN32)
     if (ART_USES_UCRT)
         add_definitions(-DART_WIN32_UCRT)
     endif()
+endif()
+
+if(APPLE AND OSX_DISPLAYP3_GAMUT)
+    add_definitions(-DART_MACOS_DISPLAYP3_PROFILE)
 endif()
 
 add_subdirectory(rtengine)
