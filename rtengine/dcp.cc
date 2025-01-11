@@ -2218,7 +2218,7 @@ DCPProfile* DCPStore::getProfile(const Glib::ustring& filename) const
     return nullptr;
 }
 
-DCPProfile* DCPStore::getStdProfile(const Glib::ustring& requested_cam_short_name) const
+DCPProfile* DCPStore::getCameraProfile(const Glib::ustring& requested_cam_short_name) const
 {
     const Glib::ustring name = requested_cam_short_name.uppercase();
 

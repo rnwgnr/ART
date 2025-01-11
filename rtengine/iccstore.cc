@@ -371,7 +371,8 @@ public:
         xyz(createXYZProfile()),
         srgb(cmsCreate_sRGBProfile()),
         thumb_monitor_xform_(nullptr),
-        monitor_profile_hash_("000000000000000000000000000000000")
+        monitor_profile_hash_("000000000000000000000000000000000"),
+        gui_monitor_xform_(nullptr)
     {
         //cmsErrorAction(LCMS_ERROR_SHOW);
 
@@ -387,6 +388,10 @@ public:
 
     ~Implementation()
     {
+        if (gui_monitor_xform_) {
+            cmsDeleteTransform(gui_monitor_xform_);
+        }
+        
         if (thumb_monitor_xform_) {
             cmsDeleteTransform(thumb_monitor_xform_);
         }
@@ -439,13 +444,13 @@ public:
         // Input profiles
         // Load these to different areas, since the short name(e.g. "NIKON D700" may overlap between system/user and RT dir)
         stdProfilesDir = Glib::build_filename(rtICCDir, "input");
-        fileStdProfiles.clear();
-        fileStdProfilesFileNames.clear();
+        fileCamProfiles.clear();
+        fileCamProfilesFileNames.clear();
 
         if (loadAll) {
-            loadProfiles(stdProfilesDir, nullptr, nullptr, &fileStdProfilesFileNames, true);
+            loadProfiles(stdProfilesDir, nullptr, nullptr, &fileCamProfilesFileNames, true);
             Glib::ustring user_input_icc_dir = Glib::build_filename(options.rtdir, "iccprofiles", "input");
-            loadProfiles(user_input_icc_dir, nullptr, nullptr, &fileStdProfilesFileNames, true);
+            loadProfiles(user_input_icc_dir, nullptr, nullptr, &fileCamProfilesFileNames, true);
         }
 
         defaultMonitorProfile = settings->monitorProfile;
@@ -457,7 +462,7 @@ public:
         cmsUInt16Number cms_alarm_codes[cmsMAXCHANNELS] = { 0, 65535, 65535 };
         cmsSetAlarmCodes(cms_alarm_codes);
 
-        update_thumbnail_monitor_transform();
+        update_thumbnail_monitor_transform(true);
     }
 
     cmsHPROFILE workingSpace(const Glib::ustring& name) const
@@ -519,16 +524,16 @@ public:
         return std::string(&buf[0]);
     }
 
-    cmsHPROFILE getStdProfile(const Glib::ustring& name)
+    cmsHPROFILE getCameraProfile(const Glib::ustring& name)
     {
         const Glib::ustring nameUpper = name.uppercase();
 
         MyMutex::MyLock lock(mutex);
 
-        const ProfileMap::const_iterator r = fileStdProfiles.find(nameUpper);
+        const ProfileMap::const_iterator r = fileCamProfiles.find(nameUpper);
 
         // Return profile from store
-        if (r != fileStdProfiles.end()) {
+        if (r != fileCamProfiles.end()) {
             return r->second;
         } else if (!loadAll) {
             // Directory not scanned, so looking and adding now...
@@ -544,10 +549,10 @@ public:
         }
 
         // Profile is not yet in store
-        const NameMap::const_iterator f = fileStdProfilesFileNames.find(nameUpper);
+        const NameMap::const_iterator f = fileCamProfilesFileNames.find(nameUpper);
 
         // Profile does not exist
-        if (f == fileStdProfilesFileNames.end()) {
+        if (f == fileCamProfilesFileNames.end()) {
             return nullptr;
         }
 
@@ -556,11 +561,11 @@ public:
         const cmsHPROFILE profile = content.toProfile();
 
         if (profile) {
-            fileStdProfiles.emplace(f->first, profile);
+            fileCamProfiles.emplace(f->first, profile);
         }
 
-        // Profile invalid or stored now --> remove entry from fileStdProfilesFileNames
-        fileStdProfilesFileNames.erase(f);
+        // Profile invalid or stored now --> remove entry from fileCamProfilesFileNames
+        fileCamProfilesFileNames.erase(f);
         return profile;
     }
 
@@ -712,6 +717,11 @@ public:
         return monitor_profile_hash_;
     }
 
+    cmsHTRANSFORM getGuiMonitorTransform() const
+    {
+        return gui_monitor_xform_;
+    }
+    
     bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
     {
         auto prof = getProfile(name);
@@ -732,31 +742,50 @@ public:
         return ICCStore::getProfileMatrix(prof, out);
     }
 
+    cmsHPROFILE getActiveMonitorProfile() const
+    {
+        cmsHPROFILE monitor = nullptr;
+#ifdef ART_OS_COLOR_MGMT
+        monitor = getStdMonitorProfile(settings->os_monitor_profile);
+#else
+        monitor = const_cast<Implementation *>(this)->getProfile_unlocked(defaultMonitorProfile);
+#endif
+        return monitor;
+    }
+
+    cmsHPROFILE getStdMonitorProfile(rtengine::Settings::StdMonitorProfile name) const
+    {
+        auto self = const_cast<Implementation *>(this);
+        switch (name) {
+        case rtengine::Settings::StdMonitorProfile::SRGB:
+            return self->getProfile_unlocked("RTv4_sRGB");
+        case rtengine::Settings::StdMonitorProfile::DISPLAY_P3:
+            return self->getProfile_unlocked("RTv4_DisplayP3");
+        case rtengine::Settings::StdMonitorProfile::ADOBE_RGB:
+            return self->getProfile_unlocked("RTv4_Medium");
+        default:
+            return nullptr;
+        }
+    }
     
 private:
-    void update_thumbnail_monitor_transform()
+    void update_thumbnail_monitor_transform(bool update_gui=false)
     {
         if (thumb_monitor_xform_) {
             cmsDeleteTransform(thumb_monitor_xform_);
         }
-        
-        cmsHPROFILE monitor = nullptr;
-        bool is_srgb = false;
-#if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
-        monitor = getProfile_unlocked(defaultMonitorProfile);
-#elif defined ART_MACOS_DISPLAYP3_PROFILE
-        monitor = getProfile_unlocked("RTv4_DisplayP3");
-#else
-        monitor = getsRGBProfile();
-        is_srgb = true;
-#endif
+        thumb_monitor_xform_ = nullptr;
 
-        if (monitor) {
-            if (is_srgb) {
-                monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, "ART builtin sRGB");
-            } else {
-                monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, ProfileContent(monitor).getData());
+        if (update_gui) {
+            if (gui_monitor_xform_) {
+                cmsDeleteTransform(gui_monitor_xform_);
             }
+            gui_monitor_xform_ = nullptr;
+        }
+
+        auto monitor = getActiveMonitorProfile();
+        if (monitor) {
+            monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, ProfileContent(monitor).getData());
             switch (settings->monitorIntent) {
             case RI_PERCEPTUAL: monitor_profile_hash_.push_back('0'); break;
             case RI_RELATIVE: monitor_profile_hash_.push_back('1'); break;
@@ -769,6 +798,10 @@ private:
             cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
             thumb_monitor_xform_ = cmsCreateTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, settings->monitorIntent, flags);
             cmsCloseProfile(iprof);
+
+            if (update_gui) {
+                gui_monitor_xform_ = cmsCreateTransform(getsRGBProfile(), TYPE_RGB_8, monitor, TYPE_RGB_8, RI_RELATIVE, flags);
+            }
         } else {
             monitor_profile_hash_ = "000000000000000000000000000000000";
         }
@@ -1078,8 +1111,8 @@ parse_error:
 
     //These contain standard profiles from RT. Keys are all in uppercase.
     Glib::ustring stdProfilesDir;
-    NameMap fileStdProfilesFileNames;
-    ProfileMap fileStdProfiles;
+    NameMap fileCamProfilesFileNames;
+    ProfileMap fileCamProfiles;
 
     Glib::ustring defaultMonitorProfile;
 
@@ -1092,6 +1125,8 @@ parse_error:
 
     cmsHTRANSFORM thumb_monitor_xform_;
     std::string monitor_profile_hash_;
+
+    cmsHTRANSFORM gui_monitor_xform_;
 };
 
 ICCStore* ICCStore::getInstance()
@@ -1143,9 +1178,9 @@ std::string ICCStore::getProfileTag(cmsHPROFILE profile, cmsTagSignature tag)
     return Implementation::getProfileTag(profile, tag);
 }
 
-cmsHPROFILE ICCStore::getStdProfile(const Glib::ustring& name) const
+cmsHPROFILE ICCStore::getCameraProfile(const Glib::ustring& name) const
 {
-    return implementation->getStdProfile(name);
+    return implementation->getCameraProfile(name);
 }
 
 ProfileContent ICCStore::getContent(const Glib::ustring& name) const
@@ -1233,6 +1268,24 @@ bool ICCStore::getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
     return implementation->getProfileMatrix(name, out);
 }
 
+
+cmsHTRANSFORM ICCStore::getGuiMonitorTransform() const
+{
+    return implementation->getGuiMonitorTransform();
+}
+
+
+cmsHPROFILE ICCStore::getStdMonitorProfile(Settings::StdMonitorProfile name) const
+{
+    return implementation->getStdMonitorProfile(name);
+}
+
+
+cmsHPROFILE ICCStore::getActiveMonitorProfile() const
+{
+    return implementation->getActiveMonitorProfile();
+}
+    
 
 bool ICCStore::getProfileMatrix(cmsHPROFILE prof, Mat33<float> &out)
 {

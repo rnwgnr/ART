@@ -54,7 +54,7 @@ void setprogressStrUI(double val, const Glib::ustring str, MyProgressBar* pProgr
 }
 
 
-#ifndef __APPLE__
+#ifndef ART_OS_COLOR_MGMT
 
 bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
 {
@@ -137,17 +137,17 @@ bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, G
     return false;
 }
 
-#endif // __APPLE__
+#endif // ART_OS_COLOR_MGMT
 
 } // namespace
 
 
 class EditorPanel::ColorManagementToolbar {
 private:
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#if !defined ART_OS_COLOR_MGMT
     MyComboBoxText profileBox;
-#endif
     PopUpButton intentBox;
+#endif
     Gtk::ToggleButton softProof;
     Gtk::ToggleButton spGamutCheck;
     Gtk::ToggleButton spGamutCheckMonitor;
@@ -158,7 +158,7 @@ private:
     EditorPanel *parent;
 
 private:
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#if !defined ART_OS_COLOR_MGMT
     void prepareProfileBox ()
     {
         const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
@@ -189,7 +189,6 @@ private:
 
         profileBox.set_tooltip_text (profileBox.get_active_text ());
     }
-#endif
 
     void prepareIntentBox ()
     {
@@ -202,6 +201,8 @@ private:
         intentBox.setSelected (1);
         intentBox.show ();
     }
+
+#endif // ART_OS_COLOR_MGMT
 
     void prepareSoftProofingBox ()
     {
@@ -235,17 +236,17 @@ private:
         spGamutCheckMonitor.show();
     }
 
-#if !defined(__APPLE__)
+#if !defined ART_OS_COLOR_MGMT
     void profileBoxChanged ()
     {
         updateParameters ();
     }
-#endif
 
     void intentBoxChanged (int)
     {
         updateParameters ();
     }
+#endif // ART_OS_COLOR_MGMT
 
     void softProofToggled ()
     {
@@ -316,14 +317,11 @@ private:
 
     void updateParameters (bool noEvent = false)
     {
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#if !defined ART_OS_COLOR_MGMT
         ConnectionBlocker profileBlocker (profileConn);
-#endif
         ConnectionBlocker intentBlocker (intentConn);
 
         Glib::ustring profile;
-
-#if !defined(__APPLE__) // monitor profile not supported on apple
 
         if (!defprof.empty() && profileBox.get_active_row_number () == 1) {
             profile = defprof;
@@ -338,12 +336,6 @@ private:
         } else if (profileBox.get_active_row_number () > 0) {
             profile = profileBox.get_active_text ();
         }
-
-#else
-        profile = "sRGB";
-#endif
-
-#if !defined(__APPLE__) // monitor profile not supported on apple
 
         if (profileBox.get_active_row_number () == 0) {
 
@@ -376,7 +368,6 @@ private:
                 intentBox.setItemSensitivity (2, true);
                 intentBox.set_sensitive (false);
                 intentBox.setSelected (1);
-                //softProof.set_sensitive (false);
             }
             spGamutCheck.set_sensitive(true);
             spGamutCheckMonitor.set_sensitive(true);
@@ -384,9 +375,7 @@ private:
             profileBox.set_tooltip_text (profileBox.get_active_text ());
 
         }
-        //softProof.set_sensitive(softProof.get_sensitive() && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
 
-#endif
         rtengine::RenderingIntent intent;
 
         switch (intentBox.getSelected ()) {
@@ -403,6 +392,7 @@ private:
                 intent = rtengine::RI_ABSOLUTE;
                 break;
         }
+#endif // ART_OS_COLOR_MGMT
 
         if (!processor) {
             return;
@@ -412,7 +402,10 @@ private:
             processor->beginUpdateParams ();
         }
 
-        processor->setMonitorProfile (profile, intent);
+#ifndef ART_OS_COLOR_MGMT
+        processor->setMonitorProfile(profile, intent);
+#endif // ART_OS_COLOR_MGMT
+        
         rtengine::GamutCheck gc = rtengine::GAMUT_CHECK_OFF;
         if (spGamutCheck.get_sensitive() && spGamutCheck.get_active()) {
             gc = rtengine::GAMUT_CHECK_OUTPUT;
@@ -428,16 +421,11 @@ private:
 
     void updateSoftProofParameters (bool noEvent = false)
     {
-#if !defined(__APPLE__) // monitor profile not supported on apple
-        //softProof.set_sensitive (profileBox.get_active_row_number () > 0 && rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
+#if !defined ART_OS_COLOR_MGMT
         spGamutCheck.set_sensitive(profileBox.get_active_row_number () > 0);
-#endif
-
-
-#if !defined(__APPLE__) // monitor profile not supported on apple
-
+        
         if (profileBox.get_active_row_number () > 0) {
-#endif
+#endif // ART_OS_COLOR_MGMT
 
             if (processor) {
                 if (!noEvent) {
@@ -457,22 +445,23 @@ private:
                 }
             }
 
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#if !defined ART_OS_COLOR_MGMT
         }
-
-#endif
+#endif // ART_OS_COLOR_MGMT
     }
 
 public:
     explicit ColorManagementToolbar(EditorPanel *p, std::shared_ptr<rtengine::StagedImageProcessor> &ipc):
+#ifndef ART_OS_COLOR_MGMT
         intentBox(Glib::ustring (), true),
+#endif
         processor(ipc),
         parent(p)
     {
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#if !defined ART_OS_COLOR_MGMT
         prepareProfileBox ();
-#endif
         prepareIntentBox ();
+#endif
         prepareSoftProofingBox ();
 
         reset ();
@@ -483,18 +472,19 @@ public:
 
         spGamutCheck.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckToggled));
         spGamutCheckMonitor.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckMonitorToggled));
-#if !defined(__APPLE__) // monitor profile not supported on apple
+
+#if !defined ART_OS_COLOR_MGMT
         profileConn = profileBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::profileBoxChanged));
-#endif
         intentConn = intentBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::intentBoxChanged));
+#endif // ART_OS_COLOR_MGMT
     }
 
     void pack_right_in (Gtk::Grid* grid)
     {
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#if !defined ART_OS_COLOR_MGMT
         grid->attach_next_to (profileBox, Gtk::POS_RIGHT, 1, 1);
-#endif
         grid->attach_next_to (*intentBox.buttonGroup, Gtk::POS_RIGHT, 1, 1);
+#endif
         grid->attach_next_to (softProof, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to (spGamutCheck, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to(spGamutCheckMonitor, Gtk::POS_RIGHT, 1, 1);
@@ -509,8 +499,8 @@ public:
 
     void reset ()
     {
+#if !defined ART_OS_COLOR_MGMT
         ConnectionBlocker intentBlocker (intentConn);
-#if !defined(__APPLE__) // monitor profile not supported on apple
         ConnectionBlocker profileBlocker (profileConn);
 
         if (!defprof.empty() && options.rtSettings.autoMonitorProfile) {
@@ -518,8 +508,6 @@ public:
         } else {
             setActiveTextOrIndex (profileBox, options.rtSettings.monitorProfile, 0);
         }
-
-#endif
 
         switch (options.rtSettings.monitorIntent) {
             default:
@@ -535,33 +523,30 @@ public:
                 intentBox.setSelected (2);
                 break;
         }
+#endif // ART_OS_COLOR_MGMT
 
-        updateParameters ();
+        updateParameters();
     }
 
     void updateHistogram()
     {
-      updateParameters();
+        updateParameters();
     }
 
 
     void defaultMonitorProfileChanged (const Glib::ustring &profile_name, bool auto_monitor_profile)
     {
+#ifndef ART_OS_COLOR_MGMT
         ConnectionBlocker profileBlocker (profileConn);
 
         if (auto_monitor_profile && !defprof.empty()) {
             rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
-#ifndef __APPLE__
             profileBox.set_active (1);
-#endif
         } else {
             rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (profile_name);
-#ifndef __APPLE__
             setActiveTextOrIndex (profileBox, profile_name, 0);
-#endif
         }
-
-        //softProof.set_sensitive(rtengine::ICCStore::getInstance()->getProfile(options.rtSettings.printerProfile));
+#endif // ART_OS_COLOR_MGMT
     }
 };
 

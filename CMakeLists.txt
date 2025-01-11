@@ -171,7 +171,7 @@ else()
     set(APPLE_NEW_BUNDLE 0)
 endif()
 
-option(OSX_DISPLAYP3_GAMUT "Enable support for Display P3 color gamut on macOS" OFF)
+option(OSX_GDK_COLOR_PROFILES "Set to on if using a custom patched GTK+ with support for color profiles on macOS" OFF)
 
 # Set installation directories:
 if(WIN32 OR APPLE)
@@ -829,8 +829,11 @@ if(WIN32)
     endif()
 endif()
 
-if(APPLE AND OSX_DISPLAYP3_GAMUT)
-    add_definitions(-DART_MACOS_DISPLAYP3_PROFILE)
+if(APPLE)
+    add_definitions(-DART_OS_COLOR_MGMT)
+    if (OSX_GDK_COLOR_PROFILES)
+        add_definitions(-DART_GDK_QUARTZ_COLOR_PROFILES)
+    endif()
 endif()
 
 add_subdirectory(rtengine)

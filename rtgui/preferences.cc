@@ -580,7 +580,9 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     monitorIccDir->signal_selection_changed ().connect (sigc::mem_fun (this, &Preferences::iccDirChanged));
 
+#ifndef ART_OS_COLOR_MGMT
     vbColorMan->pack_start(*iccdgrid, Gtk::PACK_SHRINK);
+#endif
     
     //------------------------- MONITOR ----------------------
 
@@ -598,6 +600,7 @@ Gtk::Widget* Preferences::getColorManPanel ()
     Gtk::Label* milabel = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MONINTENT") + ":", Gtk::ALIGN_START));
     setExpandAlignProperties (milabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
+#ifndef ART_OS_COLOR_MGMT
     monProfile->append (M ("PREFERENCES_PROFILE_NONE"));
     monProfile->set_active (0);
 
@@ -605,14 +608,10 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     for (const auto &profile : profiles) {
         if (profile.find("file:") != 0) {
-            std::string fileis_RTv4 = profile.substr(0, 4);
-
-            if (fileis_RTv4 != "RTv4") {
-            //    printf("pro=%s \n", profile.c_str());
-                monProfile->append(profile);
-            }
+            monProfile->append(profile);
         }
     }
+#endif // ART_OS_COLOR_MGMT
 
     // same order as the enum
     monIntent->append (M ("PREFERENCES_INTENT_PERCEPTUAL"));
@@ -631,15 +630,37 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     int row = 0;
     gmonitor->attach (*mplabel, 0, row, 1, 1);
-#if defined(__APPLE__) // monitor profile not supported on apple
+#ifdef ART_OS_COLOR_MGMT
+    for (int j = 0; j < 3; ++j) {
+        auto p = rtengine::ICCStore::getInstance()->getStdMonitorProfile(rtengine::Settings::StdMonitorProfile(j));
+        if (p) {
+            auto lbl = rtengine::ICCStore::getProfileTag(p, cmsSigProfileDescriptionTag);
+            if (lbl.size() > 9 && lbl.substr(lbl.size()-9) == " (ICC V4)") {
+                lbl = lbl.substr(0, lbl.size()-9);
+            }
+            monProfile->append(lbl);
+        }
+    }
+# if !defined ART_GDK_QUARTZ_COLOR_PROFILES
     Gtk::Label *osxwarn = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MONPROFILE_WARNOSX"), Gtk::ALIGN_START));
     setExpandAlignProperties (osxwarn, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
     gmonitor->attach (*osxwarn, 1, row, 1, 1);
-#else
+# else // ART_GDK_QUARTZ_COLOR_PROFILES
+    mplabel->set_text(M("PREFERENCES_MONITOR_GAMUT") + ":");
+    gmonitor->attach (*monProfile, 1, row, 1, 1);
+    auto rst = Gtk::manage(new Gtk::Label(Glib::ustring(" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")"));
+    setExpandAlignProperties(rst, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+    gmonitor->attach(*rst, 2, row, 1, 1);    
+    ++row;
+    auto infolbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_OSCOLORMGMT_INFO"), Gtk::ALIGN_START));
+    gmonitor->attach(*infolbl, 0, row, 3, 1);
+    ++row;
+# endif // ART_GDK_QUARTZ_COLOR_PROFILES
+#else // ART_OS_COLOR_MGMT
+    gmonitor->attach (*mplabel, 0, row, 1, 1);
     gmonitor->attach (*monProfile, 1, row, 1, 1);
     ++row;
     gmonitor->attach (*cbAutoMonProfile, 1, row, 1, 1);
-#endif
     ++row;
     gmonitor->attach (*milabel, 0, row, 1, 1);
     gmonitor->attach (*monIntent, 1, row, 1, 1);
@@ -647,6 +668,7 @@ Gtk::Widget* Preferences::getColorManPanel ()
     gmonitor->attach (*monBPC, 0, row, 2, 1);
 
     autoMonProfileToggled();
+#endif // ART_OS_COLOR_MGMT
 
     fmonitor->add (*gmonitor);
 
@@ -1766,8 +1788,7 @@ void Preferences::storePreferences ()
 
     moptions.rtSettings.printerBPC = prtBPC->get_active ();
 
-#if !defined(__APPLE__) // monitor profile not supported on apple
-
+#ifndef ART_OS_COLOR_MGMT
     if (!monProfile->get_active_row_number()) {
         moptions.rtSettings.monitorProfile = "";
     } else {
@@ -1791,7 +1812,9 @@ void Preferences::storePreferences ()
 
     moptions.rtSettings.monitorBPC = monBPC->get_active ();
     moptions.rtSettings.autoMonitorProfile = cbAutoMonProfile->get_active ();
-#endif
+#else // ART_OS_COLOR_MGMT
+    moptions.rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile(monProfile->get_active_row_number());
+#endif // ART_OS_COLOR_MGMT
 
     moptions.rtSettings.iccDirectory = iccDir->get_filename ();
     moptions.rtSettings.monitorIccDirectory = monitorIccDir->get_filename ();
@@ -1945,7 +1968,7 @@ void Preferences::fillPreferences ()
 
     prtBPC->set_active (moptions.rtSettings.printerBPC);
 
-#if !defined(__APPLE__) // monitor profile not supported on apple
+#ifndef ART_OS_COLOR_MGMT
     setActiveTextOrIndex (*monProfile, moptions.rtSettings.monitorProfile, 0);
 
     switch (moptions.rtSettings.monitorIntent) {
@@ -1965,7 +1988,9 @@ void Preferences::fillPreferences ()
 
     monBPC->set_active (moptions.rtSettings.monitorBPC);
     cbAutoMonProfile->set_active (moptions.rtSettings.autoMonitorProfile);
-#endif // __APPLE__
+#else // ART_OS_COLOR_MGMT
+    monProfile->set_active(int(moptions.rtSettings.os_monitor_profile));
+#endif // ART_OS_COLOR_MGMT
 
     if (Glib::file_test (moptions.rtSettings.iccDirectory, Glib::FILE_TEST_IS_DIR)) {
         iccDir->set_current_folder (moptions.rtSettings.iccDirectory);
@@ -2441,26 +2466,19 @@ namespace {
 
 std::vector<int> get_theme_color(const std::vector<int> &c)
 {
-#if defined(__APPLE__) && defined ART_MACOS_DISPLAYP3_PROFILE
+    auto xform = rtengine::ICCStore::getInstance()->getGuiMonitorTransform();
     std::vector<int> res(c);
-    auto s = rtengine::ICCStore::getInstance();
-    auto p = s->getProfile("RTv4_DisplayP3");
-    if (p) {
-        auto xform = cmsCreateTransform(s->getsRGBProfile(), TYPE_RGB_8, p, TYPE_RGB_8, rtengine::RI_RELATIVE, cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
+    if (xform) {
         uint8_t buf[3];
         for (int i = 0; i < 3; ++i) {
             buf[i] = rtengine::LIM(c[i], 0, 255);
         }
         cmsDoTransform(xform, buf, buf, 3);
-        cmsDeleteTransform(xform);
         for (int i = 0; i < 3; ++i) {
             res[i] = buf[i];
         }
     }
     return res;
-#else
-    return c;
-#endif
 }
 
 } // namespace

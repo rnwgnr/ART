@@ -27,6 +27,7 @@
 
 #include <lcms2.h>
 
+#include "settings.h"
 #include "color.h"
 #include "linalgebra.h"
 
@@ -69,9 +70,12 @@ public:
 
     bool             outputProfileExist(const Glib::ustring& name) const;
     cmsHPROFILE      getProfile(const Glib::ustring& name) const;
-    cmsHPROFILE      getStdProfile(const Glib::ustring& name) const;
+    cmsHPROFILE      getCameraProfile(const Glib::ustring& name) const;
     ProfileContent   getContent(const Glib::ustring& name) const;
 
+    cmsHPROFILE getStdMonitorProfile(rtengine::Settings::StdMonitorProfile name) const;
+    cmsHPROFILE getActiveMonitorProfile() const;
+    
     static std::string getProfileTag(cmsHPROFILE profile, cmsTagSignature tag);
 
     Glib::ustring getDefaultMonitorProfileName() const;
@@ -91,7 +95,7 @@ public:
     std::uint8_t     getOutputIntents(const Glib::ustring& name) const;
     std::uint8_t     getProofIntents(const Glib::ustring& name) const;
 
-    /*static*/ std::vector<Glib::ustring> getWorkingProfiles();
+    std::vector<Glib::ustring> getWorkingProfiles();
 
     static cmsHPROFILE makeStdGammaProfile(cmsHPROFILE iprof);
     static cmsHPROFILE createFromMatrix(const float matrix[3][3], bool gamma=false, const Glib::ustring &name=Glib::ustring());
@@ -99,6 +103,8 @@ public:
 
     cmsHTRANSFORM getThumbnailMonitorTransform();
     const std::string &getThumbnailMonitorHash() const;
+
+    cmsHTRANSFORM getGuiMonitorTransform() const;
 
     bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out);
     static bool getProfileMatrix(cmsHPROFILE prof, Mat33<float> &out);

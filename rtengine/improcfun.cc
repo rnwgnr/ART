@@ -99,15 +99,13 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
     monitorTransform = nullptr;
     monitor = nullptr;
 
-    if (!monitorProfile.empty()) {
-#if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
-        monitor = ICCStore::getInstance()->getProfile(monitorProfile);
-#elif defined ART_MACOS_DISPLAYP3_PROFILE
-        monitor = ICCStore::getInstance()->getProfile("RTv4_DisplayP3");
+#ifdef ART_OS_COLOR_MGMT
+    monitor = ICCStore::getInstance()->getActiveMonitorProfile();
 #else
-        monitor = ICCStore::getInstance()->getsRGBProfile();
-#endif
+    if (!monitorProfile.empty()) {
+        monitor = ICCStore::getInstance()->getProfile(monitorProfile);
     }
+#endif // ART_OS_COLOR_MGMT
 
     if (monitor) {
         MyMutex::MyLock lcmsLock (*lcmsMutex);

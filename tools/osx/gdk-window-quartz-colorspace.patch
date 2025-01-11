@@ -40,7 +40,7 @@ diff --git a/gdk/quartz/gdkwindow-quartz.c b/gdk/quartz/gdkwindow-quartz.c
    cairo_surface_t *surface;
  
 +  GdkWindow *win = impl->wrapper;
-+  CFStringRef colorspace = (CFStringRef)g_object_get_data(win, "colorspace");
++  CFStringRef colorspace = (CFStringRef)g_object_get_data(win, "gdk-quartz-colorspace");
 +  if (!colorspace) {
 +      colorspace = kCGColorSpaceSRGB;
 +  }

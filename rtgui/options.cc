@@ -630,6 +630,8 @@ void Options::setDefaults()
     theme_bg_color.assign({72, 72, 72});
     theme_fg_color.assign({170, 170, 170});
     theme_hl_color.assign({227, 146, 67});
+
+    rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile::SRGB;
 }
 
 
@@ -1552,6 +1554,17 @@ void Options::readFromFile(Glib::ustring fname)
                 if (keyFile.has_key("Color Management", "ClutsDirectory")) {
                     clutsDir = keyFile.get_string("Color Management", "ClutsDirectory");
                 }
+
+                if (keyFile.has_key("Color Management", "OSMonitorProfile")) {
+                    auto s = keyFile.get_string("Color Management", "OSMonitorProfile").lowercase();
+                    if (s == "displayp3") {
+                        rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile::DISPLAY_P3;
+                    } else if (s == "adobergb") {
+                        rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile::ADOBE_RGB;
+                    } else {
+                        rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile::SRGB;
+                    }
+                }
             }
 
             if (keyFile.has_group("ICC Profile Creator")) {
@@ -2086,6 +2099,20 @@ void Options::saveToFile(Glib::ustring fname)
 
         keyFile.set_integer("Color Management", "WhiteBalanceSpotSize", whiteBalanceSpotSize);
         keyFile.set_string("Color Management", "ClutsDirectory", clutsDir);
+
+        Glib::ustring os_mon_prof = "";
+        switch (rtSettings.os_monitor_profile) {
+        case rtengine::Settings::StdMonitorProfile::DISPLAY_P3:
+            os_mon_prof = "DisplayP3";
+            break;
+        case rtengine::Settings::StdMonitorProfile::ADOBE_RGB:
+            os_mon_prof = "AdobeRGB";
+            break;
+        default:
+            os_mon_prof = "sRGB";
+            break;
+        }
+        keyFile.set_string("Color Management", "OSMonitorProfile", os_mon_prof);
 
         keyFile.set_string("ICC Profile Creator", "PimariesPreset", ICCPC_primariesPreset);
         keyFile.set_double("ICC Profile Creator", "RedPrimaryX", ICCPC_redPrimaryX);

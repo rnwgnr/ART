@@ -162,7 +162,7 @@ public:
     bool isValidDCPFileName(const Glib::ustring& filename) const;
 
     DCPProfile* getProfile(const Glib::ustring& filename) const;
-    DCPProfile* getStdProfile(const Glib::ustring& camShortName) const;
+    DCPProfile* getCameraProfile(const Glib::ustring& camShortName) const;
 
 private:
     DCPStore() = default;

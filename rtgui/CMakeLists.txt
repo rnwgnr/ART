@@ -171,12 +171,12 @@ set(NONCLISOURCEFILES
     session.cc
     thumbimgcache.cc
     clutparamspanel.cc
+    gdkcolormgmt.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(APPLE)
-    set(NONCLISOURCEFILES ${NONCLISOURCEFILES} rtwindow_macos.cc)
     pkg_check_modules(MacIntegration gtk-mac-integration-gtk3)
     if(NOT MacIntegration_FOUND)
         find_package(MacIntegration REQUIRED)

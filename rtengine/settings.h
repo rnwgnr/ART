@@ -76,6 +76,13 @@ public:
 
     bool ctl_scripts_fast_preview;
 
+    enum class StdMonitorProfile {
+        SRGB,
+        DISPLAY_P3,
+        ADOBE_RGB
+    };
+    StdMonitorProfile os_monitor_profile;
+
     /** Creates a new instance of Settings.
       * @return a pointer to the new Settings instance. */
     static Settings* create();
