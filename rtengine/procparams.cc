@@ -2529,7 +2529,7 @@ ColorManagementParams::ColorManagementParams() :
     applyHueSatMap(true),
     dcpIlluminant(0),
     workingProfile("Rec2020"),
-    outputProfile("RTv4_sRGB"),
+    outputProfile("RTv2_sRGB"),
     outputIntent(RI_RELATIVE),
     outputBPC(true),
     inputProfileCAT(false)
