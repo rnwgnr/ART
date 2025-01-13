@@ -171,8 +171,6 @@ else()
     set(APPLE_NEW_BUNDLE 0)
 endif()
 
-option(OSX_GDK_COLOR_PROFILES "Set to on if using a custom patched GTK+ with support for color profiles on macOS" OFF)
-
 # Set installation directories:
 if(WIN32 OR APPLE)
     if(BUILD_BUNDLE)
@@ -831,9 +829,6 @@ endif()
 
 if(APPLE)
     add_definitions(-DART_OS_COLOR_MGMT)
-    if (OSX_GDK_COLOR_PROFILES)
-        add_definitions(-DART_GDK_QUARTZ_COLOR_PROFILES)
-    endif()
 endif()
 
 add_subdirectory(rtengine)

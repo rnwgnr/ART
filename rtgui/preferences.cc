@@ -27,7 +27,12 @@
 #include <sstream>
 #include "rtimage.h"
 #ifdef _OPENMP
-#include <omp.h>
+# include <omp.h>
+#endif
+
+#include <gdk/gdkconfig.h>
+#ifdef GDK_WINDOWING_QUARTZ
+# include <gdk/gdkquartz.h>
 #endif
 
 extern Options options;
@@ -641,11 +646,11 @@ Gtk::Widget* Preferences::getColorManPanel ()
             monProfile->append(lbl);
         }
     }
-# if !defined ART_GDK_QUARTZ_COLOR_PROFILES
+# if defined __APPLE__ && !defined GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
     Gtk::Label *osxwarn = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MONPROFILE_WARNOSX"), Gtk::ALIGN_START));
     setExpandAlignProperties (osxwarn, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
     gmonitor->attach (*osxwarn, 1, row, 1, 1);
-# else // ART_GDK_QUARTZ_COLOR_PROFILES
+# elif defined GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
     mplabel->set_text(M("PREFERENCES_MONITOR_GAMUT") + ":");
     gmonitor->attach (*monProfile, 1, row, 1, 1);
     auto rst = Gtk::manage(new Gtk::Label(Glib::ustring(" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")"));
@@ -655,7 +660,7 @@ Gtk::Widget* Preferences::getColorManPanel ()
     auto infolbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_OSCOLORMGMT_INFO"), Gtk::ALIGN_START));
     gmonitor->attach(*infolbl, 0, row, 3, 1);
     ++row;
-# endif // ART_GDK_QUARTZ_COLOR_PROFILES
+# endif // GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
 #else // ART_OS_COLOR_MGMT
     gmonitor->attach (*mplabel, 0, row, 1, 1);
     gmonitor->attach (*monProfile, 1, row, 1, 1);
