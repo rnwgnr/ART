@@ -26,6 +26,10 @@ void gdk_set_monitor_profile(GdkWindow *window, rtengine::Settings::StdMonitorPr
     default:
         colorspace = kCGColorSpaceSRGB;
     }
+    const char *csp = g_getenv("ART_DEBUG_GDK_QUARTZ_COLORSPACE");
+    if (csp) {
+        colorspace = CFStringCreateWithCString(NULL, csp, kCFStringEncodingUTF8);
+    }
     if (options.rtSettings.verbose > 1) {
         fprintf(stderr, "gdk_set_monitor_profile: %s\n", CFStringGetCStringPtr(colorspace, kCFStringEncodingUTF8));
     }
