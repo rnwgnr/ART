@@ -13,6 +13,8 @@ from urllib.request import urlopen
 import tarfile
 import tempfile
 import io
+import json
+import time
 
 
 def getopts():
@@ -27,6 +29,28 @@ def getopts():
     p.add_argument('-v', '--verbose', action='store_true')
     ret = p.parse_args()
     return ret
+
+
+def get_imageio_releases():
+    with urlopen(
+            'https://api.github.com/repos/artpixls/ART-imageio/releases') as f:
+        data = f.read().decode('utf-8')
+    rel = json.loads(data)
+    def key(r):
+        return (r['draft'], r['prerelease'],
+                time.strptime(r['published_at'], '%Y-%m-%dT%H:%M:%SZ'))
+    class RelInfo:
+        def __init__(self, rel):
+            self.rels = sorted(rel, key=key, reverse=True)
+            
+        def asset(self, name):
+            for rel in self.rels:
+                for asset in rel['assets']:
+                    if asset['name'] == name:
+                        return asset['browser_download_url']
+            return None
+
+    return RelInfo(rel)
 
 
 def getdlls(opts):
@@ -75,11 +99,11 @@ def extra_files(opts):
                            'exiftool')])]
     else:
         extra = []
+    imageio = get_imageio_releases() if opts.imageio_download else None
     if opts.imageio:
         extra.append(('.', [(opts.imageio, 'imageio')]))
     elif opts.imageio_download:
-        with urlopen('https://github.com/artpixls/ART-imageio/releases/'
-                     'download/v1.0/ART-imageio.tar.gz') as f:
+        with urlopen(imageio.asset('ART-imageio.tar.gz')) as f:
             if opts.verbose:
                 print('downloading ART-imageio.tar.gz '
                       'from GitHub ...')
@@ -92,8 +116,7 @@ def extra_files(opts):
     if opts.imageio_bin:
         extra.append(('imageio', [(opts.imageio_bin, 'bin')]))            
     elif opts.imageio_download:
-        with urlopen('https://github.com/artpixls/ART-imageio/releases/'
-                     'download/v1.0/ART-imageio-bin-linux64.tar.gz') as f:
+        with urlopen(imageio.asset('ART-imageio-bin-linux64.tar.gz')) as f:
             if opts.verbose:
                 print('downloading ART-imageio-bin-linux64.tar.gz '
                       'from GitHub ...')
@@ -113,9 +136,6 @@ def extra_files(opts):
         ('lib', [
             D('/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0'),
         ]),
-        # ('lib', [
-        #     D('/usr/lib/x86_64-linux-gnu/gio'),
-        # ]),
         ('lib/gio/modules', [
             D('/usr/lib/x86_64-linux-gnu/gio/modules/libgioremote-volume-monitor.so'),
             D('/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so'),
