@@ -158,7 +158,7 @@ jobs:
           wget https://download.gnome.org/sources/gtk+/3.24/gtk%2B-3.24.43.tar.xz
           tar xzf gtk+-3.24.43.tar.xz
           cd gtk+-3.24.43
-          patch -p1 < ../tools/osx/gdk-window-quartz-colorspace.patch
+          patch -p1 < ../repo/tools/osx/gdk-window-quartz-colorspace.patch
           meson setup build
           meson configure build --prefix /opt/local --buildtype release -Ddebug=false
           meson compile -C build
