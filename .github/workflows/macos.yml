@@ -155,7 +155,6 @@ jobs:
       - name: Install custom GTK+ with colorspaces support
         run: |
           export PATH=/opt/local/libexec/gnubin:/opt/local/bin:/opt/local/sbin:$PATH
-          cd gtk
           wget https://download.gnome.org/sources/gtk+/3.24/gtk%2B-3.24.43.tar.xz
           tar xzf gtk+-3.24.43.tar.xz
           cd gtk+-3.24.43
