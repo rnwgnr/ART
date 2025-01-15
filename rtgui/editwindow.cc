@@ -24,6 +24,7 @@
 #include <gtk/gtk.h>
 #include "rtimage.h"
 #include "threadutils.h"
+#include "gdkcolormgmt.h"
 
 extern Glib::ustring argv0;
 
@@ -124,6 +125,7 @@ void EditWindow::on_realize ()
 {
     Gtk::Window::on_realize ();
 
+    art::gdk_set_monitor_profile(get_window()->gobj(), options.rtSettings.os_monitor_profile);    
     editWindowCursorManager.init (get_window());
 }
 

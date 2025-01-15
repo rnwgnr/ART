@@ -171,6 +171,7 @@ set(NONCLISOURCEFILES
     session.cc
     thumbimgcache.cc
     clutparamspanel.cc
+    gdkcolormgmt.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
@@ -340,6 +341,10 @@ target_link_libraries(art-cli PUBLIC
 if(HAS_MIMALLOC)
     target_link_libraries(art PUBLIC mimalloc)
     target_link_libraries(art-cli PUBLIC mimalloc)
+endif()
+
+if(APPLE)
+    target_link_libraries(art PRIVATE "-framework ApplicationServices")
 endif()
 
 # Install executables

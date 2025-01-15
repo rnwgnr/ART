@@ -251,7 +251,7 @@ void ImProcFunctions::rgb2monitor(Imagefloat *img, Image8* image, bool bypass_ou
 
         // cmsDoTransform is relatively expensive
 #ifdef _OPENMP
-        #pragma omp parallel firstprivate(img, data, W, H)
+#       pragma omp parallel firstprivate(img, data, W, H) if (multiThread)
 #endif
         {
             AlignedBuffer<float> pBuf(3 * W);
@@ -392,7 +392,7 @@ Image8* ImProcFunctions::rgb2out(Imagefloat *img, int cx, int cy, int cw, int ch
 
         // cmsDoTransform is relatively expensive
 #ifdef _OPENMP
-#pragma omp parallel
+#       pragma omp parallel if (multiThread)
 #endif
         {
             AlignedBuffer<float> pBuf(3 * cw);

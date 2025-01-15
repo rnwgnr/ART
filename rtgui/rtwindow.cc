@@ -27,6 +27,7 @@
 #include "whitebalance.h"
 #include "threadutils.h"
 #include "editwindow.h"
+#include "gdkcolormgmt.h"
 #include "../rtengine/profilestore.h"
 
 float fontScale = 1.f;
@@ -36,6 +37,7 @@ Glib::RefPtr<Gtk::CssProvider> cssForced;
 extern unsigned char initialGdkScale;
 
 #if defined(__APPLE__)
+
 static gboolean
 osx_should_quit_cb (GtkosxApplication *app, gpointer data)
 {
@@ -695,7 +697,8 @@ RTWindow::~RTWindow()
 void RTWindow::on_realize()
 {
     Gtk::Window::on_realize();
-    
+
+    art::gdk_set_monitor_profile(get_window()->gobj(), options.rtSettings.os_monitor_profile);
     mainWindowCursorManager.init(get_window());
 
     // Display release notes only if new major version.

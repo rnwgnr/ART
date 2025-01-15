@@ -1,0 +1,68 @@
+diff --git a/gdk/quartz/GdkQuartzView.c b/gdk/quartz/GdkQuartzView.c
+--- a/gdk/quartz/GdkQuartzView.c
++++ b/gdk/quartz/GdkQuartzView.c
+@@ -537,7 +537,7 @@
+     }
+ }
+ 
+--(void)createBackingStoreWithWidth: (CGFloat) width andHeight: (CGFloat) height
++-(void)createBackingStoreWithWidth: (CGFloat) width andHeight: (CGFloat) height andColorSpace: (CFStringRef) colorspace
+ {
+   IOSurfaceRef surface;
+ 
+@@ -549,8 +549,8 @@
+                        cfpb_props, &pixels);
+ 
+   surface = CVPixelBufferGetIOSurface (pixels);
+-  IOSurfaceSetValue(surface, CFSTR("IOSurfaceColorSpace"),
+-                    kCGColorSpaceSRGB);
++  IOSurfaceSetValue(surface, CFSTR("IOSurfaceColorSpace"), colorspace);
++  
+ }
+ 
+ #if MAC_OS_X_VERSION_MIN_REQUIRED >= 10700
+diff --git a/gdk/quartz/GdkQuartzView.h b/gdk/quartz/GdkQuartzView.h
+--- a/gdk/quartz/GdkQuartzView.h
++++ b/gdk/quartz/GdkQuartzView.h
+@@ -54,6 +54,6 @@
+ - (GdkWindow *)gdkWindow;
+ - (NSTrackingRectTag)trackingRect;
+ - (void)setNeedsInvalidateShadow: (BOOL)invalidate;
+-- (void)createBackingStoreWithWidth: (CGFloat) width andHeight: (CGFloat) height;
++- (void)createBackingStoreWithWidth: (CGFloat) width andHeight: (CGFloat) height andColorSpace: (CFStringRef) colorspace;
+ 
+ @end
+diff --git a/gdk/quartz/gdkquartzwindow.h b/gdk/quartz/gdkquartzwindow.h
+--- a/gdk/quartz/gdkquartzwindow.h
++++ b/gdk/quartz/gdkquartzwindow.h
+@@ -35,6 +35,8 @@
+ #define GDK_IS_QUARTZ_WINDOW_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), GDK_TYPE_QUARTZ_WINDOW))
+ #define GDK_QUARTZ_WINDOW_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), GDK_TYPE_QUARTZ_WINDOW, GdkQuartzWindowClass))
+ 
++#define GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
++
+ #ifdef GDK_COMPILATION
+ typedef struct _GdkQuartzWindow GdkQuartzWindow;
+ #else
+diff --git a/gdk/quartz/gdkwindow-quartz.c b/gdk/quartz/gdkwindow-quartz.c
+--- a/gdk/quartz/gdkwindow-quartz.c
++++ b/gdk/quartz/gdkwindow-quartz.c
+@@ -279,11 +279,17 @@
+   GdkQuartzCairoSurfaceData *surface_data;
+   cairo_surface_t *surface;
+ 
++  GdkWindow *win = impl->wrapper;
++  CFStringRef colorspace = (CFStringRef)g_object_get_data(win, "gdk-quartz-colorspace");
++  if (!colorspace) {
++      colorspace = kCGColorSpaceSRGB;
++  }
++
+   surface_data = g_new (GdkQuartzCairoSurfaceData, 1);
+   surface_data->window_impl = impl;
+   surface_data->cg_context = NULL;
+ 
+-  [impl->view createBackingStoreWithWidth: width andHeight: height];
++  [impl->view createBackingStoreWithWidth: width andHeight: height andColorSpace: colorspace];
+   surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+   cairo_surface_set_user_data (surface, &gdk_quartz_cairo_key,
+                                surface_data,

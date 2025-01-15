@@ -3550,10 +3550,10 @@ bool RawImageSource::findInputProfile(Glib::ustring inProfile, cmsHPROFILE embed
         }
     } else if (inProfile == "(cameraICC)") {
         // DCPs have higher quality, so use them first
-        *dcpProf = DCPStore::getInstance()->getStdProfile(camName);
+        *dcpProf = DCPStore::getInstance()->getCameraProfile(camName);
 
         if (*dcpProf == nullptr) {
-            in = ICCStore::getInstance()->getStdProfile(camName);
+            in = ICCStore::getInstance()->getCameraProfile(camName);
         }
     } else if (inProfile != "(camera)" && inProfile != "") {
         Glib::ustring normalName = inProfile;

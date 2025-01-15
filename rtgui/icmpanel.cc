@@ -367,7 +367,7 @@ void ICMPanel::updateDCP(int dcpIlluminant, Glib::ustring dcp_name)
     DCPProfile* dcp = nullptr;
 
     if (dcp_name == "(cameraICC)") {
-        dcp = DCPStore::getInstance()->getStdProfile(camName);
+        dcp = DCPStore::getInstance()->getCameraProfile(camName);
     } else if (dcp_name == "(embedded)") {
         dcp = DCPStore::getInstance()->getProfile(filename);
     } else if (ifromfile->get_active() && DCPStore::getInstance()->isValidDCPFileName(dcp_name)) {
@@ -741,7 +741,7 @@ void ICMPanel::setRawMeta(bool raw, const rtengine::FramesData* pMeta)
     icamera->set_sensitive(raw);
     camName = pMeta->getCamera();
     filename = pMeta->getFileName();
-    icameraICC->set_sensitive(raw && (ICCStore::getInstance()->getStdProfile(pMeta->getCamera()) != nullptr || DCPStore::getInstance()->getStdProfile(pMeta->getCamera()) != nullptr));
+    icameraICC->set_sensitive(raw && (ICCStore::getInstance()->getCameraProfile(pMeta->getCamera()) != nullptr || DCPStore::getInstance()->getCameraProfile(pMeta->getCamera()) != nullptr));
     iembedded->set_sensitive(!raw || DCPStore::getInstance()->getProfile(filename));
 
     enableListener();
