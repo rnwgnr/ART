@@ -525,6 +525,8 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
     constexpr float hue_hi = 90.f / 360.f;
     constexpr float hue_lo = 340.f / 360.f;
 
+    constexpr float noise = 1.f;
+
     FlatCurve hcurve({FCT_MinMaxCPoints,
                       0.1, 0.1,
                       0.35, 0.35,
@@ -544,7 +546,7 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
             rgb[0] = img->r(y, x);
             rgb[1] = img->g(y, x);
             rgb[2] = img->b(y, x);
-            float m = rgb[0] + rgb[1] + rgb[2];
+            float m = Color::rgbLuminance(rgb[0], rgb[1], rgb[2], ws);
 
             if (full_adapt) {
                 rgb = dot_product(fullconv, rgb);
@@ -565,8 +567,8 @@ void apply_cat(RawImageSource *src, Imagefloat *img, const ColorTemp &ctemp)
             }
 
             // make sure we preserve the brightness
-            float m2 = rgb[0] + rgb[1] + rgb[2];
-            if (m > 0 && m2 > 0) {
+            float m2 = Color::rgbLuminance(rgb[0], rgb[1], rgb[2], ws);
+            if (m > noise && m2 > noise) {
                 float f = m / m2;
                 rgb[0] *= f;
                 rgb[1] *= f;
