@@ -371,8 +371,7 @@ public:
         xyz(createXYZProfile()),
         srgb(cmsCreate_sRGBProfile()),
         thumb_monitor_xform_(nullptr),
-        monitor_profile_hash_("000000000000000000000000000000000"),
-        gui_monitor_xform_(nullptr)
+        monitor_profile_hash_("000000000000000000000000000000000")
     {
         //cmsErrorAction(LCMS_ERROR_SHOW);
 
@@ -388,10 +387,6 @@ public:
 
     ~Implementation()
     {
-        if (gui_monitor_xform_) {
-            cmsDeleteTransform(gui_monitor_xform_);
-        }
-        
         if (thumb_monitor_xform_) {
             cmsDeleteTransform(thumb_monitor_xform_);
         }
@@ -462,7 +457,7 @@ public:
         cmsUInt16Number cms_alarm_codes[cmsMAXCHANNELS] = { 0, 65535, 65535 };
         cmsSetAlarmCodes(cms_alarm_codes);
 
-        update_thumbnail_monitor_transform(true);
+        update_thumbnail_monitor_transform();
     }
 
     cmsHPROFILE workingSpace(const Glib::ustring& name) const
@@ -717,11 +712,6 @@ public:
         return monitor_profile_hash_;
     }
 
-    cmsHTRANSFORM getGuiMonitorTransform() const
-    {
-        return gui_monitor_xform_;
-    }
-    
     bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
     {
         auto prof = getProfile(name);
@@ -769,19 +759,12 @@ public:
     }
     
 private:
-    void update_thumbnail_monitor_transform(bool update_gui=false)
+    void update_thumbnail_monitor_transform()
     {
         if (thumb_monitor_xform_) {
             cmsDeleteTransform(thumb_monitor_xform_);
         }
         thumb_monitor_xform_ = nullptr;
-
-        if (update_gui) {
-            if (gui_monitor_xform_) {
-                cmsDeleteTransform(gui_monitor_xform_);
-            }
-            gui_monitor_xform_ = nullptr;
-        }
 
         auto monitor = getActiveMonitorProfile();
         if (monitor) {
@@ -798,10 +781,6 @@ private:
             cmsUInt32Number flags = cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE;
             thumb_monitor_xform_ = cmsCreateTransform(iprof, TYPE_Lab_FLT, monitor, TYPE_RGB_FLT, settings->monitorIntent, flags);
             cmsCloseProfile(iprof);
-
-            if (update_gui) {
-                gui_monitor_xform_ = cmsCreateTransform(getsRGBProfile(), TYPE_RGB_8, monitor, TYPE_RGB_8, RI_RELATIVE, flags);
-            }
         } else {
             monitor_profile_hash_ = "000000000000000000000000000000000";
         }
@@ -1125,8 +1104,6 @@ parse_error:
 
     cmsHTRANSFORM thumb_monitor_xform_;
     std::string monitor_profile_hash_;
-
-    cmsHTRANSFORM gui_monitor_xform_;
 };
 
 ICCStore* ICCStore::getInstance()
@@ -1266,12 +1243,6 @@ const std::string &ICCStore::getThumbnailMonitorHash() const
 bool ICCStore::getProfileMatrix(const Glib::ustring &name, Mat33<float> &out)
 {
     return implementation->getProfileMatrix(name, out);
-}
-
-
-cmsHTRANSFORM ICCStore::getGuiMonitorTransform() const
-{
-    return implementation->getGuiMonitorTransform();
 }
 
 

@@ -22,6 +22,7 @@
 #include "splash.h"
 #include "cachemanager.h"
 #include "addsetids.h"
+#include "guiutils.h"
 #include "../rtengine/dfmanager.h"
 #include "../rtengine/ffmanager.h"
 #include <sstream>
@@ -2471,18 +2472,8 @@ namespace {
 
 std::vector<int> get_theme_color(const std::vector<int> &c)
 {
-    auto xform = rtengine::ICCStore::getInstance()->getGuiMonitorTransform();
     std::vector<int> res(c);
-    if (xform) {
-        uint8_t buf[3];
-        for (int i = 0; i < 3; ++i) {
-            buf[i] = rtengine::LIM(c[i], 0, 255);
-        }
-        cmsDoTransform(xform, buf, buf, 3);
-        for (int i = 0; i < 3; ++i) {
-            res[i] = buf[i];
-        }
-    }
+    getGUIColor(res[0], res[1], res[2]);
     return res;
 }
 

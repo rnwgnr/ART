@@ -39,6 +39,7 @@
 #include "colorwheel.h"
 #include "../rtengine/iccstore.h"
 #include "../rtengine/coord.h"
+#include "guiutils.h"
 #include <iostream>
 
 using rtengine::Color;
@@ -167,6 +168,10 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     Gtk::Border padding = getPadding(style);  // already scaled
     Cairo::RefPtr<Cairo::Context> cr = getContext();
+    auto bg = style->get_background_color(Gtk::STATE_FLAG_NORMAL);
+    float bg_r = bg.get_red();
+    float bg_g = bg.get_green();
+    float bg_b = bg.get_blue();
 
     if (isDirty()) {
         int width = allocation.get_width();
@@ -210,10 +215,10 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
                     } else if (h > 1.f) {
                         h -= 1.f;
                     }
-                    Color::hsl2rgb(h, s * factor, 0.5f, R, G, B);
-                    R /= 65535.f;
-                    G /= 65535.f;
-                    B /= 65535.f;
+                    // Color::hsl2rgb(h, s * factor, 0.5f, R, G, B);
+                    // R /= 65535.f;
+                    // G /= 65535.f;
+                    // B /= 65535.f;
 
                     float d1 = radius - d;
                     float w = 1.f;
@@ -227,13 +232,27 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
                     }
                     if (d2 <= 0) {
                         alpha = 0.1f + 0.15f * d / inner_radius;
+                        s *= 0.8f;
                     } else if (d2 < 1.f) {
                         w += d2;
                         cr->set_antialias(Cairo::ANTIALIAS_DEFAULT);
                     }
                     float xoff = ii > 0 ? -w : 0.f;
                     float yoff = jj > 0 ? -w : 0.f;
+
+                    Color::hsl2rgb(h, s * factor, 0.5f, R, G, B);
+                    R /= 65535.f;
+                    G /= 65535.f;
+                    B /= 65535.f;
+
+                    getGUIColor(R, G, B);
+                    
+                    // R = rtengine::intp(alpha, R, bg_r);
+                    // G = rtengine::intp(alpha, G, bg_g);
+                    // B = rtengine::intp(alpha, B, bg_b);
+                    
                     cr->set_source_rgba(R, G, B, alpha);
+                    //cr->set_source_rgb(R, G, B);
                     cr->rectangle(i+xoff, j+yoff, w, w);
                     cr->fill();
                 }
@@ -244,7 +263,9 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         {
             cr->set_antialias(Cairo::ANTIALIAS_DEFAULT);
             cr->set_line_width(0.5 * double(s));
-            cr->set_source_rgb(0.2, 0.2, 0.2);
+            double r = 0.2, g = 0.2, b = 0.2;
+            getGUIColor(r, g, b);
+            cr->set_source_rgb(r, g, b);
             for (int a = 0; a < 360; a += 30) {
                 cr->move_to(w2, h2);
                 rtengine::CoordD c(rtengine::PolarCoord(radius, a));
@@ -265,13 +286,17 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
         hia = .5f * (width + width * hia);
         hib = .5f * (height + height * hib);
         cr->set_line_width(2. * double(s));
-        cr->set_source_rgb(0.6, 0.6, 0.6);
+        double r = 0.6, g = 0.6, b = 0.6;
+        getGUIColor(r, g, b);
+        cr->set_source_rgb(r, g, b);
         cr->move_to(loa, lob);
         cr->line_to(hia, hib);
         cr->stroke();
 
         // drawing points
-        cr->set_source_rgb(0.9, 0.9, 0.9);
+        r = g = b = 0.9;
+        getGUIColor(r, g, b);
+        cr->set_source_rgb(r, g, b);
         if (point_active_) {
             cr->arc(hia, hib, 5 * s, 0, 2. * rtengine::RT_PI);
         } else {

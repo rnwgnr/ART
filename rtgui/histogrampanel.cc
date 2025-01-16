@@ -52,6 +52,28 @@ void set_arr(array2D<int> &dst, const array2D<int> &src)
 
 constexpr double padding = 0;
 
+
+template <class Gradient>
+void add_to_gradient(Gradient gradient, double offset, double red, double green, double blue, double alpha)
+{
+    getGUIColor(red, green, blue);
+    gradient->add_color_stop_rgba(offset, red, green, blue, alpha);
+}
+
+template <class Context>
+void set_source_rgb(Context cr, double red, double green, double blue)
+{
+    getGUIColor(red, green, blue);
+    cr->set_source_rgb(red, green, blue);
+}
+
+template <class Context>
+void set_source_rgba(Context cr, double red, double green, double blue, double alpha)
+{
+    getGUIColor(red, green, blue);
+    cr->set_source_rgba(red, green, blue, alpha);
+}
+
 } // namespace
 
 //
@@ -830,7 +852,7 @@ void HistogramRGBArea::updateBackBuffer (int r, int g, int b, const Glib::ustrin
     if (surface)  {
         Cairo::RefPtr<Cairo::Context> cc = Cairo::Context::create(surface);
 
-        cc->set_source_rgba (0., 0., 0., 0.);
+        set_source_rgba(cc, 0., 0., 0., 0.);
         cc->set_operator (Cairo::OPERATOR_CLEAR);
         cc->paint ();
         cc->set_operator (Cairo::OPERATOR_OVER);
@@ -841,19 +863,19 @@ void HistogramRGBArea::updateBackBuffer (int r, int g, int b, const Glib::ustrin
         if ( r != -1 && g != -1 && b != -1 ) {
             if (needRed) {
                 // Red
-                cc->set_source_rgb(rgb_R[0], rgb_R[1], rgb_R[2]);
+                set_source_rgb(cc, rgb_R[0], rgb_R[1], rgb_R[2]);
                 drawBar(cc, r, 255.0, winw, winh, s);
             }
 
             if (needGreen) {
                 // Green
-                cc->set_source_rgb(rgb_G[0], rgb_G[1], rgb_G[2]);
+                set_source_rgb(cc, rgb_G[0], rgb_G[1], rgb_G[2]);
                 drawBar(cc, g, 255.0, winw, winh, s);
             }
 
             if (needBlue) {
                 // Blue
-                cc->set_source_rgb(rgb_B[0], rgb_B[1], rgb_B[2]);
+                set_source_rgb(cc, rgb_B[0], rgb_B[1], rgb_B[2]);
                 drawBar(cc, b, 255.0, winw, winh, s);
             }
 
@@ -868,14 +890,14 @@ void HistogramRGBArea::updateBackBuffer (int r, int g, int b, const Glib::ustrin
 
                 if (needLuma) {
                     // Luma
-                    cc->set_source_rgb(1.0, 1.0, 1.0);
+                    set_source_rgb(cc, 1.0, 1.0, 1.0);
                     drawBar(cc, Lab_L, 100.0, winw, winh, s);
                 }
 
                 if (needChroma && options.histogramScopeType == ScopeType::HISTOGRAM) {
                     // Chroma
                     double chromaval = sqrt(Lab_a * Lab_a + Lab_b * Lab_b) / 1.8;
-                    cc->set_source_rgb(0.9, 0.9, 0.0);
+                    set_source_rgb(cc, 0.9, 0.9, 0.0);
                     drawBar(cc, chromaval, 100.0, winw, winh, s);
                 }
             }
@@ -1278,14 +1300,14 @@ void HistogramArea::updateBackBuffer(int custom_w, int custom_h)
     double s = RTScalable::getScale();
 
     // Setup drawing
-    cr->set_source_rgba (0., 0., 0., 0.);
+    set_source_rgba(cr, 0., 0., 0., 0.);
     cr->set_operator (Cairo::OPERATOR_CLEAR);
     cr->paint ();
 
     cr->set_operator (Cairo::OPERATOR_SOURCE);
 
     // Prepare drawing gridlines first
-    cr->set_source_rgba (1., 1., 1., 0.25);
+    set_source_rgba(cr, 1., 1., 1., 0.25);
     cr->set_line_width (1.0 * s);
     cr->set_antialias(Cairo::ANTIALIAS_NONE);
     cr->set_line_join(Cairo::LINE_JOIN_MITER);
@@ -1440,35 +1462,35 @@ void HistogramArea::updateNonRaw(Cairo::RefPtr<Cairo::Context> cr)
         const bool rawMode = (scopeType == ScopeType::HISTOGRAM_RAW);
         if (needLuma && !rawMode) {
             drawCurve(cr, lhist, realhistheight, w, h);
-            cr->set_source_rgba (0.65, 0.65, 0.65, 0.65);
+            set_source_rgba(cr, 0.65, 0.65, 0.65, 0.65);
             cr->fill ();
             drawMarks(cr, lhist, scale, w, ui, oi);
         }
 
         if (needChroma && !rawMode) {
             drawCurve(cr, chist, realhistheight, w, h);
-            cr->set_source_rgb (0.9, 0.9, 0.);
+            set_source_rgb(cr, 0.9, 0.9, 0.);
             cr->stroke ();
             drawMarks(cr, chist, scale, w, ui, oi);
         }
 
         if (needRed) {
             drawCurve(cr, rh, realhistheight, w, h);
-            cr->set_source_rgb(rgb_R[0], rgb_R[1], rgb_R[2]);
+            set_source_rgb(cr, rgb_R[0], rgb_R[1], rgb_R[2]);
             cr->stroke ();
             drawMarks(cr, rh, scale, w, ui, oi);
         }
 
         if (needGreen) {
             drawCurve(cr, gh, realhistheight, w, h);
-            cr->set_source_rgb(rgb_G[0], rgb_G[1], rgb_G[2]);
+            set_source_rgb(cr, rgb_G[0], rgb_G[1], rgb_G[2]);
             cr->stroke ();
             drawMarks(cr, gh, scale, w, ui, oi);
         }
 
         if (needBlue) {
             drawCurve(cr, bh, realhistheight, w, h);
-            cr->set_source_rgb(rgb_B[0], rgb_B[1], rgb_B[2]);
+            set_source_rgb(cr, rgb_B[0], rgb_B[1], rgb_B[2]);
             cr->stroke ();
             drawMarks(cr, bh, scale, w, ui, oi);
         }
@@ -1666,21 +1688,21 @@ void HistogramArea::updateRaw(Cairo::RefPtr<Cairo::Context> cr)
 
         if (needRed) {
             drawRawCurve(cr, rh, ub, realhistheight, w, h);
-            cr->set_source_rgb(rgb_R[0], rgb_R[1], rgb_R[2]);
+            set_source_rgb(cr, rgb_R[0], rgb_R[1], rgb_R[2]);
             cr->stroke();
             drawMarks(cr, rh, 1.0, w, ui, oi);
         }
 
         if (needGreen) {
             drawRawCurve(cr, gh, ub, realhistheight, w, h);
-            cr->set_source_rgb(rgb_G[0], rgb_G[1], rgb_G[2]);
+            set_source_rgb(cr, rgb_G[0], rgb_G[1], rgb_G[2]);
             cr->stroke();
             drawMarks(cr, gh, 1.0, w, ui, oi);
         }
 
         if (needBlue) {
             drawRawCurve(cr, bh, ub, realhistheight, w, h);
-            cr->set_source_rgb(rgb_B[0], rgb_B[1], rgb_B[2]);
+            set_source_rgb(cr, rgb_B[0], rgb_B[1], rgb_B[2]);
             cr->stroke();
             drawMarks(cr, bh, 1.0, w, ui, oi);
         }
@@ -1876,6 +1898,12 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
     const int cairo_stride = Cairo::ImageSurface::format_stride_for_width(Cairo::FORMAT_ARGB32, rwave.width());
     const auto buffer_size = static_cast<std::vector<unsigned char>::size_type>(wave_height) * cairo_stride;
 
+    const auto rgba =
+        [](uint8_t r, uint8_t g, uint8_t b, uint8_t a) -> uint32_t
+        {
+            return b | (g << 8) | (r << 16) | (a << 24);
+        };
+
     if (parade_buffer_r_dirty && needRed) {
         parade_buffer_r.assign(buffer_size, 0);
         assert(parade_buffer_r.size() % 4 == 0);
@@ -1884,9 +1912,12 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             const int* const r_row = rwave[val];
             std::uint32_t* const buffer_r_row = reinterpret_cast<uint32_t*>(parade_buffer_r.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                const unsigned char r = std::min<float>(scale * r_row[col], 0xff);
+                int r = std::min<float>(scale * r_row[col], 0xff);
                 if (r != 0) {
-                    buffer_r_row[col] = (r << 16) | (r << 24);
+                    int g = r * rgb_R[1];
+                    int b = r * rgb_R[2];
+                    getGUIColor(r, g, b);
+                    buffer_r_row[col] = rgba(r, g, b, r); //(r << 16) | (r << 24);
                 }
             }
         }
@@ -1902,9 +1933,12 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             const int* const g_row = gwave[val];
             std::uint32_t* const buffer_g_row = reinterpret_cast<uint32_t*>(parade_buffer_g.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                const unsigned char g = std::min<float>(scale * g_row[col], 0xff);
+                int g = std::min<float>(scale * g_row[col], 0xff);
                 if (g != 0) {
-                    buffer_g_row[col] = (g << 8) | (g << 24);
+                    int r = g * rgb_G[0];
+                    int b = g * rgb_G[2];
+                    getGUIColor(r, g, b);
+                    buffer_g_row[col] = rgba(r, g, b, g); //(g << 8) | (g << 24);
                 }
             }
         }
@@ -1920,10 +1954,12 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             const int* const b_row = bwave[val];
             std::uint32_t* const buffer_b_row = reinterpret_cast<uint32_t*>(parade_buffer_b.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                const unsigned char b = std::min<float>(scale * b_row[col], 0xff);
+                int b = std::min<float>(scale * b_row[col], 0xff);
                 if (b != 0) {
-                    const unsigned char green = b * rgb_B[1]; // Make blue easier to see.
-                    buffer_b_row[col] = b | (green << 8) | (b << 24);
+                    int g = b * rgb_B[1]; // Make blue easier to see.
+                    int r = b * rgb_B[0];
+                    getGUIColor(r, g, b);
+                    buffer_b_row[col] = rgba(r, g, b, b); //b | (g << 8) | (b << 24);
                 }
             }
         }
@@ -1977,6 +2013,7 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
         cr->set_matrix(orig_matrix);
     }
 }
+
 
 void HistogramArea::drawVectorscope(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
 {
@@ -2051,16 +2088,16 @@ void HistogramArea::drawVectorscope(Cairo::RefPtr<Cairo::Context> &cr, int w, in
             const double (&color_1)[3] = color_labels[i];
             const double (&color_2)[3] = color_labels[i + 3];
             cr->set_source(gradient);
-            gradient->add_color_stop_rgba(0, color_2[0], color_2[1], color_2[2], 0.5);
-            gradient->add_color_stop_rgba(0.5, 1, 1, 1, 0.25);
-            gradient->add_color_stop_rgba(1, color_1[0], color_1[1], color_1[2], 0.5);
+            add_to_gradient(gradient, 0, color_2[0], color_2[1], color_2[2], 0.5);
+            add_to_gradient(gradient, 0.5, 1, 1, 1, 0.25);
+            add_to_gradient(gradient, 1, color_1[0], color_1[1], color_1[2], 0.5);
             cr->move_to(-line_length, 0);
             cr->line_to(line_length, 0);
             cr->rotate_degrees(-120);
             cr->stroke();
         }
         cr->set_line_width (1.0 * s);
-        cr->set_source_rgba (1, 1, 1, 0.25);
+        set_source_rgba(cr, 1, 1, 1, 0.25);
         // 100% saturation circle.
         cr->arc(0, 0, scope_size / 2.0, 0, 2 * RT_PI);
         cr->stroke();
@@ -2082,9 +2119,9 @@ void HistogramArea::drawVectorscope(Cairo::RefPtr<Cairo::Context> &cr, int w, in
         cr->set_line_width (2.0 * s);
         gradient = Cairo::LinearGradient::create(0, -line_length, 0, line_length);
         cr->set_source(gradient);
-        gradient->add_color_stop_rgba(0, 1, 1, 0, 0.5); // "yellow"
-        gradient->add_color_stop_rgba(0.5, 1, 1, 1, 0.25); // neutral
-        gradient->add_color_stop_rgba(1, 0, 0, 1, 0.5); // "blue"
+        add_to_gradient(gradient, 0, 1, 1, 0, 0.5); // "yellow"
+        add_to_gradient(gradient, 0.5, 1, 1, 1, 0.25); // neutral
+        add_to_gradient(gradient, 1, 0, 0, 1, 0.5); // "blue"
         cr->move_to(0, 0);
         cr->line_to(0, line_length);
         cr->move_to(0, 0);
@@ -2092,15 +2129,15 @@ void HistogramArea::drawVectorscope(Cairo::RefPtr<Cairo::Context> &cr, int w, in
         cr->stroke();
         gradient = Cairo::LinearGradient::create(-line_length, 0, line_length, 0);
         cr->set_source(gradient);
-        gradient->add_color_stop_rgba(0, 0, 1, 0, 0.5); // "green"
-        gradient->add_color_stop_rgba(0.5, 1, 1, 1, 0.25); // neutral
-        gradient->add_color_stop_rgba(1, 1, 0, 1, 0.5); // "magenta"
+        add_to_gradient(gradient, 0, 0, 1, 0, 0.5); // "green"
+        add_to_gradient(gradient, 0.5, 1, 1, 1, 0.25); // neutral
+        add_to_gradient(gradient, 1, 1, 0, 1, 0.5); // "magenta"
         cr->move_to(0, 0);
         cr->line_to(line_length, 0);
         cr->move_to(0, 0);
         cr->line_to(-line_length, 0);
         cr->stroke();
-        cr->set_source_rgba (1, 1, 1, 0.25);
+        set_source_rgba(cr, 1, 1, 1, 0.25);
         cr->set_line_width (1.0 * s);
         // 25%, 50%, 75%, and 100% of standard chroma range.
         cr->set_dash(ch_ds, 0);
@@ -2143,16 +2180,16 @@ void HistogramArea::drawVectorscope(Cairo::RefPtr<Cairo::Context> &cr, int w, in
                 cy = h / 2.f - scope_size * pointer_b * ab_factor;
             }
             const float crosshair_size = 20.f * s;
-            cr->set_source_rgba(1, 1, 1, 0.5);
+            set_source_rgba(cr, 1, 1, 1, 0.5);
             cr->move_to(cx - crosshair_size, cy);
             cr->line_to(cx + crosshair_size, cy);
             cr->move_to(cx, cy - crosshair_size);
             cr->line_to(cx, cy + crosshair_size);
             cr->stroke();
             cr->arc(cx, cy, 3 * s, 0, 2 * RT_PI);
-            cr->set_source_rgb(1, 1, 1);
+            set_source_rgb(cr, 1, 1, 1);
             cr->fill_preserve();
-            cr->set_source_rgb(0, 0, 0);
+            set_source_rgb(cr, 0, 0, 0);
             cr->set_line_width (1.0 * s);
             cr->stroke();
         }
@@ -2170,6 +2207,12 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
     const int cairo_stride = Cairo::ImageSurface::format_stride_for_width(Cairo::FORMAT_ARGB32, rwave.width());
     const auto buffer_size = static_cast<std::vector<unsigned char>::size_type>(wave_height) * cairo_stride;
 
+    const auto rgba =
+        [](uint8_t r, uint8_t g, uint8_t b, uint8_t a) -> uint32_t
+        {
+            return b | (g << 8) | (r << 16) | (a << 24);
+        };
+    
     if (wave_buffer_dirty && (needRed || needGreen || needBlue)) {
         wave_buffer.assign(buffer_size, 0);
         assert(wave_buffer.size() % 4 == 0);
@@ -2180,13 +2223,14 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
             const int* const b_row = bwave[val];
             std::uint32_t* const buffer_row = reinterpret_cast<uint32_t*>(wave_buffer.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                const unsigned char r = needRed ? std::min<float>(scale * r_row[col], 0xff) : 0;
-                const unsigned char b = needBlue ? std::min<float>(scale * b_row[col], 0xff) : 0;
-                const unsigned char g = needGreen ? rtengine::LIM(std::min<float>(scale * g_row[col], 0xff) + float(needBlue ? b * rgb_B[1] : 0), 0.f, float(0xff)) : 0;
-                const unsigned char value = rtengine::max(r, g, b);
+                int r = needRed ? std::min<float>(scale * r_row[col], 0xff) : 0;
+                int b = needBlue ? std::min<float>(scale * b_row[col], 0xff) : 0;
+                int g = needGreen ? rtengine::LIM(std::min<float>(scale * g_row[col], 0xff) + float(needBlue ? b * rgb_B[1] : 0), 0.f, float(0xff)) : 0;
+                int value = rtengine::max(r, g, b);
                 if (value != 0) {
                     // Ensures correct order regardless of endianness.
-                    buffer_row[col] = b | (g << 8) | (r << 16) | (value << 24);
+                    getGUIColor(r, g, b);
+                    buffer_row[col] = rgba(r, g, b, value); //b | (g << 8) | (r << 16) | (value << 24);
                 }
             }
         }

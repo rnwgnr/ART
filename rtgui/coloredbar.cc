@@ -89,6 +89,17 @@ void ColoredBar::expose(Gtk::DrawingArea &drawingArea, BackBuffer *backBuffer)
     copySurface(backBuffer, &rect);
 }
 
+namespace {
+
+void poke_rgba(unsigned char*& dest, double r, double g, double b, double a)
+{
+    getGUIColor(r, g, b);
+    rtengine::poke01_d(dest, r, g, b, a);
+}
+
+} // namespace
+
+
 void ColoredBar::updateBackBuffer(Gtk::DrawingArea &drawingArea)
 {
     if (isDirty()) {
@@ -122,7 +133,9 @@ void ColoredBar::updateBackBuffer(Gtk::DrawingArea &drawingArea)
             }
 
             for (std::vector<GradientMilestone>::iterator i = bgGradient.begin(); i != bgGradient.end(); ++i) {
-                bggradient->add_color_stop_rgb (i->position, i->r, i->g, i->b);
+                auto r = i->r, g = i->g, b = i->b;
+                getGUIColor(r, g, b);
+                bggradient->add_color_stop_rgb(i->position, r, g, b);
             }
 
             cr->set_source (bggradient);
@@ -149,7 +162,7 @@ void ColoredBar::updateBackBuffer(Gtk::DrawingArea &drawingArea)
                             double y01 = double(py) / double(h - 1);
                             colorProvider->colorForValue (x01, y01, CCET_BACKGROUND, colorCallerId, this);
 
-                            rtengine::poke01_d(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
+                            poke_rgba(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
                         }
                     }
 
@@ -165,7 +178,7 @@ void ColoredBar::updateBackBuffer(Gtk::DrawingArea &drawingArea)
                             double y01 = double(py) / double(h - 1);
                             colorProvider->colorForValue (x01, y01, CCET_BACKGROUND, colorCallerId, this);
 
-                            rtengine::poke01_d(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
+                            poke_rgba(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
                         }
                     }
 
@@ -181,7 +194,7 @@ void ColoredBar::updateBackBuffer(Gtk::DrawingArea &drawingArea)
                             double y01 = double(py) / double(h - 1);
                             colorProvider->colorForValue (y01, x01, CCET_BACKGROUND, colorCallerId, this);
 
-                            rtengine::poke01_d(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
+                            poke_rgba(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
                         }
                     }
 
@@ -198,7 +211,7 @@ void ColoredBar::updateBackBuffer(Gtk::DrawingArea &drawingArea)
                             double y01 = y_ / double(h - 1);
                             colorProvider->colorForValue (y01, x01, CCET_BACKGROUND, colorCallerId, this);
 
-                            rtengine::poke01_d(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
+                            poke_rgba(pixel, ccRed, ccGreen, ccBlue, ccAlpha);
                         }
                     }
 

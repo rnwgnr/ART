@@ -345,6 +345,7 @@ RTWindow::RTWindow():
             }
         }
 
+        setDefaultMonitorProfileName(get_root_window()->gobj());
         Preferences::switchThemeTo(options.theme);
 
         // Set the font face and size

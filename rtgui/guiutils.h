@@ -675,4 +675,12 @@ enum {
     KEY_9 = 0x12
 };
 #endif
+
 } // namespace HWKeyCode
+
+bool getSystemDefaultMonitorProfile(GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname);
+void setDefaultMonitorProfileName(GdkWindow *rootwin);
+void getGUIColor(int &r, int &g, int &b);
+void getGUIColor(float &r, float &g, float &b);
+void getGUIColor(double &r, double &g, double &b);
+    

@@ -18,8 +18,28 @@
  */
 #include "myflatcurve.h"
 #include "../rtengine/curves.h"
+#include "guiutils.h"
 #include <cstring>
 #include <gdkmm/types.h>
+
+namespace {
+
+template <class Context>
+void set_source_rgb(Context cr, double red, double green, double blue)
+{
+    getGUIColor(red, green, blue);
+    cr->set_source_rgb(red, green, blue);
+}
+
+template <class Context>
+void set_source_rgba(Context cr, double red, double green, double blue, double alpha)
+{
+    getGUIColor(red, green, blue);
+    cr->set_source_rgba(red, green, blue, alpha);
+}
+
+} // namespace
+
 
 MyFlatCurve::MyFlatCurve () :
     MyCurve(),
@@ -226,21 +246,21 @@ void MyFlatCurve::draw ()
 
         if (n > 1) {
             if (pipetteR > -1.f) {
-                cr->set_source_rgba (1., 0., 0., 0.5); // WARNING: assuming that red values are stored in pipetteR, which might not be the case!
+                set_source_rgba(cr, 1., 0., 0., 0.5); // WARNING: assuming that red values are stored in pipetteR, which might not be the case!
                 cr->move_to (graphX + graphW*pipetteR, graphY + 1. * s);
                 cr->rel_line_to (0, -graphH - 1. * s);
                 cr->stroke ();
             }
 
             if (pipetteG > -1.f) {
-                cr->set_source_rgba (0., 1., 0., 0.5); // WARNING: assuming that green values are stored in pipetteG, which might not be the case!
+                set_source_rgba(cr, 0., 1., 0., 0.5); // WARNING: assuming that green values are stored in pipetteG, which might not be the case!
                 cr->move_to (graphX + graphW*pipetteG, graphY + 1. * s);
                 cr->rel_line_to (0, -graphH - 1. * s);
                 cr->stroke ();
             }
 
             if (pipetteB > -1.f) {
-                cr->set_source_rgba (0., 0., 1., 0.5); // WARNING: assuming that blue values are stored in pipetteB, which might not be the case!
+                set_source_rgba(cr, 0., 0., 1., 0.5); // WARNING: assuming that blue values are stored in pipetteB, which might not be the case!
                 cr->move_to (graphX + graphW*pipetteB, graphY + 1. * s);
                 cr->rel_line_to (0, -graphH - 1. * s);
                 cr->stroke ();
@@ -269,7 +289,7 @@ void MyFlatCurve::draw ()
 
                 cr->set_line_width (coloredLineWidth);
                 colorProvider->colorForValue(curve.x.at(i), curve.y.at(i), CCET_VERTICAL_BAR, colorCallerId, this);
-                cr->set_source_rgb (ccRed, ccGreen, ccBlue);
+                set_source_rgb(cr, ccRed, ccGreen, ccBlue);
 
                 if ( i == lit_point && (editedHandle & (FCT_EditedHandle_CPointUD | FCT_EditedHandle_CPoint | FCT_EditedHandle_CPointX)) ) {
                     cr->set_line_width (2 * coloredLineWidth);
@@ -300,7 +320,7 @@ void MyFlatCurve::draw ()
                 if (drawHLine) {
                     int point = edited_point > -1 ? edited_point : lit_point;
                     colorProvider->colorForValue(curve.x.at(i), curve.y.at(i), CCET_HORIZONTAL_BAR, colorCallerId, this);
-                    cr->set_source_rgb (ccRed, ccGreen, ccBlue);
+                    set_source_rgb(cr, ccRed, ccGreen, ccBlue);
 
                     cr->move_to (graphX - 0.5 - 0.5 * s , graphY - graphH * curve.y.at(point));
                     cr->rel_line_to (graphW + 1. + s, 0.);
@@ -312,7 +332,7 @@ void MyFlatCurve::draw ()
         // endif
         cr->set_line_width (1.0 * s);
     } else {
-        cr->set_source_rgb (0.5, 0.0, 0.0);
+        set_source_rgb(cr, 0.5, 0.0, 0.0);
 
         if (edited_point > -1 || ((lit_point > -1) && ((area & (FCT_Area_H | FCT_Area_V | FCT_Area_Point)) || editedHandle == FCT_EditedHandle_CPointUD)) ) {
             // draw the lit_point's vertical line
@@ -357,7 +377,7 @@ void MyFlatCurve::draw ()
 
         // left handle is yellow
         // TODO: finding a way to set the left handle color for flat curve editor
-        cr->set_source_rgb (1.0, 1.0, 0.0);
+        set_source_rgb(cr, 1.0, 1.0, 0.0);
 
         // draw tangential vectors
 
@@ -393,7 +413,7 @@ void MyFlatCurve::draw ()
 
         // right handle is blue
         // TODO: finding a way to set the right handle color for flat curve editor
-        cr->set_source_rgb (0.0, 0.0, 1.0);
+        set_source_rgb(cr, 0.0, 0.0, 1.0);
 
         // draw tangential vectors
 
@@ -443,18 +463,18 @@ void MyFlatCurve::draw ()
     for (int i = 0; i < (int)curve.x.size(); ++i) {
         if (curve.x.at(i) != -1.) {
             if (i == edited_point) {
-                cr->set_source_rgb (1.0, 0.0, 0.0);
+                set_source_rgb(cr, 1.0, 0.0, 0.0);
             } else if (i == lit_point) {
                 if (colorProvider && edited_point == -1) {
                     colorProvider->colorForValue(curve.x.at(i), curve.y.at(i), CCET_POINT, colorCallerId, this);
-                    cr->set_source_rgb (ccRed, ccGreen, ccBlue);
+                    set_source_rgb(cr, ccRed, ccGreen, ccBlue);
                 } else {
-                    cr->set_source_rgb (1.0, 0.0, 0.0);
+                    set_source_rgb(cr, 1.0, 0.0, 0.0);
                 }
             } else if (i == snapToElmt || i == edited_point) {
-                cr->set_source_rgb (1.0, 0.0, 0.0);
+                set_source_rgb(cr, 1.0, 0.0, 0.0);
             } else if (curve.y.at(i) == 0.5) {
-                cr->set_source_rgb (0.0, 0.5, 0.0);
+                set_source_rgb (cr, 0.0, 0.5, 0.0);
             } else {
                 cr->set_source_rgb (c.get_red(), c.get_green(), c.get_blue());
             }
@@ -466,7 +486,7 @@ void MyFlatCurve::draw ()
             cr->fill ();
 
             if (i == edited_point) {
-                cr->set_source_rgb (1.0, 0.0, 0.0);
+                set_source_rgb(cr, 1.0, 0.0, 0.0);
                 cr->set_line_width(2. * s);
                 cr->arc (x, y, (RADIUS + 2.) * s, 0, 2 * rtengine::RT_PI);
                 cr->stroke();
@@ -486,7 +506,7 @@ void MyFlatCurve::draw ()
         // LEFT handle
 
         // yellow
-        cr->set_source_rgb (1.0, 1.0, 0.0);
+        set_source_rgb(cr, 1.0, 1.0, 0.0);
         cr->rectangle(graphX + graphW * (leftTanHandle.centerX - halfSquareSizeX),
                       graphY - graphH * (leftTanHandle.centerY + halfSquareSizeY),
                       graphW * minDistanceX,
@@ -496,7 +516,7 @@ void MyFlatCurve::draw ()
         // RIGHT handle
 
         // blue
-        cr->set_source_rgb (0.0, 0.0, 1.0);
+        set_source_rgb(cr, 0.0, 0.0, 1.0);
         cr->rectangle(graphX + graphW * (rightTanHandle.centerX - halfSquareSizeX),
                       graphY - graphH * (rightTanHandle.centerY + halfSquareSizeY),
                       graphW * minDistanceX,

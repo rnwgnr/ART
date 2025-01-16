@@ -17,10 +17,9 @@
  */
 #include <cairomm/cairomm.h>
 #include "../rtengine/rt_math.h"
-
+#include "../rtengine/iccstore.h"
 #include "guiutils.h"
 #include "options.h"
-#include "../rtengine/rt_math.h"
 #include "../rtengine/utils.h"
 #include "rtimage.h"
 #include "multilangmgr.h"
@@ -1866,4 +1865,204 @@ void setTreeViewCssProvider(Gtk::TreeView *tree)
     auto p = Gtk::CssProvider::create();
     p->load_from_data("* { background-image: none; border-color: rgba(0,0,0,0); }");
     tree->get_style_context()->add_provider(p, GTK_STYLE_PROVIDER_PRIORITY_USER);
+}
+
+
+namespace {
+
+class GUIColorConversion {
+public:
+    GUIColorConversion():
+        ok_(false)
+    {
+    }
+    
+    void init()
+    {
+        ok_ = false;
+        cmsHPROFILE monitor = rtengine::ICCStore::getInstance()->getActiveMonitorProfile();
+        if (monitor) {
+            rtengine::Mat33<float> m, mi;
+            if (rtengine::ICCStore::getProfileMatrix(monitor, m) && rtengine::inverse(m, mi)) {
+                m_ = rtengine::dot_product(mi, rtengine::xyz_sRGB);
+                ok_ = true;
+            }
+        }
+    }
+
+    void operator()(int &r, int &g, int &b)
+    {
+        if (ok_) {
+            float rr = r / 255.f;
+            float gg = g / 255.f;
+            float bb = b / 255.f;
+            (*this)(rr, gg, bb);
+            r = rtengine::LIM(rr * 255.f, 0.f, 255.f);
+            g = rtengine::LIM(gg * 255.f, 0.f, 255.f);
+            b = rtengine::LIM(bb * 255.f, 0.f, 255.f);
+        }
+    }
+
+    void operator()(float &r, float &g, float &b)
+    {
+        if (ok_) {
+            v_[0] = gam(r);
+            v_[1] = gam(g);
+            v_[2] = gam(b);
+            v_ = rtengine::dot_product(m_, v_);
+            r = igam(v_[0]);
+            g = igam(v_[1]);
+            b = igam(v_[2]);
+        }
+    }
+
+    void operator()(double &r, double &g, double &b)
+    {
+        if (ok_) {
+            float rr = r;
+            float gg = g;
+            float bb = b;
+            (*this)(rr, gg, bb);
+            r = rr;
+            g = gg;
+            b = bb;
+        }
+    }
+
+private:
+    float gam(float x)
+    {
+        x = rtengine::LIM01(x);
+        return rtengine::Color::igammatab_srgb1[x * 65535.f];
+    }
+    
+    float igam(float x)
+    {
+        x = rtengine::LIM01(x);
+        return rtengine::Color::gammatab_srgb1[x * 65535.f];
+    }
+    
+    bool ok_;
+    rtengine::Mat33<float> m_;
+    rtengine::Vec3<float> v_;
+};
+
+GUIColorConversion guiconv;
+
+} // namespace
+
+void getGUIColor(int &r, int &g, int &b)
+{
+    guiconv(r, g, b);
+}
+
+void getGUIColor(float &r, float &g, float &b)
+{
+    guiconv(r, g, b);
+}
+
+void getGUIColor(double &r, double &g, double &b)
+{
+    guiconv(r, g, b);
+}
+
+
+bool getSystemDefaultMonitorProfile(GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
+{
+#ifndef ART_OS_COLOR_MGMT
+# ifdef WIN32
+    HDC hDC = GetDC (nullptr);
+
+    if (hDC != nullptr) {
+        if (SetICMMode (hDC, ICM_ON)) {
+            char profileName[MAX_PATH + 1];
+            DWORD profileLength = MAX_PATH;
+
+            if (GetICMProfileA (hDC, &profileLength, profileName)) {
+                defprof = Glib::ustring (profileName);
+                defprofname = Glib::path_get_basename (defprof);
+                size_t pos = defprofname.rfind (".");
+
+                if (pos != Glib::ustring::npos) {
+                    defprofname = defprofname.substr (0, pos);
+                }
+
+                defprof = Glib::ustring ("file:") + defprof;
+                return true;
+            }
+
+            // might fail if e.g. the monitor has no profile
+        }
+
+        ReleaseDC (NULL, hDC);
+    }
+
+# elif !defined(__APPLE__)
+    // taken from geeqie (image.c) and adapted
+    // Originally licensed as GPL v2+, with the following copyright:
+    // * Copyright (C) 2006 John Ellis
+    // * Copyright (C) 2008 - 2016 The Geeqie Team
+    //
+    guchar *prof = nullptr;
+    gint proflen;
+    GdkAtom type = GDK_NONE;
+    gint format = 0;
+
+    if (gdk_property_get (rootwin, gdk_atom_intern ("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
+        cmsHPROFILE p = cmsOpenProfileFromMem (prof, proflen);
+
+        if (p) {
+            defprofname = "from GDK";
+            {
+                auto mlu = static_cast<const cmsMLU *>(cmsReadTag(p, cmsSigProfileDescriptionTag));
+                if (mlu) {
+                    auto sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
+                    if (sz > 0) {
+                        std::vector<char> buf(sz);
+                        cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
+                        buf.back() = 0; // sanity
+                        defprofname = std::string(&buf[0]);
+                    }
+                }
+            }
+            
+            defprof = Glib::build_filename (Options::rtdir, "GDK_ICC_PROFILE.icc");
+
+            if (cmsSaveProfileToFile (p, defprof.c_str())) {
+                cmsCloseProfile (p);
+
+                if (prof) {
+                    g_free (prof);
+                }
+
+                defprof = Glib::ustring ("file:") + defprof;
+                return true;
+            }
+        }
+    }
+
+    if (prof) {
+        g_free (prof);
+    }
+# endif // WIN / LINUX
+    
+#endif // ART_OS_COLOR_MGMT
+    return false;
+}
+
+
+void setDefaultMonitorProfileName(GdkWindow *rootwin)
+{
+#ifndef ART_OS_COLOR_MGMT
+    if (options.rtSettings.autoMonitorProfile) {
+        Glib::ustring defprof;
+        Glib::ustring defprofname;
+        if (getSystemDefaultMonitorProfile(rootwin, defprof, defprofname)) {
+            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
+        }
+    } else {
+        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(options.rtSettings.monitorProfile);
+    }
+#endif // ART_OS_COLOR_MGMT
+    guiconv.init();
 }

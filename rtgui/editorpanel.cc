@@ -54,90 +54,90 @@ void setprogressStrUI(double val, const Glib::ustring str, MyProgressBar* pProgr
 }
 
 
-#ifndef ART_OS_COLOR_MGMT
+// #ifndef ART_OS_COLOR_MGMT
 
-bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
-{
-#ifdef WIN32
-    HDC hDC = GetDC (nullptr);
+// bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
+// {
+// #ifdef WIN32
+//     HDC hDC = GetDC (nullptr);
 
-    if (hDC != nullptr) {
-        if (SetICMMode (hDC, ICM_ON)) {
-            char profileName[MAX_PATH + 1];
-            DWORD profileLength = MAX_PATH;
+//     if (hDC != nullptr) {
+//         if (SetICMMode (hDC, ICM_ON)) {
+//             char profileName[MAX_PATH + 1];
+//             DWORD profileLength = MAX_PATH;
 
-            if (GetICMProfileA (hDC, &profileLength, profileName)) {
-                defprof = Glib::ustring (profileName);
-                defprofname = Glib::path_get_basename (defprof);
-                size_t pos = defprofname.rfind (".");
+//             if (GetICMProfileA (hDC, &profileLength, profileName)) {
+//                 defprof = Glib::ustring (profileName);
+//                 defprofname = Glib::path_get_basename (defprof);
+//                 size_t pos = defprofname.rfind (".");
 
-                if (pos != Glib::ustring::npos) {
-                    defprofname = defprofname.substr (0, pos);
-                }
+//                 if (pos != Glib::ustring::npos) {
+//                     defprofname = defprofname.substr (0, pos);
+//                 }
 
-                defprof = Glib::ustring ("file:") + defprof;
-                return true;
-            }
+//                 defprof = Glib::ustring ("file:") + defprof;
+//                 return true;
+//             }
 
-            // might fail if e.g. the monitor has no profile
-        }
+//             // might fail if e.g. the monitor has no profile
+//         }
 
-        ReleaseDC (NULL, hDC);
-    }
+//         ReleaseDC (NULL, hDC);
+//     }
 
-#elif !defined(__APPLE__)
-    // taken from geeqie (image.c) and adapted
-    // Originally licensed as GPL v2+, with the following copyright:
-    // * Copyright (C) 2006 John Ellis
-    // * Copyright (C) 2008 - 2016 The Geeqie Team
-    //
-    guchar *prof = nullptr;
-    gint proflen;
-    GdkAtom type = GDK_NONE;
-    gint format = 0;
+// #elif !defined(__APPLE__)
+//     // taken from geeqie (image.c) and adapted
+//     // Originally licensed as GPL v2+, with the following copyright:
+//     // * Copyright (C) 2006 John Ellis
+//     // * Copyright (C) 2008 - 2016 The Geeqie Team
+//     //
+//     guchar *prof = nullptr;
+//     gint proflen;
+//     GdkAtom type = GDK_NONE;
+//     gint format = 0;
 
-    if (gdk_property_get (rootwin, gdk_atom_intern ("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
-        cmsHPROFILE p = cmsOpenProfileFromMem (prof, proflen);
+//     if (gdk_property_get (rootwin, gdk_atom_intern ("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
+//         cmsHPROFILE p = cmsOpenProfileFromMem (prof, proflen);
 
-        if (p) {
-            defprofname = "from GDK";
-            {
-                auto mlu = static_cast<const cmsMLU *>(cmsReadTag(p, cmsSigProfileDescriptionTag));
-                if (mlu) {
-                    auto sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
-                    if (sz > 0) {
-                        std::vector<char> buf(sz);
-                        cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
-                        buf.back() = 0; // sanity
-                        defprofname = std::string(&buf[0]);
-                    }
-                }
-            }
+//         if (p) {
+//             defprofname = "from GDK";
+//             {
+//                 auto mlu = static_cast<const cmsMLU *>(cmsReadTag(p, cmsSigProfileDescriptionTag));
+//                 if (mlu) {
+//                     auto sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
+//                     if (sz > 0) {
+//                         std::vector<char> buf(sz);
+//                         cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
+//                         buf.back() = 0; // sanity
+//                         defprofname = std::string(&buf[0]);
+//                     }
+//                 }
+//             }
             
-            defprof = Glib::build_filename (Options::rtdir, "GDK_ICC_PROFILE.icc");
+//             defprof = Glib::build_filename (Options::rtdir, "GDK_ICC_PROFILE.icc");
 
-            if (cmsSaveProfileToFile (p, defprof.c_str())) {
-                cmsCloseProfile (p);
+//             if (cmsSaveProfileToFile (p, defprof.c_str())) {
+//                 cmsCloseProfile (p);
 
-                if (prof) {
-                    g_free (prof);
-                }
+//                 if (prof) {
+//                     g_free (prof);
+//                 }
 
-                defprof = Glib::ustring ("file:") + defprof;
-                return true;
-            }
-        }
-    }
+//                 defprof = Glib::ustring ("file:") + defprof;
+//                 return true;
+//             }
+//         }
+//     }
 
-    if (prof) {
-        g_free (prof);
-    }
+//     if (prof) {
+//         g_free (prof);
+//     }
 
-#endif
-    return false;
-}
+// #endif
+//     return false;
+// }
 
-#endif // ART_OS_COLOR_MGMT
+// #endif // ART_OS_COLOR_MGMT
 
 } // namespace
 
@@ -162,7 +162,7 @@ private:
     void prepareProfileBox ()
     {
         const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
-        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName());
+//        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName());
 
         profileBox.setPreferredWidth (70, 200);
         setExpandAlignProperties (&profileBox, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
@@ -170,11 +170,12 @@ private:
         profileBox.append (M ("PREFERENCES_PROFILE_NONE"));
         Glib::ustring defprofname;
 
-        if (find_default_monitor_profile (profileBox.get_root_window()->gobj(), defprof, defprofname)) {
-            profileBox.append (M ("MONITOR_PROFILE_SYSTEM") + " (" + defprofname + ")");
+        //if (find_default_monitor_profile (profileBox.get_root_window()->gobj(), defprof, defprofname)) {
+        if (getSystemDefaultMonitorProfile(profileBox.get_root_window()->gobj(), defprof, defprofname)) {
+            profileBox.append(M ("MONITOR_PROFILE_SYSTEM") + " (" + defprofname + ")");
 
             if (options.rtSettings.autoMonitorProfile) {
-                rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
+                //rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
                 profileBox.set_active (1);
             } else {
                 profileBox.set_active (0);

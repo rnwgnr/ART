@@ -104,8 +104,6 @@ public:
     cmsHTRANSFORM getThumbnailMonitorTransform();
     const std::string &getThumbnailMonitorHash() const;
 
-    cmsHTRANSFORM getGuiMonitorTransform() const;
-
     bool getProfileMatrix(const Glib::ustring &name, Mat33<float> &out);
     static bool getProfileMatrix(cmsHPROFILE prof, Mat33<float> &out);
     static bool getProfileParametricTRC(cmsHPROFILE prof, float &out_gamma, float &out_slope);

@@ -1359,13 +1359,16 @@ void ColorCorrection::drawCurve(bool rgb, Cairo::RefPtr<Cairo::Context> cr, Glib
         for (int j = 0; j < 3; ++j) {
             CurveEval getVal(W, H, slope_rgb[j]->getValue(), offset_rgb[j]->getValue(), power_rgb[j]->getValue(), pivot_rgb[j]->getValue(), compression_rgb[j]->getValue(), j * s);
 
+            double r = 0.0, g = 0.0, b = 0.0;
             if (j == 0) {
-                cr->set_source_rgb(1.0, 0.0, 0.0);
+                r = 1.0;
             } else if (j == 1) {
-                cr->set_source_rgb(0.0, 1.0, 0.0);
+                g = 1.0;
             } else {
-                cr->set_source_rgb(0.0, 0.0, 1.0);
+                b = 1.0;
             }
+            getGUIColor(r, g, b);
+            cr->set_source_rgb(r, g, b);
             cr->move_to(0, getVal(0));
 
             for (int i = 1; i < W; ++i) {
