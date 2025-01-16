@@ -106,7 +106,9 @@ public:
             cr->set_line_cap(Cairo::LINE_CAP_SQUARE);
 
             const auto c = [](float v) { return std::pow(v / 65535.f, 1.f/2.2f); };
-            cr->set_source_rgb(c(R), c(G), c(B));
+            double rr = c(R), gg = c(G), bb = c(B);
+            getGUIColor(rr, gg, bb);
+            cr->set_source_rgb(rr, gg, bb);
             cr->set_operator(Cairo::OPERATOR_OVER);
             cr->paint();
         }
@@ -238,7 +240,9 @@ private:
                 flags = F_AUTO_COLOR;
                 state = PRELIGHT;
                 RGBColor c = getInnerLineColor();
-                cr->set_source_rgb(c.getR(), c.getG(), c.getB());
+                double rr = c.getR(), gg = c.getG(), bb = c.getB();
+                getGUIColor(rr, gg, bb);
+                cr->set_source_rgb(rr, gg, bb);
 
                 double r = std::min(image_w, image_h) * 0.25;
 

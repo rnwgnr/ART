@@ -1483,6 +1483,11 @@ void get_rgb(const char *color, guint8 *rgb)
     for (int c = 0; c < 3; ++c) {
         rgb[c] = get(color, 2*c+1) * 16 + get(color, 2*c+2);
     }
+    int r = rgb[0], g = rgb[1], b = rgb[2];
+    getGUIColor(r, g, b);
+    rgb[0] = rtengine::LIM(r, 0, 255);
+    rgb[1] = rtengine::LIM(g, 0, 255);
+    rgb[2] = rtengine::LIM(b, 0, 255);
 }
 
 
@@ -1507,6 +1512,11 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
             return rtengine::LIM(int((val - 16) * scale + 7.5f), 0, 108);
         };
 
+    std::map<int, guint8[3]> fcmap;
+    for (auto &p : options.falseColorsMap) {
+        get_rgb(p.second.c_str(), fcmap[p.first]);
+    }
+
 #ifdef _OPENMP
 #   pragma omp parallel for schedule(dynamic,16)
 #endif
@@ -1515,8 +1525,12 @@ void show_false_colors(Glib::RefPtr<Gdk::Pixbuf> pixbuf, Glib::RefPtr<Gdk::Pixbu
         for (int j = 0; j < bWidth; j++) {
             int L = get_L(curr);
             int ire = L_to_IRE(L);
-            auto it = options.falseColorsMap.lower_bound(ire);
-            get_rgb(it->second.c_str(), curr);
+            // auto it = options.falseColorsMap.lower_bound(ire);
+            // get_rgb(it->second.c_str(), curr);
+            auto it = fcmap.lower_bound(ire);
+            curr[0] = it->second[0];
+            curr[1] = it->second[1];
+            curr[2] = it->second[2];
             curr += 3;
         }
     }

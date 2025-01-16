@@ -172,6 +172,17 @@ RGBColor Geometry::getOuterLineColor ()
 
 #ifdef GUIVERSION
 
+namespace {
+
+template <class Context>
+void set_source_rgba(Context cr, double r, double g, double b, double a)
+{
+    getGUIColor(r, g, b);
+    cr->set_source_rgba(r, g, b, a);
+}
+
+} // namespace
+
 void Circle::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     double lineWidth = getOuterLineWidth();
@@ -184,7 +195,7 @@ void Circle::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer
             color = outerLineColor;
         }
 
-        cr->set_source_rgba (color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
+        set_source_rgba(cr, color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
         cr->set_line_width (lineWidth);
         cr->set_line_cap(Cairo::LINE_CAP_ROUND);
 
@@ -216,7 +227,7 @@ void Circle::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer
                 color = innerLineColor;
             }
 
-            cr->set_source_rgba (color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
+            set_source_rgba(cr, color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
         }
 
         cr->set_line_width(innerLineWidth);
@@ -274,9 +285,9 @@ void Circle::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short 
 
         // setting the color to the objet's ID
         if (objectBuffer->getObjectMode() == OM_255) {
-            cr->set_source_rgba (0., 0., 0., ((id + 1) & 0xFF) / 255.);
+            set_source_rgba(cr, 0., 0., 0., ((id + 1) & 0xFF) / 255.);
         } else {
-            cr->set_source_rgba (0., 0., 0., (id + 1) / 65535.);
+            set_source_rgba(cr, 0., 0., 0., (id + 1) / 65535.);
         }
         cr->arc(center_.x + 0.5, center_.y + 0.5, radius_, 0, 2.*rtengine::RT_PI);
 
@@ -305,7 +316,7 @@ void Line::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *
             color = outerLineColor;
         }
 
-        cr->set_source_rgba (color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
+        set_source_rgba(cr, color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
         cr->set_line_width (lineWidth);
         cr->set_line_cap(Cairo::LINE_CAP_ROUND);
 
@@ -341,7 +352,7 @@ void Line::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *
                 color = innerLineColor;
             }
 
-            cr->set_source_rgba (color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
+            set_source_rgba(cr, color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
         }
 
         cr->set_line_width(innerLineWidth);
@@ -396,9 +407,9 @@ void Line::drawToMOChannel(Cairo::RefPtr<Cairo::Context> &cr, unsigned short id,
 
         // setting the color to the objet's ID
         if (objectBuffer->getObjectMode() == OM_255) {
-            cr->set_source_rgba (0., 0., 0., ((id + 1) & 0xFF) / 255.);
+            set_source_rgba(cr, 0., 0., 0., ((id + 1) & 0xFF) / 255.);
         } else {
-            cr->set_source_rgba (0., 0., 0., (id + 1) / 65535.);
+            set_source_rgba(cr, 0., 0., 0., (id + 1) / 65535.);
         }
         cr->move_to(begin_.x + 0.5, begin_.y + 0.5);
         cr->line_to(end_.x + 0.5, end_.y + 0.5);
@@ -418,7 +429,7 @@ void PolyLine::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
             color = outerLineColor;
         }
 
-        cr->set_source_rgba (color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
+        set_source_rgba(cr, color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
         cr->set_line_width (lineWidth);
         cr->set_line_cap(Cairo::LINE_CAP_ROUND);
         cr->set_line_join(Cairo::LINE_JOIN_ROUND);
@@ -467,7 +478,7 @@ void PolyLine::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
                 color = innerLineColor;
             }
 
-            cr->set_source_rgba (color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
+            set_source_rgba(cr, color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
         }
 
         cr->set_line_width(innerLineWidth);
@@ -547,9 +558,9 @@ void PolyLine::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned shor
 
         // setting the color to the objet's ID
         if (objectBuffer->getObjectMode() == OM_255) {
-            cr->set_source_rgba (0., 0., 0., ((id + 1) & 0xFF) / 255.);
+            set_source_rgba(cr, 0., 0., 0., ((id + 1) & 0xFF) / 255.);
         } else {
-            cr->set_source_rgba (0., 0., 0., (id + 1) / 65535.);
+            set_source_rgba(cr, 0., 0., 0., (id + 1) / 65535.);
         }
 
         cr->set_line_width( getMouseOverLineWidth() );
@@ -626,7 +637,7 @@ void Rectangle::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuf
             color = outerLineColor;
         }
 
-        cr->set_source_rgba (color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
+        set_source_rgba(cr, color.getR(), color.getG(), color.getB(), OUTERGEOM_OPACITY * rtengine::min(innerLineWidth / 2.f, 1.f));
         cr->set_line_width (lineWidth);
         cr->set_line_join(Cairo::LINE_JOIN_BEVEL);
 
@@ -671,7 +682,7 @@ void Rectangle::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuf
                 color = innerLineColor;
             }
 
-            cr->set_source_rgba (color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
+            set_source_rgba(cr, color.getR(), color.getG(), color.getB(), INNERGEOM_OPACITY);
         }
 
         cr->set_line_width(innerLineWidth);
@@ -745,9 +756,9 @@ void Rectangle::drawToMOChannel(Cairo::RefPtr<Cairo::Context> &cr, unsigned shor
 
         // setting the color to the objet's ID
         if (objectBuffer->getObjectMode() == OM_255) {
-            cr->set_source_rgba (0., 0., 0., ((id + 1) & 0xFF) / 255.);
+            set_source_rgba(cr, 0., 0., 0., ((id + 1) & 0xFF) / 255.);
         } else {
-            cr->set_source_rgba (0., 0., 0., (id + 1) / 65535.);
+            set_source_rgba(cr, 0., 0., 0., (id + 1) / 65535.);
         }
         cr->rectangle(tl.x + 0.5, tl.y + 0.5, br.x - tl.x, br.y - tl.y);
 
@@ -941,9 +952,9 @@ void OPIcon::drawMOImage(Cairo::RefPtr<RTSurface> &img, Cairo::RefPtr<Cairo::Con
 
     // drawing the lower byte's value
     if (objectBuffer->getObjectMode() == OM_255) {
-        cr->set_source_rgba (0., 0., 0., ((id + 1) & 0xFF) / 255.);
+        set_source_rgba(cr, 0., 0., 0., ((id + 1) & 0xFF) / 255.);
     } else {
-        cr->set_source_rgba (0., 0., 0., (id + 1) / 65535.);
+        set_source_rgba(cr, 0., 0., 0., (id + 1) / 65535.);
     }
     cr->set_line_width(0.);
     cr->rectangle(tl.x, tl.y, imgW, imgH);
