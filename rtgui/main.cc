@@ -575,6 +575,7 @@ int main (int argc, char **argv)
     gdk_threads_set_lock_functions (G_CALLBACK (myGdkLockEnter), (G_CALLBACK (myGdkLockLeave)));
     gdk_threads_init();
     gtk_init (&argc, &argv);  // use the "--g-fatal-warnings" command line flag to make warnings fatal
+    initGUIColorManagement();
 
     if (fatalError.empty() && remote) {
         char *app_argv[2] = { const_cast<char *> (argv0.c_str()) };

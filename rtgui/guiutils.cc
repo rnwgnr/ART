@@ -2051,18 +2051,39 @@ bool getSystemDefaultMonitorProfile(GdkWindow *rootwin, Glib::ustring &defprof, 
 }
 
 
-void setDefaultMonitorProfileName(GdkWindow *rootwin)
+void initGUIColorManagement()
 {
+    Glib::ustring defprof;
+    Glib::ustring defprofname;
 #ifndef ART_OS_COLOR_MGMT
+    GdkWindow *rootwin = gdk_screen_get_root_window(gdk_screen_get_default());
     if (options.rtSettings.autoMonitorProfile) {
-        Glib::ustring defprof;
-        Glib::ustring defprofname;
-        if (getSystemDefaultMonitorProfile(rootwin, defprof, defprofname)) {
-            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
+        if (!getSystemDefaultMonitorProfile(rootwin, defprof, defprofname)) {
+            defprof = "";
+            defprofname = "";
         }
     } else {
-        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(options.rtSettings.monitorProfile);
+        defprof = defprofname = options.rtSettings.monitorProfile;
+    }
+    rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
+#else // ART_OS_COLOR_MGMT
+    auto p = rtengine::ICCStore::getInstance()->getActiveMonitorProfile();
+    if (p) {
+        defprof = rtengine::ICCStore::getProfileTag(p, cmsSigProfileDescriptionTag);
+        int n = defprof.size() - 9;
+        if (n > 0 && defprof.substr(n) == " (ICC V4)") {
+            defprofname = defprof.substr(0, n);
+        } else {
+            defprofname = defprof;
+        }
     }
 #endif // ART_OS_COLOR_MGMT
+    if (options.rtSettings.verbose) {
+        if (defprof.empty()) {
+            printf("No default monitor profile specified\n");
+        } else {
+            printf("Found default monitor profile: %s\n", defprofname.c_str());
+        }
+    }
     guiconv.init();
 }

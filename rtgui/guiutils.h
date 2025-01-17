@@ -679,7 +679,7 @@ enum {
 } // namespace HWKeyCode
 
 bool getSystemDefaultMonitorProfile(GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname);
-void setDefaultMonitorProfileName(GdkWindow *rootwin);
+void initGUIColorManagement();
 void getGUIColor(int &r, int &g, int &b);
 void getGUIColor(float &r, float &g, float &b);
 void getGUIColor(double &r, double &g, double &b);

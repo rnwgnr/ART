@@ -168,10 +168,6 @@ bool ColorWheelArea::on_draw(const ::Cairo::RefPtr<Cairo::Context> &crf)
     Glib::RefPtr<Gtk::StyleContext> style = get_style_context();
     Gtk::Border padding = getPadding(style);  // already scaled
     Cairo::RefPtr<Cairo::Context> cr = getContext();
-    auto bg = style->get_background_color(Gtk::STATE_FLAG_NORMAL);
-    float bg_r = bg.get_red();
-    float bg_g = bg.get_green();
-    float bg_b = bg.get_blue();
 
     if (isDirty()) {
         int width = allocation.get_width();
