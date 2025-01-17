@@ -37,7 +37,6 @@
 #endif
 
 extern Options options;
-extern Glib::ustring argv0;
 Glib::RefPtr<Gtk::CssProvider> themecss;
 Glib::RefPtr<Gtk::CssProvider> fontcss;
 
@@ -855,7 +854,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     setExpandAlignProperties (languages, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
 
     std::vector<Glib::ustring> langs;
-    parseDir (argv0 + "/languages", langs, "");
+    parseDir (options.ART_base_dir + "/languages", langs, "");
 
     for (size_t i = 0; i < langs.size(); i++) {
         if (/*"default" != langs[i] &&*/ "README" != langs[i] && "LICENSE" != langs[i] && langs[i].size() > 0 && langs[i][langs[i].size()-1] != '~') {
@@ -896,7 +895,7 @@ Gtk::Widget* Preferences::getGeneralPanel ()
     
     //setExpandAlignProperties(themeCBT, true, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     themeCBT->set_active(0);
-    parseThemeDir(Glib::build_filename(argv0, "themes"));
+    parseThemeDir(Glib::build_filename(options.ART_base_dir, "themes"));
     for (size_t i = 0; i < themeFNames.size(); i++) {
         auto name = themeFNames[i].shortFName;
         if (themeFNames[i].deprecated) {
@@ -2507,7 +2506,7 @@ void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *op
         auto bg = get_theme_color(opts->theme_bg_color);
         auto fg = get_theme_color(opts->theme_fg_color);
         auto hl = get_theme_color(opts->theme_hl_color);
-        std::string filename(Glib::build_filename(argv0, "themes", "_ART.css"));
+        std::string filename(Glib::build_filename(options.ART_base_dir, "themes", "_ART.css"));
         buf << "@define-color ART-bg rgb(" << bg[0] << "," << bg[1] << "," << bg[2] << ");\n"
             << "@define-color ART-fg rgb(" << fg[0] << "," << fg[1] << "," << fg[2] << ");\n"
             << "@define-color ART-hl rgb(" << hl[0] << "," << hl[1] << "," << hl[2] << ");\n"
@@ -2520,7 +2519,7 @@ void Preferences::switchThemeTo(const Glib::ustring &newTheme, const Options *op
             printf ("Error: Can't load css file \"%s\"\n", filename.c_str());
         }
     } else {
-        Glib::ustring filename(Glib::build_filename(argv0, "themes", newTheme + ".css"));
+        Glib::ustring filename(Glib::build_filename(options.ART_base_dir, "themes", newTheme + ".css"));
 
         try {
             themecss->load_from_path(filename);

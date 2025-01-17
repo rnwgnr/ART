@@ -6,8 +6,6 @@
 
 using namespace rtengine;
 
-Glib::ustring argv0;
-
 void save(array2D<float> &img, const char *filename)
 {
     Imagefloat im(img.width(), img.height());

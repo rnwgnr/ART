@@ -444,7 +444,7 @@ public:
 
         if (loadAll) {
             loadProfiles(stdProfilesDir, nullptr, nullptr, &fileCamProfilesFileNames, true);
-            Glib::ustring user_input_icc_dir = Glib::build_filename(options.rtdir, "iccprofiles", "input");
+            Glib::ustring user_input_icc_dir = Glib::build_filename(options.user_config_dir, "iccprofiles", "input");
             loadProfiles(user_input_icc_dir, nullptr, nullptr, &fileCamProfilesFileNames, true);
         }
 

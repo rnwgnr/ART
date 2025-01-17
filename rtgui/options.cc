@@ -42,8 +42,10 @@
 #include <Shlobj.h>
 #endif
 
+// Global (system) settings directory, including images' profiles if used
+Glib::ustring Options::ART_base_dir;
 // User's settings directory, including images' profiles if used
-Glib::ustring Options::rtdir;
+Glib::ustring Options::user_config_dir;
 // User's cached datas' directory
 Glib::ustring Options::cacheBaseDir;
 
@@ -137,7 +139,7 @@ void Options::updatePaths()
 
         if (checkDirPath(profilePath, "Error: the user's processing profile path doesn't point to a directory or doesn't exist!\n")) {
             userProfilePath = profilePath;
-            tmpPath = Glib::build_filename(argv0, "profiles");
+            tmpPath = Glib::build_filename(ART_base_dir, "profiles");
 
             if (checkDirPath(tmpPath, "Error: the global's processing profile path doesn't point to a directory or doesn't exist!\n")) {
                 if (userProfilePath != tmpPath) {
@@ -145,7 +147,7 @@ void Options::updatePaths()
                 }
             }
         } else {
-            tmpPath = Glib::build_filename(argv0, "profiles");
+            tmpPath = Glib::build_filename(ART_base_dir, "profiles");
 
             if (checkDirPath(tmpPath, "Error: the global's processing profile path doesn't point to a directory or doesn't exist!\n")) {
                 globalProfilePath = tmpPath;
@@ -153,7 +155,7 @@ void Options::updatePaths()
         }
     } else {
         // relative paths
-        tmpPath = Glib::build_filename(rtdir, profilePath);
+        tmpPath = Glib::build_filename(user_config_dir, profilePath);
 
         if (!checkDirPath(tmpPath, "")) {
             g_mkdir_with_parents(tmpPath.c_str(), 511);
@@ -168,7 +170,7 @@ void Options::updatePaths()
             userProfilePath = tmpPath;
         }
 
-        tmpPath = Glib::build_filename(argv0, "profiles");
+        tmpPath = Glib::build_filename(ART_base_dir, "profiles");
 
         if (checkDirPath(tmpPath, "Error: the user's processing profile path doesn't point to a directory or doesn't exist!\n")) {
             globalProfilePath = tmpPath;
@@ -2240,10 +2242,10 @@ void Options::load(bool lightweight, int verbose)
     path = g_getenv("ART_SETTINGS");
 
     if (path != nullptr) {
-        rtdir = Glib::ustring(path);
+        user_config_dir = Glib::ustring(path);
 
-        if (!Glib::path_is_absolute(rtdir)) {
-            Glib::ustring msg = Glib::ustring::compose("Settings path %1 is not absolute", rtdir);
+        if (!Glib::path_is_absolute(user_config_dir)) {
+            Glib::ustring msg = Glib::ustring::compose("Settings path %1 is not absolute", user_config_dir);
             throw Error(msg);
         }
     } else {
@@ -2253,26 +2255,26 @@ void Options::load(bool lightweight, int verbose)
         if (SHGetSpecialFolderPathW(NULL, pathW, CSIDL_LOCAL_APPDATA, false)) {
             char pathA[MAX_PATH];
             WideCharToMultiByte(CP_UTF8, 0, pathW, -1, pathA, MAX_PATH, 0, 0);
-            rtdir = Glib::build_filename(Glib::ustring(pathA), Glib::ustring(CACHEFOLDERNAME));
+            user_config_dir = Glib::build_filename(Glib::ustring(pathA), Glib::ustring(CACHEFOLDERNAME));
         }
 
 #else
-        rtdir = Glib::build_filename(Glib::ustring(g_get_user_config_dir()), Glib::ustring(CACHEFOLDERNAME));
+        user_config_dir = Glib::build_filename(Glib::ustring(g_get_user_config_dir()), Glib::ustring(CACHEFOLDERNAME));
 #endif
     }
 
     if (options.rtSettings.verbose) {
-        printf("Settings directory (rtdir) = %s\n", rtdir.c_str());
+        printf("Settings directory (user_config_dir) = %s\n", user_config_dir.c_str());
     }
 
     // Set the cache folder in RT's base folder
-    cacheBaseDir = Glib::build_filename(argv0, "mycache");
+    cacheBaseDir = Glib::build_filename(ART_base_dir, "mycache");
 
     // Read the global option file (the one located in the application's base folder)
     Glib::ustring lensfun_db_dir = options.rtSettings.lensfunDbDirectory;
     bool lensfun_db_dir_update = false;
     try {
-        options.readFromFile(Glib::build_filename(argv0, "options"));
+        options.readFromFile(Glib::build_filename(ART_base_dir, "options"));
         if (options.rtSettings.lensfunDbDirectory != lensfun_db_dir) {
             lensfun_db_dir = options.rtSettings.lensfunDbDirectory;
             lensfun_db_dir_update = true;
@@ -2282,7 +2284,7 @@ void Options::load(bool lightweight, int verbose)
     }
 
     if (!options.multiUser && path == nullptr) {
-        rtdir = Glib::build_filename(argv0, "mysettings");
+        user_config_dir = Glib::build_filename(ART_base_dir, "mysettings");
     }
 
     // Modify the path of the cache folder to the one provided in ART_CACHE environment variable
@@ -2299,7 +2301,7 @@ void Options::load(bool lightweight, int verbose)
     // No environment variable provided, so falling back to the multi user mode, if enabled
     else if (options.multiUser) {
 #ifdef WIN32
-        cacheBaseDir = Glib::build_filename(rtdir, "cache");
+        cacheBaseDir = Glib::build_filename(user_config_dir, "cache");
 #else
         cacheBaseDir = Glib::build_filename(Glib::ustring(g_get_user_cache_dir()), Glib::ustring(CACHEFOLDERNAME));
 #endif
@@ -2308,7 +2310,7 @@ void Options::load(bool lightweight, int verbose)
     // Read the user option file (the one located somewhere in the user's home folder)
     // Those values supersets those of the global option file
     try {
-        options.readFromFile(Glib::build_filename(rtdir, "options"));
+        options.readFromFile(Glib::build_filename(user_config_dir, "options"));
         if (verbose >= 0) {
             options.rtSettings.verbose = verbose;
         }
@@ -2318,9 +2320,9 @@ void Options::load(bool lightweight, int verbose)
         }
     } catch (Options::Error &) {
         // If the local option file does not exist or is broken, and the local cache folder does not exist, recreate it
-        if (!g_mkdir_with_parents(rtdir.c_str(), 511)) {
+        if (!g_mkdir_with_parents(user_config_dir.c_str(), 511)) {
             // Save the option file
-            options.saveToFile(Glib::build_filename(rtdir, "options"));
+            options.saveToFile(Glib::build_filename(user_config_dir, "options"));
         }
     }
 
@@ -2400,11 +2402,11 @@ void Options::load(bool lightweight, int verbose)
     // out which are the parent translations.  Furthermore, there must be a file <Language> for each locale <Language> (<LC>) -- you cannot have
     // 'French (CA)' unless there is a file 'French'.
 
-    Glib::ustring defaultTranslation = Glib::build_filename(argv0, "languages", "default");
+    Glib::ustring defaultTranslation = Glib::build_filename(ART_base_dir, "languages", "default");
     Glib::ustring languageTranslation = "";
     Glib::ustring localeTranslation = "";
 
-    Glib::ustring user_default_translation = Glib::build_filename(rtdir, "languages", "default");
+    Glib::ustring user_default_translation = Glib::build_filename(user_config_dir, "languages", "default");
     Glib::ustring user_language_translation = "";
     Glib::ustring user_locale_translation = "";
 
@@ -2416,8 +2418,8 @@ void Options::load(bool lightweight, int verbose)
     Glib::ustring user_ctl_locale_translation = "";
 
 #ifdef ART_USE_CTL
-    ctl_default_translation = Glib::build_filename(argv0, "ctlscripts", "languages", "default");
-    user_ctl_default_translation = Glib::build_filename(rtdir, "ctlscripts", "languages", "default");
+    ctl_default_translation = Glib::build_filename(ART_base_dir, "ctlscripts", "languages", "default");
+    user_ctl_default_translation = Glib::build_filename(user_config_dir, "ctlscripts", "languages", "default");
 #endif // ART_USE_CTL
 
     if (options.languageAutoDetect) {
@@ -2428,22 +2430,22 @@ void Options::load(bool lightweight, int verbose)
         std::vector<Glib::ustring> langPortions = Glib::Regex::split_simple(" ", options.language);
 
         if (langPortions.size() >= 1) {
-            languageTranslation = Glib::build_filename(argv0, "languages", langPortions.at(0));
-            user_language_translation = Glib::build_filename(rtdir, "languages", langPortions.at(0));
+            languageTranslation = Glib::build_filename(ART_base_dir, "languages", langPortions.at(0));
+            user_language_translation = Glib::build_filename(user_config_dir, "languages", langPortions.at(0));
 
 #ifdef ART_USE_CTL
-            ctl_language_translation = Glib::build_filename(argv0, "ctlscripts", "languages", langPortions.at(0));
-            user_ctl_language_translation = Glib::build_filename(rtdir, "ctlscripts", "languages", langPortions.at(0));
+            ctl_language_translation = Glib::build_filename(ART_base_dir, "ctlscripts", "languages", langPortions.at(0));
+            user_ctl_language_translation = Glib::build_filename(user_config_dir, "ctlscripts", "languages", langPortions.at(0));
 #endif // ART_USE_CTL
         }
 
         if (langPortions.size() >= 2) {
-            localeTranslation = Glib::build_filename(argv0, "languages", options.language);
-            user_locale_translation = Glib::build_filename(rtdir, "languages", options.language);
+            localeTranslation = Glib::build_filename(ART_base_dir, "languages", options.language);
+            user_locale_translation = Glib::build_filename(user_config_dir, "languages", options.language);
 
 #ifdef ART_USE_CTL
-            ctl_locale_translation = Glib::build_filename(argv0, "ctlscripts", "languages", options.language);
-            user_ctl_locale_translation = Glib::build_filename(rtdir, "ctlscripts", "languages", options.language);
+            ctl_locale_translation = Glib::build_filename(ART_base_dir, "ctlscripts", "languages", options.language);
+            user_ctl_locale_translation = Glib::build_filename(user_config_dir, "ctlscripts", "languages", options.language);
 #endif // ART_USE_CTL
         }
     }
@@ -2455,12 +2457,12 @@ void Options::load(bool lightweight, int verbose)
     };
     langMgr.load(options.language, fnames);
 
-    rtengine::init(&options.rtSettings, argv0, rtdir, !lightweight);
+    rtengine::init(&options.rtSettings, ART_base_dir, user_config_dir, !lightweight);
 }
 
 void Options::save()
 {
-    options.saveToFile(Glib::build_filename(rtdir, "options"));
+    options.saveToFile(Glib::build_filename(user_config_dir, "options"));
 }
 
 /*

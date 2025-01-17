@@ -67,7 +67,7 @@ FilmSimulation::FilmSimulation():
     EvAfterToneCurve = ProcEventMapper::getInstance()->newEvent(RGBCURVE, "HISTORY_MSG_FILMSIMULATION_AFTER_TONE_CURVE");
     EvClutParams = ProcEventMapper::getInstance()->newEvent(RGBCURVE, "HISTORY_MSG_FILMSIMULATION_CLUT_PARAMS");
     
-    m_clutComboBox = Gtk::manage(new ClutComboBox({Glib::build_filename(argv0, "luts"), options.clutsDir}));
+    m_clutComboBox = Gtk::manage(new ClutComboBox({Glib::build_filename(options.ART_base_dir, "luts"), options.clutsDir}));
     int foundClutsCount = m_clutComboBox->foundClutsCount();
 
     if ( foundClutsCount == 0 ) {

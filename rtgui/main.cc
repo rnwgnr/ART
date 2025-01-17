@@ -64,7 +64,6 @@
 extern Options options;
 
 // stores path to data files
-Glib::ustring argv0;
 Glib::ustring creditsPath;
 Glib::ustring licensePath;
 Glib::ustring argv1;
@@ -237,9 +236,9 @@ int processLineParams(int argc, char **argv)
 
 bool init_rt()
 {
-    UserCommandStore::getInstance()->init(Glib::build_filename(options.rtdir, "usercommands"));
+    UserCommandStore::getInstance()->init(Glib::build_filename(options.user_config_dir, "usercommands"));
     SoundManager::init();
-    wb_presets::init(argv0, options.rtdir);
+    wb_presets::init(options.ART_base_dir, options.user_config_dir);
 
     if ( !options.rtSettings.verbose ) {
         TIFFSetWarningHandler (nullptr);   // avoid annoying message boxes
@@ -248,8 +247,8 @@ bool init_rt()
 #ifndef WIN32
 
     // Move the old path to the new one if the new does not exist
-    if (Glib::file_test (Glib::build_filename (options.rtdir, "cache"), Glib::FILE_TEST_IS_DIR) && !Glib::file_test (options.cacheBaseDir, Glib::FILE_TEST_IS_DIR)) {
-        g_rename (Glib::build_filename (options.rtdir, "cache").c_str (), options.cacheBaseDir.c_str ());
+    if (Glib::file_test (Glib::build_filename (options.user_config_dir, "cache"), Glib::FILE_TEST_IS_DIR) && !Glib::file_test (options.cacheBaseDir, Glib::FILE_TEST_IS_DIR)) {
+        g_rename (Glib::build_filename (options.user_config_dir, "cache").c_str (), options.cacheBaseDir.c_str ());
     }
 
 #endif
@@ -266,7 +265,7 @@ void cleanup_rt()
 
 RTWindow *create_rt_window()
 {
-    Glib::ustring icon_path = Glib::build_filename (argv0, "images");
+    Glib::ustring icon_path = Glib::build_filename (options.ART_base_dir, "images");
     Glib::RefPtr<Gtk::IconTheme> defaultIconTheme = Gtk::IconTheme::get_default();
     defaultIconTheme->append_search_path (icon_path);
 
@@ -413,7 +412,7 @@ int main (int argc, char **argv)
     simpleEditor = false;
     gimpPlugin = false;
     remote = true;
-    argv0 = "";
+    options.ART_base_dir = "";
     argv1 = "";
     argv2 = "";
 
@@ -434,11 +433,11 @@ int main (int argc, char **argv)
 
     // set paths
     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
-        argv0 = DATA_SEARCH_PATH;
+        options.ART_base_dir = DATA_SEARCH_PATH;
     } else if (strcmp(DATA_SEARCH_PATH, ".") == 0) {
-        argv0 = exePath;
+        options.ART_base_dir = exePath;
     } else {
-        argv0 = Glib::build_filename (exePath, DATA_SEARCH_PATH);
+        options.ART_base_dir = Glib::build_filename (exePath, DATA_SEARCH_PATH);
     }
 
     if (Glib::path_is_absolute (CREDITS_SEARCH_PATH)) {
@@ -456,7 +455,7 @@ int main (int argc, char **argv)
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
 
 #else // BUILD_BUNDLE
-    argv0 = DATA_SEARCH_PATH;
+    options.ART_base_dir = DATA_SEARCH_PATH;
     creditsPath = CREDITS_SEARCH_PATH;
     licensePath = LICENCE_SEARCH_PATH;
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
@@ -578,7 +577,7 @@ int main (int argc, char **argv)
     initGUIColorManagement();
 
     if (fatalError.empty() && remote) {
-        char *app_argv[2] = { const_cast<char *> (argv0.c_str()) };
+        char *app_argv[2] = { const_cast<char *> (options.ART_base_dir.c_str()) };
         int app_argc = 1;
 
         if (!argv1.empty()) {

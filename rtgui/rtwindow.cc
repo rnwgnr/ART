@@ -313,10 +313,10 @@ RTWindow::RTWindow():
                 }
                 // check if this version exist
                 bool reset = false;
-                if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                if (!Glib::file_test(Glib::build_filename(options.ART_base_dir, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
                     if (!deprecated) {
                         options.theme += "-DEPRECATED";
-                        if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                        if (!Glib::file_test(Glib::build_filename(options.ART_base_dir, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
                             reset = true;
                         }
                         
@@ -335,7 +335,7 @@ RTWindow::RTWindow():
                     options.theme = initialTheme;
                 }
             }
-            filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
+            filename = Glib::build_filename(options.ART_base_dir, "themes", options.theme + ".css");
 
             if (!match || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
                 options.theme = "Default";

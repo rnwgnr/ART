@@ -26,7 +26,6 @@
 #include "threadutils.h"
 #include "gdkcolormgmt.h"
 
-extern Glib::ustring argv0;
 
 // Check if the system has more than one display and option is set
 bool EditWindow::isMultiDisplayEnabled()
@@ -156,7 +155,7 @@ void EditWindow::setAppIcon()
             downsize = true;
         }
     }
-    Glib::ustring icon_path = Glib::build_filename (argv0, "images", fName);
+    Glib::ustring icon_path = Glib::build_filename(options.ART_base_dir, "images", fName);
     const Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file(icon_path);
     if (!pixbuf) {
         return;

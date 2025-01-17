@@ -28,7 +28,6 @@
 double RTScalable::dpi = 0.;
 int RTScalable::scale = 0;
 
-extern Glib::ustring argv0;
 extern Options options;
 extern unsigned char initialGdkScale;
 extern float fontScale;
@@ -160,7 +159,7 @@ Cairo::RefPtr<Cairo::ImageSurface> RTScalable::loadImage(const Glib::ustring &fn
     // Dark theme color  : #CCCCCC
     // Light theme color : #252525  -- not used
 
-    Glib::ustring imagesFolder = Glib::build_filename (argv0, "images");
+    Glib::ustring imagesFolder = Glib::build_filename (options.ART_base_dir, "images");
     Glib::ustring imagesCacheFolder = Glib::build_filename (options.cacheBaseDir, "svg2png");
 
     // -------------------- Looking for the cached PNG file first --------------------

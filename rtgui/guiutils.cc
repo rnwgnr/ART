@@ -2026,7 +2026,7 @@ bool getSystemDefaultMonitorProfile(GdkWindow *rootwin, Glib::ustring &defprof, 
                 }
             }
             
-            defprof = Glib::build_filename (Options::rtdir, "GDK_ICC_PROFILE.icc");
+            defprof = Glib::build_filename(options.user_config_dir, "GDK_ICC_PROFILE.icc");
 
             if (cmsSaveProfileToFile (p, defprof.c_str())) {
                 cmsCloseProfile (p);

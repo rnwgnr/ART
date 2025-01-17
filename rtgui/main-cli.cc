@@ -69,7 +69,6 @@
 extern Options options;
 
 // stores path to data files
-Glib::ustring argv0;
 Glib::ustring creditsPath;
 Glib::ustring licensePath;
 Glib::ustring argv1;
@@ -157,11 +156,11 @@ int main (int argc, char **argv)
 
     // set paths
     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
-        argv0 = DATA_SEARCH_PATH;
+        options.ART_base_dir = DATA_SEARCH_PATH;
     } else if (strcmp(DATA_SEARCH_PATH, ".") == 0) {
-        argv0 = exePath;
+        options.ART_base_dir = exePath;
     } else {
-        argv0 = Glib::build_filename (exePath, DATA_SEARCH_PATH);
+        options.ART_base_dir = Glib::build_filename (exePath, DATA_SEARCH_PATH);
     }
 
     if (Glib::path_is_absolute (CREDITS_SEARCH_PATH)) {
@@ -179,7 +178,7 @@ int main (int argc, char **argv)
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
 
 #else
-    argv0 = DATA_SEARCH_PATH;
+    options.ART_base_dir = DATA_SEARCH_PATH;
     creditsPath = CREDITS_SEARCH_PATH;
     licensePath = LICENCE_SEARCH_PATH;
     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
@@ -232,9 +231,9 @@ int main (int argc, char **argv)
 #ifndef WIN32
 
     // Move the old path to the new one if the new does not exist
-    if (Glib::file_test (Glib::build_filename (options.rtdir, "cache"), Glib::FILE_TEST_IS_DIR) && !Glib::file_test (options.cacheBaseDir, Glib::FILE_TEST_IS_DIR)) {
-        if (g_rename (Glib::build_filename (options.rtdir, "cache").c_str (), options.cacheBaseDir.c_str ()) == -1) {
-            std::cout << "g_rename " <<  Glib::build_filename (options.rtdir, "cache").c_str () << " => " << options.cacheBaseDir.c_str () << " failed." << std::endl;
+    if (Glib::file_test (Glib::build_filename (options.user_config_dir, "cache"), Glib::FILE_TEST_IS_DIR) && !Glib::file_test (options.cacheBaseDir, Glib::FILE_TEST_IS_DIR)) {
+        if (g_rename (Glib::build_filename (options.user_config_dir, "cache").c_str (), options.cacheBaseDir.c_str ()) == -1) {
+            std::cout << "g_rename " <<  Glib::build_filename (options.user_config_dir, "cache").c_str () << " => " << options.cacheBaseDir.c_str () << " failed." << std::endl;
         }
     }
 

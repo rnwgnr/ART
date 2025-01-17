@@ -89,7 +89,7 @@ bool check(const Glib::ustring &fname)
 
 Glib::ustring filename()
 {
-    return Glib::build_filename(options.rtdir, "session");
+    return Glib::build_filename(options.user_config_dir, "session");
 }
 
 

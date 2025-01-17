@@ -157,6 +157,10 @@ private:
 
 public:
 
+    static Glib::ustring ART_base_dir;
+    static Glib::ustring user_config_dir;
+    
+
     enum class NavigatorUnit {
         PERCENT,
         R0_255,
@@ -246,7 +250,6 @@ public:
     NavigatorUnit navRGBUnit;
     NavigatorUnit navLCHUnit;
     bool multiUser;
-    static Glib::ustring rtdir;
     Glib::ustring version;
     int thumbSize;
     int thumbSizeTab;
@@ -515,7 +518,6 @@ public:
 };
 
 extern Options options;
-extern Glib::ustring argv0;
 extern Glib::ustring argv1;
 extern bool simpleEditor;
 extern bool gimpPlugin;

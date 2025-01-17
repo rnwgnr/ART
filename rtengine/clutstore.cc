@@ -1159,8 +1159,8 @@ std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> 
             intp->setMaxInstCount(10*10000000);
             std::vector<std::string> module_paths{
                     Glib::path_get_dirname(full_filename),
-                    Glib::build_filename(options.rtdir, "ctlscripts"),
-                    Glib::build_filename(argv0, "ctlscripts")
+                    Glib::build_filename(options.user_config_dir, "ctlscripts"),
+                    Glib::build_filename(options.ART_base_dir, "ctlscripts")
             };
             auto pth = intp->modulePaths();
             module_paths.insert(module_paths.end(), pth.begin(), pth.end());

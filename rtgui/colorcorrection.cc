@@ -43,8 +43,8 @@ void get_builtin_luts()
     if (!done) {
         done = true;
         std::vector<Glib::ustring> dirs = {
-            Glib::build_filename(options.rtdir, "ctlscripts"),
-            Glib::build_filename(argv0, "ctlscripts")
+            Glib::build_filename(options.user_config_dir, "ctlscripts"),
+            Glib::build_filename(options.ART_base_dir, "ctlscripts")
         };
 
         std::map<rtengine::CLUTStore::CLUTName, Glib::ustring> order;

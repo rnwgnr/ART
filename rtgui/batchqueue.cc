@@ -285,7 +285,7 @@ void BatchQueue::addEntries (const std::vector<BatchQueueEntry*>& entries, bool 
 
 bool BatchQueue::saveBatchQueue ()
 {
-    const auto fileName = Glib::build_filename (options.rtdir, "batch", "queue.csv");
+    const auto fileName = Glib::build_filename (options.user_config_dir, "batch", "queue.csv");
 
     std::ofstream file (fileName, std::ios::binary | std::ios::trunc);
 
@@ -330,7 +330,7 @@ bool BatchQueue::saveBatchQueue ()
 
 bool BatchQueue::loadBatchQueue ()
 {
-    const auto fileName = Glib::build_filename (options.rtdir, "batch", "queue.csv");
+    const auto fileName = Glib::build_filename (options.user_config_dir, "batch", "queue.csv");
 
     std::ifstream file (fileName, std::ios::binary);
 
@@ -457,7 +457,7 @@ Glib::ustring BatchQueue::getTempFilenameForParams( const Glib::ustring &filenam
     timeinfo = localtime ( &rawtime );
     strftime (stringTimestamp, sizeof(stringTimestamp), "_%Y%m%d%H%M%S_", timeinfo);
     Glib::ustring savedParamPath;
-    savedParamPath = options.rtdir + "/batch/";
+    savedParamPath = options.user_config_dir + "/batch/";
     g_mkdir_with_parents (savedParamPath.c_str (), 0755);
     savedParamPath += Glib::path_get_basename (filename);
     savedParamPath += stringTimestamp;
@@ -1034,7 +1034,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
 
         if (isEmpty) {
 
-            const auto batchdir = Glib::build_filename (options.rtdir, "batch");
+            const auto batchdir = Glib::build_filename (options.user_config_dir, "batch");
 
             try {
 

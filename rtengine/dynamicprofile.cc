@@ -266,7 +266,7 @@ bool DynamicProfileRules::loadRules(bool force_builtins)
     dynamicRules.clear();
     Glib::KeyFile kf;
 
-    Glib::ustring rules_file = Glib::build_filename(Options::rtdir, "dynamicprofile.cfg");
+    Glib::ustring rules_file = Glib::build_filename(options.user_config_dir, "dynamicprofile.cfg");
     if (force_builtins || !Glib::file_test(rules_file, Glib::FILE_TEST_EXISTS)) {
         rules_file = builtin_rules_file_;
     }
@@ -356,7 +356,7 @@ bool DynamicProfileRules::storeRules()
         kf.set_string(group, "profilepath", rule.profilepath);
     }
 
-    Glib::ustring fname = Glib::build_filename(Options::rtdir, "dynamicprofile.cfg");
+    Glib::ustring fname = Glib::build_filename(options.user_config_dir, "dynamicprofile.cfg");
     if (Glib::file_test(fname, Glib::FILE_TEST_EXISTS)) {
         try {
             Glib::KeyFile old;

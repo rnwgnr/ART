@@ -194,7 +194,7 @@ void FilePanel::init ()
         if (options.startupDir == Options::STARTUPDIR_HOME) {
             dirBrowser->open (PlacesBrowser::userPicturesDir ());
         } else if (options.startupDir == Options::STARTUPDIR_CURRENT) {
-            dirBrowser->open (argv0);
+            dirBrowser->open (options.ART_base_dir);
         } else if (options.startupDir == Options::STARTUPDIR_CUSTOM || options.startupDir == Options::STARTUPDIR_LAST) {
             if (options.startupPath.length() && ((Glib::file_test(options.startupPath, Glib::FILE_TEST_EXISTS) && Glib::file_test(options.startupPath, Glib::FILE_TEST_IS_DIR)) || art::session::check(options.startupPath))) {
                 dirBrowser->open (options.startupPath);

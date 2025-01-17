@@ -60,7 +60,7 @@ inline void exec_sync(const Glib::ustring &usrdir, const Glib::ustring &sysdir, 
     auto pth = Glib::getenv("PATH");
     auto extrapath = Glib::build_filename(usrdir, "bin") + G_SEARCHPATH_SEPARATOR_S + Glib::build_filename(sysdir, "bin");
 #ifdef BUILD_BUNDLE
-    extrapath += G_SEARCHPATH_SEPARATOR_S + argv0;
+    extrapath += G_SEARCHPATH_SEPARATOR_S + options.ART_base_dir;
 #endif // BUILD_BUNDLE
     auto epth = Glib::getenv("ART_EXIFTOOL_BASE_DIR");
     if (!epth.empty()) {
