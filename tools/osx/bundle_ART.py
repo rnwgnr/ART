@@ -29,6 +29,7 @@ def getopts():
     p.add_argument('-p', '--prefix')
     p.add_argument('-n', '--no-dmg', action='store_true')
     p.add_argument('-d', '--dmg-name', default='ART')
+    p.add_argument('-s', '--shell', default='/bin/sh')
     ret = p.parse_args()
     ret.outdir = os.path.join(ret.outdir, 'ART.app')
     return ret
@@ -196,6 +197,14 @@ def make_info_plist(opts):
         <string>Copyright © 2004-2010 Gábor Horváth, 2010-2019 RawTherapee Development Team, 2019-2024 Alberto Griggio</string>
         <key>LSMultipleInstancesProhibited</key>
         <true />
+        <key>NSDesktopFolderUsageDescription</key>
+        <string>ART requires permission to access the Desktop folder.</string>
+        <key>NSDocumentsFolderUsageDescription</key>
+        <string>ART requires permission to access the Documents folder.</string>
+        <key>NSDownloadsFolderUsageDescription</key>
+        <string>ART requires permission to access the Downloads folder.</string>
+        <key>NSRemovableVolumesUsageDescription</key>
+        <string>ART requires permission to access files on Removable Volumes.</string>        
     </dict>
 </plist>
 """)
@@ -230,6 +239,46 @@ def make_dmg(opts):
                     '-volname', opts.dmg_name,
                     f'{opts.dmg_name}.dmg'],
                     cwd=os.path.join(opts.outdir, '..'),
+                   check=True)
+
+def build_launcher(opts, prog):
+    cname = os.path.join(opts.tempdir, f'{prog}_launcher.c')
+    with open(cname, 'w') as out:
+        out.write("""
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <libgen.h>
+#include <stdio.h>
+
+
+int main(int argc, char *const argv[])
+{
+    char buf[4096];
+    strlcpy(buf, argv[0], 4096);
+    char *d0 = dirname(buf);
+
+    char buf2[4096];
+    strlcpy(buf2, d0, 4096);
+    """)
+        out.write(f'strlcat(buf2, "/.{prog}.sh", 4096);\n')
+        out.write("""
+    strlcpy(buf, d0, 4096);
+    strlcat(buf, "/.zsh", 4096);
+    
+    char **newargs = (char **)malloc(sizeof(char *) * (argc + 1));
+    newargs[0] = buf;
+    newargs[1] = buf2;
+    for (int i = 1; i < argc; ++i) {
+        newargs[i+1] = argv[i];
+    }
+    return execv(buf, newargs);
+}
+""")
+    if opts.verbose:
+        print(f'building launcher for {prog}...')
+    subprocess.run(['clang', cname, '-o',
+                    os.path.join(opts.outdir, f'Contents/MacOS/{prog}_launch')],
                    check=True)
 
 
@@ -277,6 +326,10 @@ def main():
                     shutil.copy2(elem, dest)
         make_info_plist(opts)
         make_icns(opts)
+        
+        build_launcher(opts, 'ART')
+        build_launcher(opts, 'ART-cli')
+
     os.makedirs(os.path.join(opts.outdir, 'Contents/Resources/share/gtk-3.0'))
     with open(os.path.join(opts.outdir,
                            'Contents/Resources/share/gtk-3.0/settings.ini'),
@@ -290,7 +343,10 @@ def main():
         shutil.move(os.path.join(opts.outdir, 'Contents/MacOS', name),
                     os.path.join(opts.outdir, 'Contents/MacOS',
                                  '.' + name + '.bin'))
-    with open(os.path.join(opts.outdir, 'Contents/MacOS/ART'), 'w') as out:
+        shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
+                                 name + '_launch'),
+                    os.path.join(opts.outdir, 'Contents/MacOS', name))
+    with open(os.path.join(opts.outdir, 'Contents/MacOS/.ART.sh'), 'w') as out:
         out.write("""#!/bin/zsh
 export ART_restore_GTK_CSD=$GTK_CSD
 export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
@@ -316,11 +372,13 @@ export GTK_PATH="$d/Resources/etc/gtk-3.0"
 export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
 export XDG_DATA_DIRS="$d/Resources/share"
 export GDK_RENDERING=similar
+export GTK_OVERLAY_SCROLLING=0
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 "$d/MacOS/.ART.bin" "$@"
 /bin/rm -rf "$t"
 """)
-    with open(os.path.join(opts.outdir, 'Contents/MacOS/ART-cli'), 'w') as out:
+    with open(os.path.join(opts.outdir,
+                           'Contents/MacOS/.ART-cli.sh'), 'w') as out:
         out.write("""#!/bin/zsh
 export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
@@ -329,8 +387,10 @@ export DYLD_LIBRARY_PATH="$d/Frameworks"
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 exec "$d/MacOS/.ART-cli.bin" "$@"
 """)
-    for name in ('ART', 'ART-cli'):
-        os.chmod(os.path.join(opts.outdir, 'Contents/MacOS', name), 0o755)
+    shutil.copy(opts.shell, os.path.join(opts.outdir,
+                                         'Contents/MacOS/.zsh'))
+    # for name in ('ART', 'ART-cli'):
+    #     os.chmod(os.path.join(opts.outdir, 'Contents/MacOS', name), 0o755)
     if not opts.no_dmg:
         make_dmg(opts)
 
