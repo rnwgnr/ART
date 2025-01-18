@@ -372,7 +372,7 @@ export GTK_PATH="$d/Resources/etc/gtk-3.0"
 export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
 export XDG_DATA_DIRS="$d/Resources/share"
 export GDK_RENDERING=similar
-export GTK_OVERLAY_SCROLLING=0
+#export GTK_OVERLAY_SCROLLING=0
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 "$d/MacOS/.ART.bin" "$@"
 /bin/rm -rf "$t"
