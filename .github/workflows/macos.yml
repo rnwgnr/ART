@@ -90,6 +90,7 @@ jobs:
           sudo port install lcms2
           sudo port install adwaita-icon-theme
           sudo port install meson
+          sudo port install dbus
 
       - name: Install LibRaw
         run: |
