@@ -163,10 +163,10 @@ jobs:
           meson setup build
           meson configure build --prefix /opt/local --buildtype release -Ddebug=false
           meson compile -C build
-          #sudo meson install -C build
-          cd build
-          sudo install -m 0755 -o root -g wheel gdk/libgdk-2.0.dylib /opt/local/lib/libgdk-2.0.dylib
-          sudo install -o root -g wheel ../gdk/quartz/gdkquartzwindow.h /opt/local/include/gtk-3.0/gdk/quartz/gdkquartzwindow.h
+          sudo meson install -C build
+          #cd build
+          #sudo install -m 0755 -o root -g wheel gdk/libgdk-2.0.dylib /opt/local/lib/libgdk-2.0.dylib
+          #sudo install -o root -g wheel ../gdk/quartz/gdkquartzwindow.h /opt/local/include/gtk-3.0/gdk/quartz/gdkquartzwindow.h
 
       - name: Configure build
         run: |
