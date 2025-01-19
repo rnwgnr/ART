@@ -24,6 +24,7 @@
 #24 2024-01-23 alvaro
 #25 2024-05-22 alvaro
 #26 2024-07-28 alvaro
+#27 2025-01-16 alvaro
 # Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page
 
 ABOUT_TAB_BUILD;Versione
@@ -1122,12 +1123,14 @@ PREFERENCES_METADATA_SYNC_READ;Sola lettura
 PREFERENCES_METADATA_SYNC_READWRITE;Bidirezionale
 PREFERENCES_MONINTENT;Destinazione di resa di default
 PREFERENCES_MONITOR;Monitor
+PREFERENCES_MONITOR_GAMUT;Gamut del monitor
 PREFERENCES_MONITORICCDIR;Cartella profili colore del monitor
 PREFERENCES_MONPROFILE;Profilo colore di default
 PREFERENCES_MONPROFILE_WARNOSX;A causa di limitazioni del MacOS, è supportato solo sRGB.
 PREFERENCES_MULTITAB;Modalità a Schede Multiple
 PREFERENCES_MULTITABDUALMON;Modalità a Schede Multiple nella propria finestra
 PREFERENCES_NAVIGATIONFRAME;Navigazione
+PREFERENCES_OSCOLORMGMT_INFO;La gestione del colore è integrata nel sistema operativo/ambiente desktop ed è abilitata a livello globale.\nUsa le funzionalità del tuo sistema operativo per impostare il profilo del monitor, quindi seleziona il gamut più adatto qui.
 PREFERENCES_OVERLAY_FILENAMES;Sovrapponi i nomi dei file alle miniature
 PREFERENCES_OVERLAY_FILENAMES_FILMSTRIP;Sovrapponi i nomi dei file alle miniature nella scheda Modifica
 PREFERENCES_OVERWRITEOUTPUTFILE;Sovrascrivi file esistenti
@@ -1398,6 +1401,7 @@ TP_COLORCORRECTION_CHANNEL_G;Verde
 TP_COLORCORRECTION_CHANNEL_R;Rosso
 TP_COLORCORRECTION_COMPRESSION;Compressione
 TP_COLORCORRECTION_H;Tinta
+TP_COLORCORRECTION_HSL_GAMMA;Gamma
 TP_COLORCORRECTION_HUESAT;Tinta/Saturazione
 TP_COLORCORRECTION_HUESHIFT;Scostamento tinta
 TP_COLORCORRECTION_IN;Ingresso
