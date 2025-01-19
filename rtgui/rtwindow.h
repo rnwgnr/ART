@@ -26,10 +26,6 @@
 #include <set>
 #include "progressconnector.h"
 #include "splash.h"
-#if defined(__APPLE__)
-#include <gtkosxapplication.h>
-#endif
-
 
 class EditWindow;
 
@@ -64,9 +60,6 @@ public:
     RTWindow ();
     ~RTWindow() override;
 
-#if defined(__APPLE__)
-    bool osxFileOpenEvent (Glib::ustring path);
-#endif
     void addEditorPanel (EditorPanel* ep, const std::string &name);
     void remEditorPanel (EditorPanel* ep);
     bool selectEditorPanel (const std::string &name);
@@ -174,9 +167,6 @@ private:
     void showErrors ();
 
     Glib::ustring versionStr;
-#if defined(__APPLE__)
-    GtkosxApplication *osxApp;
-#endif
 
     IdleRegister idle_register;
     bool is_application_;

@@ -39,7 +39,8 @@ def getdlls(opts):
     blacklist = ['/System/', '/usr/lib/']
     res = set()
     d = os.path.join(os.getcwd(), 'Contents/MacOS')
-    to_process = [os.path.join(d, 'ART')]
+    to_process = [os.path.join(d, 'ART'),
+                  os.path.join(getprefix(opts), 'bin/dbus-daemon')]
     seen = set()
     while to_process:
         name = to_process[-1]
@@ -122,17 +123,22 @@ def extra_files(opts):
     #     extra.append(('imageio',
     #                   [(os.path.join(opts.tempdir, 'ART-imageio-bin-linux64'),
     #                     'bin')]))
-    extra.append(('Contents/Frameworks',
-                  glob.glob(os.path.join(pref,
-                                         'lib/gdk-pixbuf-2.0/2.10.0/'
-                                         'loaders/*.so'))))
-    extra.append(('Contents/Frameworks',
-                  glob.glob(os.path.join(pref,
-                                         'lib/gtk-3.0/3*/immodules/*.so'))))
-    extra.append(('Contents/Resources',
-                  [os.path.join(pref, 'bin/gtk-query-immodules-3.0'),
-                   os.path.join(pref, 'bin/gdk-pixbuf-query-loaders')]))
     return [
+        ('Contents/Frameworks',
+         glob.glob(os.path.join(pref,
+                                'lib/gdk-pixbuf-2.0/2.10.0/'
+                                'loaders/*.so'))),
+        ('Contents/Frameworks',
+         glob.glob(os.path.join(pref,
+                                'lib/gtk-3.0/3*/immodules/*.so'))),
+        ('Contents/Resources', [
+            os.path.join(pref, 'bin/gtk-query-immodules-3.0'),
+            os.path.join(pref, 'bin/gdk-pixbuf-query-loaders'),
+            os.path.join(pref, 'bin/dbus-daemon')
+        ]),
+        ('Contents/Resources/dbus-1', [
+            os.path.join(pref, 'share/dbus-1/session.conf')
+        ]),
         ('Contents/Resources/share/icons/Adwaita', [
              P('share/icons/Adwaita/scalable'),
              P('share/icons/Adwaita/index.theme'), 
@@ -358,24 +364,44 @@ export ART_restore_GTK_PATH=$GTK_PATH
 export ART_restore_GTK_IM_MODULE_FILE=$GTK_IM_MODULE_FILE
 export ART_restore_GSETTINGS_SCHEMA_DIR=$GSETTINGS_SCHEMA_DIR
 export ART_restore_XDG_DATA_DIRS=$XDG_DATA_DIRS
+export ART_restore_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+
 d=$(dirname "$0")/..
-t=$(/usr/bin/mktemp -d)
+
 export DYLD_LIBRARY_PATH="$d/Frameworks"
 export GTK_CSD=0
-"$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
-"$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
-export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
-export GTK_IM_MODULE_FILE="$t/gtk.immodules"
 export GDK_PIXBUF_MODULEDIR="$d/Frameworks"
 export FONTCONFIG_FILE="$d/Resources/fonts.conf"
 export GTK_PATH="$d/Resources/etc/gtk-3.0"
 export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
 export XDG_DATA_DIRS="$d/Resources/share"
 export GDK_RENDERING=similar
-#export GTK_OVERLAY_SCROLLING=0
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
+
+t="$TMPDIR/ART-$USER"
+/bin/mkdir -p "$t"
+
+DBUS_SOCK_FILE="$t/dbus.sock"
+export DBUS_SESSION_BUS_ADDRESS=unix:path=$DBUS_SOCK_FILE
+
+/usr/sbin/netstat -an | /usr/bin/grep -q $DBUS_SOCK_FILE
+if [ $? -ne 0 ]; then
+    /bin/rm -f $DBUS_SOCK_FILE
+    DBUS_PID=$("$d/Resources/dbus-daemon" --fork --print-pid --config-file="$d/Resources/dbus-1/session.conf" --address "$DBUS_SESSION_BUS_ADDRESS")
+
+    "$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
+    "$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
+    export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
+    export GTK_IM_MODULE_FILE="$t/gtk.immodules"
+fi
+
 "$d/MacOS/.ART.bin" "$@"
-/bin/rm -rf "$t"
+
+if [ "$DBUS_PID" != "" ]; then
+    /bin/rm -rf "$t"
+    kill $DBUS_PID
+    /bin/rm -f $DBUS_SOCK_FILE
+fi
 """)
     with open(os.path.join(opts.outdir,
                            'Contents/MacOS/.ART-cli.sh'), 'w') as out:
@@ -389,8 +415,6 @@ exec "$d/MacOS/.ART-cli.bin" "$@"
 """)
     shutil.copy(opts.shell, os.path.join(opts.outdir,
                                          'Contents/MacOS/.zsh'))
-    # for name in ('ART', 'ART-cli'):
-    #     os.chmod(os.path.join(opts.outdir, 'Contents/MacOS', name), 0o755)
     if not opts.no_dmg:
         make_dmg(opts)
 

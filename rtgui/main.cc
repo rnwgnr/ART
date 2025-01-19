@@ -58,8 +58,10 @@
 #  include <mimalloc.h>
 #endif
 
-// Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
-#define ECLIPSE_ARGS 0
+#ifdef __APPLE__
+# include <gtkosxapplication.h>
+#endif
+
 
 extern Options options;
 
@@ -94,9 +96,7 @@ void process_help_params(int argc, char **argv)
 {
     for (int i = 1; i < argc; ++i) {
         Glib::ustring currParam(argv[i]);
-#if ECLIPSE_ARGS
-        currParam = currParam.substr(1, currParam.length() - 2);
-#endif
+
         if (currParam.length() > 1 && currParam[0] == '-') {
             switch (currParam[1]) {
             case 'v':
@@ -131,9 +131,6 @@ int processLineParams(int argc, char **argv)
         if (currParam.empty()) {
             continue;
         }
-#if ECLIPSE_ARGS
-        currParam = currParam.substr(1, currParam.length() - 2);
-#endif
 
         if (currParam[0] == '-' && currParam.size() > 1) {
             switch (currParam[1]) {
@@ -148,7 +145,7 @@ int processLineParams(int argc, char **argv)
                 ret = 0;
                 break;
 
-#ifndef __APPLE__ // TODO agriggio - there seems to be already some "single instance app" support for OSX in rtwindow. Disabling it here until I understand how to merge the two
+#if 1 //ndef __APPLE__ // TODO agriggio - there seems to be already some "single instance app" support for OSX in rtwindow. Disabling it here until I understand how to merge the two
 
             case 'R':
                 if (!gimpPlugin) {
@@ -216,9 +213,6 @@ int processLineParams(int argc, char **argv)
         } else {
             if (argv1.empty()) {
                 argv1 = Glib::ustring(fname_to_utf8(argv[iArg]));
-#if ECLIPSE_ARGS
-                argv1 = argv1.substr(1, argv1.length() - 2);
-#endif
             } else if (gimpPlugin) {
                 argv2 = Glib::ustring(fname_to_utf8(argv[iArg]));
                 break;
@@ -275,24 +269,37 @@ RTWindow *create_rt_window()
 }
 
 
-class RTApplication: public Gtk::Application
-{
+#ifdef __APPLE__
+
+static gboolean osx_open_file_cb(GtkosxApplication *a, gchar *pth, gpointer data);
+
+#endif // __APPLE__
+
+class RTApplication: public Gtk::Application {
 public:
     RTApplication():
         Gtk::Application("us.pixls.art.application",
                          Gio::APPLICATION_SEND_ENVIRONMENT|Gio::APPLICATION_HANDLES_COMMAND_LINE),
-        rtWindow (nullptr)
+        rtWindow(nullptr)
     {
+#ifdef __APPLE__
+        osxApp = (GtkosxApplication *)g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
+        g_signal_connect(osxApp, "NSApplicationOpenFile", G_CALLBACK(osx_open_file_cb), this);
+#endif // __APPLE__
     }
 
     ~RTApplication() override
     {
         if (rtWindow) {
-//            delete rtWindow;
             art::session::save(art::session::filename() + ".last");
             art::session::clear();
             cleanup_rt();
         }
+#ifdef __APPLE__
+        if (osxApp) {
+            g_object_unref(osxApp);
+        }
+#endif // __APPLE__
     }
     
 private:
@@ -311,6 +318,27 @@ private:
             rtWindow = create_rt_window();
             add_window(*rtWindow);
             rtWindow->setApplication(true);
+#ifdef __APPLE__
+            add_action("quit",
+                       sigc::slot<void>([this]()
+                       {
+                           GThreadLock lck;
+                           remove_window(*rtWindow);
+                       }));
+            add_action("preferences",
+                       sigc::slot<void>([this]()
+                       {
+                           GThreadLock lck;
+                           rtWindow->showPreferences();
+                       }));
+            add_action("about",
+                       sigc::slot<void>([this]()
+                       {
+                           GThreadLock lck;
+                           Splash splash(*rtWindow);
+                           splash.run();
+                       }));
+#endif // __APPLE__
             return true;
         }
     }
@@ -318,11 +346,17 @@ private:
     int on_command_line(const Glib::RefPtr<Gio::ApplicationCommandLine> &command_line) override
     {
         auto s = command_line->getenv("ART_IS_SESSION");
-        if (!s.empty() && atoi(s.c_str())) {
-            is_session = true;
-        }
+        is_session = (!s.empty() && atoi(s.c_str()));
+
         int argc = 0;
         auto argv = command_line->get_arguments(argc);
+
+        return process_command_line(argc, argv);
+    }
+
+public:
+    int process_command_line(int argc, char **argv)
+    {
         if (is_session) {
             bool raise = !rtWindow;
             if (create_window()) {
@@ -376,10 +410,29 @@ private:
         }
         return 1;
     }
-
+    
 private:
     RTWindow *rtWindow;
+#ifdef __APPLE__
+    GtkosxApplication *osxApp;
+#endif // __APPLE__
 };
+
+
+#ifdef __APPLE__
+
+static gboolean osx_open_file_cb(GtkosxApplication *a, gchar *pth, gpointer data)
+{
+    GThreadLock lck;
+    RTApplication *app = (RTApplication *)data;
+    int argc = 2;
+    char *argv[2] = { nullptr, pth };
+    is_session = false;
+    return app->process_command_line(argc, argv);
+}    
+
+#endif // __APPLE__
+
 
 void show_gimp_plugin_info_dialog(Gtk::Window *parent)
 {
@@ -533,7 +586,7 @@ int main (int argc, char **argv)
         }
     }
 
-#else
+#else // WIN32
 
     if (argc > 1) {
         int ret = processLineParams ( argc, argv);
@@ -543,7 +596,7 @@ int main (int argc, char **argv)
         }
     }
 
-#endif
+#endif // WIN32
 
     if (gimpPlugin) {
         if (!Glib::file_test (argv1, Glib::FILE_TEST_EXISTS) || Glib::file_test (argv1, Glib::FILE_TEST_IS_DIR)) {
@@ -577,6 +630,7 @@ int main (int argc, char **argv)
     initGUIColorManagement();
 
     if (fatalError.empty() && remote) {
+#if 1//ndef __APPLE__
         char *app_argv[2] = { const_cast<char *> (options.ART_base_dir.c_str()) };
         int app_argc = 1;
 
@@ -584,6 +638,10 @@ int main (int argc, char **argv)
             app_argc = 2;
             app_argv[1] = const_cast<char *> (argv1.c_str());
         }
+#else
+        auto app_argc = argc;
+        auto app_argv = argv;
+#endif // __APPLE__
 
         RTApplication app;
         ret = app.run(app_argc, app_argv);

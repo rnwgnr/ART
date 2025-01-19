@@ -63,9 +63,6 @@
 #  include <mimalloc.h>
 #endif
 
-// Set this to 1 to make RT work when started with Eclipse and arguments, at least on Windows platform
-#define ECLIPSE_ARGS 0
-
 extern Options options;
 
 // stores path to data files
@@ -261,9 +258,6 @@ std::pair<bool, int> dontLoadCache(int argc, char **argv)
     
     for (int iArg = 1; iArg < argc; iArg++) {
         Glib::ustring currParam (argv[iArg]);
-#if ECLIPSE_ARGS
-        currParam = currParam.substr (1, currParam.length() - 2);
-#endif
         if (currParam.length() > 1 && currParam[0] == '-') {
             switch (currParam[1]) {
             case 'q':
@@ -383,9 +377,6 @@ int processLineParams ( int argc, char **argv )
         if ( currParam.empty() ) {
             continue;
         }
-#if ECLIPSE_ARGS
-        currParam = currParam.substr (1, currParam.length() - 2);
-#endif
 
         if ( currParam.at (0) == '-' && currParam.size() > 1) {
             switch ( currParam.at (1) ) {
@@ -400,9 +391,6 @@ int processLineParams ( int argc, char **argv )
                 if ( iArg + 1 < argc ) {
                     iArg++;
                     outputPath = Glib::ustring (fname_to_utf8 (argv[iArg]));
-#if ECLIPSE_ARGS
-                    outputPath = outputPath.substr (1, outputPath.length() - 2);
-#endif
 
                     if (outputPath.substr (0, 9) == "/dev/null") {
                         outputPath.assign ("/dev/null"); // removing any useless chars or filename
@@ -421,9 +409,6 @@ int processLineParams ( int argc, char **argv )
                 if ( iArg + 1 < argc ) {
                     iArg++;
                     Glib::ustring fname (fname_to_utf8 (argv[iArg]));
-#if ECLIPSE_ARGS
-                    fname = fname.substr (1, fname.length() - 2);
-#endif
 
                     if (fname.at (0) == '-') {
                         std::cerr << "Error: filename missing next to the -p switch." << std::endl;
@@ -550,9 +535,6 @@ int processLineParams ( int argc, char **argv )
                 while (iArg + 1 < argc) {
                     iArg++;
                     Glib::ustring argument (fname_to_utf8 (argv[iArg]));
-#if ECLIPSE_ARGS
-                    argument = argument.substr (1, argument.length() - 2);
-#endif
 
                     if (!Glib::file_test (argument, Glib::FILE_TEST_EXISTS)) {
                         std::cerr << "\"" << argument << "\"  doesn't exist!" << std::endl;
@@ -638,9 +620,6 @@ int processLineParams ( int argc, char **argv )
             }
         } else {
             argv1 = Glib::ustring (fname_to_utf8 (argv[iArg]));
-#if ECLIPSE_ARGS
-            argv1 = argv1.substr (1, argv1.length() - 2);
-#endif
 
             if ( outputDirectory ) {
                 options.savePathFolder = outputPath;
