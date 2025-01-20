@@ -160,9 +160,10 @@ jobs:
           tar xzf gtk+-3.24.43.tar.xz
           cd gtk+-3.24.43
           patch -p1 < ../repo/tools/osx/gdk-window-quartz-colorspace.patch
+          INSTDIR=/opt/art-deps/gtk 
           meson setup build
           meson configure build \
-            --prefix /opt/local \
+            --prefix $INSTDIR \
             --buildtype release \
             -Ddebug=false \
             -Ddemos=false \
@@ -171,6 +172,8 @@ jobs:
             -Dx11_backend=false
           meson compile -C build
           sudo meson install -C build
+          sudo cp -a $INSTDIR/include/gtk-3.0/gdk/quartz/gdkquartzwindow.h /opt/local/include/gtk-3.0/gdk/quartz
+          sudo cp -a $INSTDIR/lib/libgdk-3.0.dylib /opt/local/lib/libgdk-3.0.dylib
 
       - name: Configure build
         run: |
