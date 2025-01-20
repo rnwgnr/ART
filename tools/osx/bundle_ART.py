@@ -41,6 +41,8 @@ def getdlls(opts):
     d = os.path.join(os.getcwd(), 'Contents/MacOS')
     to_process = [os.path.join(d, 'ART'),
                   os.path.join(getprefix(opts), 'bin/dbus-daemon')]
+    if opts.verbose:
+        print('========== getdlls ==========')
     seen = set()
     while to_process:
         name = to_process[-1]
@@ -48,6 +50,8 @@ def getdlls(opts):
         if name in seen:
             continue
         seen.add(name)
+        if opts.verbose:
+            print(f'computing dependencies for: {name}')
         r = subprocess.run(['otool', '-L', name], capture_output=True,
                            encoding='utf-8')
         out = r.stdout
@@ -63,8 +67,12 @@ def getdlls(opts):
                         lib = plib
                         break
             if not any(lib.startswith(p) for p in blacklist):
+                if opts.verbose:
+                    print(f'   {lib}')
                 res.add(lib)
                 to_process.append(lib)
+    if opts.verbose:
+        print('=============================')
     return sorted(res)
 
 
