@@ -2024,3 +2024,8 @@ ZOOMPANEL_ZOOM100;Zoom al 100%\nAtajo: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Ajustar imagen a la pantalla\nAtajo: <b>f</b>
 ZOOMPANEL_ZOOMIN;Aumentar zoom\nAtajo: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Reducir zoom\nAtajo: <b>-</b>
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
+PREFERENCES_MONITOR_GAMUT;Gama del monitor
+PREFERENCES_OSCOLORMGMT_INFO;La gestión del color está integrada en el entorno del sistema operativo/escritorio y activada globalmente.\nUtilice las funciones de su entorno para establecer el perfil del monitor y, a continuación, seleccione aquí la gama más adecuada.
+TP_COLORCORRECTION_HSL_GAMMA;Gamma

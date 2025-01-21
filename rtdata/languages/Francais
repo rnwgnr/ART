@@ -1991,4 +1991,8 @@ ZOOMPANEL_ZOOM100;Zoomer à 100%\nRaccourci : <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Ajuster l'image entière à l'écran\nRaccourci : <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoomer Avant\nRaccourci : <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoomer Arrière\nRaccourci : <b>-</b>
-
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
+PREFERENCES_MONITOR_GAMUT;Gamme du moniteur
+PREFERENCES_OSCOLORMGMT_INFO;La gestion des couleurs est intégrée dans le système d'exploitation/l'environnement de bureau et activée globalement.\nUtilisez votre environnement pour définir le profil du moniteur, puis sélectionnez la gamme la plus appropriée ici.
+TP_COLORCORRECTION_HSL_GAMMA;Gamma

@@ -2005,3 +2005,8 @@ ZOOMPANEL_ZOOM100;100%로 줌\n단축키: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;화상전체를 화면에 맞춤\n단축키: <b>f</b>
 ZOOMPANEL_ZOOMIN;줌인\n단축키: <b>+</b>
 ZOOMPANEL_ZOOMOUT;줌아웃\n단축키: <b>-</b>
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;색보정 - 감마
+PREFERENCES_MONITOR_GAMUT;모니터 색 영역
+PREFERENCES_OSCOLORMGMT_INFO;색 관리가 운영 체제/데스크톱 환경에 내장되어 있으며 전역적으로 활성화됩니다.\n환경 설정 기능을 사용하여 모니터 프로필을 설정한 다음 여기에서 가장 적합한 색역을 선택하세요.
+TP_COLORCORRECTION_HSL_GAMMA;감마

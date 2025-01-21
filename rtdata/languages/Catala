@@ -2021,3 +2021,8 @@ ZOOMPANEL_ZOOM100;Zoom al 100%\nDrecera: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Ajusta la imatge a la pantalla\nDrecera: <b>f</b>
 ZOOMPANEL_ZOOMIN;Augmenta el zoom\nDrecera: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Redueix el zoom\nDrecera: <b>-</b>
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
+PREFERENCES_MONITOR_GAMUT;Gamut del monitor
+PREFERENCES_OSCOLORMGMT_INFO;La gestió del color està integrada al sistema operatiu/entorn d'escriptori i s'habilita globalment.\nUtilitzeu les instal·lacions del vostre entorn per configurar el perfil del monitor i, a continuació, seleccioneu la gamma més adequada aquí.
+TP_COLORCORRECTION_HSL_GAMMA;Gamma

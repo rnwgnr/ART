@@ -1995,3 +1995,8 @@ ZOOMPANEL_ZOOM100;Nagyítás 100%-ra\nGyorsbillentyű: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;A képernyő méretéhez igazítás\nGyorsbillentyű: <b>f</b>
 ZOOMPANEL_ZOOMIN;Nagyítás +\nGyorsbillentyű: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Kicsinyítés -\nGyorsbillentyű: <b>-</b>
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
+PREFERENCES_MONITOR_GAMUT;Monitor színskála
+PREFERENCES_OSCOLORMGMT_INFO;A színkezelés az operációs rendszerbe/asztalos környezetbe van beépítve és globálisan engedélyezve.\nHasználja a környezetének lehetőségeit a monitorprofil beállításához, majd itt válassza ki a legmegfelelőbb színskálát.
+TP_COLORCORRECTION_HSL_GAMMA;Gamma

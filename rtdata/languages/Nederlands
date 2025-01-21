@@ -2032,3 +2032,8 @@ ZOOMPANEL_ZOOM100;Zoom naar 100%\nSneltoets: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Passend in venster\nSneltoets: <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoom in\nSneltoets: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;K/Tc - gamma
+PREFERENCES_MONITOR_GAMUT;Monitor gamma
+PREFERENCES_OSCOLORMGMT_INFO;Kleurbeheer is ingebouwd in het besturingssysteem/desktopomgeving en globaal ingeschakeld.\nGebruik de omgevingsfaciliteiten om het monitorprofiel in te stellen en selecteer hier het meest geschikte gamma.
+TP_COLORCORRECTION_HSL_GAMMA;Gamma

@@ -2014,3 +2014,8 @@ ZOOMPANEL_ZOOM100;100%にズーム\nショートカット: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;画像全体を画面に合わせる\nショートカット: <b>f</b>
 ZOOMPANEL_ZOOMIN;ズームイン\nショートカット: <b>+</b>
 ZOOMPANEL_ZOOMOUT;ズームアウト\nショートカット: <b>-</b>
+# added with automatic translation
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;色補正 - ガンマ
+PREFERENCES_MONITOR_GAMUT;モニターの色域
+PREFERENCES_OSCOLORMGMT_INFO;カラーマネジメントは、オペレーティングシステム/デスクトップ環境に組み込まれており、グローバルに有効になっています。\n環境機能を使用してモニタープロファイルを設定し、ここで最適な色域を選択します。
+TP_COLORCORRECTION_HSL_GAMMA;ガンマ
