@@ -97,6 +97,11 @@
 // OM SYSTEM OM-1 MARK II
 // OM SYSTEM OM-5
 // PANASONIC DC-G9M2
+//
+// updated on Tue Jan 21 12:04:06 2025:
+// CANON EOS R3
+// NIKON Z6_3
+// SONY ILCE-6700
 
 [
   {
@@ -6349,6 +6354,50 @@
       { "name" : "tungsten", "multipliers" : [ 1.79296875, 1, 2.0078125 ] },
       { "name" : "incandescent", "multipliers" : [ 1.81640625, 1, 2.0 ] },
       { "name" : "flash", "multipliers" : [ 2.63671875, 1, 1.40625 ] }
+    ]
+  },
+  {
+    "make_model" : "CANON EOS R3",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.9580078125, 1, 1.7470703125 ] },
+      { "name" : "shade", "multipliers" : [ 2.2705078125, 1, 1.505859375 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.111328125, 1, 1.6279296875 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.369140625, 1, 2.708984375 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.67578125, 1, 2.56640625 ] },
+      { "name" : "flash", "multipliers" : [ 2.15625, 1, 1.6103515625 ] }
+    ]
+  },
+  {
+    "make_model" : "NIKON Z6_3",
+    "presets" : [
+      { "name" : "direct sunlight", "multipliers" : [ 1.7890625, 1, 1.38671875 ] },
+      { "name" : "shade", "multipliers" : [ 2.1953125, 1, 1.12890625 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.916015625, 1, 1.2578125 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.158203125, 1, 2.220703125 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 1.673828125, 1, 2.048828125 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.6875, 1, 1.390625 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 1.919921875, 1, 1.12109375 ] },
+      { "name" : "flash", "multipliers" : [ 2.01953125, 1, 1.201171875 ] }
+    ]
+  },
+  {
+    "make_model" : "SONY ILCE-6700",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 2.7080078125, 1, 1.6064453125 ] },
+      { "name" : "shade", "multipliers" : [ 3.2060546875, 1, 1.3046875 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.9365234375, 1, 1.474609375 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.642578125, 1, 2.8720703125 ] },
+      { "name" : "warm white fluorescent", "multipliers" : [ 1.91015625, 1, 2.806640625 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 2.494140625, 1, 2.162109375 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 2.6953125, 1, 1.5869140625 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.994140625, 1, 1.478515625 ] },
+      { "name" : "underwater", "multipliers" : [ 2.7021484375, 1, 1.6044921875 ] },
+      { "name" : "flash", "multipliers" : [ 2.9326171875, 1, 1.4375 ] },
+      { "name" : "2500k", "multipliers" : [ 1.486328125, 1, 3.232421875 ] },
+      { "name" : "3200k", "multipliers" : [ 1.900390625, 1, 2.376953125 ] },
+      { "name" : "4500k", "multipliers" : [ 2.466796875, 1, 1.744140625 ] },
+      { "name" : "6000k", "multipliers" : [ 2.888671875, 1, 1.4443359375 ] },
+      { "name" : "8500k", "multipliers" : [ 3.259765625, 1, 1.205078125 ] }
     ]
   }
 ]
