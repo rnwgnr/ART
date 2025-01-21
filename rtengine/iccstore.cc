@@ -734,13 +734,8 @@ public:
 
     cmsHPROFILE getActiveMonitorProfile() const
     {
-        cmsHPROFILE monitor = nullptr;
-#ifdef ART_OS_COLOR_MGMT
-        monitor = getStdMonitorProfile(settings->os_monitor_profile);
-#else
-        monitor = const_cast<Implementation *>(this)->getProfile_unlocked(defaultMonitorProfile);
-#endif
-        return monitor;
+        MyMutex::MyLock lock(mutex);
+        return getActiveMonitorProfile_unlocked();
     }
 
     cmsHPROFILE getStdMonitorProfile(rtengine::Settings::StdMonitorProfile name) const
@@ -759,6 +754,17 @@ public:
     }
     
 private:
+    inline cmsHPROFILE getActiveMonitorProfile_unlocked() const
+    {
+        cmsHPROFILE monitor = nullptr;
+#ifdef ART_OS_COLOR_MGMT
+        monitor = getStdMonitorProfile(settings->os_monitor_profile);
+#else
+        monitor = const_cast<Implementation *>(this)->getProfile_unlocked(defaultMonitorProfile);
+#endif
+        return monitor;
+    }
+    
     void update_thumbnail_monitor_transform()
     {
         if (thumb_monitor_xform_) {
@@ -766,7 +772,7 @@ private:
         }
         thumb_monitor_xform_ = nullptr;
 
-        auto monitor = getActiveMonitorProfile();
+        auto monitor = getActiveMonitorProfile_unlocked();
         if (monitor) {
             monitor_profile_hash_ = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, ProfileContent(monitor).getData());
             switch (settings->monitorIntent) {

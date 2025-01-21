@@ -64,7 +64,7 @@ void PreviewImage::render(bool enable_cms)
     if (img_) {
         cmsHTRANSFORM xform = nullptr;
         if (enable_cms) {
-            cmsHPROFILE mprof = ICCStore::getInstance()->getProfile(ICCStore::getInstance()->getDefaultMonitorProfileName());
+            cmsHPROFILE mprof = ICCStore::getInstance()->getActiveMonitorProfile();
             cmsHPROFILE iprof = imgprof_ ? imgprof_ : ICCStore::getInstance()->getsRGBProfile();
             if (mprof) {
                 lcmsMutex->lock();
