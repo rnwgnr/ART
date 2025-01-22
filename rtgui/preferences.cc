@@ -501,9 +501,9 @@ Gtk::Widget* Preferences::getPerformancePanel ()
     thumb_cache_processed_ = Gtk::manage(new Gtk::CheckButton(M("PREFERENCES_THUMBNAIL_CACHE_PROCESSED")));
     {
         Gtk::VBox *vb = Gtk::manage(new Gtk::VBox());
-        vb->pack_start(*thumbDelayUpdate);
-        vb->pack_start(*thumbLazyCaching);
         vb->pack_start(*thumb_cache_processed_);
+        vb->pack_start(*thumbLazyCaching);
+        vb->pack_start(*thumbDelayUpdate);
         thumbFrame->add(*vb);
     }
     vbPerformance->pack_start(*thumbFrame, Gtk::PACK_SHRINK, 4);

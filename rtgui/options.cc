@@ -459,7 +459,7 @@ void Options::setDefaults()
     clutCacheSize = 5;
     thumb_delay_update = false;
     thumb_lazy_caching = true;
-    thumb_cache_processed = false;
+    thumb_cache_processed = true;
     profile_append_mode = false;
     maxInspectorBuffers = 2; //  a rather conservative value for low specced systems...
     inspectorDelay = 0;
