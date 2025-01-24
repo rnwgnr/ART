@@ -1125,7 +1125,6 @@ PREFERENCES_METADATA_SYNC_READWRITE;Bidireccional
 PREFERENCES_MONINTENT;Intenció de renderitzat predeterminada
 PREFERENCES_MONITOR;Monitor
 PREFERENCES_MONPROFILE;Perfil de color predeterminat
-PREFERENCES_MONPROFILE_WARNOSX;A causa de les limitacions del MacOS, només s'admet sRGB.
 PREFERENCES_MULTITAB;Mode de pestanyes d'editor múltiple
 PREFERENCES_MULTITABDUALMON;Mode de múltiples pestanyes d'edició en finestres separades
 PREFERENCES_NAVIGATIONFRAME;Navegació
@@ -2026,3 +2025,4 @@ HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
 PREFERENCES_MONITOR_GAMUT;Gamut del monitor
 PREFERENCES_OSCOLORMGMT_INFO;La gestió del color està integrada al sistema operatiu/entorn d'escriptori i s'habilita globalment.\nUtilitzeu les instal·lacions del vostre entorn per configurar el perfil del monitor i, a continuació, seleccioneu la gamma més adequada aquí.
 TP_COLORCORRECTION_HSL_GAMMA;Gamma
+PREFERENCES_MONPROFILE_WARN_SRGB;Només sRGB és compatible com a perfil de monitor en aquest sistema operatiu/entorn d'escriptori.

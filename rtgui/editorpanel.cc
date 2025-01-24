@@ -58,10 +58,8 @@ void setprogressStrUI(double val, const Glib::ustring str, MyProgressBar* pProgr
 
 class EditorPanel::ColorManagementToolbar {
 private:
-#if !defined ART_OS_COLOR_MGMT
     MyComboBoxText profileBox;
     PopUpButton intentBox;
-#endif
     Gtk::ToggleButton softProof;
     Gtk::ToggleButton spGamutCheck;
     Gtk::ToggleButton spGamutCheckMonitor;
@@ -72,52 +70,53 @@ private:
     EditorPanel *parent;
 
 private:
-#if !defined ART_OS_COLOR_MGMT
-    void prepareProfileBox ()
+    void prepareProfileBox()
     {
-        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
 //        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName());
 
-        profileBox.setPreferredWidth (70, 200);
-        setExpandAlignProperties (&profileBox, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
+            profileBox.setPreferredWidth (70, 200);
+            setExpandAlignProperties (&profileBox, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
 
-        profileBox.append (M ("PREFERENCES_PROFILE_NONE"));
-        Glib::ustring defprofname;
+            profileBox.append (M ("PREFERENCES_PROFILE_NONE"));
+            Glib::ustring defprofname;
 
-        //if (find_default_monitor_profile (profileBox.get_root_window()->gobj(), defprof, defprofname)) {
-        if (getSystemDefaultMonitorProfile(profileBox.get_root_window()->gobj(), defprof, defprofname)) {
-            profileBox.append(M ("MONITOR_PROFILE_SYSTEM") + " (" + defprofname + ")");
+            //if (find_default_monitor_profile (profileBox.get_root_window()->gobj(), defprof, defprofname)) {
+            if (getSystemDefaultMonitorProfile(profileBox.get_root_window()->gobj(), defprof, defprofname)) {
+                profileBox.append(M ("MONITOR_PROFILE_SYSTEM") + " (" + defprofname + ")");
 
-            if (options.rtSettings.autoMonitorProfile) {
-                //rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
-                profileBox.set_active (1);
+                if (options.rtSettings.autoMonitorProfile) {
+                    //rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
+                    profileBox.set_active (1);
+                } else {
+                    profileBox.set_active (0);
+                }
             } else {
                 profileBox.set_active (0);
             }
-        } else {
-            profileBox.set_active (0);
-        }
 
-        for (const auto &profile : profiles) {
-            profileBox.append(profile);
-        }
+            for (const auto &profile : profiles) {
+                profileBox.append(profile);
+            }
 
-        profileBox.set_tooltip_text (profileBox.get_active_text ());
+            profileBox.set_tooltip_text (profileBox.get_active_text ());
+        }
     }
 
     void prepareIntentBox ()
     {
-        // same order as the enum
-        intentBox.addEntry ("intent-perceptual.png", M ("PREFERENCES_INTENT_PERCEPTUAL"));
-        intentBox.addEntry ("intent-relative.png", M ("PREFERENCES_INTENT_RELATIVE"));
-        intentBox.addEntry ("intent-absolute.png", M ("PREFERENCES_INTENT_ABSOLUTE"));
-        setExpandAlignProperties (intentBox.buttonGroup, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            // same order as the enum
+            intentBox.addEntry ("intent-perceptual.png", M ("PREFERENCES_INTENT_PERCEPTUAL"));
+            intentBox.addEntry ("intent-relative.png", M ("PREFERENCES_INTENT_RELATIVE"));
+            intentBox.addEntry ("intent-absolute.png", M ("PREFERENCES_INTENT_ABSOLUTE"));
+            setExpandAlignProperties (intentBox.buttonGroup, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_FILL);
 
-        intentBox.setSelected (1);
-        intentBox.show ();
+            intentBox.setSelected (1);
+            intentBox.show ();
+        }
     }
-
-#endif // ART_OS_COLOR_MGMT
 
     void prepareSoftProofingBox ()
     {
@@ -151,7 +150,6 @@ private:
         spGamutCheckMonitor.show();
     }
 
-#if !defined ART_OS_COLOR_MGMT
     void profileBoxChanged ()
     {
         updateParameters ();
@@ -161,7 +159,6 @@ private:
     {
         updateParameters ();
     }
-#endif // ART_OS_COLOR_MGMT
 
     void softProofToggled ()
     {
@@ -232,82 +229,80 @@ private:
 
     void updateParameters (bool noEvent = false)
     {
-#if !defined ART_OS_COLOR_MGMT
-        ConnectionBlocker profileBlocker (profileConn);
-        ConnectionBlocker intentBlocker (intentConn);
-
         Glib::ustring profile;
+        rtengine::RenderingIntent intent = rtengine::RI_RELATIVE;
+        
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            ConnectionBlocker profileBlocker (profileConn);
+            ConnectionBlocker intentBlocker (intentConn);
 
-        if (!defprof.empty() && profileBox.get_active_row_number () == 1) {
-            profile = defprof;
 
-            if (profile.empty ()) {
-                profile = options.rtSettings.monitorProfile;
+            if (!defprof.empty() && profileBox.get_active_row_number () == 1) {
+                profile = defprof;
+
+                if (profile.empty ()) {
+                    profile = options.rtSettings.monitorProfile;
+                }
+
+                if (profile.empty ()) {
+                    profile = "sRGB";
+                }
+            } else if (profileBox.get_active_row_number () > 0) {
+                profile = profileBox.get_active_text ();
             }
 
-            if (profile.empty ()) {
-                profile = "sRGB";
-            }
-        } else if (profileBox.get_active_row_number () > 0) {
-            profile = profileBox.get_active_text ();
-        }
+            if (profileBox.get_active_row_number () == 0) {
 
-        if (profileBox.get_active_row_number () == 0) {
+                profile.clear ();
 
-            profile.clear ();
-
-            intentBox.set_sensitive (false);
-            intentBox.setSelected (1);
-            //softProof.set_sensitive (false);
-            //spGamutCheck.set_sensitive (false);
-            spGamutCheckMonitor.set_sensitive (false);
-
-            profileBox.set_tooltip_text ("");
-
-        } else {
-            const uint8_t supportedIntents = rtengine::ICCStore::getInstance()->getProofIntents (profile);
-            const bool supportsRelativeColorimetric = supportedIntents & 1 << INTENT_RELATIVE_COLORIMETRIC;
-            const bool supportsPerceptual = supportedIntents & 1 << INTENT_PERCEPTUAL;
-            const bool supportsAbsoluteColorimetric = supportedIntents & 1 << INTENT_ABSOLUTE_COLORIMETRIC;
-
-            if (supportsPerceptual || supportsRelativeColorimetric || supportsAbsoluteColorimetric) {
-                intentBox.set_sensitive (true);
-                intentBox.setItemSensitivity (0, supportsPerceptual);
-                intentBox.setItemSensitivity (1, supportsRelativeColorimetric);
-                intentBox.setItemSensitivity (2, supportsAbsoluteColorimetric);
-                //softProof.set_sensitive (true);
-                //spGamutCheck.set_sensitive (true);
-            } else {
-                intentBox.setItemSensitivity (0, true);
-                intentBox.setItemSensitivity (1, true);
-                intentBox.setItemSensitivity (2, true);
                 intentBox.set_sensitive (false);
                 intentBox.setSelected (1);
+                //softProof.set_sensitive (false);
+                //spGamutCheck.set_sensitive (false);
+                spGamutCheckMonitor.set_sensitive (false);
+
+                profileBox.set_tooltip_text ("");
+
+            } else {
+                const uint8_t supportedIntents = rtengine::ICCStore::getInstance()->getProofIntents (profile);
+                const bool supportsRelativeColorimetric = supportedIntents & 1 << INTENT_RELATIVE_COLORIMETRIC;
+                const bool supportsPerceptual = supportedIntents & 1 << INTENT_PERCEPTUAL;
+                const bool supportsAbsoluteColorimetric = supportedIntents & 1 << INTENT_ABSOLUTE_COLORIMETRIC;
+
+                if (supportsPerceptual || supportsRelativeColorimetric || supportsAbsoluteColorimetric) {
+                    intentBox.set_sensitive (true);
+                    intentBox.setItemSensitivity (0, supportsPerceptual);
+                    intentBox.setItemSensitivity (1, supportsRelativeColorimetric);
+                    intentBox.setItemSensitivity (2, supportsAbsoluteColorimetric);
+                    //softProof.set_sensitive (true);
+                    //spGamutCheck.set_sensitive (true);
+                } else {
+                    intentBox.setItemSensitivity (0, true);
+                    intentBox.setItemSensitivity (1, true);
+                    intentBox.setItemSensitivity (2, true);
+                    intentBox.set_sensitive (false);
+                    intentBox.setSelected (1);
+                }
+                spGamutCheck.set_sensitive(true);
+                spGamutCheckMonitor.set_sensitive(true);
+
+                profileBox.set_tooltip_text (profileBox.get_active_text ());
+
             }
-            spGamutCheck.set_sensitive(true);
-            spGamutCheckMonitor.set_sensitive(true);
 
-            profileBox.set_tooltip_text (profileBox.get_active_text ());
-
-        }
-
-        rtengine::RenderingIntent intent;
-
-        switch (intentBox.getSelected ()) {
+            switch (intentBox.getSelected ()) {
             default:
             case 0:
                 intent = rtengine::RI_PERCEPTUAL;
                 break;
-
             case 1:
                 intent = rtengine::RI_RELATIVE;
                 break;
-
             case 2:
                 intent = rtengine::RI_ABSOLUTE;
                 break;
+            }
         }
-#endif // ART_OS_COLOR_MGMT
 
         if (!processor) {
             return;
@@ -317,9 +312,9 @@ private:
             processor->beginUpdateParams ();
         }
 
-#ifndef ART_OS_COLOR_MGMT
-        processor->setMonitorProfile(profile, intent);
-#endif // ART_OS_COLOR_MGMT
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            processor->setMonitorProfile(profile, intent);
+        }
         
         rtengine::GamutCheck gc = rtengine::GAMUT_CHECK_OFF;
         if (spGamutCheck.get_sensitive() && spGamutCheck.get_active()) {
@@ -336,12 +331,10 @@ private:
 
     void updateSoftProofParameters (bool noEvent = false)
     {
-#if !defined ART_OS_COLOR_MGMT
-        spGamutCheck.set_sensitive(profileBox.get_active_row_number () > 0);
-        
-        if (profileBox.get_active_row_number () > 0) {
-#endif // ART_OS_COLOR_MGMT
+        bool profile_active = profileBox.get_active_row_number() > 0;
+        spGamutCheck.set_sensitive(profile_active);
 
+        if (rtengine::Settings::color_mgmt_mode != rtengine::Settings::ColorManagementMode::APPLICATION || profile_active) {
             if (processor) {
                 if (!noEvent) {
                     processor->beginUpdateParams ();
@@ -359,24 +352,17 @@ private:
                     processor->endUpdateParams (rtengine::EvMonitorTransform);
                 }
             }
-
-#if !defined ART_OS_COLOR_MGMT
         }
-#endif // ART_OS_COLOR_MGMT
     }
 
 public:
     explicit ColorManagementToolbar(EditorPanel *p, std::shared_ptr<rtengine::StagedImageProcessor> &ipc):
-#ifndef ART_OS_COLOR_MGMT
         intentBox(Glib::ustring (), true),
-#endif
         processor(ipc),
         parent(p)
     {
-#if !defined ART_OS_COLOR_MGMT
         prepareProfileBox ();
         prepareIntentBox ();
-#endif
         prepareSoftProofingBox ();
 
         reset ();
@@ -388,18 +374,18 @@ public:
         spGamutCheck.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckToggled));
         spGamutCheckMonitor.signal_toggled().connect (sigc::mem_fun (this, &ColorManagementToolbar::spGamutCheckMonitorToggled));
 
-#if !defined ART_OS_COLOR_MGMT
-        profileConn = profileBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::profileBoxChanged));
-        intentConn = intentBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::intentBoxChanged));
-#endif // ART_OS_COLOR_MGMT
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            profileConn = profileBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::profileBoxChanged));
+            intentConn = intentBox.signal_changed ().connect (sigc::mem_fun (this, &ColorManagementToolbar::intentBoxChanged));
+        }
     }
 
     void pack_right_in (Gtk::Grid* grid)
     {
-#if !defined ART_OS_COLOR_MGMT
-        grid->attach_next_to (profileBox, Gtk::POS_RIGHT, 1, 1);
-        grid->attach_next_to (*intentBox.buttonGroup, Gtk::POS_RIGHT, 1, 1);
-#endif
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            grid->attach_next_to (profileBox, Gtk::POS_RIGHT, 1, 1);
+            grid->attach_next_to (*intentBox.buttonGroup, Gtk::POS_RIGHT, 1, 1);
+        }
         grid->attach_next_to (softProof, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to (spGamutCheck, Gtk::POS_RIGHT, 1, 1);
         grid->attach_next_to(spGamutCheckMonitor, Gtk::POS_RIGHT, 1, 1);
@@ -414,17 +400,17 @@ public:
 
     void reset ()
     {
-#if !defined ART_OS_COLOR_MGMT
-        ConnectionBlocker intentBlocker (intentConn);
-        ConnectionBlocker profileBlocker (profileConn);
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            ConnectionBlocker intentBlocker (intentConn);
+            ConnectionBlocker profileBlocker (profileConn);
 
-        if (!defprof.empty() && options.rtSettings.autoMonitorProfile) {
-            profileBox.set_active (1);
-        } else {
-            setActiveTextOrIndex (profileBox, options.rtSettings.monitorProfile, 0);
-        }
+            if (!defprof.empty() && options.rtSettings.autoMonitorProfile) {
+                profileBox.set_active (1);
+            } else {
+                setActiveTextOrIndex (profileBox, options.rtSettings.monitorProfile, 0);
+            }
 
-        switch (options.rtSettings.monitorIntent) {
+            switch (options.rtSettings.monitorIntent) {
             default:
             case rtengine::RI_PERCEPTUAL:
                 intentBox.setSelected (0);
@@ -437,8 +423,8 @@ public:
             case rtengine::RI_ABSOLUTE:
                 intentBox.setSelected (2);
                 break;
+            }
         }
-#endif // ART_OS_COLOR_MGMT
 
         updateParameters();
     }
@@ -451,17 +437,17 @@ public:
 
     void defaultMonitorProfileChanged (const Glib::ustring &profile_name, bool auto_monitor_profile)
     {
-#ifndef ART_OS_COLOR_MGMT
-        ConnectionBlocker profileBlocker (profileConn);
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+            ConnectionBlocker profileBlocker (profileConn);
 
-        if (auto_monitor_profile && !defprof.empty()) {
-            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
-            profileBox.set_active (1);
-        } else {
-            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (profile_name);
-            setActiveTextOrIndex (profileBox, profile_name, 0);
+            if (auto_monitor_profile && !defprof.empty()) {
+                rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
+                profileBox.set_active (1);
+            } else {
+                rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (profile_name);
+                setActiveTextOrIndex (profileBox, profile_name, 0);
+            }
         }
-#endif // ART_OS_COLOR_MGMT
     }
 };
 

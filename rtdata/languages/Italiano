@@ -1126,7 +1126,6 @@ PREFERENCES_MONITOR;Monitor
 PREFERENCES_MONITOR_GAMUT;Gamut del monitor
 PREFERENCES_MONITORICCDIR;Cartella profili colore del monitor
 PREFERENCES_MONPROFILE;Profilo colore di default
-PREFERENCES_MONPROFILE_WARNOSX;A causa di limitazioni del MacOS, è supportato solo sRGB.
 PREFERENCES_MULTITAB;Modalità a Schede Multiple
 PREFERENCES_MULTITABDUALMON;Modalità a Schede Multiple nella propria finestra
 PREFERENCES_NAVIGATIONFRAME;Navigazione
@@ -2027,5 +2026,4 @@ ZOOMPANEL_ZOOM100;Ingrandimento al 100%.\nScorciatoia: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
-
-
+PREFERENCES_MONPROFILE_WARN_SRGB;In questo sistema operativo/ambiente desktop è supportato solo sRGB come profilo monitor.

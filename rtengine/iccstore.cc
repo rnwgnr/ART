@@ -757,11 +757,11 @@ private:
     inline cmsHPROFILE getActiveMonitorProfile_unlocked() const
     {
         cmsHPROFILE monitor = nullptr;
-#ifdef ART_OS_COLOR_MGMT
-        monitor = getStdMonitorProfile(settings->os_monitor_profile);
-#else
-        monitor = const_cast<Implementation *>(this)->getProfile_unlocked(defaultMonitorProfile);
-#endif
+        if (settings->color_mgmt_mode != Settings::ColorManagementMode::APPLICATION) {
+            monitor = getStdMonitorProfile(settings->os_monitor_profile);
+        } else {
+            monitor = const_cast<Implementation *>(this)->getProfile_unlocked(defaultMonitorProfile);
+        }
         return monitor;
     }
     

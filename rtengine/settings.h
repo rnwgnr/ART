@@ -26,6 +26,8 @@ namespace rtengine {
 /** This structure holds the global parameters used by the RT engine. */
 class Settings {
 public:
+    Settings();
+    
     Glib::ustring   iccDirectory;           ///< The directory containing the possible output icc profiles
     Glib::ustring monitorIccDirectory;
 
@@ -83,12 +85,12 @@ public:
     };
     StdMonitorProfile os_monitor_profile;
 
-    /** Creates a new instance of Settings.
-      * @return a pointer to the new Settings instance. */
-    static Settings* create();
-    /** Destroys an instance of Settings.
-      * @param s a pointer to the Settings instance to destroy. */
-    static void      destroy(Settings* s);
+    enum class ColorManagementMode {
+        APPLICATION,
+        OS_SRGB,
+        OS_STD_MONITOR_PROFILE
+    };
+    static ColorManagementMode color_mgmt_mode;
 };
 
 } // namespace rtengine

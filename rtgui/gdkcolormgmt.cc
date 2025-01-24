@@ -14,7 +14,7 @@ namespace art {
 
 void gdk_set_monitor_profile(GdkWindow *window, rtengine::Settings::StdMonitorProfile prof)
 {
-#if defined ART_OS_COLOR_MGMT && defined __APPLE__ && defined GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
+#if defined __APPLE__ && defined GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
     auto colorspace = kCGColorSpaceSRGB;
     switch (prof) {
     case rtengine::Settings::StdMonitorProfile::DISPLAY_P3:

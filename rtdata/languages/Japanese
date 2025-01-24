@@ -1118,7 +1118,6 @@ PREFERENCES_METADATA_SYNC_READWRITE;読書き可
 PREFERENCES_MONINTENT;レンダリング方式 (目標)
 PREFERENCES_MONITOR;モニター
 PREFERENCES_MONPROFILE;デフォルトのモニタープロファイル
-PREFERENCES_MONPROFILE_WARNOSX;MacのOSの制約により サポート出来るのはsRGBだけです
 PREFERENCES_MULTITAB;マルチ編集タブモード
 PREFERENCES_MULTITABDUALMON;独自のウィンドウモードによるマルチ編集タブ
 PREFERENCES_NAVIGATIONFRAME;ナビゲーション
@@ -2019,3 +2018,4 @@ HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;色補正 - ガンマ
 PREFERENCES_MONITOR_GAMUT;モニターの色域
 PREFERENCES_OSCOLORMGMT_INFO;カラーマネジメントは、オペレーティングシステム/デスクトップ環境に組み込まれており、グローバルに有効になっています。\n環境機能を使用してモニタープロファイルを設定し、ここで最適な色域を選択します。
 TP_COLORCORRECTION_HSL_GAMMA;ガンマ
+PREFERENCES_MONPROFILE_WARN_SRGB;このオペレーティング システム/デスクトップ環境では、モニター プロファイルとして sRGB のみがサポートされます。

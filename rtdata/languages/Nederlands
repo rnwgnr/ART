@@ -1120,7 +1120,6 @@ PREFERENCES_MONINTENT;Standaard weergave-intentie
 PREFERENCES_MONITOR;Beeldscherm
 PREFERENCES_MONITORICCDIR;Map met kleurprofielen beeldscherm
 PREFERENCES_MONPROFILE;Standaard kleurprofiel
-PREFERENCES_MONPROFILE_WARNOSX;Als gevolg van MacOS-beperkingen wordt alleen sRGB ondersteund.
 PREFERENCES_MULTITABDUALMON;Multi-tab, indien beschikbaar op tweede monitor
 PREFERENCES_MULTITAB;Multi-tab: elke foto opent in nieuw tabvenster
 PREFERENCES_NAVIGATIONFRAME;Navigatie
@@ -2037,3 +2036,4 @@ HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;K/Tc - gamma
 PREFERENCES_MONITOR_GAMUT;Monitor gamma
 PREFERENCES_OSCOLORMGMT_INFO;Kleurbeheer is ingebouwd in het besturingssysteem/desktopomgeving en globaal ingeschakeld.\nGebruik de omgevingsfaciliteiten om het monitorprofiel in te stellen en selecteer hier het meest geschikte gamma.
 TP_COLORCORRECTION_HSL_GAMMA;Gamma
+PREFERENCES_MONPROFILE_WARN_SRGB;Alleen sRGB wordt ondersteund als monitorprofiel in dit besturingssysteem/desktopomgeving.

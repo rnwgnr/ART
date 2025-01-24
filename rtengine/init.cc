@@ -168,18 +168,25 @@ void StagedImageProcessor::destroy (StagedImageProcessor* sip)
     delete sip;
 }
 
-Settings* Settings::create  ()
-{
 
-    return new Settings;
+Settings::Settings():
+    printerBPC(false),
+    monitorIntent(RI_RELATIVE),
+    monitorBPC(false),
+    autoMonitorProfile(false),
+    verbose(0),
+    HistogramWorking(false),
+    thumbnail_inspector_mode(ThumbnailInspectorMode::JPEG),
+    thumbnail_inspector_raw_curve(ThumbnailInspectorRawCurve::LINEAR),
+    xmp_sidecar_style(XmpSidecarStyle::STD),
+    metadata_xmp_sync(MetadataXmpSync::NONE),
+    thread_pool_size(0),
+    ctl_scripts_fast_preview(false),
+    os_monitor_profile(StdMonitorProfile::SRGB)
+{
 }
 
-void Settings::destroy (Settings* s)
-{
-
-    delete s;
-}
-
+Settings::ColorManagementMode Settings::color_mgmt_mode(Settings::ColorManagementMode::APPLICATION);
 
 } // namespace rtengine
 

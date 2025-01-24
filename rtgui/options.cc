@@ -2150,6 +2150,23 @@ void Options::saveToFile(Glib::ustring fname)
 
 void Options::load(bool lightweight, int verbose)
 {
+#ifdef __APPLE__
+#  ifdef ART_MACOS_GDK_QUARTZ_COLORSPACE
+    rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::OS_STD_MONITOR_PROFILE;
+#  else
+    rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::OS_SRGB;
+#  endif
+#elsif defined WIN32
+    rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::APPLICATION;
+#else
+    const gchar *desktop_env = g_getenv("XDG_SESSION_TYPE");
+    if (desktop_env && strcmp(desktop_env, "wayland") == 0) {
+        rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::OS_SRGB;
+    } else {
+        rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::APPLICATION;
+    }        
+#endif
+
     if (verbose >= 0) {
         options.rtSettings.verbose = verbose;
     }

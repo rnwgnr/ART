@@ -1102,7 +1102,7 @@ PREFERENCES_METADATA_SYNC_READWRITE;Bidirectional
 PREFERENCES_MONINTENT;Default rendering intent
 PREFERENCES_MONITOR;Monitor
 PREFERENCES_MONPROFILE;Default color profile
-PREFERENCES_MONPROFILE_WARNOSX;Due to MacOS limitations, only sRGB is supported.
+PREFERENCES_MONPROFILE_WARN_SRGB;Only sRGB is supported as monitor profile in this operating system/desktop environment.
 PREFERENCES_MULTITAB;Multiple Editor Tabs Mode
 PREFERENCES_MULTITABDUALMON;Multiple Editor Tabs In Own Window Mode
 PREFERENCES_NAVIGATIONFRAME;Navigation

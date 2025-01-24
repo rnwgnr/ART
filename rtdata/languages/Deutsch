@@ -1106,7 +1106,6 @@ PREFERENCES_MONINTENT;Standard Monitor-Wiedergabe
 PREFERENCES_MONITOR;Monitor
 PREFERENCES_MONITORICCDIR;Verzeichnis für Monitorprofile
 PREFERENCES_MONPROFILE;Standardfarbprofil
-PREFERENCES_MONPROFILE_WARNOSX;Aufgrund einer macOS-Limitierung wird nur sRGB unterstützt.
 PREFERENCES_MULTITAB;Multi-Tab-Modus
 PREFERENCES_MULTITABDUALMON;Mehrfache Editor-Tabs in eigenem Fenster
 PREFERENCES_NAVIGATIONFRAME;Navigation
@@ -2009,3 +2008,4 @@ HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - Gamma
 PREFERENCES_MONITOR_GAMUT;Monitor-Gamut
 PREFERENCES_OSCOLORMGMT_INFO;Das Farbmanagement ist in das Betriebssystem/die Desktop-Umgebung integriert und global aktiviert.\nUtzen Sie die Einrichtungen Ihrer Umgebung, um das Monitorprofil einzustellen, und wählen Sie dann hier den am besten geeigneten Gamut.
 TP_COLORCORRECTION_HSL_GAMMA;Gamma
+PREFERENCES_MONPROFILE_WARN_SRGB;In diesem Betriebssystem/dieser Desktopumgebung wird nur sRGB als Monitorprofil unterstützt.

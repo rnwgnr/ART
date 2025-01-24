@@ -585,9 +585,9 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     monitorIccDir->signal_selection_changed ().connect (sigc::mem_fun (this, &Preferences::iccDirChanged));
 
-#ifndef ART_OS_COLOR_MGMT
-    vbColorMan->pack_start(*iccdgrid, Gtk::PACK_SHRINK);
-#endif
+    if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {    
+        vbColorMan->pack_start(*iccdgrid, Gtk::PACK_SHRINK);
+    }
     
     //------------------------- MONITOR ----------------------
 
@@ -605,18 +605,18 @@ Gtk::Widget* Preferences::getColorManPanel ()
     Gtk::Label* milabel = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MONINTENT") + ":", Gtk::ALIGN_START));
     setExpandAlignProperties (milabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
-#ifndef ART_OS_COLOR_MGMT
-    monProfile->append (M ("PREFERENCES_PROFILE_NONE"));
-    monProfile->set_active (0);
+    if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+        monProfile->append (M ("PREFERENCES_PROFILE_NONE"));
+        monProfile->set_active (0);
 
-    const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance ()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
+        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance ()->getProfilesFromDir(options.rtSettings.monitorIccDirectory);
 
-    for (const auto &profile : profiles) {
-        if (profile.find("file:") != 0) {
-            monProfile->append(profile);
+        for (const auto &profile : profiles) {
+            if (profile.find("file:") != 0) {
+                monProfile->append(profile);
+            }
         }
     }
-#endif // ART_OS_COLOR_MGMT
 
     // same order as the enum
     monIntent->append (M ("PREFERENCES_INTENT_PERCEPTUAL"));
@@ -635,45 +635,45 @@ Gtk::Widget* Preferences::getColorManPanel ()
 
     int row = 0;
     gmonitor->attach (*mplabel, 0, row, 1, 1);
-#ifdef ART_OS_COLOR_MGMT
-    for (int j = 0; j < 3; ++j) {
-        auto p = rtengine::ICCStore::getInstance()->getStdMonitorProfile(rtengine::Settings::StdMonitorProfile(j));
-        if (p) {
-            auto lbl = rtengine::ICCStore::getProfileTag(p, cmsSigProfileDescriptionTag);
-            if (lbl.size() > 9 && lbl.substr(lbl.size()-9) == " (ICC V4)") {
-                lbl = lbl.substr(0, lbl.size()-9);
+    if (rtengine::Settings::color_mgmt_mode != rtengine::Settings::ColorManagementMode::APPLICATION) {
+        for (int j = 0; j < 3; ++j) {
+            auto p = rtengine::ICCStore::getInstance()->getStdMonitorProfile(rtengine::Settings::StdMonitorProfile(j));
+            if (p) {
+                auto lbl = rtengine::ICCStore::getProfileTag(p, cmsSigProfileDescriptionTag);
+                if (lbl.size() > 9 && lbl.substr(lbl.size()-9) == " (ICC V4)") {
+                    lbl = lbl.substr(0, lbl.size()-9);
+                }
+                monProfile->append(lbl);
             }
-            monProfile->append(lbl);
         }
-    }
-# if defined __APPLE__ && !defined GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
-    Gtk::Label *osxwarn = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MONPROFILE_WARNOSX"), Gtk::ALIGN_START));
-    setExpandAlignProperties (osxwarn, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
-    gmonitor->attach (*osxwarn, 1, row, 1, 1);
-# elif defined GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
-    mplabel->set_text(M("PREFERENCES_MONITOR_GAMUT") + ":");
-    gmonitor->attach (*monProfile, 1, row, 1, 1);
-    auto rst = Gtk::manage(new Gtk::Label(Glib::ustring(" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")"));
-    setExpandAlignProperties(rst, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
-    gmonitor->attach(*rst, 2, row, 1, 1);    
-    ++row;
-    auto infolbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_OSCOLORMGMT_INFO"), Gtk::ALIGN_START));
-    gmonitor->attach(*infolbl, 0, row, 3, 1);
-    ++row;
-# endif // GDK_QUARTZ_WINDOW_SUPPORTS_COLORSPACE
-#else // ART_OS_COLOR_MGMT
-    gmonitor->attach (*mplabel, 0, row, 1, 1);
-    gmonitor->attach (*monProfile, 1, row, 1, 1);
-    ++row;
-    gmonitor->attach (*cbAutoMonProfile, 1, row, 1, 1);
-    ++row;
-    gmonitor->attach (*milabel, 0, row, 1, 1);
-    gmonitor->attach (*monIntent, 1, row, 1, 1);
-    ++row;
-    gmonitor->attach (*monBPC, 0, row, 2, 1);
+        if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::OS_SRGB) {
+            Gtk::Label *oswarn = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MONPROFILE_WARN_SRGB"), Gtk::ALIGN_START));
+            setExpandAlignProperties (oswarn, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+            gmonitor->attach (*oswarn, 1, row, 1, 1);
+        } else {
+            mplabel->set_text(M("PREFERENCES_MONITOR_GAMUT") + ":");
+            gmonitor->attach (*monProfile, 1, row, 1, 1);
+            auto rst = Gtk::manage(new Gtk::Label(Glib::ustring(" (") + M ("PREFERENCES_APPLNEXTSTARTUP") + ")"));
+            setExpandAlignProperties(rst, false, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+            gmonitor->attach(*rst, 2, row, 1, 1);    
+            ++row;
+            auto infolbl = Gtk::manage(new Gtk::Label(M("PREFERENCES_OSCOLORMGMT_INFO"), Gtk::ALIGN_START));
+            gmonitor->attach(*infolbl, 0, row, 3, 1);
+            ++row;
+        }
+    } else {
+        gmonitor->attach (*mplabel, 0, row, 1, 1);
+        gmonitor->attach (*monProfile, 1, row, 1, 1);
+        ++row;
+        gmonitor->attach (*cbAutoMonProfile, 1, row, 1, 1);
+        ++row;
+        gmonitor->attach (*milabel, 0, row, 1, 1);
+        gmonitor->attach (*monIntent, 1, row, 1, 1);
+        ++row;
+        gmonitor->attach (*monBPC, 0, row, 2, 1);
 
-    autoMonProfileToggled();
-#endif // ART_OS_COLOR_MGMT
+        autoMonProfileToggled();
+    }
 
     fmonitor->add (*gmonitor);
 
@@ -1793,14 +1793,14 @@ void Preferences::storePreferences ()
 
     moptions.rtSettings.printerBPC = prtBPC->get_active ();
 
-#ifndef ART_OS_COLOR_MGMT
-    if (!monProfile->get_active_row_number()) {
-        moptions.rtSettings.monitorProfile = "";
-    } else {
-        moptions.rtSettings.monitorProfile = monProfile->get_active_text ();
-    }
+    if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+        if (!monProfile->get_active_row_number()) {
+            moptions.rtSettings.monitorProfile = "";
+        } else {
+            moptions.rtSettings.monitorProfile = monProfile->get_active_text ();
+        }
 
-    switch (monIntent->get_active_row_number ()) {
+        switch (monIntent->get_active_row_number ()) {
         default:
         case 0:
             moptions.rtSettings.monitorIntent = rtengine::RI_PERCEPTUAL;
@@ -1813,13 +1813,13 @@ void Preferences::storePreferences ()
         case 2:
             moptions.rtSettings.monitorIntent = rtengine::RI_ABSOLUTE;
             break;
-    }
+        }
 
-    moptions.rtSettings.monitorBPC = monBPC->get_active ();
-    moptions.rtSettings.autoMonitorProfile = cbAutoMonProfile->get_active ();
-#else // ART_OS_COLOR_MGMT
-    moptions.rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile(monProfile->get_active_row_number());
-#endif // ART_OS_COLOR_MGMT
+        moptions.rtSettings.monitorBPC = monBPC->get_active ();
+        moptions.rtSettings.autoMonitorProfile = cbAutoMonProfile->get_active ();
+    } else if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::OS_STD_MONITOR_PROFILE) {
+        moptions.rtSettings.os_monitor_profile = rtengine::Settings::StdMonitorProfile(monProfile->get_active_row_number());
+    }
 
     moptions.rtSettings.iccDirectory = iccDir->get_filename ();
     moptions.rtSettings.monitorIccDirectory = monitorIccDir->get_filename ();
@@ -1973,10 +1973,10 @@ void Preferences::fillPreferences ()
 
     prtBPC->set_active (moptions.rtSettings.printerBPC);
 
-#ifndef ART_OS_COLOR_MGMT
-    setActiveTextOrIndex (*monProfile, moptions.rtSettings.monitorProfile, 0);
+    if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+        setActiveTextOrIndex (*monProfile, moptions.rtSettings.monitorProfile, 0);
 
-    switch (moptions.rtSettings.monitorIntent) {
+        switch (moptions.rtSettings.monitorIntent) {
         default:
         case rtengine::RI_PERCEPTUAL:
             monIntent->set_active (0);
@@ -1989,13 +1989,13 @@ void Preferences::fillPreferences ()
         case rtengine::RI_ABSOLUTE:
             monIntent->set_active (2);
             break;
-    }
+        }
 
-    monBPC->set_active (moptions.rtSettings.monitorBPC);
-    cbAutoMonProfile->set_active (moptions.rtSettings.autoMonitorProfile);
-#else // ART_OS_COLOR_MGMT
-    monProfile->set_active(int(moptions.rtSettings.os_monitor_profile));
-#endif // ART_OS_COLOR_MGMT
+        monBPC->set_active (moptions.rtSettings.monitorBPC);
+        cbAutoMonProfile->set_active (moptions.rtSettings.autoMonitorProfile);
+    } else {
+        monProfile->set_active(int(moptions.rtSettings.os_monitor_profile));
+    }
 
     if (Glib::file_test (moptions.rtSettings.iccDirectory, Glib::FILE_TEST_IS_DIR)) {
         iccDir->set_current_folder (moptions.rtSettings.iccDirectory);

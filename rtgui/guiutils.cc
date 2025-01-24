@@ -1969,84 +1969,83 @@ void getGUIColor(double &r, double &g, double &b)
 
 bool getSystemDefaultMonitorProfile(GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
 {
-#ifndef ART_OS_COLOR_MGMT
-# ifdef WIN32
-    HDC hDC = GetDC (nullptr);
+    if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+#ifdef WIN32
+        HDC hDC = GetDC (nullptr);
 
-    if (hDC != nullptr) {
-        if (SetICMMode (hDC, ICM_ON)) {
-            char profileName[MAX_PATH + 1];
-            DWORD profileLength = MAX_PATH;
+        if (hDC != nullptr) {
+            if (SetICMMode (hDC, ICM_ON)) {
+                char profileName[MAX_PATH + 1];
+                DWORD profileLength = MAX_PATH;
 
-            if (GetICMProfileA (hDC, &profileLength, profileName)) {
-                defprof = Glib::ustring (profileName);
-                defprofname = Glib::path_get_basename (defprof);
-                size_t pos = defprofname.rfind (".");
+                if (GetICMProfileA (hDC, &profileLength, profileName)) {
+                    defprof = Glib::ustring (profileName);
+                    defprofname = Glib::path_get_basename (defprof);
+                    size_t pos = defprofname.rfind (".");
 
-                if (pos != Glib::ustring::npos) {
-                    defprofname = defprofname.substr (0, pos);
+                    if (pos != Glib::ustring::npos) {
+                        defprofname = defprofname.substr (0, pos);
+                    }
+
+                    defprof = Glib::ustring ("file:") + defprof;
+                    return true;
                 }
 
-                defprof = Glib::ustring ("file:") + defprof;
-                return true;
+                // might fail if e.g. the monitor has no profile
             }
 
-            // might fail if e.g. the monitor has no profile
+            ReleaseDC (NULL, hDC);
         }
 
-        ReleaseDC (NULL, hDC);
-    }
+#elif !defined(__APPLE__)
+        // taken from geeqie (image.c) and adapted
+        // Originally licensed as GPL v2+, with the following copyright:
+        // * Copyright (C) 2006 John Ellis
+        // * Copyright (C) 2008 - 2016 The Geeqie Team
+        //
+        guchar *prof = nullptr;
+        gint proflen;
+        GdkAtom type = GDK_NONE;
+        gint format = 0;
 
-# elif !defined(__APPLE__)
-    // taken from geeqie (image.c) and adapted
-    // Originally licensed as GPL v2+, with the following copyright:
-    // * Copyright (C) 2006 John Ellis
-    // * Copyright (C) 2008 - 2016 The Geeqie Team
-    //
-    guchar *prof = nullptr;
-    gint proflen;
-    GdkAtom type = GDK_NONE;
-    gint format = 0;
+        if (gdk_property_get (rootwin, gdk_atom_intern ("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
+            cmsHPROFILE p = cmsOpenProfileFromMem (prof, proflen);
 
-    if (gdk_property_get (rootwin, gdk_atom_intern ("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
-        cmsHPROFILE p = cmsOpenProfileFromMem (prof, proflen);
-
-        if (p) {
-            defprofname = "from GDK";
-            {
-                auto mlu = static_cast<const cmsMLU *>(cmsReadTag(p, cmsSigProfileDescriptionTag));
-                if (mlu) {
-                    auto sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
-                    if (sz > 0) {
-                        std::vector<char> buf(sz);
-                        cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
-                        buf.back() = 0; // sanity
-                        defprofname = std::string(&buf[0]);
+            if (p) {
+                defprofname = "from GDK";
+                {
+                    auto mlu = static_cast<const cmsMLU *>(cmsReadTag(p, cmsSigProfileDescriptionTag));
+                    if (mlu) {
+                        auto sz = cmsMLUgetASCII(mlu, "en", "US", nullptr, 0);
+                        if (sz > 0) {
+                            std::vector<char> buf(sz);
+                            cmsMLUgetASCII(mlu, "en", "US", &buf[0], sz);
+                            buf.back() = 0; // sanity
+                            defprofname = std::string(&buf[0]);
+                        }
                     }
                 }
-            }
             
-            defprof = Glib::build_filename(options.user_config_dir, "GDK_ICC_PROFILE.icc");
+                defprof = Glib::build_filename(options.user_config_dir, "GDK_ICC_PROFILE.icc");
 
-            if (cmsSaveProfileToFile (p, defprof.c_str())) {
-                cmsCloseProfile (p);
+                if (cmsSaveProfileToFile (p, defprof.c_str())) {
+                    cmsCloseProfile (p);
 
-                if (prof) {
-                    g_free (prof);
+                    if (prof) {
+                        g_free (prof);
+                    }
+
+                    defprof = Glib::ustring ("file:") + defprof;
+                    return true;
                 }
-
-                defprof = Glib::ustring ("file:") + defprof;
-                return true;
             }
         }
-    }
 
-    if (prof) {
-        g_free (prof);
+        if (prof) {
+            g_free (prof);
+        }
+#endif // WIN / LINUX   
     }
-# endif // WIN / LINUX
-    
-#endif // ART_OS_COLOR_MGMT
     return false;
 }
 
@@ -2055,29 +2054,29 @@ void initGUIColorManagement()
 {
     Glib::ustring defprof;
     Glib::ustring defprofname;
-#ifndef ART_OS_COLOR_MGMT
-    GdkWindow *rootwin = gdk_screen_get_root_window(gdk_screen_get_default());
-    if (options.rtSettings.autoMonitorProfile) {
-        if (!getSystemDefaultMonitorProfile(rootwin, defprof, defprofname)) {
-            defprof = "";
-            defprofname = "";
-        }
-    } else {
-        defprof = defprofname = options.rtSettings.monitorProfile;
-    }
-    rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
-#else // ART_OS_COLOR_MGMT
-    auto p = rtengine::ICCStore::getInstance()->getActiveMonitorProfile();
-    if (p) {
-        defprof = rtengine::ICCStore::getProfileTag(p, cmsSigProfileDescriptionTag);
-        int n = defprof.size() - 9;
-        if (n > 0 && defprof.substr(n) == " (ICC V4)") {
-            defprofname = defprof.substr(0, n);
+    if (rtengine::Settings::color_mgmt_mode == rtengine::Settings::ColorManagementMode::APPLICATION) {
+        GdkWindow *rootwin = gdk_screen_get_root_window(gdk_screen_get_default());
+        if (options.rtSettings.autoMonitorProfile) {
+            if (!getSystemDefaultMonitorProfile(rootwin, defprof, defprofname)) {
+                defprof = "";
+                defprofname = "";
+            }
         } else {
-            defprofname = defprof;
+            defprof = defprofname = options.rtSettings.monitorProfile;
+        }
+        rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
+    } else {
+        auto p = rtengine::ICCStore::getInstance()->getActiveMonitorProfile();
+        if (p) {
+            defprof = rtengine::ICCStore::getProfileTag(p, cmsSigProfileDescriptionTag);
+            int n = defprof.size() - 9;
+            if (n > 0 && defprof.substr(n) == " (ICC V4)") {
+                defprofname = defprof.substr(0, n);
+            } else {
+                defprofname = defprof;
+            }
         }
     }
-#endif // ART_OS_COLOR_MGMT
     if (options.rtSettings.verbose) {
         if (defprof.empty()) {
             printf("No default monitor profile specified\n");

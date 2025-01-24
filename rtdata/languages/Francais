@@ -1096,7 +1096,6 @@ PREFERENCES_METADATA_SYNC_READWRITE;Bidirectionel
 PREFERENCES_MONINTENT;Intention de rendu par défaut
 PREFERENCES_MONITOR;Moniteur
 PREFERENCES_MONPROFILE;Profil colorimétrique par défaut
-PREFERENCES_MONPROFILE_WARNOSX;Du fait de limitations sur macOS, seul sRGB est supporté.
 PREFERENCES_MULTITAB;Mode Éditeurs Onglets Multiples
 PREFERENCES_MULTITABDUALMON;Mode Éditeurs Onglets Multiples dans fenêtres détachées
 PREFERENCES_NAVIGATIONFRAME;Navigation
@@ -1996,3 +1995,4 @@ HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
 PREFERENCES_MONITOR_GAMUT;Gamme du moniteur
 PREFERENCES_OSCOLORMGMT_INFO;La gestion des couleurs est intégrée dans le système d'exploitation/l'environnement de bureau et activée globalement.\nUtilisez votre environnement pour définir le profil du moniteur, puis sélectionnez la gamme la plus appropriée ici.
 TP_COLORCORRECTION_HSL_GAMMA;Gamma
+PREFERENCES_MONPROFILE_WARN_SRGB;Seul sRGB est pris en charge comme profil de moniteur dans ce système d'exploitation/environnement de bureau.

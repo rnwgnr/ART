@@ -99,13 +99,13 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
     monitorTransform = nullptr;
     monitor = nullptr;
 
-#ifdef ART_OS_COLOR_MGMT
-    monitor = ICCStore::getInstance()->getActiveMonitorProfile();
-#else
-    if (!monitorProfile.empty()) {
-        monitor = ICCStore::getInstance()->getProfile(monitorProfile);
+    if (settings->color_mgmt_mode != Settings::ColorManagementMode::APPLICATION) {
+        monitor = ICCStore::getInstance()->getActiveMonitorProfile();
+    } else {
+        if (!monitorProfile.empty()) {
+            monitor = ICCStore::getInstance()->getProfile(monitorProfile);
+        }
     }
-#endif // ART_OS_COLOR_MGMT
 
     if (monitor) {
         MyMutex::MyLock lcmsLock (*lcmsMutex);
