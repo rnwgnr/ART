@@ -323,7 +323,7 @@ private:
                        sigc::slot<void>([this]()
                        {
                            GThreadLock lck;
-                           remove_window(*rtWindow);
+                           rtWindow->quit();
                        }));
             add_action("preferences",
                        sigc::slot<void>([this]()

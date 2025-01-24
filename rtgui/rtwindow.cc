@@ -831,6 +831,19 @@ bool RTWindow::selectEditorPanel (const std::string &name)
     return false;
 }
 
+
+void RTWindow::quit()
+{
+    if (!on_delete_event (nullptr)) {
+        if (isApplication()) {
+            unset_application();    
+        } else {
+            gtk_main_quit();
+        }
+    }
+}
+
+
 bool RTWindow::keyPressed (GdkEventKey* event)
 {
     bool ctrl = event->state & GDK_CONTROL_MASK;
@@ -853,13 +866,7 @@ bool RTWindow::keyPressed (GdkEventKey* event)
 #endif
 
     if (try_quit) {
-        if (!on_delete_event (nullptr)) {
-            if (isApplication()) {
-                unset_application();    
-            } else {
-                gtk_main_quit();
-            }
-        }
+        quit();
     }
 
     if (event->keyval == GDK_KEY_F11) {

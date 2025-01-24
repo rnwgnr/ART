@@ -125,6 +125,8 @@ public:
 
     Gtk::Label *getFileBrowserTabLabel() { return browser_tab_label_; }
 
+    void quit();
+    
 private:
     // void show_info_msg(const Glib::ustring &msg, bool is_error, double duration, size_t padding);
     // bool hide_info_msg();
