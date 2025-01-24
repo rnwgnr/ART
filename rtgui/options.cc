@@ -2156,7 +2156,7 @@ void Options::load(bool lightweight, int verbose)
 #  else
     rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::OS_SRGB;
 #  endif
-#elsif defined WIN32
+#elif defined WIN32
     rtengine::Settings::color_mgmt_mode = rtengine::Settings::ColorManagementMode::APPLICATION;
 #else
     const gchar *desktop_env = g_getenv("XDG_SESSION_TYPE");
