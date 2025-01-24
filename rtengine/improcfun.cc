@@ -112,7 +112,12 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
 
         cmsUInt32Number flags;
         //cmsHPROFILE iprof  = cmsCreateLab4Profile (nullptr);
-        cmsHPROFILE iprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
+        cmsHPROFILE iprof = nullptr;
+        if (params->icm.outputProfile == procparams::ColorManagementParams::NoProfileString) {
+            iprof = ICCStore::getInstance()->workingSpace(params->icm.workingProfile);
+        } else {
+            iprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
+        }
         if (!iprof) {
             iprof = ICCStore::getInstance()->getsRGBProfile();
         }
