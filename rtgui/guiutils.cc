@@ -26,6 +26,10 @@
 
 #include <assert.h>
 
+#ifdef WIN32
+# include <windows.h>
+#endif
+
 using namespace std;
 
 Glib::RefPtr<RTImage> MyExpander::inconsistentImage;
