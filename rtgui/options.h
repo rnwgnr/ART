@@ -378,23 +378,6 @@ public:
     bool menuGroupProfileOperations;
     bool menuGroupExtProg;
 
-    // ICC Profile Creator
-    Glib::ustring ICCPC_primariesPreset;
-    double ICCPC_redPrimaryX;
-    double ICCPC_redPrimaryY;
-    double ICCPC_greenPrimaryX;
-    double ICCPC_greenPrimaryY;
-    double ICCPC_bluePrimaryX;
-    double ICCPC_bluePrimaryY;
-    Glib::ustring ICCPC_gammaPreset;
-    double ICCPC_gamma;
-    double ICCPC_slope;
-    Glib::ustring ICCPC_profileVersion;
-    Glib::ustring ICCPC_illuminant;
-    Glib::ustring ICCPC_description;
-    Glib::ustring ICCPC_copyright;
-    bool ICCPC_appendParamsToDesc;
-
     // fast export options
     int fastexport_resize_width;
     int fastexport_resize_height;

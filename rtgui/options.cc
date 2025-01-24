@@ -477,22 +477,6 @@ void Options::setDefaults()
     menuGroupProfileOperations = true;
     menuGroupExtProg = true;
 
-    ICCPC_primariesPreset = "sRGB",
-    ICCPC_redPrimaryX = 0.6400;
-    ICCPC_redPrimaryY = 0.3300;
-    ICCPC_greenPrimaryX = 0.3000;
-    ICCPC_greenPrimaryY = 0.6000;
-    ICCPC_bluePrimaryX = 0.1500;
-    ICCPC_bluePrimaryY = 0.0600;
-    ICCPC_gammaPreset = "Custom";
-    ICCPC_gamma = 2.4;
-    ICCPC_slope = 12.92;
-    ICCPC_profileVersion = "v4";
-    ICCPC_illuminant = "DEF";
-    ICCPC_description = "";
-    ICCPC_copyright = Options::getICCProfileCopyright();
-    ICCPC_appendParamsToDesc = false;
-
     fastexport_resize_width              = 1920;
     fastexport_resize_height             = 1920;
 
@@ -1569,54 +1553,6 @@ void Options::readFromFile(Glib::ustring fname)
                 }
             }
 
-            if (keyFile.has_group("ICC Profile Creator")) {
-                if (keyFile.has_key("ICC Profile Creator", "PimariesPreset")) {
-                    ICCPC_primariesPreset = keyFile.get_string("ICC Profile Creator", "PimariesPreset");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "RedPrimaryX")) {
-                    ICCPC_redPrimaryX = keyFile.get_double("ICC Profile Creator", "RedPrimaryX");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "RedPrimaryY")) {
-                    ICCPC_redPrimaryY = keyFile.get_double("ICC Profile Creator", "RedPrimaryY");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "GreenPrimaryX")) {
-                    ICCPC_greenPrimaryX = keyFile.get_double("ICC Profile Creator", "GreenPrimaryX");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "GreenPrimaryY")) {
-                    ICCPC_greenPrimaryY = keyFile.get_double("ICC Profile Creator", "GreenPrimaryY");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "BluePrimaryX")) {
-                    ICCPC_bluePrimaryX = keyFile.get_double("ICC Profile Creator", "BluePrimaryX");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "BluePrimaryY")) {
-                    ICCPC_bluePrimaryY = keyFile.get_double("ICC Profile Creator", "BluePrimaryY");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "GammaPreset")) {
-                    ICCPC_gammaPreset = keyFile.get_string("ICC Profile Creator", "GammaPreset");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "Gamma")) {
-                    ICCPC_gamma = keyFile.get_double("ICC Profile Creator", "Gamma");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "Slope")) {
-                    ICCPC_slope = keyFile.get_double("ICC Profile Creator", "Slope");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "ProfileVersion")) {
-                    ICCPC_profileVersion = keyFile.get_string("ICC Profile Creator", "ProfileVersion");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "Illuminant")) {
-                    ICCPC_illuminant = keyFile.get_string("ICC Profile Creator", "Illuminant");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "Description")) {
-                    ICCPC_description = keyFile.get_string("ICC Profile Creator", "Description");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "Copyright")) {
-                    ICCPC_copyright = keyFile.get_string("ICC Profile Creator", "Copyright");
-                }
-                if (keyFile.has_key("ICC Profile Creator", "AppendParamsToDesc")) {
-                    ICCPC_appendParamsToDesc = keyFile.get_boolean("ICC Profile Creator", "AppendParamsToDesc");
-                }
-            }
-
             if (keyFile.has_group("Sounds")) {
                 if (keyFile.has_key("Sounds", "Enable")) {
                     sndEnable = keyFile.get_boolean("Sounds", "Enable");
@@ -2115,22 +2051,6 @@ void Options::saveToFile(Glib::ustring fname)
             break;
         }
         keyFile.set_string("Color Management", "OSMonitorProfile", os_mon_prof);
-
-        keyFile.set_string("ICC Profile Creator", "PimariesPreset", ICCPC_primariesPreset);
-        keyFile.set_double("ICC Profile Creator", "RedPrimaryX", ICCPC_redPrimaryX);
-        keyFile.set_double("ICC Profile Creator", "RedPrimaryY", ICCPC_redPrimaryY);
-        keyFile.set_double("ICC Profile Creator", "GreenPrimaryX", ICCPC_greenPrimaryX);
-        keyFile.set_double("ICC Profile Creator", "GreenPrimaryY", ICCPC_greenPrimaryY);
-        keyFile.set_double("ICC Profile Creator", "BluePrimaryX", ICCPC_bluePrimaryX);
-        keyFile.set_double("ICC Profile Creator", "BluePrimaryY", ICCPC_bluePrimaryY);
-        keyFile.set_string("ICC Profile Creator", "GammaPreset", ICCPC_gammaPreset);
-        keyFile.set_double("ICC Profile Creator", "Gamma", ICCPC_gamma);
-        keyFile.set_double("ICC Profile Creator", "Slope", ICCPC_slope);
-        keyFile.set_string("ICC Profile Creator", "ProfileVersion", ICCPC_profileVersion);
-        keyFile.set_string("ICC Profile Creator", "Illuminant", ICCPC_illuminant);
-        keyFile.set_string("ICC Profile Creator", "Description", ICCPC_description);
-        keyFile.set_string("ICC Profile Creator", "Copyright", ICCPC_copyright);
-        keyFile.set_boolean("ICC Profile Creator", "AppendParamsToDesc", ICCPC_appendParamsToDesc);
 
         keyFile.set_boolean("Sounds", "Enable", sndEnable);
         keyFile.set_string("Sounds", "BatchQueueDone", sndBatchQueueDone);
