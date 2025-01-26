@@ -219,7 +219,7 @@ jobs:
           cd build/${BUILD_TYPE}/ART.app
           python "${OUTDIR}/repo/tools/osx/bundle_ART.py" \
             -o "${OUTDIR}" -v -r /opt/art-deps/lib \
-            -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin -e \
+            -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin -e -I \
             -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}${BUILD_SUFFIX}"
           cd "${OUTDIR}"
 
