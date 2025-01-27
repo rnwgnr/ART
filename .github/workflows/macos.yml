@@ -213,6 +213,8 @@ jobs:
           sudo installer -pkg ExifTool-$(cat ver.txt).pkg -target /
 
       - name: Create bundle
+        env:
+          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ART_NAME="ART-${ART_VERSION}"
           OUTDIR=$(pwd)
