@@ -44,7 +44,7 @@ def get_imageio_releases():
     req = Request('https://api.github.com/repos/artpixls/ART-imageio/releases')
     if auth is not None:
         req.add_header('authorization', 'Bearer ' + auth)
-    with urlopen(res) as f:
+    with urlopen(req) as f:
         data = f.read().decode('utf-8')
     rel = json.loads(data)
     def key(r):
