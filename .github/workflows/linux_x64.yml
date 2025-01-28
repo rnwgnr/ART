@@ -200,7 +200,7 @@ jobs:
             -o ../../${ART_NAME}-linux64 -v -E -I ${DBG}
           cd ../..
           tar cJf ${ART_NAME}-linux64.tar.xz ${ART_NAME}-linux64
-          echo "ART_BUNDLE_NAME=${ART_NAME}" >> $GITHUB_ENV
+          echo "ART_BUNDLE_NAME=${ART_NAME}-linux64" >> $GITHUB_ENV
 
       - name: Prepare artifact name
         run: |
