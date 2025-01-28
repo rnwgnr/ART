@@ -253,6 +253,9 @@ bool PreviewWindow::on_button_press_event (GdkEventButton* event)
         if (!isMoving) {
             isMoving = true;
 
+            // center the crop window to the mouse position
+            mainCropWin->remoteMove((event->x - x - 0.5 * w) / zoom, (event->y - y - 0.5 * h) / zoom);
+
             press_x = event->x;
             press_y = event->y;
 
