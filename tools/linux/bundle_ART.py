@@ -307,13 +307,13 @@ export GDK_BACKEND=x11
             out.write("""\
 gdb=$(which gdb)
 if [ -x "$gdb" ]; then
-    echo "set logging file /tmp/ART.log" > "$d/gdb"
-    echo "set logging redirect on" >> "$d/gdb"
-    echo "set logging on" >> "$d/gdb"
-    echo "run" >> "$d/gdb"
-    echo "thread apply all bt full" >> "$d/gdb"
-    echo "quit" >> "$d/gdb"
-    ${gdb} -batch -x "$d/gdb" "$d/ART.bin" "$@"
+    echo "set logging file /tmp/ART.log" > "$t/gdb"
+    echo "set logging redirect on" >> "$t/gdb"
+    echo "set logging on" >> "$t/gdb"
+    echo "run" >> "$t/gdb"
+    echo "thread apply all bt full" >> "$t/gdb"
+    echo "quit" >> "$t/gdb"
+    ${gdb} -batch -x "$t/gdb" "$d/ART.bin" "$@"
 else            
     "$d/ART.bin" "$@"
 fi
