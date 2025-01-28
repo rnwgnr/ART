@@ -156,6 +156,7 @@ jobs:
         run: |
           BUILDTYPE=Release
           if [ "${{ inputs.debug }}" = "true" ]; then
+              echo "Configuring a Debug build"
               BUILDTYPE=Debug
           fi    
           sudo ldconfig
@@ -188,10 +189,13 @@ jobs:
           ART_NAME="ART-${ART_VERSION}"
           DBG=
           if [ "${{ inputs.debug }}" = "true" ]; then
+              echo "Creating a Debug bundle"
               DBG=-d
               ART_NAME="${ART_NAME}-debug"
+              cd build/Debug
+          else
+              cd build/Release
           fi
-          cd build/Release
           python ../../repo/tools/linux/bundle_ART.py \
             -o ../../${ART_NAME}-linux64 -v -E -I ${DBG}
           cd ../..
