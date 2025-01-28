@@ -118,7 +118,9 @@ void CropWindow::initZoomSteps()
     // zoomSteps.push_back(ZoomStep("  6%", 1.0/15.0, 150, true));
     // zoomSteps.push_back(ZoomStep("  8%", 1.0/12.0, 120, true));
     char lbl[64];
-    for (int s = 1000; s >= 11; --s) {
+    // NOTE(zoulu): 1000 is the watershed for zoomed in and zoomed out, >=1000 (inclusive) indicates zoomed in.
+    // TODO(zoulu): avoid magic numbers, it's used widely among multiple files.
+    for (int s = 1000 - 1; s >= 10; --s) {
         float z = 10./float(s);
         sprintf(lbl, "% 2d%%", int(z * 100));
         bool is_major = (s == s/10 * 10);
@@ -2006,7 +2008,7 @@ void CropWindow::zoomIn (bool toCursor, int cursorX, int cursorY)
             }
 
             zoomVersion = exposeVersion;
-        } else if (zoomVersion != exposeVersion) {
+        } else {
             screenCoordToImage(xpos + imgX + imgW / 2, ypos + imgY + imgH / 2, x, y);
 
             if (cropHandler.cropParams.enabled) {
@@ -2056,8 +2058,8 @@ void CropWindow::zoomOut (bool toCursor, int cursorX, int cursorY)
     }
 
     zoomVersion = exposeVersion;
-    int z = cropZoom - 1;
-    while (z >= 0 && !zoomSteps[z].is_major) {
+    int z = std::max(cropZoom - 1, 0);
+    while (z > 0 && !zoomSteps[z].is_major) {
         --z;
     }
     changeZoom (z, true, x, y);
@@ -2240,11 +2242,10 @@ void CropWindow::updateHoveredPicker (rtengine::Coord *imgPos)
 }
 void CropWindow::changeZoom (int zoom, bool notify, int centerx, int centery, bool needsRedraw)
 {
-
     if (zoom < 0) {
         zoom = 0;
-    } else if (zoom > int(zoomSteps.size())-1) {
-        zoom = int(zoomSteps.size())-1;
+    } else if (zoom >= int(zoomSteps.size())) {
+        zoom = int(zoomSteps.size()) - 1;
     }
 
     cropZoom = zoom;
