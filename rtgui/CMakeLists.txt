@@ -256,7 +256,7 @@ else()
 endif()
 
 # Excluding libatomic needed by Clang/FreeBSD, #3636
-if(OPENMP_FOUND AND NOT APPLE AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
+if(OPENMP_FOUND AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(EXTRA_LIB_RTGUI ${EXTRA_LIB_RTGUI} "atomic")
 endif()
 
