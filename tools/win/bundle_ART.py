@@ -12,7 +12,7 @@ import argparse
 import tarfile, zipfile
 import tempfile
 import io
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 import json
 import time
 
@@ -40,8 +40,11 @@ def getopts():
 
 
 def get_imageio_releases():
-    with urlopen(
-            'https://api.github.com/repos/artpixls/ART-imageio/releases') as f:
+    auth = os.getenv('GITHUB_AUTH')
+    req = Request('https://api.github.com/repos/artpixls/ART-imageio/releases')
+    if auth is not None:
+        req.add_header('authorization', 'Bearer ' + auth)
+    with urlopen(req) as f:
         data = f.read().decode('utf-8')
     rel = json.loads(data)
     def key(r):
@@ -55,9 +58,11 @@ def get_imageio_releases():
             for rel in self.rels:
                 for asset in rel['assets']:
                     if asset['name'] == name:
-                        return asset['browser_download_url']
+                        res = Request(asset['browser_download_url'])
+                        if auth is not None:
+                            res.add_header('authorization', 'Bearer ' + auth)
+                        return res
             return None
-
     return RelInfo(rel)
 
 

@@ -173,6 +173,8 @@ jobs:
           PYTHONPATH=/usr/local/lib/python3.8/site-packages lensfun-update-data
 
       - name: Create bundle
+        env:
+          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ART_NAME="ART-${ART_VERSION}"
           cd build/Release
