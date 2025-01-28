@@ -6,6 +6,11 @@ on:
       - '[1-9].[0-9]+'
       - '[1-9].[0-9]+.[0-9]+'
   workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Debug build'
+        required: true
+        type: boolean
 
 jobs:
   build:
@@ -149,11 +154,15 @@ jobs:
 
       - name: Configure build
         run: |
+          BUILDTYPE=Release
+          if [ "${{ inputs.debug }}" = "true" ]; then
+              BUILDTYPE=Debug
+          fi    
           sudo ldconfig
           mkdir build
           cd build
           cmake \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=$BUILDTYPE \
             -DBUILD_BUNDLE=1 \
             -DENABLE_CTL=1 \
             -DENABLE_LIBRAW=1 \
@@ -177,15 +186,21 @@ jobs:
           GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ART_NAME="ART-${ART_VERSION}"
+          DBG=
+          if [ "${{ inputs.debug }}" = "true" ]; then
+              DBG=-d
+              ART_NAME="${ART_NAME}-debug"
+          fi
           cd build/Release
           python ../../repo/tools/linux/bundle_ART.py \
-            -o ../../${ART_NAME}-linux64 -v -E -I 
+            -o ../../${ART_NAME}-linux64 -v -E -I ${DBG}
           cd ../..
           tar cJf ${ART_NAME}-linux64.tar.xz ${ART_NAME}-linux64
+          echo "ART_BUNDLE_NAME=${ART_NAME}" >> $GITHUB_ENV
 
       - name: Prepare artifact name
         run: |
-          ARTIFACT_NAME="ART-${ART_VERSION}-linux64.tar.xz"
+          ARTIFACT_NAME="${ART_BUNDLE_NAME}.tar.xz"
           echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
               echo "RELEASE_TAG=${ART_VERSION}" >> $GITHUB_ENV

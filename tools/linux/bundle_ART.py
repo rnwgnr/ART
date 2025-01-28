@@ -27,6 +27,7 @@ def getopts():
     p.add_argument('-b', '--imageio-bin', help='path to imageio binaries')
     p.add_argument('-I', '--imageio-download', action='store_true')
     p.add_argument('-v', '--verbose', action='store_true')
+    p.add_argument('-d', '--debug', action='store_true')
     ret = p.parse_args()
     return ret
 
@@ -299,9 +300,26 @@ export GIO_MODULE_DIR="$d/lib/gio/modules"
 export FONTCONFIG_FILE="$d/fonts.conf"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
 export GDK_BACKEND=x11
-"$d/ART.bin" "$@"
-rm -rf "$t"
 """)
+        if not opts.debug:
+            out.write('"$d/ART.bin" "$@"\n')
+        else:
+            out.write("""\
+gdb=$(which gdb)
+if [ -x "$gdb" ]; then
+    echo "set logging file /tmp/ART.log" > "$d/gdb"
+    echo "set logging redirect on" >> "$d/gdb"
+    echo "set logging on" >> "$d/gdb"
+    echo "run" >> "$d/gdb"
+    echo "thread apply all bt full" >> "$d/gdb"
+    echo "quit" >> "$d/gdb"
+    ${gdb} -batch -x "$d/gdb" "$d/ART.bin" "$@"
+else            
+    "$d/ART.bin" "$@"
+fi
+""")
+        out.write('rm -rf "$t"\n')
+            
     with open(os.path.join(opts.outdir, 'ART-cli'), 'w') as out:
         out.write("""#!/bin/bash
 export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
