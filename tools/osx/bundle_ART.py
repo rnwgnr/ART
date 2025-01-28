@@ -33,6 +33,9 @@ def getopts():
     p.add_argument('-n', '--no-dmg', action='store_true')
     p.add_argument('-d', '--dmg-name', default='ART')
     p.add_argument('-s', '--shell', default='/bin/sh')
+    p.add_argument('-l', '--use-launcher', action='store_true', default=False)
+    p.add_argument('-L', '--no-launcher', action='store_false',
+                   dest='use_launcher')
     ret = p.parse_args()
     ret.outdir = os.path.join(ret.outdir, 'ART.app')
     return ret
@@ -372,9 +375,10 @@ def main():
                     shutil.copy2(elem, dest)
         make_info_plist(opts)
         make_icns(opts)
-        
-        build_launcher(opts, 'ART')
-        build_launcher(opts, 'ART-cli')
+
+        if opts.use_launcher:
+            build_launcher(opts, 'ART')
+            build_launcher(opts, 'ART-cli')
 
     os.makedirs(os.path.join(opts.outdir, 'Contents/Resources/share/gtk-3.0'))
     with open(os.path.join(opts.outdir,
@@ -392,7 +396,9 @@ def main():
         shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
                                  name + '_launch'),
                     os.path.join(opts.outdir, 'Contents/MacOS', name))
-    with open(os.path.join(opts.outdir, 'Contents/MacOS/.ART.sh'), 'w') as out:
+    art_name = 'ART' if not opts.use_launcher else '.ART.sh'
+    with open(os.path.join(opts.outdir,
+                           f'Contents/MacOS/{art_name}'), 'w') as out:
         out.write("""#!/bin/zsh
 export ART_restore_GTK_CSD=$GTK_CSD
 export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
@@ -420,7 +426,9 @@ export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 
 t="$TMPDIR/ART-$USER"
 /bin/mkdir -p "$t"
-
+""")
+        if opts.use_launcher:
+            out.write("""
 DBUS_SOCK_FILE="$t/dbus.sock"
 export DBUS_SESSION_BUS_ADDRESS=unix:path=$DBUS_SOCK_FILE
 
@@ -443,8 +451,18 @@ if [ "$DBUS_PID" != "" ]; then
     /bin/rm -f $DBUS_SOCK_FILE
 fi
 """)
+        else:
+            out.write("""
+"$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
+"$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
+export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
+export GTK_IM_MODULE_FILE="$t/gtk.immodules"
+"$d/MacOS/.ART.bin" "$@"
+/bin/rm -rf "$t"
+""")            
+    art_name = 'ART-cli' if not opts.use_launcher else '.ART-cli.sh'
     with open(os.path.join(opts.outdir,
-                           'Contents/MacOS/.ART-cli.sh'), 'w') as out:
+                           f'Contents/MacOS/{art_name}'), 'w') as out:
         out.write("""#!/bin/zsh
 export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
@@ -453,8 +471,9 @@ export DYLD_LIBRARY_PATH="$d/Frameworks"
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 exec "$d/MacOS/.ART-cli.bin" "$@"
 """)
-    shutil.copy(opts.shell, os.path.join(opts.outdir,
-                                         'Contents/MacOS/.zsh'))
+    if opts.use_launcher:
+        shutil.copy(opts.shell, os.path.join(opts.outdir,
+                                             'Contents/MacOS/.zsh'))
     if not opts.no_dmg:
         make_dmg(opts)
 
