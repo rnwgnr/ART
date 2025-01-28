@@ -312,8 +312,7 @@ int main(int argc, char *const argv[])
     """)
         out.write(f'strlcat(buf2, "/.{prog}.sh", 4096);\n')
         out.write("""
-    strlcpy(buf, d0, 4096);
-    strlcat(buf, "/.zsh", 4096);
+    strlcpy(buf, "/bin/zsh", 4096);
     
     char **newargs = (char **)malloc(sizeof(char *) * (argc + 1));
     newargs[0] = buf;
@@ -329,6 +328,108 @@ int main(int argc, char *const argv[])
     subprocess.run(['clang', cname, '-o',
                     os.path.join(opts.outdir, f'Contents/MacOS/{prog}_launch')],
                    check=True)
+
+
+def write_launcher_script_gui(opts):
+    art_name = 'ART' if not opts.use_launcher else '.ART.sh'
+    with open(os.path.join(opts.outdir,
+                           f'Contents/MacOS/{art_name}'), 'w') as out:
+        if opts.use_launcher:
+            out.write("""#!/bin/zsh
+export ART_restore_GTK_CSD=$GTK_CSD
+export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
+export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
+export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
+export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
+export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
+export ART_restore_GTK_PATH=$GTK_PATH
+export ART_restore_GTK_IM_MODULE_FILE=$GTK_IM_MODULE_FILE
+export ART_restore_GSETTINGS_SCHEMA_DIR=$GSETTINGS_SCHEMA_DIR
+export ART_restore_XDG_DATA_DIRS=$XDG_DATA_DIRS
+export ART_restore_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+
+d=$(cd "$(/usr/bin/dirname "$0")/.." ; pwd -P)
+
+export DYLD_LIBRARY_PATH="$d/Frameworks"
+export GTK_CSD=0
+export GDK_PIXBUF_MODULEDIR="$d/Frameworks"
+export FONTCONFIG_FILE="$d/Resources/fonts.conf"
+export GTK_PATH="$d/Resources/etc/gtk-3.0"
+export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
+export XDG_DATA_DIRS="$d/Resources/share"
+export GDK_RENDERING=similar
+export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
+
+t="${TMPDIR}ART-${USER}"
+/bin/mkdir -p "$t"
+
+DBUS_SOCK_FILE="$t/dbus.sock"
+export DBUS_SESSION_BUS_ADDRESS=unix:path=$DBUS_SOCK_FILE
+
+/usr/sbin/netstat -an | /usr/bin/grep -q $DBUS_SOCK_FILE
+if [ $? -ne 0 ]; then
+    /bin/rm -f $DBUS_SOCK_FILE
+    DBUS_PID=$("$d/Resources/dbus-daemon" --fork --print-pid --config-file="$d/Resources/dbus-1/session.conf" --address "$DBUS_SESSION_BUS_ADDRESS")
+
+    "$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
+    "$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
+fi
+export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
+export GTK_IM_MODULE_FILE="$t/gtk.immodules"
+
+"$d/MacOS/.ART.bin" "$@"
+
+if [ "$DBUS_PID" != "" ]; then
+    /bin/rm -rf "$t"
+    kill $DBUS_PID
+    /bin/rm -f $DBUS_SOCK_FILE
+fi
+""")
+        else:
+            out.write("""#!/bin/zsh
+export ART_restore_GTK_CSD=$GTK_CSD
+export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
+export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
+export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
+export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
+export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
+export ART_restore_GTK_PATH=$GTK_PATH
+export ART_restore_GTK_IM_MODULE_FILE=$GTK_IM_MODULE_FILE
+export ART_restore_GSETTINGS_SCHEMA_DIR=$GSETTINGS_SCHEMA_DIR
+export ART_restore_XDG_DATA_DIRS=$XDG_DATA_DIRS
+d=$(dirname "$0")/..
+t=$(/usr/bin/mktemp -d)
+export DYLD_LIBRARY_PATH="$d/Frameworks"
+export GTK_CSD=0
+"$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
+"$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
+export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
+export GTK_IM_MODULE_FILE="$t/gtk.immodules"
+export GDK_PIXBUF_MODULEDIR="$d/Frameworks"
+export FONTCONFIG_FILE="$d/Resources/fonts.conf"
+export GTK_PATH="$d/Resources/etc/gtk-3.0"
+export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
+export XDG_DATA_DIRS="$d/Resources/share"
+export GDK_RENDERING=similar
+export GTK_OVERLAY_SCROLLING=0
+export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
+"$d/MacOS/.ART.bin" "$@"
+/bin/rm -rf "$t"
+""")            
+
+
+def write_launcher_script_cli(opts):
+    art_name = 'ART-cli' if not opts.use_launcher else '.ART-cli.sh'
+    with open(os.path.join(opts.outdir,
+                           f'Contents/MacOS/{art_name}'), 'w') as out:
+        out.write("""#!/bin/zsh
+export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
+export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
+d=$(dirname "$0")/..
+export DYLD_LIBRARY_PATH="$d/Frameworks"
+export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
+exec "$d/MacOS/.ART-cli.bin" "$@"
+""")
 
 
 def main():
@@ -397,84 +498,10 @@ def main():
             shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
                                      name + '_launch'),
                         os.path.join(opts.outdir, 'Contents/MacOS', name))
-    art_name = 'ART' if not opts.use_launcher else '.ART.sh'
-    with open(os.path.join(opts.outdir,
-                           f'Contents/MacOS/{art_name}'), 'w') as out:
-        out.write("""#!/bin/zsh
-export ART_restore_GTK_CSD=$GTK_CSD
-export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
-export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
-export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
-export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
-export ART_restore_GTK_PATH=$GTK_PATH
-export ART_restore_GTK_IM_MODULE_FILE=$GTK_IM_MODULE_FILE
-export ART_restore_GSETTINGS_SCHEMA_DIR=$GSETTINGS_SCHEMA_DIR
-export ART_restore_XDG_DATA_DIRS=$XDG_DATA_DIRS
-export ART_restore_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
-
-d=$(dirname "$0")/..
-
-export DYLD_LIBRARY_PATH="$d/Frameworks"
-export GTK_CSD=0
-export GDK_PIXBUF_MODULEDIR="$d/Frameworks"
-export FONTCONFIG_FILE="$d/Resources/fonts.conf"
-export GTK_PATH="$d/Resources/etc/gtk-3.0"
-export GSETTINGS_SCHEMA_DIR="$d/Resources/share/glib-2.0/schemas"
-export XDG_DATA_DIRS="$d/Resources/share"
-export GDK_RENDERING=similar
-export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
-
-t="$TMPDIR/ART-$USER"
-/bin/mkdir -p "$t"
-""")
-        if opts.use_launcher:
-            out.write("""
-DBUS_SOCK_FILE="$t/dbus.sock"
-export DBUS_SESSION_BUS_ADDRESS=unix:path=$DBUS_SOCK_FILE
-
-/usr/sbin/netstat -an | /usr/bin/grep -q $DBUS_SOCK_FILE
-if [ $? -ne 0 ]; then
-    /bin/rm -f $DBUS_SOCK_FILE
-    DBUS_PID=$("$d/Resources/dbus-daemon" --fork --print-pid --config-file="$d/Resources/dbus-1/session.conf" --address "$DBUS_SESSION_BUS_ADDRESS")
-
-    "$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
-    "$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
-    export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
-    export GTK_IM_MODULE_FILE="$t/gtk.immodules"
-fi
-
-"$d/MacOS/.ART.bin" "$@"
-
-if [ "$DBUS_PID" != "" ]; then
-    /bin/rm -rf "$t"
-    kill $DBUS_PID
-    /bin/rm -f $DBUS_SOCK_FILE
-fi
-""")
-        else:
-            out.write("""
-"$d/Resources/gdk-pixbuf-query-loaders" "$d/Frameworks/"libpixbufloader-svg.so > "$t/loader.cache"
-"$d/Resources/gtk-query-immodules-3.0" "$d"/Frameworks/im-*.so > "$t/gtk.immodules"
-export GDK_PIXBUF_MODULE_FILE="$t/loader.cache"
-export GTK_IM_MODULE_FILE="$t/gtk.immodules"
-"$d/MacOS/.ART.bin" "$@"
-/bin/rm -rf "$t"
-""")            
-    art_name = 'ART-cli' if not opts.use_launcher else '.ART-cli.sh'
-    with open(os.path.join(opts.outdir,
-                           f'Contents/MacOS/{art_name}'), 'w') as out:
-        out.write("""#!/bin/zsh
-export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
-export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-d=$(dirname "$0")/..
-export DYLD_LIBRARY_PATH="$d/Frameworks"
-export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
-exec "$d/MacOS/.ART-cli.bin" "$@"
-""")
-    if opts.use_launcher:
-        shutil.copy(opts.shell, os.path.join(opts.outdir,
-                                             'Contents/MacOS/.zsh'))
+    write_launcher_script_gui(opts)
+    write_launcher_script_cli(opts)
+    for name in ('ART', 'ART-cli'):
+        os.chmod(os.path.join(opts.outdir, 'Contents/MacOS', name), 0o755)
     if not opts.no_dmg:
         make_dmg(opts)
 
