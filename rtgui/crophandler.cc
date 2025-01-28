@@ -214,8 +214,9 @@ void CropHandler::setZoom (int z, int centerx, int centery)
     }
 
     int oldZoom = zoom;
-    float oldScale = zoom >= 1000 ? float(zoom / 1000) : 10.f / float(zoom);
-    float newScale = z >= 1000 ? float(z / 1000) : 10.f / float(z);
+    // TODO(zoulu): Find better way to avoid hard coding 1000 as the threshold
+    float oldScale = zoom >= 1000 ? float(zoom) / 1000.0f : 10.f / float(zoom);
+    float newScale = z >= 1000 ? float(z) / 1000.0f : 10.f / float(z);
 
     int oldcax = cax;
     int oldcay = cay;
