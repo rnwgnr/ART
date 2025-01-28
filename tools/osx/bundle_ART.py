@@ -393,9 +393,10 @@ def main():
         shutil.move(os.path.join(opts.outdir, 'Contents/MacOS', name),
                     os.path.join(opts.outdir, 'Contents/MacOS',
                                  '.' + name + '.bin'))
-        shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
-                                 name + '_launch'),
-                    os.path.join(opts.outdir, 'Contents/MacOS', name))
+        if opts.use_launcher:
+            shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
+                                     name + '_launch'),
+                        os.path.join(opts.outdir, 'Contents/MacOS', name))
     art_name = 'ART' if not opts.use_launcher else '.ART.sh'
     with open(os.path.join(opts.outdir,
                            f'Contents/MacOS/{art_name}'), 'w') as out:
