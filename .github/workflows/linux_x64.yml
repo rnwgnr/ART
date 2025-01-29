@@ -55,6 +55,7 @@ jobs:
             libexpat1-dev \
             gvfs \
             wget
+          sudo python3 -m pip install meson
 
       - name: Install LCMS2
         run: |
@@ -118,7 +119,7 @@ jobs:
 
       - name: Install OpenColorIO
         run: |
-          OCIO_VERSION='2.3.2'
+          OCIO_VERSION='2.4.1'
           mkdir ocio
           cd ocio
           wget https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v${OCIO_VERSION}.tar.gz
@@ -182,6 +183,18 @@ jobs:
         run: |
           PYTHONPATH=/usr/local/lib/python3.8/site-packages lensfun-update-data
 
+      - name: Install glib 2.83
+        run: |
+          wget https://download.gnome.org/sources/glib/2.83/glib-2.83.3.tar.xz
+          tar xJf glib-2.83.3.tar.xz
+          cd glib-2.83.3
+          meson setup build \
+            -Dbuildtype=release \
+            -Dglib_debug=disabled \
+            -Dprefix=/opt/glib
+          meson compile -C build
+          sudo meson install -C build
+          
       - name: Create bundle
         env:
           GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
@@ -199,6 +212,12 @@ jobs:
           python ../../repo/tools/linux/bundle_ART.py \
             -o ../../${ART_NAME}-linux64 -v -E -I ${DBG}
           cd ../..
+          pushd ${ART_NAME}-linux64/lib
+          for l in libgmodule-2.0.so.0 libglib-2.0.so.0 libgio-2.0.so.0; do
+            rm -f ${l}
+            cp /opt/glib/lib/x86_64-linux-gnu/${l} .
+          done
+          popd
           tar cJf ${ART_NAME}-linux64.tar.xz ${ART_NAME}-linux64
           echo "ART_BUNDLE_NAME=${ART_NAME}-linux64" >> $GITHUB_ENV
 
