@@ -56,6 +56,9 @@ jobs:
             gvfs \
             wget
           sudo python3 -m pip install meson
+          wget https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+          unzip ninja-linux.zip
+          sudo mv ninja /usr/local/bin
 
       - name: Install LCMS2
         run: |
