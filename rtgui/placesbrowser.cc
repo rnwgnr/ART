@@ -128,7 +128,7 @@ bool compareMountByRoot (Glib::RefPtr<Gio::Mount> a, Glib::RefPtr<Gio::Mount> b)
     return a->get_root()->get_parse_name() < b->get_root()->get_parse_name();
 }
 
-void PlacesBrowser::SetRow(Gtk::TreeModel::Row row,
+void PlacesBrowser::setRow(Gtk::TreeModel::Row row,
                            Glib::RefPtr<Gio::Icon> icon, Glib::ustring label,
                            Glib::ustring root, PlaceType type,
                            bool rowSeparator) {
@@ -149,7 +149,7 @@ void PlacesBrowser::refreshPlacesList ()
     if (hfile && hfile->query_exists()) {
         try {
             if (auto info = hfile->query_info ()) {
-                SetRow(*(placesModel->append()), info->get_icon(),
+                setRow(*(placesModel->append()), info->get_icon(),
                        info->get_display_name(), hfile->get_parse_name(),
                        PlaceType::DEFAULT_DIR_OR_SESSION, false);
             }
@@ -162,7 +162,7 @@ void PlacesBrowser::refreshPlacesList ()
     if (hfile2 && hfile2->query_exists() && !hfile2->equal(hfile)) {
         try {
             if (auto info = hfile2->query_info ()) {
-                SetRow(*(placesModel->append()), info->get_icon(),
+                setRow(*(placesModel->append()), info->get_icon(),
                        info->get_display_name(), hfile2->get_parse_name(),
                        PlaceType::DEFAULT_DIR_OR_SESSION, false);
             }
@@ -170,7 +170,7 @@ void PlacesBrowser::refreshPlacesList ()
     }
 
     // session
-    SetRow(*(placesModel->append()),
+    setRow(*(placesModel->append()),
          Gio::ThemedIcon::create("document-open-recent"),
          M("SESSION_LABEL") + " (" +
              std::to_string(art::session::list().size()) + ")",
@@ -188,7 +188,7 @@ void PlacesBrowser::refreshPlacesList ()
         if (hfile && hfile->query_exists()) {
             try {
                 if (auto info = hfile->query_info ()) {
-                    SetRow(*(placesModel->append()), info->get_icon(),
+                    setRow(*(placesModel->append()), info->get_icon(),
                     info->get_display_name(), hfile->get_parse_name(),
                     PlaceType::FAVARITE_DIR, false);
                 }
@@ -208,7 +208,7 @@ void PlacesBrowser::refreshPlacesList ()
         std::vector<Glib::RefPtr<Gio::Volume> > volumes = drives[j]->get_volumes ();
 
         if (volumes.empty()) {
-            SetRow(*(placesModel->append()), drives[j]->get_icon(),
+            setRow(*(placesModel->append()), drives[j]->get_icon(),
                     drives[j]->get_name(), "", PlaceType::DRIVE, false);
         }
 
@@ -216,11 +216,11 @@ void PlacesBrowser::refreshPlacesList ()
             Glib::RefPtr<Gio::Mount> mount = volumes[i]->get_mount ();
 
             if (mount) { // placesed volumes
-                SetRow(*(placesModel->append()), mount->get_icon(),
+                setRow(*(placesModel->append()), mount->get_icon(),
                         mount->get_name(), mount->get_root ()->get_parse_name(),
                         PlaceType::MOUNT, false);
             } else { // unplacesed volumes
-                SetRow(*(placesModel->append()), volumes[i]->get_icon(),
+                setRow(*(placesModel->append()), volumes[i]->get_icon(),
                         volumes[i]->get_name(), "", PlaceType::VOLUME, false);
             }
         }
@@ -234,11 +234,11 @@ void PlacesBrowser::refreshPlacesList ()
             Glib::RefPtr<Gio::Mount> mount = volumes[i]->get_mount ();
 
             if (mount) { // placesed volumes
-                SetRow(*(placesModel->append()), mount->get_icon(),
+                setRow(*(placesModel->append()), mount->get_icon(),
                         mount->get_name(), mount->get_root ()->get_parse_name(),
                         PlaceType::MOUNT, false);
             } else { // unplacesed volumes
-                SetRow(*(placesModel->append()), volumes[i]->get_icon(),
+                setRow(*(placesModel->append()), volumes[i]->get_icon(),
                         volumes[i]->get_name(), "", PlaceType::VOLUME, false);
             }
         }
@@ -255,7 +255,7 @@ void PlacesBrowser::refreshPlacesList ()
 
     for (size_t i = 0; i < mounts.size (); i++) {
         if (!mounts[i]->get_volume ()) {
-            SetRow(*(placesModel->append()), mounts[i]->get_icon(),
+            setRow(*(placesModel->append()), mounts[i]->get_icon(),
                     mounts[i]->get_name(), mounts[i]->get_root ()->get_parse_name(),
                     PlaceType::MOUNT, false);
         }

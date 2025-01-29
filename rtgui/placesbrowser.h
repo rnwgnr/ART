@@ -65,7 +65,7 @@ private:
 
     void on_session_changed(const Glib::RefPtr<Gio::File>& file, const Glib::RefPtr<Gio::File>& other_file, Gio::FileMonitorEvent event_type);
 
-    void SetRow(Gtk::TreeModel::Row row, Glib::RefPtr<Gio::Icon> icon,
+    void setRow(Gtk::TreeModel::Row row, Glib::RefPtr<Gio::Icon> icon,
                 Glib::ustring label, Glib::ustring root, PlaceType type,
                 bool rowSeparator);
     
