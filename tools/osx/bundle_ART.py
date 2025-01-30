@@ -416,7 +416,8 @@ export GTK_OVERLAY_SCROLLING=0
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 """)
             if opts.debug:
-                out.write('$d/MacOS/.ART.bin" "$@" 2>&1 | /usr/bin/tee ${HOME}/ART.log\n')
+                out.write('export ASAN_OPTIONS=detect_container_overflow=0:new_delete_type_mismatch=0\n')
+                out.write('$d/MacOS/.ART.bin "$@" 2>&1 | /usr/bin/tee ${HOME}/ART.log\n')
             else:
                 out.write('$d/MacOS/.ART.bin" "$@"\n')
             out.write('/bin/rm -rf "$t"\n')
