@@ -36,6 +36,7 @@ def getopts():
     p.add_argument('-l', '--use-launcher', action='store_true', default=False)
     p.add_argument('-L', '--no-launcher', action='store_false',
                    dest='use_launcher')
+    p.add_argument('--debug', action='store_true')
     ret = p.parse_args()
     ret.outdir = os.path.join(ret.outdir, 'ART.app')
     return ret
@@ -413,9 +414,12 @@ export XDG_DATA_DIRS="$d/Resources/share"
 export GDK_RENDERING=similar
 export GTK_OVERLAY_SCROLLING=0
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
-"$d/MacOS/.ART.bin" "$@"
-/bin/rm -rf "$t"
-""")            
+""")
+            if opts.debug:
+                out.write('$d/MacOS/.ART.bin" "$@" 2>&1 | /usr/bin/tee ${HOME}/ART.log\n')
+            else:
+                out.write('$d/MacOS/.ART.bin" "$@"\n')
+            out.write('/bin/rm -rf "$t"\n')
 
 
 def write_launcher_script_cli(opts):

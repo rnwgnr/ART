@@ -6,6 +6,11 @@ on:
       - '[1-9].[0-9]+'
       - '[1-9].[0-9]+.[0-9]+'
   workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Debug build'
+        required: true
+        type: boolean
 
 jobs:
   build:
@@ -45,13 +50,11 @@ jobs:
 
       - name: Set build type
         run: |
-          if [ "${{ vars.BUILD_DEBUG }}" = "true" ]; then
-              echo "CTL_BUILD_TYPE=asan" >> $GITHUB_ENV
+          if [ "${{ inputs.debug }}" = "true" ]; then
               echo "BUILD_TYPE=Debug" >> $GITHUB_ENV
               echo "WITH_SAN=address" >> $GITHUB_ENV
               echo "BUILD_SUFFIX=-debug-asan" >> $GITHUB_ENV
           else
-              echo "CTL_BUILD_TYPE=Release" >> $GITHUB_ENV
               echo "BUILD_TYPE=Release" >> $GITHUB_ENV
               echo "WITH_SAN=OFF" >> $GITHUB_ENV
           fi
@@ -124,7 +127,7 @@ jobs:
             -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-17 \
             -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-17 \
             -DCMAKE_INSTALL_PREFIX=$INSTDIR \
-            -DCMAKE_BUILD_TYPE=${CTL_BUILD_TYPE} \
+            -DCMAKE_BUILD_TYPE=Release \
             ../CTL
           make -j$(nproc)
           sudo make install
@@ -218,10 +221,14 @@ jobs:
         run: |
           ART_NAME="ART-${ART_VERSION}"
           OUTDIR=$(pwd)
+          if [ "${{ inputs.debug }}" = "true" ]; then
+             DBG_FLAG=--debug
+          fi
           cd build/${BUILD_TYPE}/ART.app
           python "${OUTDIR}/repo/tools/osx/bundle_ART.py" \
             -o "${OUTDIR}" -v -r /opt/art-deps/lib \
             -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin -e -I \
+            ${DBG_FLAG} \
             -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}${BUILD_SUFFIX}"
           cd "${OUTDIR}"
 
