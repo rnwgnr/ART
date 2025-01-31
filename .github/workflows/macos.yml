@@ -52,7 +52,7 @@ jobs:
         run: |
           if [ "${{ inputs.debug }}" = "true" ]; then
               echo "BUILD_TYPE=Debug" >> $GITHUB_ENV
-              echo "WITH_SAN=address" >> $GITHUB_ENV
+              echo "WITH_SAN=address -fsanitize-recover=address" >> $GITHUB_ENV
               echo "BUILD_SUFFIX=-debug-asan" >> $GITHUB_ENV
           else
               echo "BUILD_TYPE=Release" >> $GITHUB_ENV
