@@ -187,7 +187,7 @@ jobs:
           /opt/local/bin/cmake \
             -DCMAKE_C_COMPILER=/opt/local/bin/clang-mp-17 \
             -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-17 \
-            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DWITH_SAN=${WITH_SAN} \
+            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DWITH_SAN="${WITH_SAN}" \
             -DENABLE_CTL=1 \
             -DENABLE_LIBRAW=1 \
             -DCTL_INCLUDE_DIR=/opt/art-deps/include/CTL \
