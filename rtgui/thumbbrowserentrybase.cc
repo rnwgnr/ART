@@ -632,12 +632,14 @@ void ThumbBrowserEntryBase::draw (Cairo::RefPtr<Cairo::Context> cc)
         updateBackBuffer ();
     }
 
-    int w_ = startx + ofsX;
-    int h_ = starty + ofsY;
-    cc->set_source(backBuffer->getSurface(), w_, h_);
-    cc->rectangle(w_, h_, backBuffer->getWidth(), backBuffer->getHeight());
-    cc->fill();
-
+    if (backBuffer->surfaceCreated()) {
+        int w_ = startx + ofsX;
+        int h_ = starty + ofsY;
+        cc->set_source(backBuffer->getSurface(), w_, h_);
+        cc->rectangle(w_, h_, backBuffer->getWidth(), backBuffer->getHeight());
+        cc->fill();
+    }
+    
     // check icon set changes!!!
 
 //    drawProgressBar (window, cc, selected ? texts : textn, selected ? bgs : bgn, ofsX+startx, exp_width, ofsY+starty + upperMargin+bsHeight+borderWidth+preh+borderWidth+textGap+tpos, fnlabh);
