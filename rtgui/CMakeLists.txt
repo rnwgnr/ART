@@ -344,7 +344,8 @@ if(HAS_MIMALLOC)
 endif()
 
 if(APPLE)
-    target_link_libraries(art PRIVATE "-framework ApplicationServices")
+    target_link_libraries(art PRIVATE "-framework ApplicationServices -framework Foundation")
+    target_link_libraries(art-cli PRIVATE "-framework Foundation")
 endif()
 
 # Install executables

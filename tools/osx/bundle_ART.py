@@ -241,6 +241,8 @@ def make_info_plist(opts):
         <string>????</string>
         <key>CFBundleVersion</key>
         <string>{version}</string>
+        <key>CFBundleAllowMixedLocalizations</key>
+        <true />
         <key>NSHighResolutionCapable</key>
         <true />
         <key>NSHumanReadableCopyright</key>
