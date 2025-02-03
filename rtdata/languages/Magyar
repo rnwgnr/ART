@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2024-11-08 Bereczky Péter
+#03 2025-01-26 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -130,7 +130,7 @@ FILEBROWSER_CACHE;Gyorsítótár
 FILEBROWSER_CACHECLEARFROMFULL;Mindent töröl, a gyorsítótárazott profilokat is
 FILEBROWSER_CACHECLEARFROMPARTIAL;Mindent töröl, kivéve a gyorsítótárazott profilokat
 FILEBROWSER_CLEARPROFILE;Törlés
-FILEBROWSER_COLORLABEL_TOOLTIP;Színcímke.\n\nHasználja a lenyitható menüt vagy a gyorsbillentyűket:\n<b>Shift-Ctrl-0</b> Nincs színcímke\n<b>Shift-Ctrl-1</b> Piros\n<b>Shift-Ctrl-2</b> Sárga\n<b>Shift-Ctrl-3</b> Zöld\n<b>Shift-Ctrl-4</b> Kék\n<b>Shift-Ctrl-5</b> Lila
+FILEBROWSER_COLORLABEL_TOOLTIP;Színcímke.\n\nHasználja a lenyitható menüt vagy a gyorsbillentyűket:\n<b>Shift-Ctrl-0</b> Nincs színcímke\n<b>Shift-Ctrl-1</b> Vörös\n<b>Shift-Ctrl-2</b> Sárga\n<b>Shift-Ctrl-3</b> Zöld\n<b>Shift-Ctrl-4</b> Kék\n<b>Shift-Ctrl-5</b> Lila
 FILEBROWSER_COPYPROFILE;Feldolgozási profil másolása
 FILEBROWSER_CURRENT_NAME;Aktuális név:
 FILEBROWSER_DARKFRAME;Dark-frame (Fekete referenciakép)
@@ -150,7 +150,7 @@ FILEBROWSER_PASTEPROFILE;Feldolgozási profil beillesztése
 FILEBROWSER_POPUPCANCELJOB;Eltávolítás a feldolgozási sorból
 FILEBROWSER_POPUPCOLORLABEL;Színcímke
 FILEBROWSER_POPUPCOLORLABEL0;Címke: Nincs
-FILEBROWSER_POPUPCOLORLABEL1;Címke: Piros
+FILEBROWSER_POPUPCOLORLABEL1;Címke: Vörös
 FILEBROWSER_POPUPCOLORLABEL2;Címke: Sárga
 FILEBROWSER_POPUPCOLORLABEL3;Címke: Zöld
 FILEBROWSER_POPUPCOLORLABEL4;Címke: Kék
@@ -197,7 +197,7 @@ FILEBROWSER_SESSION_REMOVE_LABEL;A kijelölt(ek) eltávolítása a munkamenetbő
 FILEBROWSER_SESSION_LOAD_LABEL;Munkamenet betöltése fájlból
 FILEBROWSER_SESSION_SAVE_LABEL;Munkamenet mentése fájlba
 FILECHOOSER_FILTER_ARS;ART munkamenet fájlok (*.ars)
-FILEBROWSER_SHOWCOLORLABEL1HINT;Piros címkéjű képek megjelenítése.\nGyorsbillentyű: <b>Alt-1</b>
+FILEBROWSER_SHOWCOLORLABEL1HINT;Vörös címkéjű képek megjelenítése.\nGyorsbillentyű: <b>Alt-1</b>
 FILEBROWSER_SHOWCOLORLABEL2HINT;Sárga címkéjű képek megjelenítése.\nGyorsbillentyű: <b>Alt-2</b>
 FILEBROWSER_SHOWCOLORLABEL3HINT;Zöld címkéjű képek megjelenítése.\nGyorsbillentyű: <b>Alt-3</b>
 FILEBROWSER_SHOWCOLORLABEL4HINT;Kék címkéjű képek megjelenítése.\nGyorsbillentyű: <b>Alt-4</b>
@@ -282,7 +282,7 @@ HISTOGRAM_TOOLTIP_MODE;Átkapcsolja a hisztogram lineáris, logaritmikus-lineár
 HISTOGRAM_TOOLTIP_MODE_LINEAR;lineáris
 HISTOGRAM_TOOLTIP_MODE_LOG_X;logaritmikus-lineáris
 HISTOGRAM_TOOLTIP_MODE_LOG_XY;logaritmikus-logaritmikus
-HISTOGRAM_TOOLTIP_R;Piros hisztogram megjelenítése/elrejtése.
+HISTOGRAM_TOOLTIP_R;Vörös hisztogram megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_RAW;RAW hisztogram megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Be/kikapcsolja a hisztogram beállítási gombjainak láthatóságát.
 HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Diagram világosságának beállítása.
@@ -382,7 +382,7 @@ HISTORY_MSG_108;Expozíció - Csúcsfények helyreállításának küszöbérté
 HISTORY_MSG_109;Átméretezés - Határolókeret
 HISTORY_MSG_110;Átméretezés - Alkalmazás ehhez
 HISTORY_MSG_115;Hamis színek csökkentése
-HISTORY_MSG_117;Raw CA javítás - Piros
+HISTORY_MSG_117;Raw CA javítás - Vörös
 HISTORY_MSG_118;Raw CA javítás - Kék
 HISTORY_MSG_119;Vonalzaj szűrő
 HISTORY_MSG_120;Zöldegyensúly
@@ -399,34 +399,34 @@ HISTORY_MSG_131;NR - Világosság zaj
 HISTORY_MSG_132;NR - Színzaj
 HISTORY_MSG_133;Kimeneti gamma
 HISTORY_MSG_137;Feketeszint - Zöld 1
-HISTORY_MSG_138;Feketeszint - Piros
+HISTORY_MSG_138;Feketeszint - Vörös
 HISTORY_MSG_139;Feketeszint - Kék
 HISTORY_MSG_140;Feketeszint - Zöld 2
 HISTORY_MSG_141;Feketeszint - Zöld csúszkák összekapcsolása
 HISTORY_MSG_158;TB - Erősség
 HISTORY_MSG_160;TB - Részletek mértéke
 HISTORY_MSG_162;Textúra kiemelése/Élesítés
-HISTORY_MSG_163;RGB Görbék - Piros
+HISTORY_MSG_163;RGB Görbék - Vörös
 HISTORY_MSG_164;RGB Görbék - Zöld
 HISTORY_MSG_165;RGB Görbék - Kék
 HISTORY_MSG_166;Expozíció - Visszaállítás
 HISTORY_MSG_167;Deinterpoláció módszer
 HISTORY_MSG_173;NR - Részletek helyreállítása
-HISTORY_MSG_201;NR - Színzaj - piros-zöld
+HISTORY_MSG_201;NR - Színzaj - vörös-zöld
 HISTORY_MSG_202;NR - Színzaj - kék-sárga
 HISTORY_MSG_203;NR - Színtér
 HISTORY_MSG_204;LMMSE javítási lépések
 HISTORY_MSG_207;Defringe - Színárnyalat (Hue) görbe
-HISTORY_MSG_208;WB - Kék/Piros kiegyenlítő
+HISTORY_MSG_208;WB - Kék/Vörös kiegyenlítő
 HISTORY_MSG_210;GF - Szög
 HISTORY_MSG_211;Átmenetes szűrő (GF)
 HISTORY_MSG_212;VF - Erősség
 HISTORY_MSG_213;Peremsötétedés szűrő (VF)
 HISTORY_MSG_214;Fekete-fehér (B&W)
-HISTORY_MSG_215;B&W - CM - Piros
+HISTORY_MSG_215;B&W - CM - Vörös
 HISTORY_MSG_216;B&W - CM - Zöld
 HISTORY_MSG_217;B&W - CM - Kék
-HISTORY_MSG_218;B&W - Gamma - Piros
+HISTORY_MSG_218;B&W - Gamma - Vörös
 HISTORY_MSG_219;B&W - Gamma - Zöld
 HISTORY_MSG_220;B&W - Gamma - Kék
 HISTORY_MSG_221;B&W - Színszűrő
@@ -455,7 +455,7 @@ HISTORY_MSG_286;NR - Medián - Medián
 HISTORY_MSG_287;NR - Medián - Iterációk
 HISTORY_MSG_288;Flat-Field - Vágás vezérlés
 HISTORY_MSG_289;Flat-Field - Vágás vezérlés - Auto
-HISTORY_MSG_290;Feketeszint - Piros
+HISTORY_MSG_290;Feketeszint - Vörös
 HISTORY_MSG_291;Feketeszint - Zöld
 HISTORY_MSG_292;Feketeszint - Kék
 HISTORY_MSG_293;Filmszimuláció
@@ -491,7 +491,7 @@ HISTORY_MSG_445;Raw alkép
 HISTORY_MSG_449;PS - ISO alkalmazkodás
 HISTORY_MSG_452;PS - Mozgás megjelenítése
 HISTORY_MSG_453;PS - Csak a maszk megjelenítése
-HISTORY_MSG_457;PS - Piros/kék szín ellenőrzése
+HISTORY_MSG_457;PS - Vörös/kék szín ellenőrzése
 HISTORY_MSG_462;PS - Zöld szín ellenőrzése
 HISTORY_MSG_464;PS - Bemozdulásos életlenség maszk
 HISTORY_MSG_465;PS - Elmosódás sugara
@@ -521,7 +521,7 @@ HISTORY_MSG_LOCALCONTRAST_MASKBLUR;Helyi kontraszt - elmosás maszk
 HISTORY_MSG_LOCALCONTRAST_SHOWMASK;Helyi kontraszt - maszk megjelenítése
 HISTORY_MSG_LOCALCONTRAST_AREAMASK;Helyi kontraszt - területmaszk
 HISTORY_MSG_CHMIXER_MODE;CM - mód
-HISTORY_MSG_CHMIXER_RED_PRIMARY;CM - Piros elsődleges
+HISTORY_MSG_CHMIXER_RED_PRIMARY;CM - Vörös elsődleges
 HISTORY_MSG_CHMIXER_GREEN_PRIMARY;CM - Zöld elsődleges
 HISTORY_MSG_CHMIXER_BLUE_PRIMARY;CM - Kék elsődleges
 HISTORY_MSG_COLORCORRECTION_AB;CC - színesség
@@ -551,6 +551,7 @@ HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametrikus maszk
 HISTORY_MSG_COLORCORRECTION_MASK_POSTPROCESS;CC - maszk utófeldolgozás
 HISTORY_MSG_COLORCORRECTION_LUT;CC - LUT
 HISTORY_MSG_COLORCORRECTION_LUT_PARAMS;CC - LUT paraméterek
+HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Színkorrekció (CC)
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - auto erősség (színzaj)
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Végső simítás C
@@ -878,8 +879,8 @@ MAIN_TOOLTIP_PREVIEWB;A <b>kék csatorna</b> megjelenítése.\nGyorsbillentyű: 
 MAIN_TOOLTIP_PREVIEWFOCUSMASK;A <b>fókusz maszk megjelenítése</b>.\nGyorsbillentyű: <b>Shift-f</b>\n\nPontosabb a kis mélységélességű, alacsony zajszintű és magasabb zoomszintű képeken.\nKicsinyítse 10-30%-ra, hogy javítsa az észlelés pontosságát a zajos képeken.
 MAIN_TOOLTIP_PREVIEWG;A <b>zöld csatorna</b> megjelenítése.\nGyorsbillentyű: <b>Shift-g</b>
 MAIN_TOOLTIP_PREVIEWL;A <b>világosság</b> megjelenítése.\nGyorsbillentyű: <b>Shift-v</b>\n\n0.299*R + 0.587*G + 0.114*B
-MAIN_TOOLTIP_PREVIEWR;A <b>piros csatorna</b> megjelenítése.\nGyorsbillentyű: <b>Shift-r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;<b>Élesítés kontraszt maszk</b> megjelenítése.\nGyorsbillentyű: <b>Shift-o</b>\n\Csak akkor működik, ha az élesítés engedélyezve van, és csak akkor pontos, ha a zoom >= 100%.
+MAIN_TOOLTIP_PREVIEWR;A <b>vörös csatorna</b> megjelenítése.\nGyorsbillentyű: <b>Shift-r</b>
+MAIN_TOOLTIP_PREVIEWSHARPMASK;<b>Élesítés kontraszt maszk</b> megjelenítése.\nGyorsbillentyű: <b>Shift-o</b>\n\nCsak akkor működik, ha az élesítés engedélyezve van, és csak akkor pontos, ha a zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Gyors információ a képről.\nGyorsbillentyű: <b>Shift-i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;A bal oldali panel megjelenítése/elrejtése.\nGyorsbillentyű: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;A jobb oldali panel megjelenítése/elrejtése.\nGyorsbillentyű: <b>Ctrl-l</b>
@@ -1073,6 +1074,8 @@ PREFERENCES_HISTOGRAM_TOOLTIP;Ha engedélyezve van, a munkaprofilt használja a 
 PREFERENCES_HLTHRESHOLD;A vágott csúcsfények küszöbértéke
 PREFERENCES_ICCDIR;Kimeneti színprofilokat tartalmazó könyvtár
 PREFERENCES_MONITORICCDIR;A monitor színprofiljait tartalmazó könyvtár
+PREFERENCES_MONITOR_GAMUT;Monitor gamut
+PREFERENCES_OSCOLORMGMT_INFO;A színkezelés be van építve az operációs rendszerbe/asztali környezetbe, és globálisan engedélyezve van.\nHasználja a környezet szolgáltatásait a monitorprofil beállításához, majd itt válassza ki a legmegfelelőbb gamutot.
 PREFERENCES_IMPROCPARAMS;Alapértelmezett feldolgozási profil
 PREFERENCES_INSPECT_LABEL;Vizsgálat
 PREFERENCES_INSPECT_MAXBUFFERS_LABEL;A gyorsítótárazott képek maximális száma
@@ -1099,6 +1102,7 @@ PREFERENCES_METADATA_SYNC_READWRITE;Kétirányú
 PREFERENCES_MONINTENT;Alapértelmezett megjelenítési szándék
 PREFERENCES_MONITOR;Monitor
 PREFERENCES_MONPROFILE;Alapértelmezett színprofil
+PREFERENCES_MONPROFILE_WARN_SRGB;Ebben az operációs rendszerben/asztali környezetben csak az sRGB támogatott monitorprofilként.
 PREFERENCES_MULTITAB;Több szerkesztőlap mód
 PREFERENCES_MULTITABDUALMON;Több szerkesztőlap saját ablak módban
 PREFERENCES_NAVIGATIONFRAME;Navigáció
@@ -1208,7 +1212,7 @@ PROFILEPANEL_PINTERNAL;Semleges
 PROFILEPANEL_PLASTSAVED;Utoljára mentett
 PROFILEPANEL_SAVEDLGLABEL;Feldolgozási paraméterek mentése...
 PROFILEPANEL_SAVEPPASTE;Mentendő paraméterek
-PROFILEPANEL_TOOLTIPCOPY;Aktuális feldolgozási profil másolása a vágólapra.
+PROFILEPANEL_TOOLTIPCOPY;Aktuális feldolgozási profil másolása a vágólapra.\n<b>Ctrl-click</b> a másolandó paraméterek kiválasztásához.
 PROFILEPANEL_TOOLTIPLOAD;Profil betöltése fájlból.\n<b>Ctrl-click</b> a betöltendő paraméterek kiválasztásához.
 PROFILEPANEL_TOOLTIPPASTE;Profil beillesztése a vágólapról.\n<b>Ctrl-click</b> a beillesztendő paraméterek kiválasztásához.
 PROFILEPANEL_TOOLTIPSAVE;Aktuális profil mentése.\n<b>Ctrl-click</b> a mentendő paraméterek kiválasztásához.
@@ -1322,9 +1326,9 @@ TP_BWMIX_FILTER_GREEN;Zöld
 TP_BWMIX_FILTER_GREENYELLOW;Zöld-Sárga
 TP_BWMIX_FILTER_NONE;Nincs
 TP_BWMIX_FILTER_PURPLE;Lila
-TP_BWMIX_FILTER_RED;Piros
-TP_BWMIX_FILTER_REDYELLOW;Piros-Sárga
-TP_BWMIX_FILTER_TOOLTIP;A színszűrő az objektív elé helyezett színes szűrővel készült felvételeket szimulálja. A színes szűrők csökkentik az egyes színtartományok áteresztését, és ezáltal befolyásolják azok világosságát. Például. piros szűrő sötétíti a kék eget.
+TP_BWMIX_FILTER_RED;Vörös
+TP_BWMIX_FILTER_REDYELLOW;Vörös-Sárga
+TP_BWMIX_FILTER_TOOLTIP;A színszűrő az objektív elé helyezett színes szűrővel készült felvételeket szimulálja. A színes szűrők csökkentik az egyes színtartományok áteresztését, és ezáltal befolyásolják azok világosságát. Például. vörös szűrő sötétíti a kék eget.
 TP_BWMIX_FILTER_YELLOW;Sárga
 TP_BWMIX_GAMMA;Gamma Korrekció
 TP_BWMIX_GAM_TOOLTIP;Megfelelő gamma minden RGB csatornához.
@@ -1350,16 +1354,16 @@ TP_BWMIX_SET_RGBABS;Abszolút RGB
 TP_BWMIX_SET_RGBREL;Relatív RGB
 TP_CACORRECTION_BLUE;Kék
 TP_CACORRECTION_LABEL;Kromatikus aberráció korrekció
-TP_CACORRECTION_RED;Piros
+TP_CACORRECTION_RED;Vörös
 TP_LOCALCONTRAST_LIST_TITLE;Paraméterek
 TP_CHMIXER_BLUE;Kék csatorna
 TP_CHMIXER_GREEN;Zöld csatorna
 TP_CHMIXER_LABEL;Csatornakeverő
-TP_CHMIXER_RED;Piros csatorna
+TP_CHMIXER_RED;Vörös csatorna
 TP_CHMIXER_MODE;Mód
 TP_CHMIXER_HUE;Színárnyalat korrekció
 TP_CHMIXER_SAT;Telítettség korrekció
-TP_CHMIXER_PRIMARY_R;Piros elsődleges
+TP_CHMIXER_PRIMARY_R;Vörös elsődleges
 TP_CHMIXER_PRIMARY_G;Zöld elsődleges
 TP_CHMIXER_PRIMARY_B;Kék elsődleges
 TP_CHMIXER_MODE_RGB_MATRIX;RGB mátrix
@@ -1377,8 +1381,8 @@ TP_COLORCORRECTION_MODE_RGBCHANNELS;RGB csatornánként külön
 TP_COLORCORRECTION_MODE_HSL;HSL tényezők
 TP_COLORCORRECTION_MODE_JZAZBZ;Észlelési
 TP_COLORCORRECTION_CHANNEL_B;Kék
-TP_COLORCORRECTION_CHANNEL_G;ZÖLD
-TP_COLORCORRECTION_CHANNEL_R;Piros
+TP_COLORCORRECTION_CHANNEL_G;Zöld
+TP_COLORCORRECTION_CHANNEL_R;Vörös
 TP_COLORCORRECTION_LABEL;Szín/Tónus korrekció
 TP_COLORCORRECTION_LIST_TITLE;Korrekció
 TP_COLORCORRECTION_OFFSET;Árnyékok/Kiemelés
@@ -1397,6 +1401,7 @@ TP_COLORCORRECTION_HUESHIFT;Színárnyalat eltolás
 TP_COLORCORRECTION_LUT_FILENAME;LUT fájl
 TP_COLORCORRECTION_MODE_LUT;LUT
 TP_COLORCORRECTION_LUT_SELECT;LUT fájl kiválasztása...
+TP_COLORCORRECTION_HSL_GAMMA;Gamma
 TP_CROP_FIXRATIO;Arány rögzítése
 TP_CROP_GTDIAGONALS;Átlós szabály
 TP_CROP_GTEPASSPORT;Útlevélkép (biometrikus)
@@ -1444,7 +1449,7 @@ TP_DIRPYRDENOISE_CHROMINANCE_MANUAL;Manuális
 TP_DIRPYRDENOISE_CHROMINANCE_MASTER;Színezet - Főszabályzó
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD;Módszer
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manuális\nA teljes képre hat.\nA zajcsökkentés beállításait manuálisan vezérelheti.\n\nAutomatikus globális\nA teljes képre hat.\n9 zónát használnak a globális színezési zajcsökkentési beállítás kiszámításához.\n\nAutomatikus többzónás \nNincs előnézet – csak mentés közben működik, de az "Előnézet" módszerrel a csempe méretének és közepének az előnézeti mérethez és középponthoz való igazításával képet kaphat a várt eredményekről.\nA kép csempékre van osztva (kb. 10-70 a képmérettől függően), és minden csempe megkapja a saját színzajcsökkentési beállításait.\n\nElőnézet\nA teljes képre hat.\nA kép előnézetben látható része a globális színzajcsökkentési beállítások kiszámítására szolgál.
-TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Színezet - Piros-Zöld
+TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Színezet - Vörös-Zöld
 TP_DIRPYRDENOISE_MAIN_COLORSPACE;Színtér
 TP_DIRPYRDENOISE_MAIN_COLORSPACE_LAB;L*a*b*
 TP_DIRPYRDENOISE_MAIN_COLORSPACE_RGB;RGB
@@ -1515,7 +1520,7 @@ TP_FILMNEGATIVE_GREENBALANCE;Bíborvörös/Zöld
 TP_FILMNEGATIVE_GUESS_TOOLTIP;Automatikusan állítsa be a vörös és kék arányt úgy, hogy kiválaszt két olyan foltot, amelyek semleges árnyalatúak (nincs szín) az eredeti jelenetben. A foltok fényerejének eltérőnek kell lennie.
 TP_FILMNEGATIVE_LABEL;Filmnegatív
 TP_FILMNEGATIVE_PICK;Válassz semleges helyeket
-TP_FILMNEGATIVE_RED;Piros arány
+TP_FILMNEGATIVE_RED;Vörös arány
 TP_FILMNEGATIVE_COLORSPACE;Inverziós színtér:
 TP_FILMNEGATIVE_COLORSPACE_INPUT;Beviteli színtér
 TP_FILMNEGATIVE_COLORSPACE_TOOLTIP;Válassza ki a negatív inverzió végrehajtásához használt színteret:\n<b>Bemeneti színtér</b>: hajtsa végre az inverziót a bemeneti profil alkalmazása előtt, mint az RT korábbi verzióiban.\n<b>Munkaszíntér< /b> : inverzió végrehajtása a beviteli profil után, az aktuálisan kiválasztott munkaprofil használatával.
@@ -1613,8 +1618,8 @@ TP_LABCURVE_CHROMA_TOOLTIP;A fekete-fehér tónus alkalmazásához állítsa a S
 TP_LABCURVE_CONTRAST;Kontraszt
 TP_LABCURVE_CURVEEDITOR_A_RANGE1;Zöld Telített
 TP_LABCURVE_CURVEEDITOR_A_RANGE2;Zöld Pasztell
-TP_LABCURVE_CURVEEDITOR_A_RANGE3;Piros Pasztell
-TP_LABCURVE_CURVEEDITOR_A_RANGE4;Piros Telített
+TP_LABCURVE_CURVEEDITOR_A_RANGE3;Vörös Pasztell
+TP_LABCURVE_CURVEEDITOR_A_RANGE4;Vörös Telített
 TP_LABCURVE_CURVEEDITOR_B_RANGE1;Kék Telített
 TP_LABCURVE_CURVEEDITOR_B_RANGE2;Kék Pasztell
 TP_LABCURVE_CURVEEDITOR_B_RANGE3;Sárga Pasztell
@@ -1763,15 +1768,15 @@ TP_RAWCACORR_AUTOIT;Iterációk
 TP_RAWCACORR_AUTOIT_TOOLTIP;Ez a beállítás akkor érhető el, ha az „Automatikus korrekció” be van jelölve.\nAz automatikus korrekció konzervatív, ami azt jelenti, hogy gyakran nem korrigálja az összes kromatikus aberrációt.\nA fennmaradó kromatikus aberráció kijavításához legfeljebb öt automatikus kromatikus aberráció korrekciót használhat.\nMinden iteráció további feldolgozási idő árán csökkenti az utolsó iteráció után fennmaradó kromatikus aberrációt.
 TP_RAWCACORR_AVOIDCOLORSHIFT;Színeltolódás elkerülése
 TP_RAWCACORR_CABLUE;Kék
-TP_RAWCACORR_CARED;Piros
+TP_RAWCACORR_CARED;Vörös
 TP_RAWCACORR_LABEL;Kromatikus aberráció korrekció
 TP_RAWEXPOS_BLACK_0;Zöld 1 (lead)
-TP_RAWEXPOS_BLACK_1;Piros
+TP_RAWEXPOS_BLACK_1;Vörös
 TP_RAWEXPOS_BLACK_2;Kék
 TP_RAWEXPOS_BLACK_3;Zöld 2
 TP_RAWEXPOS_BLACK_BLUE;Kék
 TP_RAWEXPOS_BLACK_GREEN;Zöld
-TP_RAWEXPOS_BLACK_RED;Piros
+TP_RAWEXPOS_BLACK_RED;Vörös
 TP_RAWEXPOS_LINEAR;Erősítés/Fehérpont korrekció
 TP_RAWEXPOS_TWOGREEN;Zöldek összekapcsolása
 TP_RAW_1PASSMEDIUM;1-lépés (Markesteijn)
@@ -1832,7 +1837,7 @@ TP_RAW_PIXELSHIFTMM_CUSTOM;Egyedi
 TP_RAW_PIXELSHIFTMM_OFF;Ki
 TP_RAW_PIXELSHIFTMOTIONMETHOD;Mozgáskorrekció
 TP_RAW_PIXELSHIFTMOTION_TOOLTIP;A 0 azt jelenti, hogy nincs mozgásérzékelés.\n1–99 azt jelenti, hogy a rendszer ennek az értéknek megfelelően érzékeli a mozgást. Növelje az értéket az észlelési arány növeléséhez.\n100 azt jelenti, hogy az AMaZE-deinterpolációt használja a rendszer.
-TP_RAW_PIXELSHIFTNONGREENCROSS;Mozgás érzékelése a piros/kék  csatornában
+TP_RAW_PIXELSHIFTNONGREENCROSS;Mozgás érzékelése a vörös/kék  csatornában
 TP_RAW_PIXELSHIFTSHOWMOTION;Mozgás maszk megjelenítése
 TP_RAW_PIXELSHIFTSHOWMOTIONMASKONLY;Csak a mozgás maszk megjelenítése
 TP_RAW_PIXELSHIFTSHOWMOTIONMASKONLY_TOOLTIP;Mozgás maszk megjelenítése a kép nélkül
@@ -1932,7 +1937,7 @@ TP_SOFTLIGHT_LABEL;Lágy fény
 TP_SOFTLIGHT_STRENGTH;Erősség
 TP_SPOT_COUNTLABEL;%1 pont(ok)
 TP_SPOT_ENTRYCHANGED;Pont megváltozott
-TP_SPOT_HINT;Kattintson erre a gombra az előnézeti terület kezeléséhez.\n\nEgy folt szerkesztéséhez vigye az egérmutatót a szerkesztett terület fehér jelére, így megjelenik a szerkesztési geometria.\n\nPont hozzáadásához nyomja meg a Ctrl-t és a bal egérgombot gombot, húzza a kört (a Ctrl billentyű felengedhető) a forrás helyére, majd engedje fel az egérgombot.\n\nA forrás vagy a célhely mozgatásához vigye az egérmutatót a közepére, majd húzza el.\n\nA belső kör (maximális hatás területe) és a "tollazat" köre átméretezhető úgy, hogy rámutat (a kör narancssárgává válik), majd húzza (a kör piros lesz) az egérrel.\n\nHa a módosítások készen vannak, kattintson a jobb gombbal bármelyik ponton kívüli területre a Spot szerkesztési mód befejezéséhez, vagy kattintson újra erre a gombra.
+TP_SPOT_HINT;Kattintson erre a gombra az előnézeti terület kezeléséhez.\n\nEgy folt szerkesztéséhez vigye az egérmutatót a szerkesztett terület fehér jelére, így megjelenik a szerkesztési geometria.\n\nPont hozzáadásához nyomja meg a Ctrl-t és a bal egérgombot gombot, húzza a kört (a Ctrl billentyű felengedhető) a forrás helyére, majd engedje fel az egérgombot.\n\nA forrás vagy a célhely mozgatásához vigye az egérmutatót a közepére, majd húzza el.\n\nA belső kör (maximális hatás területe) és a "tollazat" köre átméretezhető úgy, hogy rámutat (a kör narancssárgává válik), majd húzza (a kör vörös lesz) az egérrel.\n\nHa a módosítások készen vannak, kattintson a jobb gombbal bármelyik ponton kívüli területre a Spot szerkesztési mód befejezéséhez, vagy kattintson újra erre a gombra.
 TP_SPOT_LABEL;Folt eltávolítása
 TP_SPOT_LIGHTPIPELINE_HINT;Kattintson erre a gombra a foltok módosításához, miközben egy egyszerűsített kép előnézetét tekinti meg a sok erőforrást igénylő eszközök letiltásával (teljesítmény opció).\n\nCsak akkor van hatása, ha az előnézeti szerkesztés aktív.
 TP_SPOT_CUR_SPOT_LABEL;Aktuális folt
@@ -1977,7 +1982,7 @@ TP_WBALANCE_AUTO;Auto
 TP_WBALANCE_CAMERA;Tárolt
 TP_WBALANCE_CUSTOM;Egyedi színhőmérséklet
 TP_WBALANCE_CUSTOM_MULT;Egyedi szorzók
-TP_WBALANCE_EQBLUERED;Kék/Piros kiegyenlítő
+TP_WBALANCE_EQBLUERED;Kék/Vörös kiegyenlítő
 TP_WBALANCE_EQBLUERED_TOOLTIP;Lehetővé teszi a „fehéregyensúly” normál viselkedésétől való eltérését a kék/vörös egyensúly módosításával.\nEz akkor lehet hasznos, ha a fényképezési körülmények:\na) messze vannak a szokásos megvilágítástól (pl. víz alatt),\nb) távol vannak a kalibrálás elvégzésének körülményeitől,\nc) ahol a mátrixok vagy az ICC profilok nem megfelelőek.
 TP_WBALANCE_GREEN;Színárnyalat
 TP_WBALANCE_LABEL;Fehéregyensúly
@@ -1994,9 +1999,3 @@ ZOOMPANEL_ZOOM100;Nagyítás 100%-ra\nGyorsbillentyű: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;A képernyő méretéhez igazítás\nGyorsbillentyű: <b>f</b>
 ZOOMPANEL_ZOOMIN;Nagyítás +\nGyorsbillentyű: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Kicsinyítés -\nGyorsbillentyű: <b>-</b>
-# added with automatic translation
-HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
-PREFERENCES_MONITOR_GAMUT;Monitor színskála
-PREFERENCES_OSCOLORMGMT_INFO;A színkezelés az operációs rendszerbe/asztalos környezetbe van beépítve és globálisan engedélyezve.\nHasználja a környezetének lehetőségeit a monitorprofil beállításához, majd itt válassza ki a legmegfelelőbb színskálát.
-TP_COLORCORRECTION_HSL_GAMMA;Gamma
-PREFERENCES_MONPROFILE_WARN_SRGB;Ebben az operációs rendszerben/asztali környezetben csak az sRGB támogatott monitorprofilként.
