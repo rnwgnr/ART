@@ -34,9 +34,6 @@
 #include "../rtgui/multilangmgr.h"
 #include <sstream>
 
-using namespace std;
-
-
 namespace rtengine {
 
 extern const Settings *settings;

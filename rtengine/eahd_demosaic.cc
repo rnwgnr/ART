@@ -31,8 +31,6 @@
 //#define BENCHMARK
 #include "StopWatch.h"
 
-using namespace std;
-
 namespace rtengine
 {
 

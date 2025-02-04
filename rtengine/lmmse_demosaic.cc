@@ -26,8 +26,6 @@
 #include "opthelper.h"
 #include "median.h"
 
-using namespace std;
-
 namespace rtengine
 {
 

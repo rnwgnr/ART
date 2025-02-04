@@ -26,8 +26,6 @@
 #include "iccstore.h"
 #include "linalgebra.h"
 
-using namespace std;
-
 namespace rtengine {
 
 namespace {
@@ -2142,7 +2140,7 @@ void Color::gamutLchonly (float HH, float2 sincosval, float &Lprov1, float &Chpr
             neg = true;
 #endif
 
-            if (isnan(HH)) {
+            if (std::isnan(HH)) {
                 float atemp = ChprovSave * sincosval.y * 327.68;
                 float btemp = ChprovSave * sincosval.x * 327.68;
                 HH = xatan2f(btemp, atemp);

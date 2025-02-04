@@ -34,8 +34,6 @@
 #define BENCHMARK
 #include "StopWatch.h"
 
-using namespace std;
-
 namespace rtengine {
 
 void RawImageSource::dual_demosaic_RT(bool isBayer, const procparams::RAWParams &raw, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, double &contrast, bool autoContrast)

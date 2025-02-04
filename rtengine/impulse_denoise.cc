@@ -26,8 +26,6 @@
 #include "gauss.h"
 #include "rt_algo.h"
 
-using namespace std;
-
 namespace rtengine {
 
 namespace {

@@ -16,14 +16,12 @@
 #include "klt.h"
 #include "klt_util.h"
 
-using namespace std;
-
 /*********************************************************************/
 
 float _KLTComputeSmoothSigma(
   KLT_TrackingContext tc)
 {
-  return (tc->smooth_sigma_fact * max(tc->window_width, tc->window_height));
+  return (tc->smooth_sigma_fact * std::max(tc->window_width, tc->window_height));
 }
 
 
@@ -111,8 +109,8 @@ void _KLTWriteFloatImageToPGM(
   /* Calculate minimum and maximum values of float image */
   ptr = img->data;
   for (i = 0 ; i < npixs ; i++)  {
-    mmax = max(mmax, *ptr);
-    mmin = min(mmin, *ptr);
+    mmax = std::max(mmax, *ptr);
+    mmin = std::min(mmin, *ptr);
     ptr++;
   }
 	

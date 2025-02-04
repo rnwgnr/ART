@@ -29,7 +29,6 @@
 //#define BENCHMARK
 #include "StopWatch.h"
 
-using namespace std;
 using namespace rtengine;
 
 namespace {
@@ -571,13 +570,13 @@ BENCHFUN
 
     int nReadIndex = static_cast<int>(round(log2(idata->getISOSpeed() /  100.f) * 3.f));
 
-    if(model.find("K-3") != string::npos) {
+    if(model.find("K-3") != std::string::npos) {
         nRead = nReadK3II[nReadIndex];
         eperIsoModel = ePerIsoK3II;
-    } else if(model.find("K-1") != string::npos) { // this also matches K-1 Mark II
+    } else if(model.find("K-1") != std::string::npos) { // this also matches K-1 Mark II
         nRead = nReadK1[nReadIndex];
         eperIsoModel = ePerIsoK1;
-    } else if(model.find("ILCE-7RM3") != string::npos) {
+    } else if(model.find("ILCE-7RM3") != std::string::npos) {
         nRead = nReadILCE7RM3[nReadIndex];
         eperIsoModel = ePerIsoILCE7RM3;
     } else { // as long as we don't have values for Pentax KP, we use the values from K-70

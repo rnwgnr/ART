@@ -28,7 +28,6 @@
 #include "procparams.h"
 #include "opthelper.h"
 
-using namespace std;
 using namespace rtengine;
 
 #define TS 224

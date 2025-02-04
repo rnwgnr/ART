@@ -38,7 +38,6 @@
 #include <sys/time.h>
 #include "../rtengine/imgiomanager.h"
 
-using namespace std;
 using namespace rtengine;
 
 BatchQueue::BatchQueue (FileCatalog* aFileCatalog):

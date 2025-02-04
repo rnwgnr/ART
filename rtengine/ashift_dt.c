@@ -18,8 +18,6 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using namespace std;
-
 // taken from darktable (src/iop/ashift.c)
 /*
   This file is part of darktable,
@@ -1932,25 +1930,25 @@ static double model_fitness(double *params, void *data)
   int pcount = 0;
 
   // fill in fit parameters from params[]. Attention: order matters!!!
-  if(isnan(rotation))
+  if(std::isnan(rotation))
   {
     rotation = ilogit(params[pcount], -rotation_range, rotation_range);
     pcount++;
   }
 
-  if(isnan(lensshift_v))
+  if(std::isnan(lensshift_v))
   {
     lensshift_v = ilogit(params[pcount], -lensshift_v_range, lensshift_v_range);
     pcount++;
   }
 
-  if(isnan(lensshift_h))
+  if(std::isnan(lensshift_h))
   {
     lensshift_h = ilogit(params[pcount], -lensshift_h_range, lensshift_h_range);
     pcount++;
   }
 
-  if(isnan(shear))
+  if(std::isnan(shear))
   {
     shear = ilogit(params[pcount], -shear_range, shear_range);
     pcount++;

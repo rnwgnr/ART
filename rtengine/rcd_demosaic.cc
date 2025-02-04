@@ -23,8 +23,6 @@
 #include "../rtgui/multilangmgr.h"
 #include "StopWatch.h"
 
-using namespace std;
-
 namespace
 {
 unsigned fc(const unsigned int cfa[2][2], int r, int c) {

@@ -30,8 +30,6 @@
 # include <windows.h>
 #endif
 
-using namespace std;
-
 Glib::RefPtr<RTImage> MyExpander::inconsistentImage;
 Glib::RefPtr<RTImage> MyExpander::enabledImage;
 Glib::RefPtr<RTImage> MyExpander::disabledImage;
@@ -247,8 +245,8 @@ void drawCrop(Glib::RefPtr<Gtk::StyleContext> style, Cairo::RefPtr<Cairo::Contex
         double recty2 = round(c2y) + imy + 0.5;
 
         if(fullImageVisible) {
-            rectx2 = min(rectx2, imx + imw - 0.5);
-            recty2 = min(recty2, imy + imh - 0.5);
+            rectx2 = std::min(rectx2, imx + imw - 0.5);
+            recty2 = std::min(recty2, imy + imh - 0.5);
         }
 
         cr->set_line_width (1.0);
@@ -364,7 +362,7 @@ void drawCrop(Glib::RefPtr<Gtk::StyleContext> style, Cairo::RefPtr<Cairo::Contex
         } else if (cparams.guide == "Rule of diagonals") {
             double corners_from[4][2];
             double corners_to[4][2];
-            int mindim = min(rectx2 - rectx1, recty2 - recty1);
+            int mindim = std::min(rectx2 - rectx1, recty2 - recty1);
             corners_from[0][0] = rectx1;
             corners_from[0][1] = recty1;
             corners_to[0][0]   = rectx1 + mindim;
