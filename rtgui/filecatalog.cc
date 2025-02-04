@@ -41,8 +41,6 @@
 #include "session.h"
 #include "rtwindow.h"
 
-using namespace std;
-
 namespace {
 
 class DirCompletion: public Gtk::EntryCompletion {
@@ -981,7 +979,7 @@ void FileCatalog::_refreshProgressBar ()
                 //GThreadLock lock;
                 
                 int tot = previewsToLoad ? previewsToLoad : previewsLoaded;
-                int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : min(fileBrowser->getNumFiltered(), tot);
+                int filteredCount = fileBrowser->getNumFiltered() < 0 ? tot : std::min(fileBrowser->getNumFiltered(), tot);
 
                 Glib::ustring text = M("MAIN_FRAME_FILEBROWSER") +
                     (filteredCount != tot ? " [" + Glib::ustring::format(filteredCount) + "/" : " (")
@@ -1593,8 +1591,8 @@ void FileCatalog::categoryButtonToggled (Gtk::ToggleButton* b, bool isMouseClick
                 }
 
                 if (toggled_stars_count == 1) {
-                    int current_star = min(start_star, toggled_button);
-                    int last_star   = max(start_star, toggled_button);
+                    int current_star = std::min(start_star, toggled_button);
+                    int last_star   = std::max(start_star, toggled_button);
 
                     //we permute the start and the end star for the next loop
                     for (; current_star <= last_star; current_star++) {

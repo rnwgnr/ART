@@ -30,8 +30,6 @@
 #  include <windows.h>
 #endif
 
-using namespace std;
-
 namespace rtengine {
 
 void poke255_uc(unsigned char*& dest, unsigned char r, unsigned char g, unsigned char b)

@@ -26,8 +26,6 @@
 #include "../rtengine/mytime.h"
 #include "../rtengine/rt_math.h"
 
-using namespace std;
-
 ThumbBrowserBase::ThumbBrowserBase ()
     : location(THLOC_FILEBROWSER), inspector(nullptr), isInspectorActive(false), eventTime(0), lastClicked(nullptr), anchor(nullptr), previewHeight(options.thumbSize), numOfCols(1), arrangement(TB_Horizontal),
       use_hscroll_(true),
@@ -1166,11 +1164,11 @@ void ThumbBrowserBase::enableTabMode(bool enable)
             if (enable) {
                 double h = selected[0]->getStartX();
                 MYREADERLOCK_RELEASE(l);
-                hscroll.set_value (min(h, hscroll.get_adjustment()->get_upper()));
+                hscroll.set_value (std::min(h, hscroll.get_adjustment()->get_upper()));
             } else {
                 double v = selected[0]->getStartY();
                 MYREADERLOCK_RELEASE(l);
-                vscroll.set_value (min(v, vscroll.get_adjustment()->get_upper()));
+                vscroll.set_value (std::min(v, vscroll.get_adjustment()->get_upper()));
             }
         }
     }

@@ -117,7 +117,6 @@ bool LinEqSolve(int nDim, double* pfMatr, double* pfVect, double* pfSolution)
 
 namespace rtengine { extern const Settings *settings; } 
 
-using namespace std;
 using namespace rtengine;
 
 float* RawImageSource::CA_correct_RT(

@@ -29,9 +29,6 @@
 #include "lensexif.h"
 #include "../rtgui/multilangmgr.h"
 
-
-using namespace std;
-
 namespace rtengine {
 
 namespace {

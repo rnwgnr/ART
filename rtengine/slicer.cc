@@ -27,8 +27,6 @@
 #include <omp.h>
 #endif
 
-using namespace std;
-
 // If no parameter set, everything = 0 -> process all the image
 Block::Block()
 {

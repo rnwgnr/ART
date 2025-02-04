@@ -42,8 +42,6 @@
 
 #define CLIPI(a) ((a)>0?((a)<65534?(a):65534):0)
 
-using namespace std;
-
 namespace rtengine {
 
 class ToneCurve;

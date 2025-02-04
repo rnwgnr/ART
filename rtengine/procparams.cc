@@ -46,8 +46,6 @@
 #include "../rtgui/version.h"
 #include "../rtgui/pathutils.h"
 
-using namespace std;
-
 namespace rtengine { namespace procparams {
 
 namespace {

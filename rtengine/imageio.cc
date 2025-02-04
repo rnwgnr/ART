@@ -45,7 +45,6 @@
 
 #include "rtjpeg.h"
 
-using namespace std;
 using namespace rtengine;
 using namespace rtengine::procparams;
 

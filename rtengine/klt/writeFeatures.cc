@@ -17,8 +17,6 @@
 #include "pnmio.h"		/* ppmWriteFileRGB() */
 #include "klt.h"
 
-using namespace std;
-
 #define BINHEADERLENGTH	6
 
 extern int KLT_verbose;

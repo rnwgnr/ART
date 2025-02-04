@@ -42,8 +42,6 @@
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
 
-using namespace std;
-
 namespace rtengine {
 
 namespace curves {
@@ -577,7 +575,7 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
                                          c,  nc, pow1, nbb, ncb, cz, d);
 
 
-        if (!isfinite(J) || !isfinite(C) || !isfinite(h)) {
+        if (!std::isfinite(J) || !std::isfinite(C) || !std::isfinite(h)) {
             // this can happen for dark noise colours or colours outside human gamut. Then we just return the curve's result.
             to_working(r, g, b);
             rc[i] = CLIP(intp(strength, r, std_r));
@@ -679,7 +677,7 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
                                          xw, yw,  zw,
                                          c, nc, pow1, nbb, ncb, fl, cz, d, aw );
 
-        if (!isfinite(x) || !isfinite(y) || !isfinite(z)) {
+        if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)) {
             // can happen for colours on the rim of being outside gamut, that worked without chroma scaling but not with. Then we return only the curve's result.
             to_working(r, g, b);
 

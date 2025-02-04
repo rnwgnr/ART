@@ -21,8 +21,6 @@
 #include "rtengine.h"
 #include "procparams.h"
 
-using namespace std;
-
 namespace rtengine { namespace procparams {
 
 // Created in own file to speed up build process during elaboration
