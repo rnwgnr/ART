@@ -277,6 +277,37 @@ libgvfsdbus.so: gio-vfs,gio-volume-monitor
 """)        
     with open(os.path.join(opts.outdir, 'ART'), 'w') as out:
         out.write("""#!/bin/bash
+d=$(dirname $(readlink -f "$0"))
+
+function mkdesktop() {
+    if [ -f "$HOME/.config/ART/no-desktop" ]; then
+        return
+    fi
+    fn="$HOME/.config/ART/ART.desktop"
+    cat <<EOF > ${fn}
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ART
+Comment=raw image processor
+Icon=${d}/share/icons/hicolor/256x256/apps/ART.png
+Exec=${d}/ART %f
+Actions=
+Categories=Graphics;
+StartupWMClass=ART
+EOF
+    lnk="$HOME/.local/share/applications/us.pixls.ART.desktop"
+    if [ ! -f "$(readlink -f "${lnk}")" ]; then
+        if zenity --question --text="Create a .desktop entry for ART?" --no-wrap; then
+            rm -f "${lnk}"
+            ln -s "${fn}" "${lnk}"
+        else
+            touch "$HOME/.config/ART/no-desktop"
+        fi
+    fi
+}
+mkdesktop
+        
 export ART_restore_GTK_CSD=$GTK_CSD
 export ART_restore_GDK_PIXBUF_MODULE_FILE=$GDK_PIXBUF_MODULE_FILE
 export ART_restore_GDK_PIXBUF_MODULEDIR=$GDK_PIXBUF_MODULEDIR
@@ -286,10 +317,11 @@ export ART_restore_FONTCONFIG_FILE=$FONTCONFIG_FILE
 export ART_restore_GDK_BACKEND=$GDK_BACKEND     
 export ART_restore_GTK_IM_MODULE_FILE=$GTK_IM_MODULE_FILE
 export GTK_CSD=0
-d=$(dirname $(readlink -f "$0"))
+
 t=$(mktemp -d --suffix=-ART)
 ln -s "$d" "$t/ART"
 d="$t/ART"
+
 export LD_LIBRARY_PATH="$d/lib"
 "$d/lib/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so" "$d/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so" > "$t/loader.cache"
 "$d/lib/gtk-query-immodules-3.0" "$d"/lib/immodules/im-*.so > "$t/gtk.immodules"
