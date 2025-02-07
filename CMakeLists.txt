@@ -1,17 +1,14 @@
+cmake_minimum_required(VERSION 3.9)
 if(APPLE)
-    cmake_minimum_required(VERSION 3.7)
     cmake_policy(SET CMP0025 NEW)
     cmake_policy(SET CMP0037 NEW)
-else()
-    cmake_minimum_required(VERSION 3.0)
 endif()
 
-# Must stay before the project() command:
-if(${CMAKE_EXTRA_GENERATOR} MATCHES "Eclipse CDT4")
-    set(CMAKE_CXX_COMPILER_ARG1 "-std=c++11" CACHE STRING "C++ version for eclipse" FORCE)
-    # Users building with Eclipse should set CMAKE_ECLIPSE_VERSION through the
-    # command line to their current version of Eclipse:
-    #set(CMAKE_ECLIPSE_VERSION "4.6.0" CACHE STRING "Eclipse version" FORCE)
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    message(STATUS "Enabling ccache: ${CCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
 
 project(ART)
