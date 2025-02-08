@@ -317,11 +317,21 @@ int main(int argc, char *const argv[])
         out.write("""
     strlcpy(buf, "/bin/zsh", 4096);
     
-    char **newargs = (char **)malloc(sizeof(char *) * (argc + 1));
+    char **newargs = (char **)malloc(sizeof(char *) * (argc + 2));
     newargs[0] = buf;
     newargs[1] = buf2;
     for (int i = 1; i < argc; ++i) {
         newargs[i+1] = argv[i];
+    }
+    newargs[argc+1] = NULL;
+    
+    const char *dbg = getenv("ART_DEBUG");
+    if (dbg && atoi(dbg)) {
+        fprintf(stderr, "ART-launcher - running: %s %s", newargs[0], newargs[1]);
+        for (int i = 1; i < argc; ++i) {
+            fprintf(stderr, " %s", newargs[i+1]);
+        }
+        fprintf(stderr, "\\n");
     }
     return execv(buf, newargs);
 }
