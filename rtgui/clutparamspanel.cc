@@ -289,8 +289,9 @@ void CLUTParamsPanel::setValue(const rtengine::CLUTParamValueMap &val)
 {
     bool prev = sig_blocked_;
     sig_blocked_ = true;
-    
-    for (size_t i = 0; i < params_.size(); ++i) {
+
+    for (size_t j = params_.size(); j > 0; --j) {
+        size_t i = j-1;
         auto w = widgets_[i];
         auto &d = params_[i];
 
