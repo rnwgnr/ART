@@ -22,7 +22,7 @@ exe="ART"
 exeRelativePath=""
 
 # The path to the repository:
-repo="https://bitbucket.org/agriggio/art.git"
+repo="https://github.com/artpixls/ART.git"
 
 # No touching below this line, with the exception of the "Compile" section
 # -----------------------------------------------------------------------------
@@ -134,6 +134,19 @@ cd "${buildDir}" || exit 1
 # -----------------------------------------------------------------------------
 # Compile
 
+ctlFound=
+if [ -f /usr/local/include/CTL/CtlVersion.h ]; then
+    ctlFound=/usr/local
+elif [ -f /usr/include/CTL/CtlVersion.h ]; then
+    ctlFound=/usr
+fi
+
+if [ "$ctlFound" != "" ]; then
+    ctlArg="-DENABLE_CTL=1 -DCTL_INCLUDE_DIR=$ctlFound/include/CTL"
+else
+    ctlArg=-DENABLE_CTL=0
+fi
+
 # See:
 # http://rawpedia.rawtherapee.com/Linux#Compile_RawTherapee
 
@@ -150,6 +163,7 @@ cmake \
     -DWITH_BENCHMARK="OFF" \
     -DENABLE_LIBRAW="ON" \
     -DENABLE_OCIO="ON" \
+    $ctlArg \
     "$HOME/programs/code-${prog}" || exit 1
 
 make --jobs="$cpuCount" install || exit 1
