@@ -32,7 +32,7 @@ def getopts():
     p.add_argument('-p', '--prefix')
     p.add_argument('-n', '--no-dmg', action='store_true')
     p.add_argument('-d', '--dmg-name', default='ART')
-    p.add_argument('-s', '--shell', default='/bin/sh')
+    p.add_argument('-s', '--shell', default='/bin/zsh')
     p.add_argument('-l', '--use-launcher', action='store_true', default=False)
     p.add_argument('-L', '--no-launcher', action='store_false',
                    dest='use_launcher')
@@ -314,9 +314,8 @@ int main(int argc, char *const argv[])
     strlcpy(buf2, d0, 4096);
     """)
         out.write(f'strlcat(buf2, "/.{prog}.sh", 4096);\n')
+    out.write(f'    strlcpy(buf, "{opts.shell}", 4096);\n')
         out.write("""
-    strlcpy(buf, "/bin/zsh", 4096);
-    
     char **newargs = (char **)malloc(sizeof(char *) * (argc + 2));
     newargs[0] = buf;
     newargs[1] = buf2;

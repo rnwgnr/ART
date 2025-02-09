@@ -229,6 +229,7 @@ jobs:
             -o "${OUTDIR}" -v -r /opt/art-deps/lib \
             -r /opt/local/libexec/llvm-17/lib/clang/17/lib/darwin -e -I \
             ${DBG_FLAG} \
+            -l \
             -d "${ART_NAME}_macOS-${OS_VERSION}_${{ matrix.arch }}${BUILD_SUFFIX}"
           cd "${OUTDIR}"
 
