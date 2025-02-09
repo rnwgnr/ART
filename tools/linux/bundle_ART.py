@@ -219,7 +219,7 @@ libgvfsdbus.so: gio-vfs,gio-volume-monitor
 """)        
     for name in ('ART', 'ART-cli'):
         shutil.move(os.path.join(opts.outdir, name),
-                    os.path.join(opts.outdir, name + '.bin'))
+                    os.path.join(opts.outdir, '.' + name + '.bin'))
     with open(os.path.join(opts.outdir, 'fonts.conf'), 'w') as out:
         out.write("""\
 <?xml version="1.0"?>
@@ -334,7 +334,7 @@ export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
 export GDK_BACKEND=x11
 """)
         if not opts.debug:
-            out.write('"$d/ART.bin" "$@"\n')
+            out.write('"$d/.ART.bin" "$@"\n')
         else:
             out.write("""\
 gdb=$(which gdb)
@@ -345,9 +345,9 @@ if [ -x "$gdb" ]; then
     echo "run" >> "$t/gdb"
     echo "thread apply all bt full" >> "$t/gdb"
     echo "quit" >> "$t/gdb"
-    ${gdb} -batch -x "$t/gdb" "$d/ART.bin" "$@"
+    ${gdb} -batch -x "$t/gdb" "$d/.ART.bin" "$@"
 else            
-    "$d/ART.bin" "$@"
+    "$d/.ART.bin" "$@"
 fi
 """)
         out.write('rm -rf "$t"\n')
@@ -360,7 +360,7 @@ d=$(dirname $(readlink -f "$0"))
 export GIO_MODULE_DIR="$d/lib/gio/modules"
 export LD_LIBRARY_PATH="$d/lib"
 export ART_EXIFTOOL_BASE_DIR="$d/lib/exiftool"
-exec "$d/ART-cli.bin" "$@"
+exec "$d/.ART-cli.bin" "$@"
 """)
     for name in ('ART', 'ART-cli'):
         os.chmod(os.path.join(opts.outdir, name), 0o755)
