@@ -314,8 +314,8 @@ int main(int argc, char *const argv[])
     strlcpy(buf2, d0, 4096);
     """)
         out.write(f'strlcat(buf2, "/.{prog}.sh", 4096);\n')
-    out.write(f'    strlcpy(buf, "{opts.shell}", 4096);\n')
-    out.write("""
+        out.write(f'    strlcpy(buf, "{opts.shell}", 4096);\n')
+        out.write("""
     char **newargs = (char **)malloc(sizeof(char *) * (argc + 2));
     newargs[0] = buf;
     newargs[1] = buf2;
