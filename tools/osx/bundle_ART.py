@@ -307,13 +307,15 @@ def build_launcher(opts, prog):
 int main(int argc, char *const argv[])
 {
     char buf[4096];
-    strlcpy(buf, argv[0], 4096);
-    char *d0 = dirname(buf);
+    char *d0 = realpath(argv[0], NULL);
+    strlcpy(buf, d0, 4096);
+    free(d0);
+    d0 = dirname(buf);
 
     char buf2[4096];
     strlcpy(buf2, d0, 4096);
     """)
-        out.write(f'strlcat(buf2, "/.{prog}.sh", 4096);\n')
+        out.write(f'    strlcat(buf2, "/.{prog}.sh", 4096);\n')
         out.write(f'    strlcpy(buf, "{opts.shell}", 4096);\n')
         out.write("""
     char **newargs = (char **)malloc(sizeof(char *) * (argc + 2));
@@ -360,7 +362,8 @@ export ART_restore_GSETTINGS_SCHEMA_DIR=$GSETTINGS_SCHEMA_DIR
 export ART_restore_XDG_DATA_DIRS=$XDG_DATA_DIRS
 export ART_restore_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
 
-d=$(cd "$(/usr/bin/dirname "$0")/.." ; pwd -P)
+d="$(/usr/bin/dirname "$(/bin/realpath "$0")")"
+d="$(/bin/realpath "${d}/..")"
 
 export DYLD_LIBRARY_PATH="$d/Frameworks"
 export GTK_CSD=0
@@ -435,13 +438,14 @@ export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 
 
 def write_launcher_script_cli(opts):
-    art_name = 'ART-cli' if not opts.use_launcher else '.ART-cli.sh'
+    art_name = 'ART-cli'
     with open(os.path.join(opts.outdir,
                            f'Contents/MacOS/{art_name}'), 'w') as out:
         out.write("""#!/bin/zsh
 export ART_restore_GIO_MODULE_DIR=$GIO_MODULE_DIR
 export ART_restore_DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-d=$(dirname "$0")/..
+d="$(/usr/bin/dirname "$(/bin/realpath "$0")")"
+d="$(/bin/realpath "${d}/..")"
 export DYLD_LIBRARY_PATH="$d/Frameworks"
 export ART_EXIFTOOL_BASE_DIR="$d/Resources/exiftool"
 exec "$d/MacOS/.ART-cli.bin" "$@"
@@ -495,7 +499,6 @@ def main():
 
         if opts.use_launcher:
             build_launcher(opts, 'ART')
-            build_launcher(opts, 'ART-cli')
 
     os.makedirs(os.path.join(opts.outdir, 'Contents/Resources/share/gtk-3.0'))
     with open(os.path.join(opts.outdir,
@@ -510,10 +513,10 @@ def main():
         shutil.move(os.path.join(opts.outdir, 'Contents/MacOS', name),
                     os.path.join(opts.outdir, 'Contents/MacOS',
                                  '.' + name + '.bin'))
-        if opts.use_launcher:
-            shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
-                                     name + '_launch'),
-                        os.path.join(opts.outdir, 'Contents/MacOS', name))
+    if opts.use_launcher:
+        shutil.move(os.path.join(opts.outdir, 'Contents/MacOS',
+                                 'ART_launch'),
+                    os.path.join(opts.outdir, 'Contents/MacOS', 'ART'))
     write_launcher_script_gui(opts)
     write_launcher_script_cli(opts)
     for name in ('ART', 'ART-cli'):
