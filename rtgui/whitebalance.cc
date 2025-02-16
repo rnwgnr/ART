@@ -428,6 +428,7 @@ void WhiteBalance::read(const ProcParams* pp)
     }
 
     bool check_temp = true;
+    temp_warning_->hide();
 
     switch (pp->wb.method) {
     case WBParams::CAMERA:
