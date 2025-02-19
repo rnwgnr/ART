@@ -1,0 +1,55 @@
+/* -*- C++ -*-
+ *
+ *  This file is part of ART.
+ *
+ *  Copyright 2025 Alberto Griggio <alberto.griggio@gmail.com>
+ *
+ *  ART is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  ART is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <glibmm.h>
+#include <OpenColorIO/OpenColorIO.h>
+namespace OCIO = OCIO_NAMESPACE;
+
+#include "clutparams.h"
+#include "cache.h"
+#include "utils.h"
+
+namespace rtengine {
+
+class ExternalLUT3D {
+public:
+    ExternalLUT3D();
+    explicit ExternalLUT3D(const Glib::ustring &filename);
+    bool init(const Glib::ustring &filename);
+    std::vector<CLUTParamDescriptor> get_param_descriptors() const { return params_; }
+    bool set_param_values(const CLUTParamValueMap &values);
+    OCIO::ConstCPUProcessorRcPtr get_processor() const { return proc_; }
+    bool ok() const { return ok_; }
+    Glib::ustring get_display_name() const { return gui_name_; }
+    
+private:
+    static Cache<Glib::ustring, OCIO::ConstProcessorRcPtr> cache_;
+    
+    bool ok_;
+    Glib::ustring filename_;
+    std::vector<CLUTParamDescriptor> params_;
+    OCIO::ConstCPUProcessorRcPtr proc_;
+    Glib::ustring workdir_;
+    std::vector<Glib::ustring> argv_;
+    Glib::ustring gui_name_;
+};
+
+} // namespace rtengine

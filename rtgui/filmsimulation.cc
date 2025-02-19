@@ -26,6 +26,7 @@ Glib::ustring stripPrefixDir(const Glib::ustring& filename, const Glib::ustring&
             : filename;
 }
 
+
 bool notifySlowParseDir (const std::chrono::system_clock::time_point& startedAt)
 {
     enum Decision {
@@ -378,7 +379,7 @@ int ClutComboBox::ClutModel::parseDir(const std::vector<Glib::ustring> &paths)
             auto extension = getExtension(entry).casefold();
             if (extension.compare("tif") != 0 && extension.compare("png") != 0) {
 #ifdef ART_USE_OCIO
-                if (extension != "clf" && extension != "clfz")
+                if (extension != "clf" && extension != "clfz" && extension != "json")
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
                 if (extension != "ctl")

@@ -709,6 +709,7 @@ ColorCorrection::ColorCorrection(): FoldableToolPanel(this, "colorcorrection", M
         filter_lut->add_pattern("*.CLF");
         filter_lut->add_pattern("*.clfz");
         filter_lut->add_pattern("*.CLFZ");
+        filter_lut->add_pattern("*.json");
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
         filter_lut->add_pattern("*.ctl");

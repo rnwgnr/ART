@@ -360,7 +360,16 @@ rtengine::CLUTStore::CLUTName rtengine::CLUTStore::getClutDisplayName(const Glib
             }
         }
     }
-#endif
+#endif // ART_USE_CTL
+    
+#ifdef ART_USE_OCIO
+    if (getFileExtension(filename) == "json") {
+        ExternalLUT3D extlut(filename);
+        if (extlut.ok()) {
+            return extlut.get_display_name();
+        }
+    }
+#endif // ART_USE_OCIO
     
     Glib::ustring dummy;
     splitClutFilename(filename, name, dummy, dummy);
@@ -390,7 +399,7 @@ void rtengine::CLUTStore::splitClutFilename(
 
     bool search_profile_name = true;
 #ifdef ART_USE_OCIO
-    search_profile_name = !(extension.casefold().find("clf") == 0);
+    search_profile_name = !(extension.casefold().find("clf") == 0) && !(extension.casefold() == "json");
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     search_profile_name = search_profile_name && !(extension.casefold().find("ctl") == 0);
@@ -586,6 +595,41 @@ OCIO::ConstProcessorRcPtr rtengine::CLUTStore::getOCIOLut(const Glib::ustring& f
     return retval;
 }
 
+
+ExternalLUT3D CLUTStore::getExternalLut(const Glib::ustring& filename) const
+{
+    MyMutex::MyLock lock(mutex_);
+    
+    ExtLutCacheEntry result;
+    ExternalLUT3D retval;
+
+    const Glib::ustring full_filename =
+        !Glib::path_is_absolute(filename)
+            ? Glib::ustring(Glib::build_filename(options.clutsDir, filename))
+            : filename;
+
+    auto ext = getFileExtension(full_filename);
+    if (ext != "json") {
+        return retval;
+    }
+    
+    const auto md5 = getMD5(full_filename, true);
+
+    bool found = extlut_cache_.get(full_filename, result);
+    if (!found || result.second != md5) {
+        if (settings->verbose > 1) {
+            std::cout << "ExtLUT cache miss: " << full_filename << std::endl;
+        }
+        retval.init(full_filename);
+        result = std::make_pair(retval, md5);
+        extlut_cache_.set(full_filename, result);
+    } else {
+        retval = result.first;
+    }
+
+    return retval;
+}
+
 #endif // ART_USE_OCIO
 
 #ifdef ART_USE_CTL
@@ -616,260 +660,7 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
 
     name2pos.erase(it);
 
-    n = cJSON_GetArrayItem(root, 1);
-    if (!cJSON_IsString(n)) {
-        return false;
-    }
-    desc.gui_name = cJSON_GetStringValue(n);
-    desc.gui_group = "";
-    desc.gui_step = 1;
-    desc.value_default = { 0 };
-
-    const auto set_group_tooltip =
-        [&](int i, int sz) -> bool
-        {
-            auto n = cJSON_GetArrayItem(root, i);
-            if (!cJSON_IsString(n)) {
-                return false;
-            }
-            desc.gui_group = cJSON_GetStringValue(n);
-            if (i+1 < sz) {
-                n = cJSON_GetArrayItem(root, i+1);
-                if (!cJSON_IsString(n)) {
-                    return false;
-                }
-                desc.gui_tooltip = cJSON_GetStringValue(n);
-            }
-            return true;
-        };
-
-    const auto set_int =
-        [&](cJSON *n, double &out) -> bool
-        {
-            if (cJSON_IsNumber(n)) {
-                int v = n->valuedouble;
-                if (v == n->valuedouble) {
-                    out = v;
-                    return true;
-                }
-            }
-            return false;
-        };
-
-    const auto set_gradient =
-        [&](cJSON *n, std::vector<std::array<float, 4>> &out) -> bool
-        {
-            out.clear();
-            if (cJSON_IsNumber(n) && n->valuedouble == 0) {
-                return true;
-            } else if (cJSON_IsArray(n)) {
-                size_t k = cJSON_GetArraySize(n);
-                for (size_t j = 0; j < k; ++j) {
-                    auto g = cJSON_GetArrayItem(n, j);
-                    if (!cJSON_IsArray(g) || cJSON_GetArraySize(g) != 4) {
-                        return false;
-                    }
-                    out.emplace_back();
-                    auto &arr = out.back();
-                    for (size_t c = 0; c < 4; ++c) {
-                        auto e = cJSON_GetArrayItem(g, c);
-                        if (!cJSON_IsNumber(e)) {
-                            return false;
-                        }
-                        arr[c] = e->valuedouble;
-                    }
-                }
-                return true;
-            }
-            return false;
-        };
-
-    std::unordered_map<std::string, double> curvetypes = {
-        {"Linear", double(DCT_Linear)},
-        {"Spline", double(DCT_Spline)},
-        {"CatmullRom", double(DCT_CatmullRom)},
-        {"NURBS", double(DCT_NURBS)},
-        {"Parametric", double(DCT_Parametric)},
-        {"ControlPoints", double(FCT_MinMaxCPoints)}
-    };
-
-    switch (desc.type) {
-    case CLUTParamType::PT_BOOL:
-        if (sz == 2) {
-            return true;
-        } else if (sz >= 3 && sz <= 5) {
-            n = cJSON_GetArrayItem(root, 2);
-            if (cJSON_IsBool(n)) {
-                desc.value_default = { double(cJSON_IsTrue(n)) };
-            }
-            if (sz >= 4) {
-                return set_group_tooltip(3, sz);
-            } else {
-                return true;
-            }
-        }
-        break;
-    case CLUTParamType::PT_FLOAT:
-        if (sz >= 4 && sz <= 8) {
-            n = cJSON_GetArrayItem(root, 2);
-            if (cJSON_IsNumber(n)) {
-                desc.value_min = n->valuedouble;
-            } else {
-                return false;
-            }
-            n = cJSON_GetArrayItem(root, 3);
-            if (cJSON_IsNumber(n)) {
-                desc.value_max = n->valuedouble;
-            } else {
-                return false;
-            }
-            if (sz >= 5) {
-                n = cJSON_GetArrayItem(root, 4);
-                if (cJSON_IsNumber(n)) {
-                    desc.value_default = { n->valuedouble };
-                } else {
-                    return false;
-                }
-                if (sz >= 6) {
-                    n = cJSON_GetArrayItem(root, 5);
-                    if (cJSON_IsNumber(n)) {
-                        desc.gui_step = n->valuedouble;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    desc.gui_step = (desc.value_max - desc.value_min) / 100.0;
-                }
-                if (sz >= 7) {
-                    return set_group_tooltip(6, sz);
-                }
-            }
-            return true;
-        }
-        break;
-    case CLUTParamType::PT_INT:
-        if (sz >= 3 && sz <= 7) {
-            n = cJSON_GetArrayItem(root, 2);
-            if (cJSON_IsArray(n)) {
-                for (int i = 0, k = cJSON_GetArraySize(n); i < k; ++i) {
-                    auto v = cJSON_GetArrayItem(n, i);
-                    if (!cJSON_IsString(v)) {
-                        return false;
-                    }
-                    desc.choices.push_back(cJSON_GetStringValue(v));
-                }
-                desc.type = CLUTParamType::PT_CHOICE;
-                if (sz >= 4) {
-                    n = cJSON_GetArrayItem(root, 3);
-                    if (!set_int(n, desc.value_default[0])) {
-                        return false;
-                    }
-                    return (sz == 4) || set_group_tooltip(4, sz);
-                } else {
-                    return (sz == 3);
-                }
-            } else if (sz >= 4) {
-                if (!set_int(n, desc.value_min)) {
-                    return false;
-                }
-                n = cJSON_GetArrayItem(root, 3);
-                if (!set_int(n, desc.value_max)) {
-                    return false;
-                }
-                if (sz >= 5) {
-                    n = cJSON_GetArrayItem(root, 4);
-                    if (!set_int(n, desc.value_default[0])) {
-                        return false;
-                    }
-                    if (sz >= 6) {
-                        return set_group_tooltip(5, sz);
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        }
-        break;
-    case CLUTParamType::PT_CURVE:
-        if (sz >= 3 && sz <= 8) {
-            n = cJSON_GetArrayItem(root, 2);
-            if (cJSON_IsNumber(n) && n->valuedouble == int(n->valuedouble)) {
-                switch (int(n->valuedouble)) {
-                case 0:
-                    desc.type = CLUTParamType::PT_CURVE;
-                    break;
-                case 1:
-                    desc.type = CLUTParamType::PT_FLATCURVE;
-                    break;
-                case 2:
-                    desc.type = CLUTParamType::PT_FLATCURVE_PERIODIC;
-                    break;
-                default:
-                    return false;
-                }
-                if (sz >= 4) {
-                    n = cJSON_GetArrayItem(root, 3);
-                    if (cJSON_IsNumber(n) && n->valuedouble == 0) {
-                        // 0 is a special case for a default curve
-                        desc.value_default = { 0 };
-                    } else if (cJSON_IsArray(n)) {
-                        desc.value_default.clear();
-                        for (int i = 0, k = cJSON_GetArraySize(n); i < k; ++i) {
-                            auto v = cJSON_GetArrayItem(n, i);
-                            double d = 0;
-                            if (i == 0 && cJSON_IsString(v)) {
-                                auto it = curvetypes.find(cJSON_GetStringValue(v));
-                                if (it == curvetypes.end()) {
-                                    return false;
-                                } else {
-                                    d = it->second;
-                                }
-                            } else if (cJSON_IsNumber(v)) {
-                                d = v->valuedouble;
-                            } else {
-                                return false;
-                            }
-                            desc.value_default.push_back(d);
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-                if (sz >= 5) {
-                    if (set_group_tooltip(4, sz)) {
-                        return true;
-                    }
-                    n = cJSON_GetArrayItem(root, 4);
-                    if (!set_gradient(n, desc.gui_bottom_gradient)) {
-                        return false;
-                    }
-                    if (sz >= 6) {
-                        if (set_group_tooltip(5, sz)) {
-                            return true;
-                        }
-                        n = cJSON_GetArrayItem(root, 5);
-                        if (!set_gradient(n, desc.gui_left_gradient)) {
-                            return false;
-                        }
-                        if (sz >= 7) {
-                            return set_group_tooltip(6, sz);
-                        }
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else if (sz == 2) {
-            return true;
-        }
-        break;
-    default:
-        return false;
-    }
-
-    return false;
+    return desc.fill_from_json(root);
 }
 
 /**
@@ -881,47 +672,8 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  *
  *  // @ART-param: <param-def>
  *
- * where <param-def> is an array in JSON format, whose content depends on the
- * parameter type. The array must be at least of size 2; the first element is
- * a string containing the name of the parameter (which must mach the name
- * used in ART_main), and the second element is its GUI label. The rest of the
- * array has the following structure:
- *
- * - for "bool" parameters, the 3rd optional element specifies the default
- *   value; the 4th optional element instead is a "group name" for the GUI: if
- *   set, this will cause the control to appear under a collapsible panel with
- *   the given name in the GUI;
- *
- * - for "float" parameters, the array size must be at least 4 and at most 7.
- *   The 3rd and 4th elements are the minimum and maximum values for the
- *   GUI slider. The optional 5th element is the default value, the optional
- *   6th element the precision to use in the GUI (e.g. 0.01 will use 2 decimal
- *   digits in the GUI), and the optional last element is the GUI group name;
- *
- * - for "int" parameters, the array size must be at least 3 and at most 6.
- *   If the 3rd parameter is an array of strings, it is interpreted as a list
- *   of options in a choice menu, with values corresponding to their index in
- *   the array (i.e. the 1st option will give a value of 0, the 2nd a value of
- *   1, etc.). In this case, the array can contain at most 2 other elements,
- *   which are respectively the default value and the optional GUI group name.
- *   If the 3rd parameter is not an array of strings, then the array size must
- *   be at least 4, with the 3rd and 4th elements corresponding to the minimum
- *   and maximum values for the GUI slider. The optional 5th element is the
- *   default value, and the optional last element the GUI group name.
- *
- * - arrays of floats are used to represent curves as 1D LUTs. Both curve
- *   types supported by ART (i.e. "diagonal" and "flat") are available,
- *   depending on the parameter definition. The array size of the parameter
- *   definition must be at least 2 and at most 8. The 3rd parameter indicates
- *   the curve type: 0 for diagonal, 1 for flat, and 2 for periodic flat
- *   (e.g. like a hue curve in ART). If not given, it defaults to 0. The 4th
- *   parameter, if given, specifies the default value for the curve. This can
- *   either be 0 (i.e. an identity curve), or an array of floats defining the
- *   type of curve and its control points, in the format used by .rtc curve
- *   files. The 5th and 6th parameters can be used to define the gradients
- *   appearing at the bottom and left of the curves in the GUI. Finally, as
- *   for other parameter types, the last two optional elements are the GUI
- *   group name and tooltip string.
+ * where <param-def> is an array in JSON format, whose content is described in
+ * the comment of CLUTParamDescriptor::fill_from_json() (in clutparams.cc)
  *
  * If default values are not given in the ART parameter definition, they are
  * taken from the definition of the ART_main function. If no default is given,
@@ -1228,6 +980,7 @@ void rtengine::CLUTStore::clearCache()
     cache.clear();
 #ifdef ART_USE_OCIO
     ocio_cache_.clear();
+    extlut_cache_.clear();
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     ctl_cache_.clear();
@@ -1268,6 +1021,7 @@ rtengine::CLUTStore::CLUTStore() :
     cache(options.clutCacheSize)
 #ifdef ART_USE_OCIO
     , ocio_cache_(options.clutCacheSize)
+    , extlut_cache_(options.clutCacheSize)
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     , ctl_cache_(options.clutCacheSize * 4)
@@ -1320,6 +1074,7 @@ void CLUTApplication::init(int num_threads)
     if (!hald_clut_) {
 #ifdef ART_USE_OCIO
         if (!OCIO_init())
+        if (!extlut_init())
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
         if (!CTL_init(num_threads))
@@ -1375,6 +1130,20 @@ bool CLUTApplication::OCIO_init()
         ok_ = false;
         return false;
     }
+}
+
+
+bool CLUTApplication::extlut_init()
+{
+    ext_lut_ = CLUTStore::getInstance().getExternalLut(clut_filename_);
+    if (!ext_lut_.ok()) {
+        ok_ = false;
+        return false;
+    }
+
+    init_matrices("ACESp0");
+    ok_ = true;
+    return true;
 }
 #endif // ART_USE_OCIO
 
@@ -1594,6 +1363,11 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors() const
         return ctl_params_;
     }
 #endif // ART_USE_CTL
+#ifdef ART_USE_OCIO
+    if (ext_lut_.ok()) {
+        return ext_lut_.get_param_descriptors();
+    }
+#endif // ART_USE_OCIO
     return {};
 }
 
@@ -1605,12 +1379,30 @@ bool CLUTApplication::set_param_values(const CLUTParamValueMap &values, Quality 
         return CTL_set_params(values, q);
     }
 #endif // ART_USE_CTL
+#ifdef ART_USE_OCIO
+    if (ext_lut_.ok()) {
+        if (ext_lut_.set_param_values(values)) {
+            ocio_processor_ = ext_lut_.get_processor();
+            return true;
+        } else {
+            return false;
+        }
+    }
+#endif // ART_USE_OCIO
     return values.empty();
 }
 
 
 std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Glib::ustring &filename)
 {
+#ifdef ART_USE_OCIO
+    if (getFileExtension(filename) == "json") {
+        ExternalLUT3D extlut(filename);
+        if (extlut.ok()) {
+            return extlut.get_param_descriptors();
+        }
+    } else
+#endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     try {
         std::vector<CLUTParamDescriptor> params;
