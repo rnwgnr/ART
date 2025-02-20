@@ -1,0 +1,41 @@
+// configuration file to integrate agx-emulsion
+// (https://github.com/andreavolpato/agx-emulsion)
+// into ART as an "external 3dLUT".
+//
+// Assumes that agx-emulsion is installed in the Python interpreter available
+// from the system PATH. If this is not the case (e.g. agx-emulsion is installed
+// in a virtual env), change the command line to point to the right Python
+// interpreter (e.g. "/path/to/virtualenv/bin/python3" or similar)
+//
+// 
+{"ART-lut3d" : {
+    "command" : "python3 agx_emulsion_mklut.py --json",
+    "params" : [
+        ["input_gain", "Input gain (Ev)", -4.0, 4.0, 0.0, 0.1],
+        ["output_black_offset", "Output black offset", -1.0, 1.0, 0.0, 0.001],
+        ["film", "Film stock", [
+            "Kodak Portra 400",
+            "Kodak Ultramax 400",
+            "Kodak Gold 200",
+            "Kodak Vision3 50d",
+            "Fujifilm Pro 400h",
+            "Fujifilm Xtra 400",
+            "Fujifilm c200"
+        ], 0],
+        ["paper", "Print paper", [
+            "Kodak Endura Premier",
+            "Kodak Ektacolor Edge",
+            "Kodak Supra Endura",
+            "Kodak Portra Endura",
+            "Fujifilm Crystal Archive Type II"
+        ], 0],
+        ["camera_expcomp", "Exposure compensation (Ev)", -10.0, 10.0, 0, 0.1],
+        ["print_exposure", "Print exposure", 0.05, 5.0, 1.0, 0.01],
+        ["y_shift", "Print Y filter shift", -20, 20, 0],
+        ["m_shift", "Print M filter shift", -20, 20, 0],
+        ["dir_couplers_amount", "Dir couplers amount", 0, 2, 1, 0.01],
+        ["film_gamma", "Film gamma factor", 0.01, 2.0, 1.0, 0.01],
+        ["print_gamma", "Print gamma factor", 0.01, 2.0, 1.0, 0.01]
+    ],
+    "label" : "AgX Film Simulation"
+}}
