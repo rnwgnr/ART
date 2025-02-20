@@ -21,6 +21,7 @@
 #include "cJSON.h"
 #include "subprocess.h"
 #include "settings.h"
+#include "compress.h"
 
 #include "../rtgui/multilangmgr.h"
 #include "../rtgui/pathutils.h"
@@ -32,6 +33,8 @@
 #include <iostream>
 #include <glib/gstdio.h>
 #include <unistd.h>
+#include <giomm.h>
+#include <algorithm>
 
 namespace rtengine {
 
@@ -122,10 +125,12 @@ std::string generate_params(const std::vector<CLUTParamDescriptor> &params,
 }
 
 
-Glib::ustring get_cache_key(const Glib::ustring &filename, const std::vector<CLUTParamDescriptor> &params, const CLUTParamValueMap &values)
+std::pair<std::string, std::string> get_cache_keys(const Glib::ustring &filename, const std::vector<CLUTParamDescriptor> &params, const CLUTParamValueMap &values)
 {
     auto md5 = getMD5(filename, true);
-    return filename + "\n" + md5 + "\n" + get_params_json(params, values);
+    auto json = get_params_json(params, values);
+    auto csum = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_SHA256, Glib::filename_from_utf8(filename) + "\n" + md5 + "\n" + json);
+    return std::make_pair(csum, csum + ".clfz");
 }
 
 
@@ -167,10 +172,54 @@ std::string recompute_lut(const Glib::ustring &workdir, const std::vector<Glib::
     return fn;
 }
 
+
+std::string find_in_cache(MyMutex &mtx, const std::string &key)
+{
+    auto name = Glib::build_filename(options.cacheBaseDir, "extlut", key);
+    if (Glib::file_test(name, Glib::FILE_TEST_EXISTS)) {
+        std::string templ = Glib::build_filename(Glib::get_tmp_dir(), Glib::ustring::compose("ART-ocio-clf-%1-XXXXXX", key));
+        int fd = Glib::mkstemp(templ);
+        if (fd < 0) {
+            return "";
+        }
+        close(fd);
+        {
+            MyMutex::MyLock lck(mtx);
+            if (decompress_to(name, templ)) {
+                if (settings->verbose > 1) {
+                    std::cout << "extlut cache hit: " << key << std::endl;
+                }
+                return templ;
+            }
+        }
+    }
+    if (settings->verbose > 1) {
+        std::cout << "extlut cache miss: " << key << std::endl;
+    }
+    return "";
+}
+
+
+void store_in_cache(MyMutex &mtx, const std::string &key, const std::string &fn)
+{
+    auto dir = Glib::build_filename(options.cacheBaseDir, "extlut");
+    auto error = g_mkdir_with_parents(dir.c_str(), 0777);
+    if (!error) {
+        auto name = Glib::build_filename(dir, key);
+        MyMutex::MyLock lck(mtx);
+        if (compress_to(fn, name)) {
+            if (settings->verbose > 1) {
+                std::cout << "extlut cache store: " << key << std::endl;
+            }
+        }
+    }
+}
+
 } // namespace
 
 
-Cache<Glib::ustring, OCIO::ConstProcessorRcPtr> ExternalLUT3D::cache_(options.clutCacheSize * 4);
+Cache<std::string, OCIO::ConstProcessorRcPtr> ExternalLUT3D::cache_(options.clutCacheSize * 4);
+MyMutex ExternalLUT3D::disk_cache_mutex_;
 
 
 ExternalLUT3D::ExternalLUT3D():
@@ -278,14 +327,20 @@ bool ExternalLUT3D::set_param_values(const CLUTParamValueMap &values)
     }
     bool success = true;
     OCIO::ConstProcessorRcPtr lut;
-    Glib::ustring key = get_cache_key(filename_, params_, values);
-    bool found = cache_.get(key, lut);
+    std::pair<std::string, std::string> key = get_cache_keys(filename_, params_, values);
+    bool found = cache_.get(key.first, lut);
     if (!found) {
         if (settings->verbose) {
             std::cout << "computing 3dlut for " << filename_ << std::endl;
         }
         std::string pn = generate_params(params_, values);
-        std::string fn = recompute_lut(workdir_, argv_, pn);
+        std::string fn = find_in_cache(disk_cache_mutex_, key.second);
+        if (fn.empty()) {
+            fn = recompute_lut(workdir_, argv_, pn);
+            if (!fn.empty()) {
+                store_in_cache(disk_cache_mutex_, key.second, fn);
+            }
+        }
 
         try {
             OCIO::ConstConfigRcPtr config = OCIO::Config::CreateRaw();
@@ -293,7 +348,7 @@ bool ExternalLUT3D::set_param_values(const CLUTParamValueMap &values)
             t->setSrc(fn.c_str());
             t->setInterpolation(OCIO::INTERP_BEST);
             lut = config->getProcessor(t);
-            cache_.set(key, lut);
+            cache_.set(key.first, lut);
         } catch (...) {
             ok_ = false;
             success = false;
@@ -320,5 +375,93 @@ bool ExternalLUT3D::set_param_values(const CLUTParamValueMap &values)
     }
     return success;
 }
+
+
+void ExternalLUT3D::trim_cache()
+{
+    MyMutex::MyLock lck(disk_cache_mutex_);
+    
+    size_t num_files = 0;
+    const size_t max_num_files = std::min(size_t(options.clutCacheSize) * 100, options.maxCacheEntries);
+    const auto dir_name = Glib::build_filename(options.cacheBaseDir, "extlut");
+    const auto dir = Gio::File::create_for_path(dir_name);
+    
+    try {
+        auto enumerator = dir->enumerate_children("");
+
+        while (num_files <= max_num_files && enumerator->next_file()) {
+            ++num_files;
+        }
+    } catch (Glib::Exception&) {}
+
+    if (num_files <= max_num_files) {
+        return;
+    }
+
+    using FNameMTime = std::pair<Glib::ustring, Glib::TimeVal>;
+    std::vector<FNameMTime> files;
+
+    try {
+        auto enumerator = dir->enumerate_children("standard::name,time::modified");
+        while (auto file = enumerator->next_file()) {
+            files.emplace_back(file->get_name(), file->modification_time());
+        }
+    } catch (Glib::Exception&) {}
+
+    if (files.size() <= max_num_files) {
+        return;
+    }
+
+    std::sort(files.begin(), files.end(), [](const FNameMTime& lhs, const FNameMTime& rhs)
+    {
+        return lhs.second < rhs.second;
+    });
+
+    auto cache_entries = files.size();
+    size_t num_removed = 0;
+    for (auto entry = files.begin(); cache_entries-- > max_num_files; ++entry) {
+        const auto &name = entry->first;
+        auto pth = Glib::build_filename(dir_name, name);
+        auto error = g_remove(pth.c_str());
+        if (error && settings->verbose) {
+            std::cerr << "extlut - error removing cache file: " << name << std::endl;
+        } else {
+            ++num_removed;
+        }
+    }
+
+    if (settings->verbose > 1) {
+        std::cout << "extlut - removed " << num_removed << " cache files" << std::endl;
+    }
+}
+
+
+void ExternalLUT3D::clear_cache()
+{
+    MyMutex::MyLock lck(disk_cache_mutex_);
+
+    try {
+        auto dirname = Glib::build_filename(options.cacheBaseDir, "extlut");
+        Glib::Dir dir(dirname);
+
+        bool error = false;
+        size_t num_removed = 0;
+        for (auto entry = dir.begin(); entry != dir.end(); ++entry) {
+            auto name = Glib::build_filename(dirname, *entry);
+            if (g_remove(name.c_str()) != 0) {
+                error = true;
+            } else {
+                ++num_removed;
+            }
+        }
+
+        if (error && settings->verbose) {
+            std::cerr << "extlut - failed to delete all entries in cache directory '" << dirname << "': " << g_strerror(errno) << std::endl;
+        } else if (settings->verbose > 1) {
+            std::cout << "extlut - removed " << num_removed << " cache files" << std::endl;
+        }
+    } catch (Glib::Error&) {}
+}
+
 
 } // namespace rtengine

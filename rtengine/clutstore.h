@@ -123,9 +123,6 @@ private:
 #ifdef ART_USE_OCIO
     typedef std::pair<OCIO::ConstProcessorRcPtr, std::string> OCIOCacheEntry;
     mutable Cache<Glib::ustring, OCIOCacheEntry> ocio_cache_;
-
-    typedef std::pair<ExternalLUT3D, std::string> ExtLutCacheEntry;
-    mutable Cache<Glib::ustring, ExtLutCacheEntry> extlut_cache_;
 #endif // ART_USE_OCIO
     
 #ifdef ART_USE_CTL

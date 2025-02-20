@@ -602,7 +602,6 @@ ExternalLUT3D CLUTStore::getExternalLut(const Glib::ustring& filename) const
 {
     MyMutex::MyLock lock(mutex_);
     
-    ExtLutCacheEntry result;
     ExternalLUT3D retval;
 
     const Glib::ustring full_filename =
@@ -615,20 +614,7 @@ ExternalLUT3D CLUTStore::getExternalLut(const Glib::ustring& filename) const
         return retval;
     }
     
-    const auto md5 = getMD5(full_filename, true);
-
-    bool found = extlut_cache_.get(full_filename, result);
-    if (!found || result.second != md5) {
-        if (settings->verbose > 1) {
-            std::cout << "ExtLUT cache miss: " << full_filename << std::endl;
-        }
-        retval.init(full_filename);
-        result = std::make_pair(retval, md5);
-        extlut_cache_.set(full_filename, result);
-    } else {
-        retval = result.first;
-    }
-
+    retval.init(full_filename);
     return retval;
 }
 
@@ -982,7 +968,6 @@ void rtengine::CLUTStore::clearCache()
     cache.clear();
 #ifdef ART_USE_OCIO
     ocio_cache_.clear();
-    extlut_cache_.clear();
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     ctl_cache_.clear();
@@ -1023,7 +1008,6 @@ rtengine::CLUTStore::CLUTStore() :
     cache(options.clutCacheSize)
 #ifdef ART_USE_OCIO
     , ocio_cache_(options.clutCacheSize)
-    , extlut_cache_(options.clutCacheSize)
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     , ctl_cache_(options.clutCacheSize * 4)

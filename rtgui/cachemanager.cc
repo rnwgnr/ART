@@ -33,6 +33,9 @@
 #include "procparamchangers.h"
 #include "thumbnail.h"
 #include "../rtengine/utils.h"
+#ifdef ART_USE_OCIO
+# include "../rtengine/extclut.h"
+#endif
 
 namespace {
 
@@ -237,6 +240,9 @@ void CacheManager::closeCache() const
     MyMutex::MyLock lock(mutex);
 
     applyCacheSizeLimitation();
+#ifdef ART_USE_OCIO
+    rtengine::ExternalLUT3D::trim_cache();
+#endif
 }
 
 
@@ -247,6 +253,10 @@ void CacheManager::clearAll() const
     for (const auto& cacheDir : cacheDirs) {
         deleteDir(cacheDir);
     }
+
+#ifdef ART_USE_OCIO
+    rtengine::ExternalLUT3D::clear_cache();
+#endif
 }
 
 

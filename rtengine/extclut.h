@@ -39,9 +39,13 @@ public:
     OCIO::ConstCPUProcessorRcPtr get_processor() const { return proc_; }
     bool ok() const { return ok_; }
     Glib::ustring get_display_name() const { return gui_name_; }
+
+    static void clear_cache();
+    static void trim_cache();
     
 private:
-    static Cache<Glib::ustring, OCIO::ConstProcessorRcPtr> cache_;
+    static Cache<std::string, OCIO::ConstProcessorRcPtr> cache_;
+    static MyMutex disk_cache_mutex_;
     
     bool ok_;
     Glib::ustring filename_;
