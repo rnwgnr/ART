@@ -387,8 +387,13 @@ int ClutComboBox::ClutModel::parseDir(const std::vector<Glib::ustring> &paths)
                     continue;
             }
 
+            auto label = CLUTStore::getClutDisplayName(entry);
+            if (!label.ok()) {
+                continue;
+            }
+
             auto newRow = row ? *m_model->append(row.children()) : *m_model->append();
-            newRow[m_columns.label] = CLUTStore::getClutDisplayName(entry);
+            newRow[m_columns.label] = label;
             newRow[m_columns.clutFilename] = entry;
 
             ++fileCount;

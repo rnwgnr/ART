@@ -105,6 +105,7 @@ public:
         }
 
         operator Glib::ustring () const { return name; }
+        bool ok() const { return !name.empty(); }
     };
     static CLUTName getClutDisplayName(const Glib::ustring &filename);
     

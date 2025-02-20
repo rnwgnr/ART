@@ -367,6 +367,8 @@ rtengine::CLUTStore::CLUTName rtengine::CLUTStore::getClutDisplayName(const Glib
         ExternalLUT3D extlut(filename);
         if (extlut.ok()) {
             return extlut.get_display_name();
+        } else {
+            return CLUTName("");
         }
     }
 #endif // ART_USE_OCIO
