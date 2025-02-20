@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <locale.h>
 
 #include "../rtgui/options.h"
 #include "../rtgui/multilangmgr.h"
@@ -686,6 +687,8 @@ bool fill_from_json(std::unordered_map<std::string, int> &name2pos, std::vector<
  */ 
 bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpreter> intp, Ctl::FunctionCallPtr func, std::vector<CLUTParamDescriptor> &out, Glib::ustring &colorspace, int &lut_dim)
 {
+    setlocale(LC_NUMERIC, "C");
+    
     out.clear();
     std::unordered_map<std::string, int> name2pos;
 

@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <giomm.h>
 #include <algorithm>
+#include <locale.h>
 
 namespace rtengine {
 
@@ -65,6 +66,8 @@ bool add_param(std::vector<CLUTParamDescriptor> &params, cJSON *elem)
 std::string get_params_json(const std::vector<CLUTParamDescriptor> &params,
                             const CLUTParamValueMap &values)
 {
+    setlocale(LC_NUMERIC, "C");
+    
     cJSON *root = cJSON_CreateObject();
     const std::unique_ptr<cJSON, decltype(&cJSON_Delete)> del_root(root, cJSON_Delete);
 
@@ -261,6 +264,8 @@ bool ExternalLUT3D::init(const Glib::ustring &filename)
     const size_t rd = fread(buffer.get(), 1, length, file.get());
     buffer[rd] = 0;
 
+    setlocale(LC_NUMERIC, "C");
+    
     cJSON_Minify(buffer.get());
     const std::unique_ptr<cJSON, decltype(&cJSON_Delete)> root_p(cJSON_Parse(buffer.get()), cJSON_Delete);
     cJSON *root = root_p.get();
