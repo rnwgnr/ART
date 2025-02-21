@@ -9,7 +9,8 @@
 //
 // 
 {"ART-lut3d" : {
-    "command" : "python3 agx_emulsion_mklut.py --json",
+    "command" : "python3 agx_emulsion_mklut.py --server",
+    "server" : true,
     "params" : [
         ["input_gain", "Input gain (Ev)", -4.0, 4.0, 0.0, 0.1],
         ["output_black_offset", "Output black offset", -1.0, 1.0, 0.0, 0.001],

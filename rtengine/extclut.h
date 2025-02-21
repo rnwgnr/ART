@@ -26,6 +26,7 @@ namespace OCIO = OCIO_NAMESPACE;
 #include "clutparams.h"
 #include "cache.h"
 #include "utils.h"
+#include "subprocess.h"
 
 namespace rtengine {
 
@@ -44,10 +45,22 @@ public:
     static void trim_cache();
     
 private:
+    class SubprocessManager {
+    public:
+        ~SubprocessManager();
+        bool process(const Glib::ustring &filename, const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, const std::string &params, const std::string &outname);
+
+    private:
+        std::unordered_map<std::string, std::unique_ptr<subprocess::SubprocessInfo>> procs_;
+    };
     static Cache<std::string, OCIO::ConstProcessorRcPtr> cache_;
     static MyMutex disk_cache_mutex_;
+    static SubprocessManager smgr_;
+
+    std::string recompute_lut(const std::string &params);
     
     bool ok_;
+    bool is_server_;
     Glib::ustring filename_;
     std::vector<CLUTParamDescriptor> params_;
     OCIO::ConstCPUProcessorRcPtr proc_;

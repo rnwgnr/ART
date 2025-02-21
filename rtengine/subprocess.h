@@ -80,6 +80,8 @@ public:
     int wait();
     void kill();
 
+    int id() const;
+
 private:
     uintptr_t impl_;
 };

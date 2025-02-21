@@ -15,6 +15,8 @@ import os
 import sys
 import json
 import time
+from contextlib import redirect_stdout, redirect_stderr
+import io
 from agx_emulsion.model.process import photo_params, AgXPhoto
 from agx_emulsion.model.stocks import FilmStocks, PrintPapers
 
@@ -44,30 +46,35 @@ def getopts():
     p.add_argument('--dir-couplers-amount', type=float, default=1)
     p.add_argument('--output-black-offset', type=float, default=0)
     p.add_argument('--json', nargs=2)
+    p.add_argument('--server', action='store_true')
     opts = p.parse_args()
     if opts.json:
         with open(opts.json[0]) as f:
             params = json.load(f)
-        opts.film = params.get("film", opts.film)
-        opts.paper = params.get("paper", opts.paper)
-        opts.camera_expcomp = params.get("camera_expcomp", opts.camera_expcomp)
-        opts.print_exposure = params.get("print_exposure", opts.print_exposure)
-        opts.input_gain = params.get("input_gain", opts.input_gain)
-        opts.y_shift = params.get("y_shift", opts.y_shift)
-        opts.m_shift = params.get("m_shift", opts.m_shift)
-        opts.film_gamma = params.get("film_gamma", opts.film_gamma)
-        opts.print_gamma = params.get("print_gamma", opts.print_gamma)
-        opts.dir_couplers_amount = params.get("dir_couplers_amount",
-                                              opts.dir_couplers_amount)
-        opts.output_black_offset = params.get(
-            "output_black_offset", opts.output_black_offset)
-        opts.output = opts.json[1]
+        update_opts(opts, params, opts.json[1])
     if not opts.output:
         film = list(FilmStocks)[opts.film].name
         paper = list(PrintPapers)[opts.paper].name
         name = f'{film}@{paper}.clf{"z" if opts.compressed else ""}'
         opts.output = os.path.join(opts.outdir, name)
     return opts
+
+
+def update_opts(opts, params, output):
+    opts.film = params.get("film", opts.film)
+    opts.paper = params.get("paper", opts.paper)
+    opts.camera_expcomp = params.get("camera_expcomp", opts.camera_expcomp)
+    opts.print_exposure = params.get("print_exposure", opts.print_exposure)
+    opts.input_gain = params.get("input_gain", opts.input_gain)
+    opts.y_shift = params.get("y_shift", opts.y_shift)
+    opts.m_shift = params.get("m_shift", opts.m_shift)
+    opts.film_gamma = params.get("film_gamma", opts.film_gamma)
+    opts.print_gamma = params.get("print_gamma", opts.print_gamma)
+    opts.dir_couplers_amount = params.get("dir_couplers_amount",
+                                          opts.dir_couplers_amount)
+    opts.output_black_offset = params.get(
+        "output_black_offset", opts.output_black_offset)
+    opts.output = output
 
 
 lutsize = {
@@ -230,8 +237,39 @@ def make_lut(opts, data):
         f.write(b'</ProcessList>\n')
 
 
+def process(opts):
+    start = time.time()
+    image = get_base_image(opts)
+    params = get_params(opts)
+    photo = AgXPhoto(params)
+    def identity(rgb, *args, **kwds): return rgb
+    photo.print_paper._apply_cctf_encoding_and_clip = identity
+    image = photo.process(image)
+    make_lut(opts, image)
+    end = time.time()
+    sys.stderr.write('total time: %.3f\n' % (end - start))
+
+
 def main():
     opts = getopts()
+    if opts.server:
+        while True:
+            p = sys.stdin.readline().strip()
+            o = sys.stdin.readline().strip()
+            with open(p) as f:
+                params = json.load(f)
+            update_opts(opts, params, o)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                with redirect_stderr(buf):
+                    process(opts)
+            data = buf.getvalue().splitlines()
+            sys.stdout.write(f'Y {len(data)}\n')
+            for line in data:
+                sys.stdout.write(f'{line}\n')
+            sys.stdout.flush()
+    else:
+        process(opts)
     start = time.time()
     image = get_base_image(opts)
     params = get_params(opts)
