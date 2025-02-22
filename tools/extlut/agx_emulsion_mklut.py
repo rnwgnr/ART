@@ -15,8 +15,9 @@ import os
 import sys
 import json
 import time
-from contextlib import redirect_stdout, redirect_stderr
 import io
+import warnings
+from contextlib import redirect_stdout, redirect_stderr
 from agx_emulsion.model.process import photo_params, AgXPhoto
 from agx_emulsion.model.stocks import FilmStocks, PrintPapers
 
@@ -77,14 +78,6 @@ def update_opts(opts, params, output):
     opts.output = output
 
 
-lutsize = {
-    'small' : 16,
-    'medium' : 36,
-    'large' : 64,
-    'huge' : 121
-    }
-
-
 def srgb(a, inv):
     if not inv:
         a = numpy.fmax(numpy.fmin(a, 1.0), 0.0)
@@ -117,95 +110,101 @@ def pq(a, inv):
 
 
 
-def get_base_image(opts):
-    dim = lutsize[opts.size]
-    sz = complex(0, float(dim))
-    table = numpy.mgrid[0.0:1.0:sz, 0.0:1.0:sz, 0.0:1.0:sz].reshape(3,-1).T
-    n = int(math.sqrt(dim**3))
-    data = table.reshape(-1)
-    shaper = lambda a: pq(a, True)
-    data = numpy.fromiter(map(shaper, data), dtype=numpy.float32)
-    data = data.reshape(n, n, -1)
-    return data
+class LUTCreator:
+    lutsize = {
+        'small' : 16,
+        'medium' : 36,
+        'large' : 64,
+        'huge' : 121
+        }
+
+    ap0_to_rec709 = """\
+        <Matrix inBitDepth="32f" outBitDepth="32f" >
+          <!-- ACES AP0 to Linear Rec.709 -->
+          <Array dim="3 3">
+            2.55128702 -1.11947013 -0.4318176
+            -0.27586285  1.36601602 -0.09015301
+            -0.01729251 -0.14852912  1.16582168
+          </Array>
+        </Matrix>   
+    """.encode('utf-8')
 
 
-def get_params(opts):
-    params = photo_params(list(FilmStocks)[opts.film].value,
-                          list(PrintPapers)[opts.paper].value)
-    params.camera.exposure_compensation_ev = opts.camera_expcomp
-    params.enlarger.print_exposure = opts.print_exposure
-    params.enlarger.lens_blur = 0
-    params.scanner.lens_blur = 0
-    params.io.input_color_space = 'sRGB'
-    params.io.input_cctf_decoding = False
-    params.io.output_color_space = 'ACES2065-1'
-    params.io.output_cctf_encoding = False
-    params.io.crop = False
-    params.io.preview_resize_factor = 1.0
-    params.io.upscale_factor = 1.0
-    params.io.full_image = True
-    params.io.compute_negative = False
-    params.negative.grain.active = False
-    params.negative.halation.active = False
-    params.print_paper.glare.active = False
-    params.negative.parametric.density_curves.active = False
-    params.camera.auto_exposure = False
-    params.camera.auto_exposure_method = 'median'
-    params.enlarger.print_exposure_compensation = True
-    params.debug.deactivate_spatial_effects = True
-    params.negative.data.tune.gamma_factor = opts.film_gamma
-    params.print_paper.data.tune.gamma_factor = opts.print_gamma
-    params.enlarger.y_filter_shift = opts.y_shift
-    params.enlarger.m_filter_shift = opts.m_shift
-    params.negative.dir_couplers.amount_rgb = \
-        opts.dir_couplers_amount * numpy.array([1.0, 1.0, 1.0])
-    params.negative.dir_couplers.active = opts.dir_couplers_amount > 0
-    return params
+    rec709_to_ap0 = """\
+        <Matrix inBitDepth="32f" outBitDepth="32f" >
+          <!-- Linear Rec.709 to ACES AP0-->
+          <Array dim="3 3">
+            0.43392843 0.3762503  0.18982151
+            0.088802   0.81526168 0.09593625
+            0.01775005 0.10944762 0.87280228
+          </Array>
+        </Matrix>   
+    """.encode('utf-8')
+
+    def get_base_image(self, opts):
+        dim = self.lutsize[opts.size]
+        sz = complex(0, float(dim))
+        table = numpy.mgrid[0.0:1.0:sz, 0.0:1.0:sz, 0.0:1.0:sz].reshape(3,-1).T
+        n = int(math.sqrt(dim**3))
+        data = table.reshape(-1)
+        shaper = lambda a: pq(a, True)
+        data = numpy.fromiter(map(shaper, data), dtype=numpy.float32)
+        data = data.reshape(n, n, -1)
+        return data
+
+    def get_params(self, opts):
+        params = photo_params(list(FilmStocks)[opts.film].value,
+                              list(PrintPapers)[opts.paper].value)
+        params.camera.exposure_compensation_ev = opts.camera_expcomp
+        params.enlarger.print_exposure = opts.print_exposure
+        params.enlarger.lens_blur = 0
+        params.scanner.lens_blur = 0
+        params.io.input_color_space = 'sRGB'
+        params.io.input_cctf_decoding = False
+        params.io.output_color_space = 'ACES2065-1'
+        params.io.output_cctf_encoding = False
+        params.io.crop = False
+        params.io.preview_resize_factor = 1.0
+        params.io.upscale_factor = 1.0
+        params.io.full_image = True
+        params.io.compute_negative = False
+        params.negative.grain.active = False
+        params.negative.halation.active = False
+        params.print_paper.glare.active = False
+        params.negative.parametric.density_curves.active = False
+        params.camera.auto_exposure = False
+        params.camera.auto_exposure_method = 'median'
+        params.enlarger.print_exposure_compensation = True
+        params.debug.deactivate_spatial_effects = True
+        params.negative.data.tune.gamma_factor = opts.film_gamma
+        params.print_paper.data.tune.gamma_factor = opts.print_gamma
+        params.enlarger.y_filter_shift = opts.y_shift
+        params.enlarger.m_filter_shift = opts.m_shift
+        params.negative.dir_couplers.amount_rgb = \
+            opts.dir_couplers_amount * numpy.array([1.0, 1.0, 1.0])
+        params.negative.dir_couplers.active = opts.dir_couplers_amount > 0
+        return params
 
 
+    def __init__(self, opts):
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.image = self.get_base_image(opts)
+            self.shaper = self.get_shaper()
 
-ap0_to_rec709 = """\
-    <Matrix inBitDepth="32f" outBitDepth="32f" >
-      <!-- ACES AP0 to Linear Rec.709 -->
-      <Array dim="3 3">
-        2.55128702 -1.11947013 -0.4318176
-        -0.27586285  1.36601602 -0.09015301
-        -0.01729251 -0.14852912  1.16582168
-      </Array>
-    </Matrix>   
-""".encode('utf-8')
+    def __call__(self, opts):
+        start = time.time()
+        params = self.get_params(opts)
+        photo = AgXPhoto(params)
+        def identity(rgb, *args, **kwds): return rgb
+        photo.print_paper._apply_cctf_encoding_and_clip = identity
+        image = photo.process(self.image)
+        self.make_lut(opts, image)
+        end = time.time()
+        sys.stderr.write('total time: %.3f\n' % (end - start))
 
-
-rec709_to_ap0 = """\
-    <Matrix inBitDepth="32f" outBitDepth="32f" >
-      <!-- Linear Rec.709 to ACES AP0-->
-      <Array dim="3 3">
-        0.43392843 0.3762503  0.18982151
-        0.088802   0.81526168 0.09593625
-        0.01775005 0.10944762 0.87280228
-      </Array>
-    </Matrix>   
-""".encode('utf-8')
-
-
-def make_lut(opts, data):
-    data = data.reshape(-1, 3)
-    dim = int(round(math.pow(data.shape[0], 1.0/3.0)))
-    fopen = open if not opts.compressed else gzip.open
-    with fopen(opts.output, 'wb') as f:
-        f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
-        f.write(b'<ProcessList compCLFversion="3" id="1">\n')
-        if opts.input_gain:
-            f.write(b'<ASC_CDL inBitDepth="32f" outBitDepth="32f" '
-                    b'style="FwdNoClamp">\n')
-            f.write(b' <SOPNode>\n')
-            g = math.pow(2, opts.input_gain)
-            f.write(f'  <Slope>{g} {g} {g}</Slope>\n'.encode('utf-8'))
-            f.write(b'  <Offset>0.0 0.0 0.0</Offset>\n')
-            f.write(b'  <Power>1.0 1.0 1.0</Power>\n')
-            f.write(b' </SOPNode>\n')
-            f.write(b'</ASC_CDL>\n')
-        f.write(ap0_to_rec709)
+    def get_shaper(self):
+        f = io.BytesIO()
         f.write(b'<LUT1D inBitDepth="32f" outBitDepth="32f" '
                 b'halfDomain="true" rawHalfs="true">\n')
         f.write(b'  <Array dim="65536 1">\n')
@@ -216,42 +215,53 @@ def make_lut(opts, data):
             f.write(f'    {j}\n'.encode('utf-8'))
         f.write(b'  </Array>\n')
         f.write(b'</LUT1D>\n')            
-        f.write(b'<LUT3D inBitDepth="32f" outBitDepth="32f" '
-                b'interpolation="tetrahedral">\n')
-        f.write(f'  <Array dim="{dim} {dim} {dim} 3">\n'.encode('utf-8'))
-        for rgb in data:
-            f.write(('    %.8f  %.8f  %.8f\n' %
-                     tuple(rgb)).encode('utf-8'))
-        f.write(b'  </Array>\n')
-        f.write(b'</LUT3D>\n')
-        if opts.output_black_offset:
-            f.write(b'<ASC_CDL inBitDepth="32f" outBitDepth="32f" '
-                    b'style="FwdNoClamp">\n')
-            f.write(b' <SOPNode>\n')
-            bl = opts.output_black_offset * 2000.0 / 65535.0
-            f.write(b'  <Slope>1.0 1.0 1.0</Slope>\n')
-            f.write(f'  <Offset>{bl} {bl} {bl}</Offset>\n'.encode('utf-8'))
-            f.write(b'  <Power>1.0 1.0 1.0</Power>\n')
-            f.write(b' </SOPNode>\n')
-            f.write(b'</ASC_CDL>\n')
-        f.write(b'</ProcessList>\n')
+        return f.getvalue()
 
+    def make_lut(self, opts, data):
+        data = data.reshape(-1, 3)
+        dim = int(round(math.pow(data.shape[0], 1.0/3.0)))
+        fopen = open if not opts.compressed else gzip.open
+        with fopen(opts.output, 'wb') as f:
+            f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
+            f.write(b'<ProcessList compCLFversion="3" id="1">\n')
+            if opts.input_gain:
+                f.write(b'<ASC_CDL inBitDepth="32f" outBitDepth="32f" '
+                        b'style="FwdNoClamp">\n')
+                f.write(b' <SOPNode>\n')
+                g = math.pow(2, opts.input_gain)
+                f.write(f'  <Slope>{g} {g} {g}</Slope>\n'.encode('utf-8'))
+                f.write(b'  <Offset>0.0 0.0 0.0</Offset>\n')
+                f.write(b'  <Power>1.0 1.0 1.0</Power>\n')
+                f.write(b' </SOPNode>\n')
+                f.write(b'</ASC_CDL>\n')
+            f.write(self.ap0_to_rec709)
+            f.write(self.shaper)
+            f.write(b'<LUT3D inBitDepth="32f" outBitDepth="32f" '
+                    b'interpolation="tetrahedral">\n')
+            f.write(f'  <Array dim="{dim} {dim} {dim} 3">\n'.encode('utf-8'))
+            for rgb in data:
+                f.write(('    %.8f  %.8f  %.8f\n' %
+                         tuple(rgb)).encode('utf-8'))
+            f.write(b'  </Array>\n')
+            f.write(b'</LUT3D>\n')
+            if opts.output_black_offset:
+                f.write(b'<ASC_CDL inBitDepth="32f" outBitDepth="32f" '
+                        b'style="FwdNoClamp">\n')
+                f.write(b' <SOPNode>\n')
+                bl = opts.output_black_offset * 2000.0 / 65535.0
+                f.write(b'  <Slope>1.0 1.0 1.0</Slope>\n')
+                f.write(f'  <Offset>{bl} {bl} {bl}</Offset>\n'.encode('utf-8'))
+                f.write(b'  <Power>1.0 1.0 1.0</Power>\n')
+                f.write(b' </SOPNode>\n')
+                f.write(b'</ASC_CDL>\n')
+            f.write(b'</ProcessList>\n')
 
-def process(opts):
-    start = time.time()
-    image = get_base_image(opts)
-    params = get_params(opts)
-    photo = AgXPhoto(params)
-    def identity(rgb, *args, **kwds): return rgb
-    photo.print_paper._apply_cctf_encoding_and_clip = identity
-    image = photo.process(image)
-    make_lut(opts, image)
-    end = time.time()
-    sys.stderr.write('total time: %.3f\n' % (end - start))
+# end of class LUTCreator
 
 
 def main():
     opts = getopts()
+    process = LUTCreator(opts)
     if opts.server:
         while True:
             p = sys.stdin.readline().strip()
@@ -270,16 +280,6 @@ def main():
             sys.stdout.flush()
     else:
         process(opts)
-    start = time.time()
-    image = get_base_image(opts)
-    params = get_params(opts)
-    photo = AgXPhoto(params)
-    def identity(rgb, *args, **kwds): return rgb
-    photo.print_paper._apply_cctf_encoding_and_clip = identity
-    image = photo.process(image)
-    make_lut(opts, image)
-    end = time.time()
-    sys.stderr.write('total time: %.3f\n' % (end - start))
 
 
 if __name__ == '__main__':
