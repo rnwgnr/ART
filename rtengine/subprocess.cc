@@ -637,6 +637,8 @@ std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::v
         }
     }
 
+    auto env = get_env();
+
     data->pid = fork();
     pid_t pid = data->pid;
 
@@ -668,7 +670,14 @@ std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::v
         args_vec.back() = nullptr;
         auto args = &args_vec[0];
 
-        execv(executable.c_str(), args);
+        std::vector<char *> env_vec(env.size()+1);
+        for (size_t i = 0; i < env.size(); ++i) {
+            env_vec[i] = const_cast<char *>(env[i].c_str());
+        }
+        env_vec.back() = nullptr;
+        auto envp = &env_vec[0];
+
+        execve(executable.c_str(), args, envp);
         
         if (pipe_in) {
             close(0);
