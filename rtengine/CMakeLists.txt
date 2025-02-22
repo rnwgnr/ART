@@ -176,6 +176,7 @@ set(RTENGINESOURCEFILES
     newdelete.cc
     compress.cc
     LUT3D.cc
+    clutparams.cc
     )
 
 
@@ -203,6 +204,12 @@ if(NOT WITH_SYSTEM_KLT)
         klt/writeFeatures.cc
         )
     set(KLT_LIBRARIES)
+endif()
+
+if(OCIO_FOUND)
+    set(RTENGINESOURCEFILES ${RTENGINESOURCEFILES}
+        extclut.cc
+        )
 endif()
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")

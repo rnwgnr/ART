@@ -33,6 +33,7 @@
 #ifdef ART_USE_OCIO
 #  include <OpenColorIO/OpenColorIO.h>
 namespace OCIO = OCIO_NAMESPACE;
+#  include "extclut.h"
 #endif // ART_USE_OCIO
 
 #ifdef ART_USE_CTL
@@ -81,6 +82,7 @@ public:
     std::shared_ptr<HaldCLUT> getHaldClut(const Glib::ustring& filename) const;
 #ifdef ART_USE_OCIO
     OCIO::ConstProcessorRcPtr getOCIOLut(const Glib::ustring &filename) const;
+    ExternalLUT3D getExternalLut(const Glib::ustring &filename) const;
 #endif // ART_USE_OCIO
 #ifdef ART_USE_CTL
     std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> getCTLLut(const Glib::ustring &filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace, int &lut_dim) const;
@@ -103,6 +105,7 @@ public:
         }
 
         operator Glib::ustring () const { return name; }
+        bool ok() const { return !name.empty(); }
     };
     static CLUTName getClutDisplayName(const Glib::ustring &filename);
     
@@ -121,6 +124,7 @@ private:
     typedef std::pair<OCIO::ConstProcessorRcPtr, std::string> OCIOCacheEntry;
     mutable Cache<Glib::ustring, OCIOCacheEntry> ocio_cache_;
 #endif // ART_USE_OCIO
+    
 #ifdef ART_USE_CTL
     struct CTLCacheEntry {
         std::shared_ptr<Ctl::Interpreter> intp;
@@ -132,6 +136,7 @@ private:
     LUTf ctl_shaper_lut_;
     LUTf ctl_shaper_lut_inv_;
 #endif // ART_USE_CTL
+    
     mutable MyMutex mutex_;
 };
 
@@ -177,9 +182,11 @@ private:
 
 #ifdef ART_USE_OCIO
     bool OCIO_init();
+    bool extlut_init();
     void OCIO_apply(int W, float *r, float *g, float *b);
 
     OCIO::ConstCPUProcessorRcPtr ocio_processor_;
+    ExternalLUT3D ext_lut_;
 #endif // ART_USE_OCIO
 
 #ifdef ART_USE_CTL

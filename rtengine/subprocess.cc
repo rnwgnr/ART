@@ -356,6 +356,12 @@ bool SubprocessInfo::flush()
 }
 
 
+int SubprocessInfo::id() const
+{
+    return GetProcessId(D(impl_)->pi.hProcess);
+}
+
+
 std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::vector<Glib::ustring> &argv, bool search_in_path, bool pipe_in, bool pipe_out)
 {
     std::unique_ptr<SubprocessData> data(new SubprocessData());
@@ -689,6 +695,12 @@ std::unique_ptr<SubprocessInfo> popen(const Glib::ustring &workdir, const std::v
     res.reset(new SubprocessInfo(reinterpret_cast<uintptr_t>(impl)));
 
     return res;
+}
+
+
+int SubprocessInfo::id() const
+{
+    return D(impl_)->pid;
 }
 
 #endif // WIN32
