@@ -34,7 +34,7 @@ constexpr double MAXGREEN = 10.0;
 constexpr double MINEQUAL = 0.8;
 constexpr double MAXEQUAL = 1.5;
 constexpr double INITIALBLACKBODY = 4000.0;
-
+constexpr double MAX_WB_MUL = 20.0;
 
 class ColorTemp {
 public:

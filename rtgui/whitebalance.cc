@@ -255,7 +255,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
             "circle-blue-small.png"
         };
         for (size_t i = 0; i < 3; ++i) {
-            mult[i] = Gtk::manage(new Adjuster(M(label[i]), 0.1, 10, 0.0001, 1, Gtk::manage(new RTImage(icon[i]))));
+            mult[i] = Gtk::manage(new Adjuster(M(label[i]), 0.1, 20, 0.0001, 1, Gtk::manage(new RTImage(icon[i]))));
             multBox->pack_start(*mult[i]);
             mult[i]->show();
             mult[i]->setAdjusterListener(this);

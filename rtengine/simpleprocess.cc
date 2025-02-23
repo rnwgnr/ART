@@ -224,7 +224,15 @@ private:
         if (params.wb.method == WBParams::AUTO) {
             double rm, gm, bm;
             imgsrc->getAutoWBMultipliers (rm, gm, bm);
-            currWB.update(rm, gm, bm, params.wb.equal);
+            if (rm != -1.) {
+                if (params.wb.equal == 1) {
+                    currWB = ColorTemp(rm, gm, bm);
+                } else {
+                    currWB = ColorTemp(rm, gm, bm, params.wb.equal);
+                }
+            } else {
+                currWB.useDefaults(params.wb.equal);
+            }
         }
 
         if (pl) {

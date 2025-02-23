@@ -4272,9 +4272,19 @@ void RawImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
     double greens = avg_g / std::max(1, gn) * refwb_green;
     double blues  = avg_b / std::max(1, bn) * refwb_blue;
 
-    redAWBMul   = rm = imatrices.rgb_cam[0][0] * reds + imatrices.rgb_cam[0][1] * greens + imatrices.rgb_cam[0][2] * blues;
-    greenAWBMul = gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
-    blueAWBMul  = bm = imatrices.rgb_cam[2][0] * reds + imatrices.rgb_cam[2][1] * greens + imatrices.rgb_cam[2][2] * blues;
+    rm = imatrices.rgb_cam[0][0] * reds + imatrices.rgb_cam[0][1] * greens + imatrices.rgb_cam[0][2] * blues;
+    gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
+    bm = imatrices.rgb_cam[2][0] * reds + imatrices.rgb_cam[2][1] * greens + imatrices.rgb_cam[2][2] * blues;
+
+    wbMul2Camera(rm, gm, bm);
+    rm = LIM(rm, 0.0, MAX_WB_MUL);
+    gm = LIM(gm, 0.0, MAX_WB_MUL);
+    bm = LIM(bm, 0.0, MAX_WB_MUL);
+    wbCamera2Mul(rm, gm, bm);
+    
+    redAWBMul = rm;
+    greenAWBMul = gm;
+    blueAWBMul = bm;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

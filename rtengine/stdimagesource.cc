@@ -470,9 +470,15 @@ void StdImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
 
     img->getAutoWBMultipliers(rm, gm, bm);
 
-    redAWBMul   = rm;
+    wbMul2Camera(rm, gm, bm);
+    rm = LIM(rm, 0.0, MAX_WB_MUL);
+    gm = LIM(gm, 0.0, MAX_WB_MUL);
+    bm = LIM(bm, 0.0, MAX_WB_MUL);
+    wbCamera2Mul(rm, gm, bm);
+    
+    redAWBMul = rm;
     greenAWBMul = gm;
-    blueAWBMul  = bm;
+    blueAWBMul = bm;
 }
 
 ColorTemp StdImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coord2D> &green, std::vector<Coord2D>& blue, int tran, double equal)
