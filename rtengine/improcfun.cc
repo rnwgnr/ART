@@ -602,6 +602,7 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
         STEP_(creativeGradients);
         stop = stop || STEP_s_(textureBoost);
         if (!stop) { 
+            STEP_(filmGrain);
             STEP_(logEncoding);
             STEP_(saturationVibrance);
             dcpProfile(img, dcpProf, dcpApplyState, multiThread);
@@ -614,14 +615,12 @@ bool ImProcFunctions::process(Pipeline pipeline, Stage stage, Imagefloat *img)
             }
             STEP_(rgbCurves);
             STEP_(labAdjustments);
-            // stop = stop || STEP_s_(textureBoost);
             STEP_(softLight);
         }
         stop = stop || STEP_s_(localContrast);
         if (!stop) {
-            // STEP_(filmSimulation);
             STEP_(blackAndWhite);
-            STEP_(filmGrain);
+//            STEP_(filmGrain);
         }
         if (pipeline == Pipeline::PREVIEW && params->prsharpening.enabled) {
             double s = scale;

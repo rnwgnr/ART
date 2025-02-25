@@ -2638,7 +2638,8 @@ bool DehazeParams::operator !=(const DehazeParams& other) const
 GrainParams::GrainParams():
     enabled(false),
     iso(400),
-    strength(25)
+    strength(25),
+    color(false)
 {
 }
 
@@ -2646,7 +2647,8 @@ bool GrainParams::operator==(const GrainParams &other) const
 {
     return enabled == other.enabled
         && iso == other.iso
-        && strength == other.strength;
+        && strength == other.strength
+        && color == other.color;
 }
 
 bool GrainParams::operator!=(const GrainParams &other) const
@@ -3926,6 +3928,7 @@ int ProcParams::save(ProgressListener *pl, bool save_general,
             saveToKeyfile("Grain", "Enabled", grain.enabled, keyFile);
             saveToKeyfile("Grain", "ISO", grain.iso, keyFile);
             saveToKeyfile("Grain", "Strength", grain.strength, keyFile);
+            saveToKeyfile("Grain", "Color", grain.color, keyFile);
         }
 
 
@@ -5209,6 +5212,11 @@ int ProcParams::load(ProgressListener *pl, bool load_general,
             int gscale = 100;
             if (assignFromKeyfile(keyFile, "Grain", "Scale", gscale)) {
                 grain.strength = int(float(grain.strength)/100.f * gscale);
+            }
+            if (ppVersion < 1043) {
+                grain.strength = std::min(grain.strength * 2, 100);
+            } else {
+                assignFromKeyfile(keyFile, "Grain", "Color", grain.color);
             }
         }
 

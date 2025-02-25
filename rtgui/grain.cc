@@ -31,9 +31,20 @@ FilmGrain::FilmGrain(): FoldableToolPanel(this, "grain", M("TP_GRAIN_LABEL"), tr
     EvEnabled = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_ENABLED");
     EvStrength = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_STRENGTH");
     EvISO = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_ISO");
+    EvColor = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_GRAIN_COLOR");
     EvToolReset.set_action(DIRPYREQUALIZER);
+
+    Gtk::HBox *hb = Gtk::manage (new Gtk::HBox ());
+    hb->pack_start(*Gtk::manage(new Gtk::Label(M("TP_GRAIN_MODE") + ": ")), Gtk::PACK_SHRINK);
+    color = Gtk::manage(new MyComboBoxText());
+    color->append(M("TP_GRAIN_BW"));
+    color->append(M("TP_GRAIN_COLOR"));
+    hb->pack_start(*color);
+    color->signal_changed().connect(sigc::mem_fun(*this, &FilmGrain::colorChanged));
+    hb->show();
+    color->show();
     
-    iso = Gtk::manage(new Adjuster(M("TP_GRAIN_ISO"), 20., 6400., 1., 400.));
+    iso = Gtk::manage(new Adjuster(M("TP_GRAIN_ISO"), 100., 6400., 50., 400.));
     iso->setAdjusterListener(this);
     iso->show();
 
@@ -41,6 +52,7 @@ FilmGrain::FilmGrain(): FoldableToolPanel(this, "grain", M("TP_GRAIN_LABEL"), tr
     strength->setAdjusterListener(this);
     strength->show();
 
+    pack_start(*hb);
     pack_start(*iso);
     pack_start(*strength);
 }
@@ -51,6 +63,7 @@ void FilmGrain::read(const ProcParams *pp)
     disableListener();
 
     setEnabled(pp->grain.enabled);
+    color->set_active(pp->grain.color ? 1 : 0);
     iso->setValue(pp->grain.iso);
     strength->setValue(pp->grain.strength);
 
@@ -63,6 +76,7 @@ void FilmGrain::write(ProcParams *pp)
     pp->grain.enabled = getEnabled();
     pp->grain.iso = iso->getValue();
     pp->grain.strength = strength->getValue();
+    pp->grain.color = color->get_active_row_number() == 1;
 }
 
 void FilmGrain::setDefaults(const ProcParams *defParams)
@@ -96,6 +110,14 @@ void FilmGrain::enabledChanged ()
         } else {
             listener->panelChanged(EvEnabled, M("GENERAL_DISABLED"));
         }
+    }
+}
+
+
+void FilmGrain::colorChanged()
+{
+    if (listener) {
+        listener->panelChanged(EvColor, color->get_active_row_number() == 1 ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
     }
 }
 

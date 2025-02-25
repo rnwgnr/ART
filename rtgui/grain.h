@@ -23,20 +23,8 @@
 #include "adjuster.h"
 #include "toolpanel.h"
 
-class FilmGrain: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel
-{
-private:
-    Adjuster *iso;
-    Adjuster *strength;
-
-    rtengine::ProcEvent EvEnabled;
-    rtengine::ProcEvent EvISO;
-    rtengine::ProcEvent EvStrength;
-
-    rtengine::procparams::GrainParams initial_params;
-    
+class FilmGrain: public ToolParamBlock, public AdjusterListener, public FoldableToolPanel {
 public:
-
     FilmGrain();
 
     void read(const rtengine::procparams::ProcParams *pp) override;
@@ -45,7 +33,20 @@ public:
     void adjusterChanged(Adjuster *a, double newval) override;
     void enabledChanged() override;
     void adjusterAutoToggled(Adjuster* a, bool newval) override {}
+    void colorChanged();
 
     void toolReset(bool to_initial) override;
+
+private:
+    MyComboBoxText *color;
+    Adjuster *iso;
+    Adjuster *strength;
+
+    rtengine::ProcEvent EvEnabled;
+    rtengine::ProcEvent EvISO;
+    rtengine::ProcEvent EvStrength;
+    rtengine::ProcEvent EvColor;
+
+    rtengine::procparams::GrainParams initial_params;
 };
 
