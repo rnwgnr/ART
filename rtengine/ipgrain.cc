@@ -32,7 +32,7 @@ namespace {
 
 class ProcParamsOverride {
 public:
-    ProcParamsOverride(const procparams::ProcParams *&pp):
+    ProcParamsOverride(const procparams::ProcParams *&pp, ImProcFunctions::Pipeline pipeline, double scale):
         params_(),
         prev_(pp),
         torestore_(pp)
@@ -48,13 +48,14 @@ public:
 
         int coarseness = LIM01(float(iso - iso_min + 1) / float(iso_max - iso_min)) * 100.f + 0.5f;
 
-        for (int i = 0; i < 3; ++i) {
+        const int nlevels = pipeline == ImProcFunctions::Pipeline::OUTPUT ? 3 : int(std::ceil(3 / scale));
+        for (int i = 0; i < nlevels; ++i) {
             params_.smoothing.regions.emplace_back();
             params_.smoothing.labmasks.emplace_back();
             auto &r = params_.smoothing.regions.back();
             r.mode = procparams::SmoothingParams::Region::Mode::NOISE;
             r.channel = color ? procparams::SmoothingParams::Region::Channel::RGB : procparams::SmoothingParams::Region::Channel::LUMINANCE;
-            r.noise_strength = strength / (3-i);
+            r.noise_strength = strength / (nlevels-i);
             r.noise_coarseness = coarseness / (i+1);
         }
     }
@@ -81,8 +82,9 @@ void ImProcFunctions::filmGrain(Imagefloat *rgb)
         return;
     }
     
-    ProcParamsOverride pp(params);
+    ProcParamsOverride pp(params, cur_pipeline, scale);
     params = pp.get_params();
+
     guidedSmoothing(rgb);
 }
 
