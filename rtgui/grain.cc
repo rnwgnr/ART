@@ -117,7 +117,7 @@ void FilmGrain::enabledChanged ()
 void FilmGrain::colorChanged()
 {
     if (listener) {
-        listener->panelChanged(EvColor, color->get_active_row_number() == 1 ? M("GENERAL_ENABLED") : M("GENERAL_DISABLED"));
+        listener->panelChanged(EvColor, color->get_active_text());
     }
 }
 

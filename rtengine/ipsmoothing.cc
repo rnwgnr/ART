@@ -555,7 +555,7 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
     const int H = R.height();
 
     const float s = LIM01(float(strength)/200.f) / scale;
-    std::default_random_engine rng(42);
+    std::default_random_engine rng((42 + int(chan)) | (strength << 8) | (coarseness << 16));
     std::normal_distribution<float> d(0.f, chan == Channel::L ? 0.5f : chan == Channel::C ? 2.f : 1.f);
 
     const auto noise = 
