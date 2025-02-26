@@ -558,10 +558,11 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
     std::default_random_engine rng(42);
     std::normal_distribution<float> d(0.f, chan == Channel::L ? 0.5f : chan == Channel::C ? 2.f : 1.f);
 
-    const auto noise =
-        [&](array2D<float> &a) -> void
+    const auto noise = 
+        [&](array2D<float> &a, int chan) -> void
         {
-            const float c = (1.f + 3.f * float(coarseness) / 100.f) / scale;
+            constexpr float chan_scale[4] = { 1.f, 1.f, 0.8f, 3.f };
+            const float c = ((1.f + 3.f * float(coarseness) / 100.f) / scale) / chan_scale[chan];
             const int W2 = W / c;
             const int H2 = H / c;
             
@@ -591,13 +592,13 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
                         a[y][x] = a[y][x] * (1.f + n * s);
                     }
                 }
-            }            
+            }
         };
 
     if (chan == Channel::LC) {
-        noise(R);
-        noise(G);
-        noise(B);
+        noise(R, 1);
+        noise(G, 2);
+        noise(B, 3);
     } else {
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
@@ -609,10 +610,10 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
         }
 
         if (chan == Channel::L) {
-            noise(G);
+            noise(G, 0);
         } else {
-            noise(R);
-            noise(B);
+            noise(R, 0);
+            noise(B, 0);
         }
 
 #ifdef _OPENMP
