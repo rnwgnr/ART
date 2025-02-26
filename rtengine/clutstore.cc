@@ -1389,6 +1389,8 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
         ExternalLUT3D extlut(filename);
         if (extlut.ok()) {
             return extlut.get_param_descriptors();
+        } else {
+            return {};
         }
     } else
 #endif // ART_USE_OCIO
