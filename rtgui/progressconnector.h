@@ -113,7 +113,7 @@ public:
 
     void destroy()
     {
-        std::unique_lock<std::mutex> lock(mtx_);
+        //std::unique_lock<std::mutex> lock(mtx_);
         delete this;
     }
 };
