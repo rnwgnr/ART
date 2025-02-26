@@ -67,7 +67,7 @@ public:
     };
 
     Cache(unsigned long _size, Hook* _hook = nullptr) :
-        store_size(_size),
+        store_size(std::max(_size, static_cast<unsigned long>(1))),
         hook(_hook)
     {
     }
