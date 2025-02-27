@@ -1999,3 +1999,7 @@ ZOOMPANEL_ZOOM100;Nagyítás 100%-ra\nGyorsbillentyű: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;A képernyő méretéhez igazítás\nGyorsbillentyű: <b>f</b>
 ZOOMPANEL_ZOOMIN;Nagyítás +\nGyorsbillentyű: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Kicsinyítés -\nGyorsbillentyű: <b>-</b>
+HISTORY_MSG_GRAIN_COLOR;Filmszemcsés - mód
+TP_GRAIN_MODE;Mód
+TP_GRAIN_COLOR;Szín
+TP_GRAIN_BW;B&W

@@ -2029,3 +2029,7 @@ PREFERENCES_MONITOR_GAMUT;Gama del monitor
 PREFERENCES_OSCOLORMGMT_INFO;La gestión del color está integrada en el entorno del sistema operativo/escritorio y activada globalmente.\nUtilice las funciones de su entorno para establecer el perfil del monitor y, a continuación, seleccione aquí la gama más adecuada.
 TP_COLORCORRECTION_HSL_GAMMA;Gamma
 PREFERENCES_MONPROFILE_WARN_SRGB;En este sistema operativo/entorno de escritorio solo se admite sRGB como perfil de monitor.
+HISTORY_MSG_GRAIN_COLOR;Grano de película - Modo
+TP_GRAIN_MODE;Modo
+TP_GRAIN_COLOR;Color
+TP_GRAIN_BW;Blanco y negro

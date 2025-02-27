@@ -2037,3 +2037,7 @@ PREFERENCES_MONITOR_GAMUT;Monitor gamma
 PREFERENCES_OSCOLORMGMT_INFO;Kleurbeheer is ingebouwd in het besturingssysteem/desktopomgeving en globaal ingeschakeld.\nGebruik de omgevingsfaciliteiten om het monitorprofiel in te stellen en selecteer hier het meest geschikte gamma.
 TP_COLORCORRECTION_HSL_GAMMA;Gamma
 PREFERENCES_MONPROFILE_WARN_SRGB;Alleen sRGB wordt ondersteund als monitorprofiel in dit besturingssysteem/desktopomgeving.
+HISTORY_MSG_GRAIN_COLOR;Filmkorrel - Modus
+TP_GRAIN_MODE;Modus
+TP_GRAIN_COLOR;Kleur
+TP_GRAIN_BW;Z-W

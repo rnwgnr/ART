@@ -2019,3 +2019,7 @@ PREFERENCES_MONITOR_GAMUT;モニターの色域
 PREFERENCES_OSCOLORMGMT_INFO;カラーマネジメントは、オペレーティングシステム/デスクトップ環境に組み込まれており、グローバルに有効になっています。\n環境機能を使用してモニタープロファイルを設定し、ここで最適な色域を選択します。
 TP_COLORCORRECTION_HSL_GAMMA;ガンマ
 PREFERENCES_MONPROFILE_WARN_SRGB;このオペレーティング システム/デスクトップ環境では、モニター プロファイルとして sRGB のみがサポートされます。
+HISTORY_MSG_GRAIN_COLOR;フィルムグレイン - モード
+TP_GRAIN_MODE;モード
+TP_GRAIN_COLOR;カラー
+TP_GRAIN_BW;白黒

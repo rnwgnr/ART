@@ -2027,3 +2027,7 @@ ZOOMPANEL_ZOOMFITSCREEN;Adatta allo schermo.\nScorciatoia: <b>f</b>
 ZOOMPANEL_ZOOMIN;Ingrandisci.\nScorciatoia: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
 PREFERENCES_MONPROFILE_WARN_SRGB;In questo sistema operativo/ambiente desktop è supportato solo sRGB come profilo monitor.
+HISTORY_MSG_GRAIN_COLOR;Grana pellicola - Modalità
+TP_GRAIN_MODE;Modalità
+TP_GRAIN_COLOR;Colore
+TP_GRAIN_BW;Bianco e nero
