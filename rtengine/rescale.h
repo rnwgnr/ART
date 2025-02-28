@@ -30,8 +30,8 @@ inline float getBilinearValue(const array2D<float> &src, float x, float y)
     const int H = src.height();
     
     // Get integer and fractional parts of numbers
-    int xi = x;
-    int yi = y;
+    int xi = std::min(int(x), W - 1);
+    int yi = std::min(int(y), H - 1);
     float xf = x - xi;
     float yf = y - yi;
     int xi1 = std::min(xi + 1, W - 1);
