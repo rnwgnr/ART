@@ -35,6 +35,8 @@
 #include <iostream>
 #include <queue>
 #include <random>
+#define BENCHMARK
+#include "StopWatch.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -549,23 +551,32 @@ void nlmeans_smoothing(array2D<float> &R, array2D<float> &G, array2D<float> &B, 
 }
 
 
-void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, int strength, int coarseness, double scale, Channel chan, bool multithread)
+void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TMatrix &ws, int strength, int coarseness, double scale, Channel chan, bool multithread, bool fast)
 {
+    BENCHFUN
+        
     const int W = R.width();
     const int H = R.height();
 
-    const float s = LIM01(float(strength)/150.f) / scale;
+    const float s = LIM01(float(strength)/(chan == Channel::L ? 200.f : 100.f)) / scale;
     std::default_random_engine rng(42 + int(chan) + coarseness);
 
     const auto noise = 
         [&](array2D<float> &a, int chan) -> void
         {
-            constexpr float chan_sd[5] = { 0.5f, 2.f, 0.6f, 1.f, 1.8f };
-            std::normal_distribution<float> d(0.f, chan_sd[chan]);
-            const float c = ((1.f + 3.f * float(coarseness) / 100.f) / scale);
-            const int W2 = W / c;
-            const int H2 = H / c;
+            constexpr float chan_sd[5] = { 1.f, 1.f, 0.7f, 1.f, 1.3f };
+            constexpr float chan_sd_fast[5] = { 0.5f, 2.f, 0.8f, 1.f, 1.2f };
+            const float f = ((1.f + 3.f * float(coarseness) / 100.f) / scale);
+            const int W2 = W / f;
+            const int H2 = H / f;
+
+            const float c01 = float(coarseness) / 100.f;
+            const float c = 655.35f / (20.f + std::pow(c01, 0.5f) * 80.f);
+
+            const float sd = chan_sd_fast[chan];
+            const float s2 = s * 0.7f;
             
+            std::normal_distribution<float> d(0.f, fast ? sd : 1.f);
             array2D<float> nbuf(W2, H2);
             for (int y = 0; y < H2; ++y) {
                 for (int x = 0; x < W2; ++x) {
@@ -574,26 +585,45 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
             }
 
             array2D<float> tmp(W, H);
-            rescaleBilinear(nbuf, tmp, multithread);
+            if (!fast) {
+#ifdef _OPENMP
+#               pragma omp parallel for if (multithread)
+#endif
+                for (int y = 0; y < H; ++y) {
+                    for (int x = 0; x < W; ++x) {
+                        float v = a[y][x];
+                        float mu = LIM01(v) * c;
+                        float m = mu + pow_F(mu, 0.5f) * chan_sd[chan] * getBilinearValue(nbuf, std::min(x / f, float(W2-1)), std::min(y / f, float(H2-1)));
+                        tmp[y][x] = m / c - v;
+                    }
+                }
+            } else {
+                rescaleBilinear(nbuf, tmp, multithread);
+            }
 
 #ifdef _OPENMP
 #           pragma omp parallel if (multithread)
 #endif
             {
-                if (coarseness > 0) {
-                    gaussianBlur(tmp, tmp, W, H, (0.7f * float(coarseness)/100.f) / scale);
-                }
+                float sigma = (0.25f + std::pow(float(coarseness)/100.f, 0.5f)) / std::sqrt(scale);
+                gaussianBlur(tmp, tmp, W, H, sigma);
+
 #ifdef _OPENMP
-#               pragma omp for
+#               pragma omp for 
 #endif
                 for (int y = 0; y < H; ++y) {
                     for (int x = 0; x < W; ++x) {
                         float n = tmp[y][x];
-                        a[y][x] = a[y][x] * (1.f + n * s);
+                        if (fast) {
+                            a[y][x] *= (sd + n * s2) / sd;
+                        } else {
+                            a[y][x] += s * n;
+                        }
                     }
                 }
             }
         };
+    
 
     if (chan == Channel::LC) {
         noise(R, 2);
@@ -921,7 +951,7 @@ bool ImProcFunctions::guidedSmoothing(Imagefloat *rgb)
             Channel ch = glow ? Channel::LC : Channel(int(r.channel));
             if (r.mode == SmoothingParams::Region::Mode::NOISE) {
                 if (cur_pipeline == Pipeline::OUTPUT || cur_pipeline == Pipeline::PREVIEW) {
-                    add_noise(R, G, B, ws, r.noise_strength, r.noise_coarseness, scale, ch, multiThread);
+                    add_noise(R, G, B, ws, r.noise_strength, r.noise_coarseness, scale, ch, multiThread, cur_pipeline != Pipeline::OUTPUT && scale > 1);
                 }
             } else if (r.mode == SmoothingParams::Region::Mode::NLMEANS) {
                 nlmeans_smoothing(R, G, B, ws, iws, ch, r.nlstrength, r.nldetail, r.iterations, scale, multiThread);
