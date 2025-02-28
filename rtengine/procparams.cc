@@ -2638,7 +2638,7 @@ bool DehazeParams::operator !=(const DehazeParams& other) const
 GrainParams::GrainParams():
     enabled(false),
     iso(400),
-    strength(25),
+    strength(50),
     color(false)
 {
 }
