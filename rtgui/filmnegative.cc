@@ -178,6 +178,38 @@ void rgb2temp(const RGB &refOut, double &outLev, double &temp, double &green)
     green = ct.getGreen();
 }
 
+
+Gtk::Widget *pack_spot_picker(Gtk::Widget *spotbutton, MyComboBoxText *&spotsize)
+{
+    Gtk::Grid* spotgrid = Gtk::manage(new Gtk::Grid());
+    spotgrid->get_style_context()->add_class("grid-spacing");
+    setExpandAlignProperties(spotgrid, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
+
+    Gtk::Label *slab = Gtk::manage(new Gtk::Label(M("TP_WBALANCE_SIZE")));
+    setExpandAlignProperties(slab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+
+    Gtk::Grid *wbsizehelper = Gtk::manage(new Gtk::Grid());
+    wbsizehelper->set_name("WB-Size-Helper");
+    setExpandAlignProperties(wbsizehelper, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+
+    spotsize = Gtk::manage(new MyComboBoxText());
+    setExpandAlignProperties(spotsize, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
+    spotsize->append("2");
+    spotsize->append("4");
+    spotsize->append("8");
+    spotsize->append("16");
+    spotsize->append("32");
+    spotsize->set_active(4);
+
+    wbsizehelper->attach(*spotsize, 0, 0, 1, 1);
+    
+    spotgrid->attach(*spotbutton, 0, 0, 1, 1);
+    spotgrid->attach(*slab, 1, 0, 1, 1);
+    spotgrid->attach(*wbsizehelper, 2, 0, 1, 1);
+
+    return spotgrid;
+}
+
 } // namespace
 
 
@@ -213,6 +245,7 @@ FilmNegative::FilmNegative() :
     spotButton->set_image(*Gtk::manage(new RTImage("color-picker-small.png")));
 
     refSpotButton->set_tooltip_text(M("TP_FILMNEGATIVE_REF_TOOLTIP"));
+    setExpandAlignProperties(refSpotButton, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
 
     setExpandAlignProperties(refInputLabel, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
@@ -238,7 +271,8 @@ FilmNegative::FilmNegative() :
     pack_start(*greenExp, Gtk::PACK_SHRINK, 0);
     pack_start(*redRatio, Gtk::PACK_SHRINK, 0);
     pack_start(*blueRatio, Gtk::PACK_SHRINK, 0);
-    pack_start(*spotButton, Gtk::PACK_SHRINK, 0);
+    //pack_start(*spotButton, Gtk::PACK_SHRINK, 0);
+    pack_start(*pack_spot_picker(spotButton, spotsize), Gtk::PACK_SHRINK, 0);
 
     Gtk::Separator* const sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
     sep->get_style_context()->add_class("grid-row-separator");
@@ -250,7 +284,8 @@ FilmNegative::FilmNegative() :
     pack_start(*blueBalance, Gtk::PACK_SHRINK, 0);
     pack_start(*greenBalance, Gtk::PACK_SHRINK, 0);
 
-    pack_start(*refSpotButton, Gtk::PACK_SHRINK, 0);
+    //pack_start(*refSpotButton, Gtk::PACK_SHRINK, 0);
+    pack_start(*pack_spot_picker(refSpotButton, refspotsize), Gtk::PACK_SHRINK, 0);    
 
     spotButton->signal_toggled().connect(sigc::mem_fun(*this, &FilmNegative::editToggled));
 
@@ -489,14 +524,15 @@ bool FilmNegative::button1Pressed(int modifierKey)
 
     if (listener) {
         if (spotButton->get_active()) {
+            int sz = 2 << spotsize->get_active_row_number();
             refSpotCoords.push_back(provider->posImage);
             if (refSpotCoords.size() == 2) {
                 // User has selected 2 reference gray spots. Calculating new exponents
                 // from channel values and updating parameters.
 
                 RGB ref1, ref2, dummy;
-                if (fnp->getFilmNegativeSpot(refSpotCoords[0], 32, ref1, dummy) &&
-                        fnp->getFilmNegativeSpot(refSpotCoords[1], 32, ref2, dummy)) {
+                if (fnp->getFilmNegativeSpot(refSpotCoords[0], sz, ref1, dummy) &&
+                        fnp->getFilmNegativeSpot(refSpotCoords[1], sz, ref2, dummy)) {
                     disableListener();
 
                     RGB newExps = getFilmNegativeExponents(ref1, ref2);
@@ -524,6 +560,8 @@ bool FilmNegative::button1Pressed(int modifierKey)
         } else if (refSpotButton->get_active()) {
             disableListener();
 
+            int sz = 2 << refspotsize->get_active_row_number();
+            
             // If the luminance reference is not set, copy the current reference input
             // values, and the corresponding output luminance
             if(refLuminance.lum <= 0.f) {
@@ -534,7 +572,7 @@ bool FilmNegative::button1Pressed(int modifierKey)
             }
 
             RGB refOut;
-            fnp->getFilmNegativeSpot(provider->posImage, 32, refInputValues, refOut);
+            fnp->getFilmNegativeSpot(provider->posImage, sz, refInputValues, refOut);
             // Output luminance of the sampled spot
             float spotLum = rtengine::Color::rgbLuminance(refOut.r, refOut.g, refOut.b);
             float rexp = -(greenExp->getValue() * redRatio->getValue());
