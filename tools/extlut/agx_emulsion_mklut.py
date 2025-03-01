@@ -6,12 +6,12 @@
 # the script can be run standalone or integrated with ART
 # (https://art.pixls.us) using its "external 3dLUT" interface
 
+import os
 import numpy
 import argparse
 import gzip
 import struct
 import math
-import os
 import sys
 import json
 import time
@@ -46,6 +46,7 @@ def getopts():
     p.add_argument('--print-gamma', type=float, default=1)
     p.add_argument('--dir-couplers-amount', type=float, default=1)
     p.add_argument('--output-black-offset', type=float, default=0)
+    p.add_argument('--gamut', choices=['srgb', 'rec2020'], default='rec2020')
     p.add_argument('--json', nargs=2)
     p.add_argument('--server', action='store_true')
     opts = p.parse_args()
@@ -141,6 +142,28 @@ class LUTCreator:
         </Matrix>   
     """.encode('utf-8')
 
+    ap0_to_rec2020 = """\
+        <Matrix inBitDepth="32f" outBitDepth="32f" >
+          <!-- ACES AP0 to Rec2020-->
+          <Array dim="3 3">
+            1.50910172 -0.2589874  -0.2501146
+            -0.07757638  1.17706684 -0.09949036
+            0.0020526  -0.03114411  1.02909153
+          </Array>
+        </Matrix>   
+    """.encode('utf-8')
+
+    rec2020_to_ap0 = """\
+        <Matrix inBitDepth="32f" outBitDepth="32f" >
+          <!-- Linear Rec.2020 to ACES AP0-->
+          <Array dim="3 3">
+            0.67022657 0.15216775 0.17760585
+            0.0441723  0.86177705 0.09405057
+            0.0        0.02577705 0.97422293
+          </Array>
+        </Matrix>   
+    """.encode('utf-8')
+
     def get_base_image(self, opts):
         dim = self.lutsize[opts.size]
         sz = complex(0, float(dim))
@@ -159,7 +182,12 @@ class LUTCreator:
         params.enlarger.print_exposure = opts.print_exposure
         params.enlarger.lens_blur = 0
         params.scanner.lens_blur = 0
-        params.io.input_color_space = 'sRGB'
+        if opts.gamut == 'srgb':
+            params.io.input_color_space = 'sRGB'
+            params.settings.rgb_to_raw_method = 'mallett2019'
+        else:
+            params.io.input_color_space = 'ITU-R BT.2020'
+            params.settings.rgb_to_raw_method = 'hanatos2025'
         params.io.input_cctf_decoding = False
         params.io.output_color_space = 'ACES2065-1'
         params.io.output_cctf_encoding = False
@@ -210,7 +238,10 @@ class LUTCreator:
         f.write(b'  <Array dim="65536 1">\n')
         for i in range(65536):
             v = struct.unpack('e', struct.pack('H', i))[0]
-            o = pq(v, False)
+            if math.isfinite(v) and v >= 0:
+                o = pq(v, False)
+            else:
+                o = 0.0
             j = struct.unpack('H', struct.pack('e', o))[0]
             f.write(f'    {j}\n'.encode('utf-8'))
         f.write(b'  </Array>\n')
@@ -234,7 +265,10 @@ class LUTCreator:
                 f.write(b'  <Power>1.0 1.0 1.0</Power>\n')
                 f.write(b' </SOPNode>\n')
                 f.write(b'</ASC_CDL>\n')
-            f.write(self.ap0_to_rec709)
+            if opts.gamut == 'srgb':
+                f.write(self.ap0_to_rec709)
+            else:
+                f.write(self.ap0_to_rec2020)                
             f.write(self.shaper)
             f.write(b'<LUT3D inBitDepth="32f" outBitDepth="32f" '
                     b'interpolation="tetrahedral">\n')
