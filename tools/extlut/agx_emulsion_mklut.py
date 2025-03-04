@@ -208,8 +208,7 @@ class LUTCreator:
         params.print_paper.data.tune.gamma_factor = opts.print_gamma
         params.enlarger.y_filter_shift = opts.y_shift
         params.enlarger.m_filter_shift = opts.m_shift
-        params.negative.dir_couplers.amount_rgb = \
-            opts.dir_couplers_amount * numpy.array([1.0, 1.0, 1.0])
+        params.negative.dir_couplers.amount = opts.dir_couplers_amount
         params.negative.dir_couplers.active = opts.dir_couplers_amount > 0
         return params
 
