@@ -561,7 +561,9 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
     const int W = R.width();
     const int H = R.height();
 
-    const float s = LIM01(float(strength)/(chan == Channel::L ? 200.f : 100.f)) / scale;
+    const float sf = LIM01(float(strength)/(chan == Channel::L ? 200.f : 100.f)) / scale;
+    const float radius = (0.5f + 1.75f * float(coarseness)/100.f) / scale;//std::sqrt(scale);
+    
     RandomNumberGenerator rng(42 + int(chan) + coarseness);
 #ifdef _OPENMP
     const int nthreads = omp_get_max_threads();
@@ -573,64 +575,68 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
         rngs.emplace_back(rng.randint());
     }
 
+    array2D<float> kernel;
+    {
+        const int sz = int(std::ceil(radius)) * 2 + 1;
+        kernel(sz, sz);
+        const int c = sz / 2;
+        double totd = 0.0;
+        for (int i = 0; i < sz; ++i) {
+            for (int j = 0; j < sz; ++j) {
+                float r = std::sqrt(SQR(i-c) + SQR(j-c));
+                float d = r - radius;
+                kernel[i][j] = d < 0.f ? 1.f : std::max(1.f - d, 0.f);
+                totd += kernel[i][j];
+            }
+        }
+        const float tot = totd;
+        for (int i = 0; i < kernel.height(); ++i) {
+            for (int j = 0; j < kernel.width(); ++j) {
+                kernel[i][j] /= tot;
+            }
+        }
+    }
+    Convolution conv(kernel, W, H, multithread);
+    
     const auto noise = 
         [&](array2D<float> &a, int chan) -> void
         {
             constexpr float chan_sd[5] = { 1.f, 1.f, 0.7f, 1.f, 1.3f };
-            const float f = ((1.f + 3.f * float(coarseness) / 100.f) / scale);
-            const int W2 = W / f;
-            const int H2 = H / f;
-
             const float c01 = float(coarseness) / 100.f;
             const float c = 655.35f / (20.f + std::pow(c01, 0.5f) * 80.f);
             const float sd = chan_sd[chan];
 
             std::vector<NormalDistribution> d(nthreads);
-            array2D<float> buf(W2, H2);
             array2D<float> noisebuf(W, H);
 
 #ifdef _OPENMP
-#           pragma omp parallel if (multithread)
+#           pragma omp parallel for if (multithread)
 #endif
-            {
-
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
 #ifdef _OPENMP
-#               pragma omp for
-#endif
-                for (int y = 0; y < H2; ++y) {
-                    for (int x = 0; x < W2; ++x) {
-#ifdef _OPENMP
-                        int t = omp_get_thread_num();
+                    int t = omp_get_thread_num();
 #else
-                        int t = 0;
+                    int t = 0;
 #endif
-                        buf[y][x] = d[t](rngs[t]) * sd;
-                    }
+                        
+                    float v = a[y][x];
+                    float mu = LIM01(v) * c;
+                    float r = d[t](rngs[t]) * sd;
+                    float m = mu + sqrtf(mu) * r;
+                    noisebuf[y][x] = m / c - v;
                 }
+            }
 
+            conv(noisebuf, noisebuf);
+            
 #ifdef _OPENMP
-#               pragma omp for
+#           pragma omp parallel for if (multithread)
 #endif
-                for (int y = 0; y < H; ++y) {
-                    for (int x = 0; x < W; ++x) {
-                        float v = a[y][x];
-                        float mu = LIM01(v) * c;
-                        float m = mu + sqrtf(mu) * getBilinearValue(buf, x / f, y / f);
-                        noisebuf[y][x] = m / c - v;
-                    }
-                }
-
-                float sigma = (0.25f + std::pow(float(coarseness)/100.f, 0.5f)) / std::sqrt(scale);
-                gaussianBlur(noisebuf, noisebuf, W, H, sigma);
-
-#ifdef _OPENMP
-#               pragma omp for 
-#endif
-                for (int y = 0; y < H; ++y) {
-                    for (int x = 0; x < W; ++x) {
-                        float n = noisebuf[y][x];
-                        a[y][x] += s * n;
-                    }
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    float n = noisebuf[y][x];
+                    a[y][x] += sf * n;
                 }
             }
         };
