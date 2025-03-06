@@ -562,18 +562,9 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
     const int H = R.height();
 
     const float sf = LIM01(float(strength)/(chan == Channel::L ? 200.f : 100.f)) / scale;
-    const float radius = (0.5f + 1.75f * float(coarseness)/100.f) / scale;//std::sqrt(scale);
+    const float radius = (0.5f + 1.75f * float(coarseness)/100.f) / scale;
     
     RandomNumberGenerator rng(42 + int(chan) + coarseness);
-#ifdef _OPENMP
-    const int nthreads = omp_get_max_threads();
-#else
-    const int nthreads = 1;
-#endif
-    std::vector<RandomNumberGenerator> rngs;
-    for (int i = 0; i < nthreads; ++i) {
-        rngs.emplace_back(rng.randint());
-    }
 
     array2D<float> kernel;
     {
@@ -597,6 +588,13 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
         }
     }
     Convolution conv(kernel, W, H, multithread);
+
+    constexpr uint32_t normd_size = 5233;
+    float normd[normd_size];
+    NormalDistribution d;
+    for (uint32_t i = 0; i < normd_size; ++i) {
+        normd[i] = d(rng);
+    }
     
     const auto noise = 
         [&](array2D<float> &a, int chan) -> void
@@ -606,7 +604,6 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
             const float c = 655.35f / (20.f + std::pow(c01, 0.5f) * 80.f);
             const float sd = chan_sd[chan];
 
-            std::vector<NormalDistribution> d(nthreads);
             array2D<float> noisebuf(W, H);
 
 #ifdef _OPENMP
@@ -614,15 +611,9 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
 #endif
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
-#ifdef _OPENMP
-                    int t = omp_get_thread_num();
-#else
-                    int t = 0;
-#endif
-                        
                     float v = a[y][x];
                     float mu = LIM01(v) * c;
-                    float r = d[t](rngs[t]) * sd;
+                    float r = normd[rng.randint(normd_size)] * sd;
                     float m = mu + sqrtf(mu) * r;
                     noisebuf[y][x] = m / c - v;
                 }
