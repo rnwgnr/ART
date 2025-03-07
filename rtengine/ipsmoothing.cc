@@ -612,9 +612,10 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
                     float v = a[y][x];
+                    float s = SGN(v);
                     float mu = LIM01(v) * c;
                     float r = normd[rng.randint(normd_size)] * sd;
-                    float m = mu + sqrtf(mu) * r;
+                    float m = s * mu + s * sqrtf(mu) * r;
                     noisebuf[y][x] = m / c - v;
                 }
             }
