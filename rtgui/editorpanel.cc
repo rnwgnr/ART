@@ -332,9 +332,10 @@ private:
     void updateSoftProofParameters (bool noEvent = false)
     {
         bool profile_active = profileBox.get_active_row_number() > 0;
-        spGamutCheck.set_sensitive(profile_active);
+        bool check_is_active = rtengine::Settings::color_mgmt_mode != rtengine::Settings::ColorManagementMode::APPLICATION || profile_active;
+        spGamutCheck.set_sensitive(check_is_active);
 
-        if (rtengine::Settings::color_mgmt_mode != rtengine::Settings::ColorManagementMode::APPLICATION || profile_active) {
+        if (check_is_active) {
             if (processor) {
                 if (!noEvent) {
                     processor->beginUpdateParams ();
