@@ -599,24 +599,34 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
     const auto noise = 
         [&](array2D<float> &a, int chan) -> void
         {
-            constexpr float chan_sd[5] = { 1.f, 1.f, 0.7f, 1.f, 1.3f };
+            constexpr float chan_sd[5] = { 1.f, 0.2f, 0.7f, 1.f, 1.3f };
             const float c01 = float(coarseness) / 100.f;
             const float c = 655.35f / (20.f + std::pow(c01, 0.5f) * 80.f);
             const float sd = chan_sd[chan];
 
             array2D<float> noisebuf(W, H);
 
+            if (chan == 1) {
 #ifdef _OPENMP
-#           pragma omp parallel for if (multithread)
+#               pragma omp parallel for if (multithread)
 #endif
-            for (int y = 0; y < H; ++y) {
-                for (int x = 0; x < W; ++x) {
-                    float v = a[y][x];
-                    float s = SGN(v);
-                    float mu = LIM01(v) * c;
-                    float r = normd[rng.randint(normd_size)] * sd;
-                    float m = s * mu + s * sqrtf(mu) * r;
-                    noisebuf[y][x] = m / c - v;
+                for (int y = 0; y < H; ++y) {
+                    for (int x = 0; x < W; ++x) {
+                        noisebuf[y][x] = normd[rng.randint(normd_size)] * sd;
+                    }
+                }
+            } else {
+#ifdef _OPENMP
+#               pragma omp parallel for if (multithread)
+#endif
+                for (int y = 0; y < H; ++y) {
+                    for (int x = 0; x < W; ++x) {
+                        float v = a[y][x];
+                        float mu = LIM01(v) * c;
+                        float r = normd[rng.randint(normd_size)] * sd;
+                        float m = mu + sqrtf(mu) * r;
+                        noisebuf[y][x] = m / c - v;
+                    }
                 }
             }
 
