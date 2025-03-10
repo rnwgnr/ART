@@ -599,9 +599,9 @@ Glib::ustring get_new_name(Params &params, FileBrowserEntry *entry)
 }
 
 
-bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args, Params &out)
+bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args, Params &out, bool move)
 {
-    Gtk::Dialog dialog(M("FILEBROWSER_RENAMEDLGLABEL"), parent);
+    Gtk::Dialog dialog(M(move ? "FILEBROWSER_RENAMEDLGLABEL" : "FILEBROWSER_RENAME_DIALOG_COPY_LABEL"), parent);
     Gtk::Label lbl(M("RENAME_DIALOG_PATTERN"));
     MyFileChooserButton basedir(M("RENAME_DIALOG_BASEDIR"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
     Gtk::Entry pattern;
@@ -678,7 +678,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
     mainvb.pack_start(hb5, Gtk::PACK_SHRINK, pad);
     
     Gtk::ListViewText filelist(1);
-    filelist.set_column_title(0, M("RENAME_DIALOG_FILENAMES") + " (" + std::to_string(args.size()) + ")");
+    filelist.set_column_title(0, M(move ? "RENAME_DIALOG_FILENAMES" : "RENAME_DIALOG_FILENAMES_COPY") + " (" + std::to_string(args.size()) + ")");
     filelist.set_activate_on_single_click(true);
     for (auto &e : args) {
         filelist.append(Glib::path_get_basename(e->thumbnail->getFileName()));
@@ -747,6 +747,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
             options.renaming.allow_whitespace = allow_whitespace.get_active();
             options.renaming.on_existing = on_existing.get_active_row_number();
             options.renaming.progressive_number = progressive_number.get_value_as_int();
+            options.lastCopyMovePath = out.basedir;
 
             return true;
         };
@@ -784,7 +785,7 @@ bool get_params(Gtk::Window &parent, const std::vector<FileBrowserEntry *> &args
             on_pattern_change();
         };
 
-    basedir.set_filename(".");
+    basedir.set_filename(options.lastCopyMovePath);//".");
     pattern.set_text(options.renaming.pattern);
     sidecars.set_text(options.renaming.sidecars);
     name_norm.set_active(options.renaming.name_norm);
@@ -846,6 +847,21 @@ void get_targets(Params &params, FileBrowserEntry *entry,
     if (Glib::file_test(xmp, Glib::FILE_TEST_EXISTS)) {
         out.push_back(std::make_pair(xmp, options.getXmpSidecarFile(newpath)));
     }
+
+    const auto ok =
+        [&](const Glib::ustring &name) -> bool
+        {
+            if (!Glib::file_test(name, Glib::FILE_TEST_EXISTS)) {
+                return false;
+            }
+            for (auto &p : out) {
+                if (p.first == name) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    
     if (!params.sidecars.empty()) {
         auto base_fn = removeExtension(fn);
         auto base_newpath = removeExtension(newpath);
@@ -859,47 +875,112 @@ void get_targets(Params &params, FileBrowserEntry *entry,
                 orig_sidename = base_fn + "." + s;
                 new_sidename = base_newpath + "." + s;
             }
-            if (Glib::file_test(orig_sidename, Glib::FILE_TEST_EXISTS)) {
+            if (ok(orig_sidename)) {
                 out.push_back(std::make_pair(orig_sidename, new_sidename));
             }
         }
     }
 }
 
+
+template <class Func>
+void run_with_progress(const std::vector<FileBrowserEntry *> &args, Func func, const Glib::ustring &msg, Gtk::Window &parent)
+{
+    if (args.empty()) {
+        return;
+    }
+    
+    Gtk::MessageDialog dlg(parent, Glib::ustring::compose("%1 (0/%2)", msg, std::to_string(args.size())), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true);
+    Gtk::ProgressBar progress;
+    progress.set_fraction(0);
+    dlg.set_title(msg);
+    dlg.get_message_area()->pack_start(progress, Gtk::PACK_SHRINK, 4);
+    dlg.show_all_children();
+
+    unsigned int i = 0;
+    bool done = false;
+
+    IdleRegister reg;
+    reg.add([&]() -> bool
+            {
+                if (done || i == args.size()) {
+                    dlg.response(Gtk::RESPONSE_CANCEL);
+                    return false;
+                } else {
+                    func(args[i]);
+                    ++i;
+                    progress.set_fraction(i / double(args.size()));
+                    dlg.set_message(Glib::ustring::compose("%1 (%2/%3)", msg, std::to_string(i), std::to_string(args.size())));
+                    return true;
+                }
+            });
+    
+    dlg.run();
+    done = true;
+}
+
 } // namespace
 
 
-void FileCatalog::renameRequested(const std::vector<FileBrowserEntry *> &args)
+void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry *> &args, bool move)
 {
+    const auto doit =
+        [&](const Glib::ustring &s, const Glib::ustring &d) -> bool
+        {
+            if (move) {
+                return ::g_rename(s.c_str(), d.c_str()) == 0;
+            } else {
+                try {
+                    auto fs = Gio::File::create_for_path(s);
+                    auto fd = Gio::File::create_for_path(d);
+                    fs->copy(fd);
+                    return true;
+                } catch (Glib::Error &exc) {
+                    if (options.rtSettings.verbose) {
+                        std::cout << "copy error: " << exc.what() << std::endl;
+                    }
+                    return false;
+                }
+            }
+        };
+    
     Params params;
-    if (get_params(getToplevelWindow(this), args, params)) {
+    if (get_params(getToplevelWindow(this), args, params, move)) {
         const bool is_session = art::session::check(selectedDirectory);
         
-        removeFromBatchQueue(args);
+        if (!move) {
+            removeFromBatchQueue(args);
+        }
         std::vector<Glib::ustring> session_add, session_rem;
         
         std::vector<std::pair<Glib::ustring, Glib::ustring>> torename;
-        for (auto e : args) {
-            get_targets(params, e, torename);
-            bool first = true;
-            for (auto &p : torename) {
-                auto destdir = Glib::path_get_dirname(p.second);
-                if (::g_mkdir_with_parents(destdir.c_str(), 0755) == 0 &&
-                    ::g_rename(p.first.c_str(), p.second.c_str()) == 0) {
-                    if (first) {
-                        cacheMgr->renameEntry(p.first, e->thumbnail->getMD5(), p.second);
-                        if (is_session) {
-                            session_add.push_back(p.second);
-                            session_rem.push_back(p.first);
+
+        const auto func =
+            [&](FileBrowserEntry *e) -> void
+            {
+                get_targets(params, e, torename);
+                bool first = true;
+                for (auto &p : torename) {
+                    auto destdir = Glib::path_get_dirname(p.second);
+                    if (::g_mkdir_with_parents(destdir.c_str(), 0755) == 0 &&
+                        doit(p.first, p.second)) {
+                        if (first && move) {
+                            cacheMgr->renameEntry(p.first, e->thumbnail->getMD5(), p.second);
+                            if (is_session) {
+                                session_add.push_back(p.second);
+                                session_rem.push_back(p.first);
+                            }
                         }
+                    } else {
+                        filepanel->getParent()->error(Glib::ustring::compose(M("RENAME_DIALOG_ERROR"), p.first, p.second));
                     }
-                } else {
-                    filepanel->getParent()->error(Glib::ustring::compose(M("RENAME_DIALOG_ERROR"), p.first, p.second));
+                    first = false;
                 }
-                first = false;
-            }
-        }
-        if (is_session) {
+            };
+
+        run_with_progress(args, func, M(move ? "PROGRESSBAR_FILE_RENAME" : "PROGRESSBAR_FILE_COPY"), getToplevelWindow(this));
+
+        if (is_session && session_add.size() + session_rem.size() > 0) {
             art::session::remove(session_rem);
             art::session::add(session_add);
         } else {
@@ -952,38 +1033,44 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
             
             options.renaming.sidecars = sidecars.get_text();
             
-            for (unsigned int i = 0; i < tbe.size(); i++) {
-                const auto fname = tbe[i]->filename;
-                // remove from browser
-                delete fileBrowser->delEntry(fname);
-                // remove from cache
-                cacheMgr->deleteEntry(fname);
-                // delete from file system
-                ::g_remove(fname.c_str());
-                // delete also the arp sidecar
-                ::g_remove(options.getParamFile(fname).c_str());
+            // for (unsigned int i = 0; i < tbe.size(); i++) {
+            const auto func =
+                [&](FileBrowserEntry *e) -> void
+                {
+                    //const auto fname = tbe[i]->filename;
+                    const auto fname = e->filename;
+                    // remove from browser
+                    delete fileBrowser->delEntry(fname);
+                    // remove from cache
+                    cacheMgr->deleteEntry(fname);
+                    // delete from file system
+                    ::g_remove(fname.c_str());
+                    // delete also the arp sidecar
+                    ::g_remove(options.getParamFile(fname).c_str());
 
-                if (!params.sidecars.empty()) {
-                    auto base_fn = removeExtension(fname);
-                    for (auto &s : params.sidecars) {
-                        Glib::ustring sidename;
-                        if (s[0] == '+') {
-                            sidename = fname + "." + s.substr(1);
-                        } else {
-                            sidename = base_fn + "." + s;
-                        }
-                        if (Glib::file_test(sidename, Glib::FILE_TEST_EXISTS)) {
-                            ::g_remove(sidename.c_str());
+                    if (!params.sidecars.empty()) {
+                        auto base_fn = removeExtension(fname);
+                        for (auto &s : params.sidecars) {
+                            Glib::ustring sidename;
+                            if (s[0] == '+') {
+                                sidename = fname + "." + s.substr(1);
+                            } else {
+                                sidename = base_fn + "." + s;
+                            }
+                            if (Glib::file_test(sidename, Glib::FILE_TEST_EXISTS)) {
+                                ::g_remove(sidename.c_str());
+                            }
                         }
                     }
-                }
 
-                previewsLoaded--;
+                    previewsLoaded--;
 
-                if (is_session) {
-                    session_rem.push_back(fname);
-                }
-            }
+                    if (is_session) {
+                        session_rem.push_back(fname);
+                    }
+                };
+
+            run_with_progress(tbe, func, M("PROGRESSBAR_FILE_DELETE"), getToplevelWindow(this));
 
             _refreshProgressBar();
             if (is_session) {

@@ -1289,151 +1289,151 @@ void FileCatalog::openRequested(const std::vector<Thumbnail*>& tmb)
 }
 
 
-void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, bool moveRequested)
-{
-    if (tbe.empty()) {
-        return;
-    }
+// void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, bool moveRequested)
+// {
+//     if (tbe.empty()) {
+//         return;
+//     }
 
-    Glib::ustring fc_title;
+//     Glib::ustring fc_title;
 
-    if (moveRequested) {
-        fc_title = M("FILEBROWSER_POPUPMOVETO");
-    } else {
-        fc_title = M("FILEBROWSER_POPUPCOPYTO");
-    }
+//     if (moveRequested) {
+//         fc_title = M("FILEBROWSER_POPUPMOVETO");
+//     } else {
+//         fc_title = M("FILEBROWSER_POPUPCOPYTO");
+//     }
 
-    Gtk::FileChooserDialog fc (getToplevelWindow (this), fc_title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER );
-    fc.add_button( M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
-    fc.add_button( M("GENERAL_OK"), Gtk::RESPONSE_OK);
-    if (!options.lastCopyMovePath.empty() && Glib::file_test(options.lastCopyMovePath, Glib::FILE_TEST_IS_DIR)) {
-        fc.set_current_folder(options.lastCopyMovePath);
-    } else {
-        // open dialog at the 1-st file's path
-        fc.set_current_folder(Glib::path_get_dirname(tbe[0]->filename));
-    }
+//     Gtk::FileChooserDialog fc (getToplevelWindow (this), fc_title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER );
+//     fc.add_button( M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
+//     fc.add_button( M("GENERAL_OK"), Gtk::RESPONSE_OK);
+//     if (!options.lastCopyMovePath.empty() && Glib::file_test(options.lastCopyMovePath, Glib::FILE_TEST_IS_DIR)) {
+//         fc.set_current_folder(options.lastCopyMovePath);
+//     } else {
+//         // open dialog at the 1-st file's path
+//         fc.set_current_folder(Glib::path_get_dirname(tbe[0]->filename));
+//     }
 
-    if (fc.run() == Gtk::RESPONSE_OK) {
-        const bool is_session = art::session::check(selectedDirectory);
-        std::vector<Glib::ustring> session_add, session_rem;
+//     if (fc.run() == Gtk::RESPONSE_OK) {
+//         const bool is_session = art::session::check(selectedDirectory);
+//         std::vector<Glib::ustring> session_add, session_rem;
         
-        if (moveRequested) {
-            removeFromBatchQueue(tbe);
-        }
+//         if (moveRequested) {
+//             removeFromBatchQueue(tbe);
+//         }
         
-        options.lastCopyMovePath = fc.get_current_folder();
+//         options.lastCopyMovePath = fc.get_current_folder();
 
-        // iterate through selected files
-        for (unsigned int i = 0; i < tbe.size(); i++) {
-            Glib::ustring src_fPath = tbe[i]->filename;
-            Glib::ustring src_Dir = Glib::path_get_dirname(src_fPath);
-            Glib::RefPtr<Gio::File> src_file = Gio::File::create_for_path ( src_fPath );
+//         // iterate through selected files
+//         for (unsigned int i = 0; i < tbe.size(); i++) {
+//             Glib::ustring src_fPath = tbe[i]->filename;
+//             Glib::ustring src_Dir = Glib::path_get_dirname(src_fPath);
+//             Glib::RefPtr<Gio::File> src_file = Gio::File::create_for_path ( src_fPath );
 
-            if (!src_file) {
-                continue;    // if file is missing - skip it
-            }
+//             if (!src_file) {
+//                 continue;    // if file is missing - skip it
+//             }
 
-            Glib::ustring fname = src_file->get_basename();
-            Glib::ustring fname_noExt = removeExtension(fname);
-            Glib::ustring fname_Ext = getExtension(fname);
+//             Glib::ustring fname = src_file->get_basename();
+//             Glib::ustring fname_noExt = removeExtension(fname);
+//             Glib::ustring fname_Ext = getExtension(fname);
 
-            // construct  destination File Paths
-            Glib::ustring dest_fPath = Glib::build_filename (options.lastCopyMovePath, fname);
-            Glib::ustring dest_fPath_param = options.getParamFile(dest_fPath);
+//             // construct  destination File Paths
+//             Glib::ustring dest_fPath = Glib::build_filename (options.lastCopyMovePath, fname);
+//             Glib::ustring dest_fPath_param = options.getParamFile(dest_fPath);
 
-            if (moveRequested && (src_Dir == options.lastCopyMovePath)) {
-                continue;
-            }
+//             if (moveRequested && (src_Dir == options.lastCopyMovePath)) {
+//                 continue;
+//             }
 
-            /* comparison of src_Dir and dest_Dir is done per image for compatibility with
-            possible future use of Collections as source where each file's source path may be different.*/
+//             /* comparison of src_Dir and dest_Dir is done per image for compatibility with
+//             possible future use of Collections as source where each file's source path may be different.*/
 
-            bool filecopymovecomplete = false;
-            int i_copyindex = 1;
+//             bool filecopymovecomplete = false;
+//             int i_copyindex = 1;
 
-            while (!filecopymovecomplete) {
-                // check for filename conflicts at destination - prevent overwriting (actually RT will crash on overwriting attempt)
-                if (!Glib::file_test(dest_fPath, Glib::FILE_TEST_EXISTS) && !Glib::file_test(dest_fPath_param, Glib::FILE_TEST_EXISTS) && !Glib::file_test(Thumbnail::getXmpSidecarPath(dest_fPath), Glib::FILE_TEST_EXISTS)) {
-                    // copy/move file to destination
-                    Glib::RefPtr<Gio::File> dest_file = Gio::File::create_for_path ( dest_fPath );
+//             while (!filecopymovecomplete) {
+//                 // check for filename conflicts at destination - prevent overwriting (actually RT will crash on overwriting attempt)
+//                 if (!Glib::file_test(dest_fPath, Glib::FILE_TEST_EXISTS) && !Glib::file_test(dest_fPath_param, Glib::FILE_TEST_EXISTS) && !Glib::file_test(Thumbnail::getXmpSidecarPath(dest_fPath), Glib::FILE_TEST_EXISTS)) {
+//                     // copy/move file to destination
+//                     Glib::RefPtr<Gio::File> dest_file = Gio::File::create_for_path ( dest_fPath );
 
-                    if (moveRequested) {
-                        if (is_session) {
-                            session_rem.push_back(src_fPath);
-                            session_add.push_back(dest_fPath);
-                        }
+//                     if (moveRequested) {
+//                         if (is_session) {
+//                             session_rem.push_back(src_fPath);
+//                             session_add.push_back(dest_fPath);
+//                         }
                         
-                        // move file
-                        src_file->move(dest_file);
-                        // re-attach cache files
-                        cacheMgr->renameEntry (src_fPath, tbe[i]->thumbnail->getMD5(), dest_fPath);
-                        // remove from browser
-                        fileBrowser->delEntry (src_fPath);
+//                         // move file
+//                         src_file->move(dest_file);
+//                         // re-attach cache files
+//                         cacheMgr->renameEntry (src_fPath, tbe[i]->thumbnail->getMD5(), dest_fPath);
+//                         // remove from browser
+//                         fileBrowser->delEntry (src_fPath);
 
-                        previewsLoaded--;
-                    } else {
-                        src_file->copy(dest_file);
-                    }
+//                         previewsLoaded--;
+//                     } else {
+//                         src_file->copy(dest_file);
+//                     }
 
 
-                    // attempt to copy/move paramFile only if it exist next to the src
-                    Glib::RefPtr<Gio::File> scr_param = Gio::File::create_for_path (options.getParamFile(src_fPath));
+//                     // attempt to copy/move paramFile only if it exist next to the src
+//                     Glib::RefPtr<Gio::File> scr_param = Gio::File::create_for_path (options.getParamFile(src_fPath));
 
-                    if (Glib::file_test(options.getParamFile(src_fPath), Glib::FILE_TEST_EXISTS)) {
-                        Glib::RefPtr<Gio::File> dest_param = Gio::File::create_for_path ( dest_fPath_param);
+//                     if (Glib::file_test(options.getParamFile(src_fPath), Glib::FILE_TEST_EXISTS)) {
+//                         Glib::RefPtr<Gio::File> dest_param = Gio::File::create_for_path ( dest_fPath_param);
 
-                        // copy/move paramFile to destination
-                        if (moveRequested) {
-                            if (Glib::file_test(options.getParamFile(dest_fPath), Glib::FILE_TEST_EXISTS)) {
-                                // profile already got copied to destination from cache after cacheMgr->renameEntry
-                                // delete source profile as cleanup
-                                ::g_remove(options.getParamFile(src_fPath).c_str());
-                            } else {
-                                scr_param->move(dest_param);
-                            }
-                        } else {
-                            scr_param->copy(dest_param);
-                        }
-                    }
+//                         // copy/move paramFile to destination
+//                         if (moveRequested) {
+//                             if (Glib::file_test(options.getParamFile(dest_fPath), Glib::FILE_TEST_EXISTS)) {
+//                                 // profile already got copied to destination from cache after cacheMgr->renameEntry
+//                                 // delete source profile as cleanup
+//                                 ::g_remove(options.getParamFile(src_fPath).c_str());
+//                             } else {
+//                                 scr_param->move(dest_param);
+//                             }
+//                         } else {
+//                             scr_param->copy(dest_param);
+//                         }
+//                     }
 
-                    auto xmp_sidecar = Thumbnail::getXmpSidecarPath(src_fPath);
-                    if (Glib::file_test(xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
-                        auto s = Gio::File::create_for_path(xmp_sidecar);
-                        auto dst_xmp_sidecar = Thumbnail::getXmpSidecarPath(dest_fPath);
-                        auto dst = Gio::File::create_for_path(dst_xmp_sidecar);
-                        if (moveRequested) {
-                            if (Glib::file_test(dst_xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
-                                ::g_remove(xmp_sidecar.c_str());
-                            } else {
-                                s->move(dst);
-                            }
-                        } else {
-                            s->copy(dst);
-                        }
-                    }
+//                     auto xmp_sidecar = Thumbnail::getXmpSidecarPath(src_fPath);
+//                     if (Glib::file_test(xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
+//                         auto s = Gio::File::create_for_path(xmp_sidecar);
+//                         auto dst_xmp_sidecar = Thumbnail::getXmpSidecarPath(dest_fPath);
+//                         auto dst = Gio::File::create_for_path(dst_xmp_sidecar);
+//                         if (moveRequested) {
+//                             if (Glib::file_test(dst_xmp_sidecar, Glib::FILE_TEST_EXISTS)) {
+//                                 ::g_remove(xmp_sidecar.c_str());
+//                             } else {
+//                                 s->move(dst);
+//                             }
+//                         } else {
+//                             s->copy(dst);
+//                         }
+//                     }
 
-                    filecopymovecomplete = true;
-                } else {
-                    // adjust destination fname to avoid conflicts (append "_<index>", preserve extension)
-                    Glib::ustring dest_fname = Glib::ustring::compose("%1%2%3%4%5", fname_noExt, "_", i_copyindex, ".", fname_Ext);
-                    // re-construct  destination File Paths
-                    dest_fPath = Glib::build_filename (options.lastCopyMovePath, dest_fname);
-                    dest_fPath_param = options.getParamFile(dest_fPath);
-                    i_copyindex++;
-                }
-            }
-        }
+//                     filecopymovecomplete = true;
+//                 } else {
+//                     // adjust destination fname to avoid conflicts (append "_<index>", preserve extension)
+//                     Glib::ustring dest_fname = Glib::ustring::compose("%1%2%3%4%5", fname_noExt, "_", i_copyindex, ".", fname_Ext);
+//                     // re-construct  destination File Paths
+//                     dest_fPath = Glib::build_filename (options.lastCopyMovePath, dest_fname);
+//                     dest_fPath_param = options.getParamFile(dest_fPath);
+//                     i_copyindex++;
+//                 }
+//             }
+//         }
 
-        if (is_session) {
-            art::session::remove(session_rem);
-            art::session::add(session_add);
-        } else {
-            redrawAll();
-        }
+//         if (is_session) {
+//             art::session::remove(session_rem);
+//             art::session::add(session_add);
+//         } else {
+//             redrawAll();
+//         }
 
-        _refreshProgressBar();
-    }
-}
+//         _refreshProgressBar();
+//     }
+// }
 
 
 void FileCatalog::developRequested(const std::vector<FileBrowserEntry*>& tbe, bool fastmode)

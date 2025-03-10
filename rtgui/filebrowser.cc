@@ -390,12 +390,12 @@ void FileBrowser::build_menu()
         p++;
         submenuFileOperations->attach (*Gtk::manage(remove = new Gtk::MenuItem (M("FILEBROWSER_POPUPREMOVE"))), 0, 1, p, p + 1);
         p++;
-        submenuFileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
-        p++;
+        // submenuFileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
+        // p++;
         submenuFileOperations->attach (*Gtk::manage(copyTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPCOPYTO"))), 0, 1, p, p + 1);
         p++;
-        submenuFileOperations->attach (*Gtk::manage(moveTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPMOVETO"))), 0, 1, p, p + 1);
-        p++;
+        // submenuFileOperations->attach (*Gtk::manage(moveTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPMOVETO"))), 0, 1, p, p + 1);
+        // p++;
 
         submenuFileOperations->show_all ();
         menuFileOperations->set_submenu (*submenuFileOperations);
@@ -412,12 +412,12 @@ void FileBrowser::build_menu()
         p++;
         pmenu->attach (*Gtk::manage(remove = new Gtk::MenuItem (M("FILEBROWSER_POPUPREMOVE"))), 0, 1, p, p + 1);
         p++;
-        pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
-        p++;
+        // pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
+        // p++;
         pmenu->attach (*Gtk::manage(copyTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPCOPYTO"))), 0, 1, p, p + 1);
         p++;
-        pmenu->attach (*Gtk::manage(moveTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPMOVETO"))), 0, 1, p, p + 1);
-        p++;
+        // pmenu->attach (*Gtk::manage(moveTo = new Gtk::MenuItem (M("FILEBROWSER_POPUPMOVETO"))), 0, 1, p, p + 1);
+        // p++;
     }
 
     pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
@@ -495,7 +495,7 @@ void FileBrowser::build_menu()
     pasteprof->add_accelerator ("activate", pmaccelgroup, GDK_KEY_V, Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     partpasteprof->add_accelerator ("activate", pmaccelgroup, GDK_KEY_V, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
     copyTo->add_accelerator ("activate", pmaccelgroup, GDK_KEY_C, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
-    moveTo->add_accelerator ("activate", pmaccelgroup, GDK_KEY_M, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
+    // moveTo->add_accelerator ("activate", pmaccelgroup, GDK_KEY_M, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
     rename->add_accelerator("activate", pmaccelgroup, GDK_KEY_F2, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
     remove->add_accelerator("activate", pmaccelgroup, GDK_KEY_Delete, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
     add_to_session_->add_accelerator("activate", pmaccelgroup, GDK_KEY_S, Gdk::CONTROL_MASK | Gdk::SHIFT_MASK, Gtk::ACCEL_VISIBLE);
@@ -520,7 +520,7 @@ void FileBrowser::build_menu()
     remove->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), remove));
     selall->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), selall));
     copyTo->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), copyTo));
-    moveTo->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), moveTo));
+    // moveTo->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), moveTo));
     copyprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), copyprof));
     pasteprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), pasteprof));
     partpasteprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), partpasteprof));
@@ -604,7 +604,7 @@ void FileBrowser::rightClicked (ThumbBrowserEntryBase* entry)
         copyprof->set_sensitive (selected.size() == 1);
         clearprof->set_sensitive (!selected.empty());
         copyTo->set_sensitive (!selected.empty());
-        moveTo->set_sensitive (!selected.empty());
+        // moveTo->set_sensitive (!selected.empty());
     }
 
     // submenuDF
@@ -847,7 +847,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
     }
 
     else if (m == rename) {
-        tbl->renameRequested (mselected);
+        tbl->copyMoveRequested(mselected, true);
     } else if (m == selall) {
         lastClicked = nullptr;
         {
@@ -868,12 +868,12 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         queue_draw ();
         notifySelectionListener();
     } else if( m == copyTo) {
-        tbl->copyMoveRequested (mselected, false);
+        tbl->copyMoveRequested(mselected, false);
     }
 
-    else if( m == moveTo) {
-        tbl->copyMoveRequested (mselected, true);
-    }
+    // else if( m == moveTo) {
+    //     tbl->copyMoveRequested (mselected, true);
+    // }
 
     else if (m == autoDF) {
         for (size_t i = 0; i < mselected.size(); i++) {

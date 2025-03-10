@@ -216,7 +216,7 @@ public:
     void deleteRequested(const std::vector<FileBrowserEntry*>& tbe, bool onlySelected) override;
     void copyMoveRequested(const std::vector<FileBrowserEntry*>& tbe, bool moveRequested) override;
     void developRequested(const std::vector<FileBrowserEntry*>& tbe, bool fastmode) override;
-    void renameRequested(const std::vector<FileBrowserEntry*>& tbe) override;
+    //void renameRequested(const std::vector<FileBrowserEntry*>& tbe) override;
     void selectionChanged(const std::vector<Thumbnail*>& tbe) override;
     void clearFromCacheRequested(const std::vector<FileBrowserEntry*>& tbe, bool leavenotrace) override;
     bool isInTabMode() const override;
