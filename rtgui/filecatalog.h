@@ -17,8 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _FILECATALOG_
-#define _FILECATALOG_
+#pragma once
 
 #include "filebrowser.h"
 #include "exiffiltersettings.h"
@@ -111,6 +110,7 @@ private:
 
     Gtk::Entry* BrowsePath;
     Gtk::Button* buttonBrowsePath;
+    Gtk::ToggleButton *button_recurse_;
     Gtk::Button *button_session_add_;
     Gtk::Button *button_session_remove_;
     Gtk::Button *button_session_load_;
@@ -160,7 +160,7 @@ private:
     
     void addAndOpenFile(const Glib::ustring &fname, bool force=false);
     void addFile(const Glib::ustring& fName);
-    std::vector<Glib::ustring> getFileList();
+    std::vector<Glib::ustring> getFileList(bool recursive);
     BrowserFilter getFilter();
     void trashChanged();
 
@@ -249,6 +249,7 @@ public:
     void zoomOut ();
 
     void buttonBrowsePathPressed ();
+    void buttonRecursePressed();
 
     void sessionAddPressed();
     void sessionRemovePressed();
@@ -298,4 +299,3 @@ inline void FileCatalog::setDirSelector (const FileCatalog::DirSelectionSlot& se
     this->selectDir = selectDir;
 }
 
-#endif

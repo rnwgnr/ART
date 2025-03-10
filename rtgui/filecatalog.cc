@@ -138,12 +138,12 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     trashButtonBox->show ();
 
     //initialize hbToolBar1
-    hbToolBar1 = Gtk::manage(new Gtk::HBox ());
+    hbToolBar1 = Gtk::manage(new Gtk::HBox());
 
     //setup BrowsePath
-    Gtk::HBox* hbBrowsePath = Gtk::manage(new Gtk::HBox ());
+    Gtk::HBox* hbBrowsePath = Gtk::manage(new Gtk::HBox());
     
-    button_session_load_ = Gtk::manage(new Gtk::Button ());
+    button_session_load_ = Gtk::manage(new Gtk::Button());
     button_session_load_->set_image(*Gtk::manage(new RTImage("folder-open-recent-small.png")));
     button_session_load_->set_tooltip_markup(M("FILEBROWSER_SESSION_LOAD_LABEL"));
     button_session_load_->set_relief(Gtk::RELIEF_NONE);
@@ -186,6 +186,14 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     buttonBrowsePath->set_tooltip_markup (M("FILEBROWSER_BROWSEPATHBUTTONHINT"));
     buttonBrowsePath->set_relief (Gtk::RELIEF_NONE);
     buttonBrowsePath->signal_clicked().connect( sigc::mem_fun(*this, &FileCatalog::buttonBrowsePathPressed) );
+
+    button_recurse_ = Gtk::manage(new Gtk::ToggleButton());
+    button_recurse_->set_image(*Gtk::manage(new RTImage("folder-recurse-small.png")));
+    button_recurse_->set_tooltip_markup(M("FILEBROWSER_BROWSEPATH_RECURSIVE_TOOLTIP"));
+    button_recurse_->set_relief(Gtk::RELIEF_NONE);
+    button_recurse_->signal_toggled().connect(sigc::mem_fun(*this, &FileCatalog::buttonRecursePressed));
+    
+    hbBrowsePath->pack_start(*button_recurse_, Gtk::PACK_SHRINK, 0);
     hbBrowsePath->pack_start (*BrowsePath, Gtk::PACK_EXPAND_WIDGET, 0);
     hbBrowsePath->pack_start (*buttonBrowsePath, Gtk::PACK_SHRINK, 0);
 
@@ -821,7 +829,8 @@ private:
 
 } // namespace
 
-std::vector<Glib::ustring> FileCatalog::getFileList()
+
+std::vector<Glib::ustring> FileCatalog::getFileList(bool recursive)
 {
 
     std::vector<Glib::ustring> names;
@@ -835,15 +844,34 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
             const auto dir = Gio::File::create_for_path(selectedDirectory);
 
             auto enumerator = dir->enumerate_children("standard::name,standard::type,standard::is-hidden");
+            Glib::ustring curdir = selectedDirectory;
+
+            std::set<Glib::ustring> seen;
+            std::vector<std::pair<Glib::RefPtr<Gio::FileEnumerator>, Glib::ustring>> to_process;
 
             while (true) {
                 try {
                     const auto file = enumerator->next_file();
                     if (!file) {
-                        break;
+                        if (to_process.empty()) {
+                            break;
+                        } else {
+                            enumerator = to_process.back().first;
+                            curdir = to_process.back().second;
+                            to_process.pop_back();
+                            continue;
+                        }
                     }
 
                     if (file->get_file_type() == Gio::FILE_TYPE_DIRECTORY) {
+                        if (recursive) {
+                            auto sub = Glib::build_filename(curdir, file->get_name());
+                            if (seen.insert(sub).second) {
+                                auto d = Gio::File::create_for_path(sub);
+                                auto e = d->enumerate_children("standard::name,standard::type,standard::is-hidden");
+                                to_process.push_back(std::make_pair(e, sub));
+                            }
+                        }
                         continue;
                     }
 
@@ -862,7 +890,7 @@ std::vector<Glib::ustring> FileCatalog::getFileList()
                         continue;
                     }
 
-                    names.push_back(Glib::build_filename(selectedDirectory, fname));
+                    names.push_back(Glib::build_filename(curdir, fname));
                 } catch (Glib::Exception& exception) {
                     if (options.rtSettings.verbose) {
                         std::cerr << exception.what() << std::endl;
@@ -890,6 +918,7 @@ void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring 
         button_session_save_->set_visible(is_session);
         button_session_add_->set_visible(is_session);
         button_session_remove_->set_visible(is_session);
+        button_recurse_->set_visible(!is_session);
         
         Glib::RefPtr<Gio::File> dir = is_session ? Gio::File::create_for_path(art::session::filename()) : Gio::File::create_for_path(dirname);
 
@@ -910,7 +939,9 @@ void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring 
         BrowsePath->set_text(selectedDirectory);
         buttonBrowsePath->set_image(*iRefreshWhite);
 
-        fileNameList = getFileList();
+        const bool recursive = !is_session && button_recurse_->get_active();
+
+        fileNameList = getFileList(recursive);
         
         // if openfile exists, we have to open it first (it is a command line argument)
         if (!openfile.empty()) {
@@ -1835,7 +1866,9 @@ void FileCatalog::reparseDirectory ()
         return;
     }
 
-    auto new_file_list = getFileList();
+    const bool recursive = !is_session && button_recurse_->get_active();
+
+    auto new_file_list = getFileList(recursive);
     std::set<std::string> seen;
 
     if (is_session) {
@@ -2154,6 +2187,13 @@ void FileCatalog::buttonBrowsePathPressed ()
         buttonBrowsePath->set_image (*iRefreshRed);
     }
 }
+
+
+void FileCatalog::buttonRecursePressed()
+{
+    buttonBrowsePathPressed();
+}
+
 
 bool FileCatalog::BrowsePath_key_pressed (GdkEventKey *event)
 {
