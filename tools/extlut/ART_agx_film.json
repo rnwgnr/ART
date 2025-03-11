@@ -28,7 +28,8 @@
             "Kodak Ektacolor Edge",
             "Kodak Supra Endura",
             "Kodak Portra Endura",
-            "Fujifilm Crystal Archive Type II"
+            "Fujifilm Crystal Archive Type II",
+            "Kodak Vision Premier 2393 Print Film"
         ], 0],
         ["camera_expcomp", "Exposure compensation (Ev)", -10.0, 10.0, 0, 0.1],
         ["print_exposure", "Print exposure", 0.05, 5.0, 1.0, 0.01],
