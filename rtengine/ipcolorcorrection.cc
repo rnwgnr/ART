@@ -253,6 +253,20 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
     float rhs[n];
     std::unique_ptr<CLUTApplication> lut[n];
     float hslgamma[n];
+
+    const auto reset =
+        [&](int i) -> void
+        {
+            abca[i] = 0.f;
+            abcb[n] = 0.f;
+            rs[n] = 1.f;
+            rsout[n] = 1.f;
+            enabled[i] = false;
+            jzazbz[i] = false;
+            hsl[i] = false;
+            rhs[i] = 0.f;
+            lut[i].reset(nullptr);
+        };
     
     for (int i = 0; i < n; ++i) {
         auto &r = params->colorcorrection.regions[i];
@@ -344,6 +358,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
 
         lut[i].reset(nullptr);
         if (r.mode == ColorCorrectionParams::Mode::LUT) {
+            reset(i);
 #ifdef _OPENMP
             int num_threads = multiThread ? omp_get_max_threads() : 1;
 #else
@@ -365,16 +380,18 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             default:
                 break;
             }
-            lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads));
-            if (!(*lut[i])) {
-                lut[i].reset(nullptr);
-                if (plistener) {
-                    plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), r.lutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : r.lutFilename));
-                }
-            } else if (!lut[i]->set_param_values(r.lut_params, q)) {
-                lut[i].reset(nullptr);
-                if (plistener) {
-                    plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_INVALID_LUT_PARAMS"), r.lutFilename));
+            if (!r.lutFilename.empty()) {
+                lut[i].reset(new CLUTApplication(r.lutFilename, params->icm.workingProfile, 1.f, num_threads));
+                if (!(*lut[i])) {
+                    lut[i].reset(nullptr);
+                    if (plistener) {
+                        plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_FILE_READ"), r.lutFilename.empty() ? "(" + M("GENERAL_NONE") + ")" : r.lutFilename));
+                    }
+                } else if (!lut[i]->set_param_values(r.lut_params, q)) {
+                    lut[i].reset(nullptr);
+                    if (plistener) {
+                        plistener->error(Glib::ustring::compose(M("TP_COLORCORRECTION_LABEL") + " - " + M("ERROR_MSG_INVALID_LUT_PARAMS"), r.lutFilename));
+                    }
                 }
             }
         }
