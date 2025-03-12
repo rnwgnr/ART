@@ -32,6 +32,7 @@
 #include <sstream>
 #include <iomanip>
 #include <glibmm/regex.h>
+#include <errno.h>
 
 
 namespace {
@@ -928,7 +929,24 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry *> &args,
         [&](const Glib::ustring &s, const Glib::ustring &d) -> bool
         {
             if (move) {
-                return ::g_rename(s.c_str(), d.c_str()) == 0;
+                errno = 0;
+                if (::g_rename(s.c_str(), d.c_str()) == 0) {
+                    return true;
+                } else if (errno == EXDEV) {
+                    try {
+                        auto fs = Gio::File::create_for_path(s);
+                        auto fd = Gio::File::create_for_path(d);
+                        fs->copy(fd);
+                        return ::g_remove(s.c_str()) == 0;
+                    } catch (Glib::Error &exc) {
+                        if (options.rtSettings.verbose) {
+                            std::cout << "copy error: " << exc.what() << std::endl;
+                        }
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             } else {
                 try {
                     auto fs = Gio::File::create_for_path(s);
@@ -978,7 +996,10 @@ void FileCatalog::copyMoveRequested(const std::vector<FileBrowserEntry *> &args,
                 }
             };
 
-        run_with_progress(args, func, M(move ? "PROGRESSBAR_FILE_RENAME" : "PROGRESSBAR_FILE_COPY"), getToplevelWindow(this));
+        {
+            ConnectionBlocker blocker(dir_refresh_conn_);
+            run_with_progress(args, func, M(move ? "PROGRESSBAR_FILE_RENAME" : "PROGRESSBAR_FILE_COPY"), getToplevelWindow(this));
+        }
 
         if (is_session && session_add.size() + session_rem.size() > 0) {
             art::session::remove(session_rem);
@@ -1070,7 +1091,10 @@ void FileCatalog::deleteRequested(const std::vector<FileBrowserEntry*>& tbe, boo
                     }
                 };
 
-            run_with_progress(tbe, func, M("PROGRESSBAR_FILE_DELETE"), getToplevelWindow(this));
+            {
+                ConnectionBlocker blocker(dir_refresh_conn_);
+                run_with_progress(tbe, func, M("PROGRESSBAR_FILE_DELETE"), getToplevelWindow(this));
+            }
 
             _refreshProgressBar();
             if (is_session) {
