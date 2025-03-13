@@ -72,10 +72,7 @@ std::string get_params_json(const std::vector<CLUTParamDescriptor> &params,
 
     for (const auto &p : params) {
         auto it = values.find(p.name);
-        if (it == values.end()) {
-            return "";
-        }
-        const auto &vv = it->second;
+        const auto &vv = (it != values.end()) ? it->second : p.value_default;
         auto v = vv[0];
         
         cJSON *val = nullptr;
