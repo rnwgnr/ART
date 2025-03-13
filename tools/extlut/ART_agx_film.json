@@ -13,7 +13,7 @@
     "server" : true,
     "params" : [
         ["input_gain", "Input gain (Ev)", -4.0, 4.0, 0.0, 0.1],
-        ["output_black_offset", "Output black offset", -1.0, 1.0, 0.0, 0.001],
+        ["output_black_offset", "Output black offset", -1.0, 1.0, 0.0, 0.01],
         ["film", "Film stock", [
             "Kodak Portra 400",
             "Kodak Ultramax 400",

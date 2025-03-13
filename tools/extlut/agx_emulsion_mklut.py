@@ -225,12 +225,6 @@ class LUTCreator:
                 [0.18, 0.18, 0.18],
                 [0.99, 0.99, 0.99]
             ]])
-            lum = numpy.array([0.3618807, 0.72255045, -0.0843859],
-                              #[0.2225045,  0.7168786,  0.0606169],
-                              dtype=numpy.float32)
-            to_yuv = numpy.array([lum, lum - [0, 0, 1], [1, 0, 0] - lum],
-                                 dtype=numpy.float32)
-            to_rgb = numpy.linalg.inv(to_yuv)
 
             par = copy.copy(params)
             par.debug.return_negative_density_cmy = True
@@ -244,20 +238,18 @@ class LUTCreator:
                 photo.enlarger.m_filter_shift = m_shift
                 log_raw = photo._expose_print(density_cmy)
                 print_cmy = photo._develop_print(log_raw)
-                out = photo._scan(print_cmy)                
-                yuv = numpy.split(to_yuv @ out.reshape(-1, 3).transpose(), 3, 0)
-                return (numpy.power(yuv[1], 2) +
-                        numpy.power(yuv[2], 2)).reshape(-1)
+                out = photo._scan(print_cmy)
+                r, g, b = numpy.split(out.reshape(-1, 3).transpose(), 3, 0)
+                return numpy.fmax(numpy.abs(r - g), numpy.abs(b - g)).flatten()
 
             start = time.time()
             res = least_squares(func, [0.0, 0.0],
-                                method='dogbox',
-                                bounds=([-10, -10], [10, 10]),
-                                ftol=0.05, verbose=0)
+                                method='lm',
+                                ftol=1e-2)
             end = time.time()
             y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
-            # if True:
-            #     print(f'least_squares: {round(end - start, 2)}, y_shift: {y_shift}, m_shift: {m_shift}')
+            print(f'least_squares: {round(end - start, 2)}, '
+                  f'y_shift: {y_shift}, m_shift: {m_shift}')
             params.enlarger.y_filter_shift = y_shift
             params.enlarger.m_filter_shift = m_shift
         
