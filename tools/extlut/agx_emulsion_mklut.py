@@ -221,9 +221,7 @@ class LUTCreator:
         
         if opts.auto_ym_shifts:
             image = numpy.array([[
-                [0.01, 0.01, 0.01],
-                [0.18, 0.18, 0.18],
-                [0.99, 0.99, 0.99]
+                [0.184, 0.184, 0.184],
             ]])
 
             par = copy.copy(params)
@@ -244,7 +242,7 @@ class LUTCreator:
 
             start = time.time()
             res = least_squares(func, [0.0, 0.0],
-                                method='lm',
+                                method='dogbox', bounds=[(-10, -10), (10, 10)],
                                 ftol=1e-2)
             end = time.time()
             y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
