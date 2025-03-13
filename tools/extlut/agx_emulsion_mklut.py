@@ -229,6 +229,8 @@ class LUTCreator:
 
             photo = AgXPhoto(par)
             density_cmy = photo.process(image)
+
+            def sqr(x): return x*x
             
             def func(x):
                 y_shift, m_shift = x
@@ -237,15 +239,15 @@ class LUTCreator:
                 log_raw = photo._expose_print(density_cmy)
                 print_cmy = photo._develop_print(log_raw)
                 out = photo._scan(print_cmy)
-                r, g, b = numpy.split(out.reshape(-1, 3).transpose(), 3, 0)
-                return numpy.fmax(numpy.abs(r - g), numpy.abs(b - g)).flatten()
+                r, g, b = out.flatten()
+                return (abs(b-g), abs(r-g))
 
             start = time.time()
             res = least_squares(func, [0.0, 0.0],
                                 method='dogbox', bounds=[(-10, -10), (10, 10)],
-                                ftol=1e-2)
-            end = time.time()
+                                max_nfev=20)
             y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
+            end = time.time()
             print(f'least_squares: {round(end - start, 2)}, '
                   f'y_shift: {y_shift}, m_shift: {m_shift}')
             params.enlarger.y_filter_shift = y_shift
