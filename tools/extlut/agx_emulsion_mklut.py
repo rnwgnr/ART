@@ -220,13 +220,11 @@ class LUTCreator:
         params.settings.use_camera_lut = False
         
         if opts.auto_ym_shifts:
-            image = numpy.array([[[0.01, 0.01, 0.01],
-                                  [0.05, 0.05, 0.05],
-                                  [0.1, 0.1, 0.1],
-                                  [0.18, 0.18, 0.18],
-                                  [0.4, 0.4, 0.4],
-                                  [0.75, 0.75, 0.75],
-                                  [1.0, 1.0, 1.0]]])
+            image = numpy.array([[
+                [0.01, 0.01, 0.01],
+                [0.18, 0.18, 0.18],
+                [0.99, 0.99, 0.99]
+            ]])
             lum = numpy.array([0.3618807, 0.72255045, -0.0843859],
                               #[0.2225045,  0.7168786,  0.0606169],
                               dtype=numpy.float32)
@@ -252,15 +250,16 @@ class LUTCreator:
                         numpy.power(yuv[2], 2)).reshape(-1)
 
             start = time.time()
-            res = least_squares(func, [0.0, 0.0], method='dogbox',
-                                bounds=([-20, -20], [20, 20]),
-                                ftol=0.1, verbose=0)
+            res = least_squares(func, [0.0, 0.0],
+                                method='dogbox',
+                                bounds=([-10, -10], [10, 10]),
+                                ftol=0.05, verbose=0)
             end = time.time()
             y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
             # if True:
             #     print(f'least_squares: {round(end - start, 2)}, y_shift: {y_shift}, m_shift: {m_shift}')
-            params.enlarger.y_filter_shift += y_shift
-            params.enlarger.m_filter_shift += m_shift
+            params.enlarger.y_filter_shift = y_shift
+            params.enlarger.m_filter_shift = m_shift
         
         return params
 
