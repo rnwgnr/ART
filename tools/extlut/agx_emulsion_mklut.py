@@ -17,9 +17,12 @@ import json
 import time
 import io
 import warnings
+import copy
+from scipy.optimize import least_squares
 from contextlib import redirect_stdout, redirect_stderr
 from agx_emulsion.model.process import photo_params, AgXPhoto
 from agx_emulsion.model.stocks import FilmStocks, PrintPapers
+            
 
 
 def getopts():
@@ -49,6 +52,7 @@ def getopts():
     p.add_argument('--gamut', choices=['srgb', 'rec2020'], default='rec2020')
     p.add_argument('--json', nargs=2)
     p.add_argument('--server', action='store_true')
+    p.add_argument('--auto-ym-shifts', action='store_true')
     opts = p.parse_args()
     if opts.json:
         with open(opts.json[0]) as f:
@@ -70,6 +74,7 @@ def update_opts(opts, params, output):
     opts.input_gain = params.get("input_gain", opts.input_gain)
     opts.y_shift = params.get("y_shift", opts.y_shift)
     opts.m_shift = params.get("m_shift", opts.m_shift)
+    opts.auto_ym_shifts = params.get("auto_ym_shifts", opts.auto_ym_shifts)
     opts.film_gamma = params.get("film_gamma", opts.film_gamma)
     opts.print_gamma = params.get("print_gamma", opts.print_gamma)
     opts.dir_couplers_amount = params.get("dir_couplers_amount",
@@ -210,6 +215,53 @@ class LUTCreator:
         params.enlarger.m_filter_shift = opts.m_shift
         params.negative.dir_couplers.amount = opts.dir_couplers_amount
         params.negative.dir_couplers.active = opts.dir_couplers_amount > 0
+        params.settings.use_scanner_lut = False
+        params.settings.use_enlarger_lut = False
+        params.settings.use_camera_lut = False
+        
+        if opts.auto_ym_shifts:
+            image = numpy.array([[[0.01, 0.01, 0.01],
+                                  [0.05, 0.05, 0.05],
+                                  [0.1, 0.1, 0.1],
+                                  [0.18, 0.18, 0.18],
+                                  [0.4, 0.4, 0.4],
+                                  [0.75, 0.75, 0.75],
+                                  [1.0, 1.0, 1.0]]])
+            lum = numpy.array([0.3618807, 0.72255045, -0.0843859],
+                              #[0.2225045,  0.7168786,  0.0606169],
+                              dtype=numpy.float32)
+            to_yuv = numpy.array([lum, lum - [0, 0, 1], [1, 0, 0] - lum],
+                                 dtype=numpy.float32)
+            to_rgb = numpy.linalg.inv(to_yuv)
+
+            par = copy.copy(params)
+            par.debug.return_negative_density_cmy = True
+
+            photo = AgXPhoto(par)
+            density_cmy = photo.process(image)
+            
+            def func(x):
+                y_shift, m_shift = x
+                photo.enlarger.y_filter_shift = y_shift
+                photo.enlarger.m_filter_shift = m_shift
+                log_raw = photo._expose_print(density_cmy)
+                print_cmy = photo._develop_print(log_raw)
+                out = photo._scan(print_cmy)                
+                yuv = numpy.split(to_yuv @ out.reshape(-1, 3).transpose(), 3, 0)
+                return (numpy.power(yuv[1], 2) +
+                        numpy.power(yuv[2], 2)).reshape(-1)
+
+            start = time.time()
+            res = least_squares(func, [0.0, 0.0], method='dogbox',
+                                bounds=([-20, -20], [20, 20]),
+                                ftol=0.1, verbose=0)
+            end = time.time()
+            y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
+            # if True:
+            #     print(f'least_squares: {round(end - start, 2)}, y_shift: {y_shift}, m_shift: {m_shift}')
+            params.enlarger.y_filter_shift += y_shift
+            params.enlarger.m_filter_shift += m_shift
+        
         return params
 
 
