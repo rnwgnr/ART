@@ -240,7 +240,7 @@ class LUTCreator:
                 print_cmy = photo._develop_print(log_raw)
                 out = photo._scan(print_cmy)
                 r, g, b = out.flatten()
-                return (abs(b-g), abs(r-g))
+                return (abs(b-g), abs(r-g), abs(r-b))
 
             start = time.time()
             res = least_squares(func, [0.0, 0.0],
