@@ -21,7 +21,12 @@
             "Kodak Vision3 50d",
             "Fujifilm Pro 400h",
             "Fujifilm Xtra 400",
-            "Fujifilm c200"
+            "Fujifilm c200",
+            "Kodak Ektar 100",
+            "Kodak Portra 160",
+            "Kodak Portra 800",
+            "Kodak Portra 800 (1 stop push)",
+            "Kodak Portra 800 (2 stops push)"
         ], 0],
         ["paper", "Print paper", [
             "Kodak Endura Premier",
@@ -29,7 +34,8 @@
             "Kodak Supra Endura",
             "Kodak Portra Endura",
             "Fujifilm Crystal Archive Type II",
-            "Kodak Vision Premier 2393 Print Film"
+            "Kodak Vision Premier 2393 Print Film",
+            "Kodak Vision 2383 Print Film"
         ], 0],
         ["camera_expcomp", "Exposure compensation (Ev)", -10.0, 10.0, 0, 0.1],
         ["print_exposure", "Print exposure", 0.05, 5.0, 1.0, 0.01],

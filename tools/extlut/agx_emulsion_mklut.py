@@ -40,7 +40,13 @@ film_stocks = _enum(FilmStocks,
                     'kodak_vision3_50d',
                     'fujifilm_pro_400h',
                     'fujifilm_xtra_400',
-                    'fujifilm_c200')
+                    'fujifilm_c200',
+                    'kodak_ektar_100',
+                    'kodak_portra_160',
+                    'kodak_portra_800',
+                    'kodak_portra_800_push1',
+                    'kodak_portra_800_push2')
+                    
 
 print_papers = _enum(PrintPapers,
                      'kodak_endura_premier',
@@ -48,7 +54,8 @@ print_papers = _enum(PrintPapers,
                      'kodak_supra_endura',
                      'kodak_portra_endura',
                      'fujifilm_crystal_archive_typeii',
-                     'kodak_2393')
+                     'kodak_2393',
+                     'kodak_2383')
 
 
 def getopts():
