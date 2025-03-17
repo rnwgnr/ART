@@ -22,7 +22,33 @@ from scipy.optimize import least_squares
 from contextlib import redirect_stdout, redirect_stderr
 from agx_emulsion.model.process import photo_params, AgXPhoto
 from agx_emulsion.model.stocks import FilmStocks, PrintPapers
-            
+
+
+def _enum(cls, *vals):
+    res = []
+    for v in vals:
+        try:
+            res.append(cls[v])
+        except KeyError:
+            pass
+    return res
+
+film_stocks = _enum(FilmStocks,
+                    'kodak_portra_400',
+                    'kodak_ultramax_400',
+                    'kodak_gold_200',
+                    'kodak_vision3_50d',
+                    'fujifilm_pro_400h',
+                    'fujifilm_xtra_400',
+                    'fujifilm_c200')
+
+print_papers = _enum(PrintPapers,
+                     'kodak_endura_premier',
+                     'kodak_ektacolor_edge',
+                     'kodak_supra_endura',
+                     'kodak_portra_endura',
+                     'fujifilm_crystal_archive_typeii',
+                     'kodak_2393')
 
 
 def getopts():
@@ -33,12 +59,12 @@ def getopts():
                    default='medium')
     p.add_argument('-z', '--compressed', action='store_true')
     film_avail = f"Film stock to use. Options: " + \
-        ", ".join(f'{i} : {s.name}' for (i, s) in enumerate(FilmStocks))
-    p.add_argument('-f', '--film', type=int, choices=range(len(FilmStocks)),
+        ", ".join(f'{i} : {s.name}' for (i, s) in enumerate(film_stocks))
+    p.add_argument('-f', '--film', type=int, choices=range(len(film_stocks)),
                    help=film_avail, default=0)
     paper_avail = f"Print paper to use. Options: " + \
-        ", ".join(f'{i} : {s.name}' for (i, s) in enumerate(PrintPapers))
-    p.add_argument('-p', '--paper', type=int, choices=range(len(PrintPapers)),
+        ", ".join(f'{i} : {s.name}' for (i, s) in enumerate(print_papers))
+    p.add_argument('-p', '--paper', type=int, choices=range(len(print_papers)),
                    default=0, help=paper_avail)
     p.add_argument('-e', '--camera-expcomp', type=float, default=0)
     p.add_argument('-E', '--print-exposure', type=float, default=1)
@@ -59,8 +85,8 @@ def getopts():
             params = json.load(f)
         update_opts(opts, params, opts.json[1])
     if not opts.output:
-        film = list(FilmStocks)[opts.film].name
-        paper = list(PrintPapers)[opts.paper].name
+        film = film_stocks[opts.film].name
+        paper = print_papers[opts.paper].name
         name = f'{film}@{paper}.clf{"z" if opts.compressed else ""}'
         opts.output = os.path.join(opts.outdir, name)
     return opts
@@ -181,8 +207,8 @@ class LUTCreator:
         return data
 
     def get_params(self, opts):
-        params = photo_params(list(FilmStocks)[opts.film].value,
-                              list(PrintPapers)[opts.paper].value)
+        params = photo_params(film_stocks[opts.film].value,
+                              print_papers[opts.paper].value)
         params.camera.exposure_compensation_ev = opts.camera_expcomp
         params.enlarger.print_exposure = opts.print_exposure
         params.enlarger.lens_blur = 0
