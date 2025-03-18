@@ -283,8 +283,8 @@ class LUTCreator:
             end = time.time()
             print(f'least_squares: {round(end - start, 2)}, '
                   f'y_shift: {y_shift}, m_shift: {m_shift}')
-            params.enlarger.y_filter_shift = y_shift
-            params.enlarger.m_filter_shift = m_shift
+            params.enlarger.y_filter_shift = y_shift + opts.y_shift
+            params.enlarger.m_filter_shift = m_shift + opts.m_shift
         
         return params
 

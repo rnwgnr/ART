@@ -40,7 +40,7 @@
         ["camera_expcomp", "Exposure compensation (Ev)", -10.0, 10.0, 0, 0.1],
         ["print_exposure", "Print exposure", 0.05, 5.0, 1.0, 0.01],
         ["auto_ym_shifts", "Auto adjust", false, "Print filter shift",
-         "If enabled, the individual sliders have no effect"],
+         "Try to automatically adjust shifts to neutralize color casts on middle gray"],
         ["y_shift", "Y filter (yellow/blue)", -20, 20, 0, 0.1,
          "Print filter shift"],
         ["m_shift", "M filter (magenta/green)", -20, 20, 0, 0.1,
