@@ -829,7 +829,7 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
                 double v = root->valuedouble;
                 cJSON_Delete(root);
                 lut_dim = int(v);
-                if (lut_dim <= 0 || v != lut_dim) {
+                if (lut_dim < -1 || v != lut_dim) {
                     return err("invalid lut definition:\n  " + line);
                 }
             }
@@ -1141,7 +1141,7 @@ bool CLUTApplication::extlut_init()
 
 bool CLUTApplication::CTL_init(int num_threads)
 {
-    ctl_lut_dim_ = 0;
+    ctl_lut_dim_ = -1;
     try {
         Glib::ustring colorspace = "";
         Glib::ustring lbl;
@@ -1252,7 +1252,7 @@ bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
     }
 
     int dim = ctl_lut_dim_;
-    if (settings->ctl_scripts_fast_preview) {
+    if (dim >= 0 && settings->ctl_scripts_fast_preview) {
         switch (q) {
         case Quality::LOW:
             dim = !dim ? 24 : std::min(dim, 24);
