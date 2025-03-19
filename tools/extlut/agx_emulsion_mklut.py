@@ -253,36 +253,45 @@ class LUTCreator:
         params.settings.use_camera_lut = False
         
         if opts.auto_ym_shifts:
-            image = numpy.array([[
-                [0.184, 0.184, 0.184],
-            ]])
+            key = self._key('autoshifts', opts)
+            res = self.cache.get(key)
+            if res is not None:
+                y_shift, m_shift = res
+            else:
+                image = numpy.array([[
+                    [0.184, 0.184, 0.184],
+                ]])
 
-            par = copy.copy(params)
-            par.debug.return_negative_density_cmy = True
+                par = copy.copy(params)
+                par.debug.return_negative_density_cmy = True
 
-            photo = AgXPhoto(par)
-            density_cmy = photo.process(image)
+                photo = AgXPhoto(par)
+                density_cmy = photo.process(image)
 
-            def sqr(x): return x*x
-            
-            def func(x):
-                y_shift, m_shift = x
-                photo.enlarger.y_filter_shift = y_shift
-                photo.enlarger.m_filter_shift = m_shift
-                log_raw = photo._expose_print(density_cmy)
-                print_cmy = photo._develop_print(log_raw)
-                out = photo._scan(print_cmy)
-                r, g, b = out.flatten()
-                return (abs(b-g), abs(r-g), abs(r-b))
+                def sqr(x): return x*x
 
-            start = time.time()
-            res = least_squares(func, [0.0, 0.0],
-                                method='dogbox', bounds=[(-10, -10), (10, 10)],
-                                max_nfev=20)
-            y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
-            end = time.time()
-            print(f'least_squares: {round(end - start, 2)}, '
-                  f'y_shift: {y_shift}, m_shift: {m_shift}')
+                def func(x):
+                    y_shift, m_shift = x
+                    photo.enlarger.y_filter_shift = y_shift
+                    photo.enlarger.m_filter_shift = m_shift
+                    log_raw = photo._expose_print(density_cmy)
+                    print_cmy = photo._develop_print(log_raw)
+                    out = photo._scan(print_cmy)
+                    r, g, b = out.flatten()
+                    return (abs(b-g), abs(r-g), abs(r-b))
+
+                start = time.time()
+                res = least_squares(func, [0.0, 0.0],
+                                    method='dogbox',
+                                    bounds=[(-10, -10), (10, 10)],
+                                    max_nfev=20)
+                y_shift, m_shift = round(res.x[0], 3), round(res.x[1], 3)
+                end = time.time()
+                print(f'least_squares: {round(end - start, 2)}, '
+                      f'y_shift: {y_shift}, m_shift: {m_shift}')
+
+                self.cache[key] = (y_shift, m_shift)
+                
             params.enlarger.y_filter_shift = y_shift + opts.y_shift
             params.enlarger.m_filter_shift = m_shift + opts.m_shift
         
@@ -294,6 +303,45 @@ class LUTCreator:
             warnings.simplefilter('ignore')
             self.image = self.get_base_image(opts)
             self.shaper = self.get_shaper()
+        self.cache = {}
+
+    def _key(self, step, opts):
+        keys = {
+            'film' : ['film',
+                      'camera_expcomp',
+                      'film_gamma',
+                      'dir_couplers_amount'],
+            'full' : ['film',
+                      'camera_expcomp',
+                      'film_gamma',
+                      'dir_couplers_amount',
+                      'paper',
+                      'print_exposure',
+                      'y_shift',
+                      'm_shift',
+                      'print_gamma',
+                      'auto_ym_shifts'],
+            'autoshifts' : ['film',
+                            'camera_expcomp',
+                            'film_gamma',
+                            'dir_couplers_amount',
+                            'paper',
+                            'print_exposure',
+                            'print_gamma'],
+        }
+        d = {'step' : step}
+        for k in keys[step]:
+            d[k] = getattr(opts, k)
+        return json.dumps(d)
+
+    def _get(self, step, opts, photo, image):
+        k = self._key(step, opts)
+        res = self.cache.get(k)
+        if res is None and step == 'film':
+            photo.debug.return_negative_density_cmy = True
+            res = photo.process(image)
+            self.cache[k] = res
+        return res
 
     def __call__(self, opts):
         start = time.time()
@@ -301,7 +349,14 @@ class LUTCreator:
         photo = AgXPhoto(params)
         def identity(rgb, *args, **kwds): return rgb
         photo.print_paper._apply_cctf_encoding_and_clip = identity
-        image = photo.process(self.image)
+        image = self._get('full', opts, photo, self.image)
+        if image is None:
+            image = self._get('film', opts, photo, self.image)
+            log_raw = photo._expose_print(image)
+            density_cmy = photo._develop_print(log_raw)
+            image = photo._scan(density_cmy)
+            self.cache[self._key('full', opts)] = image
+        #image = photo.process(self.image)
         self.make_lut(opts, image)
         end = time.time()
         sys.stderr.write('total time: %.3f\n' % (end - start))
