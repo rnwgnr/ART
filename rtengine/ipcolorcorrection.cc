@@ -355,9 +355,6 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
         } else {
             rhs[i] = 0.f;
         }
-        if (rgbmode[i] && hsl[i] && hslgamma[i] != 1.f && (rs[i] != 1.f || rsout[i] != 1.f)) {
-            enabled[i] = true;
-        }
 
         lut[i].reset(nullptr);
         if (r.mode == ColorCorrectionParams::Mode::LUT) {
@@ -438,29 +435,18 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             }
 
             if (rgbmode[region]) {
-                const bool use_gamma = hsl[region] && hslgamma[region] != 1.f;
-                const bool use_isat = saturation != 1.f;
-                const bool use_osat = outsaturation != 1.f;
-                if (use_isat && !use_gamma) {
+                if (saturation != 1.f) {
                     u *= saturation;
                     v *= saturation;
                 }
                 if (enabled[region]) {
                     float rgb[3];
                     Color::yuv2rgb(Y, u, v, rgb[0], rgb[1], rgb[2], ws);
-
-                    float l = std::max(Y, 0.f);
-                    if (use_isat && use_gamma) {
-                        l = pow_F(Y / 65535.f, 1.f / hslgamma[region]);
-                    }
-                    
+                    const bool use_gamma = hsl[region] && hslgamma[region] != 1.f;
                     for (int i = 0; i < 3; ++i) {
                         float v = (rgb[i] / 65535.f);
                         if (use_gamma && v > 0.f) {
                             v = pow_F(v, 1.f / hslgamma[region]);
-                            if (use_isat) {
-                                v = l + saturation * (v - l);
-                            }                         
                         }
                         v = v * slope[i] + offset[i]/2.f;
                         if (v > 0.f) {
@@ -475,22 +461,10 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                         } else {
                             v = 0.f;
                         }
-                        if (!(use_osat && use_gamma)) {
-                            if (use_gamma && v > 0.f) {
-                                v = pow_F(v, hslgamma[region]);
-                            }
-                            rgb[i] = v * 65535.f;
+                        if (use_gamma && v > 0.f) {
+                            v = pow_F(v, hslgamma[region]);
                         }
-                    }
-                    if (use_osat && use_gamma) {
-                        float Y1 = Color::rgbLuminance(rgb[0], rgb[1], rgb[2], ws);
-                        for (int i = 0; i < 3; ++i) {
-                            rgb[i] = Y1 + outsaturation * (rgb[i] - Y1);
-                            if (rgb[i] > 0.f) {
-                                rgb[i] = pow_F(rgb[i], hslgamma[region]);
-                            }
-                            rgb[i] *= 65535.f;
-                        }
+                        rgb[i] = v * 65535.f;
                     }
                     if (rgbmode[region] != 2) {
                         Color::rgb2yuv(rgb[0], rgb[1], rgb[2], Y, u, v, ws);
@@ -510,7 +484,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     }
                 }
 
-                if (use_osat && !use_gamma) {
+                float f = max(Y, 0.f);
+                u += f * abcb[region];
+                v += f * abca[region];
+
+                if (outsaturation != 1.f) {
                     u *= outsaturation;
                     v *= outsaturation;
                 }
@@ -530,7 +508,7 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     } else {
                         YY = 0.f;
                     }
-                    if (YY > 0.f && Y > 0.f) {
+                    if (Y > 0.f) {
                         float f = YY / Y;
                         Y = YY;
                         u *= f;
@@ -660,27 +638,17 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
             }
                 
             if (rgbmode[region]) {
-                const bool use_gamma = hsl[region] && hslgamma[region] != 1.f;
-                const bool use_isat = saturation != 1.f;
-                const bool use_osat = outsaturation != 1.f;
-                vfloat vsaturation = F2V(saturation);
-                
-                if (use_isat && !use_gamma) {
+                if (saturation != 1.f) {
+                    vfloat vsaturation = F2V(saturation);
                     u *= vsaturation;
                     v *= vsaturation;
                 }
-                
                 if (enabled[region]) {
                     vfloat rgb[3];
                     Color::yuv2rgb(Y, u, v, rgb[0], rgb[1], rgb[2], vws);
-
+                    const bool use_gamma = hsl[region] && hslgamma[region] != 1.f;
                     vfloat vgamma = F2V(1.f/ hslgamma[region]);
                     vfloat vigamma = F2V(hslgamma[region]);
-
-                    vfloat l = vself(vmaskf_gt(Y, ZEROV), Y / v65535, ZEROV);
-                    if (use_isat && use_gamma) {
-                        l = pow_F(l, vgamma);
-                    }
                     
                     for (int i = 0; i < 3; ++i) {
                         vfloat vslope = F2V(slope[i]);
@@ -691,9 +659,6 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                         vfloat v = (rgb[i] / v65535);
                         if (use_gamma) {
                             v = vself(vmaskf_gt(v, ZEROV), pow_F(v, vgamma), v);
-                            if (use_isat) {
-                                v = l + vsaturation * (v - l);
-                            }
                         }
                         v = v * vslope + voffset;
                         if (pivot[i] != 1.f) {
@@ -707,21 +672,10 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                             v = vmaxf(v, ZEROV);
                             v = xlogf(v * vc0 + v1) / vc1;
                         }
-                        if (!(use_osat && use_gamma)) {
-                            if (use_gamma) {
-                                v = vself(vmaskf_gt(v, ZEROV), pow_F(v, vigamma), v);
-                            }
-                            rgb[i] = v * v65535;
+                        if (use_gamma) {
+                            v = vself(vmaskf_gt(v, ZEROV), pow_F(v, vigamma), v);
                         }
-                    }
-                    if (use_osat && use_gamma) {
-                        vfloat voutsaturation = vrsout[region];
-                        vfloat Y1 = Color::rgbLuminance(rgb[0], rgb[1], rgb[2], vws);
-                        for (int i = 0; i < 3; ++i) {
-                            rgb[i] = Y1 + voutsaturation * (rgb[i] - Y1);
-                            rgb[i] = vself(vmaskf_gt(rgb[i], ZEROV), pow_F(rgb[i], vigamma), rgb[i]);
-                            rgb[i] *= v65535;
-                        }
+                        rgb[i] = v * v65535;
                     }
                     if (rgbmode[region] != 2) {
                         Color::rgb2yuv(rgb[0], rgb[1], rgb[2], Y, u, v, vws);
@@ -743,7 +697,11 @@ bool ImProcFunctions::colorCorrection(Imagefloat *rgb)
                     }
                 }
 
-                if (use_osat && !use_gamma) {
+                vfloat fv = vmaxf(Y, ZEROV);
+                u += fv * vabcb[region];
+                v += fv * vabca[region];
+
+                if (outsaturation != 1.f) {
                     u *= vrsout[region];
                     v *= vrsout[region];
                 }
