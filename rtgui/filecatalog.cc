@@ -185,13 +185,14 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
     buttonBrowsePath->set_image (*iRefreshWhite);
     buttonBrowsePath->set_tooltip_markup (M("FILEBROWSER_BROWSEPATHBUTTONHINT"));
     buttonBrowsePath->set_relief (Gtk::RELIEF_NONE);
-    buttonBrowsePath->signal_clicked().connect( sigc::mem_fun(*this, &FileCatalog::buttonBrowsePathPressed) );
+    buttonBrowsePath->signal_clicked().connect( sigc::mem_fun(*this, &FileCatalog::browsePathRefresh) );
 
     button_recurse_ = Gtk::manage(new Gtk::ToggleButton());
     button_recurse_->set_image(*Gtk::manage(new RTImage("folder-recurse-small.png")));
     button_recurse_->set_tooltip_markup(M("FILEBROWSER_BROWSEPATH_RECURSIVE_TOOLTIP"));
     button_recurse_->set_relief(Gtk::RELIEF_NONE);
-    button_recurse_->signal_toggled().connect(sigc::mem_fun(*this, &FileCatalog::buttonRecursePressed));
+    recurse_conn_ = button_recurse_->signal_toggled().connect(sigc::mem_fun(*this, &FileCatalog::browsePathRefresh));
+    is_toggling_recurse_ = false;
     
     hbBrowsePath->pack_start(*button_recurse_, Gtk::PACK_SHRINK, 0);
     hbBrowsePath->pack_start (*BrowsePath, Gtk::PACK_EXPAND_WIDGET, 0);
@@ -925,6 +926,12 @@ void FileCatalog::dirSelected(const Glib::ustring &dirname, const Glib::ustring 
         if (!dir) {
             return;
         }
+
+        if (!is_toggling_recurse_) {
+            ConnectionBlocker recblock(recurse_conn_);
+            button_recurse_->set_active(false);
+        }
+        is_toggling_recurse_ = false;
 
         closeDir();
         previewsToLoad = 0;
@@ -2189,8 +2196,9 @@ void FileCatalog::buttonBrowsePathPressed ()
 }
 
 
-void FileCatalog::buttonRecursePressed()
+void FileCatalog::browsePathRefresh()
 {
+    is_toggling_recurse_ = true;
     buttonBrowsePathPressed();
 }
 
@@ -2635,7 +2643,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
             return true;
 
         case GDK_KEY_F5:
-            FileCatalog::buttonBrowsePathPressed();
+            FileCatalog::browsePathRefresh();
             return true;
         }
     }

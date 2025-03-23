@@ -111,6 +111,8 @@ private:
     Gtk::Entry* BrowsePath;
     Gtk::Button* buttonBrowsePath;
     Gtk::ToggleButton *button_recurse_;
+    sigc::connection recurse_conn_;
+    bool is_toggling_recurse_;
     Gtk::Button *button_session_add_;
     Gtk::Button *button_session_remove_;
     Gtk::Button *button_session_load_;
@@ -248,8 +250,8 @@ public:
     void zoomIn ();
     void zoomOut ();
 
-    void buttonBrowsePathPressed ();
-    void buttonRecursePressed();
+    void buttonBrowsePathPressed();
+    void browsePathRefresh();
 
     void sessionAddPressed();
     void sessionRemovePressed();
