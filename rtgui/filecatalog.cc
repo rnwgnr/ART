@@ -2316,7 +2316,7 @@ void FileCatalog::selectImage (Glib::ustring fname, bool clearFilters)
 {
 
     Glib::ustring dirname = Glib::path_get_dirname(fname);
-    if (art::session::check(selectedDirectory) && file_name_set_.find(fname) != file_name_set_.end()) {
+    if (/* art::session::check(selectedDirectory) &&*/ file_name_set_.find(fname) != file_name_set_.end()) {
         dirname = selectedDirectory;
     }
 
