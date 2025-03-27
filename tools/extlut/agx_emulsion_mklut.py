@@ -45,7 +45,10 @@ film_stocks = _enum(FilmStocks,
                     'kodak_portra_160',
                     'kodak_portra_800',
                     'kodak_portra_800_push1',
-                    'kodak_portra_800_push2')
+                    'kodak_portra_800_push2',
+                    'kodak_vision3_250d',
+                    'kodak_vision3_200t',
+                    'kodak_vision3_500t')
                     
 
 print_papers = _enum(PrintPapers,
