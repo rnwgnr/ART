@@ -380,13 +380,15 @@ bool openInGimp(const Glib::ustring &fileName)
 
 #ifdef WIN32
 
-    for (auto ver = 12; ver >= 0; --ver) {
+    for (auto major = 3; major >= 2; --major) {
+        for (auto minor = (major == 3 ? 1 : 12); minor >= 0; --minor) {
 
-        executable = rtengine::subprocess::to_wstr(Glib::build_filename (options.gimpDir, "bin", Glib::ustring::compose (Glib::ustring("gimp-2.%1.exe"), ver)));
-        auto success = ShellExecuteW( NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
+            executable = rtengine::subprocess::to_wstr(Glib::build_filename (options.gimpDir, "bin", Glib::ustring::compose (Glib::ustring("gimp-%1.%2.exe"), major, minor)));
+            auto success = ShellExecuteW( NULL, open.c_str(), executable.c_str(), fn.c_str(), NULL, SW_SHOWNORMAL );
 
-        if ((uintptr_t)success > 32) {
-            return true;
+            if ((uintptr_t)success > 32) {
+                return true;
+            }
         }
     }
 
