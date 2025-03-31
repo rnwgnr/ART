@@ -599,35 +599,24 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
     const auto noise = 
         [&](array2D<float> &a, int chan) -> void
         {
-            constexpr float chan_sd[5] = { 1.f, 0.2f, 0.7f, 1.f, 1.3f };
+            constexpr float chan_sd[5] = { 1.f, 0.7f, 1.f, 1.3f };
             const float c01 = float(coarseness) / 100.f;
             const float c = 655.35f / (20.f + std::pow(c01, 0.5f) * 80.f);
             const float sd = chan_sd[chan];
 
             array2D<float> noisebuf(W, H);
 
-            if (chan == 1) {
 #ifdef _OPENMP
-#               pragma omp parallel for if (multithread)
+#           pragma omp parallel for if (multithread)
 #endif
-                for (int y = 0; y < H; ++y) {
-                    for (int x = 0; x < W; ++x) {
-                        noisebuf[y][x] = normd[rng.randint(normd_size)] * sd;
-                    }
-                }
-            } else {
-#ifdef _OPENMP
-#               pragma omp parallel for if (multithread)
-#endif
-                for (int y = 0; y < H; ++y) {
-                    for (int x = 0; x < W; ++x) {
-                        float v = a[y][x];
-                        //float mu = LIM01(v) * c;
-                        float mu = std::max(v, 0.f) * c;
-                        float r = normd[rng.randint(normd_size)] * sd;
-                        float m = mu + sqrtf(mu) * r;
-                        noisebuf[y][x] = m / c - v;
-                    }
+            for (int y = 0; y < H; ++y) {
+                for (int x = 0; x < W; ++x) {
+                    float v = a[y][x];
+                    //float mu = LIM01(v) * c;
+                    float mu = std::max(v, 0.f) * c;
+                    float r = normd[rng.randint(normd_size)] * sd;
+                    float m = mu + sqrtf(mu) * r;
+                    noisebuf[y][x] = m / c - v;
                 }
             }
 
@@ -639,17 +628,18 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
             for (int y = 0; y < H; ++y) {
                 for (int x = 0; x < W; ++x) {
                     float n = noisebuf[y][x];
-                    a[y][x] += sf * n;
+                    //a[y][x] += sf * n;
+                    a[y][x] = std::max(a[y][x] + sf * n, 0.f);
                 }
             }
         };
     
 
     if (chan == Channel::LC) {
-        noise(R, 2);
-        noise(G, 3);
-        noise(B, 4);
-    } else {
+        noise(R, 1);
+        noise(G, 2);
+        noise(B, 3);
+    } else if (chan == Channel::L) {
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
 #endif
@@ -659,12 +649,7 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
             }
         }
 
-        if (chan == Channel::L) {
-            noise(G, 0);
-        } else {
-            noise(R, 1);
-            noise(B, 1);
-        }
+        noise(G, 0);
 
 #ifdef _OPENMP
 #       pragma omp parallel for if (multithread)
@@ -672,6 +657,30 @@ void add_noise(array2D<float> &R, array2D<float> &G, array2D<float> &B, const TM
         for (int y = 0; y < H; ++y) {
             for (int x = 0; x < W; ++x) {
                 Color::yuv2rgb(G[y][x], R[y][x], B[y][x], R[y][x], G[y][x], B[y][x], ws);
+            }
+        }
+    } else {
+        array2D<float> Y(W, H);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float u, v;
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], Y[y][x], u, v, ws);
+            }
+        }
+        noise(R, 1);
+        noise(G, 2);
+        noise(B, 3);
+#ifdef _OPENMP
+#       pragma omp parallel for if (multithread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float l, u, v;
+                Color::rgb2yuv(R[y][x], G[y][x], B[y][x], l, u, v, ws);
+                Color::yuv2rgb(Y[y][x], u, v, R[y][x], G[y][x], B[y][x], ws);
             }
         }
     }

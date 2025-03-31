@@ -49,12 +49,21 @@ public:
         int coarseness = LIM01(float(iso - iso_min + 1) / float(iso_max - iso_min)) * 100.f + 0.5f;
 
         const int nlevels = pipeline == ImProcFunctions::Pipeline::OUTPUT ? 3 : int(std::ceil(3 / scale));
+        if (color) {
+            params_.smoothing.regions.emplace_back();
+            params_.smoothing.labmasks.emplace_back();
+            auto &r = params_.smoothing.regions.back();
+            r.mode = procparams::SmoothingParams::Region::Mode::NOISE;
+            r.channel = procparams::SmoothingParams::Region::Channel::CHROMINANCE;
+            r.noise_strength = strength / 2;
+            r.noise_coarseness = coarseness / 2;
+        }
         for (int i = 0; i < nlevels; ++i) {
             params_.smoothing.regions.emplace_back();
             params_.smoothing.labmasks.emplace_back();
             auto &r = params_.smoothing.regions.back();
             r.mode = procparams::SmoothingParams::Region::Mode::NOISE;
-            r.channel = color ? procparams::SmoothingParams::Region::Channel::RGB : procparams::SmoothingParams::Region::Channel::LUMINANCE;
+            r.channel = procparams::SmoothingParams::Region::Channel::LUMINANCE;
             r.noise_strength = strength / (nlevels-i);
             r.noise_coarseness = coarseness / (i+1);
         }
