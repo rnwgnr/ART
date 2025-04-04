@@ -284,7 +284,14 @@ bool ExternalLUT3D::SubprocessManager::process(const Glib::ustring &filename, co
                 }
             } else {
                 if (settings->verbose) {
-                    std::cout << "unexpected output from subprocess: " << char(c) << std::endl;
+                    std::cout << "unexpected output from subprocess: " << char(c);
+                    const char *dbg = g_getenv("ART_DEBUG_EXTCLUT");
+                    if (dbg && atoi(dbg)) {
+                        while ((c = p->read()) > 0) {
+                            std::cout << char(c);
+                        }
+                    }
+                    std::cout << std::endl;
                 }
                 err = true;
                 break;
