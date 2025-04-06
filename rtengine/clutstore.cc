@@ -891,7 +891,8 @@ std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> 
         };
 
     try {
-        bool found = ctl_cache_.get(full_filename, result);
+        std::string key = Glib::filename_from_utf8(full_filename);
+        bool found = ctl_cache_.get(key, result);
         if (!found || result.md5 != md5) {
             if (settings->verbose > 1) {
                 std::cout << "CTL cache miss: " << full_filename << std::endl;
@@ -942,11 +943,13 @@ std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> 
             result.md5 = md5;
             result.params = params;
             result.colorspace = colorspace;
-            ctl_cache_.set(full_filename, result);
+            result.lut_dim = lut_dim;
+            ctl_cache_.set(key, result);
         } else {
             intp = result.intp;
             params = result.params;
             colorspace = result.colorspace;
+            lut_dim = result.lut_dim;
         }
         if (intp) {
             for (int i = 0; i < num_threads; ++i) {

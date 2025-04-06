@@ -131,8 +131,9 @@ private:
         std::string md5;
         std::vector<CLUTParamDescriptor> params;
         Glib::ustring colorspace;
+        int lut_dim;
     };
-    mutable Cache<Glib::ustring, CTLCacheEntry> ctl_cache_;
+    mutable Cache<std::string, CTLCacheEntry> ctl_cache_;
     LUTf ctl_shaper_lut_;
     LUTf ctl_shaper_lut_inv_;
 #endif // ART_USE_CTL
