@@ -278,7 +278,7 @@ static gboolean osx_open_file_cb(GtkosxApplication *a, gchar *pth, gpointer data
 class RTApplication: public Gtk::Application {
 public:
     RTApplication():
-        Gtk::Application("us.pixls.art.application",
+        Gtk::Application("us.pixls.art.ART",
                          Gio::APPLICATION_SEND_ENVIRONMENT|Gio::APPLICATION_HANDLES_COMMAND_LINE),
         rtWindow(nullptr)
     {
