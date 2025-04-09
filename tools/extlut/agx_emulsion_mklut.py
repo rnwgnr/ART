@@ -7,6 +7,8 @@
 # (https://art.pixls.us) using its "external 3dLUT" interface
 
 import os
+os.environ['KMP_WARNINGS'] = 'off'
+
 import numpy
 import argparse
 import gzip
