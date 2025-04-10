@@ -22,6 +22,7 @@
 #include "../rtgui/pathutils.h"
 #include "cJSON.h"
 
+#define BENCHMARK
 #include "StopWatch.h"
 
 #ifdef _OPENMP
@@ -1144,7 +1145,7 @@ bool CLUTApplication::extlut_init()
 
 bool CLUTApplication::CTL_init(int num_threads)
 {
-    ctl_lut_dim_ = -1;
+    ctl_lut_dim_ = 0;
     try {
         Glib::ustring colorspace = "";
         Glib::ustring lbl;
@@ -1255,20 +1256,21 @@ bool CLUTApplication::CTL_set_params(const CLUTParamValueMap &values, Quality q)
     }
 
     int dim = ctl_lut_dim_;
-    if (dim >= 0 && settings->ctl_scripts_fast_preview) {
-        switch (q) {
-        case Quality::LOW:
-            dim = !dim ? 24 : std::min(dim, 24);
-            break;
-        case Quality::MEDIUM:
-            dim = !dim ? 32 : std::min(dim, 32);
-            break;
-        case Quality::HIGH:
-            dim = !dim ? 64 : std::min(dim, 64);
-            break;
-        default:
-            break;
-        }
+    if (dim >= 0 && settings->ctl_scripts_fast_preview && q != Quality::HIGHEST) {
+        dim = !dim ? int(q) : std::min(dim, int (q));
+        // switch (q) {
+        // case Quality::LOW:
+        //     dim = !dim ? 24 : std::min(dim, 24);
+        //     break;
+        // case Quality::MEDIUM:
+        //     dim = !dim ? 32 : std::min(dim, 32);
+        //     break;
+        // case Quality::HIGH:
+        //     dim = !dim ? 64 : std::min(dim, 64);
+        //     break;
+        // default:
+        //     break;
+        // }
     }
     if (dim > 0) {
         CTL_init_lut(dim);
@@ -1308,6 +1310,11 @@ private:
 
 void CLUTApplication::CTL_init_lut(int dim)
 {
+    BENCHFUN
+    if (settings->verbose > 1) {
+        std::cout << "computing CTL lut for: " << clut_filename_ << " of dimension: " << dim << std::endl;
+    }
+            
     std::vector<float> rgb[3];
 
     int sz = SQR(dim) * dim;
