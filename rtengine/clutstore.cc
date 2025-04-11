@@ -865,6 +865,8 @@ bool get_CTL_params(const Glib::ustring &filename, std::shared_ptr<Ctl::Interpre
 std::pair<std::shared_ptr<Ctl::Interpreter>, std::vector<Ctl::FunctionCallPtr>> rtengine::CLUTStore::getCTLLut(const Glib::ustring& filename, int num_threads, int &chunk_size, std::vector<CLUTParamDescriptor> &params, Glib::ustring &colorspace, int &lut_dim) const
 {
     MyMutex::MyLock lock(mutex_);
+
+    lut_dim = 0;
     
     CTLCacheEntry result;
     std::vector<Ctl::FunctionCallPtr> retval;
@@ -1407,7 +1409,7 @@ std::vector<CLUTParamDescriptor> CLUTApplication::get_param_descriptors(const Gl
 #ifdef ART_USE_CTL
     try {
         std::vector<CLUTParamDescriptor> params;
-        int n;
+        int n = 0;
         Glib::ustring colorspace;
         auto p = CLUTStore::getInstance().getCTLLut(filename, 1, n, params, colorspace, n);
         return params;
