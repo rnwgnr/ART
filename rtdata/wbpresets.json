@@ -103,6 +103,11 @@
 // NIKON Z6_3
 // SONY ILCE-6700
 
+// updated on Thu Apr 24 11:34:17 2025:
+// FUJIFILM GFX100
+// FUJIFILM GFX100 II
+// OM SYSTEM OM-3
+
 [
   {
     "make_model" : "CANON EOS 1000D",
@@ -6398,6 +6403,54 @@
       { "name" : "4500k", "multipliers" : [ 2.466796875, 1, 1.744140625 ] },
       { "name" : "6000k", "multipliers" : [ 2.888671875, 1, 1.4443359375 ] },
       { "name" : "8500k", "multipliers" : [ 3.259765625, 1, 1.205078125 ] }
+    ]
+  },
+  {
+    "make_model" : "FUJIFILM GFX100",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.6986754966887416, 1, 1.7582781456953642 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.8410596026490067, 1, 1.5 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.1125827814569536, 1, 2.705298013245033 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.8443708609271523, 1, 1.8211920529801324 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.1821192052980134, 1, 1.490066225165563 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.7615894039735098, 1, 2.3940397350993377 ] },
+      { "name" : "underwater", "multipliers" : [ 1.695364238410596, 1, 1.7682119205298013 ] }
+    ]
+  },
+  {
+    "make_model" : "FUJIFILM GFX100 II",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 1.7384105960264902, 1, 1.9403973509933774 ] },
+      { "name" : "cloudy", "multipliers" : [ 1.913907284768212, 1, 1.6655629139072847 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.1523178807947019, 1, 2.943708609271523 ] },
+      { "name" : "day white fluorescent", "multipliers" : [ 1.880794701986755, 1, 1.9801324503311257 ] },
+      { "name" : "daylight fluorescent", "multipliers" : [ 2.23841059602649, 1, 1.6490066225165563 ] },
+      { "name" : "white fluorescent", "multipliers" : [ 1.7649006622516556, 1, 2.576158940397351 ] },
+      { "name" : "underwater", "multipliers" : [ 1.7350993377483444, 1, 1.9536423841059603 ] }
+    ]
+  },
+  {
+    "make_model" : "OM SYSTEM OM-3",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 2.21875, 1, 1.765625 ] },
+      { "name" : "shade", "multipliers" : [ 2.609375, 1, 1.40625 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.3828125, 1, 1.5859375 ] },
+      { "name" : "tungsten", "multipliers" : [ 1.3203125, 1, 3.25 ] },
+      { "name" : "cool white fluorescent", "multipliers" : [ 2.1015625, 1, 2.578125 ] },
+      { "name" : "underwater", "multipliers" : [ 2.5078125, 1, 1.703125 ] },
+      { "name" : "flash", "multipliers" : [ 2.5625, 1, 1.4765625 ] },
+      { "name" : "3000k", "multipliers" : [ 1.3203125, 1, 3.25 ] },
+      { "name" : "3300k", "multipliers" : [ 1.59375, 1, 2.5390625 ] },
+      { "name" : "3600k", "multipliers" : [ 1.703125, 1, 2.3203125 ] },
+      { "name" : "3900k", "multipliers" : [ 1.8125, 1, 2.1484375 ] },
+      { "name" : "4000k", "multipliers" : [ 2.1015625, 1, 2.578125 ] },
+      { "name" : "4300k", "multipliers" : [ 1.9453125, 1, 2.0546875 ] },
+      { "name" : "4500k", "multipliers" : [ 2.390625, 1, 2.0078125 ] },
+      { "name" : "4800k", "multipliers" : [ 2.09375, 1, 1.90625 ] },
+      { "name" : "5300k", "multipliers" : [ 2.21875, 1, 1.765625 ] },
+      { "name" : "6000k", "multipliers" : [ 2.3828125, 1, 1.5859375 ] },
+      { "name" : "6600k", "multipliers" : [ 2.5, 1, 1.703125 ] },
+      { "name" : "7500k", "multipliers" : [ 2.609375, 1, 1.40625 ] }
     ]
   }
 ]
