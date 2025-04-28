@@ -993,7 +993,7 @@ inline float CTL_shaper_func(float a, bool inv)
     constexpr float c1 = 107.0 / 128.0;
     constexpr float c2 = 2413.0 / 128.0;
     constexpr float c3 = 2392.0 / 128.0;
-    constexpr float scale = 400.0; // 11 Ev above mid gray
+    constexpr float scale = 100.0; 
 
     if (a <= 0.f) {
         return 0.f;
