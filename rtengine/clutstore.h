@@ -145,9 +145,9 @@ private:
 class CLUTApplication {
 public:
     enum class Quality {
-        LOW = 24,
-        MEDIUM = 32,
-        HIGH = 64,
+        LOW = 20,
+        MEDIUM = 30,
+        HIGH = 50,
         HIGHEST = 0
     };
     CLUTApplication(const Glib::ustring &clut_filename, const Glib::ustring &working_profile="", float strength=1.f, int num_threads=1);
