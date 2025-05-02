@@ -245,6 +245,7 @@ FILEBROWSER_SHOWUNRANKHINT;Mostra le immagini non classificate.\nScorciatoia: <b
 FILEBROWSER_SORT_DATE;Data
 FILEBROWSER_SORT_DATE_REV;Data (invertita)
 FILEBROWSER_SORT_FILENAME;Nome file
+FILEBROWSER_SORT_FILENAME_REV;Nome file (inverso)
 FILEBROWSER_SORT_LABEL;Ordine delle miniature
 FILEBROWSER_SORT_MODTIME;Ora di modifica del file
 FILEBROWSER_SORT_MODTIME_REV;Ora di modifica del file (invertita)

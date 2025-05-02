@@ -185,7 +185,8 @@ public:
         MODTIME,
         MODTIME_REV,
         PROCTIME,
-        PROCTIME_REV
+        PROCTIME_REV,
+        FILENAME_REV
     };
     
     SaveFormat saveFormat;

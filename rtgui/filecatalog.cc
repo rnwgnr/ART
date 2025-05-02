@@ -95,6 +95,39 @@ private:
     Glib::ustring root_;
 };
 
+
+int thumb_order_to_index(Options::ThumbnailOrder order)
+{
+    switch (order) {
+    case Options::ThumbnailOrder::FILENAME: return 0;
+    case Options::ThumbnailOrder::FILENAME_REV: return 1;
+    case Options::ThumbnailOrder::DATE: return 2;
+    case Options::ThumbnailOrder::DATE_REV: return 3;
+    case Options::ThumbnailOrder::MODTIME: return 4;
+    case Options::ThumbnailOrder::MODTIME_REV: return 5;
+    case Options::ThumbnailOrder::PROCTIME: return 6;
+    case Options::ThumbnailOrder::PROCTIME_REV: return 7;
+    default: return 0;
+    }
+}
+
+
+Options::ThumbnailOrder index_to_thumb_order(int index)
+{
+    switch (index) {
+    case 0: return Options::ThumbnailOrder::FILENAME;
+    case 1: return Options::ThumbnailOrder::FILENAME_REV;
+    case 2: return Options::ThumbnailOrder::DATE;
+    case 3: return Options::ThumbnailOrder::DATE_REV;
+    case 4: return Options::ThumbnailOrder::MODTIME;
+    case 5: return Options::ThumbnailOrder::MODTIME_REV;
+    case 6: return Options::ThumbnailOrder::PROCTIME;
+    case 7: return Options::ThumbnailOrder::PROCTIME_REV;
+    default: return Options::ThumbnailOrder::FILENAME;
+    }
+}
+
+
 } // namespace
 
 
@@ -541,7 +574,7 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
                     auto l = static_cast<Gtk::Label *>(mi->get_children()[0]);
                     l->set_markup("<b>" + thumbOrderLabels[sel] + "</b>");
                 }
-                options.thumbnailOrder = Options::ThumbnailOrder(sel);
+                options.thumbnailOrder = index_to_thumb_order(sel);
                 fileBrowser->sortThumbnails();
             };
 
@@ -555,6 +588,7 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
                 mi->signal_activate().connect(sigc::slot<void>(on_activate));
             };
         addItem(M("FILEBROWSER_SORT_FILENAME"));
+        addItem(M("FILEBROWSER_SORT_FILENAME_REV"));
         addItem(M("FILEBROWSER_SORT_DATE"));
         addItem(M("FILEBROWSER_SORT_DATE_REV"));
         addItem(M("FILEBROWSER_SORT_MODTIME"));
@@ -562,7 +596,7 @@ FileCatalog::FileCatalog(FilePanel* filepanel) :
         addItem(M("FILEBROWSER_SORT_PROCTIME"));
         addItem(M("FILEBROWSER_SORT_PROCTIME_REV"));
         menu->show_all_children();
-        menu->set_active(int(options.thumbnailOrder));
+        menu->set_active(thumb_order_to_index(options.thumbnailOrder));
         on_activate();
         thumbOrder->set_relief(Gtk::RELIEF_NONE);
         buttonBar->pack_start(*thumbOrder, Gtk::PACK_SHRINK);
@@ -748,6 +782,9 @@ public:
         case Options::ThumbnailOrder::PROCTIME:
         case Options::ThumbnailOrder::PROCTIME_REV:
             return lt_proctime(a, b, order_ == Options::ThumbnailOrder::PROCTIME_REV);
+            break;
+        case Options::ThumbnailOrder::FILENAME_REV:
+            return b < a;
             break;
         case Options::ThumbnailOrder::FILENAME:
         default:

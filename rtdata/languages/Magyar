@@ -219,7 +219,8 @@ FILEBROWSER_SHOWTRASHHINT;Kuka tartalmának megjelenítése.\nGyorsbillentyű: <
 FILEBROWSER_SHOWUNCOLORHINT;Színcímke nélküli képek megjelenítése.\nGyorsbillentyű: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Nem értékelt képek megjelenítése.\nGyorsbillentyű: <b>0</b>
 FILEBROWSER_SORT_LABEL;Bélyegképek rendezése
-FILEBROWSER_SORT_FILENAME;Fájlnév
+FILEBROWSER_SORT_FILENAME;Fájlnév (legrégebbi fent)
+FILEBROWSER_SORT_FILENAME_REV;Fájlnév (legújabb fent)
 FILEBROWSER_SORT_DATE;Felvétel készítésének dátuma (legrégebbi fent)
 FILEBROWSER_SORT_DATE_REV;Felvétel készítésének dátuma (legújabb fent)
 FILEBROWSER_SORT_MODTIME;Fájl módosításának ideje (legrégebbi fent)

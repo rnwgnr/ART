@@ -244,6 +244,7 @@ FILEBROWSER_SHOWUNCOLORHINT;Mostrar imágenes sin etiqueta de color.\nAtajo: <b>
 FILEBROWSER_SHOWUNRANKHINT;Mostrar imágenes sin puntuación.\nAtajo: <b>0</b>
 FILEBROWSER_SORT_LABEL;Orden de las miniaturas
 FILEBROWSER_SORT_FILENAME;Nombre del archivo
+FILEBROWSER_SORT_FILENAME_REV;Nombre del archivo (inverso)
 FILEBROWSER_SORT_DATE;Fecha
 FILEBROWSER_SORT_DATE_REV;Fecha (inverso)
 FILEBROWSER_SORT_MODTIME;Hora de modificación del archivo

@@ -143,6 +143,9 @@ public:
         case Options::ThumbnailOrder::PROCTIME_REV:
             return lt_proctime(*a, *b, order_ == Options::ThumbnailOrder::PROCTIME_REV);
             break;
+        case Options::ThumbnailOrder::FILENAME_REV:
+            return *b < *a;
+            break;
         case Options::ThumbnailOrder::FILENAME:
         default:
             return *a < *b;

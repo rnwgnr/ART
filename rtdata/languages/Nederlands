@@ -256,7 +256,8 @@ FILEBROWSER_SHOWTRASHHINT;Toon inhoud prullenbak\nSneltoets: <b>Ctrl+T</b>
 FILEBROWSER_SHOWUNCOLORHINT;Toon foto's zonder kleurlabel\nSneltoets: <b>Alt+0</b>
 FILEBROWSER_SHOWUNRANKHINT;Toon foto's zonder sterwaardering\nSneltoets: <b>0</b>
 FILEBROWSER_SORT_LABEL;Volgorde miniaturen
-FILEBROWSER_SORT_FILENAME;Bestandsnaam  in
+FILEBROWSER_SORT_FILENAME;Bestandsnaam in
+FILEBROWSER_SORT_FILENAME_REV;Bestandsnaam in (omgekeerd)
 FILEBROWSER_SORT_DATE;Datum
 FILEBROWSER_SORT_DATE_REV;Datum (omgekeerd)
 FILEBROWSER_SORT_MODTIME;Tijdstip bestandsmodificatie

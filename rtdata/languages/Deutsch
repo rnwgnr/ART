@@ -224,7 +224,8 @@ FILEBROWSER_SHOWUNCOLORHINT;Nur unmarkierte Bilder anzeigen.\nTaste: <b>Alt + 0<
 FILEBROWSER_SHOWUNRANKHINT;Nur unbewertete Bilder anzeigen.\nTaste: <b>0</b>
 FILEBROWSER_SORT_DATE;Aufnahmedatum (älteste oben)
 FILEBROWSER_SORT_DATE_REV;Aufnahmedatum (neueste oben)
-FILEBROWSER_SORT_FILENAME;Dateiname
+FILEBROWSER_SORT_FILENAME;Dateiname (älteste oben)
+FILEBROWSER_SORT_FILENAME_REV;Dateiname (neueste oben)
 FILEBROWSER_SORT_LABEL;Sortierung
 FILEBROWSER_SORT_MODTIME;Änderungsdatum der Datei (älteste oben)
 FILEBROWSER_SORT_MODTIME_REV;Änderungsdatum der Datei (neueste oben)

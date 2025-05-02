@@ -218,6 +218,7 @@ FILEBROWSER_SHOWUNCOLORHINT;Afficher les images sans label de couleur\nRaccourci
 FILEBROWSER_SHOWUNRANKHINT;Voir les images sans étoile\nRaccourci : <b>0</b>
 FILEBROWSER_SORT_LABEL;Ordre des vignettes
 FILEBROWSER_SORT_FILENAME;Nom de fichier
+FILEBROWSER_SORT_FILENAME_REV;Nom de fichier (inverser)
 FILEBROWSER_SORT_DATE;Date
 FILEBROWSER_SORT_DATE_REV;Date (inverser)
 FILEBROWSER_SORT_MODTIME;Heure de modification du fichier

@@ -217,6 +217,7 @@ FILEBROWSER_SHOWUNCOLORHINT;Show images without a color label.\nShortcut: <b>Alt
 FILEBROWSER_SHOWUNRANKHINT;Show unranked images.\nShortcut: <b>0</b>
 FILEBROWSER_SORT_LABEL;Thumbnail order
 FILEBROWSER_SORT_FILENAME;File name
+FILEBROWSER_SORT_FILENAME_REV;File name (reverse)
 FILEBROWSER_SORT_DATE;Date
 FILEBROWSER_SORT_DATE_REV;Date (reverse)
 FILEBROWSER_SORT_MODTIME;File modification time
