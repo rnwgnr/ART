@@ -416,11 +416,11 @@ FramesData::FramesData(const Glib::ustring &fname):
         }
 
         if (find_exif_tag("Exif.Image.Rating")) {
-            rating_ = exiv2_to_long(*pos);
+            rating_ = int16_t(uint16_t(exiv2_to_long(*pos)));
         } else {
             auto it = meta.xmpData().findKey(Exiv2::XmpKey("Xmp.xmp.Rating"));
             if (it != meta.xmpData().end() && it->size()) {
-                rating_ = exiv2_to_long(*it);
+                rating_ = int16_t(uint16_t(exiv2_to_long(*it)));
             }
         }
 
