@@ -37,6 +37,7 @@
 #include "sleef.h"
 #include "../rtgui/threadutils.h"
 #include "imagefloat.h"
+#include "rescale.h"
 
 #define BENCHMARK
 #include "StopWatch.h"
@@ -1034,7 +1035,12 @@ public:
     void operator()()
     {
         auto band = init();
+        process(band);
+    }
 
+private:
+    void process(std::vector<BandElement> &band)
+    {
         float last_dist = 0.f;
         // find next pixel to inpaint with FFM (Fast Marching Method)
         // FFM advances the band of the mask towards its center,
@@ -1073,8 +1079,9 @@ public:
                 float d2 = solve_eikonal(nb_y + 1, nb_x, nb_y, nb_x + 1, flags_);
                 float d3 = solve_eikonal(nb_y - 1, nb_x, nb_y, nb_x + 1, flags_);
                 float d4 = solve_eikonal(nb_y + 1, nb_x, nb_y, nb_x - 1, flags_);
-                last_dist = min(d1, d2, d3, d4);
-                dists_[nb_y][nb_x] = last_dist;
+                float ld = min(d1, d2, d3, d4);
+                last_dist = max(last_dist, ld);
+                dists_[nb_y][nb_x] = ld;
 
                 // inpaint neighbor
                 inpaint_pixel(nb_y, nb_x);
@@ -1088,7 +1095,6 @@ public:
         }
     }
 
-private:
     float solve_eikonal(int y1, int x1, int y2, int x2, const array2D<char> &flags)
     {
         if (y1 < 0 || y1 >= H_ || x1 < 0 || x1 >= W_) {
@@ -1465,12 +1471,50 @@ private:
 
 } // namespace
 
-void inpaint(Imagefloat *img, const array2D<float> &mask, float threshold, int radius, int border, int limit, bool multithread)
+void inpaint(Imagefloat *img, const array2D<float> &mask, float threshold, int radius, int border, int limit, bool multithread, int skip)
 {
     BENCHFUN
-        
-    Inpainting op(img, mask, threshold, radius, border, limit, multithread);
-    op();
+
+    if (skip > 1) {
+        int W = img->getWidth();
+        int H = img->getHeight();
+        int dW = W / skip;
+        int dH = H / skip;
+        Imagefloat tmp(dW, dH);
+        array2D<float> tmpm(dW, dH);
+        rescaleBilinear(mask, tmpm, multithread);
+        for (int i = 0; i < 3; ++i) {
+            array2D<float> asrc(W, H, i == 0 ? img->r.ptrs : i == 1 ? img->g.ptrs : img->b.ptrs, ARRAY2D_BYREFERENCE);
+            array2D<float> adst(dW, dH, i == 0 ? tmp.r.ptrs : i == 1 ? tmp.g.ptrs : tmp.b.ptrs, ARRAY2D_BYREFERENCE);
+            rescaleBilinear(asrc, adst, multithread);
+        }
+
+        Inpainting op(img, mask, threshold, radius / skip, border / skip, limit / skip, multithread);
+        op();
+
+        array2D<float> r(dW, dH, tmp.r.ptrs, ARRAY2D_BYREFERENCE);
+        array2D<float> g(dW, dH, tmp.g.ptrs, ARRAY2D_BYREFERENCE);
+        array2D<float> b(dW, dH, tmp.b.ptrs, ARRAY2D_BYREFERENCE);
+        float t = std::abs(threshold);
+        float cs = float(dW) / float(W);
+        float rs = float(dH) / float(H);
+        bool inv = threshold < 0;
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                float m = inv ? 1.f - mask[y][x] : mask[y][x];
+                if (m >= t) {
+                    float xx = x * cs;
+                    float yy = y * cs;
+                    img->r(y, x) = getBilinearValue(r, xx, yy);
+                    img->g(y, x) = getBilinearValue(g, xx, yy);
+                    img->b(y, x) = getBilinearValue(b, xx, yy);
+                }
+            }
+        }
+    } else {
+        Inpainting op(img, mask, threshold, radius, border, limit, multithread);
+        op();
+    }
 }
 
 } // namespace rtengine

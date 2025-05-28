@@ -66,6 +66,6 @@ void get_luminance(const Imagefloat *src, array2D<float> &out, const float ws[3]
 void multiply(Imagefloat *img, const array2D<float> &num, const array2D<float> &den, bool multithread);
 
 
-void inpaint(Imagefloat *img, const array2D<float> &mask, float threshold, int radius, int border, int limit, bool multithread);
+void inpaint(Imagefloat *img, const array2D<float> &mask, float threshold, int radius, int border, int limit, bool multithread, int skip);
 
 } // namespace rtengine
