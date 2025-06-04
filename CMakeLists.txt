@@ -134,8 +134,10 @@ if(APPLE)
     endif()
 
     # Set minimum system version
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    if(CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -headerpad_max_install_names")
 endif()
 
@@ -151,16 +153,19 @@ option(ENABLE_LIBRAW "Use libraw for decoding" ON)
 option(ENABLE_OCIO "Use OpenColorIOv2 for LUT application" ON)
 option(ENABLE_CTL "Enable support for the ACES Color Transformation Language" OFF)
 
-# For macOS only, OSX_DEV_BUILD option allows using relative paths instead of absolute
-# paths. Consequently, for development builds, application can be launching without
-# being bundled. However, file access can be restricted for some folder.
-option(OSX_DEV_BUILD "Generate macOS development builds" OFF)
+option(MACOS_LEGACY_BUNDLE "Use legacy method for building a macOS bundle using the tools/osx/macos_bundle.sh script" OFF)
 
-# On macOS, optionally generate the final zip artifact file without version in the name for nightly upload purposes.
-option(OSX_NIGHTLY "Generate a generically-named zip" OFF)
+option(OSX_DEV_BUILD "DEPRECATED - Generate macOS development builds" OFF)
 
-# Generate a universal macOS build
-option(OSX_UNIVERSAL "Generate a universal app" OFF)
+option(OSX_NIGHTLY "DEPRECATED - Generate a generically-named zip (only when MACOS_LEGACY_BUNDLE is OFF)" OFF)
+
+option(OSX_UNIVERSAL "DEPRECATED - Generate a universal app (only when MACOS_LEGACY_BUNDLE is OFF)" OFF)
+
+if(MACOS_LEGACY_BUNDLE)
+    set(OSX_DEV_BUILD 1 FORCE)
+else()
+    set(OSX_DEV_BUILD 0 FORCE)
+endif()
 
 if(APPLE AND OSX_DEV_BUILD)
     set(APPLE_NEW_BUNDLE 1)

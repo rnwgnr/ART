@@ -202,7 +202,7 @@ jobs:
             -DENABLE_LIBRAW=1 \
             -DCTL_INCLUDE_DIR=/opt/art-deps/include/CTL \
             -DCMAKE_LIBRARY_PATH=/opt/art-deps/lib \
-            -DOSX_DEV_BUILD=1 \
+            -DMACOS_LEGACY_BUNDLE=0 \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=$OS_VERSION \
             ../repo
           cd ..
