@@ -1899,10 +1899,13 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
     const auto buffer_size = static_cast<std::vector<unsigned char>::size_type>(wave_height) * cairo_stride;
 
     const auto rgba =
-        [](uint8_t r, uint8_t g, uint8_t b, uint8_t a) -> uint32_t
+        [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t
         {
+            //return a | (a << 8) | (a << 16) | (a << 24);
             return b | (g << 8) | (r << 16) | (a << 24);
         };
+
+    constexpr float val_max = 255;
 
     if (parade_buffer_r_dirty && needRed) {
         parade_buffer_r.assign(buffer_size, 0);
@@ -1912,12 +1915,13 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             const int* const r_row = rwave[val];
             std::uint32_t* const buffer_r_row = reinterpret_cast<uint32_t*>(parade_buffer_r.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                int r = std::min<float>(scale * r_row[col], 0xff);
+                int r = std::min<float>(scale * r_row[col], val_max);
                 if (r != 0) {
+                    int a = r;
                     int g = r * rgb_R[1];
                     int b = r * rgb_R[2];
                     getGUIColor(r, g, b);
-                    buffer_r_row[col] = rgba(r, g, b, r); //(r << 16) | (r << 24);
+                    buffer_r_row[col] = rgba(r, g, b, a);
                 }
             }
         }
@@ -1933,12 +1937,13 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             const int* const g_row = gwave[val];
             std::uint32_t* const buffer_g_row = reinterpret_cast<uint32_t*>(parade_buffer_g.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                int g = std::min<float>(scale * g_row[col], 0xff);
+                int g = std::min<float>(scale * g_row[col], val_max);
                 if (g != 0) {
+                    int a = g;
                     int r = g * rgb_G[0];
                     int b = g * rgb_G[2];
                     getGUIColor(r, g, b);
-                    buffer_g_row[col] = rgba(r, g, b, g); //(g << 8) | (g << 24);
+                    buffer_g_row[col] = rgba(r, g, b, a);
                 }
             }
         }
@@ -1954,12 +1959,13 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             const int* const b_row = bwave[val];
             std::uint32_t* const buffer_b_row = reinterpret_cast<uint32_t*>(parade_buffer_b.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                int b = std::min<float>(scale * b_row[col], 0xff);
+                int b = std::min<float>(scale * b_row[col], val_max);
                 if (b != 0) {
+                    int a = b;
                     int g = b * rgb_B[1]; // Make blue easier to see.
                     int r = b * rgb_B[0];
                     getGUIColor(r, g, b);
-                    buffer_b_row[col] = rgba(r, g, b, b); //b | (g << 8) | (b << 24);
+                    buffer_b_row[col] = rgba(r, g, b, a);
                 }
             }
         }
@@ -1976,8 +1982,8 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
             std::uint32_t* const buffer_row =
                 reinterpret_cast<uint32_t*>(wave_buffer_luma.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                const unsigned char l = std::min<float>(scale * l_row[col], 0xff);
-                buffer_row[col] = l | (l << 8) | (l << 16) | (l << 24);
+                const unsigned char l = std::min<float>(scale * l_row[col], val_max);
+                buffer_row[col] = rgba(l, l, l, l);
             }
         }
 
@@ -2002,8 +2008,8 @@ void HistogramArea::drawParade(Cairo::RefPtr<Cairo::Context> &cr, int w, int h)
     const double display_wave_width = static_cast<double>(w) / buffers.size();
     for (unsigned i = 0; i < buffers.size(); i++) {
         Cairo::RefPtr<Cairo::ImageSurface> surface;
-        cr->translate(i * display_wave_width, padding);
-        cr->scale(display_wave_width / wave_width, (h - 2 * padding) / wave_height);
+        cr->translate(i * display_wave_width, padding+1);
+        cr->scale(display_wave_width / wave_width, (h - 2 * (padding+1)) / wave_height);
         surface = Cairo::ImageSurface::create(
             buffers[i], Cairo::FORMAT_ARGB32, wave_width, wave_height, cairo_stride);
         cr->set_source(surface, 0, 0);
@@ -2208,10 +2214,12 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
     const auto buffer_size = static_cast<std::vector<unsigned char>::size_type>(wave_height) * cairo_stride;
 
     const auto rgba =
-        [](uint8_t r, uint8_t g, uint8_t b, uint8_t a) -> uint32_t
+        [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t
         {
             return b | (g << 8) | (r << 16) | (a << 24);
         };
+
+    constexpr float val_max = 255.f;
     
     if (wave_buffer_dirty && (needRed || needGreen || needBlue)) {
         wave_buffer.assign(buffer_size, 0);
@@ -2223,14 +2231,14 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
             const int* const b_row = bwave[val];
             std::uint32_t* const buffer_row = reinterpret_cast<uint32_t*>(wave_buffer.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                int r = needRed ? std::min<float>(scale * r_row[col], 0xff) : 0;
-                int b = needBlue ? std::min<float>(scale * b_row[col], 0xff) : 0;
-                int g = needGreen ? rtengine::LIM(std::min<float>(scale * g_row[col], 0xff) + float(needBlue ? b * rgb_B[1] : 0), 0.f, float(0xff)) : 0;
+                int r = needRed ? std::min<float>(scale * r_row[col], val_max) : 0;
+                int b = needBlue ? std::min<float>(scale * b_row[col], val_max) : 0;
+                int g = needGreen ? rtengine::LIM(std::min<float>(scale * g_row[col], val_max) + float(needBlue ? b * rgb_B[1] : 0), 0.f, val_max) : 0;
                 int value = rtengine::max(r, g, b);
                 if (value != 0) {
                     // Ensures correct order regardless of endianness.
                     getGUIColor(r, g, b);
-                    buffer_row[col] = rgba(r, g, b, value); //b | (g << 8) | (r << 16) | (value << 24);
+                    buffer_row[col] = rgba(r, g, b, value);
                 }
             }
         }
@@ -2247,8 +2255,8 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
             std::uint32_t* const buffer_row =
                 reinterpret_cast<uint32_t*>(wave_buffer_luma.data() + (255 - val) * cairo_stride);
             for (int col = 0; col < wave_width; col++) {
-                const unsigned char l = std::min<float>(scale * l_row[col], 0xff);
-                buffer_row[col] = l | (l << 8) | (l << 16) | (l << 24);
+                const unsigned char l = std::min<float>(scale * l_row[col], val_max);
+                buffer_row[col] = rgba(l, l, l, l);
             }
         }
 
@@ -2257,8 +2265,8 @@ void HistogramArea::drawWaveform(Cairo::RefPtr<Cairo::Context> &cr, int w, int h
 
     Cairo::RefPtr<Cairo::ImageSurface> surface;
     auto orig_matrix = cr->get_matrix();
-    cr->translate(0, padding);
-    cr->scale(static_cast<double>(w) / wave_width, (h - 2 * padding) / wave_height);
+    cr->translate(0, padding+1);
+    cr->scale(static_cast<double>(w) / wave_width, (h - 2 * (padding + 1)) / wave_height);
     if (needLuma) {
         surface = Cairo::ImageSurface::create(
             wave_buffer_luma.data(), Cairo::FORMAT_ARGB32, wave_width, wave_height, cairo_stride);

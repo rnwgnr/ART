@@ -1132,7 +1132,7 @@ bool ImProcCoordinator::updateWaveforms()
             waveformBlue[workimg->data[ofs++]][j]++;
             float L, a, b;
             bufs_[2]->getLab(i, j, L, a, b);
-            waveformLuma[LIM<int>(L * luma_factor, 0, 255)][j]++;
+            waveformLuma[LIM<int>(L * luma_factor + 0.5, 0, 255)][j]++;
         }
     }
 
