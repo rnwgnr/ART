@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2025-01-26 Bereczky Péter
+#03 2025-06-11 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -26,7 +26,7 @@ CURVEEDITOR_CUSTOM;Standard
 CURVEEDITOR_DARKS;Sötétek
 CURVEEDITOR_EDITPOINT_HINT;Engedélyezi a vezérlőpont be-/kimeneti értékeinek szerkesztését.\n\nJobb kattintás a vezérlőponton a kiválasztáshoz.\nJobb kattintás egy üres területen kilépés a szerkesztésből.
 CURVEEDITOR_HIGHLIGHTS;Csúcsfények
-CURVEEDITOR_LIGHTS;Középtónusok
+CURVEEDITOR_LIGHTS;Fények
 CURVEEDITOR_LINEAR;Ki
 CURVEEDITOR_LOADDLGLABEL;Görbe betöltése...
 CURVEEDITOR_MINMAXCPOINTS;Kiegyenlítő
@@ -100,11 +100,11 @@ EXPORT_BYPASS_ALL;Mindent kijelöl/kijelölés megszüntetése
 EXPORT_BYPASS_DEFRINGE;Színhibajavítás kihagyása
 EXPORT_BYPASS_DIRPYRDENOISE;Képzajcsökkentés kihagyása
 EXPORT_BYPASS_LOCALCONTRAST;Helyi kontraszt kihagyása
-EXPORT_BYPASS_RAW_CA;Kromatikus aberráció korrekció kihagyása [Raw]
+EXPORT_BYPASS_RAW_CA;Kromatikusaberráció-korrekció kihagyása [Raw]
 EXPORT_BYPASS_RAW_CCSTEPS;Hamis színek elnyomásának kihagyása [Raw]
 EXPORT_BYPASS_RAW_DCB_ENHANCE;DCB fejlesztési lépéseinek kihagyása [Raw]
 EXPORT_BYPASS_RAW_DCB_ITERATIONS;DCB ismétlések kihagyása [Raw]
-EXPORT_BYPASS_RAW_DF;Dark-frame (feketekép) kihagyása [Raw]
+EXPORT_BYPASS_RAW_DF;Dark-frame (fekete kép) kihagyása [Raw]
 EXPORT_BYPASS_RAW_FF;Flat-field kihagyása [Raw]
 EXPORT_BYPASS_RAW_GREENTHRESH;Zöld egyensúly kihagyása [Raw]
 EXPORT_BYPASS_RAW_LINENOISE;Vonalzaj szűrő figyelmen kívül hagyása [Raw]
@@ -122,7 +122,7 @@ EXPORT_USE_FAST_PIPELINE_TIP;Használjon dedikált feldolgozási folyamatot a k�
 EXPORT_USE_NORMAL_PIPELINE;Standard (kihagy néhány lépést, átméretezés a végén)
 FILEBROWSER_APPLYPROFILE;Alkalmaz
 FILEBROWSER_APPLYPROFILE_PARTIAL;Részlegesen alkalmaz
-FILEBROWSER_AUTODARKFRAME;Auto feketekép (dark-frame)
+FILEBROWSER_AUTODARKFRAME;Auto fekete kép (dark-frame)
 FILEBROWSER_AUTOFLATFIELD;Auto flat-field
 FILEBROWSER_BROWSEPATHBUTTONHINT;Bélyegképek listájának frissítése.\nGyorsbillentyű: <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;Adja meg az elérési utat a navigációhoz.\n\nGyorsbillentyűk:\n<b>Ctrl-o</b> a beviteli mezőre állítja a fókuszt.\n<b>Enter</b> / <b>Ctrl-Enter</b> böngészés;\n<b>Esc</b> törli a változásokat.\n<b>Shift-Esc</b> elveszi a fókuszt.\n\nÚtvonal gyorsbillentyűk:\n<b>~</b>	- a felhasználó saját (home) könyvtára.\n<b>!</b>	- a felhasználó képeinek könyvtára
@@ -234,7 +234,7 @@ FILEBROWSER_ZOOMOUTHINT;Bélyegképek méretének csökkentése.\n\nGyorsbillent
 FILECHOOSER_FILTER_ANY;Minden fájl
 FILECHOOSER_FILTER_COLPROF;Színprofilok (*.icc)
 FILECHOOSER_FILTER_CURVE;Görbe fájlok
-FILECHOOSER_FILTER_LCP;Objektív korrekciós profilok
+FILECHOOSER_FILTER_LCP;Objektívkorrekciós profilok
 FILECHOOSER_FILTER_PP;Feldolgozási profilok
 FILECHOOSER_FILTER_SAME;Az aktuális fényképpel megegyező formátumú
 FILECHOOSER_FILTER_TIFF;TIFF fájlok
@@ -278,7 +278,7 @@ HISTOGRAM_TOOLTIP_BAR;RGB jelzősáv megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_CHRO;Színesség (chromaticity) hisztogram megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_CROSSHAIR;Szálkereszt jelző megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_G;Zöld hisztogram megjelenítése/elrejtése.
-HISTOGRAM_TOOLTIP_L;CIELab fényerő hisztogram megjelenítése/elrejtése.
+HISTOGRAM_TOOLTIP_L;CIELab Világosság hisztogram megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_MODE;Átkapcsolja a hisztogram lineáris, logaritmikus-lineáris és logaritmikus-logaritmikus skála szerinti megjelenítését.\n(Aktuális mód: %1)
 HISTOGRAM_TOOLTIP_MODE_LINEAR;lineáris
 HISTOGRAM_TOOLTIP_MODE_LOG_X;logaritmikus-lineáris
@@ -286,13 +286,13 @@ HISTOGRAM_TOOLTIP_MODE_LOG_XY;logaritmikus-logaritmikus
 HISTOGRAM_TOOLTIP_R;Vörös hisztogram megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_RAW;RAW hisztogram megjelenítése/elrejtése.
 HISTOGRAM_TOOLTIP_SHOW_OPTIONS;Be/kikapcsolja a hisztogram beállítási gombjainak láthatóságát.
-HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Diagram világosságának beállítása.
+HISTOGRAM_TOOLTIP_TRACE_BRIGHTNESS;Diagram fényerejének beállítása.
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM;Hisztogram
 HISTOGRAM_TOOLTIP_TYPE_HISTOGRAM_RAW;Raw Hisztogram
 HISTOGRAM_TOOLTIP_TYPE_PARADE;RGB egymás mellett
 HISTOGRAM_TOOLTIP_TYPE_WAVEFORM;Hullámforma
-HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;Színárnyalat-Színesség (Hue-Chromaticity) vektornézet
-HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;Színárnyalat-Telítettség (Hue-Saturation) vektornézet
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HC;Színezet-Színesség (Hue-Chromaticity) vektornézet
+HISTOGRAM_TOOLTIP_TYPE_VECTORSCOPE_HS;Színezet-Telítettség (Hue-Saturation) vektornézet
 HISTORY_CHANGED;Változott
 HISTORY_CUSTOMCURVE;Egyedi görbe
 HISTORY_FROMCLIPBOARD;Vágólapról
@@ -327,7 +327,7 @@ HISTORY_MSG_35;Objektív - peremsötétedés
 HISTORY_MSG_36;Objektív - CA
 HISTORY_MSG_38;WB - Módszer
 HISTORY_MSG_39;WB - Színhőmérséklet
-HISTORY_MSG_40;WB - Színárnyalat
+HISTORY_MSG_40;WB - Színezet
 HISTORY_MSG_41;Tónusgörbe - Görbe 1 mód
 HISTORY_MSG_42;Tónusgörbe - Görbe 2
 HISTORY_MSG_43;Tónusgörbe - Görbe 2 mód
@@ -338,7 +338,7 @@ HISTORY_MSG_58;Vízszintes tükrözés
 HISTORY_MSG_59;Függőleges tükrözés
 HISTORY_MSG_60;Forgatás
 HISTORY_MSG_61;Automatikus kitöltés
-HISTORY_MSG_62;Torzítás korrekció
+HISTORY_MSG_62;Torzításkorrekció
 HISTORY_MSG_63;Pillanatkép kiválasztása
 HISTORY_MSG_64;Vágás
 HISTORY_MSG_65;Kromatikus aberráció (CA) korrekció
@@ -348,7 +348,7 @@ HISTORY_MSG_68;Expozíció - kiégett részletek helyreállítása
 HISTORY_MSG_69;Feldolgozási színprofil
 HISTORY_MSG_70;Kimeneti színprofil
 HISTORY_MSG_71;Bemeneti színprofil
-HISTORY_MSG_72;Peremsötétedés korrekció - Mérték
+HISTORY_MSG_72;Peremsötétedés-korrekció - Mérték
 HISTORY_MSG_73;Csatornakeverő (CM)
 HISTORY_MSG_74;Átméretezés - Skála
 HISTORY_MSG_75;Átméretezés - Módszer
@@ -359,7 +359,7 @@ HISTORY_MSG_80;Átméretezés - Magasság
 HISTORY_MSG_81;Átméretezés
 HISTORY_MSG_82;Megváltozott profil
 HISTORY_MSG_84;Perspektívakorrekció
-HISTORY_MSG_85;Objektív korrekció - LCP fájl
+HISTORY_MSG_85;Objektívkorrekció - LCP fájl
 HISTORY_MSG_87;Impulzuszaj csökkentése
 HISTORY_MSG_88;Impulzuszaj csökkentés küszöb
 HISTORY_MSG_89;Zajcsökkentés (NR)
@@ -372,7 +372,7 @@ HISTORY_MSG_97;L*a*b* - b* görbe
 HISTORY_MSG_98;Színrekonstrukciós módszer
 HISTORY_MSG_99;Hot pixel szűrő
 HISTORY_MSG_100;Telítettség/Élénkség - Telítettség
-HISTORY_MSG_101;CEQ - Színárnyalat
+HISTORY_MSG_101;CEQ - Színezet
 HISTORY_MSG_102;CEQ - Telítettség
 HISTORY_MSG_103;CEQ - Világosság
 HISTORY_MSG_104;Színkiegyenlítő (CEQ)
@@ -390,20 +390,20 @@ HISTORY_MSG_120;Zöldegyensúly
 HISTORY_MSG_121;Raw CA javítás - Auto
 HISTORY_MSG_122;Dark-Frame - Auto
 HISTORY_MSG_123;Dark-Frame - Fájl
-HISTORY_MSG_124;Erősítés/fehérpont korrekció
+HISTORY_MSG_124;Nyereség/Fehérpont-korrekció
 HISTORY_MSG_126;Flat-Field - Fájl
 HISTORY_MSG_127;Flat-Field - Auto
 HISTORY_MSG_128;Flat-Field - Elmosás sugara
 HISTORY_MSG_129;Flat-Field - Elmosás típusa
-HISTORY_MSG_130;Automatikus torzítás korrekció
+HISTORY_MSG_130;Automatikus torzításkorrekció
 HISTORY_MSG_131;NR - Világosság zaj
 HISTORY_MSG_132;NR - Színzaj
 HISTORY_MSG_133;Kimeneti gamma
-HISTORY_MSG_137;Feketeszint - Zöld 1
-HISTORY_MSG_138;Feketeszint - Vörös
-HISTORY_MSG_139;Feketeszint - Kék
-HISTORY_MSG_140;Feketeszint - Zöld 2
-HISTORY_MSG_141;Feketeszint - Zöld csúszkák összekapcsolása
+HISTORY_MSG_137;Fekete szint - Zöld 1
+HISTORY_MSG_138;Fekete szint - Vörös
+HISTORY_MSG_139;Fekete szint - Kék
+HISTORY_MSG_140;Fekete szint - Zöld 2
+HISTORY_MSG_141;Fekete szint - Zöld csúszkák összekapcsolása
 HISTORY_MSG_158;TB - Erősség
 HISTORY_MSG_160;TB - Részletek mértéke
 HISTORY_MSG_162;Textúra kiemelése/Élesítés
@@ -417,7 +417,7 @@ HISTORY_MSG_201;NR - Színzaj - vörös-zöld
 HISTORY_MSG_202;NR - Színzaj - kék-sárga
 HISTORY_MSG_203;NR - Színtér
 HISTORY_MSG_204;LMMSE javítási lépések
-HISTORY_MSG_207;Defringe - Színárnyalat (Hue) görbe
+HISTORY_MSG_207;Defringe - Színezet (Hue) görbe
 HISTORY_MSG_208;WB - Kék/Vörös kiegyenlítő
 HISTORY_MSG_210;GF - Szög
 HISTORY_MSG_211;Átmenetes szűrő (GF)
@@ -454,11 +454,11 @@ HISTORY_MSG_256;NR - Medián - Típus
 HISTORY_MSG_285;NR - Medián - Módszer
 HISTORY_MSG_286;NR - Medián - Medián
 HISTORY_MSG_287;NR - Medián - Iterációk
-HISTORY_MSG_288;Flat-Field - Vágás vezérlés
-HISTORY_MSG_289;Flat-Field - Vágás vezérlés - Auto
-HISTORY_MSG_290;Feketeszint - Vörös
-HISTORY_MSG_291;Feketeszint - Zöld
-HISTORY_MSG_292;Feketeszint - Kék
+HISTORY_MSG_288;Flat-Field - Vágásvezérlés
+HISTORY_MSG_289;Flat-Field - Vágásvezérlés - Auto
+HISTORY_MSG_290;Fekete szint - Vörös
+HISTORY_MSG_291;Fekete szint - Zöld
+HISTORY_MSG_292;Fekete szint - Kék
 HISTORY_MSG_293;Filmszimuláció
 HISTORY_MSG_294;Filmszimuláció - Erősség
 HISTORY_MSG_295;Filmszimuláció - Film
@@ -503,16 +503,16 @@ HISTORY_MSG_472;PS - Sima átmenetek
 HISTORY_MSG_473;PS - LMMSE alkalmazása
 HISTORY_MSG_474;PS - Kiegyenlítés
 HISTORY_MSG_475;PS - színcsatorna kiegyenlítő
-HISTORY_MSG_485;Objektív korrekció
-HISTORY_MSG_486;Objektív korrekció - Fényképezőgép
-HISTORY_MSG_487;Objektív korrekció - Objektív
+HISTORY_MSG_485;Objektívkorrekció
+HISTORY_MSG_486;Objektívkorrekció - Fényképezőgép
+HISTORY_MSG_487;Objektívkorrekció - Objektív
 HISTORY_MSG_488;Dinamikus tartomány tömörítése (DRC)
 HISTORY_MSG_489;DRC - Részletek
 HISTORY_MSG_490;DRC - Erősség
 HISTORY_MSG_491;Fehéregyensúly (WB)
 HISTORY_MSG_492;RGB Görbék
 HISTORY_MSG_493;L*a*b* Korrekció
-HISTORY_MSG_BWMIX_COLORCAST;Fekete-fehér - Színárnyalat
+HISTORY_MSG_BWMIX_COLORCAST;Fekete-fehér - Színezés
 HISTORY_MSG_SATURATION_VIBRANCE;Telítettség/Élénkség - Élénkség
 HISTORY_MSG_LOCALCONTRAST_LIST;Helyi kontraszt - területek
 HISTORY_MSG_LOCALCONTRAST_HUEMASK;Helyi kontraszt - H maszk
@@ -532,7 +532,7 @@ HISTORY_MSG_COLORCORRECTION_CHROMATICITYMASK;CC - C maszk
 HISTORY_MSG_COLORCORRECTION_CONTRASTTHRESHOLDMASK;CC - kontrasztküszöb maszk
 HISTORY_MSG_COLORCORRECTION_ENABLED;Szín/Tónus Korrekció (CC)
 HISTORY_MSG_COLORCORRECTION_HUEMASK;CC - H maszk
-HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - színárnyalat-eltolás
+HISTORY_MSG_COLORCORRECTION_HUESHIFT;CC - színezet-eltolás
 HISTORY_MSG_COLORCORRECTION_LIGHTNESS;CC - világosság
 HISTORY_MSG_COLORCORRECTION_LIGHTNESSMASK;CC - L maszk
 HISTORY_MSG_COLORCORRECTION_LIST;CC - területek
@@ -545,7 +545,7 @@ HISTORY_MSG_COLORCORRECTION_RGBLUMINANCE;CC - fényerő mód
 HISTORY_MSG_COLORCORRECTION_INSATURATION;CC - bemeneti telítettség
 HISTORY_MSG_COLORCORRECTION_OUTSATURATION;CC - kimeneti telítettség
 HISTORY_MSG_COLORCORRECTION_SHOWMASK;CC - maszk megjelenítése
-HISTORY_MSG_COLORCORRECTION_SLOPE;CC - csúcsfények/erősítés
+HISTORY_MSG_COLORCORRECTION_SLOPE;CC - csúcsfények/nyereség
 HISTORY_MSG_COLORCORRECTION_DELTAEMASK;CC - színbeli hasonlóság maszk
 HISTORY_MSG_COLORCORRECTION_DRAWNMASK;CC - ecsetmaszk
 HISTORY_MSG_COLORCORRECTION_PARAMETRICMASK;CC - parametrikus maszk
@@ -556,7 +556,7 @@ HISTORY_MSG_COLORCORRECTION_HSL_GAMMA;CC - gamma
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CC - Színkorrekció (CC)
 HISTORY_MSG_DENOISE_CHROMINANCE_AUTO_FACTOR;NR - auto erősség (színzaj)
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_RADIUS;NR - Végső simítás C
-HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;NR - Detail threshold
+HISTORY_MSG_DENOISE_LUMINANCE_DETAIL_THRESHOLD;NR - Részletküszöb
 HISTORY_MSG_DENOISE_LUMINANCE_CURVE;NR - Fényerő görbe
 HISTORY_MSG_DENOISE_GUIDED_CHROMA_STRENGTH;NR - GF C erősség
 HISTORY_MSG_DENOISE_NL_DETAIL;NR - Végső simítás részletek
@@ -565,10 +565,10 @@ HISTORY_MSG_DENOISE_SMOOTHING_METHOD;NR - Simitás módszere
 HISTORY_MSG_DEHAZE_BLACKPOINT;Dehaze - Feketepont-korrekció
 HISTORY_MSG_DEHAZE_DEPTH;Dehaze - Mélység
 HISTORY_MSG_DEHAZE_ENABLED;Homály eltávolítása (Dehaze)
-HISTORY_MSG_DEHAZE_LUMINANCE;Dehaze - Csak világosság
+HISTORY_MSG_DEHAZE_LUMINANCE;Dehaze - Csak fényerő
 HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Dehaze - Mélységtérkép megjelenítése
 HISTORY_MSG_DEHAZE_STRENGTH;Dehaze - Erősség
-HISTORY_MSG_DISTORTION_AUTO;Auto Torzítás korrekció
+HISTORY_MSG_DISTORTION_AUTO;Automatikus Torzításkorrekció
 HISTORY_MSG_DUALDEMOSAIC_AUTO_CONTRAST;Dupla színrekonstrukció - Auto küszöb
 HISTORY_MSG_DUALDEMOSAIC_CONTRAST;Dupla színrekonstrukció - Kontrasztküszöb
 HISTORY_MSG_EPD_DETAIL_THRESHOLD;TB - részletek
@@ -585,7 +585,7 @@ HISTORY_MSG_EPD_DELTAEMASK;TB - színbeli hasonlóság maszk
 HISTORY_MSG_EPD_DRAWNMASK;TB - ecsetmaszk
 HISTORY_MSG_EPD_PARAMETRICMASK;TB - parametrikus maszk
 HISTORY_MSG_EPD_MASK_POSTPROCESS;TB - maszk utófeldolgozás
-HISTORY_MSG_EXPOSURE_BLACK;Expozíció - Feketepont
+HISTORY_MSG_EXPOSURE_BLACK;Expozíció - Fekete pont
 HISTORY_MSG_EXPOSURE_HRBLUR;Expozíció - Színterjesztés
 HISTORY_MSG_FILMNEGATIVE_BALANCE;FN - Referencia kimenet
 HISTORY_MSG_FILMNEGATIVE_ENABLED;Filmnegatív (FN)
@@ -700,7 +700,7 @@ HISTORY_MSG_TONECURVE_SATCURVE;Tónusgörbe - Telítettség
 HISTORY_MSG_TONECURVE_PERCEPTUAL_STRENGTH;Tónusgörbe - Érzékelési erősség
 HISTORY_MSG_TONECURVE_CONTRAST_LEGACY;Tónusgörbe - Kontraszt örökölt mód
 HISTORY_MSG_TONECURVE_MODE;Tónusgörbe - Mód
-HISTORY_MSG_TONECURVE_WHITEPOINT;Tónusgörbe - Fehérpont
+HISTORY_MSG_TONECURVE_WHITEPOINT;Tónusgörbe - Fehér pont
 HISTORY_MSG_WBALANCE_MULT;WB - szorzók
 HISTORY_NEWSNAPSHOT;Hozzáad
 HISTORY_NEWSNAPSHOT_TOOLTIP;Gyorsbillentyű: <b>Alt-s</b>
@@ -754,7 +754,7 @@ INSPECTOR_HISTOGRAM;Hisztogram.\nGyorsbillentyű: <b>h</b>.
 INSPECTOR_INFO;Gyors infó.\nGyorsbillentyű: <b>Shift-i</b>.
 INSPECTOR_PREVIEW;Beágyazott előnézeti kép.\nGyorsbillentyű: <b>j</b>.
 INSPECTOR_RAW_LINEAR;Gyors Raw renderelés lineáris tónusgörbével.\nGyorsbillentyű: <b>r</b>.
-INSPECTOR_RAW_FILM;FGyors Raw renderelés filmszerű tónusgörbével.\nGyorsbillentyű: <b>f</b>.
+INSPECTOR_RAW_FILM;Gyors Raw renderelés filmszerű tónusgörbével.\nGyorsbillentyű: <b>f</b>.
 INSPECTOR_RAW_CLIP;Raw kivágott képpontok.\nGyorsbillentyű: <b>w</b>.
 INSPECTOR_RAW_SHADOW;Gyors Raw renderelés árnyéknövelő tónusgörbével.\nGyorsbillentyű: <b>s</b>.
 INSPECTOR_SPLIT;Osztott nézet.\nGyorsbillentyű: <b>y</b>.
@@ -911,7 +911,7 @@ PARTIALPASTE_EFFECTSGROUP;Speciális effektusok beállításai
 PARTIALPASTE_EXPOSUREGROUP;Expozíció beállításai
 PARTIALPASTE_SATURATION;Telítettség/Élénkség
 PARTIALPASTE_TONECURVE;Tónusgörbe
-PARTIALPASTE_CACORRECTION;Kromatikus aberráció korrekció
+PARTIALPASTE_CACORRECTION;Kromatikusaberráció-korrekció
 PARTIALPASTE_CHANNELMIXER;Csatornakeverő
 PARTIALPASTE_CHANNELMIXERBW;Fekete-fehér
 PARTIALPASTE_COARSETRANS;Durva forgatás/tükrözés
@@ -930,7 +930,7 @@ PARTIALPASTE_DETAILGROUP;Részletek beállítása
 PARTIALPASTE_DIALOGLABEL;Feldolgozási profil részleges beillesztése
 PARTIALPASTE_DIRPYRDENOISE;Zajcsökkentés
 PARTIALPASTE_DIRPYREQUALIZER;Kontraszt részletek szerint
-PARTIALPASTE_DISTORTION;Torzítás korrekció
+PARTIALPASTE_DISTORTION;Torzításkorrekció
 PARTIALPASTE_TEXTUREBOOST;Textúra kiemelése/élesítés
 PARTIALPASTE_EQUALIZER;Wavelet szintek
 PARTIALPASTE_EVERYTHING;Minden
@@ -951,7 +951,7 @@ PARTIALPASTE_IMPULSEDENOISE;Impulzuszaj csökkentése
 PARTIALPASTE_IPTCINFO;IPTC
 PARTIALPASTE_LABCURVE;L*a*b* korrekciók
 PARTIALPASTE_LENSGROUP;Objektívvel kapcsolatos beállítások
-PARTIALPASTE_LENSPROFILE;Objektív korrekció profil alapján
+PARTIALPASTE_LENSPROFILE;Objektívkorrekció profil alapján
 PARTIALPASTE_LOCALCONTRAST;Helyi kontraszt
 PARTIALPASTE_LOCALGROUP;Helyi szerkesztési beállítások
 PARTIALPASTE_METADATA;Metaadat mód
@@ -966,8 +966,8 @@ PARTIALPASTE_PREPROCESS_PDAFLINESFILTER;PDAF sor szűrő
 PARTIALPASTE_PRSHARPENING;Kimenet élesítése
 PARTIALPASTE_RAWCA;Raw CA korrekció
 PARTIALPASTE_RAW_DEMOSAIC;Színrekonstrukció
-PARTIALPASTE_RAW_BLACK;Feketeszint
-PARTIALPASTE_RAW_WHITE;Erősítés/fehérpont korrekció
+PARTIALPASTE_RAW_BLACK;Fekete szint
+PARTIALPASTE_RAW_WHITE;Nyereség/Fehérpont-korrekció
 PARTIALPASTE_RAWGROUP;Raw beállítások
 PARTIALPASTE_RAW_PREPROCESSING;Raw előfeldolgozás
 PARTIALPASTE_HOT_DEAD_PIXEL_FILTER;Forró/halott pixel szűrő
@@ -988,7 +988,7 @@ PARTIALPASTE_TM_FATTAL;Dinamikus tartomány tömörítése
 PARTIALPASTE_TM_LOG;Logaritmikus tónusleképezés
 PARTIALPASTE_TONE_EQUALIZER;Tónuskiegyenlítő
 PARTIALPASTE_VIBRANCE;Élénkség
-PARTIALPASTE_VIGNETTING;Peremsötétedés korrekció
+PARTIALPASTE_VIGNETTING;Peremsötétedés-korrekció
 PARTIALPASTE_WHITEBALANCE;Fehéregyensúly
 PREFERENCES_ADD;Hozzáad
 PREFERENCES_ADJUSTER_FORCE_LINEAR;Lineáris skála kényszerítése a beállító csúszkáknál
@@ -1020,7 +1020,7 @@ PREFERENCES_CLIPPINGIND;Vágás jelzése
 PREFERENCES_CLUTSCACHE;CLUT gyorsítótár
 PREFERENCES_CLUTSCACHE_LABEL;A gyorsítótárazott CLUT-ok maximális száma
 PREFERENCES_CLUTSDIR;CLUT könyvtár
-PREFERENCES_CMMBPC;feketepont-kompenzáció
+PREFERENCES_CMMBPC;Feketepont-kompenzáció
 PREFERENCES_CTL_SCRIPTS_FAST_PREVIEW;Alkalmazzon gyorsabb, de kevésbé pontos renderelést a CTL-szkriptekhez ha az előnézeti kép nagyítása <100%
 PREFERENCES_CURVEBBOXPOS;A görbe másolása és beillesztése gombok helyzete
 PREFERENCES_CURVEBBOXPOS_ABOVE;Fent
@@ -1263,7 +1263,7 @@ RENAME_DIALOG_SKIP;Átlépés
 RENAME_DIALOG_RENAME;Egyedi fájlnév generálása
 RENAME_DIALOG_PROGRESSIVE;Progresszív szám
 RENAME_DIALOG_SIDECARS;További kísérőfájlok
-RENAME_DIALOG_SIDECARS_TIP;A műveletbe bevonandó további kísérőfájlok kiterjesztésének listája „;” karakterrel elválasztva. Ha egy kiterjesztés „+” jellel kezdődik, akkor a kiterjesztés felülírása helyett az eredeti névhez fűződik.\nFHa például a bemeneti fájl <i>file.raw</i>, az <i>ext1;+ext2</i> megadása a <i>file.ext1</i> és <i>file.raw.ext2</i> kísérőfájlokat eredményezi.
+RENAME_DIALOG_SIDECARS_TIP;A műveletbe bevonandó további kísérőfájlok kiterjesztésének listája „;” karakterrel elválasztva. Ha egy kiterjesztés „+” jellel kezdődik, akkor a kiterjesztés felülírása helyett az eredeti névhez fűződik.\nHa például a bemeneti fájl <i>file.raw</i>, az <i>ext1;+ext2</i> megadása a <i>file.ext1</i> és <i>file.raw.ext2</i> kísérőfájlokat eredményezi.
 RENAME_DIALOG_FILENAMES;Átnevezendő fájlok
 RENAME_DIALOG_PREVIEW;Előnézet
 RENAME_DIALOG_INVALID_PATTERN;Érvénytelen minta
@@ -1298,7 +1298,7 @@ SESSION_LABEL;Munkamenet
 SHCSELECTOR_TOOLTIP;Kattintson a jobb egérgombbal a 3 csúszka pozíciójának visszaállításához.
 SOFTPROOF_GAMUTCHECK_MONITOR_TOOLTIP;Emelje ki a tartományon (gamuton) kívüli képpontokat a monitorprofilhoz képest.
 SOFTPROOF_GAMUTCHECK_TOOLTIP;Emelje ki a gamuton kívüli színekkel rendelkező pixeleket a következők tekintetében:\n- a Soft-proofing profilt használja, ha az be van állítva és a Soft-proofing engedélyezve van,\n- a kimeneti profilt használja, ha a Soft-proofing le van tiltva.
-SOFTPROOF_TOOLTIP;A Soft-proofing szimulálja a kép megjelenését egy adott nyomtatón vagy monitoron, ha megfelelő profil van beállítva a Beállítások > Színkezelés menüpontban.\n(Kattintson, tartsa lenyomva a <b>Ctrl</b> gombot a Soft-proofing profil módosításához.)
+SOFTPROOF_TOOLTIP;A Soft-proofing szimulálja a kép megjelenését egy adott nyomtatón vagy monitoron, ha megfelelő profil van beállítva a Beállítások > Színkezelés menüpontban.\n(A <b>Ctrl</b> nyomva tartása mellett kattintson a Soft-proofing profil módosításához.)
 THRESHOLDSELECTOR_B;Alsó
 THRESHOLDSELECTOR_BL;Bal alsó
 THRESHOLDSELECTOR_BR;Jobb alsó
@@ -1317,8 +1317,8 @@ TP_SATURATION_LABEL;Telítettség/Élénkség
 TP_BRIGHTCONTRSAT_CONTRAST;Kontraszt
 TP_SATURATION_SATURATION;Telítettség
 TP_SATURATION_VIBRANCE;Élénkség
-TP_BWMIX_COLORCAST;Színezet
-TP_BWMIX_HUE;Színárnyalat
+TP_BWMIX_COLORCAST;Színezés
+TP_BWMIX_HUE;Színezet
 TP_BWMIX_SATURATION;Telítettség
 TP_BWMIX_FILTER;Színszűrő
 TP_BWMIX_FILTER_BLUE;Kék
@@ -1341,7 +1341,7 @@ TP_BWMIX_RGB_TOOLTIP;Keverje össze az RGB csatornákat. Használjon előre beá
 TP_BWMIX_SETTING;Előre beállított
 TP_BWMIX_SETTING_TOOLTIP;Különböző előbeállítások (film, tájkép stb.) vagy manuális Channel Mixer beállítások.
 TP_BWMIX_SET_HIGHCONTAST;Magas kontraszt
-TP_BWMIX_SET_HIGHSENSIT;Nagy érzékenység
+TP_BWMIX_SET_HIGHSENSIT;Magas érzékenység
 TP_BWMIX_SET_HYPERPANCHRO;Hiper Pankromatikus
 TP_BWMIX_SET_INFRARED;Infravörös
 TP_BWMIX_SET_LANDSCAPE;Tájkép
@@ -1354,7 +1354,7 @@ TP_BWMIX_SET_PORTRAIT;Portré
 TP_BWMIX_SET_RGBABS;Abszolút RGB
 TP_BWMIX_SET_RGBREL;Relatív RGB
 TP_CACORRECTION_BLUE;Kék
-TP_CACORRECTION_LABEL;Kromatikus aberráció korrekció
+TP_CACORRECTION_LABEL;Kromatikusaberráció-korrekció
 TP_CACORRECTION_RED;Vörös
 TP_LOCALCONTRAST_LIST_TITLE;Paraméterek
 TP_CHMIXER_BLUE;Kék csatorna
@@ -1362,7 +1362,7 @@ TP_CHMIXER_GREEN;Zöld csatorna
 TP_CHMIXER_LABEL;Csatornakeverő
 TP_CHMIXER_RED;Vörös csatorna
 TP_CHMIXER_MODE;Mód
-TP_CHMIXER_HUE;Színárnyalat korrekció
+TP_CHMIXER_HUE;Színezet korrekció
 TP_CHMIXER_SAT;Telítettség korrekció
 TP_CHMIXER_PRIMARY_R;Vörös elsődleges
 TP_CHMIXER_PRIMARY_G;Zöld elsődleges
@@ -1392,13 +1392,13 @@ TP_COLORCORRECTION_POWER;Középtónusok/Gamma
 TP_COLORCORRECTION_COMPRESSION;Tömörítés
 TP_COLORCORRECTION_RGBLUMINANCE;Fényerő mód
 TP_COLORCORRECTION_SATURATION;Telítettség
-TP_COLORCORRECTION_SLOPE;Csúcsfények/Erősítés
+TP_COLORCORRECTION_SLOPE;Csúcsfények/Nyereség
 TP_COLORCORRECTION_SYNC_SLIDERS;Megfelelő csúszkák összekapcsolása
 TP_COLORCORRECTION_L;Világosság
-TP_COLORCORRECTION_H;Színárnyalat
+TP_COLORCORRECTION_H;Színezet
 TP_COLORCORRECTION_S;Telítettség
-TP_COLORCORRECTION_HUESAT;Színárnyalat/Telítettség
-TP_COLORCORRECTION_HUESHIFT;Színárnyalat-eltolás
+TP_COLORCORRECTION_HUESAT;Színezet/Telítettség
+TP_COLORCORRECTION_HUESHIFT;Színezet-eltolás
 TP_COLORCORRECTION_LUT_FILENAME;LUT fájl
 TP_COLORCORRECTION_MODE_LUT;LUT
 TP_COLORCORRECTION_LUT_SELECT;LUT fájl kiválasztása...
@@ -1444,33 +1444,33 @@ TP_DENOISE_SMOOTHING_METHOD;Módszer
 TP_DENOISE_SMOOTHING_GUIDED;Irányított szűrő
 TP_DIRPYRDENOISE_CHROMINANCE_AUTO_FACTOR;Automatikus csökkentés erőssége
 TP_DIRPYRDENOISE_CHROMINANCE_AUTOGLOBAL;Automatikus
-TP_DIRPYRDENOISE_CHROMINANCE_BLUEYELLOW;Színezet - Kék-Sárga
-TP_DIRPYRDENOISE_CHROMINANCE_FRAME;Színezet
+TP_DIRPYRDENOISE_CHROMINANCE_BLUEYELLOW;Szín - Kék-Sárga
+TP_DIRPYRDENOISE_CHROMINANCE_FRAME;Szín
 TP_DIRPYRDENOISE_CHROMINANCE_MANUAL;Manuális
-TP_DIRPYRDENOISE_CHROMINANCE_MASTER;Színezet - Főszabályzó
+TP_DIRPYRDENOISE_CHROMINANCE_MASTER;Szín - Főszabályzó
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD;Módszer
 TP_DIRPYRDENOISE_CHROMINANCE_METHOD_TOOLTIP;Manuális\nA teljes képre hat.\nA zajcsökkentés beállításait manuálisan vezérelheti.\n\nAutomatikus globális\nA teljes képre hat.\n9 zónát használnak a globális színezési zajcsökkentési beállítás kiszámításához.\n\nAutomatikus többzónás \nNincs előnézet – csak mentés közben működik, de az "Előnézet" módszerrel a csempe méretének és közepének az előnézeti mérethez és középponthoz való igazításával képet kaphat a várt eredményekről.\nA kép csempékre van osztva (kb. 10-70 a képmérettől függően), és minden csempe megkapja a saját színzajcsökkentési beállításait.\n\nElőnézet\nA teljes képre hat.\nA kép előnézetben látható része a globális színzajcsökkentési beállítások kiszámítására szolgál.
-TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Színezet - Vörös-Zöld
+TP_DIRPYRDENOISE_CHROMINANCE_REDGREEN;Szín - Vörös-Zöld
 TP_DIRPYRDENOISE_MAIN_COLORSPACE;Színtér
 TP_DIRPYRDENOISE_MAIN_COLORSPACE_LAB;L*a*b*
 TP_DIRPYRDENOISE_MAIN_COLORSPACE_RGB;RGB
 TP_DIRPYRDENOISE_LABEL;Zajcsökkentés
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL;Részletek helyreállítása
-TP_DIRPYRDENOISE_LUMINANCE_FRAME;Fényerő
+TP_DIRPYRDENOISE_LUMINANCE_FRAME;Világosság
 TP_DIRPYRDENOISE_LUMINANCE_DETAIL_THRESHOLD;Részletek küszöb
-TP_DIRPYRDENOISE_LUMINANCE_SMOOTHING;Fényerő
+TP_DIRPYRDENOISE_LUMINANCE_SMOOTHING;Világosság
 TP_DIRPYRDENOISE_MAIN_GAMMA;Gamma
 TP_DIRPYRDENOISE_MAIN_GAMMA_TOOLTIP;A gamma a tónusok tartománya szerint változtatja a zajcsökkentés erősségét. A kisebb értékek az árnyékokat célozzák meg, míg a nagyobb értékek a világosabb tónusokra kiterjesztik a hatást.
 TP_DIRPYRDENOISE_MAIN_MODE;Mód
-TP_DIRPYRDENOISE_MAIN_MODE_AGGRESSIVE;Aggreszív
+TP_DIRPYRDENOISE_MAIN_MODE_AGGRESSIVE;Agresszív
 TP_DIRPYRDENOISE_MAIN_MODE_CONSERVATIVE;Konzervatív
 TP_DIRPYRDENOISE_MAIN_MODE_TOOLTIP;A „konzervatív” megőrzi az alacsony frekvenciájú színmintázatokat, míg az „agresszív” eltünteti azokat.
 TP_DIRPYRDENOISE_MEDIAN_METHOD;Median módszer
 TP_DIRPYRDENOISE_MEDIAN_METHOD_CHROMINANCE;Csak a színzaj
 TP_DIRPYRDENOISE_MEDIAN_METHOD_LAB;L*a*b*
-TP_DIRPYRDENOISE_MEDIAN_METHOD_LUMINANCE;Csak fényerő
+TP_DIRPYRDENOISE_MEDIAN_METHOD_LUMINANCE;Csak világosság
 TP_DIRPYRDENOISE_MEDIAN_METHOD_RGB;RGB
-TP_DIRPYRDENOISE_MEDIAN_METHOD_TOOLTIP;A "Csak fényerő" és az "L*a*b*" metódusok használatakor a medián szűrés közvetlenül a wavelet lépés után kerül végrehajtásra a zajcsökkentési csővezetékben.\nAz "RGB" mód használatakor ez a legpontosabban történik nagyon közel a zajcsökkentő vezeték végéhez.
+TP_DIRPYRDENOISE_MEDIAN_METHOD_TOOLTIP;A "Csak világosság" és az "L*a*b*" metódusok használatakor a medián szűrés közvetlenül a wavelet lépés után kerül végrehajtásra a zajcsökkentési csővezetékben.\nAz "RGB" mód használatakor ez a legpontosabban történik nagyon közel a zajcsökkentő vezeték végéhez.
 TP_DIRPYRDENOISE_MEDIAN_METHOD_WEIGHTED;Súlyozott L* (kicsi) + a*b* (normál)
 TP_DIRPYRDENOISE_MEDIAN_PASSES;Median iterációk
 TP_DIRPYRDENOISE_MEDIAN_PASSES_TOOLTIP;Három medián szűrő iteráció alkalmazása 3x3-as ablakmérettel gyakran jobb eredményekhez vezet, mint egy medián szűrő iteráció alkalmazása 7x7-es ablakmérettel.
@@ -1484,7 +1484,7 @@ TP_DIRPYRDENOISE_TYPE_7X7;7x7
 TP_DIRPYRDENOISE_TYPE_9X9;9x9
 TP_DISTORTION_AMOUNT;Erősség
 TP_DISTORTION_AUTO_TIP;Automatikusan korrigálja az objektív torzítását azáltal, hogy a beágyazott JPEG-képhez igazítja, ha létezik ilyen, és ha a fényképezőgép automatikusan korrigálta az objektív torzítását.
-TP_DISTORTION_LABEL;Torzítás korrekció
+TP_DISTORTION_LABEL;Torzításkorrekció
 TP_EPD_DETAIL_THRESHOLD;Részletek
 TP_EPD_LABEL;Textúra kiemelése/Élesítés
 TP_EPD_LIST_TITLE;Paraméterek
@@ -1498,7 +1498,7 @@ TP_EXPOSURE_CURVEEDITOR2_TOOLTIP;Kérjük, olvassa el az "Expozíció > Tónusg�
 TP_EXPOSURE_EXPCOMP;Expozíció-kompenzáció
 TP_EXPOSURE_HISTMATCHING;Automatikusan illeszkedő tónusgörbe
 TP_EXPOSURE_HISTMATCHING_TOOLTIP;A csúszkák és görbék automatikus beállítása (az expozíció-kompenzáció kivételével) a beágyazott JPEG képhez hasonló megjelenés eléréséhez.
-TP_EXPOSURE_HRBLUR;Színterjesztés
+TP_EXPOSURE_HRBLUR;Színterjesztés simasága
 TP_EXPOSURE_LABEL;Expozíció
 TP_EXPOSURE_TCMODE_FILMLIKE;Filmszerű
 TP_EXPOSURE_TCMODE_LABEL1;Görbe mód 1
@@ -1509,8 +1509,8 @@ TP_EXPOSURE_TCMODE_PERCEPTUAL;Észlelési
 TP_EXPOSURE_TCMODE_SATANDVALBLENDING;Telítettség és érték keverése
 TP_EXPOSURE_TCMODE_STANDARD;Standard
 TP_EXPOSURE_TCMODE_WEIGHTEDSTD;Súlyozott Standard
-TP_EXPOS_BLACKPOINT_LABEL;Raw Feketepont
-TP_EXPOS_WHITEPOINT_LABEL;Raw Erősítés/Fehérpont
+TP_EXPOS_BLACKPOINT_LABEL;Raw fekete pontok
+TP_EXPOS_WHITEPOINT_LABEL;Raw Nyereség/Fehér pont
 TP_FILMNEGATIVE_BLUE;Kék arány
 TP_FILMNEGATIVE_BLUEBALANCE;Hideg/Meleg
 TP_FILMNEGATIVE_FILMBASE_PICK;Válassza ki a film alapszínét
@@ -1529,7 +1529,7 @@ TP_FILMNEGATIVE_COLORSPACE_WORKING;Működő színtér
 TP_FILMNEGATIVE_OUT_LEVEL;Kimeneti szint
 TP_FILMNEGATIVE_REF_LABEL;Bemeneti RGB: %1
 TP_FILMNEGATIVE_REF_PICK;Válasszon fehéregyensúly-foltot
-TP_FILMNEGATIVE_REF_TOOLTIP;Válasszon egy szürke foltot a kimeneti pozitív kép fehéregyensúlyozásához.
+TP_FILMNEGATIVE_REF_TOOLTIP;Válasszon egy szürke foltot a kimeneti pozitív kép fehéregyensúlyának beállításához.
 TP_FILMSIMULATION_LABEL;Filmszimuláció
 TP_FILMSIMULATION_SLOWPARSEDIR;Az ART úgy van beállítva, hogy a Filmszimulációs eszközhöz használt Hald CLUT képeket egy olyan mappában keresse, amelynek betöltése túl sokáig tart.\nNyissa meg a Beállítások > Képfeldolgozás > Filmszimuláció\nmappát a használt mappa megtekintéséhez. Az ART-t egy olyan mappára kell irányítania, amely csak Hald CLUT képeket tartalmaz, és semmi többet, vagy egy üres mappára, ha nem szeretné használni a Filmszimulációs eszközt.\n\nTovábbi információért olvassa el a RawPedia Filmszimuláció című cikkét. \n\nSzeretné most megszakítani a vizsgálatot?
 TP_FILMSIMULATION_STRENGTH;Erősség
@@ -1542,7 +1542,7 @@ TP_FLATFIELD_BT_AREA;Terület
 TP_FLATFIELD_BT_HORIZONTAL;Vízszintes
 TP_FLATFIELD_BT_VERTHORIZ;Függőleges + Vízszintes
 TP_FLATFIELD_BT_VERTICAL;Függőleges
-TP_FLATFIELD_CLIPCONTROL;Vágás vezérlés
+TP_FLATFIELD_CLIPCONTROL;Vágásvezérlés
 TP_FLATFIELD_CLIPCONTROL_TOOLTIP;A vágásvezérlés elkerüli a flat-field alkalmazása által okozott csúcsfényeket. Ha a flat-field alkalmazása előtt már vannak levágott csúcsok, a vágásvezérlés elszíneződéshez vezethet.
 TP_FLATFIELD_EMBEDDED;Beágyazva a metaadatokban
 TP_FLATFIELD_LABEL;Flat-Field
@@ -1587,7 +1587,7 @@ TP_ICM_DCPILLUMINANT;Fényforrás
 TP_ICM_DCPILLUMINANT_INTERPOLATED;Interpolált
 TP_ICM_DCPILLUMINANT_TOOLTIP;Válassza ki, melyik beágyazott DCP fényforrást használja. Az alapértelmezett az "interpolált", ami a kettő keveréke a fehéregyensúly alapján. A beállítás csak akkor érhető el, ha egy interpoláció-támogatással rendelkező, kettős megvilágítású DCP van kiválasztva.
 TP_ICM_INPUTCAMERA;Fényképezőgép standard
-TP_ICM_INPUTCAMERAICC;Automatikusan illeszkedő fényképezőgép profil
+TP_ICM_INPUTCAMERAICC;Automatikusan illeszkedő fényképezőgép-profil
 TP_ICM_INPUTCAMERAICC_TOOLTIP;Használjon fényképezőgép-specifikus DCP vagy ICC bemeneti színprofilokat. Ezek a profilok pontosabbak, mint az egyszerűbb mátrixosok, de nem minden kamerához érhetők el.
 TP_ICM_INPUTCAMERA_TOOLTIP;Használjon egyszerű, fényképezőgép-specifikus színmátrixot.
 TP_ICM_INPUTCUSTOM;Egyedi
@@ -1625,7 +1625,7 @@ TP_LABCURVE_CURVEEDITOR_B_RANGE1;Kék Telített
 TP_LABCURVE_CURVEEDITOR_B_RANGE2;Kék Pasztell
 TP_LABCURVE_CURVEEDITOR_B_RANGE3;Sárga Pasztell
 TP_LABCURVE_CURVEEDITOR_B_RANGE4;Sárga Telített
-TP_LABCURVE_CURVEEDITOR_LL_TOOLTIP;Fényerő a fényerő függvényében L=f(L)
+TP_LABCURVE_CURVEEDITOR_LL_TOOLTIP;Világosság a világosság függvényében L=f(L)
 TP_LABCURVE_LABEL;L*a*b* korrekciók
 TP_LABMASKS_AREA;Területmaszk
 TP_LABMASKS_AREA_ANGLE;Szög
@@ -1698,7 +1698,7 @@ TP_LENSPROFILE_CORRECTION_AUTOMATCH;Automatikusan adatbázisból
 TP_LENSPROFILE_CORRECTION_EXIF;Metaadatokba ágyazva
 TP_LENSPROFILE_CORRECTION_LCPFILE;LCP fájl
 TP_LENSPROFILE_CORRECTION_MANUAL;Manuálisan adatbázisból
-TP_LENSPROFILE_LABEL;Profilozott objektív korrekció
+TP_LENSPROFILE_LABEL;Profilozott objektívkorrekció
 TP_LENSPROFILE_LENS_WARNING;Figyelmeztetés: az objektív profilalkotáshoz használt vágási tényező nagyobb, mint a fényképezőgép vágási tényezője, az eredmény hibás lehet.
 TP_LENSPROFILE_MODE_HEADER;Objektív profil:
 TP_LENSPROFILE_USE_CA;Kromatikus aberráció
@@ -1713,7 +1713,7 @@ TP_LOGENC_ADVANCED;Haladó beállítások
 TP_LOGENC_BLACK_EV;Fekete relatív expozíció (Fé)
 TP_LOGENC_GAIN;Előtte történő Exp. Komp. (Fé)
 TP_LOGENC_WHITE_EV;Fehér relatív expozíció (Fé)
-TP_LOGENC_TARGET_GRAY;Cél szürke pont (fényerő)
+TP_LOGENC_TARGET_GRAY;Cél szürke pont (fényesség)
 TP_LOGENC_LABEL;Logaritmikus tónusleképezés
 TP_LOGENC_REGULARIZATION;Helyi kontraszt megőrzésének mértéke
 TP_LOGENC_HLCOMPRESSION;Csúcsfények előtömörítése
@@ -1732,7 +1732,7 @@ TP_PCVIGNETTE_ROUNDNESS_TOOLTIP;Kerekség:\n0 = téglalap,\n50 = illesztett elli
 TP_PCVIGNETTE_STRENGTH;Erősség
 TP_PCVIGNETTE_STRENGTH_TOOLTIP;Szűrő erőssége fényértékben (a sarkokat elérve).
 TP_PERSPECTIVE_ANGLE;Szög
-TP_PERSPECTIVE_ASPECT;Képarány beállítása
+TP_PERSPECTIVE_ASPECT;Oldalarány beállítása
 TP_PERSPECTIVE_AUTO;Automatikus korrekció
 TP_PERSPECTIVE_AUTO_BOTH_TOOLTIP;Vízszintes és függőleges
 TP_PERSPECTIVE_AUTO_HORIZONTAL_TOOLTIP;Vízszintes
@@ -1745,7 +1745,7 @@ TP_PERSPECTIVE_HORIZONTAL;Vízszintes
 TP_PERSPECTIVE_LABEL;Perspektívakorrekció
 TP_PERSPECTIVE_SHEAR;Nyírás
 TP_PERSPECTIVE_VERTICAL;Függőleges
-TP_PFCURVE_CURVEEDITOR_CH;Színárnyalat
+TP_PFCURVE_CURVEEDITOR_CH;Színezet
 TP_PFCURVE_CURVEEDITOR_CH_TOOLTIP;Szabályozza az erősséget szín szerint.\nMagasabb = több,\nAlsó = kevesebb.
 TP_PREPROCESS_DEADPIXFILT;Halott pixel szűrő
 TP_PREPROCESS_DEADPIXFILT_TOOLTIP;Megpróbálja elnyomni a halott pixeleket.
@@ -1770,7 +1770,7 @@ TP_RAWCACORR_AUTOIT_TOOLTIP;Ez a beállítás akkor érhető el, ha az „Automa
 TP_RAWCACORR_AVOIDCOLORSHIFT;Színeltolódás elkerülése
 TP_RAWCACORR_CABLUE;Kék
 TP_RAWCACORR_CARED;Vörös
-TP_RAWCACORR_LABEL;Kromatikus aberráció korrekció
+TP_RAWCACORR_LABEL;Kromatikusaberráció-korrekció
 TP_RAWEXPOS_BLACK_0;Zöld 1 (lead)
 TP_RAWEXPOS_BLACK_1;Vörös
 TP_RAWEXPOS_BLACK_2;Kék
@@ -1778,7 +1778,7 @@ TP_RAWEXPOS_BLACK_3;Zöld 2
 TP_RAWEXPOS_BLACK_BLUE;Kék
 TP_RAWEXPOS_BLACK_GREEN;Zöld
 TP_RAWEXPOS_BLACK_RED;Vörös
-TP_RAWEXPOS_LINEAR;Erősítés/Fehérpont korrekció
+TP_RAWEXPOS_LINEAR;Nyereség/Fehérpont-korrekció
 TP_RAWEXPOS_TWOGREEN;Zöldek összekapcsolása
 TP_RAW_1PASSMEDIUM;1-menetes (Markesteijn)
 TP_RAW_2PASS;1-menetes+gyors
@@ -1897,7 +1897,7 @@ TP_SHARPENING_RADIUS;Sugár
 TP_SHARPENING_RLD;RL Dekonvolució
 TP_SHARPENING_RLD_AMOUNT;Mérték
 TP_SHARPENING_RLD_AUTORADIUS_TOOLTIP;Automatikus számítás nyers adatok alapján
-TP_SHARPENING_RLD_CORNERBOOST;Élesítés mértékének erősítése a sarkokban
+TP_SHARPENING_RLD_CORNERBOOST;Élesítés mértékének növelése a sarkokban
 TP_SHARPENING_RLD_CORNERLATITUDE;Szélesség
 TP_SHARPENING_RLD_CORNERRADIUS;Sugár növelése
 TP_SHARPENING_THRESHOLD;Küszöb
@@ -1909,7 +1909,7 @@ TP_SMOOTHING_LABEL;Simítás
 TP_SMOOTHING_LIST_TITLE;Simítási paraméterek
 TP_SMOOTHING_FALLOFF;Csökkenés
 TP_SMOOTHING_HALATION_SIZE;Erősség
-TP_SMOOTHING_HALATION_COLOR;Színárnyalat
+TP_SMOOTHING_HALATION_COLOR;Színezet
 TP_SMOOTHING_MODE;Mód
 TP_SMOOTHING_MODE_GUIDED;Irányított
 TP_SMOOTHING_MODE_GAUSSIAN;Gauss
@@ -1937,7 +1937,7 @@ TP_SMOOTHING_OFFSET;Eltolódás
 TP_SMOOTHING_WAVELETS_LEVELS;Szintek
 TP_SOFTLIGHT_LABEL;Lágy fény
 TP_SOFTLIGHT_STRENGTH;Erősség
-TP_SPOT_COUNTLABEL;%1 folt(ok)
+TP_SPOT_COUNTLABEL;%1 folt
 TP_SPOT_ENTRYCHANGED;Folt megváltozott
 TP_SPOT_HINT;Kattintson erre a gombra az előnézeti terület kezeléséhez.\n\nEgy folt szerkesztéséhez vigye az egérmutatót a szerkesztett terület fehér jelére, így megjelenik a szerkesztési geometria.\n\nFolt hozzáadásához nyomja meg a Ctrl-t és a bal egérgombot gombot, húzza a kört (a Ctrl billentyű felengedhető) a forrás helyére, majd engedje fel az egérgombot.\n\nA forrás vagy a célhely mozgatásához vigye az egérmutatót a közepére, majd húzza el.\n\nA belső kör (maximális hatás területe) és a "tollazat" köre átméretezhető úgy, hogy rámutat (a kör narancssárgává válik), majd húzza (a kör vörös lesz) az egérrel.\n\nHa a módosítások készen vannak, kattintson a jobb gombbal bármelyik folton kívüli területre a Folt szerkesztési mód befejezéséhez, vagy kattintson újra erre a gombra.
 TP_SPOT_LABEL;Folt eltávolítása
@@ -1964,7 +1964,7 @@ TP_TONECURVE_SATCURVE;Telítettség
 TP_TONECURVE_PERCEPTUAL_STRENGTH;Észlelési görbe erőssége
 TP_TONECURVE_MODE;Mód
 TP_TONECURVE_CONTRAST_LEGACY;Kontraszt (örökölt)
-TP_TONECURVE_WHITEPOINT;Fehérpont
+TP_TONECURVE_WHITEPOINT;Fehér pont
 TP_TONE_EQUALIZER_BAND_0;Feketék
 TP_TONE_EQUALIZER_BAND_1;Árnyékok
 TP_TONE_EQUALIZER_BAND_2;Középtónusok
@@ -1977,7 +1977,7 @@ TP_TONE_EQUALIZER_PIVOT;Pivot (középtónusok eltolása) (Fé)
 TP_VIGNETTING_AMOUNT;Mérték
 TP_VIGNETTING_CENTER_X;Középpont X
 TP_VIGNETTING_CENTER_Y;Középpont Y
-TP_VIGNETTING_LABEL;Peremsötétedés korrekció
+TP_VIGNETTING_LABEL;Peremsötétedés-korrekció
 TP_VIGNETTING_RADIUS;Sugár
 TP_VIGNETTING_STRENGTH;Erősség
 TP_WBALANCE_AUTO;Auto
@@ -2001,7 +2001,3 @@ ZOOMPANEL_ZOOM100;Nagyítás 100%-ra\nGyorsbillentyű: <b>z</b>
 ZOOMPANEL_ZOOMFITSCREEN;A képernyő méretéhez igazítás\nGyorsbillentyű: <b>f</b>
 ZOOMPANEL_ZOOMIN;Nagyítás +\nGyorsbillentyű: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Kicsinyítés -\nGyorsbillentyű: <b>-</b>
-HISTORY_MSG_GRAIN_COLOR;Filmszemcsés - mód
-TP_GRAIN_MODE;Mód
-TP_GRAIN_COLOR;Szín
-TP_GRAIN_BW;B&W
