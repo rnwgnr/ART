@@ -531,7 +531,13 @@ void Exiv2Metadata::saveToImage(ProgressListener *pl, const Glib::ustring &path,
         dst->setXmpData(xmp_data_);
     }
 
-    dst->exifData()["Exif.Image.Software"] = RTNAME " " RTVERSION;
+    if (!exif_keys_ || exif_keys_->find("Exif.Image.Software") == exif_keys_->end()) {
+        dst->exifData()["Exif.Image.Software"] = RTNAME " " RTVERSION;
+    }
+    if (!exif_keys_ || exif_keys_->find("Exif.Image.DateTime") == exif_keys_->end()) {
+        dst->exifData()["Exif.Image.DateTime"] = Glib::DateTime::create_now_local().format("%Y:%m:%d %H:%M:%S");
+    }
+    
     if (rating_ != 0) {
         if (!preserve_all_tags || dst->exifData().findKey(Exiv2::ExifKey("Exif.Image.Rating")) == dst->exifData().end()) {
             dst->exifData()["Exif.Image.Rating"] = static_cast<unsigned short>(LIM(rating_, 0, 5));
