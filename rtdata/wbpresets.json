@@ -110,6 +110,9 @@
 //
 // updated on Mon Jun  9 11:55:42 2025:
 // FUJIFILM X-A10
+//
+// updated on Fri Jun 20 08:12:55 2025:
+// PANASONIC DC-S9
 
 [
   {
@@ -6466,6 +6469,17 @@
       { "name" : "6000k", "multipliers" : [ 2.3828125, 1, 1.5859375 ] },
       { "name" : "6600k", "multipliers" : [ 2.5, 1, 1.703125 ] },
       { "name" : "7500k", "multipliers" : [ 2.609375, 1, 1.40625 ] }
+    ]
+  },
+  {
+    "make_model" : "PANASONIC DC-S9",
+    "presets" : [
+      { "name" : "daylight", "multipliers" : [ 2.0859375, 1, 1.71875 ] },
+      { "name" : "shade", "multipliers" : [ 2.32421875, 1, 1.54296875 ] },
+      { "name" : "shade", "multipliers" : [ 2.33984375, 1, 1.5390625 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.203125, 1, 1.6171875 ] },
+      { "name" : "cloudy", "multipliers" : [ 2.21484375, 1, 1.61328125 ] },
+      { "name" : "incandescent", "multipliers" : [ 1.41796875, 1, 2.64453125 ] }
     ]
   }
 ]
