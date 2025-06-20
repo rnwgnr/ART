@@ -1304,6 +1304,49 @@ XIAOMI 15 PRO REAR WIDE CAMERA
 XIAOMI 15 REAR TELEPHOTO CAMERA
 XIAOMI 15 REAR ULTRAWIDE CAMERA
 XIAOMI 15 REAR WIDE CAMERA
+
+Updated on Fri Jun 20 08:19:14 2025:
+CANON EOS R50 V
+CANON POWERSHOT V1
+FUJIFILM GFX 100RF
+GOOGLE PIXEL 9A FRONT CAMERA
+GOOGLE PIXEL 9A ULTRAWIDE CAMERA
+GOOGLE PIXEL 9A WIDE CAMERA
+IPHONE17,5 BACK CAMERA
+IPHONE17,5 FRONT CAMERA
+LEICA SL3-S
+NIKON COOLPIX P1100
+NIKON Z 5 2
+OM DIGITAL SOLUTIONS OM-3
+PANASONIC DC-S1M2
+PANASONIC DC-S1M2ES
+PANASONIC DC-S1RM2
+SAMSUNG GALAXY S25 FRONT CAMERA
+SAMSUNG GALAXY S25 REAR TELEPHOTO CAMERA
+SAMSUNG GALAXY S25 REAR ULTRAWIDE CAMERA
+SAMSUNG GALAXY S25 REAR WIDE CAMERA
+SAMSUNG GALAXY S25 ULTRA FRONT CAMERA
+SAMSUNG GALAXY S25 ULTRA REAR SUPER TELEPHOTO CAMERA
+SAMSUNG GALAXY S25 ULTRA REAR TELEPHOTO CAMERA
+SAMSUNG GALAXY S25 ULTRA REAR ULTRAWIDE CAMERA
+SAMSUNG GALAXY S25 ULTRA REAR WIDE CAMERA
+SAMSUNG GALAXY S25+ FRONT CAMERA
+SAMSUNG GALAXY S25+ REAR TELEPHOTO CAMERA
+SAMSUNG GALAXY S25+ REAR ULTRAWIDE CAMERA
+SAMSUNG GALAXY S25+ REAR WIDE CAMERA
+SIGMA BF
+SONY DSC-RX100M7A
+SONY ILCE-6100A
+SONY ILCE-6400A
+SONY XPERIA 1 VII FRONT CAMERA
+SONY XPERIA 1 VII ULTRAWIDE CAMERA
+SONY XPERIA 1 VII WIDE CAMERA
+SONY XPERIA 1 VII ZOOM CAMERA
+SONY ZV-1A
+XIAOMI 15 ULTRA REAR SUPER TELEPHOTO CAMERA
+XIAOMI 15 ULTRA REAR TELEPHOTO CAMERA
+XIAOMI 15 ULTRA REAR ULTRAWIDE CAMERA
+XIAOMI 15 ULTRA REAR WIDE CAMERA
 */
 {"camera_constants": [
     {
@@ -1571,6 +1614,10 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [9269, -2012, -1107, -3990, 11762, 2527, -569, 2093, 4913]
     },
     {
+        "make_model" : "CANON EOS R50 V",
+        "dcraw_matrix" : [9089, -1810, -1209, -4294, 12116, 2454, -497, 1862, 4923]
+    },
+    {
         "make_model" : "CANON EOS R6",
         "dcraw_matrix" : [8293, -1611, -1132, -4759, 12710, 2275, -1013, 2415, 5508]
     },
@@ -1789,6 +1836,10 @@ XIAOMI 15 REAR WIDE CAMERA
     {
         "make_model" : "CANON POWERSHOT SX70 HS",
         "dcraw_matrix" : [18285, -8907, -1951, -1845, 10688, 1323, 364, 1101, 5139]
+    },
+    {
+        "make_model" : "CANON POWERSHOT V1",
+        "dcraw_matrix" : [12600, -4747, -2027, -6110, 15868, -28, 110, 479, 6011]
     },
     {
         "make_model" : "CASIO EX-F1",
@@ -2013,6 +2064,10 @@ XIAOMI 15 REAR WIDE CAMERA
     {
         "make_model" : "FUJIFILM GFX 100 IR",
         "dcraw_matrix" : [16212, -8423, -1583, -4336, 12583, 1937, -195, 726, 6199]
+    },
+    {
+        "make_model" : "FUJIFILM GFX 100RF",
+        "dcraw_matrix" : [12806, -5779, -1110, -3546, 11507, 2318, -177, 995, 5715]
     },
     {
         "make_model" : ["FUJIFILM GFX 100S", "FUJIFILM GFX100S"],
@@ -2489,6 +2544,18 @@ XIAOMI 15 REAR WIDE CAMERA
     {
         "make_model" : ["GOOGLE PIXEL 9 WIDE CAMERA", "GOOGLE PIXEL 9"],
         "dcraw_matrix" : [11061, -4782, -817, -2162, 11128, 1160, 222, 1696, 4771]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 9A FRONT CAMERA",
+        "dcraw_matrix" : [9940, -3923, -1121, -3441, 12132, 1438, 145, 911, 5087]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 9A ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [10035, -4060, -703, -3922, 12065, 2079, -361, 1385, 5506]
+    },
+    {
+        "make_model" : "GOOGLE PIXEL 9A WIDE CAMERA",
+        "dcraw_matrix" : [14482, -6776, -1302, -1891, 11128, 844, 574, 1315, 5074]
     },
     {
         "make_model" : "GOOGLE PIXEL FOLD FRONT CAMERA",
@@ -3143,6 +3210,14 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [8421, -2562, -877, -4309, 12738, 1717, -903, 2172, 4701]
     },
     {
+        "make_model" : "IPHONE17,5 BACK CAMERA",
+        "dcraw_matrix" : [11529, -4264, -1229, -3399, 11629, 1998, -205, 1661, 4991]
+    },
+    {
+        "make_model" : "IPHONE17,5 FRONT CAMERA",
+        "dcraw_matrix" : [8421, -2562, -877, -4309, 12738, 1717, -903, 2172, 4701]
+    },
+    {
         "make_model" : ["IPHONE8,1 BACK CAMERA", "APPLE IPHONE8,1 BACK CAMERA"],
         "dcraw_matrix" : [9631, -3743, -905, -3330, 11838, 1664, -281, 1395, 5153]
     },
@@ -3439,6 +3514,10 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [9860, -3893, -823, -3878, 11761, 2398, -346, 1164, 5470]
     },
     {
+        "make_model" : "LEICA SL3-S",
+        "dcraw_matrix" : [10667, -4463, -903, -4217, 12255, 2195, -253, 1117, 5792]
+    },
+    {
         "make_model" : "LEICA T (TYP 701)",
         "dcraw_matrix" : [6294, -1679, -475, -5586, 13046, 2837, -1409, 1889, 7075]
     },
@@ -3707,6 +3786,10 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [14294, -6116, -1333, -1628, 10219, 1637, -14, 1158, 5022]
     },
     {
+        "make_model" : "NIKON COOLPIX P1100",
+        "dcraw_matrix" : [14294, -6116, -1333, -1628, 10219, 1637, -14, 1158, 5022]
+    },
+    {
         "make_model" : "NIKON COOLPIX P330",
         "dcraw_matrix" : [10321, -3920, -931, -2750, 11146, 1824, -442, 1545, 5538]
     },
@@ -3961,6 +4044,10 @@ XIAOMI 15 REAR WIDE CAMERA
     {
         "make_model" : "NIKON Z 5",
         "dcraw_matrix" : [8695, -2558, -648, -5015, 12711, 2575, -1279, 2215, 7514]
+    },
+    {
+        "make_model" : "NIKON Z 5 2",
+        "dcraw_matrix" : [9874, -3784, -823, -4728, 12673, 2286, -648, 1513, 6375]
     },
     {
         "make_model" : "NIKON Z 50",
@@ -4299,6 +4386,10 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [9090, -3590, -756, -3252, 11396, 2109, -318, 1059, 5606]
     },
     {
+        "make_model" : "OM DIGITAL SOLUTIONS OM-3",
+        "dcraw_matrix" : [9090, -3590, -756, -3252, 11396, 2109, -318, 1059, 5606]
+    },
+    {
         "make_model" : ["OM DIGITAL SOLUTIONS OM-5", "OLYMPUS OM-5"],
         "dcraw_matrix" : [11896, -5110, -1076, -3181, 11378, 2048, -519, 1224, 5165]
     },
@@ -4439,8 +4530,20 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [9397, -3719, -805, -5425, 13326, 2309, -972, 1715, 6034]
     },
     {
+        "make_model" : "PANASONIC DC-S1M2",
+        "dcraw_matrix" : [10730, -4442, -922, -4478, 12504, 2199, -380, 1198, 6039]
+    },
+    {
+        "make_model" : "PANASONIC DC-S1M2ES",
+        "dcraw_matrix" : [11333, -4794, -1062, -3912, 12027, 2115, 42, 784, 5904]
+    },
+    {
         "make_model" : "PANASONIC DC-S1R",
         "dcraw_matrix" : [11822, -5321, -1249, -5958, 15114, 766, -614, 1264, 7043]
+    },
+    {
+        "make_model" : "PANASONIC DC-S1RM2",
+        "dcraw_matrix" : [9941, -4056, -871, -3745, 11604, 2433, -254, 1132, 5526]
     },
     {
         "make_model" : "PANASONIC DC-S5",
@@ -5267,6 +5370,58 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [12696, -5678, -1102, -2785, 11850, 1013, 168, 1487, 4593]
     },
     {
+        "make_model" : "SAMSUNG GALAXY S25 FRONT CAMERA",
+        "dcraw_matrix" : [11649, -4575, -1286, -2619, 11674, 1032, 71, 1806, 4498]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12494, -5636, -1489, -3552, 13113, 379, 206, 961, 5168]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [12407, -5800, -1112, -2467, 11222, 1402, 27, 1393, 4681]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 REAR WIDE CAMERA",
+        "dcraw_matrix" : [12696, -5678, -1102, -2785, 11850, 1013, 168, 1487, 4593]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 ULTRA FRONT CAMERA",
+        "dcraw_matrix" : [12434, -5391, -1231, -2556, 11725, 897, 558, 1005, 4815]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 ULTRA REAR SUPER TELEPHOTO CAMERA",
+        "dcraw_matrix" : [13543, -5648, -1666, -3896, 14010, -253, 311, 1032, 4510]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 ULTRA REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12889, -5858, -1380, -2493, 11124, 1550, 212, 1198, 5246]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 ULTRA REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [13402, -6058, -1098, -2965, 12367, 597, -184, 2094, 4549]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25 ULTRA REAR WIDE CAMERA",
+        "dcraw_matrix" : [12295, -5407, -1018, -2150, 11307, 929, 219, 1687, 4828]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25+ FRONT CAMERA",
+        "dcraw_matrix" : [11649, -4575, -1286, -2619, 11674, 1032, 71, 1806, 4498]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25+ REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [12494, -5636, -1489, -3552, 13113, 379, 206, 961, 5168]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25+ REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [12407, -5800, -1112, -2467, 11222, 1402, 27, 1393, 4681]
+    },
+    {
+        "make_model" : "SAMSUNG GALAXY S25+ REAR WIDE CAMERA",
+        "dcraw_matrix" : [12696, -5678, -1102, -2785, 11850, 1013, 168, 1487, 4593]
+    },
+    {
         "make_model" : "SAMSUNG GALAXY S6",
         "dcraw_matrix" : [13698, -5767, -1384, -4449, 13879, 499, -467, 1691, 5891]
     },
@@ -5471,6 +5626,10 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [12093, -3557, -1155, -1000, 9534, 1733, -22, 1787, 4576]
     },
     {
+        "make_model" : "SIGMA BF",
+        "dcraw_matrix" : [13562, -6122, -1045, -3789, 11910, 2113, -176, 1064, 5906]
+    },
+    {
         "make_model" : "SIGMA FP",
         "dcraw_matrix" : [12431, -5541, -1000, -4387, 12361, 2265, -732, 1526, 5970]
     },
@@ -5544,6 +5703,10 @@ XIAOMI 15 REAR WIDE CAMERA
     },
     {
         "make_model" : "SONY DSC-RX100M7",
+        "dcraw_matrix" : [10315, -4390, -937, -4859, 12734, 2365, -734, 1537, 5997]
+    },
+    {
+        "make_model" : "SONY DSC-RX100M7A",
         "dcraw_matrix" : [10315, -4390, -937, -4859, 12734, 2365, -734, 1537, 5997]
     },
     {
@@ -5679,11 +5842,19 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [7657, -2847, -607, -4083, 11966, 2389, -684, 1418, 5844]
     },
     {
+        "make_model" : "SONY ILCE-6100A",
+        "dcraw_matrix" : [7657, -2847, -607, -4083, 11966, 2389, -684, 1418, 5844]
+    },
+    {
         "make_model" : "SONY ILCE-6300",
         "dcraw_matrix" : [5973, -1695, -419, -3826, 11797, 2293, -639, 1398, 5789]
     },
     {
         "make_model" : "SONY ILCE-6400",
+        "dcraw_matrix" : [7657, -2847, -607, -4083, 11966, 2389, -684, 1418, 5844]
+    },
+    {
+        "make_model" : "SONY ILCE-6400A",
         "dcraw_matrix" : [7657, -2847, -607, -4083, 11966, 2389, -684, 1418, 5844]
     },
     {
@@ -5955,6 +6126,22 @@ XIAOMI 15 REAR WIDE CAMERA
         "dcraw_matrix" : [12220, -5110, -1606, -4290, 15218, -1310, 167, 845, 3780]
     },
     {
+        "make_model" : "SONY XPERIA 1 VII FRONT CAMERA",
+        "dcraw_matrix" : [13435, -6213, -1429, -2675, 11420, 1405, 2, 1302, 4704]
+    },
+    {
+        "make_model" : "SONY XPERIA 1 VII ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [14144, -6848, -1202, -2793, 11294, 1696, 50, 1240, 4416]
+    },
+    {
+        "make_model" : "SONY XPERIA 1 VII WIDE CAMERA",
+        "dcraw_matrix" : [14913, -7123, -1423, -3583, 12542, 1107, 203, 785, 4900]
+    },
+    {
+        "make_model" : "SONY XPERIA 1 VII ZOOM CAMERA",
+        "dcraw_matrix" : [13900, -6606, -1267, -2575, 11266, 1475, 11, 1214, 4198]
+    },
+    {
         "make_model" : ["SONY XPERIA 1 WIDE-ANGLE CAMERA", "SONY XPERIA 1"],
         "dcraw_matrix" : [12042, -5521, -995, -2205, 10859, 1535, 329, 1152, 4649]
     },
@@ -6025,6 +6212,10 @@ XIAOMI 15 REAR WIDE CAMERA
     {
         "make_model" : ["SONY XPERIA PRO-I WIDE CAMERA", "SONY XPERIA PRO-I"],
         "dcraw_matrix" : [10926, -4363, -1006, -4257, 12273, 2220, -322, 1175, 5546]
+    },
+    {
+        "make_model" : "SONY ZV-1A",
+        "dcraw_matrix" : [8280, -2987, -703, -3531, 11645, 2133, -550, 1542, 5312]
     },
     {
         "make_model" : "SONY ZV-1M2",
@@ -6241,6 +6432,22 @@ XIAOMI 15 REAR WIDE CAMERA
     {
         "make_model" : "XIAOMI 15 REAR WIDE CAMERA",
         "dcraw_matrix" : [10259, -4203, -1201, -4642, 13151, 1605, -187, 1147, 5520]
+    },
+    {
+        "make_model" : "XIAOMI 15 ULTRA REAR SUPER TELEPHOTO CAMERA",
+        "dcraw_matrix" : [11259, -4726, -898, -2842, 11922, 992, 11, 1690, 4752]
+    },
+    {
+        "make_model" : "XIAOMI 15 ULTRA REAR TELEPHOTO CAMERA",
+        "dcraw_matrix" : [11144, -4960, -885, -3227, 11411, 2062, 5, 1561, 5130]
+    },
+    {
+        "make_model" : "XIAOMI 15 ULTRA REAR ULTRAWIDE CAMERA",
+        "dcraw_matrix" : [8287, -2303, -927, -5059, 14170, 859, -1237, 3380, 4409]
+    },
+    {
+        "make_model" : "XIAOMI 15 ULTRA REAR WIDE CAMERA",
+        "dcraw_matrix" : [8569, -3516, -954, -4348, 12444, 2119, -399, 1421, 4942]
     },
     {
         "make_model" : "XIAOMI CIVI 4 PRO REAR TELEPHOTO CAMERA",
