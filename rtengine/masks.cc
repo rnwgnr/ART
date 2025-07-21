@@ -824,15 +824,6 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
     const int end_idx = (show_mask_idx < 0 ? n : show_mask_idx+1);
     bool has_mask = false;
 
-    const auto tweak =
-        [](std::vector<double> m) -> std::vector<double>
-        {
-            for (size_t i = 1; i < m.size(); i += 4) {
-                m[i] = xlog2lin(m[i], 50.f);
-            }
-            return m;
-        };
-
     for (int i = begin_idx; i < end_idx; ++i) {
         auto &r = masks[i];
         if (r.deltaEMask.enabled) {
@@ -843,7 +834,7 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
             has_mask = true;
         }
         if (r.parametricMask.enabled && !r.parametricMask.chromaticity.empty() && r.parametricMask.chromaticity[0] != FCT_Linear && r.parametricMask.chromaticity != dflt.parametricMask.chromaticity) {
-            cmask[i].reset(new FlatCurve(tweak(r.parametricMask.chromaticity), false));
+            cmask[i].reset(new FlatCurve(r.parametricMask.chromaticity, false));
             has_mask = true;
         }
         if (r.parametricMask.enabled && !r.parametricMask.lightness.empty() && r.parametricMask.lightness[0] != FCT_Linear && r.parametricMask.lightness != dflt.parametricMask.lightness) {
@@ -920,7 +911,7 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
     }
     
     // magic constant c_factor: normally chromaticity is in [0; 42000] (see color.h), but here we use the constant to match how the chromaticity pipette works (see improcfun.cc lines 4705-4706 and color.cc line 1930
-    constexpr float c_factor = 327.68f / 48000.f;
+    constexpr float c_factor = 327.68f * (42000.f / 48000.f);
 
     DeltaEEvaluator dE(masks);
 
@@ -976,9 +967,9 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
 #else
                     float c, h;
                     Color::Lab2Lch(a, b, c, h);
-                    //c = xlin2log(c * c_factor, 100.f);
                     c *= c_factor;
 #endif
+                    c = xlin2log(c, 50.f);
                         
                     h = Color::huelab_to_huehsv2(h);
                     h += 1.f/6.f; // offset the hue because we start from purple instead of red
