@@ -124,10 +124,11 @@ jobs:
           lensfun-update-data
 
       - name: Create bundle
-        env:
-          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+        #   GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd build/Release
+          echo "TOKEN: ${{ secrets.GITHUB_TOKEN }}"
           python ../../repo/tools/win/bundle_ART.py \
             -o ../../bundle -v -E -I -m c:/msys2/msys64 \
             --exiftool-version 13.00
