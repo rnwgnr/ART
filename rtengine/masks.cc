@@ -962,7 +962,7 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
                 if (has_mask) {
 #ifdef __SSE2__
                     // use precalculated values
-                    const float c = cBuffer[x];
+                    float c = cBuffer[x];
                     float h = hBuffer[x];
 #else
                     float c, h;
