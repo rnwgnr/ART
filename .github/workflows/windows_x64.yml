@@ -9,6 +9,9 @@ on:
     inputs:
       msystem:
         description: 'MSYS2 environment'
+        type: choice
+        required: true
+        default: 'MINGW64'
         options:
           - MINGW64
           - CLANG64
@@ -93,9 +96,11 @@ jobs:
           cd build-CTL
           cmake \
             -GNinja \
+            -GNinja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=c:/msys2/msys64/usr/local \
-            -DCMAKE_CXX_FLAGS=-fpermissive \
+            -DCMAKE_CXX_FLAGS="-fpermissive -fms-extensions" \
+            -DCTL_BUILD_TESTS=0 -DCTL_BUILD_TOOLS=0 \
             ../CTL
           ninja install
           cd ..
