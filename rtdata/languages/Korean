@@ -15,6 +15,7 @@
 #14 2024-01-20 Ohnishi, Yasuo, updates for 1.21.1
 #15 2024-05-21 Ohnishi, Yasuo, updates for 1.22
 #16 2024-07-28 Ohnishi, Yasuo, updates for 1.22.2
+#17 2025-08-01 Ohnishi, Yasuo, updates for 1.25.7
 ABOUT_TAB_BUILD;버전
 ABOUT_TAB_CREDITS;크레디트
 ABOUT_TAB_LICENSE;저작권
@@ -137,6 +138,7 @@ FILEBROWSER_AUTODARKFRAME;자동 장시간노출 노이즈 제거
 FILEBROWSER_AUTOFLATFIELD;자동 센서의 오점 그늘 제거
 FILEBROWSER_BROWSEPATHBUTTONHINT;썸네일 리스트 갱신\n단축키: <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;참조할 패스를 입력합니다.\n<b>Ctrl-O</b> 패스의 칸에커서를  이동함\n<b>Enter</b> / <b>Ctrl-Enter</b>그 장소를 브라우징함\n<b>Esc</b> 변경을 해세\n<b>Shift-Esc</b>초점을 삭제함\n패스의 단축키:\n  <b>~</b> - 사용자의 홈 디렉토리\n  <b>!</b> - 사용자의 화상 디렉토리
+FILEBROWSER_BROWSEPATH_RECURSIVE_TOOLTIP;하위 디렉토리의 이미지도 찾습니다.
 FILEBROWSER_CACHE;캐시
 FILEBROWSER_CACHECLEARFROMFULL;프로파일을 포함한 캐시내를 비우기
 FILEBROWSER_CACHECLEARFROMPARTIAL;프로파일을 빼고 캐시내를 비우기
@@ -198,6 +200,7 @@ FILEBROWSER_RANK3_TOOLTIP;평가 3 *\n단축키: <b>Shift-3</b>
 FILEBROWSER_RANK4_TOOLTIP;평가 4 *\n단축키: <b>Shift-4</b>
 FILEBROWSER_RANK5_TOOLTIP;평가 5 *\n단축키: <b>Shift-5</b>
 FILEBROWSER_RENAMEDLGLABEL;파일명변경
+FILEBROWSER_RENAME_DIALOG_COPY_LABEL;파일 복사
 FILEBROWSER_RESETDEFAULTPROFILE;초기 설정으로 리셋함
 FILEBROWSER_SELECTDARKFRAME;장시간노출 노이즈 제거 선택...
 FILEBROWSER_SELECTFLATFIELD;센서의 오점 그늘 제거용 화상을 선택함...
@@ -1224,6 +1227,9 @@ PROFILEPANEL_TOOLTIPLOAD;파일에서 프로파일을 불러옵니다.\nCtrl-클
 PROFILEPANEL_TOOLTIPPASTE; 클립 보드에서 프로파일을 붙입니다.\nCtrl-클릭으로 붙이는 매개 변수를 선택합니다.
 PROFILEPANEL_TOOLTIPSAVE;현재 프로파일을 보존\nCtrl-클릭으로 보존하는 매개 변수를 선택합니다.
 PROGRESSBAR_DENOISING;노이즈 감소 중...
+PROGRESSBAR_FILE_RENAME;파일 개명 중...
+PROGRESSBAR_FILE_COPY;파일 복사 중...
+PROGRESSBAR_FILE_DELETE;파일 삭제 중...
 PROGRESSBAR_HLREC;하이라이트의 복원...
 PROGRESSBAR_LOADING;화상불러오기 중...
 PROGRESSBAR_LOADINGTHUMBS;썸네일을 불러오기...
@@ -1259,6 +1265,8 @@ RENAME_DIALOG_BASEDIR;기본 디렉토리
 RENAME_DIALOG_PATTERN;파일명의패턴
 RENAME_DIALOG_PATTERN_TIP;원래 사진이나 메타데이터명을 바탕으로 출력명을 지정하세요.\n\n형식을 지정하는 문자열의 뜻은 이하와 같습니다.:\n<b>%f</b>: 확장자가 없는 파일명\n<b>%e</b>: 확장자\n<b>%#</b>: 파일명과 부가번호\n<b>%C</b>: 사진기명 (회사명 및 머델)\n<b>%M</b>: 사진기브랜드\n<b>%N</b>: 사진기 머델\n<b>%Y</b>: 촬영 년 (4자리)\n<b>%y</b>: 촬영 년 (2자리)\n<b>%m</b>: 촬영 월 (수자)\n<b>%b</b>: 촬영 월 (영어 약칭)\n<b>%B</b>: 촬영 월 (영어 fullname)\n<b>%d</b>: 촬영 날짜 (수자)\n<b>%a</b>: 촬영 날짜 (영어 약칭)\n<b>%A</b>: 촬영 날짜 (영어  fullname)\n<b>%n1</b> to <b>%n9</b>: 증분치 자리수 지정 (예, <b>%n2</b> results in <i>01</i>)\n<b>%I</b>: ISO감도\n<b>%L</b>: 렌즈 모델명\n<b>%F</b>: 렌즈조 리개 값 (F값)\n<b>%l</b>: 초점거리\n<b>%E</b>: 노출 보정량\n<b>%s</b>: 셔터속도\n<b>%r</b>: 사진의 평가\n<b>%T[<i>태그명</i>]</b>: 메타데이터태그 내용 <i>태그명</i> (무효 문자는  '_' 로 대체됨)\n<b>%%</b>: '%' 문자.
 RENAME_DIALOG_ALLOW_WHITESPACE;출력명에 공백을 허용함
+RENAME_DIALOG_ERROR_COPY; %1 을 %2 에 복사할 수 없었습니다.
+RENAME_DIALOG_FILENAMES_COPY;복사할 파일
 RENAME_DIALOG_NAME_NORMALIZATION;파일명 표준화 (normalization)
 RENAME_DIALOG_NORM_OFF;없음
 RENAME_DIALOG_NORM_UPPERCASE;대문자
@@ -1924,6 +1932,7 @@ TP_SMOOTHING_MODE_NLMEANS;비국소평균 (Non-local means)
 TP_SMOOTHING_MODE_LENS;렌즈 흐림 효과
 TP_SMOOTHING_MODE_MOTION;모션 블러 (Motion blur)
 TP_SMOOTHING_MODE_NOISE;노이즈 추가
+TP_SMOOTHING_MODE_WAVELETS;웨이블릿
 TP_SMOOTHING_NOISE_COARSENESS;거칠기 정도
 TP_SMOOTHING_CHANNEL;채널
 TP_SMOOTHING_CHANNEL_L;밝기
@@ -1939,6 +1948,7 @@ TP_SMOOTHING_NUMBLADES;조리개 날 매수 (Blades)
 TP_SMOOTHING_ANGLE;흐림의 각도 (Angle)
 TP_SMOOTHING_CURVATURE;흐름의 곡률 (Curvature)
 TP_SMOOTHING_OFFSET;Offset
+TP_SMOOTHING_WAVELETS_LEVELS;레벨
 TP_SOFTLIGHT_LABEL;소프트라이트
 TP_SOFTLIGHT_STRENGTH;강도
 TP_SPOT_COUNTLABEL;%1 점

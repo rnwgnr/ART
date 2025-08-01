@@ -1,7 +1,7 @@
 #00 Hungary - Hungarian
 #01 Developers should add translations to this file and then run the 'generateTranslationDiffs' Bash script to update other locales.
 #02 Translators please append a comment here with the current date and your name(s) as used in the RawTherapee/ART forum or Bitbucket page, e.g.:
-#03 2025-06-11 Bereczky Péter
+#03 2025-08-01 Bereczky Péter
 ABOUT_TAB_BUILD;Verzió
 ABOUT_TAB_CREDITS;Szerzők
 ABOUT_TAB_LICENSE;Licenc
@@ -219,8 +219,8 @@ FILEBROWSER_SHOWTRASHHINT;Kuka tartalmának megjelenítése.\nGyorsbillentyű: <
 FILEBROWSER_SHOWUNCOLORHINT;Színcímke nélküli képek megjelenítése.\nGyorsbillentyű: <b>Alt-0</b>
 FILEBROWSER_SHOWUNRANKHINT;Nem értékelt képek megjelenítése.\nGyorsbillentyű: <b>0</b>
 FILEBROWSER_SORT_LABEL;Bélyegképek rendezése
-FILEBROWSER_SORT_FILENAME;Fájlnév (legrégebbi fent)
-FILEBROWSER_SORT_FILENAME_REV;Fájlnév (legújabb fent)
+FILEBROWSER_SORT_FILENAME;Fájlnév
+FILEBROWSER_SORT_FILENAME_REV;Fájlnév (fordított)
 FILEBROWSER_SORT_DATE;Felvétel készítésének dátuma (legrégebbi fent)
 FILEBROWSER_SORT_DATE_REV;Felvétel készítésének dátuma (legújabb fent)
 FILEBROWSER_SORT_MODTIME;Fájl módosításának ideje (legrégebbi fent)

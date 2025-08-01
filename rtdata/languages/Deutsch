@@ -7,6 +7,7 @@
 #06 04.12.2023 Update für neue Version (apostel338)
 #07 25.05.2024 Update für neue Version (apostel338)
 #08 28.07.2024 Update für neue Version (apostel338)
+#09 31.07.2025 Update für neue Version (apostel338)
 ABOUT_TAB_BUILD;Version
 ABOUT_TAB_CREDITS;Danksagungen
 ABOUT_TAB_LICENSE;Lizenz
@@ -224,8 +225,8 @@ FILEBROWSER_SHOWUNCOLORHINT;Nur unmarkierte Bilder anzeigen.\nTaste: <b>Alt + 0<
 FILEBROWSER_SHOWUNRANKHINT;Nur unbewertete Bilder anzeigen.\nTaste: <b>0</b>
 FILEBROWSER_SORT_DATE;Aufnahmedatum (älteste oben)
 FILEBROWSER_SORT_DATE_REV;Aufnahmedatum (neueste oben)
-FILEBROWSER_SORT_FILENAME;Dateiname (älteste oben)
-FILEBROWSER_SORT_FILENAME_REV;Dateiname (neueste oben)
+FILEBROWSER_SORT_FILENAME;Dateiname (A-Z)
+FILEBROWSER_SORT_FILENAME_REV;Dateiname (Z-A)
 FILEBROWSER_SORT_LABEL;Sortierung
 FILEBROWSER_SORT_MODTIME;Änderungsdatum der Datei (älteste oben)
 FILEBROWSER_SORT_MODTIME_REV;Änderungsdatum der Datei (neueste oben)

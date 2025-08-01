@@ -24,6 +24,7 @@
 #23 2024-01-20 Ohnishi, Yasuo, updates for 1.21.1
 #24 2024-05-21 Ohnishi, Yasuo, updates for 1.22
 #25 2024-07-28 Ohnishi, Yasuo, updates for 1.22.2
+#26 2025-08-01 Ohnishi, Yasuo, updates for 1.25.7
 ABOUT_TAB_BUILD;バージョン
 ABOUT_TAB_CREDITS;クレジット
 ABOUT_TAB_LICENSE;ライセンス
@@ -146,6 +147,7 @@ FILEBROWSER_AUTODARKFRAME;オート･ダークフレーム
 FILEBROWSER_AUTOFLATFIELD;オート･フラットフィールド
 FILEBROWSER_BROWSEPATHBUTTONHINT;サムネイルのリストを更新\nショートカット: <b>F5</b>
 FILEBROWSER_BROWSEPATHHINT;参照するパスを入力します\n<b>Ctrl-O</b> パスのテキストボックスにフォーカス\n<b>Enter</b> / <b>Ctrl-Enter</b>その場所をブラウズします\n<b>Esc</b> 変更をクリア\n<b>Shift-Esc</b>フォーカスを削除\nパスのショートカット:\n  <b>~</b> - ユーザーのホームディレクトリ\n  <b>!</b> - ユーザーの画像ディレクトリ
+FILEBROWSER_BROWSEPATH_RECURSIVE_TOOLTIP;下位ディレクトリの画像も探します
 FILEBROWSER_CACHE;キャッシュ
 FILEBROWSER_CACHECLEARFROMFULL;プロファイルを含めcache内をクリアにする
 FILEBROWSER_CACHECLEARFROMPARTIAL;プロファイルを除き cache内をクリアにする
@@ -207,6 +209,7 @@ FILEBROWSER_RANK3_TOOLTIP;ランク 3 *\nショートカット: <b>Shift-3</b>
 FILEBROWSER_RANK4_TOOLTIP;ランク 4 *\nショートカット: <b>Shift-4</b>
 FILEBROWSER_RANK5_TOOLTIP;ランク 5 *\nショートカット: <b>Shift-5</b>
 FILEBROWSER_RENAMEDLGLABEL;ファイル名変更
+FILEBROWSER_RENAME_DIALOG_COPY_LABEL;ファイルをコピー
 FILEBROWSER_RESETDEFAULTPROFILE;デフォルトにリセット
 FILEBROWSER_SELECTDARKFRAME;ダークフレームの選択...
 FILEBROWSER_SELECTFLATFIELD;フラットフィールドの選択...
@@ -1230,9 +1233,11 @@ PROFILEPANEL_SAVEDLGLABEL;処理プロファイルを保存...
 PROFILEPANEL_SAVEPPASTE;保存するパラメータ
 PROFILEPANEL_TOOLTIPCOPY;クリップボードに現在のプロファイルをコピーします
 PROFILEPANEL_TOOLTIPLOAD;ファイルからプロファイルを読み込みます\nCtrl-クリックで読み込むパラメータを選択します
-PROFILEPANEL_TOOLTIPPASTE; クリップボードからプロファイルを貼り付けます\nCtrl-クリックで貼り付けるパラメータを選択します
-PROFILEPANEL_TOOLTIPSAVE;現在のプロファイルを保存\nCtrl-クリックで保存するパラメータを選択します
+PROFILEPANEL_TOOLTIPPASTE; クリップボードからプロファイルを貼り付けます\nCtrl-クリックで貼り付けるパラメータを選択しますPROFILEPANEL_TOOLTIPSAVE;現在のプロファイルを保存\nCtrl-クリックで保存するパラメータを選択します
 PROGRESSBAR_DENOISING;ノイズ低減中...
+PROGRESSBAR_FILE_RENAME;ファイル名変更中...
+PROGRESSBAR_FILE_COPY; ファイルコピー中...
+PROGRESSBAR_FILE_DELETE;ファイル削除中...
 PROGRESSBAR_HLREC;ハイライトの復元. . .
 PROGRESSBAR_LOADING;画像読み込み中...
 PROGRESSBAR_LOADINGTHUMBS;サムネイルの読み込み...
@@ -1268,6 +1273,8 @@ RENAME_DIALOG_BASEDIR;基本ディレクトリ
 RENAME_DIALOG_PATTERN;ファイル名のパターン
 RENAME_DIALOG_PATTERN_TIP;元の写真やメタデータ名に基づき出力名を指定して下さい.\n\n形式を指定する文字列の意味は以下の通りです:\n<b>%f</b>: 拡張子のないファイル名\n<b>%e</b>: 拡張子\n<b>%#</b>: ファイル名と付加番号\n<b>%C</b>: カメラ名 (メーカー及モデル)\n<b>%M</b>: カメラブランド\n<b>%N</b>: カメラモデル\n<b>%Y</b>: 写真の年 (4桁)\n<b>%y</b>: 写真の年 (2桁)\n<b>%m</b>: 写真の月 (数字)\n<b>%b</b>: 写真の月 (英略称)\n<b>%B</b>: 写真の月 (英フルネーム)\n<b>%d</b>: 写真の日付 (数字)\n<b>%a</b>: 写真の日付 (英略称)\n<b>%A</b>: 写真の日付 (英フルネーム)\n<b>%n1</b> to <b>%n9</b>: 増分値の桁指定 (例: <b>%n2</b> は <i>01</i> となる)\n<b>%I</b>: ISO感度\n<b>%L</b>: レンズ名\n<b>%F</b>: レンズ絞り (F番号)\n<b>%l</b>: 焦点距離\n<b>%E</b>: 露出補正量 (compensation)\n<b>%s</b>: シャッター速度\n<b>%r</b>: 写真の評価\n<b>%T[<i>タグ名</i>]</b>: メタデータタグの内容 <i>タグ名</i> (無効な文字は '_' で代替)\n<b>%%</b>: '%' 文字.
 RENAME_DIALOG_ALLOW_WHITESPACE;出力名に空白を許容
+RENAME_DIALOG_ERROR_COPY; %1 から %2 にコピーできませんでいた
+RENAME_DIALOG_FILENAMES_COPY; コピーするファイル
 RENAME_DIALOG_NAME_NORMALIZATION;ファイル名の標準化 (normalization)
 RENAME_DIALOG_NORM_OFF;なし
 RENAME_DIALOG_NORM_UPPERCASE;大文字
@@ -1933,6 +1940,7 @@ TP_SMOOTHING_MODE_NLMEANS;非局所平均 (Non-local means)
 TP_SMOOTHING_MODE_LENS;レンズぼけ効果
 TP_SMOOTHING_MODE_MOTION;ぶれ効果 (Motion blur)
 TP_SMOOTHING_MODE_NOISE;ノイズ追加
+TP_SMOOTHING_MODE_WAVELETS;ウェーブレット
 TP_SMOOTHING_NOISE_COARSENESS;粗さ
 TP_SMOOTHING_CHANNEL;チャンネル
 TP_SMOOTHING_CHANNEL_L;輝度
@@ -1948,6 +1956,7 @@ TP_SMOOTHING_NUMBLADES;絞り羽根枚数 (Blades)
 TP_SMOOTHING_ANGLE;ぼかす角度 (Angle)
 TP_SMOOTHING_CURVATURE;ぼかす曲率 (Curvature)
 TP_SMOOTHING_OFFSET;オフセット
+TP_SMOOTHING_WAVELETS_LEVELS;レベル
 TP_SOFTLIGHT_LABEL;ソフトライト
 TP_SOFTLIGHT_STRENGTH;強さ
 TP_SPOT_COUNTLABEL;%1 箇所
