@@ -19,6 +19,8 @@ jobs:
   build:
     runs-on: windows-latest
 
+    if: 
+
     permissions:
       contents: write
     
@@ -84,6 +86,13 @@ jobs:
           git clone --depth 1 https://github.com/LibRaw/LibRaw.git
           cd LibRaw
           autoreconf -i
+          if [ "${{ inputs.msystem }}" = "MINGW64" ]; then
+             export CC=gcc
+             export CXX=g++
+          else
+             export CC=clang
+             export CXX=clang++
+          fi
           CPPFLAGS=-DUSE_X3FTOOLS ./configure --prefix=c:/msys2/msys64/usr/local
           make -j
           make install
