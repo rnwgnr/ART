@@ -137,8 +137,8 @@ jobs:
         run: |
           cd build/Release
           python ../../repo/tools/win/bundle_ART.py \
-            -o ../../bundle -v -E -I -m c:/msys2/msys64 \
-            --exiftool-version 13.00
+            -o ../../bundle -v -E -I -m c:/msys2/msys64 
+#            --exiftool-version 13.00
 
       - name: Create installer
         working-directory: bundle
