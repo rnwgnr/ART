@@ -1,4 +1,4 @@
-name: Windows arm64 Build
+name: Windows x64 Build
 
 on:
   push:
@@ -9,7 +9,19 @@ on:
 
 jobs:
   build:
-    runs-on: windows-11-arm
+    strategy:
+      matrix:
+        os: [windows-latest, windows-11-arm]
+        include:
+          - os: windows-latest
+            arch: x64
+            msystem: MINGW64
+          - os: windows-11-arm
+            arch: arm64
+            msystem: CLANGARM64
+      fail-fast: false
+    
+    runs-on: ${{ matrix.os }}
 
     permissions:
       contents: write
@@ -29,7 +41,7 @@ jobs:
         with:
           location: C:\msys2
           update: true
-          msystem: CLANGARM64
+          msystem: ${{ matrix.msystem }}
           install: |
             git
             wget
@@ -46,7 +58,14 @@ jobs:
             mimalloc:p
             opencolorio:p
 
-      - name: Downgrade glib2
+      - if: ${{ matrix.arch == 'x64' }}
+        name: Downgrade glib2
+        run: |
+          pacman --noconfirm -U
+          https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-glib2-2.84.2-1-any.pkg.tar.zst
+
+      - if: ${{ matrix.arch == 'arm64' }}
+        name: Downgrade glib2
         run: |
           pacman --noconfirm -U https://repo.msys2.org/mingw/clangarm64/mingw-w64-clang-aarch64-glib2-2.84.2-1-any.pkg.tar.zst
 
@@ -80,6 +99,13 @@ jobs:
           git clone --depth 1 https://github.com/LibRaw/LibRaw.git
           cd LibRaw
           autoreconf -i
+          if [ "${{ matrix.msystem }}" = "MINGW64" ]; then
+             export CC=gcc
+             export CXX=g++
+          else
+             export CC=clang
+             export CXX=clang++
+          fi
           CPPFLAGS=-DUSE_X3FTOOLS ./configure --prefix=c:/msys2/msys64/usr/local
           make -j
           make install
@@ -91,6 +117,7 @@ jobs:
           mkdir build-CTL
           cd build-CTL
           cmake \
+            -GNinja \
             -GNinja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=c:/msys2/msys64/usr/local \
@@ -105,16 +132,21 @@ jobs:
           mkdir build
           cd build
           export PKG_CONFIG_PATH=c:/msys2/msys64/usr/local/lib/pkgconfig
+          if [ "${{ matrix.msystem }}" = "MINGW64" ]; then
+             ART_CXX_FLAGS=
+          else
+             ART_CXX_FLAGS=-Wno-ignored-attributes -Wno-unused-command-line-argument
+          fi
           cmake \
             -GNinja \
             -DCMAKE_BUILD_TYPE=Release \
             -DENABLE_LIBRAW=1 \
             -DENABLE_OCIO=1 \
             -DENABLE_CTL=1 \
-            -DCTL_INCLUDE_DIR=c:/msys2/msys64/usr/local/include/CTL \
-            -DCMAKE_LIBRARY_PATH=c:/msys2/msys64/usr/local/lib \
-            -DCMAKE_CXX_FLAGS="-Wno-ignored-attributes -Wno-unused-command-line-argument" \
+            -DCTL_INCLUDE_DIR=/usr/local/include/CTL \
+            -DCMAKE_LIBRARY_PATH=/usr/local/lib \
             -DBUILD_BUNDLE=1 \
+            -DCMAKE_CXX_FLAGS="${ART_CXX_FLAGS}" \
             ../repo
           cd ..
 
@@ -128,8 +160,8 @@ jobs:
           lensfun-update-data
 
       - name: Create bundle
-        # env:
-        #   GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd build/Release
           python ../../repo/tools/win/bundle_ART.py \
@@ -145,7 +177,11 @@ jobs:
 
       - name: Prepare artifact name
         run: |
-          ARTIFACT_NAME="ART_${ART_VERSION}_Windows_arm64.exe"
+          if [ "${{ matrix.arch }}" = "x64" ]; then
+              ARTIFACT_NAME="ART_${ART_VERSION}_Win64.exe"
+          else
+              ARTIFACT_NAME="ART_${ART_VERSION}_Windows_arm64.exe"
+          fi
           echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> "$(cygpath -u $GITHUB_ENV)"
           mv installer.exe ${ARTIFACT_NAME} 
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
