@@ -46,6 +46,10 @@ jobs:
             mimalloc:p
             opencolorio:p
 
+      - name: Downgrade glib2
+        run: |
+          pacman --noconfirm -U https://repo.msys2.org/mingw/clangarm64/mingw-w64-clang-aarch64-glib2-2.84.2-1-any.pkg.tar.zst
+
       - name: Get version
         run: |
           cd repo

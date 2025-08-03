@@ -56,6 +56,14 @@ jobs:
             mimalloc:p
             opencolorio:p
 
+      - name: Downgrade glib2
+        run: |
+          if [ "${{ inputs.msystem }}" = "MINGW64" ]; then
+              pacman --noconfirm -U https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-glib2-2.84.2-1-any.pkg.tar.zst
+          else
+              pacman --noconfirm -U https://repo.msys2.org/mingw/clang64/mingw-w64-clang-x86_64-glib2-2.84.2-1-any.pkg.tar.zst
+          fi
+
       - name: Get version
         run: |
           cd repo
