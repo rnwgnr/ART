@@ -134,7 +134,7 @@ jobs:
           if [ "${{ matrix.msystem }}" = "MINGW64" ]; then
              ART_CXX_FLAGS=
           else
-             ART_CXX_FLAGS=-Wno-ignored-attributes -Wno-unused-command-line-argument
+             ART_CXX_FLAGS="-Wno-ignored-attributes -Wno-unused-command-line-argument"
           fi
           cmake \
             -GNinja \
