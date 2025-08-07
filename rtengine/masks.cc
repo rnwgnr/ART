@@ -933,6 +933,9 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
 #ifdef __SSE2__
             for (int x = 0; x < W; ++x) {
                 rgb2lab(mode, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), lBuffer[x], aBuffer[x], bBuffer[x], wp);
+                lBuffer[x] /= 32768.f;
+                aBuffer[x] /= 42000.f;
+                bBuffer[x] /= 42000.f;
             }
             if (has_mask) {
                 // vectorized precalculation
@@ -944,9 +947,9 @@ bool generateMasks(Imagefloat *rgb, const std::vector<Mask> &masks, int offset_x
 #endif
             for (int x = 0; x < W; ++x) {
 #ifdef __SSE2__
-                float l = lBuffer[x] / 32768.f;
-                const float a = aBuffer[x] / 42000.f;
-                const float b = bBuffer[x] / 42000.f;
+                const float l = lBuffer[x]; // / 32768.f;
+                const float a = aBuffer[x]; // / 42000.f;
+                const float b = bBuffer[x]; // / 42000.f;
 #else
                 float l, a, b;
                 rgb2lab(mode, rgb->r(y, x), rgb->g(y, x), rgb->b(y, x), l, a, b, wp);
