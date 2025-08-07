@@ -363,7 +363,8 @@ private:
                     e,
                     "-stay_open", "true",
                     "-@", "-",
-                    "-common_args", "-charset", "filename=utf8"
+                    "-common_args", "-charset", "filename=utf8",
+                    "-api", "WindowsLongPath=0"
                 };
                 try {
                     p_ = subprocess::popen("", argv, true, true, true);
