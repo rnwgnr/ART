@@ -205,7 +205,5 @@ jobs:
           body: ${{ env.RELEASE_TAG }}
           allowUpdates: true
           makeLatest: ${{ env.RELEASE_MAKE_LATEST }}
-          artifacts:
-            - ${{ env.ARTIFACT_NAME }}
-            - ${{ env.ARTIFACT_ARCHIVE_NAME }}
-            
+          artifacts: ${{ env.ARTIFACT_NAME }},${{ env.ARTIFACT_ARCHIVE_NAME }}
+
