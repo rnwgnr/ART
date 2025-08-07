@@ -46,6 +46,7 @@ jobs:
             git
             wget
             xz
+            p7zip
           pacboy: |
             gcc:p
             cmake:p
@@ -165,7 +166,6 @@ jobs:
           cd build/Release
           python ../../repo/tools/win/bundle_ART.py \
             -o ../../bundle -v -E -I -m c:/msys2/msys64 
-#            --exiftool-version 13.00
 
       - name: Create installer
         working-directory: bundle
@@ -191,6 +191,13 @@ jobs:
               echo "RELEASE_MAKE_LATEST=false" >> "$(cygpath -u $GITHUB_ENV)"
           fi
 
+      - name: Create portable package
+        run: |
+          ART_DIR_NAME="${ARTIFACT_NAME%%.exe}_portable"
+          mv bundle "${ART_DIR_NAME}"
+          7z a "${ART_DIR_NAME}.7z" "${ART_DIR_NAME}"
+          echo "ARTIFACT_ARCHIVE_NAME=${ART_DIR_NAME}.7z" >> "$(cygpath -u $GITHUB_ENV)"
+
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
@@ -198,4 +205,7 @@ jobs:
           body: ${{ env.RELEASE_TAG }}
           allowUpdates: true
           makeLatest: ${{ env.RELEASE_MAKE_LATEST }}
-          artifacts: ${{ env.ARTIFACT_NAME }}
+          artifacts:
+            - ${{ env.ARTIFACT_NAME }}
+            - ${{ env.ARTIFACT_ARCHIVE_NAME }}
+            
