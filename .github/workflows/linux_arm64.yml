@@ -56,8 +56,8 @@ jobs:
             gvfs \
             wget
           sudo python3 -m pip install meson
-          wget https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
-          unzip ninja-linux.zip
+          wget https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux-aarch64.zip
+          unzip ninja-linux-aarch64.zip
           sudo mv ninja /usr/local/bin
 
       - name: Install LCMS2
@@ -200,16 +200,16 @@ jobs:
               cd build/Release
           fi
           python ../../repo/tools/linux/bundle_ART.py \
-            -o ../../${ART_NAME}-linux64 -v -E -I ${DBG}
+            -o ../../${ART_NAME}-linux-arm64 -v -E -I ${DBG}
           cd ../..
-          pushd ${ART_NAME}-linux64/lib
+          pushd ${ART_NAME}-linux-arm64/lib
           for l in libgmodule-2.0.so.0 libglib-2.0.so.0 libgio-2.0.so.0; do
             rm -f ${l}
             cp /opt/glib/lib/x86_64-linux-gnu/${l} .
           done
           popd
-          tar cJf ${ART_NAME}-linux64.tar.xz ${ART_NAME}-linux64
-          echo "ART_BUNDLE_NAME=${ART_NAME}-linux64" >> $GITHUB_ENV
+          tar cJf ${ART_NAME}-linux-arm64.tar.xz ${ART_NAME}-linux-arm64
+          echo "ART_BUNDLE_NAME=${ART_NAME}-linux-arm64" >> $GITHUB_ENV
 
       - name: Prepare artifact name
         run: |
