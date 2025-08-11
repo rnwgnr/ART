@@ -200,7 +200,7 @@ jobs:
               cd build/Release
           fi
           python ../../repo/tools/linux/bundle_ART.py \
-            -o ../../${ART_NAME}-linux-arm64 -v -E -I ${DBG}
+            -o ../../${ART_NAME}-linux-arm64 -v -E -I ${DBG} --aarch64
           cd ../..
           pushd ${ART_NAME}-linux-arm64/lib
           for l in libgmodule-2.0.so.0 libglib-2.0.so.0 libgio-2.0.so.0; do

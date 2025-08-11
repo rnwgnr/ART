@@ -28,6 +28,7 @@ def getopts():
     p.add_argument('-I', '--imageio-download', action='store_true')
     p.add_argument('-v', '--verbose', action='store_true')
     p.add_argument('-d', '--debug', action='store_true')
+    p.add_argument('-a', '--aarch64', action='store_true', help='build aarch64 bundle')
     ret = p.parse_args()
     return ret
 
@@ -140,17 +141,17 @@ def extra_files(opts):
             D('/usr/share/icons/Adwaita/cursors'),
         ]),
         ('lib', [
-            D('/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0'),
+            D('/usr/lib/'+arch+'-linux-gnu/gdk-pixbuf-2.0'),
         ]),
         ('lib/gio/modules', [
-            D('/usr/lib/x86_64-linux-gnu/gio/modules/libgioremote-volume-monitor.so'),
-            D('/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so'),
+            D('/usr/lib/'+arch+'-linux-gnu/gio/modules/libgioremote-volume-monitor.so'),
+            D('/usr/lib/'+arch+'-linux-gnu/gio/modules/libgvfsdbus.so'),
         ]),
         ('lib', [
-            D('/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules')
+            D('/usr/lib/'+arch+'-linux-gnu/gtk-3.0/3.0.0/immodules')
         ]),
         ('lib', [
-            D('/usr/lib/x86_64-linux-gnu/libgtk-3-0/gtk-query-immodules-3.0')
+            D('/usr/lib/'+arch+'-linux-gnu/libgtk-3-0/gtk-query-immodules-3.0')
         ]),
         ('share/glib-2.0/schemas', [
             D('/usr/share/glib-2.0/schemas/gschemas.compiled'),
@@ -159,8 +160,8 @@ def extra_files(opts):
             (D('~/.local/share/lensfun/updates/version_1'), 'lensfun'),
         ]),
         ('lib', [
-            D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so'),
-            D('/usr/lib/x86_64-linux-gnu/gvfs/libgvfsdaemon.so'),
+            D('/usr/lib/'+arch+'-linux-gnu/gvfs/libgvfscommon.so'),
+            D('/usr/lib/'+arch+'-linux-gnu/gvfs/libgvfsdaemon.so'),
         ]),
     ] + extra
 
@@ -172,6 +173,11 @@ def main():
         sys.stderr.write('ERROR: ART not found! Please run this script '
                          'from the build directory of ART\n')
         sys.exit(1)
+    if opts.aarch64:
+        arch="aarch64"
+    else:
+        arch="x86_64"
+
     if opts.verbose:
         print('copying %s to %s' % (os.getcwd(), opts.outdir))
     shutil.copytree(d, opts.outdir)
